@@ -1,0 +1,2 @@
+terminalbd_invoice_bundle.routes:
+  resource: '@TerminalBdInvoiceBundle/config/routes.yaml'
