@@ -1,3 +1,0 @@
-terminalbd_invoice_bundle.routes:
-  type: attribute
-  resource: '../src/Controller'
