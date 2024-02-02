@@ -6,25 +6,39 @@
     "repositories": [
         {
             "type": "path",
-            "url": "./bundle/TerminalBd/InvoiceBundle"
+            "url": "./bundle/Domain/DomainBundle"
+        },
+        {
+            "type": "path",
+            "url": "./lib/acme/foo-bundle"
+        },
+        {
+            "type": "path",
+            "url": "./bundle/Domain/InventoryBundle"
         }
     ],
     "require": {
         "php": ">=8.2",
         "ext-ctype": "*",
         "ext-iconv": "*",
+        "beberlei/doctrineextensions": "^1.3",
+        "doctrine/dbal": "^3.8",
         "doctrine/doctrine-bundle": "^2.11",
         "doctrine/doctrine-migrations-bundle": "^3.3",
         "doctrine/orm": "^2.17",
+        "domain/domain-bundle": "^0.1.0",
+        "acme/foo-bundle": "^0.1.0",
+        "domain/inventory-bundle": "^0.1.0",
+        "gedmo/doctrine-extensions": "^3.14",
         "lexik/jwt-authentication-bundle": "^2.20",
+        "phpoffice/phpspreadsheet": "^2.0",
         "symfony/console": "7.0.*",
         "symfony/dotenv": "7.0.*",
-        "symfony/flex": "^2",
+        "symfony/flex": "^2.4",
         "symfony/framework-bundle": "7.0.*",
         "symfony/runtime": "7.0.*",
         "symfony/security-bundle": "7.0.*",
-        "symfony/yaml": "7.0.*",
-        "terminalbd/invoice-bundle": "^0.1.0"
+        "symfony/yaml": "7.0.*"
     },
     "require-dev": {
         "symfony/maker-bundle": "^1.52"
@@ -39,12 +53,14 @@
     },
     "autoload": {
         "psr-4": {
-            "App\\": "src/"
+            "App\\": "src/",
+            "Acme\\FooBundle\\": "lib/acme/foo-bundle/"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "App\\Tests\\": "tests/"
+            "App\\Tests\\": "tests/",
+            "Acme\\FooBundle\\": "lib/acme/foo-bundle/"
         }
     },
     "replace": {
@@ -60,7 +76,7 @@
     "scripts": {
         "auto-scripts": {
             "cache:clear": "symfony-cmd",
-            "assets:install %PUBLIC_DIR%": "symfony-cmd"
+            "assets:install --symlink --relative %PUBLIC_DIR%": "symfony-cmd"
         },
         "post-install-cmd": [
             "@auto-scripts"

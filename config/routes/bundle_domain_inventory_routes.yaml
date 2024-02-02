@@ -1,0 +1,2 @@
+bundle_inventory.routes:
+  resource: '@DomainInventoryBundle/config/routes.yaml'

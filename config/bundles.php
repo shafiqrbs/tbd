@@ -7,5 +7,7 @@ return [
     Doctrine\Bundle\DoctrineBundle\DoctrineBundle::class => ['all' => true],
     Doctrine\Bundle\MigrationsBundle\DoctrineMigrationsBundle::class => ['all' => true],
     Lexik\Bundle\JWTAuthenticationBundle\LexikJWTAuthenticationBundle::class => ['all' => true],
-    TerminalBd\InvoiceBundle\TerminalBdInvoiceBundle::class => ['all' => true],
+    Domain\InventoryBundle\DomainInventoryBundle::class => ['all' => true],
+    Domain\DomainBundle\DomainDomainBundle::class => ['all' => true],
+    Acme\FooBundle\AcmeFooBundle::class => ['all' => true],
 ];
