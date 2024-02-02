@@ -1,0 +1,26 @@
+{
+    "name": "domain/domain-bundle",
+    "version": "0.1.0",
+    "type": "symfony-bundle",
+    "description": "",
+    "license": "MIT",
+    "require": {
+        "php": ">=7.4"
+    },
+    "autoload": {
+        "psr-4": {
+            "Domain\\DomainBundle\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Domain\\DomainBundle\\Tests": "tests/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Md. Shafiqul Islam",
+            "email": "shafiqabs@gmail.com"
+        }
+    ]
+}

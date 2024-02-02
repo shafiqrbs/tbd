@@ -1,0 +1,2 @@
+bundle_domain.routes:
+  resource: '@DomainDomainBundle/config/routes.yaml'
