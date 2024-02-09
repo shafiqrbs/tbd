@@ -1,0 +1,9 @@
+{
+    "Domain": true,
+    "Inventory": true,
+    "Core": true,
+    "Terminal": true,
+    "AppsApi": true,
+    "Configuration": true,
+    "Utility": true
+}

@@ -1,3 +1,0 @@
-domain_domain_bundle.routes:
-  type: attribute
-  resource: '../src/Controller'

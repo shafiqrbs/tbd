@@ -1,8 +1,0 @@
-parameters:
-
-services:
-  _defaults:
-    autowire: true
-    autoconfigure: true
-
-  Domain\InventoryBundle\Controller\DefaultController: ~

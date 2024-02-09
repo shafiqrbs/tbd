@@ -1,3 +1,0 @@
-domain_inventory_bundle.routes:
-  type: attribute
-  resource: '../src/Controller'

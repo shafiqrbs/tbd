@@ -1,0 +1,11 @@
+{
+    "name": "AppsApi",
+    "alias": "appsapi",
+    "description": "",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\AppsApi\\App\\Providers\\AppsApiServiceProvider"
+    ],
+    "files": []
+}

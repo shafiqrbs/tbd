@@ -1,0 +1,11 @@
+{
+    "name": "Domain",
+    "alias": "domain",
+    "description": "",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\Domain\\App\\Providers\\DomainServiceProvider"
+    ],
+    "files": []
+}
