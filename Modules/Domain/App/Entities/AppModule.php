@@ -10,7 +10,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 /**
  * AppModule
  *
- * @ORM\Table("dom_app_device_setup")
+ * @ORM\Table("dom_app_module")
  * @ORM\Entity(repositoryClass="Modules\Domain\App\Repositories\AppModuleRepository")
  */
 class AppModule
@@ -24,11 +24,6 @@ class AppModule
      */
     private $id;
 
-    /**
-     * @ORM\ManyToMany(targetEntity="Modules\Domain\App\Entities\SiteSetting", mappedBy="appModules")
-     **/
-
-    private $siteSettings;
 
      /**
      * @ORM\OneToMany(targetEntity="Modules\Domain\App\Entities\GlobalOption", mappedBy="mainApp")

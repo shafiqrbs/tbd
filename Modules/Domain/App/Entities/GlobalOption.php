@@ -179,17 +179,6 @@ class GlobalOption
      */
     private $isSidebar = false;
 
-    /**
-     * @ORM\ManyToOne(targetEntity="Modules\Domain\App\Entities\Syndicate", inversedBy="globalOption")
-     **/
-
-    private $syndicate;
-    /**
-     * @ORM\OneToOne(targetEntity="Modules\Domain\App\Entities\SiteSetting", mappedBy="globalOption" , cascade={"persist", "remove"} )
-     **/
-
-    private $siteSetting;
-
 
     /**
      * @var boolean

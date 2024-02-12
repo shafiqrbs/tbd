@@ -23,18 +23,6 @@ class Theme
      */
     private $id;
 
-    /**
-     * @ORM\OneToMany(targetEntity="Modules\Domain\App\Entities\SiteSetting", mappedBy="theme")
-     **/
-
-    private $siteSetting;
-
-
-    /**
-     * @ORM\ManyToMany(targetEntity="Modules\Domain\App\Entities\Syndicate", inversedBy="themes")
-     **/
-
-    private $syndicates;
 
     /**
      * @ORM\ManyToOne(targetEntity="Modules\Domain\App\Entities\AppModule", inversedBy="themes")

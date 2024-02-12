@@ -37,6 +37,7 @@ return [
                 base_path('Modules/Domain/App/Entities'),
                 base_path('Modules/Core/App/Entities'),
                 base_path('Modules/Utility/App/Entities'),
+                base_path('Modules/Inventory/App/Entities'),
             ],
             'repository'    => Doctrine\ORM\EntityRepository::class,
 
@@ -44,6 +45,19 @@ return [
                 'namespace'     => 'DoctrineProxies',
                 'path'          => storage_path('proxies'),
                 'auto_generate' => env('DOCTRINE_PROXY_AUTOGENERATE', false)
+            ],
+            'doctrine' => [
+                'eventmanager' => array(
+                    'orm_default' => array(
+                        'subscribers' => array(
+                            'Gedmo\Tree\TreeListener',
+                            'Gedmo\Timestampable\TimestampableListener',
+                            'Gedmo\Sluggable\SluggableListener',
+                            'Gedmo\Loggable\LoggableListener',
+                            'Gedmo\Sortable\SortableListener',
+                        ),
+                    ),
+                ),
             ],
 
             /*

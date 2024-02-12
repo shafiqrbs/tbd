@@ -8,7 +8,12 @@ use Gedmo\Mapping\Annotation as Gedmo;
 
 /**
  * Customer
- * @ORM\Table(name="cor_customers" , indexes={@ORM\Index(name="allowIndex", columns={"name","mobile","customerId"})})
+ * @ORM\Table(name="cor_customers" , indexes={
+ *     @ORM\Index(name="allowIndex", columns={"name"}),
+ *     @ORM\Index(name="customerIdIndex", columns={"customerId"}),
+ *     @ORM\Index(name="mobileIndex", columns={"mobile"}),
+ *     @ORM\Index(name="statusIndex", columns={"status"})
+ * })
  * @ORM\Entity(repositoryClass="Modules\Core\App\Repositories\CustomerRepository")
  */
 class Customer
@@ -434,6 +439,14 @@ class Customer
     private $additionalPhone;
 
 
+      /**
+     * @var string
+     *
+     * @ORM\Column(name="unique_key", type="string", nullable=true)
+     */
+    private $uniqueKey;
+
+
     /**
      * @var float
      *
@@ -445,16 +458,23 @@ class Customer
     /**
      * @var boolean
      *
-     * @ORM\Column(name="status", type="boolean")
+     * @ORM\Column(name="status", type="boolean", nullable=true)
      */
     private $status = true;
 
     /**
      * @var boolean
      *
-     * @ORM\Column(name="isNew", type="boolean")
+     * @ORM\Column(name="isNew", type="boolean", nullable=true)
      */
     private $isNew = true;
+
+     /**
+     * @var boolean
+     *
+     * @ORM\Column(name="is_delete", type="boolean", nullable=true)
+     */
+    private $isDelete = false;
 
     /**
      * @var \DateTime
@@ -462,6 +482,13 @@ class Customer
      * @ORM\Column(name="created_at", type="datetime")
      */
     private $createdAt;
+
+     /**
+     * @var \DateTime
+     * @Gedmo\Timestampable(on="create")
+     * @ORM\Column(name="updated_at", type="datetime")
+     */
+    private $updatedAt;
 
      /**
      * @var \DateTime
@@ -1843,6 +1870,60 @@ class Customer
     {
         $this->createdAt = $createdAt;
     }
+
+    /**
+     * @return string
+     */
+    public function getUniqueKey()
+    {
+        return $this->uniqueKey;
+    }
+
+    /**
+     * @param string $uniqueKey
+     */
+    public function setUniqueKey($uniqueKey)
+    {
+        $this->uniqueKey = $uniqueKey;
+    }
+
+    /**
+     * @return \DateTime
+     */
+    public function getUpdatedAt()
+    {
+        return $this->updatedAt;
+    }
+
+    /**
+     * @param \DateTime $updatedAt
+     */
+    public function setUpdatedAt($updatedAt)
+    {
+        $this->updatedAt = $updatedAt;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isDelete()
+    {
+        return $this->isDelete;
+    }
+
+    /**
+     * @param bool $isDelete
+     */
+    public function setIsDelete($isDelete)
+    {
+        $this->isDelete = $isDelete;
+    }
+
+
+
+
+
+
 
 
 

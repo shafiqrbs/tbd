@@ -2,6 +2,7 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use Modules\Core\App\Http\Controllers\CustomerController;
 
 /*
     |--------------------------------------------------------------------------
@@ -14,6 +15,9 @@ use Illuminate\Support\Facades\Route;
     |
 */
 
-Route::middleware(['auth:sanctum'])->prefix('v1')->name('api.')->group(function () {
-    Route::get('core', fn (Request $request) => $request->user())->name('core');
+
+Route::prefix('/customer')->group(function() {
+    Route::get('/select-search', [CustomerController::class,'selectSearch'])->name('customer_autosearch');
 });
+Route::apiResource('customer', 'CustomerController');
+

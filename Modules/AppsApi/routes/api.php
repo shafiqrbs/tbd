@@ -2,7 +2,6 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-use Modules\AppsApi\Http\Middleware\ApiCheckMiddleware;
 use Modules\AppsApi\App\Http\Controllers\AppsApiController;
 use Modules\AppsApi\App\Http\Controllers\GlobalApiController;
 

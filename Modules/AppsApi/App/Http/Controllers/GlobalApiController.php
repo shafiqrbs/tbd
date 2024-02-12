@@ -9,7 +9,9 @@ use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Response;
 use Illuminate\Routing\Controller;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
+use Modules\AppsApi\App\Services\CacheClearable;
 use Modules\AppsApi\App\Services\JsonRequestResponse;
 use Modules\Core\App\Entities\Customer;
 use Modules\Core\App\Filters\CustomerFilter;
@@ -22,6 +24,7 @@ class GlobalApiController extends Controller
 {
 
     public function index(Request $request,EntityManagerInterface $em){
+
 
         $entities = $em->getRepository(Customer::class)->listWithSearch($request->query());
         try{
@@ -43,10 +46,12 @@ class GlobalApiController extends Controller
 
     public function splash(Request $request,EntityManagerInterface $em){
 
+        $service = new JsonRequestResponse();
+        $service->clearCaches('Customer');
         $entities = $em->getRepository(Customer::class)->listWithSearch($request->query());
-        $json =  new JsonRequestResponse();
-        $data = $json->returnJosnResponse($entities);
+        $data = $service->returnJosnResponse($entities);
         return $data;
+
     }
 
     public function customer(Request $request,EntityManagerInterface $em){
