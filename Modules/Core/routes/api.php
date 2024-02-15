@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Middleware\HeaderAuthenticationMiddleware;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Modules\Core\App\Http\Controllers\CustomerController;
@@ -16,8 +17,9 @@ use Modules\Core\App\Http\Controllers\CustomerController;
 */
 
 
-Route::prefix('/customer')->group(function() {
+Route::prefix('/customer')->middleware([HeaderAuthenticationMiddleware::class])->group(function() {
     Route::get('/select-search', [CustomerController::class,'selectSearch'])->name('customer_autosearch');
 });
-Route::apiResource('customer', 'CustomerController')->middleware('api.header.authentication');
+Route::apiResource('customer', 'CustomerController')->middleware([HeaderAuthenticationMiddleware::class]);
+
 

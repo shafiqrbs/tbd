@@ -65,12 +65,11 @@ class Kernel extends HttpKernel
         'signed' => \App\Http\Middleware\ValidateSignature::class,
         'throttle' => \Illuminate\Routing\Middleware\ThrottleRequests::class,
         'verified' => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
-        'header.authentication' => HeaderAuthenticationMiddleware::class
+        'HeaderAuthentication' => HeaderAuthenticationMiddleware::class
     ];
 
     protected $routeMiddleware = [
         'api.check' => ApiCheckMiddleware::class,
-        'header.authentication' => HeaderAuthenticationMiddleware::class,
         'api.header.authentication' => HeaderAuthentication::class
     ];
 }

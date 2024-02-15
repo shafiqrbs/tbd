@@ -2,28 +2,25 @@
 
 namespace App\Http\Middleware;
 
-use Illuminate\Auth\Middleware\Authenticate as Middleware;
+use Closure;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Mockery\Matcher\Closure;
+use Symfony\Component\HttpFoundation\Response;
 
-class HeaderAuthenticationMiddleware extends Middleware
+class HeaderAuthenticationMiddleware
 {
     /**
      * Handle an incoming request.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \Closure  $next
-     * @return mixed
+     * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
      */
-    public function handle(Request $request, Closure $next , $guard="api")
+    public function handle(Request $request, Closure $next): Response
     {
-        dd('ok');
-        /*$apiKey = \config('api.X-API-KEY');
-        $requestHeaderKey = $request->header('X-API-KEY');
-        if($requestHeaderKey == $apiKey){
+        $requestHeaderKey = $request->header('x-api-key');
+        $appApiKey = config('core.api_key');
+        if($requestHeaderKey == $appApiKey){
             return $next($request);
         }
-        return \response('Unauthorized access',404);*/
-
+        return new JsonResponse(['status'=>404, 'message'=>'Unauthorized access']);
     }
 }
