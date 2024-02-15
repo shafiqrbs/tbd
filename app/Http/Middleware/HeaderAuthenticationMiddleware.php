@@ -1,8 +1,7 @@
 <?php
 
-namespace Modules\AppsApi\App\Http\Middleware;
+namespace App\Http\Middleware;
 
-use http\Env\Response;
 use Illuminate\Auth\Middleware\Authenticate as Middleware;
 use Illuminate\Http\Request;
 use Mockery\Matcher\Closure;
@@ -16,14 +15,15 @@ class HeaderAuthenticationMiddleware extends Middleware
      * @param  \Closure  $next
      * @return mixed
      */
-    public function handle($request, Closure $next , $guard="web")
+    public function handle(Request $request, Closure $next , $guard="api")
     {
-        $apiKey = \config('api.X-API-KEY');
+        dd('ok');
+        /*$apiKey = \config('api.X-API-KEY');
         $requestHeaderKey = $request->header('X-API-KEY');
         if($requestHeaderKey == $apiKey){
             return $next($request);
         }
-        return \response('Unauthorized access',404);
+        return \response('Unauthorized access',404);*/
 
     }
 }

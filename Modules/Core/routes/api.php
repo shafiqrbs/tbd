@@ -19,5 +19,5 @@ use Modules\Core\App\Http\Controllers\CustomerController;
 Route::prefix('/customer')->group(function() {
     Route::get('/select-search', [CustomerController::class,'selectSearch'])->name('customer_autosearch');
 });
-Route::apiResource('customer', 'CustomerController');
+Route::apiResource('customer', 'CustomerController')->middleware('api.header.authentication');
 

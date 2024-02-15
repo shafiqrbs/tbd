@@ -2,8 +2,9 @@
 
 namespace App\Http;
 
+use App\Http\Middleware\HeaderAuthentication;
+use App\Http\Middleware\HeaderAuthenticationMiddleware;
 use Illuminate\Foundation\Http\Kernel as HttpKernel;
-use Modules\AppsApi\Http\Middleware\ApiCheckMiddleware;
 
 class Kernel extends HttpKernel
 {
@@ -54,7 +55,6 @@ class Kernel extends HttpKernel
      * @var array<string, class-string|string>
      */
     protected $middlewareAliases = [
-        'auth' => \App\Http\Middleware\ApiCheck::class,
         'auth.basic' => \Illuminate\Auth\Middleware\AuthenticateWithBasicAuth::class,
         'auth.session' => \Illuminate\Session\Middleware\AuthenticateSession::class,
         'cache.headers' => \Illuminate\Http\Middleware\SetCacheHeaders::class,
@@ -65,9 +65,12 @@ class Kernel extends HttpKernel
         'signed' => \App\Http\Middleware\ValidateSignature::class,
         'throttle' => \Illuminate\Routing\Middleware\ThrottleRequests::class,
         'verified' => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
+        'header.authentication' => HeaderAuthenticationMiddleware::class
     ];
 
     protected $routeMiddleware = [
         'api.check' => ApiCheckMiddleware::class,
+        'header.authentication' => HeaderAuthenticationMiddleware::class,
+        'api.header.authentication' => HeaderAuthentication::class
     ];
 }

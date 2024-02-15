@@ -38,27 +38,18 @@ class CustomerRepository extends EntityRepository {
 
     public function searchAutoComplete($domain, $term, $type = 'NULL')
     {
-
         $entity = DB::table("cor_customers as e")
             ->select(DB::raw("CONCAT(e.mobile, ' - ', e.name) AS value"),'e.id as id')
-            ->where('e.status', 1)->limit(5000)->get();
+            ->where('e.status', 1)
+            ->where('e.global_option_id', $domain)
+            ->where(function ($query) use ($term) {
+                $query->orWhere('e.name','LIKE','%'.$term.'%')
+                    ->orWhere('e.mobile','LIKE','%'.$term.'%');
+            })
+            ->limit(5000)->get();
         return $entity;
-
-
-        $query = $this->createQueryBuilder('e');
-        $query->select('e.id as id');
-        $query->addSelect('CONCAT(e.mobile, \' - \', e.name) AS value');
-    //    $query->where("e.globalOption = :globalOption")->setParameter('globalOption', $domain);
-     //   $query->andWhere('e.name LIKE :searchTerm OR e.mobile LIKE :searchTerm')->setParameter('searchTerm', '%'.$term.'%');
-        $query->where('e.status=1');
-        $query->orderBy('e.name', 'ASC');
-        $query->groupBy('e.mobile');
-        $query->setMaxResults( 5000);
-      //  return $query->getQuery()->getResult();
-
-
-
     }
+
     public function searchPatientAutoComplete(GlobalOption $globalOption, $q, $type = 'NULL')
     {
         $query = $this->createQueryBuilder('e');

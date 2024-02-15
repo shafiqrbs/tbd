@@ -82,7 +82,7 @@ class CustomerController extends Controller
     public function show($id)
     {
         $service = new JsonRequestResponse();
-        $service->clearCaches('Customer');
+      //  $service->clearCaches('Customer');
         $entity = CustomerModel::find($id);
         $data = $service->returnJosnResponse($entity);
         return $data;
@@ -109,9 +109,14 @@ class CustomerController extends Controller
         $service = new JsonRequestResponse();
         $service->clearCaches('Customer');
         $entity = CustomerModel::find($id);
-        $entity->update($input);
-        $data = $service->returnJosnResponse($entity);
-        return $data;
+        DB::beginTransaction();
+        try {
+            $entity->update($input);
+            $data = $service->returnJosnResponse($entity);
+            return $data;
+        } catch (\Exception $e) {
+            DB::rollback();
+        }
     }
 
     /**
@@ -123,11 +128,16 @@ class CustomerController extends Controller
         $service->clearCaches('Customer');
         $user=CustomerModel::find($id);
         $entity = ['message'=>'false'];
-        if($user and $user->delete()){
-            $entity = ['message'=>'success'];
+        DB::beginTransaction();
+        try {
+            if($user and $user->delete()){
+                $entity = ['message'=>'success'];
+            }
+            $data = $service->returnJosnResponse($entity);
+            return $data;
+        } catch (\Exception $e) {
+            DB::rollback();
         }
-        $data = $service->returnJosnResponse($entity);
-        return $data;
     }
 
 
