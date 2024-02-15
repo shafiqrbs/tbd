@@ -2,5 +2,5 @@
 
 return [
     'name' => 'Core',
-    'api_key' => env('x_api_key'),
+    'api_key' => env('X_API_KEY'),
 ];
