@@ -3,12 +3,13 @@
 namespace Modules\Core\App\Entities;
 
 use Doctrine\ORM\Mapping as ORM;
+use Gedmo\Mapping\Annotation as Gedmo;
 use Modules\Domain\App\Entities\GlobalOption;
 
 
 /**
- * @ORM\Table(name="core_user")
- * @ORM\Entity(repositoryClass="Module\Core\App\Repositories\UserRepository")
+ * @ORM\Table(name="users")
+ * @ORM\Entity(repositoryClass="Modules\Core\App\Repositories\UserRepository")
  */
 class User
 {
@@ -21,12 +22,6 @@ class User
 	 */
 	protected $id;
 
-	/**
-	 * @var string
-	 */
-	protected $username;
-
-	protected $role;
 
 	protected $enabled = true;
 
@@ -54,9 +49,55 @@ class User
 	/**
 	 * @var string
 	 *
+	 * @ORM\Column(name="username", type="string", length = 30, nullable=true)
+	 */
+	private $username = "";
+
+
+	/**
+	 * @var string
+	 *
+	 * @ORM\Column(name="password", type="string", nullable=true)
+	 */
+	private $password = "";
+
+
+	/**
+	 * @var string
+	 *
+	 * @ORM\Column(name="email", type="string", length = 30, nullable=true)
+	 */
+	private $email = "";
+
+
+	/**
+	 * @var string
+	 *
+	 * @ORM\Column(name="name", type="string", length = 30, nullable=true)
+	 */
+	private $name = "";
+
+	/**
+	 * @var string
+	 *
+	 * @ORM\Column(name="remember_token", type="string", length = 30, nullable=true)
+	 */
+	private $remember_token = "";
+
+	/**
+	 * @var string
+	 *
 	 * @ORM\Column(name="appPassword", type="string", length = 30, nullable=true)
 	 */
 	private $appPassword = "@123456";
+
+	/**
+	 * @var array
+	 *
+	 * @ORM\Column(name="roles", type="array", nullable=true)
+	 */
+	private $roles;
+
 
 	/**
 	 * @var array
@@ -99,9 +140,52 @@ class User
 
 	protected $globalOption;
 
+    /**
+     * @var \DateTime
+     * @Gedmo\Timestampable(on="create")
+     * @ORM\Column(name="email_verified_at", type="datetime")
+     */
+    private $emailVerifiedAt;
 
+     /**
+     * @var \DateTime
+     * @Gedmo\Timestampable(on="create")
+     * @ORM\Column(name="deleted_at", type="datetime")
+     */
+    private $deletedAt;
 
-	public function isGranted($role)
+     /**
+     * @var \DateTime
+     * @Gedmo\Timestampable(on="create")
+     * @ORM\Column(name="created_at", type="datetime")
+     */
+    private $createdAt;
+
+    /**
+     * @var \DateTime
+     * @Gedmo\Timestampable(on="create")
+     * @ORM\Column(name="updated_at", type="datetime")
+     */
+    private $updatedAt;
+
+    /**
+     * @var \DateTime
+     * @Gedmo\Timestampable(on="create")
+     * @ORM\Column(name="created", type="datetime")
+     */
+    private $created;
+
+    /**
+     * Get id
+     *
+     * @return integer
+     */
+    public function getId()
+    {
+        return $this->id;
+    }
+
+    public function isGranted($role)
 	{
 		$domain = $this->getRole();
 		if('ROLE_SUPER_ADMIN' === $domain or 'ROLE_DOMAIN' === $domain) {
@@ -254,34 +338,6 @@ class User
 	}
 
 
-
-	/**
-	 * @return mixed
-	 */
-	public function getPages()
-	{
-		return $this->pages;
-	}
-
-
-	/**
-	 * @param mixed $siteSetting
-	 */
-	public function setSiteSetting($siteSetting)
-	{
-		$siteSetting->setUser($this);
-		$this->siteSetting = $siteSetting;
-	}
-
-	/**
-	 * @return mixed
-	 */
-	public function getSiteSetting()
-	{
-		return $this->siteSetting;
-	}
-
-
 	/**
 	 * @return GlobalOption
 	 */
@@ -298,107 +354,6 @@ class User
 		$this->globalOption = $globalOption;
 	}
 
-
-
-	/**
-	 * @return mixed
-	 */
-	public function getHomePage()
-	{
-		return $this->homePage;
-	}
-
-	/**
-	 * @return mixed
-	 */
-	public function getContactPage()
-	{
-		return $this->contactPage;
-	}
-
-	/**
-	 * @return mixed
-	 */
-	public function getSyndicateContents()
-	{
-		return $this->syndicateContents;
-	}
-
-
-	/**
-	 * @return mixed
-	 */
-	public function getProducts()
-	{
-		return $this->products;
-	}
-
-	/**
-	 * @return mixed
-	 */
-	public function getVendor()
-	{
-		return $this->vendor;
-	}
-
-	/**
-	 * @param mixed $vendor
-	 */
-	public function setVendor($vendor)
-	{
-		$this->vendor = $vendor;
-	}
-
-	/**
-	 * @return mixed
-	 */
-	public function getCategoryGrouping()
-	{
-		return $this->categoryGrouping;
-	}
-
-	/**
-	 * @return mixed
-	 */
-	public function getHomeSliders()
-	{
-		return $this->homeSliders;
-	}
-
-
-	/**
-	 * @return mixed
-	 */
-	public function getSalesUser()
-	{
-		return $this->salesUser;
-	}
-
-	/**
-	 * @return mixed
-	 */
-	public function getSales()
-	{
-		return $this->sales;
-	}
-
-	/**
-	 * @return mixed
-	 */
-	public function getPurchaseReturn()
-	{
-		return $this->purchaseReturn;
-	}
-
-	/**
-	 * @return mixed
-	 */
-	public function getPurchasesReturnApprovedBy()
-	{
-		return $this->purchasesReturnApprovedBy;
-	}
-
-
 	/**
 	 * @return boolean
 	 */
@@ -413,88 +368,6 @@ class User
 	public function setIsDelete($isDelete)
 	{
 		$this->isDelete = $isDelete;
-	}
-
-	/**
-	 * @return mixed
-	 */
-	public function getSalesReturn()
-	{
-		return $this->salesReturn;
-	}
-
-
-
-	/**
-	 * @return mixed
-	 */
-	public function getExpenditure()
-	{
-		return $this->expenditure;
-	}
-
-	/**
-	 * @return mixed
-	 */
-	public function getExpenditureToUser()
-	{
-		return $this->expenditureToUser;
-	}
-
-	/**
-	 * @return mixed
-	 */
-	public function getExpenditureApprove()
-	{
-		return $this->expenditureApprove;
-	}
-
-	/**
-	 * @return mixed
-	 */
-	public function getPaymentSalaries()
-	{
-		return $this->paymentSalaries;
-	}
-
-	/**
-	 * @return mixed
-	 */
-	public function getSalesApprovedBy()
-	{
-		return $this->salesApprovedBy;
-	}
-
-	/**
-	 * @return mixed
-	 */
-	public function getInvoiceSmsEmail()
-	{
-		return $this->invoiceSmsEmail;
-	}
-
-	/**
-	 * @return mixed
-	 */
-	public function getInvoiceSmsEmailReceivedBy()
-	{
-		return $this->invoiceSmsEmailReceivedBy;
-	}
-
-	/**
-	 * @return mixed
-	 */
-	public function getSalesImport()
-	{
-		return $this->salesImport;
-	}
-
-	/**
-	 * @return StockItem
-	 */
-	public function getStockItems()
-	{
-		return $this->stockItems;
 	}
 
 
@@ -521,146 +394,6 @@ class User
 
     }
 
-	/**
-	 * @return Damage
-	 */
-	public function getDamageApprovedBy()
-	{
-		return $this->damageApprovedBy;
-	}
-
-	/**
-	 * @return Damage
-	 */
-	public function getDamage()
-	{
-		return $this->damage;
-	}
-
-
-	/**
-	 * @return Branches
-	 */
-	public function getBranches()
-	{
-		return $this->branches;
-	}
-
-	/**
-	 * @return BranchInvoice
-	 */
-	public function getBranchInvoice()
-	{
-		return $this->branchInvoice;
-	}
-
-	/**
-	 * @return BranchInvoice
-	 */
-	public function getBranchInvoiceApprovedBy()
-	{
-		return $this->branchInvoiceApprovedBy;
-	}
-
-	/**
-	 * @return ExcelImporter
-	 */
-	public function getExcelImporters()
-	{
-		return $this->excelImporters;
-	}
-
-	/**
-	 * @return Delivery
-	 */
-	public function getDelivery()
-	{
-		return $this->delivery;
-	}
-
-	/**
-	 * @return Delivery
-	 */
-	public function getDeliveryApprovedBy()
-	{
-		return $this->deliveryApprovedBy;
-	}
-
-	/**
-	 * @return DeliveryReturn
-	 */
-	public function getDeliveryReturn()
-	{
-		return $this->deliveryReturn;
-	}
-
-	/**
-	 * @return DeliveryReturn
-	 */
-	public function getDeliveryReturnApprovedBy()
-	{
-		return $this->deliveryReturnApprovedBy;
-	}
-
-	/**
-	 * @return GlobalOption
-	 */
-	public function getGlobalOptionAgents()
-	{
-		return $this->globalOptionAgents;
-	}
-
-	/**
-	 * @return mixed
-	 */
-	public function getAgent()
-	{
-		return $this->agent;
-	}
-
-	/**
-	 * @param mixed $agent
-	 */
-	public function setAgent($agent)
-	{
-		$this->agent = $agent;
-	}
-
-
-
-
-
-	/**
-	 * @return MedicineReverse
-	 */
-	public function getMedicineReverse()
-	{
-		return $this->medicineReverse;
-	}
-
-	/**
-	 * @return DpsParticular
-	 */
-	public function getDpsParticularOperator()
-	{
-		return $this->dpsParticularOperator;
-	}
-
-	/**
-	 * @return MedicinePurchase
-	 */
-	public function getMedicinePurchasesBy()
-	{
-		return $this->medicinePurchasesBy;
-	}
-
-	/**
-	 * @return MedicineSalesTemporary
-	 */
-	public function getMedicineSalesTemporary()
-	{
-		return $this->medicineSalesTemporary;
-	}
 
 	/**
 	 * @return int
@@ -670,23 +403,6 @@ class User
 		return $this->domainOwner;
 	}
 
-	/**
-	 * @param int $domainOwner
-	 */
-	public function setDomainOwner($domainOwner)
-	{
-		$this->domainOwner = $domainOwner;
-	}
-
-	/**
-	 * @return DomainUser
-	 */
-	public function getDomainUser()
-	{
-		return $this->domainUser;
-	}
-
-
 
 	/**
 	 * @return bool
@@ -695,40 +411,6 @@ class User
 		return $this->enabled;
 	}
 
-
-
-	/**
-	 * @return AccountCash
-	 */
-	public function getAccountCashes() {
-		return $this->accountCashes;
-	}
-
-
-
-    /**
-     * @return RestaurantTemporary
-     */
-    public function getRestaurantTemps()
-    {
-        return $this->restaurantTemps;
-    }
-
-    /**
-     * @return AccountSalesAdjustment
-     */
-    public function getSalesAdjustment()
-    {
-        return $this->salesAdjustment;
-    }
-
-    /**
-     * @return AccountSalesAdjustment
-     */
-    public function getSalesAdjustmentApprove()
-    {
-        return $this->salesAdjustmentApprove;
-    }
 
     /**
      * @return string
@@ -746,39 +428,6 @@ class User
         $this->userGroup = $userGroup;
     }
 
-    /**
-     * @return AccountHead
-     */
-    public function getAccountHead()
-    {
-        return $this->accountHead;
-    }
-
-
-    /**
-     * @return EmployeePayroll
-     */
-    public function getPayrollApproved()
-    {
-        return $this->payrollApproved;
-    }
-
-    /**
-     * @param  EmployeePayroll $employeePayroll
-     */
-    public function setEmployeePayroll($employeePayroll)
-    {
-        $employeePayroll->setEmployee($this);
-        $this->employeePayroll = $employeePayroll;
-    }
-
-     /**
-     * @return EmployeePayroll
-     */
-    public function getEmployeePayroll()
-    {
-        return $this->employeePayroll;
-    }
 
     /**
      * @return array
@@ -813,19 +462,195 @@ class User
     }
 
     /**
-     * @return BusinessAndroidProcess
+     * @return string
      */
-    public function getBusinessAndroidProcess()
+    public function getName()
     {
-        return $this->businessAndroidProcess;
+        return $this->name;
+    }
+
+    /**
+     * @param string $name
+     */
+    public function setName($name)
+    {
+        $this->name = $name;
+    }
+
+    /**
+     * @return string
+     */
+    public function getRememberToken()
+    {
+        return $this->remember_token;
+    }
+
+    /**
+     * @param string $remember_token
+     */
+    public function setRememberToken($remember_token)
+    {
+        $this->remember_token = $remember_token;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isAgent()
+    {
+        return $this->agent;
+    }
+
+    /**
+     * @param bool $agent
+     */
+    public function setAgent($agent)
+    {
+        $this->agent = $agent;
     }
 
     /**
      * @return mixed
      */
-    public function getHmsInvoiceTemporaryParticulars()
+    public function getGroups()
     {
-        return $this->hmsInvoiceTemporaryParticulars;
+        return $this->groups;
+    }
+
+    /**
+     * @param mixed $groups
+     */
+    public function setGroups($groups)
+    {
+        $this->groups = $groups;
+    }
+
+    /**
+     * @return \DateTime
+     */
+    public function getEmailVerifiedAt()
+    {
+        return $this->emailVerifiedAt;
+    }
+
+    /**
+     * @param \DateTime $emailVerifiedAt
+     */
+    public function setEmailVerifiedAt($emailVerifiedAt)
+    {
+        $this->emailVerifiedAt = $emailVerifiedAt;
+    }
+
+    /**
+     * @return \DateTime
+     */
+    public function getCreatedAt()
+    {
+        return $this->createdAt;
+    }
+
+    /**
+     * @param \DateTime $createdAt
+     */
+    public function setCreatedAt($createdAt)
+    {
+        $this->createdAt = $createdAt;
+    }
+
+    /**
+     * @return \DateTime
+     */
+    public function getUpdatedAt()
+    {
+        return $this->updatedAt;
+    }
+
+    /**
+     * @param \DateTime $updatedAt
+     */
+    public function setUpdatedAt($updatedAt)
+    {
+        $this->updatedAt = $updatedAt;
+    }
+
+    /**
+     * @return \DateTime
+     */
+    public function getCreated()
+    {
+        return $this->created;
+    }
+
+    /**
+     * @param \DateTime $created
+     */
+    public function setCreated($created)
+    {
+        $this->created = $created;
+    }
+
+    /**
+     * @return string
+     */
+    public function getEmail()
+    {
+        return $this->email;
+    }
+
+    /**
+     * @param string $email
+     */
+    public function setEmail($email)
+    {
+        $this->email = $email;
+    }
+
+    /**
+     * @return array
+     */
+    public function getRoles()
+    {
+        return $this->roles;
+    }
+
+    /**
+     * @param array $roles
+     */
+    public function setRoles($roles)
+    {
+        $this->roles = $roles;
+    }
+
+    /**
+     * @return \DateTime
+     */
+    public function getDeletedAt()
+    {
+        return $this->deletedAt;
+    }
+
+    /**
+     * @param \DateTime $deletedAt
+     */
+    public function setDeletedAt($deletedAt)
+    {
+        $this->deletedAt = $deletedAt;
+    }
+
+    /**
+     * @return string
+     */
+    public function getPassword()
+    {
+        return $this->password;
+    }
+
+    /**
+     * @param string $password
+     */
+    public function setPassword($password)
+    {
+        $this->password = $password;
     }
 
 

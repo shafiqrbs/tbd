@@ -16,9 +16,11 @@ class HeaderAuthenticationMiddleware
      */
     public function handle(Request $request, Closure $next): Response
     {
-        $requestHeaderKey = $request->header('x-api-key');
+        $requestHeaderKey = $request->header('X-Api-Key');
+        $requestHeaderValue = $request->header('x-Api-Value');
         $appApiKey = config('core.api_key');
-        if($requestHeaderKey == $appApiKey){
+        $appApiValue = config('core.api_value');
+        if($requestHeaderKey == $appApiKey ){
             return $next($request);
         }
         return new JsonResponse(['status'=>404, 'message'=>'Unauthorized access']);
