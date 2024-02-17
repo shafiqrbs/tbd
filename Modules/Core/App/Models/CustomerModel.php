@@ -44,8 +44,6 @@ class CustomerModel extends Model
     public static function boot() {
         parent::boot();
         self::creating(function ($model) {
-            dd($model);
-            exit;
             $date =  new \DateTime("now");
             $model->unique_key = self::quickRandom();
             $model->created_at = $date;

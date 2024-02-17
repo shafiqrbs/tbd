@@ -46,6 +46,13 @@ class Customer
      **/
     protected $location;
 
+    /**
+     * @ORM\ManyToOne(targetEntity="Modules\Core\App\Entities\User")
+     **/
+    protected $marketing;
+
+
+
 
     /**
      * @var integer
@@ -1918,18 +1925,6 @@ class Customer
     {
         $this->isDelete = $isDelete;
     }
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 }
