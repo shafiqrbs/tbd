@@ -50,14 +50,7 @@ class CustomerModel extends Model
             $model->updated_at = $date;
             $model->created = $date;
             $model->updated = $date;
-
             $datetime = new \DateTime("now");
-            /*$lastCode = $this->getLastCode();
-            $entity->setCode($lastCode+1);
-            if(empty($entity->getCustomerId())){
-                $model->setCustomerId(sprintf("%s%s", $datetime->format('my'), str_pad($entity->getCode(),5, '0', STR_PAD_LEFT)));
-            }*/
-
         });
 
         self::updating(function ($model) {
