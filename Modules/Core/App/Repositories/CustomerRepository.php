@@ -21,9 +21,9 @@ class CustomerRepository extends EntityRepository {
     {
 
         $page = (isset($queryParams['page']) and $queryParams['page'] ) ? $queryParams['page']:1;
-        $limit = (isset($queryParams['limit']) and $queryParams['limit'] ) ? $queryParams['limit']:10000;
-        $data = Cache::remember('Customer'.$page, 10000, function() use ($queryParams,$limit){
-            $queryBuilder = CustomerModel::with(['location'])->select('id','name','mobile','created_at');
+        $limit = (isset($queryParams['limit']) and $queryParams['limit'] ) ? $queryParams['limit']:200;
+        $data = Cache::remember('Customer'.$page, 200, function() use ($queryParams,$limit){
+            $queryBuilder = CustomerModel::with(['location'])->select('id','name','mobile','created_at')->orderBy('created_at','DESC');
             $query = resolve(CustomerFilter::class)->getResults([
                 'builder' => $queryBuilder,
                 'params' => $queryParams,
