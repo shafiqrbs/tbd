@@ -85,7 +85,7 @@ class Customer
      /**
      * @var string
      *
-     * @ORM\Column(name="referenceId", type="string",  nullable=true)
+     * @ORM\Column(name="reference_id", type="string",  nullable=true)
      */
     private $referenceId;
 
@@ -218,7 +218,7 @@ class Customer
      /**
      * @var string
      *
-     * @ORM\Column(name="alternativeMobile", type="string", length=50, nullable =true)
+     * @ORM\Column(name="alternative_mobile", type="string", length=50, nullable =true)
      */
     private $alternativeMobile;
 
@@ -253,7 +253,7 @@ class Customer
     /**
      * @var string
      *
-     * @ORM\Column(name="customerGroup", type="string", length=100, nullable =true)
+     * @ORM\Column(name="customer_group", type="string", length=100, nullable =true)
      */
     private $customerGroup;
 
@@ -438,6 +438,14 @@ class Customer
      */
     private $batchYear;
 
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="opening_balance", type="string", nullable=true)
+     */
+    private $openingBalance;
+
     /**
      * @var string
      *
@@ -457,7 +465,7 @@ class Customer
     /**
      * @var float
      *
-     * @ORM\Column(name="creditLimit", type="float", nullable=true)
+     * @ORM\Column(name="credit_Limit", type="float", nullable=true)
      */
     private $creditLimit;
 
@@ -1925,6 +1933,24 @@ class Customer
     {
         $this->isDelete = $isDelete;
     }
+
+    /**
+     * @return string
+     */
+    public function getOpeningBalance()
+    {
+        return $this->openingBalance;
+    }
+
+    /**
+     * @param string $openingBalance
+     */
+    public function setOpeningBalance($openingBalance)
+    {
+        $this->openingBalance = $openingBalance;
+    }
+
+
 
 
 }

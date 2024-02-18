@@ -21,10 +21,18 @@ class CustomerModel extends Model
     protected $guarded = ['id'];
     protected $fillable = [
         'name',
-        'mobile'
+        'mobile',
+        'location_id',
+        'address',
+        'customer_group',
+        'email',
+        'alternative_mobile',
+        'credit_limit',
+        'reference_id',
+        'opening_balance',
+        'marketing_id',
+        'global_option_id'
     ];
-
-
     public static function getAllCustomers(){
         $data = self::where(['status'=>1])->whereNotNull('mobile')->orderBy('name','ASC')
             ->select([
