@@ -440,9 +440,9 @@ class Customer
 
 
     /**
-     * @var string
+     * @var float
      *
-     * @ORM\Column(name="opening_balance", type="string", nullable=true)
+     * @ORM\Column(name="opening_balance", type="float", nullable=true)
      */
     private $openingBalance;
 
