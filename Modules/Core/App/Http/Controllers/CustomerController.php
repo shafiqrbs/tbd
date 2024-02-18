@@ -4,20 +4,16 @@ namespace Modules\Core\App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use Doctrine\ORM\EntityManagerInterface;
-use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
 use Modules\AppsApi\App\Services\GeneratePatternCodeService;
 use Modules\AppsApi\App\Services\JsonRequestResponse;
 use Modules\Core\App\Entities\Customer;
-use Modules\Core\App\Forms\CustomerType;
 use Modules\Core\App\Http\Requests\CustomerRequest;
-use Modules\Core\App\Http\Requests\FormValidationManager;
 use Modules\Core\App\Models\CustomerModel;
 use Barryvdh\Form\CreatesForms;
 use Barryvdh\Form\ValidatesForms;
-use Illuminate\Support\Facades\Validator;
+
 
 
 class CustomerController extends Controller
@@ -69,6 +65,7 @@ class CustomerController extends Controller
         DB::beginTransaction();
         try {
             $entity = CustomerModel::create($input);
+            DB::commit();
             $data = $service->returnJosnResponse($entity);
             return $data;
         } catch (\Exception $e) {
@@ -94,7 +91,6 @@ class CustomerController extends Controller
     public function edit($id)
     {
         $service = new JsonRequestResponse();
-        $service->clearCaches('Customer');
         $entity = CustomerModel::find($id);
         $data = $service->returnJosnResponse($entity);
         return $data;
@@ -112,6 +108,7 @@ class CustomerController extends Controller
         DB::beginTransaction();
         try {
             $entity->update($input);
+            DB::commit();
             $data = $service->returnJosnResponse($entity);
             return $data;
         } catch (\Exception $e) {
@@ -133,6 +130,7 @@ class CustomerController extends Controller
             if($user and $user->delete()){
                 $entity = ['message'=>'success'];
             }
+            DB::commit();
             $data = $service->returnJosnResponse($entity);
             return $data;
         } catch (\Exception $e) {

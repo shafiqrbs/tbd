@@ -19,7 +19,7 @@ class JsonRequestResponse
                 'status' => Response::HTTP_OK,
                 'data' => $data
             ]));
-            $response->setStatusCode(Response::HTTP_FOUND);
+            $response->setStatusCode(Response::HTTP_OK);
             return $response;
         }catch(\Exception $ex){
             return \response([
