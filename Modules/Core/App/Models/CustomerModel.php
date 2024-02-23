@@ -54,7 +54,7 @@ class CustomerModel extends Model
         'lastName',
         'customerId',
         'customer_unique_name',
-        'customer_unique_id',
+        'unique_id',
         'global_option_id'
     ];
     public static function getAllCustomers(){
@@ -77,7 +77,7 @@ class CustomerModel extends Model
         parent::boot();
         self::creating(function ($model) {
             $date =  new \DateTime("now");
-            $model->unique_key = self::quickRandom();
+            $model->unique_id = self::quickRandom();
             $model->created_at = $date;
             $model->updated_at = $date;
             $model->created = $date;
@@ -87,10 +87,8 @@ class CustomerModel extends Model
 
         self::updating(function ($model) {
             $date =  new \DateTime("now");
-            $model->unique_key = self::quickRandom();
-            $model->created_at = $date;
+            $model->unique_id = self::quickRandom();
             $model->updated_at = $date;
-            $model->created = $date;
             $model->updated = $date;
         });
 
@@ -102,22 +100,5 @@ class CustomerModel extends Model
         return substr(str_shuffle(str_repeat($pool, $length)), 0, $length);
     }
 
-
-    public static function getLastCode($domain)
-    {
-
-
-      //  $entity = self::where('global_option_id',$domain)->count();
-        $datetime = new \DateTime("now");
-        $today_startdatetime = $datetime->format('Y-m-01 00:00:00');
-        $today_enddatetime = $datetime->format('Y-m-t 23:59:59');
-        $entity = DB::table('cor_customers as s')
-            ->select(DB::raw("MAX(s.code) as code"))
-            //->where('s.created','>=', $today_startdatetime)
-            //->where('s.created','<=', $today_startdatetime)
-            ->where('s.global_option_id', $domain)->first();
-       return $entity->code;
-
-    }
 
 }

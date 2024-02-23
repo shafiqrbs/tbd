@@ -9,30 +9,32 @@
 namespace Modules\Core\App\Repositories;
 
 use Doctrine\ORM\EntityRepository;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
+use Modules\Core\App\Filters\CustomerFilter;
+use Modules\Core\App\Models\UserModel;
 
 class UserRepository extends EntityRepository {
 
 
     public function listWithSearch(array $queryParams = [])
     {
-        $entity = DB::table("users as e")
-            ->select(DB::raw("e.id as id,e.username as name"))->limit(100)->get();
-        return $entity;
-    }
 
-
-    public function searchAutoComplete($q)
-    {
-        $query = $this->createQueryBuilder('e');
-        $query->select('e.id as id');
-        $query->addSelect('username.name) AS text');
-        $query->andWhere($query->expr()->like("e.username", "'$q%'"  ));
-        $query->orderBy('e.username', 'ASC');
-        $query->setMaxResults( '100' );
-        return $query->getQuery()->getResult();
+        $page = (isset($queryParams['page']) and $queryParams['page'] ) ? $queryParams['page']:1;
+        $limit = (isset($queryParams['limit']) and $queryParams['limit'] ) ? $queryParams['limit']:200;
+        $data = Cache::remember('users'.$page, 200, function() use ($queryParams,$limit){
+            $queryBuilder = UserModel::where('isDelete',0)->select('id','username as name','email','created_at')->orderBy('created_at','DESC');
+            $query = resolve(CustomerFilter::class)->getResults([
+                'builder' => $queryBuilder,
+                'params' => $queryParams,
+                'limit' => $limit
+            ]);
+            return $query;
+        });
+        return $data;
 
     }
+
 
 
 }

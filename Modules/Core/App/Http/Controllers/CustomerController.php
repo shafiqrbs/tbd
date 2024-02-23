@@ -5,6 +5,7 @@ namespace Modules\Core\App\Http\Controllers;
 use App\Http\Controllers\Controller;
 use Doctrine\ORM\EntityManagerInterface;
 use Illuminate\Contracts\Validation\Validator;
+use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -35,23 +36,6 @@ class CustomerController extends Controller
         return $data;
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function selectSearch(Request $request,EntityManagerInterface $em)
-    {
-
-        $term = $request['term'];
-        $entities = [];
-        $service = new JsonRequestResponse();
-        if ($term) {
-           // $go = $this->getUser()->getGlobalOption();
-            $go = 65;
-            $entities = $em->getRepository(Customer::class)->searchAutoComplete($go,$term);
-        }
-        $data = $service->returnJosnResponse($entities);
-        return $data;
-    }
 
     /**
      * Store a newly created resource in storage.
@@ -72,11 +56,11 @@ class CustomerController extends Controller
             $entity = CustomerModel::create($input);
             DB::commit();
             $data = $service->returnJosnResponse($entity);
-            return $data;
-        } catch (\Exception $e) {
+        } catch(QueryException $ex){
             DB::rollback();
-            Log::error('Exception: '.$e->getMessage());
+            $data = $service->returnJosnResponse($ex->getMessage());
         }
+        return $data;
     }
 
     /**
@@ -112,14 +96,14 @@ class CustomerController extends Controller
         $input['customer_unique_id'] = "{$entity['global_option_id']}@{$input['mobile']}-{$input['name']}";
         DB::beginTransaction();
         try {
-            $entity->update($input);
-            DB::commit();
-            $data = $service->returnJosnResponse($entity);
+                $entity->update($input);
+                DB::commit();
+                $data = $service->returnJosnResponse($entity);
+            } catch(QueryException $ex){
+                DB::rollback();
+                $data = $service->returnJosnResponse($ex->getMessage());
+            }
             return $data;
-        } catch (\Exception $e) {
-            DB::rollback();
-            Log::error('Exception: '.$e->getMessage());
-        }
     }
 
     /**

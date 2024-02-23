@@ -36,19 +36,6 @@ class VendorRepository extends EntityRepository {
 
     }
 
-    public function searchAutoComplete($domain, $term, $type = 'NULL')
-    {
-        $entity = DB::table("cor_customers as e")
-            ->select(DB::raw("CONCAT(e.mobile, ' - ', e.name) AS value"),'e.id as id')
-            ->where('e.status', 1)
-            ->where('e.global_option_id', $domain)
-            ->where(function ($query) use ($term) {
-                $query->orWhere('e.name','LIKE','%'.$term.'%')
-                    ->orWhere('e.mobile','LIKE','%'.$term.'%');
-            })
-            ->limit(5000)->get();
-        return $entity;
-    }
 
 
 }

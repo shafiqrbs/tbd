@@ -120,6 +120,12 @@ class Customer
      */
     private $name;
 
+    /**
+     * @Gedmo\Slug(fields={"name"})
+     * @Doctrine\ORM\Mapping\Column(length=255)
+     */
+    private $slug;
+
 
     /**
      * Generated column
@@ -138,9 +144,9 @@ class Customer
      /**
      * @var string
      *
-     * @ORM\Column(name="customer_unique_id", type="string", unique=true, nullable =true)
+     * @ORM\Column(name="unique_id", type="string", unique=true, nullable =true)
      */
-    private $customerUniqueId;
+    private $uniqueId;
 
     /**
      * @var string
@@ -1314,20 +1320,6 @@ class Customer
 		$this->namePrefix = $namePrefix;
 	}
 
-	/**
-	 * @return AccountVendor
-	 */
-	public function getAccountVendor() {
-		return $this->accountVendor;
-	}
-
-    /**
-     * @return AccountHead
-     */
-    public function getAccountHead()
-    {
-        return $this->accountHead;
-    }
 
     /**
      * @return string
@@ -1984,9 +1976,37 @@ class Customer
         $this->customerUniqueName = $customerUniqueName;
     }
 
+    /**
+     * @return mixed
+     */
+    public function getSlug()
+    {
+        return $this->slug;
+    }
 
+    /**
+     * @param mixed $slug
+     */
+    public function setSlug($slug)
+    {
+        $this->slug = $slug;
+    }
 
+    /**
+     * @return string
+     */
+    public function getUniqueId()
+    {
+        return $this->uniqueId;
+    }
 
+    /**
+     * @param string $uniqueId
+     */
+    public function setUniqueId($uniqueId)
+    {
+        $this->uniqueId = $uniqueId;
+    }
 
 
 }

@@ -10,26 +10,20 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 
 
-class VendorModel extends Model
+class UserModel extends Model
 {
     use HasFactory;
     use Sluggable;
 
 
-    protected $table = 'cor_vendors';
+    protected $table = 'users';
     public $timestamps = true;
     protected $guarded = ['id'];
     protected $fillable = [
         'name',
-        'company_name',
+        'username',
         'mobile',
-        'address',
         'email',
-        'opening_balance',
-        'binno',
-        'tinno',
-        'code',
-        'vendor_code',
         'global_option_id'
     ];
 

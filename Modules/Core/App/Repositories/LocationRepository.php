@@ -27,21 +27,5 @@ class LocationRepository extends EntityRepository {
     }
 
 
-    public function searchAutoComplete($q)
-    {
-        $query = $this->createQueryBuilder('e');
-        $query->join('e.parent','parent');
-        $query->select('e.id as id');
-        $query->addSelect('CONCAT(e.name, \',\', parent.name) AS text');
-        $query->where("e.level = 3");
-        $query->andWhere($query->expr()->like("e.name", "'$q%'"  ));
-        $query->groupBy('e.id');
-        $query->orderBy('e.name', 'ASC');
-        $query->setMaxResults( '10' );
-        return $query->getQuery()->getResult();
-
-    }
-
-
 
 }

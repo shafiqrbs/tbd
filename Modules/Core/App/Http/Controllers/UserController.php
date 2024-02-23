@@ -31,6 +31,7 @@ class UserController extends Controller
      * Display a listing of the resource.
      */
     public function index(Request $request,EntityManagerInterface $em){
+
         $service = new JsonRequestResponse();
         $service->clearCaches('User');
         $entities = $em->getRepository(User::class)->listWithSearch($request->query());
@@ -38,21 +39,7 @@ class UserController extends Controller
         return $data;
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function selectSearch(Request $request,EntityManagerInterface $em)
-    {
 
-        $term = $request['term'];
-        $entities = [];
-        $service = new JsonRequestResponse();
-        if ($term) {
-            $entities = $em->getRepository(User::class)->searchAutoComplete($term);
-        }
-        $data = $service->returnJosnResponse($entities);
-        return $data;
-    }
 
     /**
      * Store a newly created resource in storage.

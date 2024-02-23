@@ -66,22 +66,22 @@ class Vendor
      /**
      * @var string
      *
-     * @ORM\Column(name="unique_key", type="string", length=255, nullable=true)
+     * @ORM\Column(name="unique_id", type="string", length=255, nullable=true)
      */
-    private $uniqueKey;
+    private $uniqueId;
 
 
     /**
      * @var string
      *
-     * @ORM\Column(name="vendor_code", type="string", length=20)
+     * @ORM\Column(name="vendor_code", type="string", length=50, nullable=true)
      */
     private $vendorCode;
 
     /**
      * @var integer
      *
-     * @ORM\Column(name="code", type="integer")
+     * @ORM\Column(name="code", type="integer", nullable=true)
      */
     private $code;
 
@@ -89,7 +89,7 @@ class Vendor
      /**
      * @var float
      *
-     * @ORM\Column(name="opening_balance", type="float")
+     * @ORM\Column(name="opening_balance", type="float", nullable=true)
      */
     private $openingBalance;
 
@@ -97,7 +97,7 @@ class Vendor
     /**
      * @var string
      *
-     * @ORM\Column(name="company_name", type="string", length=255)
+     * @ORM\Column(name="company_name", type="string", length=255, nullable=true)
      */
     private $companyName;
 
@@ -607,21 +607,7 @@ class Vendor
         $this->globalOption = $globalOption;
     }
 
-    /**
-     * @return string
-     */
-    public function getUniqueKey()
-    {
-        return $this->uniqueKey;
-    }
 
-    /**
-     * @param string $uniqueKey
-     */
-    public function setUniqueKey($uniqueKey)
-    {
-        $this->uniqueKey = $uniqueKey;
-    }
 
     /**
      * @return float
@@ -638,6 +624,24 @@ class Vendor
     {
         $this->openingBalance = $openingBalance;
     }
+
+    /**
+     * @return string
+     */
+    public function getUniqueId()
+    {
+        return $this->uniqueId;
+    }
+
+    /**
+     * @param string $uniqueId
+     */
+    public function setUniqueId($uniqueId)
+    {
+        $this->uniqueId = $uniqueId;
+    }
+
+
 
 }
 
