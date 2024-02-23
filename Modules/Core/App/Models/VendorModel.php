@@ -12,66 +12,38 @@ use Illuminate\Support\Facades\DB;
 use Modules\Core\App\Entities\Customer;
 
 
-class CustomerModel extends Model
+class VendorModel extends Model
 {
     use HasFactory;
 
-    protected $table = 'cor_customers';
+    protected $table = 'cor_vendors';
     public $timestamps = true;
     protected $guarded = ['id'];
     protected $fillable = [
         'name',
+        'company_name',
         'mobile',
-        'location_id',
         'address',
-        'customer_group',
         'email',
-        'alternative_mobile',
-        'credit_limit',
-        'reference_id',
         'opening_balance',
-        'marketing_id',
-        'code',
-        'customerId',
-        'bloodGroup',
-        'dob',
-        'age',
-        'ageType',
-        'ageGroup',
-        'gender',
-        'permanentAddress',
-        'fatherName',
-        'motherName',
-        'maritalStatus',
-        'alternativeContactPerson',
-        'alternativeContactMobile',
-        'alternativeRelation',
-        'company',
-        'weight',
-        'bloodPressure',
-        'diabetes',
-        'firstName',
-        'lastName',
-        'customerId',
-        'customer_unique_name',
-        'customer_unique_id',
+        'binno',
+        'tinno',
         'global_option_id'
     ];
+
+
     public static function getAllCustomers(){
         $data = self::where(['status'=>1])->whereNotNull('mobile')->orderBy('name','ASC')
             ->select([
-                'customers.id as id',
-                'customers.name as name',
-                'customers.mobile as mobile'
+                'cor_vendors.id as id',
+                'cor_vendors.name as name',
+                'cor_vendors.company_name as company',
+                'cor_vendors.mobile as mobile'
             ])
             ->get()->toArray();
         return $data;
     }
 
-    public function location(): BelongsTo
-    {
-        return $this->belongsTo(LocationModel::class);
-    }
 
     public static function boot() {
         parent::boot();

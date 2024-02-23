@@ -12,12 +12,15 @@ use Gedmo\Mapping\Annotation as Gedmo;
  *     @ORM\Index(name="allowIndex", columns={"name"}),
  *     @ORM\Index(name="customerIdIndex", columns={"customerId"}),
  *     @ORM\Index(name="mobileIndex", columns={"mobile"}),
+ *     @ORM\Index(name="createdIndex", columns={"created_at"}),
+ *     @ORM\Index(name="updatedIndex", columns={"updated_at"}),
  *     @ORM\Index(name="statusIndex", columns={"status"})
  * })
  * @ORM\Entity(repositoryClass="Modules\Core\App\Repositories\CustomerRepository")
  */
 class Customer
 {
+
 
     /**
      * @var integer
@@ -43,15 +46,15 @@ class Customer
 
     /**
      * @ORM\ManyToOne(targetEntity="Modules\Core\App\Entities\Location")
+     * @ORM\JoinColumn(name="location_id", referencedColumnName="id", nullable=true, onDelete="SET NULL")
      **/
     protected $location;
 
     /**
      * @ORM\ManyToOne(targetEntity="Modules\Core\App\Entities\User")
+     * @ORM\JoinColumn(name="marketing_id", referencedColumnName="id", nullable=true, onDelete="SET NULL")
      **/
     protected $marketing;
-
-
 
 
     /**
@@ -117,12 +120,27 @@ class Customer
      */
     private $name;
 
+
+    /**
+     * Generated column
+     * @ORM\Column(type="string", name="customer_unique_name", insertable=false, updatable=false, nullable=true)
+     * MySQL example: full_name char(41) GENERATED ALWAYS AS (concat(global_option_id,'-'concat(name,'-',mobile)),
+     */
+    protected $customerUniqueName;
+
     /**
      * @var string
      *
      * @ORM\Column(name="nid", type="string", length=100, nullable =true)
      */
     private $nid;
+
+     /**
+     * @var string
+     *
+     * @ORM\Column(name="customer_unique_id", type="string", unique=true, nullable =true)
+     */
+    private $customerUniqueId;
 
     /**
      * @var string
@@ -1949,6 +1967,24 @@ class Customer
     {
         $this->openingBalance = $openingBalance;
     }
+
+    /**
+     * @return mixed
+     */
+    public function getCustomerUniqueName()
+    {
+        return $this->customerUniqueName;
+    }
+
+    /**
+     * @param mixed $customerUniqueName
+     */
+    public function setCustomerUniqueName($customerUniqueName)
+    {
+        $this->customerUniqueName = $customerUniqueName;
+    }
+
+
 
 
 

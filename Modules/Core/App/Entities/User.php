@@ -3,6 +3,7 @@
 namespace Modules\Core\App\Entities;
 
 use Doctrine\ORM\Mapping as ORM;
+use Doctrine\ORM\Mapping\Column;
 use Gedmo\Mapping\Annotation as Gedmo;
 use Modules\Domain\App\Entities\GlobalOption;
 
@@ -139,6 +140,11 @@ class User
 	 **/
 
 	protected $globalOption;
+
+    /**
+     * @Column(type="integer", name="login_count", nullable=false, options={"unsigned":true, "default":0})
+     */
+    protected $loginCount;
 
     /**
      * @var \DateTime
@@ -652,6 +658,24 @@ class User
     {
         $this->password = $password;
     }
+
+    /**
+     * @return mixed
+     */
+    public function getLoginCount()
+    {
+        return $this->loginCount;
+    }
+
+    /**
+     * @param mixed $loginCount
+     */
+    public function setLoginCount($loginCount)
+    {
+        $this->loginCount = $loginCount;
+    }
+
+
 
 
 

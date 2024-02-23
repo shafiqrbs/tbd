@@ -17,7 +17,7 @@ class UserRepository extends EntityRepository {
     public function listWithSearch(array $queryParams = [])
     {
         $entity = DB::table("users as e")
-            ->select(DB::raw("e.id as id,e.username as name"))->limit(5000)->get();
+            ->select(DB::raw("e.id as id,e.username as name"))->limit(100)->get();
         return $entity;
     }
 

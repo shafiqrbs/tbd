@@ -2,19 +2,24 @@
 
 namespace Modules\Core\App\Entities;
 
-use Appstore\Bundle\BusinessBundle\Entity\BusinessInvoiceParticular;
-use Appstore\Bundle\BusinessBundle\Entity\BusinessPurchase;
-use Appstore\Bundle\TallyBundle\Entity\Purchase;
-use Appstore\Bundle\TallyBundle\Entity\StockItem;
+
 use Doctrine\ORM\Mapping as ORM;
+use Modules\Domain\App\Entities\GlobalOption;
 use Gedmo\Mapping\Annotation as Gedmo;
-use Setting\Bundle\ToolBundle\Entity\GlobalOption;
+
 
 /**
- * Vendor
- *
- * @ORM\Table(name="cor_vendor")
- * @ORM\Entity(repositoryClass="")
+ * Customer
+ * @ORM\Table(name="cor_vendors" , indexes={
+ *     @ORM\Index(name="allowIndex", columns={"name"}),
+ *     @ORM\Index(name="customerIdIndex", columns={"company_name"}),
+ *     @ORM\Index(name="vendorCodeIndex", columns={"vendor_code"}),
+ *     @ORM\Index(name="mobileIndex", columns={"mobile"}),
+ *     @ORM\Index(name="statusIndex", columns={"status"}),
+ *     @ORM\Index(name="createdIndex", columns={"created_at"}),
+ *     @ORM\Index(name="updatedIndex", columns={"updated_at"})
+ * })
+ * @ORM\Entity(repositoryClass="Modules\Core\App\Repositories\VendorRepository")
  */
 class Vendor
 {
@@ -58,10 +63,18 @@ class Vendor
     private $name;
 
 
+     /**
+     * @var string
+     *
+     * @ORM\Column(name="unique_key", type="string", length=255, nullable=true)
+     */
+    private $uniqueKey;
+
+
     /**
      * @var string
      *
-     * @ORM\Column(name="vendorCode", type="string", length=20)
+     * @ORM\Column(name="vendor_code", type="string", length=20)
      */
     private $vendorCode;
 
@@ -73,10 +86,18 @@ class Vendor
     private $code;
 
 
+     /**
+     * @var float
+     *
+     * @ORM\Column(name="opening_balance", type="float")
+     */
+    private $openingBalance;
+
+
     /**
      * @var string
      *
-     * @ORM\Column(name="companyName", type="string", length=255)
+     * @ORM\Column(name="company_name", type="string", length=255)
      */
     private $companyName;
 
@@ -107,6 +128,20 @@ class Vendor
      */
     private $email;
 
+     /**
+     * @var string
+     *
+     * @ORM\Column(name="binno", type="string", length=255 , nullable=true)
+     */
+    private $binno;
+
+     /**
+     * @var string
+     *
+     * @ORM\Column(name="tinno", type="string", length=255 , nullable=true)
+     */
+    private $tinno;
+
     /**
      * @var integer
      *
@@ -122,12 +157,54 @@ class Vendor
 	private $mode;
 
 
-	/**
+    /**
      * @var boolean
      *
-     * @ORM\Column(name="status", type="boolean" )
+     * @ORM\Column(name="status", type="boolean", nullable=true)
      */
-    private $status=true;
+    private $status = true;
+
+    /**
+     * @var boolean
+     *
+     * @ORM\Column(name="isNew", type="boolean", nullable=true)
+     */
+    private $isNew = true;
+
+    /**
+     * @var boolean
+     *
+     * @ORM\Column(name="is_delete", type="boolean", nullable=true)
+     */
+    private $isDelete = false;
+
+    /**
+     * @var \DateTime
+     * @Gedmo\Timestampable(on="create")
+     * @ORM\Column(name="created_at", type="datetime")
+     */
+    private $createdAt;
+
+    /**
+     * @var \DateTime
+     * @Gedmo\Timestampable(on="create")
+     * @ORM\Column(name="updated_at", type="datetime")
+     */
+    private $updatedAt;
+
+    /**
+     * @var \DateTime
+     * @Gedmo\Timestampable(on="create")
+     * @ORM\Column(name="created", type="datetime")
+     */
+    private $created;
+
+    /**
+     * @var \DateTime
+     * @Gedmo\Timestampable(on="update")
+     * @ORM\Column(name="updated", type="datetime")
+     */
+    private $updated;
 
 
     /**
@@ -311,7 +388,6 @@ class Vendor
     }
 
 
-
     /**
      * @return mixed
      */
@@ -328,38 +404,6 @@ class Vendor
         $this->slug = $slug;
     }
 
-
-    /**
-     * @return GlobalOption
-     */
-    public function getGlobalOption()
-    {
-        return $this->globalOption;
-    }
-
-    /**
-     * @param GlobalOption $globalOption
-     */
-    public function setGlobalOption($globalOption)
-    {
-        $this->globalOption = $globalOption;
-    }
-
-    /**
-     * @return BusinessPurchase
-     */
-    public function getBusinessPurchases()
-    {
-        return $this->businessPurchases;
-    }
-
-    /**
-     * @return AccountPurchase
-     */
-    public function getAccountPurchases()
-    {
-        return $this->accountPurchases;
-    }
 
 	/**
 	 * @return int
@@ -404,29 +448,196 @@ class Vendor
 	}
 
     /**
-     * @return BusinessInvoiceParticular
+     * @return mixed
      */
-    public function getBusinessInvoiceParticulars()
+    public function getCustomer()
     {
-        return $this->businessInvoiceParticulars;
+        return $this->customer;
     }
 
     /**
-     * @return StockItem
+     * @param mixed $customer
      */
-    public function getStockItems()
+    public function setCustomer($customer)
     {
-        return $this->stockItems;
+        $this->customer = $customer;
     }
 
     /**
-     * @return Purchase
+     * @return string
      */
-    public function getTallyPurchase()
+    public function getBinno()
     {
-        return $this->tallyPurchase;
+        return $this->binno;
     }
 
+    /**
+     * @param string $binno
+     */
+    public function setBinno($binno)
+    {
+        $this->binno = $binno;
+    }
+
+    /**
+     * @return string
+     */
+    public function getTinno()
+    {
+        return $this->tinno;
+    }
+
+    /**
+     * @param string $tinno
+     */
+    public function setTinno($tinno)
+    {
+        $this->tinno = $tinno;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isNew()
+    {
+        return $this->isNew;
+    }
+
+    /**
+     * @param bool $isNew
+     */
+    public function setIsNew($isNew)
+    {
+        $this->isNew = $isNew;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isDelete()
+    {
+        return $this->isDelete;
+    }
+
+    /**
+     * @param bool $isDelete
+     */
+    public function setIsDelete($isDelete)
+    {
+        $this->isDelete = $isDelete;
+    }
+
+    /**
+     * @return \DateTime
+     */
+    public function getCreatedAt()
+    {
+        return $this->createdAt;
+    }
+
+    /**
+     * @param \DateTime $createdAt
+     */
+    public function setCreatedAt($createdAt)
+    {
+        $this->createdAt = $createdAt;
+    }
+
+    /**
+     * @return \DateTime
+     */
+    public function getUpdatedAt()
+    {
+        return $this->updatedAt;
+    }
+
+    /**
+     * @param \DateTime $updatedAt
+     */
+    public function setUpdatedAt($updatedAt)
+    {
+        $this->updatedAt = $updatedAt;
+    }
+
+    /**
+     * @return \DateTime
+     */
+    public function getCreated()
+    {
+        return $this->created;
+    }
+
+    /**
+     * @param \DateTime $created
+     */
+    public function setCreated($created)
+    {
+        $this->created = $created;
+    }
+
+    /**
+     * @return \DateTime
+     */
+    public function getUpdated()
+    {
+        return $this->updated;
+    }
+
+    /**
+     * @param \DateTime $updated
+     */
+    public function setUpdated($updated)
+    {
+        $this->updated = $updated;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getGlobalOption()
+    {
+        return $this->globalOption;
+    }
+
+    /**
+     * @param mixed $globalOption
+     */
+    public function setGlobalOption($globalOption)
+    {
+        $this->globalOption = $globalOption;
+    }
+
+    /**
+     * @return string
+     */
+    public function getUniqueKey()
+    {
+        return $this->uniqueKey;
+    }
+
+    /**
+     * @param string $uniqueKey
+     */
+    public function setUniqueKey($uniqueKey)
+    {
+        $this->uniqueKey = $uniqueKey;
+    }
+
+    /**
+     * @return float
+     */
+    public function getOpeningBalance()
+    {
+        return $this->openingBalance;
+    }
+
+    /**
+     * @param float $openingBalance
+     */
+    public function setOpeningBalance($openingBalance)
+    {
+        $this->openingBalance = $openingBalance;
+    }
 
 }
 

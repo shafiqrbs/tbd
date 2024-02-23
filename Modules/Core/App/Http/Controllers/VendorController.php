@@ -4,15 +4,11 @@ namespace Modules\Core\App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use Doctrine\ORM\EntityManagerInterface;
-use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Redirect;
-use Illuminate\Validation\Rule;
 use Modules\AppsApi\App\Services\GeneratePatternCodeService;
 use Modules\AppsApi\App\Services\JsonRequestResponse;
-use Modules\Core\App\Entities\Customer;
+use Modules\Core\App\Entities\Vendor;
 use Modules\Core\App\Http\Requests\CustomerRequest;
 use Modules\Core\App\Models\CustomerModel;
 use Barryvdh\Form\CreatesForms;
@@ -20,7 +16,7 @@ use Barryvdh\Form\ValidatesForms;
 
 
 
-class CustomerController extends Controller
+class VendorController extends Controller
 {
 
     use ValidatesForms, CreatesForms;
@@ -30,7 +26,7 @@ class CustomerController extends Controller
     public function index(Request $request,EntityManagerInterface $em){
         $service = new JsonRequestResponse();
         $service->clearCaches('Customer');
-        $entities = $em->getRepository(Customer::class)->listWithSearch($request->query());
+        $entities = $em->getRepository(Vendor::class)->listWithSearch($request->query());
         $data = $service->returnJosnResponse($entities);
         return $data;
     }
@@ -47,7 +43,7 @@ class CustomerController extends Controller
         if ($term) {
            // $go = $this->getUser()->getGlobalOption();
             $go = 65;
-            $entities = $em->getRepository(Customer::class)->searchAutoComplete($go,$term);
+            $entities = $em->getRepository(Vendor::class)->searchAutoComplete($go,$term);
         }
         $data = $service->returnJosnResponse($entities);
         return $data;
@@ -62,8 +58,7 @@ class CustomerController extends Controller
         $input = $request->all();
         $domain = 65;
         $input['global_option_id'] = $domain;
-        $input['customer_unique_id'] = "{$domain}@{$input['mobile']}-{$input['name']}";
-        $params = ['domain' => $domain,'table' => 'cor_customers','prefix' => 'EMP-'];
+        $params = ['domain' => $domain,'table' => 'cor_vendors','prefix' => 'EMP'];
         $pattern = $patternCodeService->customerCode($params);
         $input['code'] = $pattern['code'];
         $input['customerId'] = $pattern['generateId'];
@@ -75,7 +70,6 @@ class CustomerController extends Controller
             return $data;
         } catch (\Exception $e) {
             DB::rollback();
-            Log::error('Exception: '.$e->getMessage());
         }
     }
 
@@ -85,6 +79,7 @@ class CustomerController extends Controller
     public function show($id)
     {
         $service = new JsonRequestResponse();
+      //  $service->clearCaches('Customer');
         $entity = CustomerModel::find($id);
         $data = $service->returnJosnResponse($entity);
         return $data;
@@ -108,8 +103,8 @@ class CustomerController extends Controller
     {
         $input = $request->all();
         $service = new JsonRequestResponse();
+        $service->clearCaches('Customer');
         $entity = CustomerModel::find($id);
-        $input['customer_unique_id'] = "{$entity['global_option_id']}@{$input['mobile']}-{$input['name']}";
         DB::beginTransaction();
         try {
             $entity->update($input);
@@ -118,7 +113,6 @@ class CustomerController extends Controller
             return $data;
         } catch (\Exception $e) {
             DB::rollback();
-            Log::error('Exception: '.$e->getMessage());
         }
     }
 
