@@ -22,16 +22,28 @@ class CustomerRepository extends EntityRepository {
 
         $page = (isset($queryParams['page']) and $queryParams['page'] ) ? $queryParams['page']:1;
         $limit = (isset($queryParams['limit']) and $queryParams['limit'] ) ? $queryParams['limit']:200;
-        $data = Cache::remember('Customer'.$page, 200, function() use ($queryParams,$limit){
-            $queryBuilder = CustomerModel::with(['location'])->select('id','name','mobile','created_at')->orderBy('created_at','DESC');
+
+        $queryBuilder = CustomerModel::with(['location'])->select('id','name','mobile','created_at')->orderBy('created_at','DESC')->limit(2000);
+        if ($queryParams){
+            $queryBuilder->where(function ($query) use ($queryParams) {
+                $query->orWhere('name','LIKE','%'.$queryParams['term'].'%')
+                    ->orWhere('mobile','LIKE','%'.$queryParams['term'].'%');
+            });
+        }
+
+        $results =$queryBuilder->get()->toArray();
+
+
+        /*$data = Cache::remember('Customer'.$page, 200, function() use ($queryParams,$limit){
+            $queryBuilder = CustomerModel::with(['location'])->select('id','name','mobile','created_at')->orderBy('created_at','DESC')->limit(2000);
             $query = resolve(CustomerFilter::class)->getResults([
                 'builder' => $queryBuilder,
                 'params' => $queryParams,
                 'limit' => $limit
             ]);
-            return $query;
-        });
-        return $data;
+            return $queryBuilder;
+        });*/
+        return $results;
 
     }
 

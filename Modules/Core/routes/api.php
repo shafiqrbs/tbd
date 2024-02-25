@@ -30,14 +30,6 @@ Route::prefix('/core/select')->middleware([HeaderAuthenticationMiddleware::class
     Route::get('/location', [CoreController::class,'location'])->name('location_autosearch');
 });
 
-Route::prefix('/inventory/select')->middleware([HeaderAuthenticationMiddleware::class])->group(function() {
-    Route::get('/user', [InventoryController::class,'user'])->name('user_autosearch');
-    Route::get('/executive', [InventoryController::class,'executive'])->name('executive_autosearch');
-    Route::get('/vendor', [InventoryController::class,'vendor'])->name('vendor_autosearch');
-    Route::get('/customer', [InventoryController::class,'customer'])->name('customer_autosearch');
-    Route::get('/location', [InventoryController::class,'location'])->name('location_autosearch');
-});
-
 Route::apiResource('user', UserController::class)->middleware([HeaderAuthenticationMiddleware::class]);
 Route::apiResource('location', LocationController::class)->middleware([HeaderAuthenticationMiddleware::class]);
 Route::apiResource('customer', CustomerController::class)->middleware([HeaderAuthenticationMiddleware::class]);

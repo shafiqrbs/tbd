@@ -13,6 +13,10 @@ abstract class BaseFilter
             ->send($contents)
             ->through($this->getFilters())
             ->then(fn ($contents) => $contents['builder']);
-        return $results->paginate($limit)->withQueryString();
+
+//        dd($results->limit($limit)->get()->toArray());
+//        return $results->paginate($limit)->withQueryString();
+//        return $results->limit($limit);
+        return $results->limit($limit)->get()->toArray();
     }
 }
