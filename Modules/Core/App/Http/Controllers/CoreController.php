@@ -27,10 +27,8 @@ class CoreController extends Controller
         $term = $request['term'];
         $entities = [];
         $service = new JsonRequestResponse();
-        if ($term) {
-            $go = 64;
-            $entities = $em->getRepository(Core::class)->userAutoComplete($go,$term);
-        }
+        $go = 64;
+        $entities = $em->getRepository(Core::class)->userAutoComplete($go,$term);
         $data = $service->returnJosnResponse($entities);
         return $data;
     }
@@ -59,11 +57,9 @@ class CoreController extends Controller
         $term = $request['term'];
         $entities = [];
         $service = new JsonRequestResponse();
-        if ($term) {
-            // $go = $this->getUser()->getGlobalOption();
-            $go = 64;
-            $entities = $em->getRepository(Core::class)->customerAutoComplete($go,$term);
-        }
+        // $go = $this->getUser()->getGlobalOption();
+        $go = 64;
+        $entities = $em->getRepository(Core::class)->customerAutoComplete($go,$term);
         $data = $service->returnJosnResponse($entities);
         return $data;
     }
@@ -77,11 +73,9 @@ class CoreController extends Controller
         $term = $request['term'];
         $entities = [];
         $service = new JsonRequestResponse();
-        if ($term) {
-            // $go = $this->getUser()->getGlobalOption();
-            $go = 65;
-            $entities = $em->getRepository(Core::class)->vendorAutoComplete($go,$term);
-        }
+        // $go = $this->getUser()->getGlobalOption();
+        $go = 65;
+        $entities = $em->getRepository(Core::class)->vendorAutoComplete($go,$term);
         $data = $service->returnJosnResponse($entities);
         return $data;
     }

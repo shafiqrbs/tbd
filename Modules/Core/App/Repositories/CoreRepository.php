@@ -68,8 +68,6 @@ class CoreRepository extends EntityRepository{
             ->limit(5000)->get();
         return $entity;
 
-
-
     }
 
 }
