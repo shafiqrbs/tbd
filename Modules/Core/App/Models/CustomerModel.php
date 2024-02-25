@@ -2,6 +2,7 @@
 
 namespace Modules\Core\App\Models;
 
+use Cviebrock\EloquentSluggable\Sluggable;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\Persistence\Event\LifecycleEventArgs;
 use Illuminate\Database\Eloquent\Model;
@@ -15,6 +16,7 @@ use Modules\Core\App\Entities\Customer;
 class CustomerModel extends Model
 {
     use HasFactory;
+    use Sluggable;
 
     protected $table = 'cor_customers';
     public $timestamps = true;
@@ -92,6 +94,20 @@ class CustomerModel extends Model
             $model->updated = $date;
         });
 
+    }
+
+    /**
+     * Return the sluggable configuration array for this model.
+     *
+     * @return array
+     */
+    public function sluggable(): array
+    {
+        return [
+            'slug' => [
+                'source' => 'name'
+            ]
+        ];
     }
 
     public static function quickRandom($length = 32)
