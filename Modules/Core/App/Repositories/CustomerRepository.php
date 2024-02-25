@@ -23,7 +23,7 @@ class CustomerRepository extends EntityRepository {
         $page = (isset($queryParams['page']) and $queryParams['page'] ) ? $queryParams['page']:1;
         $limit = (isset($queryParams['limit']) and $queryParams['limit'] ) ? $queryParams['limit']:200;
 
-        $queryBuilder = CustomerModel::with(['location'])->select('id','name','mobile','created_at')->orderBy('created_at','DESC')->limit(2000);
+        $queryBuilder = CustomerModel::with(['location'])->select('id','name','mobile','created_at')->orderBy('created_at','DESC')->limit(200);
         if ($queryParams){
             $queryBuilder->where(function ($query) use ($queryParams) {
                 $query->orWhere('name','LIKE','%'.$queryParams['term'].'%')
