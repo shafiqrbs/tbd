@@ -1,7 +1,7 @@
 <?php
 
 namespace Modules\Inventory\App\Repositories;
-use Modules\Inventory\App\Entities\BusinessConfig;
+use Modules\Inventory\App\Entities\Config;
 use Modules\Inventory\App\Entities\BusinessDamage;
 use Modules\Inventory\App\Entities\BusinessInvoiceAccessories;
 use Modules\Inventory\App\Entities\BusinessInvoiceReturn;
@@ -349,7 +349,7 @@ class BusinessStockHistoryRepository extends EntityRepository
         }
     }
 
-    public function openingDailyQuantity(BusinessConfig $config,$data)
+    public function openingDailyQuantity(Config $config, $data)
     {
 
         $item = isset($data['name'])? $data['name'] :'';
@@ -370,7 +370,7 @@ class BusinessStockHistoryRepository extends EntityRepository
 
     }
 
-    public function monthlyStockLedger(BusinessConfig $config , $data)
+    public function monthlyStockLedger(Config $config , $data)
     {
         $config = $config->getId();
         $compare = new \DateTime();

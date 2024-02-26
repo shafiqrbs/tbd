@@ -26,7 +26,7 @@ class ItemImport
     private $id;
 
     /**
-     * @ORM\ManyToOne(targetEntity="Modules\Inventory\App\Entities\BusinessConfig", inversedBy="itemImports" , cascade={"detach","merge"} )
+     * @ORM\ManyToOne(targetEntity="Config.php", inversedBy="itemImports" , cascade={"detach","merge"} )
      * @ORM\JoinColumn(onDelete="CASCADE")
      **/
     private  $businessConfig;

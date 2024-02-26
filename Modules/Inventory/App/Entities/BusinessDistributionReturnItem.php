@@ -25,7 +25,7 @@ class BusinessDistributionReturnItem
 
 
     /**
-     * @ORM\ManyToOne(targetEntity="Modules\Inventory\App\Entities\BusinessConfig", inversedBy="businessPurchasesReturns" , cascade={"detach","merge"} )
+     * @ORM\ManyToOne(targetEntity="Config.php", inversedBy="businessPurchasesReturns" , cascade={"detach","merge"} )
      **/
     private  $businessConfig;
 
@@ -307,7 +307,7 @@ class BusinessDistributionReturnItem
     }
 
     /**
-     * @return BusinessConfig
+     * @return Config
      */
     public function getBusinessConfig()
     {
@@ -315,7 +315,7 @@ class BusinessDistributionReturnItem
     }
 
     /**
-     * @param BusinessConfig $businessConfig
+     * @param Config $businessConfig
      */
     public function setBusinessConfig($businessConfig)
     {

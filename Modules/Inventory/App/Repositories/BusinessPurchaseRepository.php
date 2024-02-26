@@ -2,7 +2,7 @@
 
 namespace Modules\Inventory\App\Repositories;
 use Modules\Core\App\Entities\Vendor;
-use Modules\Inventory\App\Entities\BusinessConfig;
+use Modules\Inventory\App\Entities\Config;
 use Modules\Inventory\App\Entities\BusinessInvoice;
 use Modules\Inventory\App\Entities\BusinessInvoiceParticular;
 use Modules\Inventory\App\Entities\BusinessInvoiceReturn;

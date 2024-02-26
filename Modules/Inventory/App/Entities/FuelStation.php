@@ -24,7 +24,7 @@ class FuelStation
 
 
     /**
-     * @ORM\ManyToOne(targetEntity="Modules\Inventory\App\Entities\BusinessConfig", inversedBy="marketing" , cascade={"detach","merge"} )
+     * @ORM\ManyToOne(targetEntity="Config.php", inversedBy="marketing" , cascade={"detach","merge"} )
      * @ORM\JoinColumn(onDelete="CASCADE")
      **/
     private  $businessConfig;
@@ -163,7 +163,7 @@ class FuelStation
     }
 
     /**
-     * @return BusinessConfig
+     * @return Config
      */
     public function getBusinessConfig()
     {
@@ -171,7 +171,7 @@ class FuelStation
     }
 
     /**
-     * @param BusinessConfig $businessConfig
+     * @param Config $businessConfig
      */
     public function setBusinessConfig($businessConfig)
     {

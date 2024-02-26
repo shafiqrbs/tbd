@@ -1,7 +1,7 @@
 <?php
 
 namespace Modules\Inventory\App\Repositories;
-use Modules\Inventory\App\Entities\BusinessConfig;
+use Modules\Inventory\App\Entities\Config;
 use Doctrine\ORM\EntityRepository;
 
 

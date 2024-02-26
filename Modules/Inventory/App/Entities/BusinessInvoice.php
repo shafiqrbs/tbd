@@ -31,7 +31,7 @@ class BusinessInvoice
 
 
     /**
-     * @ORM\ManyToOne(targetEntity="Modules\Inventory\App\Entities\BusinessConfig", inversedBy="businessInvoices")
+     * @ORM\ManyToOne(targetEntity="Config.php", inversedBy="businessInvoices")
      * @ORM\JoinColumn(onDelete="CASCADE")
      **/
     private $businessConfig;
@@ -650,7 +650,7 @@ class BusinessInvoice
 
 
     /**
-     * @return BusinessConfig
+     * @return Config
      */
     public function getBusinessConfig()
     {
@@ -658,7 +658,7 @@ class BusinessInvoice
     }
 
     /**
-     * @param BusinessConfig $businessConfig
+     * @param Config $businessConfig
      */
     public function setBusinessConfig($businessConfig)
     {

@@ -1,7 +1,7 @@
 <?php
 
 namespace Modules\Inventory\App\Repositories;
-use Modules\Inventory\App\Entities\BusinessConfig;
+use Modules\Inventory\App\Entities\Config;
 use Doctrine\ORM\EntityRepository;
 
 
@@ -13,7 +13,7 @@ use Doctrine\ORM\EntityRepository;
  */
 class BusinessVendorRepository extends EntityRepository
 {
-    public function searchAutoComplete($q, BusinessConfig $config)
+    public function searchAutoComplete($q, Config $config)
     {
         $query = $this->createQueryBuilder('e');
         $query->join('e.businessConfig', 'ic');

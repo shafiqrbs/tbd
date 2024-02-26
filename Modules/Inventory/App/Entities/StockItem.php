@@ -9,10 +9,10 @@ use Modules\Utility\App\Entities\ProductUnit;
 /**
  * BusinessParticular
  *
- * @ORM\Table( name = "inv_particular")
+ * @ORM\Table( name = "inv_stock_item")
  * @ORM\Entity(repositoryClass="Modules\Inventory\App\Repositories\BusinessParticularRepository")
  */
-class BusinessParticular
+class StockItem
 {
     /**
      * @var integer

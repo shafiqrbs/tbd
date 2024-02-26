@@ -24,7 +24,7 @@ class ItemStockAdjustment
 
 
     /**
-     * @ORM\ManyToOne(targetEntity="Modules\Inventory\App\Entities\BusinessConfig")
+     * @ORM\ManyToOne(targetEntity="Config.php")
      **/
     private $config;
 

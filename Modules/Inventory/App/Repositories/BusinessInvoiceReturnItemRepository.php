@@ -2,7 +2,7 @@
 
 namespace Modules\Inventory\App\Repositories;
 use Modules\Core\App\Entities\Vendor;
-use Modules\Inventory\App\Entities\BusinessConfig;
+use Modules\Inventory\App\Entities\Config;
 use Modules\Inventory\App\Entities\BusinessInvoiceReturn;
 use Modules\Inventory\App\Entities\BusinessInvoiceReturnItem;
 use Modules\Inventory\App\Entities\BusinessPurchase;
@@ -82,7 +82,7 @@ class BusinessInvoiceReturnItemRepository extends EntityRepository
     }
 
 
-    public function getCustomerItem(BusinessConfig $config, Customer $vendor)
+    public function getCustomerItem(Config $config, Customer $vendor)
     {
         $configId = $config->getId();
         $vendorId = $vendor->getId();

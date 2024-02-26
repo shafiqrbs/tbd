@@ -23,7 +23,7 @@ class BusinessReverse
     private $id;
 
     /**
-     * @ORM\ManyToOne(targetEntity="Modules\Inventory\App\Entities\BusinessConfig", inversedBy="businessReverses")
+     * @ORM\ManyToOne(targetEntity="Config.php", inversedBy="businessReverses")
      * @ORM\JoinColumn(onDelete="CASCADE")
      */
     protected $businessConfig;
@@ -218,14 +218,14 @@ class BusinessReverse
 	}
 
 	/**
-	 * @return BusinessConfig
+	 * @return Config
 	 */
 	public function getBusinessConfig() {
 		return $this->businessConfig;
 	}
 
 	/**
-	 * @param BusinessConfig $businessConfig
+	 * @param Config $businessConfig
 	 */
 	public function setBusinessConfig( $businessConfig ) {
 		$this->businessConfig = $businessConfig;

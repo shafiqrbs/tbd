@@ -1,7 +1,7 @@
 <?php
 
 namespace Modules\Inventory\App\Repositories;
-use Modules\Inventory\App\Entities\BusinessConfig;
+use Modules\Inventory\App\Entities\Config;
 use Modules\Inventory\App\Entities\BusinessInvoice;
 use Modules\Inventory\App\Entities\BusinessInvoiceAccessories;
 use Modules\Inventory\App\Entities\BusinessInvoiceParticular;
@@ -72,7 +72,7 @@ class BusinessInvoiceAccessoriesRepository extends EntityRepository
         $em->flush();
     }
 
-    public function reportAccessoriesOut(BusinessConfig $config , $data)
+    public function reportAccessoriesOut(Config $config , $data)
     {
         $qb = $this->createQueryBuilder('e');
         $qb->select('SUM(e.subTotal) as subTotal');
@@ -82,7 +82,7 @@ class BusinessInvoiceAccessoriesRepository extends EntityRepository
         return $result['subTotal'];
     }
 
-    public function getAccessoriesItemOut(BusinessConfig $config , $data)
+    public function getAccessoriesItemOut(Config $config , $data)
     {
         $qb = $this->createQueryBuilder('e');
         $qb->join('e.dmsParticular','particular');

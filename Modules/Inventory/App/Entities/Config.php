@@ -14,7 +14,7 @@ use Symfony\Component\Validator\Constraints as Assert;
  * @ORM\Table( name ="inv_config")
  * @ORM\Entity(repositoryClass="Modules\Inventory\App\Repositories\BusinessConfigRepository")
  */
-class BusinessConfig
+class Config
 {
     /**
      * @var integer
@@ -198,6 +198,13 @@ class BusinessConfig
 
 
     /**
+     * @var boolean
+     *
+     * @ORM\Column(name="multiCompany", type="boolean",  nullable=true)
+     */
+    private $multiCompany = false;
+
+     /**
      * @var boolean
      *
      * @ORM\Column(name="vatEnable", type="boolean",  nullable=true)
@@ -1265,7 +1272,7 @@ class BusinessConfig
      * Set address
      *
      * @param mixed $address
-     * @return BusinessConfig
+     * @return Config
      */
     public function setAddress($address)
     {
@@ -1764,6 +1771,21 @@ class BusinessConfig
         $this->fuelStation = $fuelStation;
     }
 
+    /**
+     * @return bool
+     */
+    public function isMultiCompany()
+    {
+        return $this->multiCompany;
+    }
+
+    /**
+     * @param bool $multiCompany
+     */
+    public function setMultiCompany($multiCompany)
+    {
+        $this->multiCompany = $multiCompany;
+    }
 
 
 }

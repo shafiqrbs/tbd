@@ -3,7 +3,7 @@
 namespace Modules\Inventory\App\Repositories;
 use Appstore\Bundle\BusinessBundle\BusinessBundle;
 use Modules\Inventory\App\Entities\BusinessBatchParticular;
-use Modules\Inventory\App\Entities\BusinessConfig;
+use Modules\Inventory\App\Entities\Config;
 use Modules\Inventory\App\Entities\BusinessInvoiceParticular;
 useModules\Core\App\Entities\Customer;
 use Modules\Inventory\App\Entities\BusinessInvoice;
@@ -22,7 +22,7 @@ use Modules\Domain\App\Entities\GlobalOption;
 class BusinessInvoiceRepository extends EntityRepository
 {
 
-    public function getLastInvoice(BusinessConfig $config,$customer)
+    public function getLastInvoice(Config $config, $customer)
     {
         $entity = $this->findOneBy(
             array('businessConfig' => $config,'customer' => $customer),

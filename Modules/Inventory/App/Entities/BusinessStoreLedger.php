@@ -26,7 +26,7 @@ class BusinessStoreLedger
 
 
     /**
-     * @ORM\ManyToOne(targetEntity="Modules\Inventory\App\Entities\BusinessConfig", inversedBy="storeLedgers", cascade={"detach","merge"})
+     * @ORM\ManyToOne(targetEntity="Config.php", inversedBy="storeLedgers", cascade={"detach","merge"})
      * @ORM\JoinColumn(onDelete="CASCADE")
      **/
     protected $businessConfig;

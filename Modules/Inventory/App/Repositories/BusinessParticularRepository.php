@@ -1,7 +1,7 @@
 <?php
 
 namespace Modules\Inventory\App\Repositories;
-use Modules\Inventory\App\Entities\BusinessConfig;
+use Modules\Inventory\App\Entities\Config;
 use Modules\Inventory\App\Entities\BusinessInvoiceAccessories;
 use Modules\Inventory\App\Entities\BusinessInvoiceReturnItem;
 use Modules\Inventory\App\Entities\BusinessProduction;
@@ -31,7 +31,7 @@ class BusinessParticularRepository extends EntityRepository
 {
 
 
-    public function getStockItemReport(BusinessConfig $config)
+    public function getStockItemReport(Config $config)
     {
         $query = $this->createQueryBuilder('e');
         $query->select('e.id as id');
@@ -67,7 +67,7 @@ class BusinessParticularRepository extends EntityRepository
 	    return $particular;
     }
 
-    public function searchAutoComplete(BusinessConfig $config,$q)
+    public function searchAutoComplete(Config $config, $q)
     {
         $query = $this->createQueryBuilder('e');
 	    $query->select('e.name as id');
@@ -161,7 +161,7 @@ class BusinessParticularRepository extends EntityRepository
         return  $qb;
     }
 
-    public function getPurchaseDetails(BusinessConfig $config,BusinessParticular $stock){
+    public function getPurchaseDetails(Config $config, BusinessParticular $stock){
 
         $qb = $this->_em->createQueryBuilder();
         $qb->from('BusinessBundle:BusinessPurchaseItem','e');
@@ -176,7 +176,7 @@ class BusinessParticularRepository extends EntityRepository
 
     }
 
-    public function getPurchaseReturnDetails(BusinessConfig $config,BusinessParticular $stock){
+    public function getPurchaseReturnDetails(Config $config, BusinessParticular $stock){
 
         $qb = $this->_em->createQueryBuilder();
         $qb->from('BusinessBundle:BusinessPurchaseReturnItem','e');
@@ -191,7 +191,7 @@ class BusinessParticularRepository extends EntityRepository
 
     }
 
-    public function getSalesDetails(BusinessConfig $config,BusinessParticular $stock){
+    public function getSalesDetails(Config $config, BusinessParticular $stock){
 
         $qb = $this->_em->createQueryBuilder();
         $qb->from('BusinessBundle:BusinessInvoiceParticular','e');
@@ -206,7 +206,7 @@ class BusinessParticularRepository extends EntityRepository
 
     }
 
-    public function getSalesReturnDetails(BusinessConfig $config,BusinessParticular $stock){
+    public function getSalesReturnDetails(Config $config, BusinessParticular $stock){
 
         $qb = $this->_em->createQueryBuilder();
         $qb->from('BusinessBundle:BusinessInvoiceReturn','e');
@@ -219,7 +219,7 @@ class BusinessParticularRepository extends EntityRepository
 
     }
 
-    public function getDamageDetails(BusinessConfig $config,BusinessParticular $stock){
+    public function getDamageDetails(Config $config, BusinessParticular $stock){
 
         $qb = $this->_em->createQueryBuilder();
         $qb->from('BusinessBundle:BusinessDamage','e');
@@ -276,7 +276,7 @@ class BusinessParticularRepository extends EntityRepository
         return $_SERVER['HTTP_HOST'].$path;
     }
 
-    public function getFindWithParticular(BusinessConfig $config,$type){
+    public function getFindWithParticular(Config $config, $type){
 
         $zero = $config->isZeroStock();
         $qb = $this->createQueryBuilder('e');
@@ -290,7 +290,7 @@ class BusinessParticularRepository extends EntityRepository
         return  $result;
     }
 
-    public function getFindStockItem(BusinessConfig $config,$type){
+    public function getFindStockItem(Config $config, $type){
 
         $zero = $config->isZeroStock();
         $qb = $this->createQueryBuilder('e');

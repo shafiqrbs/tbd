@@ -4,7 +4,7 @@ namespace Modules\Inventory\App\Repositories;
 use Modules\Core\App\Entities\Vendor;
 use Modules\Inventory\App\Entities\BusinessBatch;
 use Modules\Inventory\App\Entities\BusinessBatchParticular;
-use Modules\Inventory\App\Entities\BusinessConfig;
+use Modules\Inventory\App\Entities\Config;
 use Modules\Inventory\App\Entities\BusinessInvoice;
 use Modules\Inventory\App\Entities\BusinessInvoiceParticular;
 use Modules\Inventory\App\Entities\BusinessParticular;
@@ -575,7 +575,7 @@ class BusinessInvoiceParticularRepository extends EntityRepository
 		return $qb->getQuery();
 	}
 
-    public function searchAutoComplete(BusinessConfig $config,$q)
+    public function searchAutoComplete(Config $config, $q)
     {
         $query = $this->createQueryBuilder('e');
         $query->join('e.businessInvoice', 'i');
@@ -958,7 +958,7 @@ class BusinessInvoiceParticularRepository extends EntityRepository
 
     }
 
-    public function getCustomerItem(BusinessConfig $config, Customer $vendor)
+    public function getCustomerItem(Config $config, Customer $vendor)
     {
         $configId = $config->getId();
         $vendorId = $vendor->getId();

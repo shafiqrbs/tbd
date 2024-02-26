@@ -24,7 +24,7 @@ class BusinessDamage
 
 
     /**
-     * @ORM\ManyToOne(targetEntity="Modules\Inventory\App\Entities\BusinessConfig", inversedBy="businessDamages")
+     * @ORM\ManyToOne(targetEntity="Config.php", inversedBy="businessDamages")
      * @ORM\JoinColumn(onDelete="CASCADE")
      **/
     private $businessConfig;
@@ -197,7 +197,7 @@ class BusinessDamage
     }
 
     /**
-     * @return BusinessConfig
+     * @return Config
      */
     public function getBusinessConfig()
     {
@@ -205,7 +205,7 @@ class BusinessDamage
     }
 
     /**
-     * @param BusinessConfig $businessConfig
+     * @param Config $businessConfig
      */
     public function setBusinessConfig($businessConfig)
     {

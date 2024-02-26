@@ -23,7 +23,7 @@ class BusinessBrand
 
 
     /**
-     * @ORM\ManyToOne(targetEntity="Modules\Inventory\App\Entities\BusinessConfig", cascade={"detach","merge"} )
+     * @ORM\ManyToOne(targetEntity="Config.php", cascade={"detach","merge"} )
      * @ORM\JoinColumn(onDelete="CASCADE")
      **/
     private  $businessConfig;
@@ -72,7 +72,7 @@ class BusinessBrand
     }
 
     /**
-     * @return BusinessConfig
+     * @return Config
      */
     public function getBusinessConfig()
     {
@@ -80,7 +80,7 @@ class BusinessBrand
     }
 
     /**
-     * @param BusinessConfig $businessConfig
+     * @param Config $businessConfig
      */
     public function setBusinessConfig($businessConfig)
     {

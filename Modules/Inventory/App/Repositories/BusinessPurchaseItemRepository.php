@@ -2,7 +2,7 @@
 
 namespace Modules\Inventory\App\Repositories;
 use Modules\Core\App\Entities\Vendor;
-use Modules\Inventory\App\Entities\BusinessConfig;
+use Modules\Inventory\App\Entities\Config;
 use Modules\Inventory\App\Entities\BusinessPurchase;
 use Modules\Inventory\App\Entities\BusinessPurchaseItem;
 use Modules\Inventory\App\Entities\BusinessParticular;
@@ -79,7 +79,7 @@ class BusinessPurchaseItemRepository extends EntityRepository
 		return  $qb;
 	}
 
-	public function getVendorItem(BusinessConfig $config, AccountVendor $vendor)
+	public function getVendorItem(Config $config, AccountVendor $vendor)
 	{
 		$configId = $config->getId();
 		$vendorId = $vendor->getId();
