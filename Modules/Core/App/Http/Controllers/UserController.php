@@ -14,7 +14,6 @@ use Modules\Core\App\Entities\Customer;
 use Modules\Core\App\Entities\Location;
 use Modules\Core\App\Entities\User;
 use Modules\Core\App\Forms\CustomerType;
-use Modules\Core\App\Http\Requests\CustomerRequest;
 use Modules\Core\App\Http\Requests\FormValidationManager;
 use Modules\Core\App\Models\CustomerModel;
 use Barryvdh\Form\CreatesForms;
@@ -44,14 +43,14 @@ class UserController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(CustomerRequest $request, GeneratePatternCodeService $patternCodeService )
+    public function store(Request $request)
     {
         $service = new JsonRequestResponse();
         $input = $request->all();
         $domain = 65;
         $input['global_option_id'] = $domain;
         $params = ['domain' => $domain,'table' => 'cor_customers'];
-        $pattern = $patternCodeService->customerCode($params);
+
         $input['code'] = $pattern['code'];
         $input['customerId'] = $pattern['generateId'];
         DB::beginTransaction();
