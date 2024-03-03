@@ -1,20 +1,12 @@
 <?php
 
 namespace Modules\Core\App\Models;
-
-
-use Cviebrock\EloquentSluggable\Sluggable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-
-
-
 
 class UserModel extends Model
 {
     use HasFactory;
-    use Sluggable;
-
 
     protected $table = 'users';
     public $timestamps = true;
@@ -24,7 +16,8 @@ class UserModel extends Model
         'username',
         'mobile',
         'email',
-        'global_option_id'
+        'password',
+        'IsDelete',
     ];
 
 
@@ -32,34 +25,20 @@ class UserModel extends Model
         parent::boot();
         self::creating(function ($model) {
             $date =  new \DateTime("now");
-            $model->unique_id = self::quickRandom();
+//            $model->unique_id = self::quickRandom();
             $model->created_at = $date;
             $model->updated_at = $date;
-            $model->created = $date;
-            $model->updated = $date;
+//            $model->created = $date;
+//            $model->updated = $date;
         });
 
         self::updating(function ($model) {
             $date =  new \DateTime("now");
-            $model->unique_id = self::quickRandom();
+//            $model->unique_id = self::quickRandom();
             $model->updated_at = $date;
-            $model->updated = $date;
+//            $model->updated = $date;
         });
 
-    }
-
-    /**
-     * Return the sluggable configuration array for this model.
-     *
-     * @return array
-     */
-    public function sluggable(): array
-    {
-        return [
-            'slug' => [
-                'source' => 'name'
-            ]
-        ];
     }
 
     public static function quickRandom($length = 32)

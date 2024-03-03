@@ -8,6 +8,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 use Modules\AppsApi\App\Services\GeneratePatternCodeService;
 use Modules\AppsApi\App\Services\JsonRequestResponse;
 use Modules\Core\App\Entities\Customer;
@@ -15,10 +16,12 @@ use Modules\Core\App\Entities\Location;
 use Modules\Core\App\Entities\User;
 use Modules\Core\App\Forms\CustomerType;
 use Modules\Core\App\Http\Requests\FormValidationManager;
+use Modules\Core\App\Http\Requests\UserRequest;
 use Modules\Core\App\Models\CustomerModel;
 use Barryvdh\Form\CreatesForms;
 use Barryvdh\Form\ValidatesForms;
 use Illuminate\Support\Facades\Validator;
+use Modules\Core\App\Models\UserModel;
 use Modules\Core\App\Repositories\LocationRepository;
 
 
@@ -29,13 +32,44 @@ class UserController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index(Request $request,EntityManagerInterface $em){
+    public function index(Request $request){
+        $page =  isset($request['page']) && $request['page'] > 0?($request['page'] - 1 ) : 0;
+        $perPage = isset($request['offset']) && $request['offset']!=''? (int)($request['offset']):0;
+        $skip = isset($page) && $page!=''? (int)$page*$perPage:0;
 
-        $service = new JsonRequestResponse();
-        $service->clearCaches('User');
-        $entities = $em->getRepository(User::class)->listWithSearch($request->query());
-        $data = $service->returnJosnResponse($entities);
-        return $data;
+        $users = UserModel::/*where('isDelete',0)*/
+                    select([
+                        'id',
+                        'name',
+                        'username',
+                        'email',
+                        'mobile',
+                        'created_at'
+                    ]);
+
+        if (isset($request['term']) && !empty($request['term'])){
+            $users = $users->where('name','LIKE','%'.$request['term'].'%')
+                ->orWhere('email','LIKE','%'.$request['term'].'%')
+                ->orWhere('username','LIKE','%'.$request['term'].'%')
+                ->orWhere('mobile','LIKE','%'.$request['term'].'%');
+        }
+
+        $totalUsers  = $users->count();
+        $users = $users->skip($skip)
+                       ->take($perPage)
+                       ->orderBy('id','DESC')->get();
+
+
+        $response = new Response();
+        $response->headers->set('Content-Type','application/json');
+        $response->setContent(json_encode([
+            'message' => 'success',
+            'status' => Response::HTTP_OK,
+            'total' => $totalUsers,
+            'data' => $users
+        ]));
+        $response->setStatusCode(Response::HTTP_OK);
+        return $response;
     }
 
 
@@ -43,24 +77,16 @@ class UserController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(UserRequest $request)
     {
+        $data = $request->validated();
+        $data['email_verified_at']= now();
+        $data['password']= Hash::make($data['password']);
+        $data['isDelete']= 0;
+        $user = UserModel::create($data);
         $service = new JsonRequestResponse();
-        $input = $request->all();
-        $domain = 65;
-        $input['global_option_id'] = $domain;
-        $params = ['domain' => $domain,'table' => 'cor_customers'];
-
-        $input['code'] = $pattern['code'];
-        $input['customerId'] = $pattern['generateId'];
-        DB::beginTransaction();
-        try {
-            $entity = CustomerModel::create($input);
-            $data = $service->returnJosnResponse($entity);
-            return $data;
-        } catch (\Exception $e) {
-            DB::rollback();
-        }
+        $data = $service->returnJosnResponse($user);
+        return $data;
     }
 
     /**
@@ -69,8 +95,10 @@ class UserController extends Controller
     public function show($id)
     {
         $service = new JsonRequestResponse();
-      //  $service->clearCaches('Customer');
-        $entity = CustomerModel::find($id);
+        $entity = UserModel::find($id);
+        if (!$entity){
+            $entity = 'Data not found';
+        }
         $data = $service->returnJosnResponse($entity);
         return $data;
     }
@@ -81,8 +109,10 @@ class UserController extends Controller
     public function edit($id)
     {
         $service = new JsonRequestResponse();
-        $service->clearCaches('Customer');
-        $entity = CustomerModel::find($id);
+        $entity = UserModel::find($id);
+        if (!$entity){
+            $entity = 'Data not found';
+        }
         $data = $service->returnJosnResponse($entity);
         return $data;
     }
@@ -90,20 +120,14 @@ class UserController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(CustomerRequest $request, $id)
+    public function update(UserRequest $request, $id)
     {
-        $input = $request->all();
+
+        $data = $request->validated();
+        $entity = UserModel::find($id);
+        $entity->update($data);
         $service = new JsonRequestResponse();
-        $service->clearCaches('Customer');
-        $entity = CustomerModel::find($id);
-        DB::beginTransaction();
-        try {
-            $entity->update($input);
-            $data = $service->returnJosnResponse($entity);
-            return $data;
-        } catch (\Exception $e) {
-            DB::rollback();
-        }
+        return $service->returnJosnResponse($entity);
     }
 
     /**
@@ -112,19 +136,10 @@ class UserController extends Controller
     public function destroy($id)
     {
         $service = new JsonRequestResponse();
-        $service->clearCaches('Customer');
-        $user=CustomerModel::find($id);
-        $entity = ['message'=>'false'];
-        DB::beginTransaction();
-        try {
-            if($user and $user->delete()){
-                $entity = ['message'=>'success'];
-            }
-            $data = $service->returnJosnResponse($entity);
-            return $data;
-        } catch (\Exception $e) {
-            DB::rollback();
-        }
+        $user = UserModel::find($id)->delete();
+        $entity = ['message'=>'delete'];
+        $data = $service->returnJosnResponse($entity);
+        return $data;
     }
 
 
