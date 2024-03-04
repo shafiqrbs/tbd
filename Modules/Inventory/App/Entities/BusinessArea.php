@@ -24,7 +24,7 @@ class BusinessArea
 
 
     /**
-     * @ORM\ManyToOne(targetEntity="Config.php", inversedBy="area" , cascade={"detach","merge"} )
+     * @ORM\ManyToOne(targetEntity="Modules\Inventory\App\Entities\Config", inversedBy="area" , cascade={"detach","merge"} )
      * @ORM\JoinColumn(onDelete="CASCADE")
      **/
     private  $businessConfig;

@@ -25,7 +25,7 @@ class BusinessVendorStock
     private $id;
 
     /**
-     * @ORM\ManyToOne(targetEntity="Config.php", inversedBy="businessVendorStocks" , cascade={"detach","merge"} )
+     * @ORM\ManyToOne(targetEntity="Modules\Inventory\App\Entities\Config", inversedBy="businessVendorStocks" , cascade={"detach","merge"} )
      * @ORM\JoinColumn(onDelete="CASCADE")
      **/
     private  $businessConfig;

@@ -23,7 +23,7 @@ class Marketing
 
 
     /**
-     * @ORM\ManyToOne(targetEntity="Config.php", inversedBy="marketing" , cascade={"detach","merge"} )
+     * @ORM\ManyToOne(targetEntity="Modules\Inventory\App\Entities\Config", inversedBy="marketing" , cascade={"detach","merge"} )
      * @ORM\JoinColumn(onDelete="CASCADE")
      **/
     private  $businessConfig;

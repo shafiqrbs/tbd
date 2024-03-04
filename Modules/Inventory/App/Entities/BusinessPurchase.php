@@ -25,7 +25,7 @@ class BusinessPurchase
 
 
     /**
-     * @ORM\ManyToOne(targetEntity="Config.php", inversedBy="businessPurchases" , cascade={"detach","merge"} )
+     * @ORM\ManyToOne(targetEntity="Modules\Inventory\App\Entities\Config", inversedBy="businessPurchases" , cascade={"detach","merge"} )
      **/
     private  $businessConfig;
 

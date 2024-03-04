@@ -25,7 +25,7 @@ class BusinessAndroidProcess
     private $id;
 
     /**
-     * @ORM\ManyToOne(targetEntity="Config.php", inversedBy="androidProcess")
+     * @ORM\ManyToOne(targetEntity="Modules\Inventory\App\Entities\Config", inversedBy="androidProcess")
      */
     protected $businessConfig;
 

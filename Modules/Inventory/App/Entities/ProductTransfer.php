@@ -24,7 +24,7 @@ class ProductTransfer
 
 
     /**
-     * @ORM\ManyToOne(targetEntity="Config.php", inversedBy="wearHouses" , cascade={"detach","merge"} )
+     * @ORM\ManyToOne(targetEntity="Modules\Inventory\App\Entities\Config", inversedBy="wearHouses" , cascade={"detach","merge"} )
      * @ORM\JoinColumn(onDelete="CASCADE")
      **/
     private  $businessConfig;

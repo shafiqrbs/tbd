@@ -24,7 +24,7 @@ class BusinessDamage
 
 
     /**
-     * @ORM\ManyToOne(targetEntity="Config.php", inversedBy="businessDamages")
+     * @ORM\ManyToOne(targetEntity="Modules\Inventory\App\Entities\Config", inversedBy="businessDamages")
      * @ORM\JoinColumn(onDelete="CASCADE")
      **/
     private $businessConfig;

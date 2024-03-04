@@ -25,7 +25,7 @@ class BusinessBatch
 
     /**
      * @var Config
-     * @ORM\ManyToOne(targetEntity="Config.php")
+     * @ORM\ManyToOne(targetEntity="Modules\Inventory\App\Entities\Config")
      * @ORM\JoinColumn(onDelete="CASCADE")
      **/
     private $businessConfig;

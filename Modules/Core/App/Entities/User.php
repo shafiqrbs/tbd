@@ -78,6 +78,14 @@ class User
 	 */
 	private $name = "";
 
+
+	/**
+	 * @var string
+	 *
+	 * @ORM\Column(name="mobile", type="string", length = 30, nullable=true)
+	 */
+	private $mobile = "";
+
 	/**
 	 * @var string
 	 *
@@ -675,10 +683,21 @@ class User
         $this->loginCount = $loginCount;
     }
 
+    /**
+     * @return string
+     */
+    public function getMobile()
+    {
+        return $this->mobile;
+    }
 
-
-
-
+    /**
+     * @param string $mobile
+     */
+    public function setMobile($mobile)
+    {
+        $this->mobile = $mobile;
+    }
 
 
 }

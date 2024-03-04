@@ -32,11 +32,11 @@ class UserController extends Controller
     /**
      * Display a listing of the resource.
      */
+
     public function index(Request $request){
         $page =  isset($request['page']) && $request['page'] > 0?($request['page'] - 1 ) : 0;
         $perPage = isset($request['offset']) && $request['offset']!=''? (int)($request['offset']):0;
         $skip = isset($page) && $page!=''? (int)$page*$perPage:0;
-
         $users = UserModel::/*where('isDelete',0)*/
                     select([
                         'id',

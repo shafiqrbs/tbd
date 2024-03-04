@@ -26,7 +26,7 @@ class BusinessStockHistory
     private $id;
 
     /**
-     * @ORM\ManyToOne(targetEntity="Config.php" , cascade={"detach","merge"} )
+     * @ORM\ManyToOne(targetEntity="Modules\Inventory\App\Entities\Config" , cascade={"detach","merge"} )
      **/
     private  $businessConfig;
 

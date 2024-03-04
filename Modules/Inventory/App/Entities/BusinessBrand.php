@@ -23,7 +23,7 @@ class BusinessBrand
 
 
     /**
-     * @ORM\ManyToOne(targetEntity="Config.php", cascade={"detach","merge"} )
+     * @ORM\ManyToOne(targetEntity="Modules\Inventory\App\Entities\Config", cascade={"detach","merge"} )
      * @ORM\JoinColumn(onDelete="CASCADE")
      **/
     private  $businessConfig;
