@@ -7,12 +7,14 @@ use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityManagerInterface;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Modules\AppsApi\App\Services\GeneratePatternCodeService;
 use Modules\AppsApi\App\Services\JsonRequestResponse;
 use Modules\Core\App\Entities\Vendor;
 use Modules\Core\App\Http\Requests\CustomerRequest;
+use Modules\Core\App\Models\UserModel;
 use Modules\Core\App\Models\VendorModel;
 use Barryvdh\Form\CreatesForms;
 use Barryvdh\Form\ValidatesForms;
@@ -23,15 +25,47 @@ class VendorController extends Controller
 {
 
     use ValidatesForms, CreatesForms;
-    /**
-     * Display a listing of the resource.
-     */
-    public function index(Request $request,EntityManagerInterface $em){
-        $service = new JsonRequestResponse();
-        $entities = $em->getRepository(Vendor::class)->listWithSearch($request->query());
-        $data = $service->returnJosnResponse($entities);
-        return $data;
+
+
+    public function index(Request $request){
+        $page =  isset($request['page']) && $request['page'] > 0?($request['page'] - 1 ) : 0;
+        $perPage = isset($request['offset']) && $request['offset']!=''? (int)($request['offset']):0;
+        $skip = isset($page) && $page!=''? (int)$page*$perPage:0;
+        $users = VendorModel::/*where('isDelete',0)*/
+        select([
+            'id',
+            'name',
+            'company_name',
+            'email',
+            'mobile',
+            'created_at'
+        ]);
+
+        if (isset($request['term']) && !empty($request['term'])){
+            $users = $users->where('name','LIKE','%'.$request['term'].'%')
+                ->orWhere('email','LIKE','%'.$request['term'].'%')
+                ->orWhere('company_name','LIKE','%'.$request['term'].'%')
+                ->orWhere('mobile','LIKE','%'.$request['term'].'%');
+        }
+
+        $totalUsers  = $users->count();
+        $users = $users->skip($skip)
+            ->take($perPage)
+            ->orderBy('id','DESC')->get();
+
+
+        $response = new Response();
+        $response->headers->set('Content-Type','application/json');
+        $response->setContent(json_encode([
+            'message' => 'success',
+            'status' => Response::HTTP_OK,
+            'total' => $totalUsers,
+            'data' => $users
+        ]));
+        $response->setStatusCode(Response::HTTP_OK);
+        return $response;
     }
+
 
 
 
