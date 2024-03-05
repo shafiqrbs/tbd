@@ -3,32 +3,16 @@
 namespace Modules\Core\App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
-use Doctrine\ORM\EntityManagerInterface;
-use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
-use Modules\AppsApi\App\Services\GeneratePatternCodeService;
 use Modules\AppsApi\App\Services\JsonRequestResponse;
-use Modules\Core\App\Entities\Customer;
-use Modules\Core\App\Entities\Location;
-use Modules\Core\App\Entities\User;
-use Modules\Core\App\Forms\CustomerType;
-use Modules\Core\App\Http\Requests\FormValidationManager;
 use Modules\Core\App\Http\Requests\UserRequest;
-use Modules\Core\App\Models\CustomerModel;
-use Barryvdh\Form\CreatesForms;
-use Barryvdh\Form\ValidatesForms;
-use Illuminate\Support\Facades\Validator;
 use Modules\Core\App\Models\UserModel;
-use Modules\Core\App\Repositories\LocationRepository;
-
 
 class UserController extends Controller
 {
 
-    use ValidatesForms, CreatesForms;
     /**
      * Display a listing of the resource.
      */
@@ -136,7 +120,7 @@ class UserController extends Controller
     public function destroy($id)
     {
         $service = new JsonRequestResponse();
-        $user = UserModel::find($id)->delete();
+        UserModel::find($id)->delete();
         $entity = ['message'=>'delete'];
         $data = $service->returnJosnResponse($entity);
         return $data;

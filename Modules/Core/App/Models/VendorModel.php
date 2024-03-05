@@ -7,9 +7,6 @@ use Cviebrock\EloquentSluggable\Sluggable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
-
-
-
 class VendorModel extends Model
 {
     use HasFactory;
@@ -30,6 +27,7 @@ class VendorModel extends Model
         'tinno',
         'code',
         'vendor_code',
+        'customer_id',
         'global_option_id'
     ];
 

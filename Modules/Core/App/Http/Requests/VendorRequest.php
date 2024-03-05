@@ -1,12 +1,7 @@
 <?php
 
 namespace Modules\Core\App\Http\Requests;
-
-
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Http\Exceptions\HttpResponseException;
-use Illuminate\Contracts\Validation\Validator;
-use Illuminate\Validation\Rule;
 
 class VendorRequest extends FormRequest
 {
@@ -28,7 +23,12 @@ class VendorRequest extends FormRequest
             case 'POST':
             {
                 return [
-                    'name' => 'required|max:255',
+                    'company_name' => 'required|string',
+                    'name' => 'required|string',
+                    'mobile' => 'required|numeric',
+                    'email' => 'email',
+                    'customer_id' => 'integer',
+                    'address' => 'string',
                 ];
             }
 
@@ -36,7 +36,12 @@ class VendorRequest extends FormRequest
             case 'PATCH':
             {
                 return [
-                    'name' => 'required'.$this->get('id').'|max:255',
+                    'company_name' => 'required|string',
+                    'name' => 'required|string',
+                    'mobile' => 'required|numeric',
+                    'email' => 'email',
+                    'customer_id' => 'integer',
+                    'address' => 'string',
                 ];
             }
             default:break;
@@ -46,17 +51,13 @@ class VendorRequest extends FormRequest
     public function messages()
     {
         return [
-            'name.required' => 'Name is Required.',
+            'company_name.required' => 'Company name field must be required',
+            'company_name.string' => 'Company name field must be string',
+            'name.required' => 'Name field must be required',
+            'name.string' => 'Name field must be string',
+            'mobile.required' => 'Mobile field must be required',
+            'mobile.integer' => 'Mobile field must be number',
         ];
-    }
-
-    public function failedValidation(Validator $validator)
-    {
-        throw new HttpResponseException(response()->json([
-            'success'   => false,
-            'message'   => 'Form Validation errors',
-            'data'      => $validator->errors()
-        ]));
     }
 
     /**
