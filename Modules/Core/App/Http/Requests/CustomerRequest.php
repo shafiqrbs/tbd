@@ -30,7 +30,15 @@ class CustomerRequest extends FormRequest
                 return [
                     'name' => 'required|max:255',
                     'mobile' => 'required',
-                    'customer_unique_id' => [Rule::unique('unique:global_option_id,mobile,name')],
+                    'location_id' => 'integer',
+                    'marketing_id' => 'integer',
+                    'customer_group' => 'string',
+                    'credit_limit' => 'string',
+                    'reference_id' => 'integer',
+                    'alternative_mobile' => 'integer',
+                    'address' => 'string',
+                    'email' => 'email',
+//                    'customer_unique_id' => [Rule::unique('unique:global_option_id,mobile,name')],
                 ];
             }
 
@@ -40,9 +48,15 @@ class CustomerRequest extends FormRequest
                 return [
                     'name' => 'required'.$this->get('id').'|max:255',
                     'mobile' => 'required',
-                    'customer_unique_id' => [
-                        'unique:global_option_id,mobile,name'
-                    ],
+                    'location_id' => 'integer',
+                    'marketing_id' => 'integer',
+                    'customer_group' => 'string',
+                    'credit_limit' => 'string',
+                    'reference_id' => 'integer',
+                    'alternative_mobile' => 'integer',
+                    'address' => 'string',
+                    'email' => 'email',
+                    //                    'customer_unique_id' => ['unique:global_option_id,mobile,name'],
                 ];
             }
             default:break;

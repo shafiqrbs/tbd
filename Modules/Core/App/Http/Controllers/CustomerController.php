@@ -4,38 +4,52 @@ namespace Modules\Core\App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use Doctrine\ORM\EntityManagerInterface;
-use Illuminate\Contracts\Validation\Validator;
-use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Redirect;
-use Illuminate\Validation\Rule;
+use Illuminate\Http\Response;
 use Modules\AppsApi\App\Services\GeneratePatternCodeService;
 use Modules\AppsApi\App\Services\JsonRequestResponse;
-use Modules\Core\App\Entities\Customer;
 use Modules\Core\App\Http\Requests\CustomerRequest;
 use Modules\Core\App\Models\CustomerModel;
-use Barryvdh\Form\CreatesForms;
-use Barryvdh\Form\ValidatesForms;
-
-
 
 class CustomerController extends Controller
 {
-
-    use ValidatesForms, CreatesForms;
     /**
      * Display a listing of the resource.
      */
     public function index(Request $request,EntityManagerInterface $em){
-        $service = new JsonRequestResponse();
-        $service->clearCaches('Customer');
-        $entities = $em->getRepository(Customer::class)->listWithSearch($request->query());
-        $data = $service->returnJosnResponse($entities);
-        return $data;
-    }
+        $page =  isset($request['page']) && $request['page'] > 0?($request['page'] - 1 ) : 0;
+        $perPage = isset($request['offset']) && $request['offset']!=''? (int)($request['offset']):0;
+        $skip = isset($page) && $page!=''? (int)$page*$perPage:0;
+        $vendors = CustomerModel::/*where('isDelete',0)*/
+        select([
+            'id',
+            'name',
+            'mobile',
+            'created_at'
+        ]);
 
+        if (isset($request['term']) && !empty($request['term'])){
+            $vendors = $vendors->where('name','LIKE','%'.$request['term'].'%')
+                ->orWhere('mobile','LIKE','%'.$request['term'].'%');
+        }
+
+        $totalUsers  = $vendors->count();
+        $vendors = $vendors->skip($skip)
+            ->take($perPage)
+            ->orderBy('id','DESC')->get();
+
+        $response = new Response();
+        $response->headers->set('Content-Type','application/json');
+        $response->setContent(json_encode([
+            'message' => 'success',
+            'status' => Response::HTTP_OK,
+            'total' => $totalUsers,
+            'data' => $vendors
+        ]));
+
+        $response->setStatusCode(Response::HTTP_OK);
+        return $response;
+    }
 
     /**
      * Store a newly created resource in storage.
@@ -43,23 +57,20 @@ class CustomerController extends Controller
     public function store(CustomerRequest $request, GeneratePatternCodeService $patternCodeService )
     {
         $service = new JsonRequestResponse();
-        $input = $request->all();
+        $input = $request->validated();
+
         $domain = 65;
         $input['global_option_id'] = $domain;
         $input['customer_unique_id'] = "{$domain}@{$input['mobile']}-{$input['name']}";
+
         $params = ['domain' => $domain,'table' => 'cor_customers','prefix' => 'EMP-'];
         $pattern = $patternCodeService->customerCode($params);
+
         $input['code'] = $pattern['code'];
         $input['customerId'] = $pattern['generateId'];
-        DB::beginTransaction();
-        try {
-            $entity = CustomerModel::create($input);
-            DB::commit();
-            $data = $service->returnJosnResponse($entity);
-        } catch(QueryException $ex){
-            DB::rollback();
-            $data = $service->returnJosnResponse($ex->getMessage());
-        }
+
+        $entity = CustomerModel::create($input);
+        $data = $service->returnJosnResponse($entity);
         return $data;
     }
 
@@ -70,6 +81,11 @@ class CustomerController extends Controller
     {
         $service = new JsonRequestResponse();
         $entity = CustomerModel::find($id);
+
+        if (!$entity){
+            $entity = 'Data not found';
+        }
+
         $data = $service->returnJosnResponse($entity);
         return $data;
     }
@@ -81,6 +97,11 @@ class CustomerController extends Controller
     {
         $service = new JsonRequestResponse();
         $entity = CustomerModel::find($id);
+
+        if (!$entity){
+            $entity = 'Data not found';
+        }
+
         $data = $service->returnJosnResponse($entity);
         return $data;
     }
@@ -90,20 +111,15 @@ class CustomerController extends Controller
      */
     public function update(CustomerRequest $request, $id)
     {
-        $input = $request->all();
-        $service = new JsonRequestResponse();
+
+        $data = $request->validated();
         $entity = CustomerModel::find($id);
-        $input['customer_unique_id'] = "{$entity['global_option_id']}@{$input['mobile']}-{$input['name']}";
-        DB::beginTransaction();
-        try {
-                $entity->update($input);
-                DB::commit();
-                $data = $service->returnJosnResponse($entity);
-            } catch(QueryException $ex){
-                DB::rollback();
-                $data = $service->returnJosnResponse($ex->getMessage());
-            }
-            return $data;
+        $data['customer_unique_id'] = "{$entity['global_option_id']}@{$data['mobile']}-{$data['name']}";
+
+        $entity->update($data);
+
+        $service = new JsonRequestResponse();
+        return $service->returnJosnResponse($entity);
     }
 
     /**
@@ -112,20 +128,10 @@ class CustomerController extends Controller
     public function destroy($id)
     {
         $service = new JsonRequestResponse();
-        $service->clearCaches('Customer');
-        $user=CustomerModel::find($id);
-        $entity = ['message'=>'false'];
-        DB::beginTransaction();
-        try {
-            if($user and $user->delete()){
-                $entity = ['message'=>'success'];
-            }
-            DB::commit();
-            $data = $service->returnJosnResponse($entity);
-            return $data;
-        } catch (\Exception $e) {
-            DB::rollback();
-        }
+        CustomerModel::find($id)->delete();
+
+        $entity = ['message'=>'delete'];
+        return $service->returnJosnResponse($entity);
     }
 
 
