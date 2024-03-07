@@ -21,6 +21,8 @@ use Modules\Inventory\App\Http\Controllers\InventoryController;
     |
 */
 
+Route::POST('/user-login', [UserController::class,'userLogin'])->name('user_login');
+
 
 Route::prefix('/core/select')->middleware([HeaderAuthenticationMiddleware::class])->group(function() {
     Route::get('/user', [CoreController::class,'user'])->name('user_autosearch');
