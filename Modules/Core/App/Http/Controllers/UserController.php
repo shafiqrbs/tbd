@@ -20,39 +20,15 @@ class UserController extends Controller
      */
 
     public function index(Request $request){
-        $page =  isset($request['page']) && $request['page'] > 0?($request['page'] - 1 ) : 0;
-        $perPage = isset($request['offset']) && $request['offset']!=''? (int)($request['offset']):0;
-        $skip = isset($page) && $page!=''? (int)$page*$perPage:0;
-        $users = UserModel::/*where('isDelete',0)*/
-                    select([
-                        'id',
-                        'name',
-                        'username',
-                        'email',
-                        'mobile',
-                        'created_at'
-                    ]);
 
-        if (isset($request['term']) && !empty($request['term'])){
-            $users = $users->where('name','LIKE','%'.$request['term'].'%')
-                ->orWhere('email','LIKE','%'.$request['term'].'%')
-                ->orWhere('username','LIKE','%'.$request['term'].'%')
-                ->orWhere('mobile','LIKE','%'.$request['term'].'%');
-        }
-
-        $totalUsers  = $users->count();
-        $users = $users->skip($skip)
-                       ->take($perPage)
-                       ->orderBy('id','DESC')->get();
-
-
+        $data = UserModel::getRecords($request);
         $response = new Response();
         $response->headers->set('Content-Type','application/json');
         $response->setContent(json_encode([
             'message' => 'success',
             'status' => Response::HTTP_OK,
-            'total' => $totalUsers,
-            'data' => $users
+            'total' => $data['count'],
+            'data' => $data['entities']
         ]));
         $response->setStatusCode(Response::HTTP_OK);
         return $response;

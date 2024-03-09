@@ -56,9 +56,7 @@ class CustomerRequest extends FormRequest
                     'alternative_mobile' => 'integer|nullable',
                     'address' => 'string|nullable',
                     'email' => 'email|nullable',
-                    'customer_unique_id' => ['unique:global_option_id,mobile,name'],
-
-
+                    'customer_unique_id' => ['unique:global_option_id,mobile,name']
                 ];
             }
             default:break;
