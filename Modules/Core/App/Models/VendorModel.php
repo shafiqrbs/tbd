@@ -31,6 +31,37 @@ class VendorModel extends Model
         'global_option_id'
     ];
 
+    public static function getRecords($request)
+    {
+        $page =  isset($request['page']) && $request['page'] > 0?($request['page'] - 1 ) : 0;
+        $perPage = isset($request['offset']) && $request['offset']!=''? (int)($request['offset']):0;
+        $skip = isset($page) && $page!=''? (int)$page*$perPage:0;
+        $vendors = self::
+        select([
+            'id',
+            'name',
+            'company_name',
+            'email',
+            'mobile',
+            'created_at'
+        ]);
+
+        if (isset($request['term']) && !empty($request['term'])){
+            $vendors = $vendors->where('name','LIKE','%'.$request['term'].'%')
+                ->orWhere('email','LIKE','%'.$request['term'].'%')
+                ->orWhere('company_name','LIKE','%'.$request['term'].'%')
+                ->orWhere('mobile','LIKE','%'.$request['term'].'%');
+        }
+
+        $total  = $vendors->count();
+        $entities = $vendors->skip($skip)
+            ->take($perPage)
+            ->orderBy('id','DESC')->get();
+
+        $data = array('count'=>$total,'entities'=>$entities);
+        return $data;
+    }
+
 
     public static function boot() {
         parent::boot();

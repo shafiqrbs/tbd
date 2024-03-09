@@ -8,14 +8,15 @@ use Illuminate\Http\Response;
 use Modules\AppsApi\App\Services\GeneratePatternCodeService;
 use Modules\AppsApi\App\Services\JsonRequestResponse;
 use Modules\Core\App\Http\Requests\VendorRequest;
-use Modules\Core\App\Models\VendorModel;
+use Modules\Core\App\Models\UserRoleGroupModel;
 
-class VendorController extends Controller
+
+class UserRoleGroupController extends Controller
 {
 
     public function index(Request $request){
 
-        $data = VendorModel::getRecords($request);
+        $data = UserRoleGroupModel::getRecords($request);
         $response = new Response();
         $response->headers->set('Content-Type','application/json');
         $response->setContent(json_encode([
@@ -32,17 +33,11 @@ class VendorController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(VendorRequest $request, GeneratePatternCodeService $patternCodeService)
+    public function store(VendorRequest $request)
     {
         $service = new JsonRequestResponse();
         $input = $request->validated();
-        $domain = 65;
-        $input['global_option_id'] = $domain;
-        $params = ['domain' => $domain,'table' => 'cor_vendors','prefix' => ''];
-        $pattern = $patternCodeService->customerCode($params);
-        $input['code'] = $pattern['code'];
-        $input['vendor_code'] = $pattern['generateId'];
-        $entity = VendorModel::create($input);
+        $entity = UserRoleGroupModel::create($input);
         $data = $service->returnJosnResponse($entity);
         return $data;
     }
@@ -53,12 +48,10 @@ class VendorController extends Controller
     public function show($id)
     {
         $service = new JsonRequestResponse();
-        $entity = VendorModel::find($id);
-
+        $entity = UserRoleGroupModel::find($id);
         if (!$entity){
             $entity = 'Data not found';
         }
-
         $data = $service->returnJosnResponse($entity);
         return $data;
     }
@@ -69,12 +62,10 @@ class VendorController extends Controller
     public function edit($id)
     {
         $service = new JsonRequestResponse();
-        $entity = VendorModel::find($id);
-
+        $entity = UserRoleGroupModel::find($id);
         if (!$entity){
             $entity = 'Data not found';
         }
-
         $data = $service->returnJosnResponse($entity);
         return $data;
     }
@@ -85,7 +76,7 @@ class VendorController extends Controller
     public function update(VendorRequest $request, $id)
     {
         $data = $request->validated();
-        $entity = VendorModel::find($id);
+        $entity = UserRoleGroupModel::find($id);
         $entity->update($data);
 
         $service = new JsonRequestResponse();
@@ -98,7 +89,7 @@ class VendorController extends Controller
     public function destroy($id)
     {
         $service = new JsonRequestResponse();
-        VendorModel::find($id)->delete();
+        UserRoleGroupModel::find($id)->delete();
 
         $entity = ['message'=>'delete'];
         return $service->returnJosnResponse($entity);
