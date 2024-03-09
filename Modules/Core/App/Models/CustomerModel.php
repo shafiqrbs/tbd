@@ -117,4 +117,42 @@ class CustomerModel extends Model
     }
 
 
+    public static function getRecords($request){
+
+        $page =  isset($request['page']) && $request['page'] > 0?($request['page'] - 1 ) : 0;
+        $perPage = isset($request['offset']) && $request['offset']!=''? (int)($request['offset']):0;
+        $skip = isset($page) && $page!=''? (int)$page*$perPage:0;
+
+        $customers = CustomerModel::
+        select([
+            'id',
+            'name',
+            'mobile',
+            'created_at'
+        ]);
+
+        if (isset($request['term']) && !empty($request['term'])){
+            $customers = $customers->where('name','LIKE','%'.$request['term'].'%')
+                ->orWhere('mobile','LIKE','%'.$request['term'].'%');
+        }
+
+        if (isset($request['name']) && !empty($request['name'])){
+            $customers = $customers->where('name',$request['name']);
+        }
+
+        if (isset($request['mobile']) && !empty($request['mobile'])){
+            $customers = $customers->where('mobile',$request['mobile']);
+        }
+
+
+        $totalUsers  = $customers->count();
+        $customers = $customers->skip($skip)
+            ->take($perPage)
+            ->orderBy('id','DESC')->get();
+
+        $data = array('count'=>$totalUsers,'entities' => $customers);
+        return $data;
+    }
+
+
 }

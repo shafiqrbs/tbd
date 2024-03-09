@@ -42,6 +42,18 @@ class UserModel extends Model
                 ->orWhere('mobile','LIKE','%'.$request['term'].'%');
         }
 
+        if (isset($request['name']) && !empty($request['name'])){
+            $users = $users->where('name',$request['name']);
+        }
+
+        if (isset($request['mobile']) && !empty($request['mobile'])){
+            $users = $users->where('mobile',$request['mobile']);
+        }
+
+        if (isset($request['email']) && !empty($request['email'])){
+            $users = $users->where('email',$request['email']);
+        }
+
         $total  = $users->count();
         $entities = $users->skip($skip)
             ->take($perPage)

@@ -53,6 +53,18 @@ class VendorModel extends Model
                 ->orWhere('mobile','LIKE','%'.$request['term'].'%');
         }
 
+        if (isset($request['name']) && !empty($request['name'])){
+            $vendors = $vendors->where('name',$request['name']);
+        }
+
+        if (isset($request['mobile']) && !empty($request['mobile'])){
+            $vendors = $vendors->where('mobile',$request['mobile']);
+        }
+
+        if (isset($request['company_name']) && !empty($request['company_name'])){
+            $vendors = $vendors->where('company_name',$request['company_name']);
+        }
+
         $total  = $vendors->count();
         $entities = $vendors->skip($skip)
             ->take($perPage)

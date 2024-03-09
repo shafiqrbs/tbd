@@ -17,46 +17,16 @@ class CustomerController extends Controller
      * Display a listing of the resource.
      */
     public function index(Request $request,EntityManagerInterface $em){
-        $page =  isset($request['page']) && $request['page'] > 0?($request['page'] - 1 ) : 0;
-        $perPage = isset($request['offset']) && $request['offset']!=''? (int)($request['offset']):0;
-        $skip = isset($page) && $page!=''? (int)$page*$perPage:0;
 
-        $customers = CustomerModel::
-        select([
-            'id',
-            'name',
-            'mobile',
-            'created_at'
-        ]);
-
-        if (isset($request['term']) && !empty($request['term'])){
-            $customers = $customers->where('name','LIKE','%'.$request['term'].'%')
-                ->orWhere('mobile','LIKE','%'.$request['term'].'%');
-        }
-
-        if (isset($request['name']) && !empty($request['name'])){
-            $customers = $customers->where('name',$request['name']);
-        }
-
-        if (isset($request['mobile']) && !empty($request['mobile'])){
-            $customers = $customers->where('mobile',$request['mobile']);
-        }
-
-
-        $totalUsers  = $customers->count();
-        $customers = $customers->skip($skip)
-            ->take($perPage)
-            ->orderBy('id','DESC')->get();
-
+        $data = CustomerModel::getRecords($request);
         $response = new Response();
         $response->headers->set('Content-Type','application/json');
         $response->setContent(json_encode([
             'message' => 'success',
             'status' => Response::HTTP_OK,
-            'total' => $totalUsers,
-            'data' => $customers
+            'total' => $data['count'],
+            'data' => $data['entities']
         ]));
-
         $response->setStatusCode(Response::HTTP_OK);
         return $response;
     }
