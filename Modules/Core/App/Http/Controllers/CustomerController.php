@@ -20,7 +20,8 @@ class CustomerController extends Controller
         $page =  isset($request['page']) && $request['page'] > 0?($request['page'] - 1 ) : 0;
         $perPage = isset($request['offset']) && $request['offset']!=''? (int)($request['offset']):0;
         $skip = isset($page) && $page!=''? (int)$page*$perPage:0;
-        $vendors = CustomerModel::/*where('isDelete',0)*/
+
+        $customers = CustomerModel::
         select([
             'id',
             'name',
@@ -29,12 +30,21 @@ class CustomerController extends Controller
         ]);
 
         if (isset($request['term']) && !empty($request['term'])){
-            $vendors = $vendors->where('name','LIKE','%'.$request['term'].'%')
+            $customers = $customers->where('name','LIKE','%'.$request['term'].'%')
                 ->orWhere('mobile','LIKE','%'.$request['term'].'%');
         }
 
-        $totalUsers  = $vendors->count();
-        $vendors = $vendors->skip($skip)
+        if (isset($request['name']) && !empty($request['name'])){
+            $customers = $customers->where('name',$request['name']);
+        }
+
+        if (isset($request['mobile']) && !empty($request['mobile'])){
+            $customers = $customers->where('mobile',$request['mobile']);
+        }
+
+
+        $totalUsers  = $customers->count();
+        $customers = $customers->skip($skip)
             ->take($perPage)
             ->orderBy('id','DESC')->get();
 
@@ -44,7 +54,7 @@ class CustomerController extends Controller
             'message' => 'success',
             'status' => Response::HTTP_OK,
             'total' => $totalUsers,
-            'data' => $vendors
+            'data' => $customers
         ]));
 
         $response->setStatusCode(Response::HTTP_OK);
