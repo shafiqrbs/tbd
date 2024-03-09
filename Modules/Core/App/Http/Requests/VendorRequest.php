@@ -26,9 +26,9 @@ class VendorRequest extends FormRequest
                     'company_name' => 'required|string',
                     'name' => 'required|string',
                     'mobile' => 'required|numeric',
-                    'email' => 'email',
-                    'customer_id' => 'integer',
-                    'address' => 'string',
+                    'email' => 'email|nullable',
+                    'customer_id' => 'integer|nullable',
+                    'address' => 'string|nullable',
                 ];
             }
 
@@ -39,9 +39,9 @@ class VendorRequest extends FormRequest
                     'company_name' => 'required|string',
                     'name' => 'required|string',
                     'mobile' => 'required|numeric',
-                    'email' => 'email',
-                    'customer_id' => 'integer',
-                    'address' => 'string',
+                    'email' => 'email|nullable',
+                    'customer_id' => 'integer|nullable',
+                    'address' => 'string|nullable',
                 ];
             }
             default:break;
