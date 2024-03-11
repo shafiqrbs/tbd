@@ -35,7 +35,7 @@ class VendorModel extends Model
     {
         $page =  isset($request['page']) && $request['page'] > 0?($request['page'] - 1 ) : 0;
         $perPage = isset($request['offset']) && $request['offset']!=''? (int)($request['offset']):0;
-        $skip = isset($page) && $page!=''? (int)$page*$perPage:0;
+        $skip = isset($page) && $page!=''? (int)$page * $perPage:0;
         $vendors = self::
         select([
             'id',
@@ -45,7 +45,6 @@ class VendorModel extends Model
             'mobile',
             'created_at'
         ]);
-
         if (isset($request['term']) && !empty($request['term'])){
             $vendors = $vendors->where('name','LIKE','%'.$request['term'].'%')
                 ->orWhere('email','LIKE','%'.$request['term'].'%')

@@ -1,0 +1,24 @@
+<?php
+
+namespace Modules\Domain\App\Models;
+
+
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Modules\Inventory\App\Models\SettingTypeModel;
+
+class CurrencyModel extends Model
+{
+    use HasFactory;
+
+    protected $table = 'dom_currencys';
+    public $timestamps = true;
+    protected $guarded = ['id'];
+    protected $fillable = [
+        'name',
+        'code',
+        'symbol',
+        'status'
+    ];
+
+}

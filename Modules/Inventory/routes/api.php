@@ -14,6 +14,4 @@ use Illuminate\Support\Facades\Route;
     |
 */
 
-Route::middleware(['auth:sanctum'])->prefix('v1')->name('api.')->group(function () {
-    Route::get('inventory', fn (Request $request) => $request->user())->name('inventory');
-});
+Route::apiResource('config', VendorController::class)->middleware([HeaderAuthenticationMiddleware::class]);
