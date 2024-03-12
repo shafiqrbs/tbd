@@ -16,7 +16,7 @@ class ConfigModel extends Model
     public $timestamps = true;
     protected $guarded = ['id'];
     protected $fillable = [
-        'business_model',
+        'business_model_id',
         'stock_format',
         'global_option_id',
         'printer',

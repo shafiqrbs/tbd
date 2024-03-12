@@ -55,7 +55,7 @@ class ConfigController extends Controller
         $entity->update($data);
 
         $service = new JsonRequestResponse();
-        return $service->returnJosnResponse($entity);
+        return $service->returnJosnResponse($data);
     }
 
 
