@@ -14,6 +14,16 @@ use Modules\Core\App\Models\UserModel;
 
 class UserController extends Controller
 {
+    protected $domain;
+
+    public function __construct(Request $request)
+    {
+        $userId = $request->header('X-Api-User');
+        if ($userId && !empty($userId)){
+            $userData = UserModel::getUserData($userId);
+            $this->domain = $userData;
+        }
+    }
 
     /**
      * Display a listing of the resource.
@@ -21,7 +31,7 @@ class UserController extends Controller
 
     public function index(Request $request){
 
-        $data = UserModel::getRecords($request);
+        $data = UserModel::getRecords($request,$this->domain);
         $response = new Response();
         $response->headers->set('Content-Type','application/json');
         $response->setContent(json_encode([
@@ -104,38 +114,5 @@ class UserController extends Controller
         $entity = ['message'=>'delete'];
         $data = $service->returnJosnResponse($entity);
         return $data;
-    }
-
-    /**
-     * Login the specified resource from storage.
-     */
-    public function userLogin(UserLoginRequest $request)
-    {
-        $data = $request->validated();
-
-        $userExists = UserModel::where('username',$data['username'])->first();
-
-        if ($userExists){
-            $verify = password_verify($data['password'], $userExists->password);
-            if (!$verify){
-                return new JsonResponse(['status'=> 404, 'message'=>'Wrong password']);
-            }
-        }else{
-            return new JsonResponse(['status'=>404, 'message'=>'Invalid credentials']);
-        }
-
-        $arrayData=[
-            'id'=>$userExists->id,
-            'name'=>$userExists->name,
-            'mobile'=>$userExists->mobile,
-            'email'=>$userExists->email,
-            'username'=>$userExists->username,
-            'global_option_id'=>$userExists->global_option_id,
-        ];
-        return new JsonResponse([
-            'status'=>200,
-            'message'=>'success',
-            'data'=>$arrayData
-        ]);
     }
 }

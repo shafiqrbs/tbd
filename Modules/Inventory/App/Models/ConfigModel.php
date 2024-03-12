@@ -12,7 +12,7 @@ class ConfigModel extends Model
 {
     use HasFactory;
 
-    protected $table = 'inv_configs';
+    protected $table = 'inv_config';
     public $timestamps = true;
     protected $guarded = ['id'];
     protected $fillable = [

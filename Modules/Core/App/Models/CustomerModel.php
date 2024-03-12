@@ -117,23 +117,24 @@ class CustomerModel extends Model
     }
 
 
-    public static function getRecords($request){
+    public static function getRecords($domain,$request){
+
+        $global = $domain['global_id'];
 
         $page =  isset($request['page']) && $request['page'] > 0?($request['page'] - 1 ) : 0;
         $perPage = isset($request['offset']) && $request['offset']!=''? (int)($request['offset']):0;
         $skip = isset($page) && $page!=''? (int)$page*$perPage:0;
 
-        $customers = CustomerModel::
-        select([
-            'id',
-            'name',
-            'mobile',
-            'created_at'
-        ]);
+        $customers = self::where('global_option_id',$global)
+            ->select([
+                'id',
+                'name',
+                'mobile',
+                'created_at'
+            ]);
 
         if (isset($request['term']) && !empty($request['term'])){
-            $customers = $customers->where('name','LIKE','%'.$request['term'].'%')
-                ->orWhere('mobile','LIKE','%'.$request['term'].'%');
+            $customers = $customers->whereAny(['name','mobile'],'LIKE','%'.$request['term'].'%');
         }
 
         if (isset($request['name']) && !empty($request['name'])){
@@ -147,8 +148,9 @@ class CustomerModel extends Model
 
         $totalUsers  = $customers->count();
         $customers = $customers->skip($skip)
-            ->take($perPage)
-            ->orderBy('id','DESC')->get();
+                            ->take($perPage)
+                            ->orderBy('id','DESC')
+                            ->get();
 
         $data = array('count'=>$totalUsers,'entities' => $customers);
         return $data;

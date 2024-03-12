@@ -8,14 +8,24 @@ use Illuminate\Http\Response;
 use Modules\AppsApi\App\Services\GeneratePatternCodeService;
 use Modules\AppsApi\App\Services\JsonRequestResponse;
 use Modules\Core\App\Http\Requests\VendorRequest;
+use Modules\Core\App\Models\UserModel;
 use Modules\Core\App\Models\VendorModel;
 
 class VendorController extends Controller
 {
+    protected $domain;
 
+    public function __construct(Request $request)
+    {
+        $userId = $request->header('X-Api-User');
+        if ($userId && !empty($userId)){
+            $userData = UserModel::getUserData($userId);
+            $this->domain = $userData;
+        }
+    }
     public function index(Request $request){
 
-        $data = VendorModel::getRecords($request);
+        $data = VendorModel::getRecords($request,$this->domain);
         $response = new Response();
         $response->headers->set('Content-Type','application/json');
         $response->setContent(json_encode([

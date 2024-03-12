@@ -1,7 +1,10 @@
 <?php
 
+use App\Http\Middleware\HeaderAuthenticationMiddleware;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use Modules\Inventory\App\Http\Controllers\BusinessModelController;
+use Modules\Inventory\App\Http\Controllers\ConfigController;
 
 /*
     |--------------------------------------------------------------------------
@@ -14,4 +17,12 @@ use Illuminate\Support\Facades\Route;
     |
 */
 
-Route::apiResource('config', VendorController::class)->middleware([HeaderAuthenticationMiddleware::class]);
+
+Route::prefix('/inventory/select')->middleware([HeaderAuthenticationMiddleware::class])->group(function() {
+    Route::get('/business-model', [BusinessModelController::class,'businessModelDropdown'])->name('business_model_dropdown');
+});
+
+Route::prefix('/inventory')->middleware([HeaderAuthenticationMiddleware::class])->group(function() {
+    Route::get('/config', [ConfigController::class,'getConfig'])->name('get_config');
+    Route::put('/config-update', [ConfigController::class,'updateConfig'])->name('update_config');
+});

@@ -8,20 +8,32 @@ use Illuminate\Http\Response;
 use Modules\AppsApi\App\Services\GeneratePatternCodeService;
 use Modules\AppsApi\App\Services\JsonRequestResponse;
 use Modules\Core\App\Http\Requests\VendorRequest;
+use Modules\Core\App\Models\UserModel;
 use Modules\Core\App\Models\VendorModel;
+use Modules\Inventory\App\Http\Requests\ConfigRequest;
+use Modules\Inventory\App\Models\ConfigModel;
 
 class ConfigController extends Controller
 {
+    protected $domain;
 
-
+    public function __construct(Request $request)
+    {
+        $userId = $request->header('X-Api-User');
+        if ($userId && !empty($userId)){
+            $userData = UserModel::getUserData($userId);
+            $this->domain = $userData;
+        }
+    }
 
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit($id)
+    public function getConfig()
     {
+        $id = $this->domain['config_id'];
         $service = new JsonRequestResponse();
-        $entity = VendorModel::find($id);
+        $entity = ConfigModel::find($id);
 
         if (!$entity){
             $entity = 'Data not found';
@@ -34,27 +46,16 @@ class ConfigController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(VendorRequest $request, $id)
+    public function updateConfig(ConfigRequest $request)
     {
+        $id = $this->domain['config_id'];
+
         $data = $request->validated();
-        $entity = VendorModel::find($id);
+        $entity = ConfigModel::find($id);
         $entity->update($data);
 
         $service = new JsonRequestResponse();
         return $service->returnJosnResponse($entity);
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy($id)
-    {
-        $service = new JsonRequestResponse();
-        VendorModel::find($id)->delete();
-
-        $entity = ['message'=>'delete'];
-        return $service->returnJosnResponse($entity);
-
     }
 
 

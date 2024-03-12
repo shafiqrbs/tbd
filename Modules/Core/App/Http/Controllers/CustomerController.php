@@ -10,15 +10,26 @@ use Modules\AppsApi\App\Services\GeneratePatternCodeService;
 use Modules\AppsApi\App\Services\JsonRequestResponse;
 use Modules\Core\App\Http\Requests\CustomerRequest;
 use Modules\Core\App\Models\CustomerModel;
+use Modules\Core\App\Models\UserModel;
 
 class CustomerController extends Controller
 {
+    protected $domain;
+
+    public function __construct(Request $request)
+    {
+        $userId = $request->header('X-Api-User');
+        if ($userId && !empty($userId)){
+            $userData = UserModel::getUserData($userId);
+            $this->domain = $userData;
+        }
+    }
     /**
      * Display a listing of the resource.
      */
     public function index(Request $request,EntityManagerInterface $em){
 
-        $data = CustomerModel::getRecords($request);
+        $data = CustomerModel::getRecords($this->domain,$request);
         $response = new Response();
         $response->headers->set('Content-Type','application/json');
         $response->setContent(json_encode([
