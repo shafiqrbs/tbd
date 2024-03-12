@@ -29,6 +29,35 @@ class ConfigRequest extends FormRequest
                     'ait_percent' => 'nullable|numeric|regex:/^\d+(\.\d{1,2})?$/',
                     'address' => 'string|nullable',
                     'invoice_comment' => 'string|nullable'
+
+                    /*'business_model' => 'required|integer',
+                    'vat_percent' => 'integer|nullable',
+                    'ait_percent' => 'integer|nullable',
+                    'address' => 'string|nullable',
+                    'vat_reg_no' => 'string|nullable',
+                    'invoice_comment' => 'string|nullable',
+                    'multi_company' => 'boolean|nullable',
+                    'vat_enable' => 'boolean|nullable',
+                    'bonus_from_stock' => 'boolean|nullable',
+                    'condition_sales' => 'boolean|nullable',
+                    'is_marketing_executive' => 'boolean|nullable',
+                    'pos_print' => 'boolean|nullable',
+                    'fuel_station' => 'boolean|nullable',
+                    'zero_stock' => 'boolean|nullable',
+                    'tlo_commission' => 'boolean|nullable',
+                    'sr_commission' => 'boolean|nullable',
+                    'sales_return' => 'boolean|nullable',
+                    'store_ledger' => 'boolean|nullable',
+                    'is_print_header' => 'boolean|nullable',
+                    'is_invoice_title' => 'boolean|nullable',
+                    'print_outstanding' => 'boolean|nullable',
+                    'show_stock' => 'boolean|nullable',
+                    'is_powered' => 'boolean|nullable',
+                    'remove_image' => 'boolean|nullable',
+                    'is_unit_price' => 'boolean|nullable',
+                    'barcode_print' => 'boolean|nullable',
+                    'custom_invoice' => 'boolean|nullable',
+                    'custom_invoice_print' => 'boolean|nullable',*/
                 ];
             }
             default:break;

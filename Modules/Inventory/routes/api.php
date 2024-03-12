@@ -24,5 +24,5 @@ Route::prefix('/inventory/select')->middleware([HeaderAuthenticationMiddleware::
 
 Route::prefix('/inventory')->middleware([HeaderAuthenticationMiddleware::class])->group(function() {
     Route::get('/config', [ConfigController::class,'getConfig'])->name('get_config');
-    Route::put('/config-update', [ConfigController::class,'updateConfig'])->name('update_config');
+    Route::PATCH('/config-update', [ConfigController::class,'updateConfig'])->name('update_config');
 });
