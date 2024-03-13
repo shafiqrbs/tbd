@@ -5,7 +5,7 @@ use Modules\Core\App\Entities\Vendor;
 use Modules\Inventory\App\Entities\Config;
 use Modules\Inventory\App\Entities\BusinessPurchase;
 use Modules\Inventory\App\Entities\BusinessPurchaseItem;
-use Modules\Inventory\App\Entities\BusinessParticular;
+use Modules\Inventory\App\Entities\Product;
 use Modules\Core\App\Entities\User;
 use Doctrine\ORM\EntityRepository;
 
@@ -124,7 +124,7 @@ class BusinessPurchaseItemRepository extends EntityRepository
 
     }
 
-	public function getPurchaseAveragePrice(BusinessParticular $particular)
+	public function getPurchaseAveragePrice(Product $particular)
     {
 
        /* $qb = $this->_em->createQueryBuilder();
@@ -143,7 +143,7 @@ class BusinessPurchaseItemRepository extends EntityRepository
     {
         $em = $this->_em;
 
-        /* @var $particular BusinessParticular */
+        /* @var $particular Product */
         $particular = $this->_em->getRepository('BusinessBundle:BusinessParticular')->find($data['particularId']);
         $entity = new BusinessPurchaseItem();
         $entity->setBusinessPurchase($invoice);
@@ -177,7 +177,7 @@ class BusinessPurchaseItemRepository extends EntityRepository
 
     public function insertPurchaseDistributionItems($invoice, $data)
     {
-        /* @var $particular BusinessParticular */
+        /* @var $particular Product */
         $particular = $this->_em->getRepository('BusinessBundle:BusinessParticular')->find($data['particularId']);
         $em = $this->_em;
 
@@ -233,7 +233,7 @@ class BusinessPurchaseItemRepository extends EntityRepository
 
     public function insertSignPurchaseItems($invoice, $data)
     {
-        /* @var $particular BusinessParticular */
+        /* @var $particular Product */
         $particular = $this->_em->getRepository('BusinessBundle:BusinessParticular')->find($data['particularId']);
         $em = $this->_em;
         $entity = new BusinessPurchaseItem();
@@ -307,7 +307,7 @@ class BusinessPurchaseItemRepository extends EntityRepository
         return $data;
     }
 
-    public function purchaseStockItemUpdate(BusinessParticular $stockItem)
+    public function purchaseStockItemUpdate(Product $stockItem)
     {
         $qb = $this->createQueryBuilder('e');
         $qb->join('e.businessPurchase', 'mp');
@@ -318,7 +318,7 @@ class BusinessPurchaseItemRepository extends EntityRepository
         return $qnt['quantity'];
     }
 
-    public function bonusStockItemUpdate(BusinessParticular $stockItem)
+    public function bonusStockItemUpdate(Product $stockItem)
     {
         $qb = $this->createQueryBuilder('e');
         $qb->join('e.businessPurchase', 'mp');
@@ -352,7 +352,7 @@ class BusinessPurchaseItemRepository extends EntityRepository
 
     }
 
-    public function getPurchaseSalesAvg(BusinessParticular $stockItem)
+    public function getPurchaseSalesAvg(Product $stockItem)
     {
         $qb = $this->createQueryBuilder('e');
         $qb->select('AVG(e.purchasePrice) AS purchase');

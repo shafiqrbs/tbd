@@ -27,7 +27,7 @@ class BusinessPurchase
     /**
      * @ORM\ManyToOne(targetEntity="Modules\Inventory\App\Entities\Config", inversedBy="businessPurchases" , cascade={"detach","merge"} )
      **/
-    private  $businessConfig;
+    private  $config;
 
 
     /**
@@ -668,7 +668,7 @@ class BusinessPurchase
      */
     public function getBusinessConfig()
     {
-        return $this->businessConfig;
+        return $this->config;
     }
 
     /**
@@ -676,7 +676,7 @@ class BusinessPurchase
      */
     public function setBusinessConfig($businessConfig)
     {
-        $this->businessConfig = $businessConfig;
+        $this->businessConfig = $config;
     }
 
 

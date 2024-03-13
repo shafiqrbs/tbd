@@ -959,7 +959,7 @@ class Config
     }
 
     /**
-     * @return BusinessParticular
+     * @return Product
      */
     public function getBusinessParticulars()
     {

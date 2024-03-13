@@ -3,7 +3,7 @@
 namespace Modules\Inventory\App\Repositories;
 use Modules\Inventory\App\Entities\BusinessDamage;
 use Modules\Inventory\App\Entities\BusinessInvoiceReturnItem;
-use Modules\Inventory\App\Entities\BusinessParticular;
+use Modules\Inventory\App\Entities\Product;
 use Doctrine\ORM\EntityRepository;
 
 
@@ -16,7 +16,7 @@ use Doctrine\ORM\EntityRepository;
 class BusinessDamageRepository extends EntityRepository
 {
 
-    public function damageStockItemUpdate(BusinessParticular $item)
+    public function damageStockItemUpdate(Product $item)
     {
         $qb = $this->createQueryBuilder('e');
         $qb->select('SUM(e.quantity) AS quantity');

@@ -14,7 +14,7 @@ use Modules\Inventory\App\Entities\BusinessPurchaseItem;
 use Modules\Inventory\App\Entities\BusinessInvoice;
 use Modules\Inventory\App\Entities\BusinessInvoiceParticular;
 
-use Modules\Inventory\App\Entities\BusinessParticular;
+use Modules\Inventory\App\Entities\Product;
 use Modules\Inventory\App\Entities\BusinessPurchaseReturn;
 use Modules\Inventory\App\Entities\BusinessPurchaseReturnItem;
 use Modules\Inventory\App\Entities\BusinessStockHistory;
@@ -62,7 +62,7 @@ class BusinessStockHistoryRepository extends EntityRepository
 
     }
 
-    public function getItemOpeningQuantity(BusinessParticular $item){
+    public function getItemOpeningQuantity(Product $item){
         $em = $this->_em;
         $qb = $this->createQueryBuilder('e');
         $qb->select('(COALESCE(SUM(e.quantity),0) AS openingQuantity');
@@ -72,7 +72,7 @@ class BusinessStockHistoryRepository extends EntityRepository
 
     }
 
-    public function OpeningInsertQuantity(BusinessParticular $item){
+    public function OpeningInsertQuantity(Product $item){
         $em = $this->_em;
         $exist = $this->findOneBy(array('process'=>'opening','businessConfig'=>$item->getBusinessConfig(),'item'=>$item));
         if(empty($exist)){

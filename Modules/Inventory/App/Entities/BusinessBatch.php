@@ -28,7 +28,7 @@ class BusinessBatch
      * @ORM\ManyToOne(targetEntity="Modules\Inventory\App\Entities\Config")
      * @ORM\JoinColumn(onDelete="CASCADE")
      **/
-    private $businessConfig;
+    private $config;
 
     /**
      * @var BusinessBatchParticular
@@ -106,7 +106,7 @@ class BusinessBatch
      */
     public function getBusinessConfig()
     {
-        return $this->businessConfig;
+        return $this->config;
     }
 
     /**
@@ -114,7 +114,7 @@ class BusinessBatch
      */
     public function setBusinessConfig($businessConfig)
     {
-        $this->businessConfig = $businessConfig;
+        $this->businessConfig = $config;
     }
 
 

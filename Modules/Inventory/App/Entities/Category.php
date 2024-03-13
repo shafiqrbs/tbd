@@ -28,15 +28,7 @@ class Category
      * @ORM\ManyToOne(targetEntity="Modules\Inventory\App\Entities\Config", inversedBy="categories" , cascade={"detach","merge"} )
      * @ORM\JoinColumn(onDelete="CASCADE")
      **/
-    private  $businessConfig;
-
-
-    /**
-     * @ORM\OneToMany(targetEntity="Modules\Inventory\App\Entities\BusinessParticular", mappedBy="category")
-     * @ORM\OrderBy({"sorting" = "ASC"})
-     **/
-    private $businessParticulars;
-
+    private  $config;
 
     /**
      * @Gedmo\TreeParent
@@ -221,7 +213,7 @@ class Category
      */
     public function getBusinessConfig()
     {
-        return $this->businessConfig;
+        return $this->config;
     }
 
     /**
@@ -229,11 +221,11 @@ class Category
      */
     public function setBusinessConfig($businessConfig)
     {
-        $this->businessConfig = $businessConfig;
+        $this->businessConfig = $config;
     }
 
     /**
-     * @return BusinessParticular
+     * @return Product
      */
     public function getBusinessParticulars()
     {

@@ -9,7 +9,7 @@ use Gedmo\Mapping\Annotation as Gedmo;
  * MedicineDamage
  *
  * @ORM\Table("inv_stock_adjustment")
- * @ORM\Entity(repositoryClass="Modules\Inventory\App\Repositories\ItemStockAdjustmentRepository")
+ * @ORM\Entity()
  */
 class ItemStockAdjustment
 {
@@ -30,7 +30,7 @@ class ItemStockAdjustment
 
 
     /**
-     * @ORM\ManyToOne(targetEntity="Modules\Inventory\App\Entities\BusinessParticular")
+     * @ORM\ManyToOne(targetEntity="Product")
      * @ORM\JoinColumn(onDelete="CASCADE")
      **/
     private $item;

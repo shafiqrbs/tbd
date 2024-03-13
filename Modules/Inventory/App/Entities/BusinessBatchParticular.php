@@ -32,7 +32,7 @@ class BusinessBatchParticular
     private $businessBatch;
 
     /**
-     * @ORM\ManyToOne(targetEntity="Modules\Inventory\App\Entities\BusinessParticular")
+     * @ORM\ManyToOne(targetEntity="Product")
      * @ORM\JoinColumn(onDelete="CASCADE")
      **/
     private $businessParticular;
@@ -130,7 +130,7 @@ class BusinessBatchParticular
     }
 
     /**
-     * @return BusinessParticular
+     * @return Product
      */
     public function getBusinessParticular()
     {
@@ -138,7 +138,7 @@ class BusinessBatchParticular
     }
 
     /**
-     * @param BusinessParticular $businessParticular
+     * @param Product $businessParticular
      */
     public function setBusinessParticular($businessParticular)
     {

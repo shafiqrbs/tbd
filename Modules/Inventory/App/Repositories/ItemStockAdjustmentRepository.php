@@ -2,7 +2,7 @@
 
 namespace Modules\Inventory\App\Repositories;
 use Modules\Inventory\App\Entities\Config;
-use Modules\Inventory\App\Entities\BusinessParticular;
+use Modules\Inventory\App\Entities\Product;
 use Appstore\Bundle\InventoryBundle\Entity\Item;
 use Appstore\Bundle\MedicineBundle\Entity\MedicineConfig;
 use Appstore\Bundle\MedicineBundle\Entity\MedicinePurchaseItem;
@@ -43,7 +43,7 @@ class ItemStockAdjustmentRepository extends EntityRepository
    }
 
 
-    public function adjustmentStockItemUpdate(BusinessParticular $item)
+    public function adjustmentStockItemUpdate(Product $item)
     {
         $qb = $this->createQueryBuilder('e');
         $qb->select('SUM(e.quantity) AS quantity','SUM(e.bonus) AS bonus');

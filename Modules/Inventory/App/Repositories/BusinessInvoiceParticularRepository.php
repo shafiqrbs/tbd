@@ -7,7 +7,7 @@ use Modules\Inventory\App\Entities\BusinessBatchParticular;
 use Modules\Inventory\App\Entities\Config;
 use Modules\Inventory\App\Entities\BusinessInvoice;
 use Modules\Inventory\App\Entities\BusinessInvoiceParticular;
-use Modules\Inventory\App\Entities\BusinessParticular;
+use Modules\Inventory\App\Entities\Product;
 use Modules\Inventory\App\Entities\BusinessProductionElement;
 use Modules\Inventory\App\Entities\BusinessPurchase;
 use Modules\Inventory\App\Entities\BusinessPurchaseItem;
@@ -84,7 +84,7 @@ class BusinessInvoiceParticularRepository extends EntityRepository
 
     }
 
-    public function insertStudentInvoiceParticular(BusinessInvoice $invoice,BusinessParticular $particular)
+    public function insertStudentInvoiceParticular(BusinessInvoice $invoice, Product $particular)
     {
 
         $date = new \DateTime("now");
@@ -337,7 +337,7 @@ class BusinessInvoiceParticularRepository extends EntityRepository
     }
 
 
-	public function salesStockItemUpdate(BusinessParticular $stockItem)
+	public function salesStockItemUpdate(Product $stockItem)
     {
         $qb = $this->createQueryBuilder('e');
         $qb->select('SUM(e.totalQuantity) AS quantity');
@@ -346,7 +346,7 @@ class BusinessInvoiceParticularRepository extends EntityRepository
         return $qnt['quantity'];
     }
 
-    public function bonusStockItemUpdate(BusinessParticular $stockItem)
+    public function bonusStockItemUpdate(Product $stockItem)
     {
         $qb = $this->createQueryBuilder('e');
         $qb->select('SUM(e.bonusQnt) AS quantity');
@@ -908,7 +908,7 @@ class BusinessInvoiceParticularRepository extends EntityRepository
 
     public function insertDistributionItem(BusinessInvoice $entity,$particulars)
     {
-        /* @var $particular BusinessParticular */
+        /* @var $particular Product */
         $em = $this->_em;
         if(empty($entity->getBusinessInvoiceParticulars())){
             foreach ($particulars as $particular):
@@ -934,7 +934,7 @@ class BusinessInvoiceParticularRepository extends EntityRepository
                 $particular->setTotalQuantity(0);
                 $em->flush();
                 if($particular->getBusinessParticular()){
-                    $em->getRepository(BusinessParticular::class)->updateRemoveStockQuantity($particular->getBusinessParticular(),'sales');
+                    $em->getRepository(Product::class)->updateRemoveStockQuantity($particular->getBusinessParticular(),'sales');
                 }
             endforeach;
         }
@@ -951,7 +951,7 @@ class BusinessInvoiceParticularRepository extends EntityRepository
                 $particular->setQuantity(0);
                 $em->flush();
                 if($particular->getBusinessParticular()){
-                    $em->getRepository(BusinessParticular::class)->updateRemoveStockQuantity($particular->getBusinessParticular(),'purchase');
+                    $em->getRepository(Product::class)->updateRemoveStockQuantity($particular->getBusinessParticular(),'purchase');
                 }
             endforeach;
         }

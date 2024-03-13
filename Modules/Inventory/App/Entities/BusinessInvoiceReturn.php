@@ -30,7 +30,7 @@ class BusinessInvoiceReturn
      * @ORM\ManyToOne(targetEntity="Modules\Inventory\App\Entities\Config", inversedBy="businessPurchasesReturns" , cascade={"detach","merge"} )
      * @ORM\JoinColumn(onDelete="CASCADE")
      **/
-    private  $businessConfig;
+    private  $config;
 
     /**
      * @ORM\OneToOne(targetEntity="Modules\Inventory\App\Entities\BusinessInvoice", inversedBy="invoiceReturn")
@@ -237,7 +237,7 @@ class BusinessInvoiceReturn
      */
     public function getBusinessConfig()
     {
-        return $this->businessConfig;
+        return $this->config;
     }
 
     /**
@@ -245,7 +245,7 @@ class BusinessInvoiceReturn
      */
     public function setBusinessConfig($businessConfig)
     {
-        $this->businessConfig = $businessConfig;
+        $this->businessConfig = $config;
     }
 
     /**

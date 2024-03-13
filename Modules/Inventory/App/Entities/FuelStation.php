@@ -27,7 +27,7 @@ class FuelStation
      * @ORM\ManyToOne(targetEntity="Modules\Inventory\App\Entities\Config", inversedBy="marketing" , cascade={"detach","merge"} )
      * @ORM\JoinColumn(onDelete="CASCADE")
      **/
-    private  $businessConfig;
+    private  $config;
 
     /**
      * @ORM\ManyToOne(targetEntity="Modules\Inventory\App\Entities\WearHouse")
@@ -35,7 +35,7 @@ class FuelStation
     private $waerhouse;
 
     /**
-     * @ORM\ManyToOne(targetEntity="Modules\Inventory\App\Entities\BusinessParticular")
+     * @ORM\ManyToOne(targetEntity="Product")
      **/
     private $particular;
 
@@ -167,7 +167,7 @@ class FuelStation
      */
     public function getBusinessConfig()
     {
-        return $this->businessConfig;
+        return $this->config;
     }
 
     /**
@@ -175,7 +175,7 @@ class FuelStation
      */
     public function setBusinessConfig($businessConfig)
     {
-        $this->businessConfig = $businessConfig;
+        $this->businessConfig = $config;
     }
 
     /**

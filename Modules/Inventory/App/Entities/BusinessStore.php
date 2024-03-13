@@ -26,7 +26,7 @@ class BusinessStore
      * @ORM\ManyToOne(targetEntity="Modules\Inventory\App\Entities\Config", inversedBy="marketing" , cascade={"detach","merge"} )
      * @ORM\JoinColumn(onDelete="CASCADE")
      **/
-    private  $businessConfig;
+    private  $config;
 
     /**
      * @ORM\ManyToOne(targetEntity="Modules\Core\App\Entities\Customer")
@@ -127,7 +127,7 @@ class BusinessStore
      */
     public function getBusinessConfig()
     {
-        return $this->businessConfig;
+        return $this->config;
     }
 
     /**
@@ -135,7 +135,7 @@ class BusinessStore
      */
     public function setBusinessConfig($businessConfig)
     {
-        $this->businessConfig = $businessConfig;
+        $this->businessConfig = $config;
     }
 
 

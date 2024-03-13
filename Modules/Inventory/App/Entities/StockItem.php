@@ -26,7 +26,7 @@ class StockItem
     /**
      * @ORM\ManyToOne(targetEntity="Modules\Inventory\App\Entities\Config", inversedBy="businessParticulars" , cascade={"detach","merge"} )
      **/
-    private  $businessConfig;
+    private  $config;
 
     /**
      * @ORM\ManyToOne(targetEntity="Modules\Inventory\App\Entities\Category", inversedBy="businessParticulars" )
@@ -47,9 +47,9 @@ class StockItem
     private $wearHouse;
 
     /**
-     * @ORM\ManyToOne(targetEntity="Modules\Inventory\App\Entities\BusinessParticularType", inversedBy="businessParticulars" )
+     * @ORM\ManyToOne(targetEntity="Product", inversedBy="businessParticulars" )
      **/
-    private $businessParticularType;
+    private $product;
 
     /**
      * @ORM\OneToMany(targetEntity="Modules\Inventory\App\Entities\BusinessInvoiceParticular", mappedBy="businessParticular" )
@@ -563,7 +563,7 @@ class StockItem
     /**
      * Sets file.
      *
-     * @param BusinessParticular $file
+     * @param Product $file
      */
     public function setFile(UploadedFile $file = null)
     {
@@ -573,7 +573,7 @@ class StockItem
     /**
      * Get file.
      *
-     * @return BusinessParticular
+     * @return Product
      */
     public function getFile()
     {
@@ -741,7 +741,7 @@ class StockItem
      */
     public function getBusinessConfig()
     {
-        return $this->businessConfig;
+        return $this->config;
     }
 
     /**
@@ -749,7 +749,7 @@ class StockItem
      */
     public function setBusinessConfig($businessConfig)
     {
-        $this->businessConfig = $businessConfig;
+        $this->businessConfig = $config;
     }
 
     /**
@@ -810,21 +810,6 @@ class StockItem
         return $this->businessProductionExpenseItem;
     }
 
-    /**
-     * @return BusinessParticularType
-     */
-    public function getBusinessParticularType()
-    {
-        return $this->businessParticularType;
-    }
-
-    /**
-     * @param BusinessParticularType $businessParticularType
-     */
-    public function setBusinessParticularType($businessParticularType)
-    {
-        $this->businessParticularType = $businessParticularType;
-    }
 
     /**
      * @return string
@@ -1299,6 +1284,24 @@ class StockItem
     {
         $this->path = $path;
     }
+
+    /**
+     * @return mixed
+     */
+    public function getProduct()
+    {
+        return $this->product;
+    }
+
+    /**
+     * @param mixed $product
+     */
+    public function setProduct($product)
+    {
+        $this->product = $product;
+    }
+
+
 
 }
 

@@ -27,7 +27,7 @@ class BusinessAndroidProcess
     /**
      * @ORM\ManyToOne(targetEntity="Modules\Inventory\App\Entities\Config", inversedBy="androidProcess")
      */
-    protected $businessConfig;
+    protected $config;
 
     /**
      * @ORM\ManyToOne(targetEntity="Modules\Utility\App\Entities\AndroidDeviceSetup", inversedBy="businessAndroidProcess" )
@@ -432,7 +432,7 @@ class BusinessAndroidProcess
      */
     public function getBusinessConfig()
     {
-        return $this->businessConfig;
+        return $this->config;
     }
 
     /**
@@ -440,7 +440,7 @@ class BusinessAndroidProcess
      */
     public function setBusinessConfig($businessConfig)
     {
-        $this->businessConfig = $businessConfig;
+        $this->businessConfig = $config;
     }
 
     /**

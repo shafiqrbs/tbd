@@ -1,7 +1,7 @@
 <?php
 
 namespace Modules\Inventory\App\Repositories;
-use Modules\Inventory\App\Entities\BusinessParticular;
+use Modules\Inventory\App\Entities\Product;
 use Modules\Inventory\App\Entities\BusinessProductionElement;
 use Doctrine\ORM\EntityRepository;
 
@@ -33,7 +33,7 @@ class BusinessProductionElementRepository extends EntityRepository
 
     }
 
-    public function getProductPurchaseSalesPrice(BusinessParticular $particular)
+    public function getProductPurchaseSalesPrice(Product $particular)
     {
 
 	    $qb = $this->createQueryBuilder('e');
@@ -43,7 +43,7 @@ class BusinessProductionElementRepository extends EntityRepository
 	    return $qb->getQuery()->getOneOrNullResult();
     }
 
-    public function particularProductionElements(BusinessParticular $particular)
+    public function particularProductionElements(Product $particular)
     {
         $entities = $particular->getProductionElements();
         $data = '';

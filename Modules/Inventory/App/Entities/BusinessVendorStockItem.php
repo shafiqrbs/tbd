@@ -31,7 +31,7 @@ class BusinessVendorStockItem
     protected $businessVendorStock;
 
     /**
-     * @ORM\ManyToOne(targetEntity="Modules\Inventory\App\Entities\BusinessParticular", inversedBy="businessVendorStockItems", cascade={"persist"} )
+     * @ORM\ManyToOne(targetEntity="Product", inversedBy="businessVendorStockItems", cascade={"persist"} )
      **/
     private $particular;
 
@@ -86,7 +86,7 @@ class BusinessVendorStockItem
 
 
     /**
-     * @return BusinessParticular
+     * @return Product
      */
     public function getParticular()
     {
@@ -94,7 +94,7 @@ class BusinessVendorStockItem
     }
 
     /**
-     * @param BusinessParticular $particular
+     * @param Product $particular
      */
     public function setParticular($particular)
     {

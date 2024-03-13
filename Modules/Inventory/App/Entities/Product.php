@@ -9,10 +9,10 @@ use Modules\Utility\App\Entities\ProductUnit;
 /**
  * BusinessParticular
  *
- * @ORM\Table( name = "inv_particular")
- * @ORM\Entity(repositoryClass="Modules\Inventory\App\Repositories\BusinessParticularRepository")
+ * @ORM\Table( name = "inv_product")
+ * @ORM\Entity()
  */
-class BusinessParticular
+class Product
 {
     /**
      * @var integer
@@ -26,7 +26,7 @@ class BusinessParticular
     /**
      * @ORM\ManyToOne(targetEntity="Modules\Inventory\App\Entities\Config", inversedBy="businessParticulars" , cascade={"detach","merge"} )
      **/
-    private  $businessConfig;
+    private  $config;
 
     /**
      * @ORM\ManyToOne(targetEntity="Modules\Inventory\App\Entities\Category", inversedBy="businessParticulars" )
@@ -47,9 +47,15 @@ class BusinessParticular
     private $wearHouse;
 
     /**
-     * @ORM\ManyToOne(targetEntity="Modules\Inventory\App\Entities\BusinessParticularType", inversedBy="businessParticulars" )
+     * @ORM\ManyToOne(targetEntity="Modules\Inventory\App\Entities\WearHouse", inversedBy="businessParticulars" )
      **/
     private $businessParticularType;
+
+
+     /**
+     * @ORM\ManyToOne(targetEntity="Particular")
+     **/
+    private $rackNo;
 
     /**
      * @ORM\OneToMany(targetEntity="Modules\Inventory\App\Entities\BusinessInvoiceParticular", mappedBy="businessParticular" )
@@ -103,7 +109,7 @@ class BusinessParticular
 
 
     /**
-     * @ORM\ManyToOne(targetEntity="Modules\Utility\App\Entities\ProductUnit", inversedBy="businessParticulars" )
+     * @ORM\ManyToOne(targetEntity="Modules\Utility\App\Entities\ProductUnit")
      **/
     private  $unit;
 
@@ -111,7 +117,7 @@ class BusinessParticular
     /**
      * @var string
      *
-     * @ORM\Column(name="productType", type="string", length=20, nullable=true)
+     * @ORM\Column(type="string", length=20, nullable=true)
      */
     private $productType;
 
@@ -119,7 +125,7 @@ class BusinessParticular
     /**
      * @var string
      *
-     * @ORM\Column(name="name", type="string", length=255, nullable=true)
+     * @ORM\Column(type="string", length=255, nullable=true)
      */
     private $name;
 
@@ -134,7 +140,7 @@ class BusinessParticular
     /**
      * @var string
      *
-     * @ORM\Column(name="productionType", type="string", length=30,nullable = true)
+     * @ORM\Column(type="string", length=30,nullable = true)
      */
     private $productionType;
 
@@ -150,7 +156,7 @@ class BusinessParticular
     /**
      * @var float
      *
-     * @ORM\Column(name="openingQuantity", type="float", nullable=true)
+     * @ORM\Column(type="float", nullable=true)
      */
     private $openingQuantity;
 
@@ -158,14 +164,14 @@ class BusinessParticular
      /**
      * @var integer
      *
-     * @ORM\Column(name="adjustmentQuantity", type="integer", nullable=true)
+     * @ORM\Column(type="integer", nullable=true)
      */
     private $adjustmentQuantity;
 
     /**
      * @var boolean
      *
-     * @ORM\Column(name="openingApprove", type="boolean",  nullable=true)
+     * @ORM\Column( type="boolean",  nullable=true)
      */
     private $openingApprove = false;
 
@@ -173,14 +179,21 @@ class BusinessParticular
     /**
      * @var integer
      *
-     * @ORM\Column(name="minQuantity", type="integer", nullable=true)
+     * @ORM\Column(type="integer", nullable=true)
      */
     private $minQuantity;
 
     /**
+     * @var integer
+     *
+     * @ORM\Column(type="integer", nullable=true)
+     */
+    private $reorderQuantity;
+
+    /**
      * @var float
      *
-     * @ORM\Column(name="transferQuantity", type="float", nullable=true)
+     * @ORM\Column(type="float", nullable=true)
      */
     private $transferQuantity;
 
@@ -188,7 +201,7 @@ class BusinessParticular
     /**
      * @var float
      *
-     * @ORM\Column(name="stockIn", type="float", nullable=true)
+     * @ORM\Column(type="float", nullable=true)
      */
     private $stockIn = 0;
 
@@ -196,14 +209,14 @@ class BusinessParticular
     /**
      * @var float
      *
-     * @ORM\Column(name="purchaseQuantity", type="float", nullable=true)
+     * @ORM\Column(type="float", nullable=true)
      */
     private $purchaseQuantity;
 
     /**
      * @var float
      *
-     * @ORM\Column(name="salesQuantity", type="float", nullable=true)
+     * @ORM\Column( type="float", nullable=true)
      */
     private $salesQuantity;
 
@@ -211,7 +224,7 @@ class BusinessParticular
     /**
      * @var float
      *
-     * @ORM\Column(name="remainingQuantity", type="float", nullable=true)
+     * @ORM\Column( type="float", nullable=true)
      */
     private $remainingQuantity = 0;
 
@@ -219,21 +232,21 @@ class BusinessParticular
     /**
      * @var float
      *
-     * @ORM\Column(name="purchaseReturnQuantity", type="float", nullable=true)
+     * @ORM\Column(type="float", nullable=true)
      */
     private $purchaseReturnQuantity = 0;
 
     /**
      * @var float
      *
-     * @ORM\Column(name="salesReturnQuantity", type="float", nullable=true)
+     * @ORM\Column(type="float", nullable=true)
      */
     private $salesReturnQuantity = 0;
 
     /**
      * @var float
      *
-     * @ORM\Column(name="damageQuantity", type="float", nullable=true)
+     * @ORM\Column(type="float", nullable=true)
      */
     private $damageQuantity = 0;
 
@@ -241,7 +254,7 @@ class BusinessParticular
     /**
      * @var float
      *
-     * @ORM\Column(name="bonusQuantity", type="float", nullable=true)
+     * @ORM\Column(type="float", nullable=true)
      */
     private $bonusQuantity = 0;
 
@@ -250,7 +263,7 @@ class BusinessParticular
     /**
      * @var float
      *
-     * @ORM\Column(name="bonusAdjustment", type="float", nullable=true)
+     * @ORM\Column(type="float", nullable=true)
      */
     private $bonusAdjustment = 0;
 
@@ -258,7 +271,7 @@ class BusinessParticular
     /**
      * @var float
      *
-     * @ORM\Column(name="returnBonusQuantity", type="float", nullable=true)
+     * @ORM\Column(type="float", nullable=true)
      */
     private $returnBonusQuantity = 0;
 
@@ -266,7 +279,7 @@ class BusinessParticular
     /**
      * @var float
      *
-     * @ORM\Column(name="bonusPurchaseQuantity", type="float", nullable=true)
+     * @ORM\Column(type="float", nullable=true)
      */
     private $bonusPurchaseQuantity = 0;
 
@@ -274,7 +287,7 @@ class BusinessParticular
     /**
      * @var float
      *
-     * @ORM\Column(name="bonusSalesQuantity", type="float", nullable=true)
+     * @ORM\Column(type="float", nullable=true)
      */
     private $bonusSalesQuantity = 0;
 
@@ -282,7 +295,7 @@ class BusinessParticular
     /**
      * @var float
      *
-     * @ORM\Column(name="purchasePrice", type="float", nullable=true)
+     * @ORM\Column(type="float", nullable=true)
      */
     private $purchasePrice = 0;
 
@@ -290,7 +303,7 @@ class BusinessParticular
 	/**
      * @var float
      *
-     * @ORM\Column(name="avgPurchasePrice", type="float", nullable=true)
+     * @ORM\Column(type="float", nullable=true)
      */
     private $avgPurchasePrice = 0;
 
@@ -298,7 +311,7 @@ class BusinessParticular
 	/**
 	 * @var float
 	 *
-	 * @ORM\Column(name="productionSalesPrice", type="float", nullable=true)
+	 * @ORM\Column(type="float", nullable=true)
 	 */
 	private $productionSalesPrice;
 
@@ -322,7 +335,7 @@ class BusinessParticular
     /**
      * @var float
      *
-     * @ORM\Column(name="salesPrice", type="float", nullable=true)
+     * @ORM\Column(type="float", nullable=true)
      */
     private $salesPrice = 0;
 
@@ -336,21 +349,21 @@ class BusinessParticular
     /**
      * @var float
      *
-     * @ORM\Column(name="discountPrice", type="float", nullable=true)
+     * @ORM\Column(type="float", nullable=true)
      */
     private $discountPrice;
 
     /**
      * @var float
      *
-     * @ORM\Column(name="commission", type="float", nullable=true)
+     * @ORM\Column(type="float", nullable=true)
      */
     private $commission = 0;
 
     /**
      * @var float
      *
-     * @ORM\Column(name="minimumPrice", type="float", nullable=true)
+     * @ORM\Column( type="float", nullable=true)
      */
     private $minimumPrice = 0;
 
@@ -371,9 +384,33 @@ class BusinessParticular
     /**
      * @var string
      *
-     * @ORM\Column(name="particularCode", type="string", length=10, nullable=true)
+     * @ORM\Column(type="string", length=100, nullable=true)
      */
     private $particularCode;
+
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(type="string", length=100, nullable=true)
+     */
+    private $sku;
+
+
+     /**
+     * @var string
+     *
+     * @ORM\Column(type="string", length=100, nullable=true)
+     */
+    private $barcode;
+
+
+     /**
+     * @var string
+     *
+     * @ORM\Column(type="string", length=100, nullable=true)
+     */
+    private $modelNo;
 
 
     /**
@@ -389,21 +426,19 @@ class BusinessParticular
     protected $path;
 
 
-
+    /**
+     * @var \DateTime
+     * @Gedmo\Timestampable(on="create")
+     * @ORM\Column(name="created_at", type="datetime")
+     */
+    private $createdAt;
 
     /**
      * @var \DateTime
      * @Gedmo\Timestampable(on="create")
-     * @ORM\Column(name="created", type="datetime")
+     * @ORM\Column(name="updated_at", type="datetime")
      */
-    private $created;
-
-    /**
-     * @var \DateTime
-     * @Gedmo\Timestampable(on="update")
-     * @ORM\Column(name="updated", type="datetime")
-     */
-    private $updated;
+    private $updatedAt;
 
 
 
@@ -563,7 +598,7 @@ class BusinessParticular
     /**
      * Sets file.
      *
-     * @param BusinessParticular $file
+     * @param Product $file
      */
     public function setFile(UploadedFile $file = null)
     {
@@ -573,7 +608,7 @@ class BusinessParticular
     /**
      * Get file.
      *
-     * @return BusinessParticular
+     * @return Product
      */
     public function getFile()
     {
@@ -741,7 +776,7 @@ class BusinessParticular
      */
     public function getBusinessConfig()
     {
-        return $this->businessConfig;
+        return $this->config;
     }
 
     /**
@@ -749,7 +784,7 @@ class BusinessParticular
      */
     public function setBusinessConfig($businessConfig)
     {
-        $this->businessConfig = $businessConfig;
+        $this->businessConfig = $config;
     }
 
     /**
@@ -811,7 +846,7 @@ class BusinessParticular
     }
 
     /**
-     * @return BusinessParticularType
+     * @return ParticularType
      */
     public function getBusinessParticularType()
     {
@@ -819,7 +854,7 @@ class BusinessParticular
     }
 
     /**
-     * @param BusinessParticularType $businessParticularType
+     * @param ParticularType $businessParticularType
      */
     public function setBusinessParticularType($businessParticularType)
     {

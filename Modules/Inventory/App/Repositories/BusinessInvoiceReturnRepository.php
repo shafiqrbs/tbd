@@ -8,7 +8,7 @@ use Modules\Inventory\App\Entities\BusinessInvoiceReturn;
 use Modules\Inventory\App\Entities\BusinessInvoiceReturnItem;
 use Modules\Inventory\App\Entities\BusinessPurchase;
 use Modules\Inventory\App\Entities\BusinessPurchaseItem;
-use Modules\Inventory\App\Entities\BusinessParticular;
+use Modules\Inventory\App\Entities\Product;
 use Modules\Core\App\Entities\User;
 use Doctrine\ORM\EntityRepository;
 

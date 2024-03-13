@@ -24,7 +24,7 @@ class BusinessProduction
 
 
     /**
-     * @ORM\ManyToOne(targetEntity="Modules\Inventory\App\Entities\BusinessParticular", inversedBy="businessProductions" )
+     * @ORM\ManyToOne(targetEntity="Product", inversedBy="businessProductions" )
      * @ORM\JoinColumn(onDelete="CASCADE")
      **/
     private  $businessParticular;
@@ -219,14 +219,14 @@ class BusinessProduction
 	}
 
 	/**
-	 * @return BusinessParticular
+	 * @return Product
 	 */
 	public function getBusinessParticular() {
 		return $this->businessParticular;
 	}
 
 	/**
-	 * @param BusinessParticular $businessParticular
+	 * @param Product $businessParticular
 	 */
 	public function setBusinessParticular( $businessParticular ) {
 		$this->businessParticular = $businessParticular;

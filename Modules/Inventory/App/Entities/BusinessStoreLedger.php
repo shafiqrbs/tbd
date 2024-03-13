@@ -29,7 +29,7 @@ class BusinessStoreLedger
      * @ORM\ManyToOne(targetEntity="Modules\Inventory\App\Entities\Config", inversedBy="storeLedgers", cascade={"detach","merge"})
      * @ORM\JoinColumn(onDelete="CASCADE")
      **/
-    protected $businessConfig;
+    protected $config;
 
      /**
      * @ORM\ManyToOne(targetEntity="Modules\Inventory\App\Entities\BusinessInvoice",inversedBy="storeLedgers")
@@ -367,7 +367,7 @@ class BusinessStoreLedger
      */
     public function getBusinessConfig()
     {
-        return $this->businessConfig;
+        return $this->config;
     }
 
     /**
@@ -375,7 +375,7 @@ class BusinessStoreLedger
      */
     public function setBusinessConfig($businessConfig)
     {
-        $this->businessConfig = $businessConfig;
+        $this->businessConfig = $config;
     }
 
     /**

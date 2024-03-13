@@ -3,7 +3,7 @@
 namespace Modules\Inventory\App\Repositories;
 use Modules\Inventory\App\Entities\BusinessInvoice;
 use Modules\Inventory\App\Entities\BusinessInvoiceParticular;
-use Modules\Inventory\App\Entities\BusinessParticular;
+use Modules\Inventory\App\Entities\Product;
 use Modules\Inventory\App\Entities\BusinessProductionElement;
 use Doctrine\ORM\EntityRepository;
 

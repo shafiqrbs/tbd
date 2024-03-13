@@ -27,11 +27,11 @@ class BusinessDamage
      * @ORM\ManyToOne(targetEntity="Modules\Inventory\App\Entities\Config", inversedBy="businessDamages")
      * @ORM\JoinColumn(onDelete="CASCADE")
      **/
-    private $businessConfig;
+    private $config;
 
 
     /**
-     * @ORM\ManyToOne(targetEntity="Modules\Inventory\App\Entities\BusinessParticular", inversedBy="businessDamages", cascade={"persist"} )
+     * @ORM\ManyToOne(targetEntity="Product", inversedBy="businessDamages", cascade={"persist"} )
      * @ORM\JoinColumn(onDelete="CASCADE")
      **/
     private $businessParticular;
@@ -201,7 +201,7 @@ class BusinessDamage
      */
     public function getBusinessConfig()
     {
-        return $this->businessConfig;
+        return $this->config;
     }
 
     /**
@@ -209,7 +209,7 @@ class BusinessDamage
      */
     public function setBusinessConfig($businessConfig)
     {
-        $this->businessConfig = $businessConfig;
+        $this->businessConfig = $config;
     }
 
     /**
@@ -261,7 +261,7 @@ class BusinessDamage
     }
 
     /**
-     * @return BusinessParticular
+     * @return Product
      */
     public function getBusinessParticular()
     {
@@ -269,7 +269,7 @@ class BusinessDamage
     }
 
     /**
-     * @param BusinessParticular $businessParticular
+     * @param Product $businessParticular
      */
     public function setBusinessParticular($businessParticular)
     {

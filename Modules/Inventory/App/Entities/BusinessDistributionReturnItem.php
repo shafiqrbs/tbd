@@ -27,11 +27,11 @@ class BusinessDistributionReturnItem
     /**
      * @ORM\ManyToOne(targetEntity="Modules\Inventory\App\Entities\Config", inversedBy="businessPurchasesReturns" , cascade={"detach","merge"} )
      **/
-    private  $businessConfig;
+    private  $config;
 
 
     /**
-     * @ORM\ManyToOne(targetEntity="Modules\Inventory\App\Entities\BusinessParticular", inversedBy="businessDistributionReturnItem" )
+     * @ORM\ManyToOne(targetEntity="Product", inversedBy="businessDistributionReturnItem" )
      * @ORM\JoinColumn(onDelete="CASCADE")
      **/
     private  $businessParticular;
@@ -209,7 +209,7 @@ class BusinessDistributionReturnItem
     }
 
     /**
-     * @return BusinessParticular
+     * @return Product
      */
     public function getBusinessParticular()
     {
@@ -217,7 +217,7 @@ class BusinessDistributionReturnItem
     }
 
     /**
-     * @param BusinessParticular $businessParticular
+     * @param Product $businessParticular
      */
     public function setBusinessParticular($businessParticular)
     {
@@ -311,7 +311,7 @@ class BusinessDistributionReturnItem
      */
     public function getBusinessConfig()
     {
-        return $this->businessConfig;
+        return $this->config;
     }
 
     /**
@@ -319,7 +319,7 @@ class BusinessDistributionReturnItem
      */
     public function setBusinessConfig($businessConfig)
     {
-        $this->businessConfig = $businessConfig;
+        $this->businessConfig = $config;
     }
 
     /**

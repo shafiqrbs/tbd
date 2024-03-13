@@ -28,10 +28,10 @@ class BusinessStockHistory
     /**
      * @ORM\ManyToOne(targetEntity="Modules\Inventory\App\Entities\Config" , cascade={"detach","merge"} )
      **/
-    private  $businessConfig;
+    private  $config;
 
     /**
-     * @ORM\ManyToOne(targetEntity="Modules\Inventory\App\Entities\BusinessParticular", inversedBy="stockHistory" )
+     * @ORM\ManyToOne(targetEntity="Product", inversedBy="stockHistory" )
      * @ORM\JoinColumn(onDelete="CASCADE")
      * @ORM\OrderBy({"sorting" = "ASC"})
      **/
@@ -247,7 +247,7 @@ class BusinessStockHistory
      */
     public function getBusinessConfig()
     {
-        return $this->businessConfig;
+        return $this->config;
     }
 
     /**
@@ -255,7 +255,7 @@ class BusinessStockHistory
      */
     public function setBusinessConfig($businessConfig)
     {
-        $this->businessConfig = $businessConfig;
+        $this->businessConfig = $config;
     }
 
     /**
