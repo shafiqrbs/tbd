@@ -2,7 +2,7 @@
 
 namespace Modules\Inventory\App\Entities;
 
-use Modules\Inventory\App\Entities\BusinessParticular;
+use Modules\Inventory\App\Entities\Product;
 use Doctrine\ORM\Mapping as ORM;
 use Gedmo\Mapping\Annotation as Gedmo;
 use Modules\Utility\App\Entities\ProductUnit;
@@ -26,7 +26,7 @@ class BusinessPurchaseItem
     private $id;
 
     /**
-     * @ORM\ManyToOne(targetEntity="Modules\Inventory\App\Entities\BusinessParticular", inversedBy="businessPurchaseItems" )
+     * @ORM\ManyToOne(targetEntity="Product", inversedBy="businessPurchaseItems" )
      * @ORM\JoinColumn(onDelete="CASCADE")
      **/
     private  $businessParticular;
@@ -370,7 +370,7 @@ class BusinessPurchaseItem
     }
 
     /**
-     * @return BusinessParticular
+     * @return Product
      */
     public function getBusinessParticular()
     {
@@ -378,7 +378,7 @@ class BusinessPurchaseItem
     }
 
     /**
-     * @param BusinessParticular $businessParticular
+     * @param Product $businessParticular
      */
     public function setBusinessParticular($businessParticular)
     {

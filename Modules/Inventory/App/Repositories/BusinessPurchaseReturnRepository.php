@@ -5,7 +5,7 @@ use Modules\Inventory\App\Entities\Config;
 use Modules\Inventory\App\Entities\BusinessDistributionReturnItem;
 use Modules\Inventory\App\Entities\BusinessInvoice;
 use Modules\Inventory\App\Entities\BusinessInvoiceParticular;
-use Modules\Inventory\App\Entities\BusinessParticular;
+use Modules\Inventory\App\Entities\Product;
 use Modules\Inventory\App\Entities\BusinessPurchaseReturn;
 use Modules\Inventory\App\Entities\BusinessPurchaseReturnItem;
 use Modules\Core\App\Entities\User;
@@ -81,7 +81,7 @@ class BusinessPurchaseReturnRepository extends EntityRepository
         return  $qb;
     }
 
-    public function purchaseReturnStockUpdate(BusinessParticular $item)
+    public function purchaseReturnStockUpdate(Product $item)
     {
         $qb = $this->createQueryBuilder('e');
         $qb->select('SUM(e.quantity) AS quantity');
@@ -192,7 +192,7 @@ class BusinessPurchaseReturnRepository extends EntityRepository
             $quantity = floatval($data['quantity'][$key]);
             if($quantity > 0 ){
 
-                /* @var  $particular BusinessParticular */
+                /* @var  $particular Product */
                 $particular = $em->getRepository('BusinessBundle:BusinessParticular')->find($item);
                 $purchaseItem = new BusinessPurchaseReturnItem();
                 $purchaseItem->setBusinessPurchaseReturn($entity);

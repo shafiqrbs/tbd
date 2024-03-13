@@ -23,13 +23,13 @@ class BusinessProductionElement
     private $id;
 
     /**
-     * @ORM\ManyToOne(targetEntity="Modules\Inventory\App\Entities\BusinessParticular", inversedBy="productionElements" )
+     * @ORM\ManyToOne(targetEntity="Product", inversedBy="productionElements" )
      * @ORM\JoinColumn(onDelete="CASCADE")
      **/
     private  $businessParticular;
 
     /**
-     * @ORM\ManyToOne(targetEntity="Modules\Inventory\App\Entities\BusinessParticular", inversedBy="production" )
+     * @ORM\ManyToOne(targetEntity="Product", inversedBy="production" )
      * @ORM\JoinColumn(onDelete="CASCADE")
      **/
     private  $particular;
@@ -129,7 +129,7 @@ class BusinessProductionElement
     }
 
     /**
-     * @return BusinessParticular
+     * @return Product
      */
     public function getBusinessParticular()
     {
@@ -137,7 +137,7 @@ class BusinessProductionElement
     }
 
     /**
-     * @param BusinessParticular $businessParticular
+     * @param Product $businessParticular
      */
     public function setBusinessParticular($businessParticular)
     {
@@ -145,7 +145,7 @@ class BusinessProductionElement
     }
 
     /**
-     * @return BusinessParticular
+     * @return Product
      */
     public function getParticular()
     {
@@ -153,7 +153,7 @@ class BusinessProductionElement
     }
 
     /**
-     * @param BusinessParticular $particular
+     * @param Product $particular
      */
     public function setParticular($particular)
     {

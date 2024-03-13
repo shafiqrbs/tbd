@@ -1,7 +1,7 @@
 <?php
 
 namespace Modules\Inventory\App\Repositories;
-use Modules\Inventory\App\Entities\BusinessParticular;
+use Modules\Inventory\App\Entities\Product;
 use Modules\Inventory\App\Entities\BusinessStore;
 use Doctrine\ORM\EntityRepository;
 use Modules\Domain\App\Entities\GlobalOption;
@@ -61,7 +61,7 @@ class BusinessConfigRepository extends EntityRepository
 
         $items = $this->_em->getRepository('BusinessBundle:BusinessParticular')->findBy(array('businessConfig'=>$config));
 
-	    /* @var BusinessParticular $item */
+	    /* @var Product $item */
 
 	    foreach ($items as $item){
 

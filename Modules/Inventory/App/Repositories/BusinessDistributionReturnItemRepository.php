@@ -5,7 +5,7 @@ use Modules\Inventory\App\Entities\BusinessDistributionReturnItem;
 use Modules\Inventory\App\Entities\BusinessInvoice;
 use Modules\Inventory\App\Entities\BusinessInvoiceParticular;
 use Modules\Inventory\App\Entities\BusinessInvoiceReturnItem;
-use Modules\Inventory\App\Entities\BusinessParticular;
+use Modules\Inventory\App\Entities\Product;
 use Modules\Inventory\App\Entities\BusinessPurchaseReturn;
 use Modules\Inventory\App\Entities\BusinessPurchaseReturnItem;
 use Doctrine\ORM\EntityRepository;
@@ -104,7 +104,7 @@ class BusinessDistributionReturnItemRepository extends EntityRepository
 
     }
 
-    public function purchaseReturnStockUpdate(BusinessParticular $item)
+    public function purchaseReturnStockUpdate(Product $item)
     {
         $qb = $this->createQueryBuilder('e');
         $qb->select('SUM(e.quantity) AS quantity');

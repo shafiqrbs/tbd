@@ -4,7 +4,7 @@ namespace Modules\Inventory\App\Repositories;
 use Modules\Core\App\Entities\Vendor;
 use Modules\Inventory\App\Entities\BusinessInvoice;
 use Modules\Inventory\App\Entities\BusinessInvoiceParticular;
-use Modules\Inventory\App\Entities\BusinessParticular;
+use Modules\Inventory\App\Entities\Product;
 use Modules\Inventory\App\Entities\BusinessVendorStock;
 use Modules\Inventory\App\Entities\BusinessVendorStockItem;
 use Modules\Core\App\Entities\User;
@@ -117,7 +117,7 @@ class BusinessVendorStockItemRepository extends EntityRepository
 
     }
 
-    private function updateStockVendorStock(BusinessParticular $stock , $qnt ){
+    private function updateStockVendorStock(Product $stock , $qnt ){
 
         $em = $this->_em;
         $stock->setStockIn($qnt);

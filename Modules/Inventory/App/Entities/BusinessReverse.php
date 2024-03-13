@@ -26,7 +26,7 @@ class BusinessReverse
      * @ORM\ManyToOne(targetEntity="Modules\Inventory\App\Entities\Config", inversedBy="businessReverses")
      * @ORM\JoinColumn(onDelete="CASCADE")
      */
-    protected $businessConfig;
+    protected $config;
 
     /**
      * @ORM\OneToOne(targetEntity="Modules\Inventory\App\Entities\BusinessInvoice", inversedBy="businessReverse")
@@ -221,14 +221,14 @@ class BusinessReverse
 	 * @return Config
 	 */
 	public function getBusinessConfig() {
-		return $this->businessConfig;
+		return $this->config;
 	}
 
 	/**
 	 * @param Config $businessConfig
 	 */
 	public function setBusinessConfig( $businessConfig ) {
-		$this->businessConfig = $businessConfig;
+		$this->businessConfig = $config;
 	}
 
 	/**

@@ -5,7 +5,7 @@ use Modules\Inventory\App\Entities\Config;
 use Modules\Inventory\App\Entities\BusinessInvoice;
 use Modules\Inventory\App\Entities\BusinessInvoiceAccessories;
 use Modules\Inventory\App\Entities\BusinessInvoiceParticular;
-use Modules\Inventory\App\Entities\BusinessParticular;
+use Modules\Inventory\App\Entities\Product;
 use Modules\Core\App\Entities\User;
 use Doctrine\ORM\EntityRepository;
 use Modules\Domain\App\Entities\GlobalOption;

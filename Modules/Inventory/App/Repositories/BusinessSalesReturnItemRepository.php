@@ -4,7 +4,7 @@ namespace Modules\Inventory\App\Repositories;
 use Modules\Inventory\App\Entities\BusinessDistributionReturnItem;
 use Modules\Inventory\App\Entities\BusinessInvoice;
 use Modules\Inventory\App\Entities\BusinessInvoiceParticular;
-use Modules\Inventory\App\Entities\BusinessParticular;
+use Modules\Inventory\App\Entities\Product;
 use Modules\Inventory\App\Entities\BusinessPurchaseReturn;
 use Modules\Inventory\App\Entities\BusinessPurchaseReturnItem;
 use Doctrine\ORM\EntityRepository;

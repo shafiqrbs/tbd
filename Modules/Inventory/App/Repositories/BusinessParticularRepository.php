@@ -12,7 +12,7 @@ use Modules\Inventory\App\Entities\BusinessPurchaseItem;
 use Modules\Inventory\App\Entities\BusinessInvoice;
 use Modules\Inventory\App\Entities\BusinessInvoiceParticular;
 
-use Modules\Inventory\App\Entities\BusinessParticular;
+use Modules\Inventory\App\Entities\Product;
 use Modules\Inventory\App\Entities\BusinessPurchaseReturn;
 use Appstore\Bundle\RestaurantBundle\Entity\ProductionElement;
 use Modules\Core\App\Entities\User;
@@ -55,7 +55,7 @@ class BusinessParticularRepository extends EntityRepository
 
     }
 
-    public function updateSalesPrice(BusinessParticular $particular)
+    public function updateSalesPrice(Product $particular)
     {
 	    $price = $this->_em->getRepository('BusinessBundle:BusinessProductionElement')->getProductPurchaseSalesPrice($particular);
 	    $salesPrice =  empty($price['salesPrice']) ? 0 : $price['salesPrice'];
@@ -161,7 +161,7 @@ class BusinessParticularRepository extends EntityRepository
         return  $qb;
     }
 
-    public function getPurchaseDetails(Config $config, BusinessParticular $stock){
+    public function getPurchaseDetails(Config $config, Product $stock){
 
         $qb = $this->_em->createQueryBuilder();
         $qb->from('BusinessBundle:BusinessPurchaseItem','e');
@@ -176,7 +176,7 @@ class BusinessParticularRepository extends EntityRepository
 
     }
 
-    public function getPurchaseReturnDetails(Config $config, BusinessParticular $stock){
+    public function getPurchaseReturnDetails(Config $config, Product $stock){
 
         $qb = $this->_em->createQueryBuilder();
         $qb->from('BusinessBundle:BusinessPurchaseReturnItem','e');
@@ -191,7 +191,7 @@ class BusinessParticularRepository extends EntityRepository
 
     }
 
-    public function getSalesDetails(Config $config, BusinessParticular $stock){
+    public function getSalesDetails(Config $config, Product $stock){
 
         $qb = $this->_em->createQueryBuilder();
         $qb->from('BusinessBundle:BusinessInvoiceParticular','e');
@@ -206,7 +206,7 @@ class BusinessParticularRepository extends EntityRepository
 
     }
 
-    public function getSalesReturnDetails(Config $config, BusinessParticular $stock){
+    public function getSalesReturnDetails(Config $config, Product $stock){
 
         $qb = $this->_em->createQueryBuilder();
         $qb->from('BusinessBundle:BusinessInvoiceReturn','e');
@@ -219,7 +219,7 @@ class BusinessParticularRepository extends EntityRepository
 
     }
 
-    public function getDamageDetails(Config $config, BusinessParticular $stock){
+    public function getDamageDetails(Config $config, Product $stock){
 
         $qb = $this->_em->createQueryBuilder();
         $qb->from('BusinessBundle:BusinessDamage','e');
@@ -410,7 +410,7 @@ class BusinessParticularRepository extends EntityRepository
 
         foreach($purchase->getPurchaseItems() as $purchaseItem ){
 
-            /** @var BusinessParticular  $particular */
+            /** @var Product  $particular */
 
             $particular = $purchaseItem->getBusinessParticular();
             $qnt = ($particular->getPurchaseQuantity() + $purchaseItem->getQuantity());
@@ -460,7 +460,7 @@ class BusinessParticularRepository extends EntityRepository
 
     }
 
-    public function updateRemoveStockQuantity(BusinessParticular $stock,$fieldName=''){
+    public function updateRemoveStockQuantity(Product $stock, $fieldName=''){
 
         $em = $this->_em;
         if($fieldName == 'sales'){
@@ -587,7 +587,7 @@ class BusinessParticularRepository extends EntityRepository
 
 	}
 
-    public function stockAdjustment(BusinessParticular $stock){
+    public function stockAdjustment(Product $stock){
         $em = $this->_em;
         $adjustment = $em->getRepository('BusinessBundle:ItemStockAdjustment')->adjustmentStockItemUpdate($stock);
         $stock->setAdjustmentQuantity($adjustment['quantity']);
@@ -598,7 +598,7 @@ class BusinessParticularRepository extends EntityRepository
     }
 
 
-    public function updateSalesReturnQuantity(BusinessParticular $particular,$returnQuantity){
+    public function updateSalesReturnQuantity(Product $particular, $returnQuantity){
 
         $quantity = $returnQuantity['quantity'];
         $bonus = $returnQuantity['bonus'];
@@ -611,7 +611,7 @@ class BusinessParticularRepository extends EntityRepository
 
     }
 
-    public function remainingQnt(BusinessParticular $stock)
+    public function remainingQnt(Product $stock)
     {
         $em = $this->_em;
        // $em->getRepository('BusinessBundle:BusinessPurchaseItem')->getCurrentStock($stock);
@@ -694,7 +694,7 @@ class BusinessParticularRepository extends EntityRepository
 		$this->remainingQnt($particular);
     }
 
-    public function getSumTotalProductionItemQuantity(BusinessParticular $particular){
+    public function getSumTotalProductionItemQuantity(Product $particular){
 
 	    $qb = $this->_em->createQueryBuilder();
 	    $qb->from('BusinessBundle:BusinessProductionExpense','e');

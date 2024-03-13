@@ -7,7 +7,7 @@ use Modules\Inventory\App\Entities\BusinessInvoiceReturn;
 use Modules\Inventory\App\Entities\BusinessInvoiceReturnItem;
 use Modules\Inventory\App\Entities\BusinessPurchase;
 use Modules\Inventory\App\Entities\BusinessPurchaseItem;
-use Modules\Inventory\App\Entities\BusinessParticular;
+use Modules\Inventory\App\Entities\Product;
 use Modules\Inventory\App\Entities\BusinessPurchaseReturn;
 use Modules\Inventory\App\Entities\BusinessPurchaseReturnItem;
 use Modules\Inventory\App\Entities\WearHouse;
@@ -135,7 +135,7 @@ class BusinessInvoiceReturnItemRepository extends EntityRepository
         }
     }
 
-    public function returnSalesReturnQuantity(BusinessParticular $particular,$modes)
+    public function returnSalesReturnQuantity(Product $particular, $modes)
     {
         $qb = $this->createQueryBuilder('e');
         $qb->join('e.invoiceReturn','ir');

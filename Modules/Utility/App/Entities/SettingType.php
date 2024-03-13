@@ -1,17 +1,17 @@
 <?php
 
-namespace Modules\Inventory\App\Entities;
+namespace Modules\Utility\App\Entities;
 
 use Doctrine\ORM\Mapping as ORM;
 use Gedmo\Mapping\Annotation as Gedmo;
 
 /**
- * BusinessParticular
+ * SettingType
  *
- * @ORM\Table( name = "inv_particular_type")
- * @ORM\Entity(repositoryClass="")
+ * @ORM\Table( name = "uti_setting_types")
+ * @ORM\Entity()
  */
-class BusinessParticularType
+class SettingType
 {
     /**
      * @var integer
@@ -22,10 +22,6 @@ class BusinessParticularType
      */
     private $id;
 
-    /**
-     * @ORM\OneToMany(targetEntity="Modules\Inventory\App\Entities\BusinessParticular", mappedBy="businessParticularType" )
-     **/
-    private $businessParticulars;
 
     /**
      * @var string
@@ -40,6 +36,20 @@ class BusinessParticularType
      * @ORM\Column(length=255, unique=true)
      */
     private $slug;
+
+    /**
+     * @var \DateTime
+     * @Gedmo\Timestampable(on="create")
+     * @ORM\Column(name="created_at", type="datetime")
+     */
+    private $createdAt;
+
+    /**
+     * @var \DateTime
+     * @Gedmo\Timestampable(on="create")
+     * @ORM\Column(name="updated_at", type="datetime")
+     */
+    private $updatedAt;
 
     /**
      * @var boolean
@@ -111,12 +121,39 @@ class BusinessParticularType
     }
 
     /**
-     * @return BusinessParticular
+     * @return \DateTime
      */
-    public function getBusinessParticulars()
+    public function getCreatedAt()
     {
-        return $this->businessParticulars;
+        return $this->createdAt;
     }
+
+    /**
+     * @param \DateTime $createdAt
+     */
+    public function setCreatedAt($createdAt)
+    {
+        $this->createdAt = $createdAt;
+    }
+
+    /**
+     * @return \DateTime
+     */
+    public function getUpdatedAt()
+    {
+        return $this->updatedAt;
+    }
+
+    /**
+     * @param \DateTime $updatedAt
+     */
+    public function setUpdatedAt($updatedAt)
+    {
+        $this->updatedAt = $updatedAt;
+    }
+
+
+
 
 
 }

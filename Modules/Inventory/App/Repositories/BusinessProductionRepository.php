@@ -1,7 +1,7 @@
 <?php
 
 namespace Modules\Inventory\App\Repositories;
-use Modules\Inventory\App\Entities\BusinessParticular;
+use Modules\Inventory\App\Entities\Product;
 use Modules\Inventory\App\Entities\BusinessProduction;
 use Modules\Inventory\App\Entities\BusinessProductionElement;
 use Modules\Inventory\App\Entities\BusinessProductionExpense;
@@ -59,7 +59,7 @@ class BusinessProductionRepository extends EntityRepository
     }
 
 
-    public function particularProductionElements(BusinessParticular $particular)
+    public function particularProductionElements(Product $particular)
     {
         $entities = $particular->getProductionElements();
         $data = '';
@@ -109,7 +109,7 @@ class BusinessProductionRepository extends EntityRepository
     }
 
 
-	public function productionExpense(BusinessProduction $production,BusinessParticular  $item)
+	public function productionExpense(BusinessProduction $production, Product  $item)
 	{
 
 		if(!empty($item->getProductionElements())){

@@ -38,7 +38,7 @@ class BusinessInvoiceParticular
     private  $androidProcess;
 
     /**
-     * @ORM\ManyToOne(targetEntity="Modules\Inventory\App\Entities\BusinessParticular", inversedBy="businessInvoiceParticulars", cascade={"persist"} )
+     * @ORM\ManyToOne(targetEntity="Product", inversedBy="businessInvoiceParticulars", cascade={"persist"} )
      * @ORM\JoinColumn(onDelete="CASCADE")
      **/
     private $businessParticular;
@@ -237,7 +237,7 @@ class BusinessInvoiceParticular
 
 
     /**
-     * @return BusinessParticular
+     * @return Product
      */
     public function getBusinessParticular()
     {
@@ -245,7 +245,7 @@ class BusinessInvoiceParticular
     }
 
     /**
-     * @param BusinessParticular $businessParticular
+     * @param Product $businessParticular
      */
     public function setBusinessParticular($businessParticular)
     {

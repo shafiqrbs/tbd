@@ -26,11 +26,11 @@ class WearHouse
      * @ORM\ManyToOne(targetEntity="Modules\Inventory\App\Entities\Config", inversedBy="wearHouses" , cascade={"detach","merge"} )
      * @ORM\JoinColumn(onDelete="CASCADE")
      **/
-    private  $businessConfig;
+    private  $config;
 
 
     /**
-     * @ORM\OneToMany(targetEntity="Modules\Inventory\App\Entities\BusinessParticular", mappedBy="wearHouse")
+     * @ORM\OneToMany(targetEntity="Product", mappedBy="wearHouse")
      * @ORM\OrderBy({"sorting" = "ASC"})
      **/
     private $businessParticulars;
@@ -185,7 +185,7 @@ class WearHouse
      */
     public function getBusinessConfig()
     {
-        return $this->businessConfig;
+        return $this->config;
     }
 
     /**
@@ -193,11 +193,11 @@ class WearHouse
      */
     public function setBusinessConfig($businessConfig)
     {
-        $this->businessConfig = $businessConfig;
+        $this->businessConfig = $config;
     }
 
     /**
-     * @return BusinessParticular
+     * @return Product
      */
     public function getBusinessParticulars()
     {

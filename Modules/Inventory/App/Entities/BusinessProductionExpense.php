@@ -35,13 +35,13 @@ class BusinessProductionExpense
     private  $businessProduction;
 
     /**
-     * @ORM\ManyToOne(targetEntity="Modules\Inventory\App\Entities\BusinessParticular", inversedBy="businessProductionExpense" )
+     * @ORM\ManyToOne(targetEntity="Product", inversedBy="businessProductionExpense" )
      * @ORM\JoinColumn(onDelete="CASCADE")
      **/
     private  $productionItem;
 
     /**
-     * @ORM\ManyToOne(targetEntity="Modules\Inventory\App\Entities\BusinessParticular", inversedBy="businessProductionExpenseItem" )
+     * @ORM\ManyToOne(targetEntity="Product", inversedBy="businessProductionExpenseItem" )
      * @ORM\JoinColumn(onDelete="CASCADE")
      **/
     private  $productionElement;
@@ -157,7 +157,7 @@ class BusinessProductionExpense
     }
 
     /**
-     * @return BusinessParticular
+     * @return Product
      */
     public function getProductionItem()
     {
@@ -165,7 +165,7 @@ class BusinessProductionExpense
     }
 
     /**
-     * @param BusinessParticular $productionItem
+     * @param Product $productionItem
      */
     public function setProductionItem($productionItem)
     {
@@ -173,7 +173,7 @@ class BusinessProductionExpense
     }
 
     /**
-     * @return BusinessParticular
+     * @return Product
      */
     public function getProductionElement()
     {
@@ -181,7 +181,7 @@ class BusinessProductionExpense
     }
 
     /**
-     * @param BusinessParticular $productionElement
+     * @param Product $productionElement
      */
     public function setProductionElement($productionElement)
     {
