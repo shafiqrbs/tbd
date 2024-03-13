@@ -3,10 +3,12 @@
 namespace Modules\Inventory\App\Entities;
 
 use Doctrine\ORM\Mapping as ORM;
+use Gedmo\Mapping\Annotation as Gedmo;
+
 
 /**
  * RestaurantCategory
- *
+ * @Gedmo\Tree(type="materializedPath")
  * @ORM\Table( name ="inv_category")
  * @ORM\Entity(repositoryClass="Modules\Inventory\App\Repositories\CategoryRepository")
  */
@@ -34,6 +36,17 @@ class Category
      * @ORM\OrderBy({"sorting" = "ASC"})
      **/
     private $businessParticulars;
+
+
+    /**
+     * @Gedmo\TreeParent
+     * @ORM\ManyToOne(targetEntity="Modules\Inventory\App\Entities\Category", inversedBy="children")
+     * @ORM\JoinColumns({
+     *   @ORM\JoinColumn(name="parent", referencedColumnName="id", onDelete="SET NULL", nullable=true)
+     * })
+     */
+    private $parent;
+
 
 
     /**
@@ -67,7 +80,7 @@ class Category
     /**
      * @var boolean
      *
-     * @ORM\Column(name="hasQuantity", type="boolean" )
+     * @ORM\Column(type="boolean",nullable=true )
      */
     private $hasQuantity = false;
 
@@ -77,6 +90,21 @@ class Category
      * @ORM\Column(name="status", type="boolean" )
      */
     private $status= true;
+
+    /**
+     * @var \DateTime
+     * @Gedmo\Timestampable(on="create")
+     * @ORM\Column(name="created_at", type="datetime")
+     */
+    private $createdAt;
+
+    /**
+     * @var \DateTime
+     * @Gedmo\Timestampable(on="create")
+     * @ORM\Column(name="updated_at", type="datetime")
+     */
+    private $updatedAt;
+
 
     /**
      * Get id
@@ -187,14 +215,6 @@ class Category
         $this->slug = $slug;
     }
 
-    /**
-     * @return Particular
-     */
-    public function getParticulars()
-    {
-        return $this->particulars;
-    }
-
 
     /**
      * @return Config
@@ -219,6 +239,55 @@ class Category
     {
         return $this->businessParticulars;
     }
+
+    /**
+     * @return mixed
+     */
+    public function getParent()
+    {
+        return $this->parent;
+    }
+
+    /**
+     * @param mixed $parent
+     */
+    public function setParent($parent)
+    {
+        $this->parent = $parent;
+    }
+
+    /**
+     * @return \DateTime
+     */
+    public function getCreatedAt()
+    {
+        return $this->createdAt;
+    }
+
+    /**
+     * @param \DateTime $createdAt
+     */
+    public function setCreatedAt($createdAt)
+    {
+        $this->createdAt = $createdAt;
+    }
+
+    /**
+     * @return \DateTime
+     */
+    public function getUpdatedAt()
+    {
+        return $this->updatedAt;
+    }
+
+    /**
+     * @param \DateTime $updatedAt
+     */
+    public function setUpdatedAt($updatedAt)
+    {
+        $this->updatedAt = $updatedAt;
+    }
+
 
 
 }
