@@ -21,6 +21,7 @@ use Modules\Inventory\App\Http\Controllers\ConfigController;
 
 Route::prefix('/inventory/select')->middleware([HeaderAuthenticationMiddleware::class])->group(function() {
     Route::get('/business-model', [BusinessModelController::class,'businessModelDropdown'])->name('business_model_dropdown');
+    Route::get('/category-group', [CategoryGroupController::class,'categoryGroupDropdown'])->name('category_group_dropdown');
 });
 
 Route::prefix('/inventory')->middleware([HeaderAuthenticationMiddleware::class])->group(function() {

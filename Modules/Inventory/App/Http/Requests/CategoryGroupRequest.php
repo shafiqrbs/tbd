@@ -25,6 +25,7 @@ class CategoryGroupRequest extends FormRequest
                 return [
                     'name' => 'required|string',
                     'status' => 'required|boolean',
+                    'parent' => 'integer|nullable',
                 ];
             }
 
@@ -34,6 +35,7 @@ class CategoryGroupRequest extends FormRequest
                 return [
                     'name' => 'required|string',
                     'status' => 'required|boolean',
+                    'parent' => 'integer|nullable',
                 ];
             }
             default:break;

@@ -10,6 +10,8 @@ use Modules\AppsApi\App\Services\JsonRequestResponse;
 use Modules\Core\App\Http\Requests\VendorRequest;
 use Modules\Core\App\Models\UserModel;
 use Modules\Core\App\Models\VendorModel;
+use Modules\Inventory\App\Http\Requests\CategoryGroupRequest;
+use Modules\Inventory\App\Models\CategoryModel;
 
 class CategoryGroupController extends Controller
 {
@@ -25,7 +27,7 @@ class CategoryGroupController extends Controller
     }
     public function index(Request $request){
 
-        $data = VendorModel::getRecords($request,$this->domain);
+        $data = CategoryModel::getRecords($request,$this->domain);
         $response = new Response();
         $response->headers->set('Content-Type','application/json');
         $response->setContent(json_encode([
@@ -42,20 +44,15 @@ class CategoryGroupController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(VendorRequest $request, GeneratePatternCodeService $patternCodeService)
+    public function store(CategoryGroupRequest $request, GeneratePatternCodeService $patternCodeService)
     {
-        var_dump($request->all());
-        /*$service = new JsonRequestResponse();
+        $service = new JsonRequestResponse();
         $input = $request->validated();
-        $domain = 65;
-        $input['global_option_id'] = $domain;
-        $params = ['domain' => $domain,'table' => 'cor_vendors','prefix' => ''];
-        $pattern = $patternCodeService->customerCode($params);
-        $input['code'] = $pattern['code'];
-        $input['vendor_code'] = $pattern['generateId'];
-        $entity = VendorModel::create($input);
+        $input['config_id'] = $this->domain['config_id'];
+
+        $entity = CategoryModel::create($input);
         $data = $service->returnJosnResponse($entity);
-        return $data;*/
+        return $data;
     }
 
     /**
@@ -64,7 +61,7 @@ class CategoryGroupController extends Controller
     public function show($id)
     {
         $service = new JsonRequestResponse();
-        $entity = VendorModel::find($id);
+        $entity = CategoryModel::find($id);
 
         if (!$entity){
             $entity = 'Data not found';
@@ -81,7 +78,7 @@ class CategoryGroupController extends Controller
     public function details($id)
     {
         $service = new JsonRequestResponse();
-        $entity = VendorModel::find($id);
+        $entity = CategoryModel::find($id);
 
         if (!$entity){
             $entity = 'Data not found';
@@ -110,10 +107,11 @@ class CategoryGroupController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(VendorRequest $request, $id)
+    public function update(CategoryGroupRequest $request, $id)
     {
         $data = $request->validated();
-        $entity = VendorModel::find($id);
+//        var_dump($data);
+        $entity = CategoryModel::find($id);
         $entity->update($data);
 
         $service = new JsonRequestResponse();
@@ -131,6 +129,17 @@ class CategoryGroupController extends Controller
         $entity = ['message'=>'delete'];
         return $service->returnJosnResponse($entity);
 
+    }
+
+    /**
+     * dropdown the specified resource from storage.
+     */
+    public function categoryGroupDropdown(Request $request)
+    {
+        $type = $request->get('type');
+        $dropdown = CategoryModel::getCategoryDropdown($type);
+        $service = new JsonRequestResponse();
+        return $service->returnJosnResponse($dropdown);
     }
 
 
