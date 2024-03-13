@@ -82,6 +82,22 @@ class CustomerController extends Controller
     }
 
     /**
+     * Show the specified resource.
+     */
+    public function details($id)
+    {
+        $service = new JsonRequestResponse();
+        $entity = CustomerModel::find($id);
+
+        if (!$entity){
+            $entity = 'Data not found';
+        }
+
+        $data = $service->returnJosnResponse($entity);
+        return $data;
+    }
+
+    /**
      * Show the form for editing the specified resource.
      */
     public function edit($id)

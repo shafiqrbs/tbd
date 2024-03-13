@@ -73,6 +73,23 @@ class VendorController extends Controller
         return $data;
     }
 
+
+    /**
+     * Show the specified resource.
+     */
+    public function details($id)
+    {
+        $service = new JsonRequestResponse();
+        $entity = VendorModel::find($id);
+
+        if (!$entity){
+            $entity = 'Data not found';
+        }
+
+        $data = $service->returnJosnResponse($entity);
+        return $data;
+    }
+
     /**
      * Show the form for editing the specified resource.
      */
