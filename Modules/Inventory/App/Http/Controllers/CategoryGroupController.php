@@ -7,7 +7,6 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Modules\AppsApi\App\Services\GeneratePatternCodeService;
 use Modules\AppsApi\App\Services\JsonRequestResponse;
-use Modules\Core\App\Http\Requests\VendorRequest;
 use Modules\Core\App\Models\UserModel;
 use Modules\Core\App\Models\VendorModel;
 use Modules\Inventory\App\Http\Requests\CategoryGroupRequest;
@@ -40,7 +39,6 @@ class CategoryGroupController extends Controller
         return $response;
     }
 
-
     /**
      * Store a newly created resource in storage.
      */
@@ -70,7 +68,6 @@ class CategoryGroupController extends Controller
         $data = $service->returnJosnResponse($entity);
         return $data;
     }
-
 
     /**
      * Show the specified resource.
@@ -110,7 +107,6 @@ class CategoryGroupController extends Controller
     public function update(CategoryGroupRequest $request, $id)
     {
         $data = $request->validated();
-//        var_dump($data);
         $entity = CategoryModel::find($id);
         $entity->update($data);
 
@@ -123,12 +119,26 @@ class CategoryGroupController extends Controller
      */
     public function destroy($id)
     {
-        $service = new JsonRequestResponse();
-        VendorModel::find($id)->delete();
+        $isParent = CategoryModel::getCategoryIsParent($id);
+        $isDeletable = true;
+        if ($isParent){
+            $isDeletable = CategoryModel::getCategoryIsDeletable($id);
+        }
+        if ($isDeletable){
+            CategoryModel::find($id)->delete();
+            $message = 'delete';
+        }else{
+            $message = 'exists';
+        }
 
-        $entity = ['message'=>'delete'];
-        return $service->returnJosnResponse($entity);
-
+        $response = new Response();
+        $response->headers->set('Content-Type','application/json');
+        $response->setContent(json_encode([
+            'message' => $message,
+            'status' => Response::HTTP_OK,
+        ]));
+        $response->setStatusCode(Response::HTTP_OK);
+        return $response;
     }
 
     /**

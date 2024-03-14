@@ -2,7 +2,6 @@
 
 namespace Modules\Inventory\App\Models;
 
-
 use Cviebrock\EloquentSluggable\Sluggable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -10,8 +9,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 class CategoryModel extends Model
 {
     use HasFactory,Sluggable;
-
-
+    
     protected $table = 'inv_category';
     public $timestamps = true;
     protected $guarded = ['id'];
@@ -110,5 +108,25 @@ class CategoryModel extends Model
 
         $data = array('count'=>$total,'entities'=>$entities);
         return $data;
+    }
+
+    public static function getCategoryIsParent($id)
+    {
+        $data = self::find($id);
+        if (!$data->parent){
+            return true;
+        }else{
+            return false;
+        }
+    }
+
+    public static function getCategoryIsDeletable($id)
+    {
+        $data = self::where('parent',$id)->get();
+        if (sizeof($data)>0){
+            return false;
+        }else{
+            return true;
+        }
     }
 }
