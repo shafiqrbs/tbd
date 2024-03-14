@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 class CategoryModel extends Model
 {
     use HasFactory,Sluggable;
-    
+
     protected $table = 'inv_category';
     public $timestamps = true;
     protected $guarded = ['id'];
@@ -49,21 +49,17 @@ class CategoryModel extends Model
         });
     }
 
-    public static function getCategoryDropdown($type='parent')
+    public static function getCategoryDropdown($type='parent',$domain)
     {
-        $data = self::select([
-            'name',
-            'slug',
-            'id'
-        ])->where('status',1);
-        if ($type === 'parent'){
-            $data = $data->whereNull('parent');
+        $query = self::select(['name', 'slug', 'id'])
+            ->where([['status', 1],['config_id', $domain['config_id']]]);
+
+        if ($type === 'parent') {
+            $query->whereNull('parent');
+        } else if ($type === 'category') {
+            $query->whereNotNull('parent');
         }
-        if ($type === 'category'){
-            $data = $data->whereNotNull('parent');
-        }
-        $data = $data->get();
-        return $data;
+        return $query->get();
     }
 
 
