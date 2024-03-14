@@ -18,6 +18,8 @@ class UserModel extends Model
         'email',
         'password',
         'IsDelete',
+        'global_option_id',
+        'email_verified_at',
     ];
 
     public static function getRecords($request,$domain){
@@ -70,16 +72,12 @@ class UserModel extends Model
             $date =  new \DateTime("now");
 //            $model->unique_id = self::quickRandom();
             $model->created_at = $date;
-            $model->updated_at = $date;
-//            $model->created = $date;
-//            $model->updated = $date;
         });
 
         self::updating(function ($model) {
             $date =  new \DateTime("now");
 //            $model->unique_id = self::quickRandom();
             $model->updated_at = $date;
-//            $model->updated = $date;
         });
 
     }

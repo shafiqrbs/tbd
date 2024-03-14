@@ -51,16 +51,14 @@ class UserController extends Controller
     {
         $data = $request->validated();
 
-        $domain = 65;
-        $data['global_option_id'] = $domain;
+        $data['global_option_id'] = $this->domain['global_id'];
         $data['email_verified_at']= now();
         $data['password']= Hash::make($data['password']);
         $data['isDelete']= 0;
 
         $user = UserModel::create($data);
         $service = new JsonRequestResponse();
-        $data = $service->returnJosnResponse($user);
-        return $data;
+        return $service->returnJosnResponse($user);
     }
 
     /**

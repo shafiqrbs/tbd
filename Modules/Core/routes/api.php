@@ -33,10 +33,10 @@ Route::prefix('/core/select')->middleware([HeaderAuthenticationMiddleware::class
 Route::prefix('/core')->middleware([HeaderAuthenticationMiddleware::class])->group(function() {
     Route::get('/customer/details', [CustomerController::class,'details'])->name('customer_details');
     Route::get('/vendor/details', [VendorController::class,'details'])->name('vendor_details');
-});
 
-Route::apiResource('user', UserController::class)->middleware([HeaderAuthenticationMiddleware::class]);
-Route::apiResource('location', LocationController::class)->middleware([HeaderAuthenticationMiddleware::class]);
-Route::apiResource('customer', CustomerController::class)->middleware([HeaderAuthenticationMiddleware::class]);
-Route::apiResource('vendor', VendorController::class)->middleware([HeaderAuthenticationMiddleware::class]);
+    Route::apiResource('user', UserController::class)->middleware([HeaderAuthenticationMiddleware::class]);
+    Route::apiResource('location', LocationController::class)->middleware([HeaderAuthenticationMiddleware::class]);
+    Route::apiResource('customer', CustomerController::class)->middleware([HeaderAuthenticationMiddleware::class]);
+    Route::apiResource('vendor', VendorController::class)->middleware([HeaderAuthenticationMiddleware::class]);
+});
 

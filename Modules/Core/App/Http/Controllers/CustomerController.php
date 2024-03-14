@@ -50,11 +50,10 @@ class CustomerController extends Controller
         $service = new JsonRequestResponse();
         $input = $request->validated();
 
-        $domain = 65;
-        $input['global_option_id'] = $domain;
-        $input['customer_unique_id'] = "{$domain}@{$input['mobile']}-{$input['name']}";
+        $input['global_option_id'] = $this->domain['global_id'];
+        $input['customer_unique_id'] = "{$this->domain['global_id']}@{$input['mobile']}-{$input['name']}";
 
-        $params = ['domain' => $domain,'table' => 'cor_customers','prefix' => 'EMP-'];
+        $params = ['domain' => $this->domain['global_id'],'table' => 'cor_customers','prefix' => 'EMP-'];
         $pattern = $patternCodeService->customerCode($params);
 
         $input['code'] = $pattern['code'];
