@@ -141,16 +141,6 @@ class CategoryGroupController extends Controller
         return $response;
     }
 
-    /**
-     * dropdown the specified resource from storage.
-     */
-    public function categoryGroupDropdown(Request $request)
-    {
-        $type = $request->get('type');
-        $dropdown = CategoryModel::getCategoryDropdown($type,$this->domain);
-        $service = new JsonRequestResponse();
-        return $service->returnJosnResponse($dropdown);
-    }
 
 
 }

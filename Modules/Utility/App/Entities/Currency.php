@@ -9,7 +9,7 @@ use Doctrine\ORM\Mapping as ORM;
 /**
  * Icon
  *
- * @ORM\Table(name="uti_currency")
+ * @ORM\Table(name="uti_currencies")
  * @ORM\Entity()
  */
 class Currency

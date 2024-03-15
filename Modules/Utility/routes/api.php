@@ -1,7 +1,11 @@
 <?php
 
+use App\Http\Middleware\HeaderAuthenticationMiddleware;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use Modules\Utility\App\Http\Controllers\UtilityController;
+use Modules\Utility\App\Models\ProductUnitModel;
+use Modules\Utility\App\Models\SettingModel;
 
 /*
     |--------------------------------------------------------------------------
@@ -14,6 +18,10 @@ use Illuminate\Support\Facades\Route;
     |
 */
 
-Route::middleware(['auth:sanctum'])->prefix('v1')->name('api.')->group(function () {
-    Route::get('utility', fn (Request $request) => $request->user())->name('utility');
+
+
+
+Route::prefix('/utility/select')->middleware([HeaderAuthenticationMiddleware::class])->group(function() {
+    Route::get('/setting', [UtilityController::class,'settingDropdown'])->name('utility_setting_dropdown');
+    Route::get('/product-unit', [UtilityController::class,'productUnitDropdown'])->name('utility_product_unit');
 });

@@ -24,7 +24,7 @@ class Setting
 
 
     /**
-     * @ORM\ManyToOne(targetEntity="Modules\Domain\App\Entities\SettingType")
+     * @ORM\ManyToOne(targetEntity="Modules\Utility\App\Entities\SettingType")
      **/
 
     private $setting_type;

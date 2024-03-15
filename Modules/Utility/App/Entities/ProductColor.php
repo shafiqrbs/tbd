@@ -1,6 +1,6 @@
 <?php
 
-namespace Setting\Bundle\ToolBundle\Entity;
+namespace Modules\Utility\App\Entities;
 
 use Doctrine\ORM\Mapping as ORM;
 use Gedmo\Mapping\Annotation as Gedmo;
@@ -9,7 +9,7 @@ use Gedmo\Mapping\Annotation as Gedmo;
  * ItemColor
  *
  * @ORM\Table("uti_color")
- * @ORM\Entity(repositoryClass="Setting\Bundle\ToolBundle\Repository\ProductColorRepository")
+ * @ORM\Entity()
  */
 class ProductColor
 {

@@ -113,6 +113,16 @@ class Product
      **/
     private  $unit;
 
+    /**
+     * @ORM\ManyToOne(targetEntity="Modules\Utility\App\Entities\ProductSize")
+     **/
+    private  $size;
+
+    /**
+     * @ORM\ManyToOne(targetEntity="Modules\Utility\App\Entities\ProductColor")
+     **/
+    private  $color;
+
 
     /**
      * @var string
@@ -131,6 +141,15 @@ class Product
 
 
     /**
+     * @var string
+     *
+     * @ORM\Column(type="string", length=255, nullable=true)
+     */
+    private $alternativeName;
+
+
+
+    /**
      * @Gedmo\Slug(fields={"name"})
      * @Doctrine\ORM\Mapping\Column(length=255,unique=false)
      */
@@ -145,11 +164,10 @@ class Product
     private $productionType;
 
 
-
     /**
      * @var float
      *
-     * @ORM\Column(name="quantity", type="float", nullable=true)
+     * @ORM\Column(type="float", nullable=true)
      */
     private $quantity = 0;
 
@@ -327,7 +345,7 @@ class Product
     /**
      * @var string
      *
-     * @ORM\Column(name="content", type="text", nullable=true)
+     * @ORM\Column( type="text", nullable=true)
      */
     private $content;
 
@@ -342,7 +360,7 @@ class Product
     /**
      * @var float
      *
-     * @ORM\Column(name="price", type="float", nullable=true)
+     * @ORM\Column(type="float", nullable=true)
      */
     private $price;
 
@@ -370,14 +388,14 @@ class Product
     /**
      * @var string
      *
-     * @ORM\Column(name="sorting", type="string", length=5, nullable=true)
+     * @ORM\Column(type="string", length=5, nullable=true)
      */
     private $sorting;
 
     /**
      * @var integer
      *
-     * @ORM\Column(name="code", type="integer",  nullable=true)
+     * @ORM\Column(type="integer",  nullable=true)
      */
     private $code;
 
@@ -416,7 +434,7 @@ class Product
     /**
      * @var boolean
      *
-     * @ORM\Column(name="status", type="boolean" )
+     * @ORM\Column(type="boolean" )
      */
     private $status= true;
 
@@ -429,14 +447,14 @@ class Product
     /**
      * @var \DateTime
      * @Gedmo\Timestampable(on="create")
-     * @ORM\Column(name="created_at", type="datetime")
+     * @ORM\Column(type="datetime",nullable=true)
      */
     private $createdAt;
 
     /**
      * @var \DateTime
      * @Gedmo\Timestampable(on="create")
-     * @ORM\Column(name="updated_at", type="datetime")
+     * @ORM\Column(type="datetime",nullable=true)
      */
     private $updatedAt;
 
@@ -1333,6 +1351,182 @@ class Product
     public function setPath($path)
     {
         $this->path = $path;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getConfig()
+    {
+        return $this->config;
+    }
+
+    /**
+     * @param mixed $config
+     */
+    public function setConfig($config)
+    {
+        $this->config = $config;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getRackNo()
+    {
+        return $this->rackNo;
+    }
+
+    /**
+     * @param mixed $rackNo
+     */
+    public function setRackNo($rackNo)
+    {
+        $this->rackNo = $rackNo;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getSize()
+    {
+        return $this->size;
+    }
+
+    /**
+     * @param mixed $size
+     */
+    public function setSize($size)
+    {
+        $this->size = $size;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getColor()
+    {
+        return $this->color;
+    }
+
+    /**
+     * @param mixed $color
+     */
+    public function setColor($color)
+    {
+        $this->color = $color;
+    }
+
+    /**
+     * @return string
+     */
+    public function getAlternativeName()
+    {
+        return $this->alternativeName;
+    }
+
+    /**
+     * @param string $alternativeName
+     */
+    public function setAlternativeName($alternativeName)
+    {
+        $this->alternativeName = $alternativeName;
+    }
+
+    /**
+     * @return int
+     */
+    public function getReorderQuantity()
+    {
+        return $this->reorderQuantity;
+    }
+
+    /**
+     * @param int $reorderQuantity
+     */
+    public function setReorderQuantity($reorderQuantity)
+    {
+        $this->reorderQuantity = $reorderQuantity;
+    }
+
+    /**
+     * @return string
+     */
+    public function getSku()
+    {
+        return $this->sku;
+    }
+
+    /**
+     * @param string $sku
+     */
+    public function setSku($sku)
+    {
+        $this->sku = $sku;
+    }
+
+    /**
+     * @return string
+     */
+    public function getBarcode()
+    {
+        return $this->barcode;
+    }
+
+    /**
+     * @param string $barcode
+     */
+    public function setBarcode($barcode)
+    {
+        $this->barcode = $barcode;
+    }
+
+    /**
+     * @return string
+     */
+    public function getModelNo()
+    {
+        return $this->modelNo;
+    }
+
+    /**
+     * @param string $modelNo
+     */
+    public function setModelNo($modelNo)
+    {
+        $this->modelNo = $modelNo;
+    }
+
+    /**
+     * @return \DateTime
+     */
+    public function getCreatedAt()
+    {
+        return $this->createdAt;
+    }
+
+    /**
+     * @param \DateTime $createdAt
+     */
+    public function setCreatedAt($createdAt)
+    {
+        $this->createdAt = $createdAt;
+    }
+
+    /**
+     * @return \DateTime
+     */
+    public function getUpdatedAt()
+    {
+        return $this->updatedAt;
+    }
+
+    /**
+     * @param \DateTime $updatedAt
+     */
+    public function setUpdatedAt($updatedAt)
+    {
+        $this->updatedAt = $updatedAt;
     }
 
 }

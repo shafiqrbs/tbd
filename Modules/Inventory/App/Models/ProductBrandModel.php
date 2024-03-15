@@ -6,7 +6,7 @@ use Cviebrock\EloquentSluggable\Sluggable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
-class CategoryModel extends Model
+class ProductBrandModel extends Model
 {
     use HasFactory,Sluggable;
 
@@ -18,7 +18,6 @@ class CategoryModel extends Model
         'name',
         'slug',
         'status',
-        'parent'
     ];
 
     /**
@@ -49,22 +48,13 @@ class CategoryModel extends Model
         });
     }
 
-    public static function getCategoryGroupDropdown($domain)
+    public static function getEntityDropdown($domain)
     {
         $query = self::select(['name', 'slug', 'id'])
             ->where([['status', 1],['config_id', $domain['config_id']]]);
         $query->whereNull('parent');
         return $query->get();
     }
-
-    public static function getCategoryDropdown($domain)
-    {
-        $query = self::select(['name', 'slug', 'id'])
-            ->where([['status', 1],['config_id', $domain['config_id']]]);
-        $query->whereNotNull('parent');
-        return $query->get();
-    }
-
 
     public static function getRecords($request,$domain)
     {
@@ -109,15 +99,6 @@ class CategoryModel extends Model
         return $data;
     }
 
-    public static function getCategoryIsParent($id)
-    {
-        $data = self::find($id);
-        if (!$data->parent){
-            return true;
-        }else{
-            return false;
-        }
-    }
 
     public static function getCategoryIsDeletable($id)
     {

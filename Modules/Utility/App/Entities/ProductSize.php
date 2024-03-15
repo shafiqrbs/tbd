@@ -9,7 +9,7 @@ use Gedmo\Mapping\Annotation as Gedmo;
  * ProductSize
  *
  * @ORM\Table("uti_size")
- * @ORM\Entity(repositoryClass="")
+ * @ORM\Entity()
  */
 class ProductSize
 {

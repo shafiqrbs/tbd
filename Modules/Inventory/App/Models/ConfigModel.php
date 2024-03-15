@@ -5,8 +5,8 @@ namespace Modules\Inventory\App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Modules\Domain\App\Models\CurrencyModel;
-use Modules\Domain\App\Models\SettingModel;
+use Modules\Utility\App\Models\SettingModel;
+
 
 class ConfigModel extends Model
 {

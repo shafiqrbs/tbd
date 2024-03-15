@@ -31,13 +31,13 @@ class Config
     private $globalOption;
 
     /**
-     * @ORM\ManyToOne(targetEntity="Modules\Domain\App\Entities\Setting")
+     * @ORM\ManyToOne(targetEntity="Modules\Utility\App\Entities\Setting")
      **/
     private $businessModel;
 
 
      /**
-     * @ORM\ManyToOne(targetEntity="Modules\Domain\App\Entities\Currency")
+     * @ORM\ManyToOne(targetEntity="Modules\Utility\App\Entities\Currency")
      **/
     private $currency;
 

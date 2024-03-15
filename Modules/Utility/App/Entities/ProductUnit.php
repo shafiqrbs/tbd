@@ -10,8 +10,8 @@ use Gedmo\Mapping\Annotation as Gedmo;
 /**
  * ProductUnit
  *
- * @ORM\Table(name="uti_unit")
- * @ORM\Entity(repositoryClass="")
+ * @ORM\Table(name="uti_product_unit")
+ * @ORM\Entity()
  */
 
 class ProductUnit

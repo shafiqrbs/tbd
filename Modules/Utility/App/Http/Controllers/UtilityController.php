@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Modules\Utility\App\Models\ProductUnitModel;
+use Modules\Utility\App\Models\SettingModel;
 
 class UtilityController extends Controller
 {
@@ -18,50 +20,41 @@ class UtilityController extends Controller
     }
 
     /**
-     * Show the form for creating a new resource.
+     * Show the form for editing the specified resource.
      */
-    public function create()
+    public function settingDropdown(Request $request)
     {
-        return view('utility::create');
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request): RedirectResponse
-    {
-        //
-    }
-
-    /**
-     * Show the specified resource.
-     */
-    public function show($id)
-    {
-        return view('utility::show');
+        $mode = $request->get('dropdown-type');
+        $entities = SettingModel::getEntityDropdown($mode);
+        $response = new Response();
+        $response->headers->set('Content-Type','application/json');
+        $response->setContent(json_encode([
+            'message' => 'success',
+            'status' => Response::HTTP_OK,
+            'data' => $entities
+        ]));
+        $response->setStatusCode(Response::HTTP_OK);
+        return $response;
     }
 
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit($id)
+    public function productUnitDropdown(Request $request)
     {
-        return view('utility::edit');
+
+        $entities = ProductUnitModel::getEntityDropdown();
+        $response = new Response();
+        $response->headers->set('Content-Type','application/json');
+        $response->setContent(json_encode([
+            'message' => 'success',
+            'status' => Response::HTTP_OK,
+            'data' => $entities
+        ]));
+        $response->setStatusCode(Response::HTTP_OK);
+        return $response;
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, $id): RedirectResponse
-    {
-        //
-    }
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy($id)
-    {
-        //
-    }
+
 }

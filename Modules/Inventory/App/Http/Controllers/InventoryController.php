@@ -8,10 +8,27 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Modules\AppsApi\App\Services\JsonRequestResponse;
-use Modules\Core\App\Entities\Core;
+use Modules\Core\App\Models\UserModel;
+use Modules\Inventory\App\Models\CategoryModel;
+use Modules\Inventory\App\Models\ProductBrandModel;
+use Modules\Utility\App\Models\SettingModel;
+
 
 class InventoryController extends Controller
 {
+
+    protected $domain;
+
+    public function __construct(Request $request)
+    {
+        $userId = $request->header('X-Api-User');
+        if ($userId && !empty($userId)){
+            $userData = UserModel::getUserData($userId);
+            $this->domain = $userData;
+        }
+    }
+
+
     /**
      * Display a listing of the resource.
      */
@@ -21,84 +38,53 @@ class InventoryController extends Controller
     }
 
     /**
-     * Show the form for creating a new resource.
+     * Show the form for editing the specified resource.
      */
-    public function user(Request $request,EntityManagerInterface $em)
+    public function settingDropdown(Request $request)
     {
-
-        $term = $request['term'];
-        $entities = [];
-        $service = new JsonRequestResponse();
-        if ($term) {
-            $go = 64;
-            $entities = $em->getRepository(Core::class)->userAutoComplete($go,$term);
-        }
-        $data = $service->returnJosnResponse($entities);
-        return $data;
+        $mode = $request->get('dropdown-type');
+        $entities = SettingModel::getSettingDropdown($mode);
+        $response = new Response();
+        $response->headers->set('Content-Type','application/json');
+        $response->setContent(json_encode([
+            'message' => 'success',
+            'status' => Response::HTTP_OK,
+            'data' => $entities
+        ]));
+        $response->setStatusCode(Response::HTTP_OK);
+        return $response;
     }
 
     /**
-     * Show the form for creating a new resource.
+     * dropdown the specified resource from storage.
      */
-    public function executive(Request $request,EntityManagerInterface $em)
+    public function brandDropdown(Request $request)
     {
-
-        $term = $request['term'];
-        $entities = [];
+        $dropdown = ProductBrandModel::getEntityDropdown($this->domain);
         $service = new JsonRequestResponse();
-        $go = 64;
-        $entities = $em->getRepository(Core::class)->userAutoComplete( $go,$term);
-        $data = $service->returnJosnResponse($entities);
-        return $data;
+        return $service->returnJosnResponse($dropdown);
     }
 
     /**
-     * Show the form for creating a new resource.
+     * dropdown the specified resource from storage.
      */
-    public function customer(Request $request,EntityManagerInterface $em)
+    public function categoryGroupDropdown(Request $request)
     {
-
-        $term = $request['term'];
-        $entities = [];
+        $dropdown = CategoryModel::getCategoryGroupDropdown($this->domain);
         $service = new JsonRequestResponse();
-        if ($term) {
-            // $go = $this->getUser()->getGlobalOption();
-            $go = 64;
-            $entities = $em->getRepository(Core::class)->customerAutoComplete($go,$term);
-        }
-        $data = $service->returnJosnResponse($entities);
-        return $data;
+        return $service->returnJosnResponse($dropdown);
     }
 
     /**
-     * Show the form for creating a new resource.
+     * dropdown the specified resource from storage.
      */
-    public function vendor(Request $request,EntityManagerInterface $em)
+    public function categoryDropdown(Request $request)
     {
-
-        $term = $request['term'];
-        $entities = [];
+        $dropdown = CategoryModel::getCategoryDropdown($this->domain);
         $service = new JsonRequestResponse();
-        if ($term) {
-            // $go = $this->getUser()->getGlobalOption();
-            $go = 65;
-            $entities = $em->getRepository(Core::class)->vendorAutoComplete($go,$term);
-        }
-        $data = $service->returnJosnResponse($entities);
-        return $data;
+        return $service->returnJosnResponse($dropdown);
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function location(Request $request,EntityManagerInterface $em)
-    {
 
-        $term = $request['term'];
-        $entities = [];
-        $service = new JsonRequestResponse();
-        $entities = $em->getRepository(Core::class)->locationAutoComplete($term);
-        $data = $service->returnJosnResponse($entities);
-        return $data;
-    }
+
 }
