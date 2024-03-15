@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Modules\AppsApi\App\Services\JsonRequestResponse;
+use Modules\Inventory\App\Models\ProductBrandModel;
 use Modules\Utility\App\Models\ProductUnitModel;
 use Modules\Utility\App\Models\SettingModel;
 
@@ -25,16 +27,10 @@ class UtilityController extends Controller
     public function settingDropdown(Request $request)
     {
         $mode = $request->get('dropdown-type');
-        $entities = SettingModel::getEntityDropdown($mode);
-        $response = new Response();
-        $response->headers->set('Content-Type','application/json');
-        $response->setContent(json_encode([
-            'message' => 'success',
-            'status' => Response::HTTP_OK,
-            'data' => $entities
-        ]));
-        $response->setStatusCode(Response::HTTP_OK);
-        return $response;
+        $dropdown = SettingModel::getEntityDropdown($mode);
+        $service = new JsonRequestResponse();
+        return $service->returnJosnResponse($dropdown);
+
     }
 
     /**
@@ -43,16 +39,9 @@ class UtilityController extends Controller
     public function productUnitDropdown(Request $request)
     {
 
-        $entities = ProductUnitModel::getEntityDropdown();
-        $response = new Response();
-        $response->headers->set('Content-Type','application/json');
-        $response->setContent(json_encode([
-            'message' => 'success',
-            'status' => Response::HTTP_OK,
-            'data' => $entities
-        ]));
-        $response->setStatusCode(Response::HTTP_OK);
-        return $response;
+        $dropdown = ProductUnitModel::getEntityDropdown();
+        $service = new JsonRequestResponse();
+        return $service->returnJosnResponse($dropdown);
     }
 
 

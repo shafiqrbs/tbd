@@ -35,7 +35,7 @@ class StockItem
     private $category;
 
      /**
-     * @ORM\ManyToOne(targetEntity="Modules\Inventory\App\Entities\BusinessBrand")
+     * @ORM\ManyToOne(targetEntity="Brand")
      * @ORM\OrderBy({"sorting" = "ASC"})
      **/
     private $brand;

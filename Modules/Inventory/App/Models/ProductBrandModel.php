@@ -10,7 +10,7 @@ class ProductBrandModel extends Model
 {
     use HasFactory,Sluggable;
 
-    protected $table = 'inv_category';
+    protected $table = 'inv_brand';
     public $timestamps = true;
     protected $guarded = ['id'];
     protected $fillable = [
@@ -52,7 +52,6 @@ class ProductBrandModel extends Model
     {
         $query = self::select(['name', 'slug', 'id'])
             ->where([['status', 1],['config_id', $domain['config_id']]]);
-        $query->whereNull('parent');
         return $query->get();
     }
 
@@ -62,13 +61,12 @@ class ProductBrandModel extends Model
         $perPage = isset($request['offset']) && $request['offset']!=''? (int)($request['offset']):0;
         $skip = isset($page) && $page!=''? (int)$page * $perPage:0;
 
-        $categories = self::where('inv_category.config_id',$domain['config_id'])
-            ->leftjoin('inv_category as p','p.id','=','inv_category.parent')
+        $categories = self::where('config_id',$domain['config_id'])
             ->select([
-                'inv_category.id',
-                'inv_category.name',
-                'inv_category.slug',
-                'inv_category.parent as parent_id',
+                'id',
+                'name',
+                'slug',
+                'parent as parent_id',
             ]);
 
         if (isset($request['type']) && $request['type'] === 'category'){
@@ -78,21 +76,21 @@ class ProductBrandModel extends Model
         }
 
         if (isset($request['term']) && !empty($request['term'])){
-            $categories = $categories->whereAny(['inv_category.name','inv_category.slug'],'LIKE','%'.$request['term'].'%');
+            $categories = $categories->whereAny(['name','slug'],'LIKE','%'.$request['term'].'%');
         }
 
         if (isset($request['type']) && $request['type'] === 'category'){
-            $categories = $categories->whereNotNull('inv_category.parent');
+            $categories = $categories->whereNotNull('parent');
         }
         if (isset($request['type']) && $request['type'] === 'parent' ){
-            $categories = $categories->whereNull('inv_category.parent');
+            $categories = $categories->whereNull('parent');
         }
 
 
         $total  = $categories->count();
         $entities = $categories->skip($skip)
             ->take($perPage)
-            ->orderBy('inv_category.id','DESC')
+            ->orderBy('id','DESC')
             ->get();
 
         $data = array('count'=>$total,'entities'=>$entities);

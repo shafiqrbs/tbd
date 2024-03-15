@@ -43,16 +43,9 @@ class InventoryController extends Controller
     public function settingDropdown(Request $request)
     {
         $mode = $request->get('dropdown-type');
-        $entities = SettingModel::getSettingDropdown($mode);
-        $response = new Response();
-        $response->headers->set('Content-Type','application/json');
-        $response->setContent(json_encode([
-            'message' => 'success',
-            'status' => Response::HTTP_OK,
-            'data' => $entities
-        ]));
-        $response->setStatusCode(Response::HTTP_OK);
-        return $response;
+        $dropdown = SettingModel::getSettingDropdown($mode);
+        $service = new JsonRequestResponse();
+        return $service->returnJosnResponse($dropdown);
     }
 
     /**
