@@ -13,9 +13,23 @@ class ProductModel extends Model
     protected $table = 'inv_product';
     public $timestamps = true;
     protected $guarded = ['id'];
+
     protected $fillable = [
+        'product_type_id',
         'category_id',
-        'unit_id'
+        'unit_id',
+        'brand_id',
+        'name',
+        'alternative_name',
+        'sku',
+        'barcode',
+        'opening_quantity',
+        'sales_price',
+        'purchase_price',
+        'min_quantity',
+        'reorder_quantity',
+        'status',
+        'config_id',
     /*name
     quantity
     content
@@ -97,22 +111,6 @@ class ProductModel extends Model
         });
     }
 
-    public static function getCategoryGroupDropdown($domain)
-    {
-        $query = self::select(['name', 'slug', 'id'])
-            ->where([['status', 1],['config_id', $domain['config_id']]]);
-        $query->whereNull('parent');
-        return $query->get();
-    }
-
-    public static function getCategoryDropdown($domain)
-    {
-        $query = self::select(['name', 'slug', 'id'])
-            ->where([['status', 1],['config_id', $domain['config_id']]]);
-        $query->whereNotNull('parent');
-        return $query->get();
-    }
-
 
     public static function getRecords($request,$domain)
     {
@@ -120,60 +118,87 @@ class ProductModel extends Model
         $perPage = isset($request['offset']) && $request['offset']!=''? (int)($request['offset']):0;
         $skip = isset($page) && $page!=''? (int)$page * $perPage:0;
 
-        $categories = self::where('inv_category.config_id',$domain['config_id'])
-            ->leftjoin('inv_category as p','p.id','=','inv_category.parent')
+        $products = self::where([['inv_product.config_id',$domain['config_id']]])
+            ->leftjoin('inv_category','inv_category.id','=','inv_product.category_id')
+            ->leftjoin('uti_product_unit','uti_product_unit.id','=','inv_product.unit_id')
+            ->leftjoin('inv_brand','inv_brand.id','=','inv_product.brand_id')
+            ->leftjoin('uti_settings','uti_settings.id','=','inv_product.product_type_id')
             ->select([
-                'inv_category.id',
-                'inv_category.name',
-                'inv_category.slug',
-                'inv_category.parent as parent_id',
+                'inv_product.id',
+                'inv_product.name as product_name',
+                'inv_product.slug',
+                'inv_category.name as category_name',
+                'uti_product_unit.name as unit_name',
+                'inv_brand.name as brand_name',
+                'inv_product.opening_quantity',
+                'inv_product.min_quantity',
+                'inv_product.reorder_quantity',
+                'inv_product.purchase_price',
+                'inv_product.sales_price',
+                'inv_product.barcode',
+                'inv_product.alternative_name',
+                'uti_settings.name as product_type',
             ]);
-
-        if (isset($request['type']) && $request['type'] === 'category'){
-            $categories = $categories->addSelect([
-                'p.name as parent_name'
-            ]);
-        }
 
         if (isset($request['term']) && !empty($request['term'])){
-            $categories = $categories->whereAny(['inv_category.name','inv_category.slug'],'LIKE','%'.$request['term'].'%');
+            $products = $products->whereAny(['inv_product.name','inv_product.slug','inv_category.name','uti_product_unit.name','inv_brand.name','inv_product.sales_price','uti_settings.name'],'LIKE','%'.$request['term'].'%');
         }
 
-        if (isset($request['type']) && $request['type'] === 'category'){
-            $categories = $categories->whereNotNull('inv_category.parent');
-        }
-        if (isset($request['type']) && $request['type'] === 'parent' ){
-            $categories = $categories->whereNull('inv_category.parent');
+        if (isset($request['name']) && !empty($request['name'])){
+            $products = $products->where('inv_product.name',$request['name']);
         }
 
+        if (isset($request['alternative_name']) && !empty($request['alternative_name'])){
+            $products = $products->where('inv_product.alternative_name',$request['alternative_name']);
+        }
+        if (isset($request['sku']) && !empty($request['sku'])){
+            $products = $products->where('inv_product.sku',$request['sku']);
+        }
+        if (isset($request['sales_price']) && !empty($request['sales_price'])){
+            $products = $products->where('inv_product.sales_price',$request['sales_price']);
+        }
 
-        $total  = $categories->count();
-        $entities = $categories->skip($skip)
+        $total  = $products->count();
+        $entities = $products->skip($skip)
             ->take($perPage)
-            ->orderBy('inv_category.id','DESC')
+            ->orderBy('inv_product.id','DESC')
             ->get();
 
         $data = array('count'=>$total,'entities'=>$entities);
         return $data;
     }
 
-    public static function getCategoryIsParent($id)
-    {
-        $data = self::find($id);
-        if (!$data->parent){
-            return true;
-        }else{
-            return false;
-        }
-    }
 
-    public static function getCategoryIsDeletable($id)
+    public static function getProductDetails($id,$domain)
     {
-        $data = self::where('parent',$id)->get();
-        if (sizeof($data)>0){
-            return false;
-        }else{
-            return true;
-        }
+        $product = self::where([['inv_product.config_id',$domain['config_id']],['inv_product.id',$id]])
+            ->leftjoin('inv_category','inv_category.id','=','inv_product.category_id')
+            ->leftjoin('uti_product_unit','uti_product_unit.id','=','inv_product.unit_id')
+            ->leftjoin('inv_brand','inv_brand.id','=','inv_product.brand_id')
+            ->leftjoin('uti_settings','uti_settings.id','=','inv_product.product_type_id')
+            ->select([
+                'inv_product.id',
+                'inv_product.name as product_name',
+                'inv_product.slug',
+                'inv_product.category_id',
+                'inv_category.name as category_name',
+                'inv_product.unit_id',
+                'uti_product_unit.name as unit_name',
+                'inv_product.brand_id',
+                'inv_brand.name as brand_name',
+                'inv_product.opening_quantity',
+                'inv_product.min_quantity',
+                'inv_product.reorder_quantity',
+                'inv_product.purchase_price',
+                'inv_product.sales_price',
+                'inv_product.barcode',
+                'inv_product.alternative_name',
+                'inv_product.product_type_id',
+                'uti_settings.name as product_type',
+                'inv_product.sku',
+                'inv_product.status'
+            ])->first();
+
+        return $product;
     }
 }

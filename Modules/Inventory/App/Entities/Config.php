@@ -11,7 +11,7 @@ use Gedmo\Mapping\Annotation as Gedmo;
  * BusinessConfig
  *
  * @ORM\Table( name ="inv_config")
- * @ORM\Entity(repositoryClass="Modules\Inventory\App\Repositories\BusinessConfigRepository")
+ * @ORM\Entity()
  */
 class Config
 {

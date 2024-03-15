@@ -28,6 +28,12 @@ class Product
      **/
     private  $config;
 
+
+    /**
+     * @ORM\ManyToOne(targetEntity="Modules\Utility\App\Entities\Setting")
+     **/
+    private  $productType;
+
     /**
      * @ORM\ManyToOne(targetEntity="Modules\Inventory\App\Entities\Category", inversedBy="businessParticulars" )
      * @ORM\OrderBy({"sorting" = "ASC"})
@@ -123,13 +129,6 @@ class Product
      **/
     private  $color;
 
-
-    /**
-     * @var string
-     *
-     * @ORM\Column(type="string", length=20, nullable=true)
-     */
-    private $productType;
 
 
     /**
@@ -803,22 +802,6 @@ class Product
     public function setBusinessConfig($businessConfig)
     {
         $this->businessConfig = $config;
-    }
-
-    /**
-     * @return string
-     */
-    public function getProductType()
-    {
-        return $this->productType;
-    }
-
-    /**
-     * @param string $productType
-     */
-    public function setProductType($productType)
-    {
-        $this->productType = $productType;
     }
 
 

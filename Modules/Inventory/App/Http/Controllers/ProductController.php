@@ -5,12 +5,10 @@ namespace Modules\Inventory\App\Http\Controllers;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
-use Modules\AppsApi\App\Services\GeneratePatternCodeService;
 use Modules\AppsApi\App\Services\JsonRequestResponse;
 use Modules\Core\App\Models\UserModel;
-use Modules\Core\App\Models\VendorModel;
-use Modules\Inventory\App\Http\Requests\CategoryGroupRequest;
-use Modules\Inventory\App\Models\CategoryModel;
+use Modules\Inventory\App\Http\Requests\ProductRequest;
+use Modules\Inventory\App\Models\ProductModel;
 
 class ProductController extends Controller
 {
@@ -19,16 +17,18 @@ class ProductController extends Controller
     public function __construct(Request $request)
     {
         $userId = $request->header('X-Api-User');
-        if ($userId && !empty($userId)){
+        if ($userId && !empty($userId)) {
             $userData = UserModel::getUserData($userId);
             $this->domain = $userData;
         }
     }
-    public function index(Request $request){
 
-        $data = CategoryModel::getRecords($request,$this->domain);
+    public function index(Request $request)
+    {
+
+        $data = ProductModel::getRecords($request, $this->domain);
         $response = new Response();
-        $response->headers->set('Content-Type','application/json');
+        $response->headers->set('Content-Type', 'application/json');
         $response->setContent(json_encode([
             'message' => 'success',
             'status' => Response::HTTP_OK,
@@ -42,13 +42,13 @@ class ProductController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(CategoryGroupRequest $request, GeneratePatternCodeService $patternCodeService)
+    public function store(ProductRequest $request)
     {
         $service = new JsonRequestResponse();
         $input = $request->validated();
         $input['config_id'] = $this->domain['config_id'];
 
-        $entity = CategoryModel::create($input);
+        $entity = ProductModel::create($input);
         $data = $service->returnJosnResponse($entity);
         return $data;
     }
@@ -59,41 +59,9 @@ class ProductController extends Controller
     public function show($id)
     {
         $service = new JsonRequestResponse();
-        $entity = CategoryModel::find($id);
+        $entity = ProductModel::getProductDetails($id, $this->domain);
 
-        if (!$entity){
-            $entity = 'Data not found';
-        }
-
-        $data = $service->returnJosnResponse($entity);
-        return $data;
-    }
-
-    /**
-     * Show the specified resource.
-     */
-    public function details($id)
-    {
-        $service = new JsonRequestResponse();
-        $entity = CategoryModel::find($id);
-
-        if (!$entity){
-            $entity = 'Data not found';
-        }
-
-        $data = $service->returnJosnResponse($entity);
-        return $data;
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit($id)
-    {
-        $service = new JsonRequestResponse();
-        $entity = VendorModel::find($id);
-
-        if (!$entity){
+        if (!$entity) {
             $entity = 'Data not found';
         }
 
@@ -104,10 +72,10 @@ class ProductController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(CategoryGroupRequest $request, $id)
+    public function update(ProductRequest $request, $id)
     {
         $data = $request->validated();
-        $entity = CategoryModel::find($id);
+        $entity = ProductModel::find($id);
         $entity->update($data);
 
         $service = new JsonRequestResponse();
@@ -119,28 +87,11 @@ class ProductController extends Controller
      */
     public function destroy($id)
     {
-        $isParent = CategoryModel::getCategoryIsParent($id);
-        $isDeletable = true;
-        if ($isParent){
-            $isDeletable = CategoryModel::getCategoryIsDeletable($id);
-        }
-        if ($isDeletable){
-            CategoryModel::find($id)->delete();
-            $message = 'delete';
-        }else{
-            $message = 'exists';
-        }
+        $service = new JsonRequestResponse();
+        ProductModel::find($id)->delete();
 
-        $response = new Response();
-        $response->headers->set('Content-Type','application/json');
-        $response->setContent(json_encode([
-            'message' => $message,
-            'status' => Response::HTTP_OK,
-        ]));
-        $response->setStatusCode(Response::HTTP_OK);
-        return $response;
+        $entity = ['message' => 'delete'];
+        return $service->returnJosnResponse($entity);
     }
-
-
 
 }
