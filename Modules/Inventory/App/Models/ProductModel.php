@@ -201,4 +201,34 @@ class ProductModel extends Model
 
         return $product;
     }
+
+
+    public static function getProductsForSales($domain)
+    {
+        $products = self::where([['inv_product.config_id',$domain['config_id']]])
+            ->leftjoin('inv_category','inv_category.id','=','inv_product.category_id')
+            ->leftjoin('uti_product_unit','uti_product_unit.id','=','inv_product.unit_id')
+            ->leftjoin('inv_brand','inv_brand.id','=','inv_product.brand_id')
+            ->leftjoin('uti_settings','uti_settings.id','=','inv_product.product_type_id')
+            ->select([
+                'inv_product.id',
+                'inv_product.name as product_name',
+                'inv_product.slug',
+                'inv_category.name as category_name',
+                'uti_product_unit.name as unit_name',
+                'inv_brand.name as brand_name',
+                'inv_product.opening_quantity',
+                'inv_product.min_quantity',
+                'inv_product.reorder_quantity',
+                'inv_product.purchase_price',
+                'inv_product.sales_price',
+                'inv_product.barcode',
+                'inv_product.alternative_name',
+                'uti_settings.name as product_type',
+            ]);
+
+        $products = $products->orderBy('inv_product.id','DESC')->get();
+
+        return $products;
+    }
 }
