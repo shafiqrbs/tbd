@@ -226,6 +226,7 @@ class ProductModel extends Model
                 'inv_product.barcode',
                 'inv_product.alternative_name',
                 'uti_settings.name as product_type',
+                \DB::raw("CONCAT(inv_product.name, ' [', inv_product.remaining_quantity, '] ', uti_product_unit.name) AS product_lavel"),
             ]);
 
         $products = $products->orderBy('inv_product.id','DESC')->get();
