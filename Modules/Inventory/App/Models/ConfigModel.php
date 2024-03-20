@@ -5,6 +5,9 @@ namespace Modules\Inventory\App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Modules\Utility\App\Models\CurrencyModel;
 use Modules\Utility\App\Models\SettingModel;
 
 
@@ -78,17 +81,18 @@ class ConfigModel extends Model
         'show_stock',
         'is_powered',
         'remove_image',
+        'currency_id'
 
     ];
 
-    public function business_model(): BelongsTo
+    public function businessModel(): BelongsTo
     {
-        return $this->belongsTo(SettingModel::class);
+        return $this->belongsTo(SettingModel::class,'business_model_id','id');
     }
 
     public function currency(): BelongsTo
     {
-        return $this->belongsTo(CurrencyModel::class);
+        return $this->BelongsTo(CurrencyModel::class,'currency_id','id');
     }
 
 }

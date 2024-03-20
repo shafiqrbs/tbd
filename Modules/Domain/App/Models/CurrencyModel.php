@@ -11,7 +11,7 @@ class CurrencyModel extends Model
 {
     use HasFactory;
 
-    protected $table = 'dom_currencys';
+    protected $table = 'uti_currencies';
     public $timestamps = true;
     protected $guarded = ['id'];
     protected $fillable = [

@@ -205,8 +205,8 @@ class ProductModel extends Model
 
     public static function getProductsForSales($domain)
     {
-        $products = self::where([['inv_product.config_id',$domain['config_id']]])
-            ->leftjoin('inv_category','inv_category.id','=','inv_product.category_id')
+        $products = self::
+            leftjoin('inv_category','inv_category.id','=','inv_product.category_id')
             ->leftjoin('uti_product_unit','uti_product_unit.id','=','inv_product.unit_id')
             ->leftjoin('inv_brand','inv_brand.id','=','inv_product.brand_id')
             ->leftjoin('uti_settings','uti_settings.id','=','inv_product.product_type_id')
@@ -217,9 +217,10 @@ class ProductModel extends Model
                 'inv_category.name as category_name',
                 'uti_product_unit.name as unit_name',
                 'inv_brand.name as brand_name',
-                'inv_product.opening_quantity',
-                'inv_product.min_quantity',
-                'inv_product.reorder_quantity',
+//                'inv_product.opening_quantity',
+//                'inv_product.min_quantity',
+                'inv_product.remaining_quantity as quantity',
+//                'inv_product.reorder_quantity',
                 'inv_product.purchase_price',
                 'inv_product.sales_price',
                 'inv_product.barcode',
