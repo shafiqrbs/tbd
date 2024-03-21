@@ -203,7 +203,7 @@ class ProductModel extends Model
     }
 
 
-    public static function getProductsForSales($domain)
+    public static function getStockItem($domain)
     {
         $products = self::
             leftjoin('inv_category','inv_category.id','=','inv_product.category_id')
@@ -212,21 +212,18 @@ class ProductModel extends Model
             ->leftjoin('uti_settings','uti_settings.id','=','inv_product.product_type_id')
             ->select([
                 'inv_product.id',
-                'inv_product.name as product_name',
+                'inv_product.name as display_name',
+                \DB::raw("CONCAT(inv_product.name, ' [',inv_product.remaining_quantity,'] ', uti_product_unit.name) AS product_name"),
                 'inv_product.slug',
                 'inv_category.name as category_name',
                 'uti_product_unit.name as unit_name',
                 'inv_brand.name as brand_name',
-//                'inv_product.opening_quantity',
-//                'inv_product.min_quantity',
+                'inv_product.min_quantity',
                 'inv_product.remaining_quantity as quantity',
-//                'inv_product.reorder_quantity',
                 'inv_product.purchase_price',
                 'inv_product.sales_price',
                 'inv_product.barcode',
                 'inv_product.alternative_name',
-                'uti_settings.name as product_type',
-                \DB::raw("CONCAT(inv_product.name, ' [', inv_product.remaining_quantity, '] ', uti_product_unit.name) AS product_lavel"),
             ]);
 
         $products = $products->orderBy('inv_product.id','DESC')->get();

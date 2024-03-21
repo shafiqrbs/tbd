@@ -93,11 +93,11 @@ class ProductController extends Controller
         return $service->returnJosnResponse($entity);
     }
 
-    public function productForSales()
+    public function stockItem()
     {
         $service = new JsonRequestResponse();
-        $data = ProductModel::getProductsForSales($this->domain);
-        
+        $data = ProductModel::getStockItem($this->domain);
+
         return $service->returnJosnResponse($data);
     }
 
