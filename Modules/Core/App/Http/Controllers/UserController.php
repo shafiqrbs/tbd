@@ -54,7 +54,7 @@ class UserController extends Controller
         $data['global_option_id'] = $this->domain['global_id'];
         $data['email_verified_at']= now();
         $data['password']= Hash::make($data['password']);
-        $data['isDelete']= 0;
+        $data['is_delete']= 0;
 
         $user = UserModel::create($data);
         $service = new JsonRequestResponse();

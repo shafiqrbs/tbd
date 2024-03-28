@@ -17,7 +17,7 @@ class UserModel extends Model
         'mobile',
         'email',
         'password',
-        'IsDelete',
+        'is_delete',
         'global_option_id',
         'email_verified_at',
     ];
@@ -27,6 +27,7 @@ class UserModel extends Model
         $page =  isset($request['page']) && $request['page'] > 0?($request['page'] - 1 ) : 0;
         $perPage = isset($request['offset']) && $request['offset']!=''? (int)($request['offset']):0;
         $skip = isset($page) && $page!=''? (int)$page*$perPage:0;
+
         $users = self::where('global_option_id',$domain['global_id'])
         ->select([
             'id',
