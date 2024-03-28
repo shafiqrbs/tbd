@@ -225,7 +225,6 @@ class ProductModel extends Model
                 'inv_product.barcode',
                 'inv_product.alternative_name',
             ]);
-
         $products = $products->orderBy('inv_product.id','DESC')->get();
 
         return $products;

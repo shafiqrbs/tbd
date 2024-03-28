@@ -49,6 +49,7 @@ class LoginController extends Controller
             'mobile'=>$userExists->mobile,
             'email'=>$userExists->email,
             'username'=>$userExists->username,
+            'user_group'=>$userExists->user_group,
             'global_option_id'=>$userExists->global_option_id,
         ];
         return new JsonResponse([

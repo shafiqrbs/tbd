@@ -29,21 +29,21 @@ class User
 	/**
 	 * @var boolean
 	 *
-	 * @ORM\Column(name="isDelete", type="boolean", nullable=true)
+	 * @ORM\Column(type="boolean", nullable=true)
 	 */
 	private $isDelete = 0;
 
 	/**
 	 * @var int
 	 *
-	 * @ORM\Column(name="domainOwner", type="smallint", nullable=true)
+	 * @ORM\Column(type="smallint", nullable=true)
 	 */
 	private $domainOwner = 0;
 
 	/**
 	 * @var string
 	 *
-	 * @ORM\Column(name="userGroup", type="string", length = 30, nullable=true)
+	 * @ORM\Column(type="string", length = 30, nullable=true)
 	 */
 	private $userGroup = "user";
 
@@ -96,7 +96,7 @@ class User
 	/**
 	 * @var string
 	 *
-	 * @ORM\Column(name="appPassword", type="string", length = 30, nullable=true)
+	 * @ORM\Column(type="string", length = 30, nullable=true)
 	 */
 	private $appPassword = "@123456";
 
@@ -111,17 +111,9 @@ class User
 	/**
 	 * @var array
 	 *
-	 * @ORM\Column(name="appRoles", type="array", nullable=true)
+	 * @ORM\Column( type="array", nullable=true)
 	 */
 	private $appRoles;
-
-	/**
-	 * @var boolean
-	 *
-	 * @ORM\Column(name="agent", type="boolean", nullable=true)
-	 */
-	private $agent = false;
-
 
 	/**
 	 * @ORM\Column(type="string", length=255, nullable=true)
