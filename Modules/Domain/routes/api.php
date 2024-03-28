@@ -18,5 +18,6 @@ use Modules\Domain\App\Http\Controllers\DomainController;
 
 
 Route::prefix('/domain')->middleware(array(HeaderAuthenticationMiddleware::class))->group(function() {
-    Route::apiResource('/', DomainController::class)->middleware([HeaderAuthenticationMiddleware::class]);
+    Route::apiResource('/global', DomainController::class)->middleware([HeaderAuthenticationMiddleware::class]);
+    Route::apiResource('/setting', DomainController::class)->middleware([HeaderAuthenticationMiddleware::class]);
 });
