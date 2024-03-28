@@ -6,7 +6,9 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
-use Modules\Core\App\Http\Requests\DomainRequest;
+use Modules\AppsApi\App\Services\JsonRequestResponse;
+use Modules\Domain\App\Http\Requests\DomainRequest;
+use Modules\Core\App\Models\UserModel;
 use Modules\Domain\App\Models\DomainModel;
 
 class DomainController extends Controller
@@ -17,7 +19,7 @@ class DomainController extends Controller
     {
         $entityId = $request->header('X-Api-User');
         if ($entityId && !empty($entityId)){
-            $entityData = DomainModel::getUserData($entityId);
+            $entityData = UserModel::getUserData($entityId);
             $this->domain = $entityData;
         }
     }

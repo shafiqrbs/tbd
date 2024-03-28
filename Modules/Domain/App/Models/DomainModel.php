@@ -1,21 +1,33 @@
 <?php
 
 namespace Modules\Domain\App\Models;
+use Cviebrock\EloquentSluggable\Sluggable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class DomainModel extends Model
 {
-    use HasFactory;
+    use HasFactory,Sluggable;
 
-    protected $table = 'dom_domain';
+    protected $table = 'dom_global_option';
     public $timestamps = true;
     protected $guarded = ['id'];
     protected $fillable = [
         'name',
         'mobile',
         'email',
+        'unique_code',
+        'slug',
     ];
+
+    public function sluggable(): array
+    {
+        return [
+            'slug' => [
+                'source' => 'name'
+            ]
+        ];
+    }
 
     public static function getRecords($request){
 
@@ -63,21 +75,21 @@ class DomainModel extends Model
         parent::boot();
         self::creating(function ($model) {
             $date =  new \DateTime("now");
-            $model->unique_id = self::quickRandom();
+            $model->unique_code = self::quickRandom();
             $model->created_at = $date;
         });
 
         self::updating(function ($model) {
             $date =  new \DateTime("now");
-            $model->unique_id = self::quickRandom();
+            $model->unique_code = self::quickRandom();
             $model->updated_at = $date;
         });
 
     }
 
-    public static function quickRandom($length = 16)
+    public static function quickRandom($length = 10)
     {
-        $pool = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+        $pool = '0123456789';
         return substr(str_shuffle(str_repeat($pool, $length)), 0, $length);
     }
 
