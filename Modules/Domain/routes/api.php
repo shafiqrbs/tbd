@@ -1,7 +1,9 @@
 <?php
 
+use App\Http\Middleware\HeaderAuthenticationMiddleware;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use Modules\Domain\App\Http\Controllers\DomainController;
 
 /*
     |--------------------------------------------------------------------------
@@ -14,6 +16,7 @@ use Illuminate\Support\Facades\Route;
     |
 */
 
-Route::middleware(['auth:sanctum'])->prefix('v1')->name('api.')->group(function () {
-    Route::get('domain', fn (Request $request) => $request->user())->name('domain');
+
+Route::prefix('/domain')->middleware(array(HeaderAuthenticationMiddleware::class))->group(function() {
+    Route::apiResource('/', DomainController::class)->middleware([HeaderAuthenticationMiddleware::class]);
 });

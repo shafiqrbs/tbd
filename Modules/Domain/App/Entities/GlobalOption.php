@@ -11,23 +11,11 @@ use Gedmo\Mapping\Annotation as Gedmo;
 
 /**
  * GlobalOption
- * @ORM\Table(name="dom_global_option")
- * @ORM\Entity(repositoryClass="Modules\Domain\App\Repositories\GlobalOptionRepository")
+ * @ORM\Table(name="dom_domain")
+ * @ORM\Entity()
  */
 class GlobalOption
 {
-
-    /**
-     * @ORM\OneToMany(targetEntity="Modules\Core\App\Entities\User", mappedBy="globalOption" , cascade={"persist", "remove"} )
-     **/
-    protected $users;
-
-
-    /**
-     * @ORM\ManyToOne(targetEntity="Modules\Domain\App\Entities\AppModule", inversedBy="appDomains")
-     */
-    protected $mainApp;
-
 
     /**
      * @var integer
@@ -48,7 +36,7 @@ class GlobalOption
     /**
      * @var string
      *
-     * @ORM\Column(name="hotline", type="string", length=15, nullable = true )
+     * @ORM\Column(type="string", length=15, nullable = true )
      */
     private $hotline;
 
@@ -69,14 +57,14 @@ class GlobalOption
     /**
      * @var string
      *
-     * @ORM\Column(name="billingAddress", type="string", nullable = true )
+     * @ORM\Column( type="string", nullable = true )
      */
     private $billingAddress;
 
     /**
      * @var float
      *
-     * @ORM\Column(name="monthlyAmount", type="float", length=100, nullable = true )
+     * @ORM\Column(type="float", length=100, nullable = true )
      */
     private $monthlyAmount;
 
@@ -92,42 +80,42 @@ class GlobalOption
     /**
      * @var string
      *
-     * @ORM\Column(name="description", type="text", length=255  , nullable=true )
+     * @ORM\Column( type="text", length=255  , nullable=true )
      */
     private $description;
 
     /**
      * @var string
      *
-     * @ORM\Column(name="binNo", type="text", length=255  , nullable=true )
+     * @ORM\Column(type="text", length=255  , nullable=true )
      */
     private $binNo;
 
     /**
      * @var string
      *
-     * @ORM\Column(name="vatPercent", type="text", length=255  , nullable=true )
+     * @ORM\Column( type="text", length=255  , nullable=true )
      */
     private $vatPercent;
 
     /**
      * @var boolean
      *
-     * @ORM\Column(name="vatEnable", type="boolean", nullable=true )
+     * @ORM\Column( type="boolean", nullable=true )
      */
     private $vatEnable;
 
     /**
      * @var string
      *
-     * @ORM\Column(name="printMessage", type="text", length=255  , nullable=true )
+     * @ORM\Column( type="text", length=255  , nullable=true )
      */
     private $printMessage;
 
     /**
      * @var string
      *
-     * @ORM\Column(name="mobileName", type="string", length=50  , nullable=true )
+     * @ORM\Column(type="string", length=50  , nullable=true )
      */
     private $mobileName;
 
@@ -135,7 +123,7 @@ class GlobalOption
     /**
      * @var string
      *
-     * @ORM\Column(name="organizationName", type="string", length=255  , nullable=true )
+     * @ORM\Column(type="string", length=255  , nullable=true )
      */
     private $organizationName;
 
@@ -154,172 +142,63 @@ class GlobalOption
     /**
      * @var string
      *
-     * @ORM\Column(name="subDomain", type="string", length=255 , unique=true, nullable=true)
+     * @ORM\Column( type="string", length=255 , unique=true, nullable=true)
      */
     private $subDomain;
 
-    /**
-     * @var boolean
-     *
-     * @ORM\Column(name="isMobile", type="boolean" , nullable=true)
-     */
-    private $isMobile;
-
-    /**
-     * @var boolean
-     *
-     * @ORM\Column(name="isBranch", type="boolean" , nullable=true)
-     */
-    private $isBranch = false;
-
-     /**
-     * @var boolean
-     *
-     * @ORM\Column(name="isSidebar", type="boolean" , nullable=true)
-     */
-    private $isSidebar = false;
 
 
     /**
      * @var boolean
      *
-     * @ORM\Column(name="customizeDesign", type="boolean" , nullable=true)
-     */
-    private $customizeDesign;
-
-    /* App store relation for application work this domain */
-    /**
-     * @var boolean
-     *
-     * @ORM\Column(name="facebookAds", type="boolean" , nullable=true)
-     */
-    private $facebookAds;
-    /**
-     * @var boolean
-     *
-     * @ORM\Column(name="facebookApps", type="boolean" , nullable=true)
-     */
-    private $facebookApps;
-
-    /**
-     * @var string
-     *
-     * @ORM\Column(name="instagramPageUrl", type="string", length=255 , nullable=true)
-     */
-    private $instagramPageUrl;
-
-    /**
-     * @var string
-     *
-     * @ORM\Column(name="facebookPageUrl", type="string", length=255 , nullable=true)
-     */
-    private $facebookPageUrl;
-     /**
-     * @var string
-     *
-     * @ORM\Column(name="twitterUrl", type="string", length=255 , nullable=true)
-     */
-    private $twitterUrl;
-     /**
-     * @var string
-     *
-     * @ORM\Column(name="googlePlus", type="string", length=255 , nullable=true)
-     */
-    private $googlePlus;
-
-    /**
-     * @var string
-     *
-     * @ORM\Column(name="youtube", type="string", length=255 , nullable=true)
-     */
-    private $youtube;
-
-    /**
-     * @var string
-     *
-     * @ORM\Column(name="skype", type="string", length=255 , nullable=true)
-     */
-    private $skype;
-
-    /**
-     * @var string
-     *
-     * @ORM\Column(name="linkedin", type="string", length=255 , nullable=true)
-     */
-    private $linkedin;
-
-    /**
-     * @var array
-     *
-     * @ORM\Column(name="stockFormat", type="array", length=50 , nullable=true)
-     */
-    private $stockFormat;
-
-    /**
-     * @var boolean
-     *
-     * @ORM\Column(name="promotion", type="boolean" , nullable=true)
-     */
-    private $promotion;
-
-    /**
-     * @var boolean
-     *
-     * @ORM\Column(name="googleAds", type="boolean" , nullable=true)
-     */
-    private $googleAds;
-
-    /**
-     * @var boolean
-     *
-     * @ORM\Column(name="userMode", type="boolean" , nullable=true)
+     * @ORM\Column(type="boolean" , nullable=true)
      */
     private $userMode;
 
     /**
      * @var boolean
      *
-     * @ORM\Column(name="customApp", type="boolean" , nullable=true)
+     * @ORM\Column(type="boolean" , nullable=true)
      */
     private $customApp;
 
     /**
      * @var boolean
      *
-     * @ORM\Column(name="smsIntegration", type="boolean" , nullable=true)
+     * @ORM\Column( type="boolean" , nullable=true)
      */
     private $smsIntegration;
     /**
      * @var boolean
      *
-     * @ORM\Column(name="emailIntegration", type="boolean" , nullable=true)
+     * @ORM\Column( type="boolean" , nullable=true)
      */
     private $emailIntegration;
     /**
      * @var boolean
      *
-     * @ORM\Column(name="isIntro", type="boolean" , nullable=true)
+     * @ORM\Column(type="boolean" , nullable=true)
      */
     private $isIntro;
 
      /**
      * @var boolean
      *
-     * @ORM\Column(name="isPortalStore", type="boolean" , nullable=true)
+     * @ORM\Column( type="boolean" , nullable=true)
      */
     private $isPortalStore;
 
     /**
      * @var string
      *
-     * @ORM\Column(name="callBackEmail", type="string", length=255 , nullable=true)
+     * @ORM\Column(type="string", length=255 , nullable=true)
      */
     private $callBackEmail;
 
     /**
      * @var string
      *
-     * @ORM\Column(name="domainType", type="string", length=30 , nullable=true)
+     * @ORM\Column(type="string", length=30 , nullable=true)
      */
     private $domainType;
 
@@ -327,14 +206,14 @@ class GlobalOption
     /**
      * @var text
      *
-     * @ORM\Column(name="callBackContent", type="text", nullable=true)
+     * @ORM\Column(type="text", nullable=true)
      */
     private $callBackContent;
 
 	/**
 	 * @var integer
 	 *
-	 * @ORM\Column(name="status", type="smallint", nullable=true)
+	 * @ORM\Column( type="smallint", nullable=true)
 	 */
 	private $status = 0;
 
@@ -343,13 +222,13 @@ class GlobalOption
     /**
      * @var boolean
      *
-     * @ORM\Column(name="callBackNotify", type="boolean", nullable=true)
+     * @ORM\Column(type="boolean", nullable=true)
      */
     private $callBackNotify;
     /**
      * @var boolean
      *
-     * @ORM\Column(name="primaryNumber", type="boolean", nullable=true)
+     * @ORM\Column(type="boolean", nullable=true)
      */
     private $primaryNumber = true;
 
@@ -357,7 +236,7 @@ class GlobalOption
     /**
      * @var string
      *
-     * @ORM\Column(name="leaveEmail", type="string", length=255 , nullable=true)
+     * @ORM\Column(type="string", length=255 , nullable=true)
      */
     private $leaveEmail;
 
@@ -365,18 +244,16 @@ class GlobalOption
     /**
      * @var string
      *
-     * @ORM\Column(name="webMail", type="string", length=255 , nullable=true)
+     * @ORM\Column(type="string", length=255 , nullable=true)
      */
     private $webMail;
     /**
      * @var text
      *
-     * @ORM\Column(name="leaveContent", type="text", nullable=true)
+     * @ORM\Column(type="text", nullable=true)
      */
     private $leaveContent;
 
-
-    /* ===================      Fixed Assets      =======================================  */
 
     /**
      * @var \DateTime
@@ -393,9 +270,23 @@ class GlobalOption
     private $updated;
 
     /**
+     * @var \DateTime
+     * @Gedmo\Timestampable(on="create")
+     * @ORM\Column(type="datetime")
+     */
+    private $created_at;
+
+    /**
+     * @var \DateTime
+     * @Gedmo\Timestampable(on="update")
+     * @ORM\Column(type="datetime")
+     */
+    private $updated_at;
+
+    /**
      * @var string
      *
-     * @ORM\Column(name="uniqueCode", type="string", length=255, nullable=true)
+     * @ORM\Column(type="string", length=255, nullable=true)
      */
     private $uniqueCode;
 
@@ -433,22 +324,6 @@ class GlobalOption
         $this->uniqueCode = $uniqueCode;
     }
 
-
-    /**
-     * @return Syndicate
-     */
-    public function getSyndicate()
-    {
-        return $this->syndicate;
-    }
-
-    /**
-     * @param Syndicate $syndicate
-     */
-    public function setSyndicate($syndicate)
-    {
-        $this->syndicate = $syndicate;
-    }
 
     /**
      * Get domain
@@ -718,14 +593,6 @@ class GlobalOption
         $this->name = $name;
     }
 
-    /**
-     * @return mixed
-     */
-    public function getSiteSetting()
-    {
-        return $this->siteSetting;
-    }
-
 
     /**
      * @return mixed
@@ -808,21 +675,6 @@ class GlobalOption
     }
 
 
-    /**
-     * @return Location
-     */
-    public function getLocation()
-    {
-        return $this->location;
-    }
-
-    /**
-     * @param mixed $location
-     */
-    public function setLocation($location)
-    {
-        $this->location = $location;
-    }
 
     /**
      * @return string
@@ -840,109 +692,6 @@ class GlobalOption
         $this->mobile = $mobile;
     }
 
-    /**
-     * @return TemplateCustomize
-     */
-    public function getTemplateCustomize()
-    {
-        return $this->templateCustomize;
-    }
-
-    /**
-     * @return HomePage
-     */
-    public function getHomePage()
-    {
-        return $this->homePage;
-    }
-
-    /**
-     * @return ContactPage
-     */
-    public function getContactPage()
-    {
-        return $this->contactPage;
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getFooterSetting()
-    {
-        return $this->footerSetting;
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getMobileIcon()
-    {
-        return $this->mobileIcon;
-    }
-
-    /**
-     * @return string
-     */
-    public function getCallBackEmail()
-    {
-        return $this->callBackEmail;
-    }
-
-    /**
-     * @param string $callBackEmail
-     */
-    public function setCallBackEmail($callBackEmail)
-    {
-        $this->callBackEmail = $callBackEmail;
-    }
-
-    /**
-     * @return text
-     */
-    public function getCallBackContent()
-    {
-        return $this->callBackContent;
-    }
-
-    /**
-     * @param text $callBackContent
-     */
-    public function setCallBackContent($callBackContent)
-    {
-        $this->callBackContent = $callBackContent;
-    }
-
-    /**
-     * @return string
-     */
-    public function getLeaveEmail()
-    {
-        return $this->leaveEmail;
-    }
-
-    /**
-     * @param string $leaveEmail
-     */
-    public function setLeaveEmail($leaveEmail)
-    {
-        $this->leaveEmail = $leaveEmail;
-    }
-
-    /**
-     * @return text
-     */
-    public function getLeaveContent()
-    {
-        return $this->leaveContent;
-    }
-
-    /**
-     * @param text $leaveContent
-     */
-    public function setLeaveContent($leaveContent)
-    {
-        $this->leaveContent = $leaveContent;
-    }
 
     /**
      * @return boolean
@@ -992,86 +741,6 @@ class GlobalOption
         $this->email = $email;
     }
 
-    /**
-     * @return DomainUser
-     */
-    public function getDomainUser()
-    {
-        return $this->domainUser;
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getAdsTool()
-    {
-        return $this->adsTool;
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getItemTypeGrouping()
-    {
-        return $this->itemTypeGrouping;
-    }
-
-    /**
-     * @return InventoryConfig
-     */
-    public function getInventoryConfig()
-    {
-        return $this->inventoryConfig;
-    }
-
-    /**
-     * @return User[]
-     */
-    public function getUsers()
-    {
-        return $this->users;
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getMenuGrouping()
-    {
-        return $this->menuGrouping;
-    }
-
-
-    /**
-     * @return Page
-     */
-    public function getPages()
-    {
-        return $this->pages;
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getAccountPurchase()
-    {
-        return $this->accountPurchase;
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getPettyCash()
-    {
-        return $this->pettyCash;
-    }
-
-    /**
-     * @return HomeSlider
-     */
-    public function getHomeSliders()
-    {
-        return $this->homeSliders;
-    }
 
     /**
      * @return \DateTime
@@ -1119,30 +788,6 @@ class GlobalOption
     }
 
     /**
-     * @return PortalBankAccount
-     */
-    public function getPortalBankAccount()
-    {
-        return $this->portalBankAccount;
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getInvoiceSmsEmails()
-    {
-        return $this->invoiceSmsEmails;
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getInvoiceModules()
-    {
-        return $this->invoiceModules;
-    }
-
-    /**
      * @return string
      */
     public function getWebMail()
@@ -1158,203 +803,7 @@ class GlobalOption
         $this->webMail = $webMail;
     }
 
-    /**
-     * @return mixed
-     */
-    public function getExpenseCategory()
-    {
-        $criteria = Criteria::create();
-        $criteria->where(Criteria::expr()->eq('level', 1));
-        return $this->expenseCategory->matching($criteria);
-    }
 
-    /**
-     * @return Transaction
-     */
-    public function getTransactions()
-    {
-        return $this->transactions;
-    }
-
-    /**
-     * @return EcommerceConfig
-     */
-    public function getEcommerceConfig()
-    {
-        return $this->ecommerceConfig;
-    }
-
-
-    /**
-     * @return PhotoGallery
-     */
-    public function getPhotoGalleries()
-    {
-        return $this->photoGalleries;
-    }
-
-
-    /**
-     * @return ModuleCategory
-     */
-    public function getModuleCategories()
-    {
-        return $this->moduleCategories;
-    }
-
-
-    /**
-     * @return PageFile
-     */
-    public function getPageFiles()
-    {
-        return $this->pageFiles;
-    }
-
-   /**
-    * @return AccountCash
-    */
-   public function getAccountCashes()
-   {
-    return $this->accountCashes;
-   }
-
-
- /**
-  * @return mixed
-  */
- public function getAccountSalesReturn()
- {
-  return $this->accountSalesReturn;
- }
-
- /**
-  * @return AccountPurchaseReturn
-  */
- public function getAccountPurchaseReturn()
- {
-  return $this->accountPurchaseReturn;
- }
-
- /**
-  * @return AccountingConfig
-  */
-  public function getAccountingConfig()
-  {
-   return $this->accountingConfig;
-  }
-
-    /**
-     * @return Branches
-     */
-    public function getBranches()
-    {
-        return $this->branches;
-    }
-
-    /**
-     * @return Order
-     */
-    public function getOrders()
-    {
-        return $this->orders;
-    }
-
-    /**
-     * @return FeatureWidget
-     */
-    public function getFeatureWidgets()
-    {
-        return $this->featureWidgets;
-    }
-
-    /**
-     * @return Feature
-     */
-    public function getFeatures()
-    {
-        return $this->features;
-    }
-
-    /**
-     * @return SmsSender
-     */
-    public function getSmsSenders()
-    {
-        return $this->smsSenders;
-    }
-
-    /**
-     * @return SmsSenderTotal
-     */
-    public function getSmsSenderTotal()
-    {
-        return $this->smsSenderTotal;
-    }
-
-    /**
-     * @return PreOrder
-     */
-    public function getPreOrders()
-    {
-        return $this->preOrders;
-    }
-
-    /**
-     * @return NotificationConfig
-     */
-    public function getNotificationConfig()
-    {
-        return $this->notificationConfig;
-    }
-
-    /**
-     * @return SidebarWidgetPanel
-     */
-    public function getSidebarWidgetPanels()
-    {
-        return $this->sidebarWidgetPanels;
-    }
-
-    /**
-     * @return User
-     */
-    public function getAgent()
-    {
-        return $this->agent;
-    }
-
-    /**
-     * @param User $agent
-     */
-    public function setAgent($agent)
-    {
-        $this->agent = $agent;
-    }
-
-    /**
-     * @return Customer
-     */
-    public function getCustomers()
-    {
-        return $this->customers;
-    }
-
-    /**
-     * @return FeatureBrand
-     */
-    public function getFeatureBrands()
-    {
-        return $this->featureBrands;
-    }
-
-    /**
-     * @return FeatureCategory
-     */
-    public function getFeatureCategories()
-    {
-        return $this->featureCategories;
-    }
 
     /**
      * @return string
@@ -1373,63 +822,6 @@ class GlobalOption
     }
 
 
-    /**
-     * @return HospitalConfig
-     */
-    public function getHospitalConfig()
-    {
-        return $this->hospitalConfig;
-    }
-
-    /**
-     * @return Menu
-     */
-    public function getMenus()
-    {
-        return $this->menus;
-    }
-
-    /**
-     * @return AccountMobileBank
-     */
-    public function getAccountMobileBank()
-    {
-        return $this->accountMobileBank;
-    }
-
-    /**
-     * @return DmsConfig
-     */
-    public function getDmsConfig()
-    {
-        return $this->dmsConfig;
-    }
-
-    /**
-     * @return RestaurantConfig
-     */
-    public function getRestaurantConfig()
-    {
-        return $this->restaurantConfig;
-    }
-
-    /**
-     * @return DailyAttendance
-     */
-    public function getDailyAttendance()
-    {
-        return $this->dailyAttendance;
-    }
-
-
-
-    /**
-     * @return BusinessConfig
-     */
-    public function getBusinessConfig()
-    {
-        return $this->businessConfig;
-    }
 
     /**
      * @return float
@@ -1447,58 +839,7 @@ class GlobalOption
         $this->monthlyAmount = $monthlyAmount;
     }
 
-    /**
-     * @return DpsConfig
-     */
-    public function getDpsConfig()
-    {
-        return $this->dpsConfig;
-    }
 
-    /**
-     * @return MedicineConfig
-     */
-    public function getMedicineConfig()
-    {
-        return $this->medicineConfig;
-    }
-
-    /**
-     * @return AccountVendor
-     */
-    public function getVendors()
-    {
-        return $this->vendors;
-    }
-
-    /**
-     * @return MedicineBrand
-     */
-    public function getMedicineBrands()
-    {
-        return $this->medicineBrands;
-    }
-
-	/**
-	 * @return HotelConfig
-	 */
-	public function getHotelConfig() {
-		return $this->hotelConfig;
-	}
-
-	/**
-	 * @return ElectionConfig
-	 */
-	public function getElectionConfig() {
-		return $this->electionConfig;
-	}
-
-	/**
-	 * @return AccountBalanceTransfer
-	 */
-	public function getBalanceTransfer() {
-		return $this->balanceTransfer;
-	}
 
 	/**
 	 * @return string
@@ -1556,13 +897,6 @@ class GlobalOption
 		$this->linkedin = $linkedin;
 	}
 
-	/**
-	 * @return EducationConfig
-	 */
-
-	public function getEducationConfig() {
-		return $this->educationConfig;
-	}
 
     /**
      * @return AppModule
@@ -1580,29 +914,6 @@ class GlobalOption
         $this->mainApp = $mainApp;
     }
 
-    /**
-     * @return AccountSalesAdjustment
-     */
-    public function getAccountSalesAdjustment()
-    {
-        return $this->accountSalesAdjustment;
-    }
-
-    /**
-     * @return AccountPurchaseCommission
-     */
-    public function getAccountPurchaseCommission()
-    {
-        return $this->accountPurchaseCommission;
-    }
-
-    /**
-     * @return AndroidDeviceSetup
-     */
-    public function getAndroids()
-    {
-        return $this->androids;
-    }
 
 
     /**
@@ -1621,21 +932,6 @@ class GlobalOption
         $this->organizationName = $organizationName;
     }
 
-    /**
-     * @return ProcurementConfig
-     */
-    public function getProcurementConfig()
-    {
-        return $this->procurementConfig;
-    }
-
-    /**
-     * @return AssetsConfig
-     */
-    public function getAssetsConfig()
-    {
-        return $this->assetsConfig;
-    }
 
 
     /**
@@ -1735,29 +1031,6 @@ class GlobalOption
         $this->address = $address;
     }
 
-    /**
-     * @return mixed
-     */
-    public function getCurrency()
-    {
-        return $this->currency;
-    }
-
-    /**
-     * @param mixed $currency
-     */
-    public function setCurrency($currency)
-    {
-        $this->currency = $currency;
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getCountry()
-    {
-        return $this->country;
-    }
 
     /**
      * @param mixed $country
@@ -1879,121 +1152,55 @@ class GlobalOption
         $this->customApp = $customApp;
     }
 
-    /**
-     * @return array
-     */
-    public function getStockFormat()
-    {
-        return $this->stockFormat;
-    }
 
     /**
-     * @param array $stockFormat
-     * Category
-     * Brand
-     * Model
-     * Size
-     * Color
-     * Vendor
+     * @return \DateTime
      */
-    public function setStockFormat($stockFormat)
+    public function getCreatedAt()
     {
-        $this->stockFormat = $stockFormat;
+        return $this->created_at;
     }
 
     /**
-     * Sets file.
-     *
-     * @param GlobalOption $file
+     * @param \DateTime $created_at
      */
-    public function setFile(UploadedFile $file = null)
+    public function setCreatedAt($created_at)
     {
-        $this->file = $file;
+        $this->created_at = $created_at;
     }
 
     /**
-     * Get file.
-     *
-     * @return GlobalOption
+     * @return \DateTime
      */
-    public function getFile()
+    public function getUpdatedAt()
     {
-        return $this->file;
+        return $this->updated_at;
     }
 
-    public function getAbsolutePath()
+    /**
+     * @param \DateTime $updated_at
+     */
+    public function setUpdatedAt($updated_at)
     {
-        return null === $this->path
-            ? null
-            : $this->getUploadRootDir().'/'.$this->path;
-    }
-
-    public function getWebPath()
-    {
-        return null === $this->path
-            ? null
-            : $this->getUploadDir().'/' . $this->path;
-    }
-
-
-
-    protected function getUploadRootDir()
-    {
-        return __DIR__.'/../../../../../web/'.$this->getUploadDir();
-    }
-
-    protected function getUploadDir()
-    {
-        return 'uploads/domain';
-    }
-
-    public function removeUpload()
-    {
-        if ($file = $this->getAbsolutePath()) {
-            unlink($file);
-            $this->path = null ;
-        }
-    }
-
-    public function upload()
-    {
-        // the file property can be empty if the field is not required
-        if (null === $this->getFile()) {
-            return;
-        }
-
-        // use the original file name here but you should
-        // sanitize it at least to avoid any security issues
-
-        // move takes the target directory and then the
-        // target filename to move to
-        $filename = date('YmdHmi') . "_" . $this->getFile()->getClientOriginalName();
-        $this->getFile()->move(
-            $this->getUploadRootDir(),
-            $filename
-        );
-
-        // set the path property to the filename where you've saved the file
-        $this->path = $filename ;
-
-        // clean up the file property as you won't need it anymore
-        $this->file = null;
+        $this->updated_at = $updated_at;
     }
 
     /**
      * @return mixed
      */
-    public function getLinkDomain()
+    public function getPath()
     {
-        return $this->linkDomain;
+        return $this->path;
     }
 
     /**
-     * @param mixed $linkDomain
+     * @param mixed $path
      */
-    public function setLinkDomain($linkDomain)
+    public function setPath($path)
     {
-        $this->linkDomain = $linkDomain;
+        $this->path = $path;
     }
+
+
 
 }

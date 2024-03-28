@@ -6,31 +6,50 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Modules\Core\App\Http\Requests\DomainRequest;
+use Modules\Domain\App\Models\DomainModel;
 
 class DomainController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
+    protected $domain;
+
+    public function __construct(Request $request)
     {
-        return view('domain::index');
+        $entityId = $request->header('X-Api-User');
+        if ($entityId && !empty($entityId)){
+            $entityData = DomainModel::getUserData($entityId);
+            $this->domain = $entityData;
+        }
     }
 
     /**
-     * Show the form for creating a new resource.
+     * Display a listing of the resource.
      */
-    public function create()
-    {
-        return view('domain::create');
+
+    public function index(Request $request){
+
+        $data = DomainModel::getRecords($request);
+        $response = new Response();
+        $response->headers->set('Content-Type','application/json');
+        $response->setContent(json_encode([
+            'message' => 'success',
+            'status' => Response::HTTP_OK,
+            'total' => $data['count'],
+            'data' => $data['entities']
+        ]));
+        $response->setStatusCode(Response::HTTP_OK);
+        return $response;
     }
 
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request): RedirectResponse
+    public function store(DomainRequest $request)
     {
-        //
+        $data = $request->validated();
+        $entity = DomainModel::create($data);
+        $service = new JsonRequestResponse();
+        return $service->returnJosnResponse($entity);
     }
 
     /**
@@ -38,7 +57,13 @@ class DomainController extends Controller
      */
     public function show($id)
     {
-        return view('domain::show');
+        $service = new JsonRequestResponse();
+        $entity = DomainModel::find($id);
+        if (!$entity){
+            $entity = 'Data not found';
+        }
+        $data = $service->returnJosnResponse($entity);
+        return $data;
     }
 
     /**
@@ -46,15 +71,26 @@ class DomainController extends Controller
      */
     public function edit($id)
     {
-        return view('domain::edit');
+        $service = new JsonRequestResponse();
+        $entity = DomainModel::find($id);
+        if (!$entity){
+            $entity = 'Data not found';
+        }
+        $data = $service->returnJosnResponse($entity);
+        return $data;
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, $id): RedirectResponse
+    public function update(DomainRequest $request, $id)
     {
-        //
+
+        $data = $request->validated();
+        $entity = DomainModel::find($id);
+        $entity->update($data);
+        $service = new JsonRequestResponse();
+        return $service->returnJosnResponse($entity);
     }
 
     /**
@@ -62,6 +98,10 @@ class DomainController extends Controller
      */
     public function destroy($id)
     {
-        //
+        $service = new JsonRequestResponse();
+        DomainModel::find($id)->delete();
+        $entity = ['message'=>'delete'];
+        $data = $service->returnJosnResponse($entity);
+        return $data;
     }
 }
