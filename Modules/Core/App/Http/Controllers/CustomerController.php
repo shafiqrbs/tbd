@@ -28,7 +28,6 @@ class CustomerController extends Controller
      * Display a listing of the resource.
      */
     public function index(Request $request,EntityManagerInterface $em){
-
         $data = CustomerModel::getRecords($this->domain,$request);
         $response = new Response();
         $response->headers->set('Content-Type','application/json');
