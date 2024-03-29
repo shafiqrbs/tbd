@@ -38,7 +38,6 @@ class UtilityController extends Controller
      */
     public function productUnitDropdown(Request $request)
     {
-
         $dropdown = ProductUnitModel::getEntityDropdown();
         $service = new JsonRequestResponse();
         return $service->returnJosnResponse($dropdown);

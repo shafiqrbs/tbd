@@ -9,7 +9,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Modules\AppsApi\App\Services\JsonRequestResponse;
 use Modules\Core\App\Models\UserModel;
-use Modules\Inventory\App\Models\AccountTransactionModel;
+use Modules\Inventory\App\Models\CategoryModel;
 use Modules\Inventory\App\Models\ProductBrandModel;
 use Modules\Utility\App\Models\SettingModel;
 
@@ -63,7 +63,7 @@ class InventoryController extends Controller
      */
     public function categoryGroupDropdown(Request $request)
     {
-        $dropdown = AccountTransactionModel::getCategoryGroupDropdown($this->domain);
+        $dropdown = CategoryModel::getCategoryGroupDropdown($this->domain);
         $service = new JsonRequestResponse();
         return $service->returnJosnResponse($dropdown);
     }
@@ -73,7 +73,7 @@ class InventoryController extends Controller
      */
     public function categoryDropdown(Request $request)
     {
-        $dropdown = AccountTransactionModel::getCategoryDropdown($this->domain);
+        $dropdown = CategoryModel::getCategoryDropdown($this->domain);
         $service = new JsonRequestResponse();
         return $service->returnJosnResponse($dropdown);
     }

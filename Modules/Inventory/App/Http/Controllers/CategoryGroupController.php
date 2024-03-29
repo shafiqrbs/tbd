@@ -10,7 +10,7 @@ use Modules\AppsApi\App\Services\JsonRequestResponse;
 use Modules\Core\App\Models\UserModel;
 use Modules\Core\App\Models\VendorModel;
 use Modules\Inventory\App\Http\Requests\CategoryGroupRequest;
-use Modules\Inventory\App\Models\AccountTransactionModel;
+use Modules\Inventory\App\Models\CategoryModel;
 
 class CategoryGroupController extends Controller
 {
@@ -26,7 +26,7 @@ class CategoryGroupController extends Controller
     }
     public function index(Request $request){
 
-        $data = AccountTransactionModel::getRecords($request,$this->domain);
+        $data = CategoryModel::getRecords($request,$this->domain);
         $response = new Response();
         $response->headers->set('Content-Type','application/json');
         $response->setContent(json_encode([
@@ -48,7 +48,7 @@ class CategoryGroupController extends Controller
         $input = $request->validated();
         $input['config_id'] = $this->domain['config_id'];
 
-        $entity = AccountTransactionModel::create($input);
+        $entity = CategoryModel::create($input);
         $data = $service->returnJosnResponse($entity);
         return $data;
     }
@@ -59,7 +59,7 @@ class CategoryGroupController extends Controller
     public function show($id)
     {
         $service = new JsonRequestResponse();
-        $entity = AccountTransactionModel::find($id);
+        $entity = CategoryModel::find($id);
 
         if (!$entity){
             $entity = 'Data not found';
@@ -75,7 +75,7 @@ class CategoryGroupController extends Controller
     public function details($id)
     {
         $service = new JsonRequestResponse();
-        $entity = AccountTransactionModel::find($id);
+        $entity = CategoryModel::find($id);
 
         if (!$entity){
             $entity = 'Data not found';
@@ -107,7 +107,7 @@ class CategoryGroupController extends Controller
     public function update(CategoryGroupRequest $request, $id)
     {
         $data = $request->validated();
-        $entity = AccountTransactionModel::find($id);
+        $entity = CategoryModel::find($id);
         $entity->update($data);
 
         $service = new JsonRequestResponse();
@@ -119,13 +119,13 @@ class CategoryGroupController extends Controller
      */
     public function destroy($id)
     {
-        $isParent = AccountTransactionModel::getCategoryIsParent($id);
+        $isParent = CategoryModel::getCategoryIsParent($id);
         $isDeletable = true;
         if ($isParent){
-            $isDeletable = AccountTransactionModel::getCategoryIsDeletable($id);
+            $isDeletable = CategoryModel::getCategoryIsDeletable($id);
         }
         if ($isDeletable){
-            AccountTransactionModel::find($id)->delete();
+            CategoryModel::find($id)->delete();
             $message = 'delete';
         }else{
             $message = 'exists';
