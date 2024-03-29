@@ -51,7 +51,7 @@ class UserController extends Controller
     {
         $data = $request->validated();
 
-        $data['global_option_id'] = $this->domain['global_id'];
+        $data['domain_id'] = $this->domain['global_id'];
         $data['email_verified_at']= now();
         $data['password']= Hash::make($data['password']);
         $data['is_delete']= 0;

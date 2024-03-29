@@ -9,7 +9,7 @@ use Gedmo\Mapping\Annotation as Gedmo;
  * TransactionMethod
  *
  * @ORM\Table(name="uti_transaction_method")
- * @ORM\Entity(repositoryClass="")
+ * @ORM\Entity()
  */
 class TransactionMethod
 {

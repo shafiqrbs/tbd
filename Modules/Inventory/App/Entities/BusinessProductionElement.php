@@ -9,7 +9,7 @@ use Doctrine\ORM\Mapping as ORM;
  * BusinessProductionElement
  *
  * @ORM\Table(name ="inv_production_element")
- * @ORM\Entity(repositoryClass="Modules\Inventory\App\Repositories\BusinessProductionElementRepository")
+ * @ORM\Entity()
  */
 class BusinessProductionElement
 {

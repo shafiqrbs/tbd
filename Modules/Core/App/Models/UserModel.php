@@ -18,7 +18,7 @@ class UserModel extends Model
         'email',
         'password',
         'is_delete',
-        'global_option_id',
+        'domain_id',
         'email_verified_at',
     ];
 
@@ -28,7 +28,7 @@ class UserModel extends Model
         $perPage = isset($request['offset']) && $request['offset']!=''? (int)($request['offset']):0;
         $skip = isset($page) && $page!=''? (int)$page*$perPage:0;
 
-        $users = self::where('global_option_id',$domain['global_id'])
+        $users = self::where('domain_id',$domain['global_id'])
         ->select([
             'id',
             'name',
@@ -71,13 +71,16 @@ class UserModel extends Model
         parent::boot();
         self::creating(function ($model) {
             $date =  new \DateTime("now");
-//            $model->unique_id = self::quickRandom();
+            $model->email_verified_at = $date;
+        });
+
+         self::creating(function ($model) {
+            $date =  new \DateTime("now");
             $model->created_at = $date;
         });
 
         self::updating(function ($model) {
             $date =  new \DateTime("now");
-//            $model->unique_id = self::quickRandom();
             $model->updated_at = $date;
         });
 
@@ -92,9 +95,10 @@ class UserModel extends Model
 
     public static function getUserData($id)
     {
-        $data = self::select(['dom_global_option.id as global_id','inv_config.id as config_id','users.id as user_id'])
-            ->join('dom_global_option','dom_global_option.id','=','users.global_option_id')
-            ->join('inv_config','inv_config.global_option_id','=','dom_global_option.id')
+        $data = self::select(['dom_domain.id as global_id','inv_config.id as config_id','users.id as user_id','acc_config.id as acc_config_id'])
+            ->join('dom_domain','dom_domain.id','=','users.domain_id')
+            ->join('inv_config','inv_config.domain_id','=','dom_domain.id')
+            ->join('acc_config','acc_config.domain_id','=','dom_domain.id')
             ->where('users.id',$id)->first();
         return $data;
     }

@@ -20,7 +20,7 @@ class GeneratePatternCodeService
         $datetime = new \DateTime("now");
         $date = $datetime->format('Y-m-01');
         $entity = DB::table("{$table} as e")
-            ->where('e.global_option_id', $domain)
+            ->where('e.domain_id', $domain)
             ->whereBetween('e.created', [
                 Carbon::parse($date),
                 Carbon::parse($date)->endOfMonth()
@@ -48,7 +48,7 @@ class GeneratePatternCodeService
         $datetime = new \DateTime("now");
         $date = $datetime->format('Y-m-01');
         $entity = DB::table("{$table} as e")
-            ->where('e.global_option_id', $domain)
+            ->where('e.domain_id', $domain)
             ->whereBetween('e.created', [
                 Carbon::parse($date),
                 Carbon::parse($date)->endOfMonth()

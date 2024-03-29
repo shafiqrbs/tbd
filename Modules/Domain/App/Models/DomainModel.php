@@ -9,7 +9,7 @@ class DomainModel extends Model
 {
     use HasFactory,Sluggable;
 
-    protected $table = 'dom_global_option';
+    protected $table = 'dom_domain';
     public $timestamps = true;
     protected $guarded = ['id'];
     protected $fillable = [
@@ -97,8 +97,8 @@ class DomainModel extends Model
     public static function getEntityData($id)
     {
         $data = self::select(['dom_global_option.id as global_id','inv_config.id as config_id','users.id as user_id'])
-            ->join('dom_global_option','dom_global_option.id','=','users.global_option_id')
-            ->join('inv_config','inv_config.global_option_id','=','dom_global_option.id')
+            ->join('dom_global_option','dom_global_option.id','=','users.domain_id')
+            ->join('inv_config','inv_config.domain_id','=','dom_global_option.id')
             ->where('users.id',$id)->first();
         return $data;
     }

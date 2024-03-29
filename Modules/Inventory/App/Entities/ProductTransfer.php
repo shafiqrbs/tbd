@@ -9,7 +9,7 @@ use Gedmo\Mapping\Annotation as Gedmo;
  * BusinessWearHouse
  *
  * @ORM\Table( name ="inv_product_transfer")
- * @ORM\Entity(repositoryClass="Modules\Inventory\App\Repositories\ProductTransferRepository")
+ * @ORM\Entity()
  */
 class ProductTransfer
 {
@@ -24,7 +24,7 @@ class ProductTransfer
 
 
     /**
-     * @ORM\ManyToOne(targetEntity="Modules\Inventory\App\Entities\Config", inversedBy="wearHouses" , cascade={"detach","merge"} )
+     * @ORM\ManyToOne(targetEntity="Modules\Inventory\App\Entities\Config" , cascade={"detach","merge"} )
      * @ORM\JoinColumn(onDelete="CASCADE")
      **/
     private  $config;
@@ -94,6 +94,19 @@ class ProductTransfer
      */
     private $updated;
 
+    /**
+     * @var \DateTime
+     * @Gedmo\Timestampable(on="create")
+     * @ORM\Column(name="created_at", type="datetime")
+     */
+    private $createdAt;
+
+    /**
+     * @var \DateTime
+     * @Gedmo\Timestampable(on="create")
+     * @ORM\Column(name="updated_at", type="datetime")
+     */
+    private $updatedAt;
 
 
     /**
@@ -104,205 +117,6 @@ class ProductTransfer
     private $status= true;
 
 
-    /**
-     * Get id
-     *
-     * @return integer
-     */
-    public function getId()
-    {
-        return $this->id;
-    }
-
-
-    /**
-     * @return Config
-     */
-    public function getBusinessConfig()
-    {
-        return $this->config;
-    }
-
-    /**
-     * @param Config $businessConfig
-     */
-    public function setBusinessConfig($businessConfig)
-    {
-        $this->businessConfig = $config;
-    }
-
-
-	/**
-	 * @return int
-	 */
-	public function getQuantity(){
-		return $this->quantity;
-	}
-
-	/**
-	 * @param int $quantity
-	 */
-	public function setQuantity($quantity ) {
-		$this->quantity = $quantity;
-	}
-
-	/**
-	 * @return bool
-	 */
-	public function isStatus(): bool {
-		return $this->status;
-	}
-
-	/**
-	 * @param bool $status
-	 */
-	public function setStatus($status ) {
-		$this->status = $status;
-	}
-
-    /**
-     * @return mixed
-     */
-    public function getBusinessParticular()
-    {
-        return $this->businessParticular;
-    }
-
-    /**
-     * @param mixed $businessParticular
-     */
-    public function setBusinessParticular($businessParticular)
-    {
-        $this->businessParticular = $businessParticular;
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getFromWearHouse()
-    {
-        return $this->fromWearHouse;
-    }
-
-    /**
-     * @param mixed $fromWearHouse
-     */
-    public function setFromWearHouse($fromWearHouse)
-    {
-        $this->fromWearHouse = $fromWearHouse;
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getToWearHouse()
-    {
-        return $this->toWearHouse;
-    }
-
-    /**
-     * @param mixed $toWearHouse
-     */
-    public function setToWearHouse($toWearHouse)
-    {
-        $this->toWearHouse = $toWearHouse;
-    }
-
-    /**
-     * @return string
-     */
-    public function getRemark()
-    {
-        return $this->remark;
-    }
-
-    /**
-     * @param string $remark
-     */
-    public function setRemark($remark)
-    {
-        $this->remark = $remark;
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getCreatedBy()
-    {
-        return $this->createdBy;
-    }
-
-    /**
-     * @param mixed $createdBy
-     */
-    public function setCreatedBy($createdBy)
-    {
-        $this->createdBy = $createdBy;
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getApprovedBy()
-    {
-        return $this->approvedBy;
-    }
-
-    /**
-     * @param mixed $approvedBy
-     */
-    public function setApprovedBy($approvedBy)
-    {
-        $this->approvedBy = $approvedBy;
-    }
-
-    /**
-     * @return string
-     */
-    public function getProcess()
-    {
-        return $this->process;
-    }
-
-    /**
-     * @param string $process
-     */
-    public function setProcess($process)
-    {
-        $this->process = $process;
-    }
-
-    /**
-     * @return \DateTime
-     */
-    public function getCreated()
-    {
-        return $this->created;
-    }
-
-    /**
-     * @param \DateTime $created
-     */
-    public function setCreated($created)
-    {
-        $this->created = $created;
-    }
-
-    /**
-     * @return \DateTime
-     */
-    public function getUpdated()
-    {
-        return $this->updated;
-    }
-
-    /**
-     * @param \DateTime $updated
-     */
-    public function setUpdated($updated)
-    {
-        $this->updated = $updated;
-    }
 
 }
 

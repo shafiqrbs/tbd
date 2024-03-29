@@ -10,7 +10,7 @@ use Gedmo\Mapping\Annotation as Gedmo;
  * BusinessBatch
  *
  * @ORM\Table( name="inv_batch")
- * @ORM\Entity(repositoryClass="Modules\Inventory\App\Repositories\BusinessBatchRepository")
+ * @ORM\Entity()
  */
 class BusinessBatch
 {
@@ -30,11 +30,6 @@ class BusinessBatch
      **/
     private $config;
 
-    /**
-     * @var BusinessBatchParticular
-     * @ORM\OneToMany(targetEntity="Modules\Inventory\App\Entities\BusinessBatchParticular", mappedBy="businessBatch")
-     **/
-    private $businessBatchParticulars;
 
     /**
      * @var string
@@ -79,183 +74,16 @@ class BusinessBatch
     /**
      * @var \DateTime
      * @Gedmo\Timestampable(on="create")
-     * @ORM\Column(name="created", type="datetime")
+     * @ORM\Column(type="datetime")
      */
-    private $created;
+    private $createdAt;
 
     /**
      * @var \DateTime
      * @Gedmo\Timestampable(on="update")
-     * @ORM\Column(name="updated", type="datetime")
+     * @ORM\Column(type="datetime")
      */
-    private $updated;
-
-
-    /**
-     * Get id
-     *
-     * @return integer
-     */
-    public function getId()
-    {
-        return $this->id;
-    }
-
-    /**
-     * @return Config
-     */
-    public function getBusinessConfig()
-    {
-        return $this->config;
-    }
-
-    /**
-     * @param Config $businessConfig
-     */
-    public function setBusinessConfig($businessConfig)
-    {
-        $this->businessConfig = $config;
-    }
-
-
-    /**
-     * @return BusinessBatchParticular
-     */
-    public function getBusinessBatchParticulars()
-    {
-        return $this->businessBatchParticulars;
-    }
-
-
-    /**
-     * @return string
-     */
-    public function getProcess()
-    {
-        return $this->process;
-    }
-
-    /**
-     * @param string $process
-     */
-    public function setProcess($process)
-    {
-        $this->process = $process;
-    }
-
-    /**
-     * @return string
-     */
-    public function getInvoice()
-    {
-        return $this->invoice;
-    }
-
-    /**
-     * @param string $invoice
-     */
-    public function setInvoice($invoice)
-    {
-        $this->invoice = $invoice;
-    }
-
-    /**
-     * @return int
-     */
-    public function getCode()
-    {
-        return $this->code;
-    }
-
-    /**
-     * @param int $code
-     */
-    public function setCode($code)
-    {
-        $this->code = $code;
-    }
-
-    /**
-     * @return float
-     */
-    public function getSubTotal()
-    {
-        return $this->subTotal;
-    }
-
-    /**
-     * @param float $subTotal
-     */
-    public function setSubTotal($subTotal)
-    {
-        $this->subTotal = $subTotal;
-    }
-
-    /**
-     * @return float
-     */
-    public function getTotal()
-    {
-        return $this->total;
-    }
-
-    /**
-     * @param float $total
-     */
-    public function setTotal($total)
-    {
-        $this->total = $total;
-    }
-
-    /**
-     * @return \DateTime
-     */
-    public function getCreated()
-    {
-        return $this->created;
-    }
-
-    /**
-     * @param \DateTime $created
-     */
-    public function setCreated($created)
-    {
-        $this->created = $created;
-    }
-
-    /**
-     * @return \DateTime
-     */
-    public function getUpdated()
-    {
-        return $this->updated;
-    }
-
-    /**
-     * @param \DateTime $updated
-     */
-    public function setUpdated($updated)
-    {
-        $this->updated = $updated;
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getCreatedBy()
-    {
-        return $this->createdBy;
-    }
-
-    /**
-     * @param mixed $createdBy
-     */
-    public function setCreatedBy($createdBy)
-    {
-        $this->createdBy = $createdBy;
-    }
-
-
+    private $updatedAt;
 
 
 

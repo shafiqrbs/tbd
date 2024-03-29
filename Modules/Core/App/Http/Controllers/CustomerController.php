@@ -50,7 +50,7 @@ class CustomerController extends Controller
         $service = new JsonRequestResponse();
         $input = $request->validated();
 
-        $input['global_option_id'] = $this->domain['global_id'];
+        $input['domain_id'] = $this->domain['global_id'];
         $input['customer_unique_id'] = "{$this->domain['global_id']}@{$input['mobile']}-{$input['name']}";
 
         $params = ['domain' => $this->domain['global_id'],'table' => 'cor_customers','prefix' => 'EMP-'];
@@ -120,7 +120,7 @@ class CustomerController extends Controller
 
         $data = $request->validated();
         $entity = CustomerModel::find($id);
-        $data['customer_unique_id'] = "{$entity['global_option_id']}@{$data['mobile']}-{$data['name']}";
+        $data['customer_unique_id'] = "{$entity['domain_id']}@{$data['mobile']}-{$data['name']}";
 
         $entity->update($data);
 

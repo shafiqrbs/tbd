@@ -9,7 +9,7 @@ use Gedmo\Mapping\Annotation as Gedmo;
  * BusinessDamage
  *
  * @ORM\Table("inv_damage")
- * @ORM\Entity(repositoryClass="Modules\Inventory\App\Repositories\BusinessDamageRepository")
+ * @ORM\Entity()
  */
 class BusinessDamage
 {
@@ -24,7 +24,7 @@ class BusinessDamage
 
 
     /**
-     * @ORM\ManyToOne(targetEntity="Modules\Inventory\App\Entities\Config", inversedBy="businessDamages")
+     * @ORM\ManyToOne(targetEntity="Modules\Inventory\App\Entities\Config")
      * @ORM\JoinColumn(onDelete="CASCADE")
      **/
     private $config;
@@ -38,14 +38,14 @@ class BusinessDamage
 
 
     /**
-     * @ORM\ManyToOne(targetEntity="Modules\Inventory\App\Entities\BusinessPurchaseItem", inversedBy="businessDamages", cascade={"persist"} )
+     * @ORM\ManyToOne(targetEntity="Modules\Inventory\App\Entities\BusinessPurchaseItem", cascade={"persist"} )
      * @ORM\JoinColumn(onDelete="CASCADE")
      **/
     private $businessPurchaseItem;
 
     /**
      * @Gedmo\Blameable(on="create")
-     * @ORM\ManyToOne(targetEntity="Modules\Core\App\Entities\User", inversedBy="damage" )
+     * @ORM\ManyToOne(targetEntity="Modules\Core\App\Entities\User")
      **/
     private  $createdBy;
 
@@ -80,16 +80,16 @@ class BusinessDamage
     /**
      * @var \DateTime
      * @Gedmo\Timestampable(on="create")
-     * @ORM\Column(name="created", type="datetime")
+     * @ORM\Column(type="datetime")
      */
-    private $created;
+    private $createdAt;
 
     /**
      * @var \DateTime
      * @Gedmo\Timestampable(on="update")
-     * @ORM\Column(name="updated", type="datetime")
+     * @ORM\Column(type="datetime")
      */
-    private $updated;
+    private $updatedAt;
 
     /**
      * @var string
@@ -104,207 +104,6 @@ class BusinessDamage
 	 * @ORM\Column(name="process", type="string", nullable=true)
 	 */
 	private $process = "Created";
-
-
-    /**
-     * Get id
-     *
-     * @return integer
-     */
-    public function getId()
-    {
-        return $this->id;
-    }
-
-    /**
-     * @return int
-     */
-    public function getQuantity()
-    {
-        return $this->quantity;
-    }
-
-    /**
-     * @param int $quantity
-     */
-    public function setQuantity($quantity)
-    {
-        $this->quantity = $quantity;
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getCreatedBy()
-    {
-        return $this->createdBy;
-    }
-
-    /**
-     * @param mixed $createdBy
-     */
-    public function setCreatedBy($createdBy)
-    {
-        $this->createdBy = $createdBy;
-    }
-
-    /**
-     * @return \DateTime
-     */
-    public function getCreated()
-    {
-        return $this->created;
-    }
-
-    /**
-     * @param \DateTime $created
-     */
-    public function setCreated($created)
-    {
-        $this->created = $created;
-    }
-
-    /**
-     * @return \DateTime
-     */
-    public function getUpdated()
-    {
-        return $this->updated;
-    }
-
-    /**
-     * @param \DateTime $updated
-     */
-    public function setUpdated($updated)
-    {
-        $this->updated = $updated;
-    }
-
-    /**
-     * @return string
-     */
-    public function getNotes()
-    {
-        return $this->notes;
-    }
-
-    /**
-     * @param string $notes
-     */
-    public function setNotes($notes)
-    {
-        $this->notes = $notes;
-    }
-
-    /**
-     * @return Config
-     */
-    public function getBusinessConfig()
-    {
-        return $this->config;
-    }
-
-    /**
-     * @param Config $businessConfig
-     */
-    public function setBusinessConfig($businessConfig)
-    {
-        $this->businessConfig = $config;
-    }
-
-    /**
-     * @return BusinessPurchaseItem
-     */
-    public function getBusinessPurchaseItem()
-    {
-        return $this->businessPurchaseItem;
-    }
-
-    /**
-     * @param BusinessPurchaseItem $businessPurchaseItem
-     */
-    public function setBusinessPurchaseItem($businessPurchaseItem)
-    {
-        $this->businessPurchaseItem = $businessPurchaseItem;
-    }
-
-    /**
-     * @return float
-     */
-    public function getPurchasePrice()
-    {
-        return $this->purchasePrice;
-    }
-
-    /**
-     * @param float $purchasePrice
-     */
-    public function setPurchasePrice($purchasePrice)
-    {
-        $this->purchasePrice = $purchasePrice;
-    }
-
-    /**
-     * @return float
-     */
-    public function getSubTotal()
-    {
-        return $this->subTotal;
-    }
-
-    /**
-     * @param float $subTotal
-     */
-    public function setSubTotal($subTotal)
-    {
-        $this->subTotal = $subTotal;
-    }
-
-    /**
-     * @return Product
-     */
-    public function getBusinessParticular()
-    {
-        return $this->businessParticular;
-    }
-
-    /**
-     * @param Product $businessParticular
-     */
-    public function setBusinessParticular($businessParticular)
-    {
-        $this->businessParticular = $businessParticular;
-    }
-
-	/**
-	 * @return string
-	 */
-	public function getProcess(){
-		return $this->process;
-	}
-
-	/**
-	 * @param string $process
-	 */
-	public function setProcess( string $process ) {
-		$this->process = $process;
-	}
-
-    /**
-     * @return mixed
-     */
-    public function getWearHouse()
-    {
-        return $this->wearHouse;
-    }
-
-    /**
-     * @param mixed $wearHouse
-     */
-    public function setWearHouse($wearHouse)
-    {
-        $this->wearHouse = $wearHouse;
-    }
 
 
 }

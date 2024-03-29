@@ -33,6 +33,10 @@ class DomainRequest extends FormRequest
                     'name' => 'required|string',
                     'mobile' => 'required|numeric',
                     'email' => 'required|email',
+                    'company_name' => 'required|string',
+                    'alternative_mobile' => 'string',
+                    'username' => 'required|string',
+                    'address' => 'string',
                 ];
             }
 
@@ -43,6 +47,8 @@ class DomainRequest extends FormRequest
                     'name' => 'required|string',
                     'mobile' => 'required|numeric',
                     'email' => 'required|email',
+                    'address' => 'string',
+                    'company_name' => 'required|string',
                 ];
             }
             default:break;
@@ -56,6 +62,7 @@ class DomainRequest extends FormRequest
             'name.string' => 'Name field must be string',
             'mobile.required' => 'Mobile field must be required',
             'mobile.integer' => 'Mobile field must be number',
+            'mobile.unique' => 'Mobile field must be unique',
             'email.required' => 'Email field must be required',
             'email.email' => 'Email field must be valid',
             'email.unique' => 'Email field must be unique',

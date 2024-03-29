@@ -34,6 +34,7 @@ return [
             ],
             'paths'      => [
                 base_path('app'),
+                base_path('Modules/Accounting/App/Entities'),
                 base_path('Modules/Domain/App/Entities'),
                 base_path('Modules/Core/App/Entities'),
                 base_path('Modules/Utility/App/Entities'),

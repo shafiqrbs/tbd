@@ -45,7 +45,7 @@ class LocationController extends Controller
         $service = new JsonRequestResponse();
         $input = $request->all();
         $domain = 65;
-        $input['global_option_id'] = $domain;
+        $input['domain_id'] = $domain;
         $params = ['domain' => $domain,'table' => 'cor_customers'];
         $pattern = $patternCodeService->customerCode($params);
         $input['code'] = $pattern['code'];

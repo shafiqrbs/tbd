@@ -3,12 +3,13 @@
 namespace Modules\Inventory\App\Entities;
 
 use Doctrine\ORM\Mapping as ORM;
+use Gedmo\Mapping\Annotation as Gedmo;
 
 /**
  * BusinessWearHouse
  *
  * @ORM\Table( name ="inv_wearhouse")
- * @ORM\Entity(repositoryClass="Modules\Inventory\App\Repositories\WearHouseRepository")
+ * @ORM\Entity()
  */
 class WearHouse
 {
@@ -23,17 +24,10 @@ class WearHouse
 
 
     /**
-     * @ORM\ManyToOne(targetEntity="Modules\Inventory\App\Entities\Config", inversedBy="wearHouses" , cascade={"detach","merge"} )
+     * @ORM\ManyToOne(targetEntity="Modules\Inventory\App\Entities\Config", cascade={"detach","merge"} )
      * @ORM\JoinColumn(onDelete="CASCADE")
      **/
     private  $config;
-
-
-    /**
-     * @ORM\OneToMany(targetEntity="Product", mappedBy="wearHouse")
-     * @ORM\OrderBy({"sorting" = "ASC"})
-     **/
-    private $businessParticulars;
 
 
     /**
@@ -67,7 +61,7 @@ class WearHouse
      /**
      * @var string
      *
-     * @ORM\Column(name="wearHouseCode", type="string", length=10, nullable=true)
+     * @ORM\Column(type="string", length=10, nullable=true)
      */
     private $wearHouseCode;
 
@@ -85,6 +79,21 @@ class WearHouse
      * @ORM\Column(name="status", type="boolean" )
      */
     private $status= true;
+
+    /**
+     * @var \DateTime
+     * @Gedmo\Timestampable(on="create")
+     * @ORM\Column(name="created_at", type="datetime")
+     */
+    private $createdAt;
+
+    /**
+     * @var \DateTime
+     * @Gedmo\Timestampable(on="create")
+     * @ORM\Column(name="updated_at", type="datetime")
+     */
+    private $updatedAt;
+
 
 
     /**

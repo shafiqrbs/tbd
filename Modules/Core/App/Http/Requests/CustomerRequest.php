@@ -38,7 +38,7 @@ class CustomerRequest extends FormRequest
                     'alternative_mobile' => 'integer|nullable',
                     'address' => 'string|nullable',
                     'email' => 'email|nullable',
-//                    'customer_unique_id' => [Rule::unique('unique:global_option_id,mobile,name')],
+//                    'customer_unique_id' => [Rule::unique('unique:domain_id,mobile,name')],
                 ];
             }
 
@@ -56,7 +56,7 @@ class CustomerRequest extends FormRequest
                     'alternative_mobile' => 'integer|nullable',
                     'address' => 'string|nullable',
                     'email' => 'email|nullable',
-                    'customer_unique_id' => ['unique:global_option_id,mobile,name']
+                    'customer_unique_id' => ['unique:domain_id,mobile,name']
                 ];
             }
             default:break;

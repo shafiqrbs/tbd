@@ -11,7 +11,7 @@ use Modules\Utility\App\Entities\ProductUnit;
  * BusinessVendorStockItem
  *
  * @ORM\Table(name="inv_vendor_stock_item")
- * @ORM\Entity(repositoryClass="Modules\Inventory\App\Repositories\BusinessVendorStockItemRepository")
+ * @ORM\Entity()
  */
 class BusinessVendorStockItem
 {
@@ -25,7 +25,7 @@ class BusinessVendorStockItem
     private $id;
 
     /**
-     * @ORM\ManyToOne(targetEntity="Modules\Inventory\App\Entities\BusinessVendorStock", inversedBy="businessVendorStockItems")
+     * @ORM\ManyToOne(targetEntity="Modules\Inventory\App\Entities\BusinessVendorStock")
      * @ORM\JoinColumn(onDelete="CASCADE")
      */
     protected $businessVendorStock;
@@ -35,10 +35,6 @@ class BusinessVendorStockItem
      **/
     private $particular;
 
-     /**
-         * @ORM\OneToMany(targetEntity="Modules\Inventory\App\Entities\BusinessInvoiceParticular", mappedBy="vendorStockItem", cascade={"persist"} )
-         **/
-    private $businessInvoiceParticulars;
 
 
     /**
@@ -72,122 +68,21 @@ class BusinessVendorStockItem
      */
     private $subTotal = 0;
 
-
+    /**
+     * @var \DateTime
+     * @Gedmo\Timestampable(on="create")
+     * @ORM\Column(type="datetime")
+     */
+    private $createdAt;
 
     /**
-     * Get id
-     *
-     * @return integer
+     * @var \DateTime
+     * @Gedmo\Timestampable(on="update")
+     * @ORM\Column(type="datetime")
      */
-    public function getId()
-    {
-        return $this->id;
-    }
+    private $updatedAt;
 
 
-    /**
-     * @return Product
-     */
-    public function getParticular()
-    {
-        return $this->particular;
-    }
-
-    /**
-     * @param Product $particular
-     */
-    public function setParticular($particular)
-    {
-        $this->particular = $particular;
-    }
-
-    /**
-     * @return int
-     */
-    public function getQuantity()
-    {
-        return $this->quantity;
-    }
-
-    /**
-     * @param int $quantity
-     */
-    public function setQuantity($quantity)
-    {
-        $this->quantity = $quantity;
-    }
-
-    /**
-     * @return float
-     */
-    public function getPrice()
-    {
-        return $this->price;
-    }
-
-    /**
-     * @param float $price
-     */
-    public function setPrice($price)
-    {
-        $this->price = $price;
-    }
-
-    /**
-     * @return float
-     */
-    public function getSubTotal()
-    {
-        return $this->subTotal;
-    }
-
-    /**
-     * @param float $subTotal
-     */
-    public function setSubTotal($subTotal)
-    {
-        $this->subTotal = $subTotal;
-    }
-
-    /**
-     * @return BusinessVendorStock
-     */
-    public function getBusinessVendorStock()
-    {
-        return $this->businessVendorStock;
-    }
-
-    /**
-     * @param BusinessVendorStock $businessVendorStock
-     */
-    public function setBusinessVendorStock($businessVendorStock)
-    {
-        $this->businessVendorStock = $businessVendorStock;
-    }
-
-    /**
-     * @return int
-     */
-    public function getSalesQuantity()
-    {
-        return $this->salesQuantity;
-    }
-
-    /**
-     * @param int $salesQuantity
-     */
-    public function setSalesQuantity($salesQuantity)
-    {
-        $this->salesQuantity = $salesQuantity;
-    }
-
-    /**
-     * @return BusinessInvoiceParticular
-     */
-    public function getBusinessInvoiceParticulars()
-    {
-        return $this->businessInvoiceParticulars;
-    }
 
 
 }

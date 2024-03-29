@@ -47,7 +47,7 @@ class VendorController extends Controller
         $service = new JsonRequestResponse();
         $input = $request->validated();
 
-        $input['global_option_id'] = $this->domain['global_id'];
+        $input['domain_id'] = $this->domain['global_id'];
         $params = ['domain' => $this->domain['global_id'],'table' => 'cor_vendors','prefix' => ''];
         $pattern = $patternCodeService->customerCode($params);
         $input['code'] = $pattern['code'];

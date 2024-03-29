@@ -9,7 +9,7 @@ use Setting\Bundle\LocationBundle\Entity\Location;
  * BusinessWearHouse
  *
  * @ORM\Table( name ="inv_area")
- * @ORM\Entity(repositoryClass="")
+ * @ORM\Entity()
  */
 class BusinessArea
 {
@@ -59,105 +59,6 @@ class BusinessArea
      */
     private $status= true;
 
-
-    /**
-     * Get id
-     *
-     * @return integer
-     */
-    public function getId()
-    {
-        return $this->id;
-    }
-
-
-    /**
-     * @return WearHouse
-     */
-    public function getName()
-    {
-        return $this->name;
-    }
-
-    /**
-     * @param WearHouse $name
-     */
-    public function setName($name)
-    {
-        $this->name = $name;
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getCode()
-    {
-        return $this->code;
-    }
-
-    /**
-     * @return Location
-     */
-    public function getLocation()
-    {
-        return $this->location;
-    }
-
-    /**
-     * @param Location $location
-     */
-    public function setLocation($location)
-    {
-        $this->location = $location;
-    }
-
-    /**
-     * @return Config
-     */
-    public function getBusinessConfig()
-    {
-        return $this->config;
-    }
-
-    /**
-     * @param Config $businessConfig
-     */
-    public function setBusinessConfig($businessConfig)
-    {
-        $this->businessConfig = $config;
-    }
-
-    /**
-     * @return BusinessInvoice
-     */
-    public function getInvoices()
-    {
-        return $this->invoices;
-    }
-
-    /**
-     * @return bool
-     */
-    public function isStatus()
-    {
-        return $this->status;
-    }
-
-    /**
-     * @param bool $status
-     */
-    public function setStatus($status)
-    {
-        $this->status = $status;
-    }
-
-    /**
-     * @return BusinessStore
-     */
-    public function getStores()
-    {
-        return $this->stores;
-    }
 
 
 }

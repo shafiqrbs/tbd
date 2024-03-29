@@ -18,7 +18,7 @@ class CoreRepository extends EntityRepository{
         $entity = DB::table("users as e")
             ->select(DB::raw("CONCAT(e.username, ' - ', e.email) AS name"),'e.id as id')
             ->where('e.is_delete', 0)
-            ->where('e.global_option_id', $domain)
+            ->where('e.domain_id', $domain)
             ->where(function ($query) use ($term) {
                 $query->orWhere('e.username','LIKE','%'.$term.'%')
                     ->orWhere('e.name','LIKE','%'.$term.'%');
@@ -32,7 +32,7 @@ class CoreRepository extends EntityRepository{
         $entity = DB::table("cor_customers as e")
             ->select(DB::raw("CONCAT(e.mobile, ' - ', e.name) AS name"),'e.id as id')
             ->where('e.status', 1)
-            ->where('e.global_option_id', $domain)
+            ->where('e.domain_id', $domain)
             ->where(function ($query) use ($term) {
                 $query->orWhere('e.name','LIKE','%'.$term.'%')
                     ->orWhere('e.mobile','LIKE','%'.$term.'%');
@@ -46,7 +46,7 @@ class CoreRepository extends EntityRepository{
         $entity = DB::table("cor_vendors as e")
             ->select(DB::raw("CONCAT(e.mobile, ' - ', e.name) AS name"),'e.id as id')
             ->where('e.status', 1)
-            ->where('e.global_option_id', $domain)
+            ->where('e.domain_id', $domain)
             ->where(function ($query) use ($term) {
                 $query->orWhere('e.name','LIKE','%'.$term.'%')
                     ->orWhere('e.mobile','LIKE','%'.$term.'%');

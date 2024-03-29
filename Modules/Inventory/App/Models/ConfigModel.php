@@ -21,7 +21,7 @@ class ConfigModel extends Model
     protected $fillable = [
         'business_model_id',
         'stock_format',
-        'global_option_id',
+        'domain_id',
         'printer',
         'address',
         'path',

@@ -28,7 +28,7 @@ class VendorModel extends Model
         'code',
         'vendor_code',
         'customer_id',
-        'global_option_id'
+        'domain_id'
     ];
 
     public static function getRecords($request,$domain)
@@ -37,7 +37,7 @@ class VendorModel extends Model
         $perPage = isset($request['offset']) && $request['offset']!=''? (int)($request['offset']):0;
         $skip = isset($page) && $page!=''? (int)$page * $perPage:0;
 
-        $vendors = self::where('global_option_id',$domain['global_id'])
+        $vendors = self::where('domain_id',$domain['global_id'])
         ->select([
             'id',
             'name',

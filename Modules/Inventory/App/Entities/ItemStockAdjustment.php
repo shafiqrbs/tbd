@@ -37,7 +37,7 @@ class ItemStockAdjustment
 
     /**
      * @Gedmo\Blameable(on="create")
-     * @ORM\ManyToOne(targetEntity="Modules\Core\App\Entities\User", inversedBy="damage" )
+     * @ORM\ManyToOne(targetEntity="Modules\Core\App\Entities\User")
      **/
     private  $createdBy;
 
@@ -55,21 +55,6 @@ class ItemStockAdjustment
      * @ORM\Column(name="bonus", type="integer",nullable=true)
      */
     private $bonus;
-
-
-    /**
-     * @var \DateTime
-     * @Gedmo\Timestampable(on="create")
-     * @ORM\Column(name="created", type="datetime")
-     */
-    private $created;
-
-    /**
-     * @var \DateTime
-     * @Gedmo\Timestampable(on="update")
-     * @ORM\Column(name="updated", type="datetime")
-     */
-    private $updated;
 
     /**
      * @var string
@@ -92,176 +77,33 @@ class ItemStockAdjustment
      */
     private $mode = "minus";
 
+    /**
+     * @var \DateTime
+     * @Gedmo\Timestampable(on="create")
+     * @ORM\Column(name="created_at", type="datetime")
+     */
+    private $createdAt;
 
     /**
-     * Get id
-     *
-     * @return integer
+     * @var \DateTime
+     * @Gedmo\Timestampable(on="create")
+     * @ORM\Column(name="updated_at", type="datetime")
      */
-    public function getId()
-    {
-        return $this->id;
-    }
+    private $updatedAt;
 
     /**
-     * @return int
+     * @var \DateTime
+     * @Gedmo\Timestampable(on="create")
+     * @ORM\Column(name="created", type="datetime")
      */
-    public function getQuantity()
-    {
-        return $this->quantity;
-    }
+    private $created;
 
     /**
-     * @param int $quantity
+     * @var \DateTime
+     * @Gedmo\Timestampable(on="update")
+     * @ORM\Column(name="updated", type="datetime")
      */
-    public function setQuantity($quantity)
-    {
-        $this->quantity = $quantity;
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getCreatedBy()
-    {
-        return $this->createdBy;
-    }
-
-    /**
-     * @param mixed $createdBy
-     */
-    public function setCreatedBy($createdBy)
-    {
-        $this->createdBy = $createdBy;
-    }
-
-    /**
-     * @return \DateTime
-     */
-    public function getCreated()
-    {
-        return $this->created;
-    }
-
-    /**
-     * @param \DateTime $created
-     */
-    public function setCreated($created)
-    {
-        $this->created = $created;
-    }
-
-    /**
-     * @return \DateTime
-     */
-    public function getUpdated()
-    {
-        return $this->updated;
-    }
-
-    /**
-     * @param \DateTime $updated
-     */
-    public function setUpdated($updated)
-    {
-        $this->updated = $updated;
-    }
-
-    /**
-     * @return string
-     */
-    public function getNotes()
-    {
-        return $this->notes;
-    }
-
-    /**
-     * @param string $notes
-     */
-    public function setNotes($notes)
-    {
-        $this->notes = $notes;
-    }
-
-
-	/**
-	 * @return string
-	 */
-	public function getProcess(){
-		return $this->process;
-	}
-
-	/**
-	 * @param string $process
-	 */
-	public function setProcess($process ) {
-		$this->process = $process;
-	}
-
-
-    /**
-     * @return string
-     */
-    public function getMode()
-    {
-        return $this->mode;
-    }
-
-    /**
-     * @param string $mode
-     */
-    public function setMode($mode)
-    {
-        $this->mode = $mode;
-    }
-
-    /**
-     * @return int
-     */
-    public function getBonus()
-    {
-        return $this->bonus;
-    }
-
-    /**
-     * @param int $bonus
-     */
-    public function setBonus($bonus)
-    {
-        $this->bonus = $bonus;
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getConfig()
-    {
-        return $this->config;
-    }
-
-    /**
-     * @param mixed $config
-     */
-    public function setConfig($config)
-    {
-        $this->config = $config;
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getItem()
-    {
-        return $this->item;
-    }
-
-    /**
-     * @param mixed $item
-     */
-    public function setItem($item)
-    {
-        $this->item = $item;
-    }
+    private $updated;
 
 
 

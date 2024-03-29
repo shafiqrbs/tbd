@@ -24,7 +24,7 @@ class Product
     private $id;
 
     /**
-     * @ORM\ManyToOne(targetEntity="Modules\Inventory\App\Entities\Config", inversedBy="businessParticulars" , cascade={"detach","merge"} )
+     * @ORM\ManyToOne(targetEntity="Modules\Inventory\App\Entities\Config", cascade={"detach","merge"} )
      **/
     private  $config;
 
@@ -35,7 +35,7 @@ class Product
     private  $productType;
 
     /**
-     * @ORM\ManyToOne(targetEntity="Modules\Inventory\App\Entities\Category", inversedBy="businessParticulars" )
+     * @ORM\ManyToOne(targetEntity="Modules\Inventory\App\Entities\Category")
      * @ORM\OrderBy({"sorting" = "ASC"})
      **/
     private $category;
@@ -47,13 +47,13 @@ class Product
     private $brand;
 
      /**
-     * @ORM\ManyToOne(targetEntity="Modules\Inventory\App\Entities\WearHouse", inversedBy="businessParticulars" )
+     * @ORM\ManyToOne(targetEntity="Modules\Inventory\App\Entities\WearHouse")
      * @ORM\OrderBy({"sorting" = "ASC"})
      **/
     private $wearHouse;
 
     /**
-     * @ORM\ManyToOne(targetEntity="Modules\Inventory\App\Entities\WearHouse", inversedBy="businessParticulars" )
+     * @ORM\ManyToOne(targetEntity="Modules\Inventory\App\Entities\WearHouse")
      **/
     private $businessParticularType;
 
@@ -62,56 +62,6 @@ class Product
      * @ORM\ManyToOne(targetEntity="Particular")
      **/
     private $rackNo;
-
-    /**
-     * @ORM\OneToMany(targetEntity="Modules\Inventory\App\Entities\BusinessInvoiceParticular", mappedBy="businessParticular" )
-     * @ORM\OrderBy({"id" = "ASC"})
-     **/
-    private $businessInvoiceParticulars;
-
-    /**
-     * @ORM\OneToMany(targetEntity="Modules\Inventory\App\Entities\BusinessProductionExpense", mappedBy="productionItem" )
-     * @ORM\OrderBy({"id" = "ASC"})
-     **/
-    private $businessProductionExpense;
-
-    /**
-     * @ORM\OneToMany(targetEntity="Modules\Inventory\App\Entities\BusinessProductionExpense", mappedBy="productionElement" )
-     * @ORM\OrderBy({"id" = "ASC"})
-     **/
-    private $businessProductionExpenseItem;
-
-
-	/**
-	 * @ORM\OneToMany(targetEntity="Modules\Inventory\App\Entities\BusinessProductionElement", mappedBy="businessParticular" )
-	 **/
-	private $productionElements;
-
-    /**
-	 * @ORM\OneToMany(targetEntity="Modules\Inventory\App\Entities\BusinessProduction", mappedBy="businessParticular" )
-	 **/
-	private $businessProductions;
-
-    /**
-     * @ORM\OneToMany(targetEntity="Modules\Inventory\App\Entities\BusinessProductionElement", mappedBy="particular" )
-     **/
-    private $production;
-
-    /**
-     * @ORM\OneToMany(targetEntity="Modules\Inventory\App\Entities\BusinessPurchaseItem", mappedBy="businessParticular" )
-     **/
-    private $businessPurchaseItems;
-
-     /**
-     * @ORM\OneToMany(targetEntity="Modules\Inventory\App\Entities\BusinessDamage", mappedBy="businessParticular" )
-     **/
-    private $businessDamages;
-
-
-     /**
-     * @ORM\OneToMany(targetEntity="Modules\Inventory\App\Entities\BusinessVendorStockItem", mappedBy="particular" )
-     **/
-    private $businessVendorStockItems;
 
 
     /**

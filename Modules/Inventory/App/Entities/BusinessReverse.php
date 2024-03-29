@@ -9,7 +9,8 @@ use Gedmo\Mapping\Annotation as Gedmo;
  * BusinessReverse
  *
  * @ORM\Table(name="inv_reverse")
- * @ORM\Entity(repositoryClass="Modules\Inventory\App\Repositories\BusinessReverseRepository")
+ * @ORM\Entity()
+ *
  */
 class BusinessReverse
 {

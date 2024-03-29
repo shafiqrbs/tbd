@@ -3,12 +3,13 @@
 namespace Modules\Inventory\App\Entities;
 
 use Doctrine\ORM\Mapping as ORM;
+use Gedmo\Mapping\Annotation as Gedmo;
 
 /**
  * Courier
  *
  * @ORM\Table( name ="inv_courier")
- * @ORM\Entity(repositoryClass="Modules\Inventory\App\Repositories\CourierRepository")
+ * @ORM\Entity()
  */
 class Courier
 {
@@ -23,15 +24,10 @@ class Courier
 
 
     /**
-     * @ORM\ManyToOne(targetEntity="Modules\Inventory\App\Entities\Config", inversedBy="marketing" , cascade={"detach","merge"} )
+     * @ORM\ManyToOne(targetEntity="Modules\Inventory\App\Entities\Config" , cascade={"detach","merge"} )
      * @ORM\JoinColumn(onDelete="CASCADE")
      **/
     private  $config;
-
-    /**
-     * @ORM\OneToMany(targetEntity="Modules\Inventory\App\Entities\BusinessInvoice", mappedBy="courier")
-     **/
-    private $invoices;
 
 
     /**
@@ -51,20 +47,20 @@ class Courier
     /**
      * @var string
      *
-     * @ORM\Column(name="mobileNo", type="string", length=100, nullable=true)
+     * @ORM\Column( type="string", length=100, nullable=true)
      */
     private $mobileNo;
 
     /**
      * @var string
      *
-     * @ORM\Column(name="companyName", type="string", length=200, nullable=true)
+     * @ORM\Column( type="string", length=200, nullable=true)
      */
     private $companyName;
 
     /**
      * @var \DateTime
-     * @ORM\Column(name="joiningDate", type="datetime",  nullable=true)
+     * @ORM\Column(type="datetime",  nullable=true)
      */
     private $joiningDate;
 
@@ -76,137 +72,21 @@ class Courier
      */
     private $status= true;
 
+    /**
+     * @var \DateTime
+     * @Gedmo\Timestampable(on="create")
+     * @ORM\Column(name="created_at", type="datetime")
+     */
+    private $createdAt;
 
     /**
-     * Get id
-     *
-     * @return integer
+     * @var \DateTime
+     * @Gedmo\Timestampable(on="create")
+     * @ORM\Column(name="updated_at", type="datetime")
      */
-    public function getId()
-    {
-        return $this->id;
-    }
+    private $updatedAt;
 
 
-    /**
-     * @return WearHouse
-     */
-    public function getName()
-    {
-        return $this->name;
-    }
-
-    /**
-     * @param WearHouse $name
-     */
-    public function setName($name)
-    {
-        $this->name = $name;
-    }
-
-    /**
-     * @return Config
-     */
-    public function getBusinessConfig()
-    {
-        return $this->config;
-    }
-
-    /**
-     * @param Config $businessConfig
-     */
-    public function setBusinessConfig($businessConfig)
-    {
-        $this->businessConfig = $config;
-    }
-
-    /**
-     * @return BusinessInvoice
-     */
-    public function getInvoices()
-    {
-        return $this->invoices;
-    }
-
-    /**
-     * @return string
-     */
-    public function getDesignation()
-    {
-        return $this->designation;
-    }
-
-    /**
-     * @param string $designation
-     */
-    public function setDesignation(string $designation)
-    {
-        $this->designation = $designation;
-    }
-
-    /**
-     * @return string
-     */
-    public function getMobileNo()
-    {
-        return $this->mobileNo;
-    }
-
-    /**
-     * @param string $mobileNo
-     */
-    public function setMobileNo(string $mobileNo)
-    {
-        $this->mobileNo = $mobileNo;
-    }
-
-    /**
-     * @return string
-     */
-    public function getCompanyName()
-    {
-        return $this->companyName;
-    }
-
-    /**
-     * @param string $companyName
-     */
-    public function setCompanyName(string $companyName)
-    {
-        $this->companyName = $companyName;
-    }
-
-    /**
-     * @return \DateTime
-     */
-    public function getJoiningDate()
-    {
-        return $this->joiningDate;
-    }
-
-    /**
-     * @param \DateTime $joiningDate
-     */
-    public function setJoiningDate($joiningDate)
-    {
-        $this->joiningDate = $joiningDate;
-    }
-
-    /**
-     * @return bool
-     */
-    public function isStatus()
-    {
-        return $this->status;
-    }
-
-    /**
-     * @param bool $status
-     */
-    public function setStatus($status)
-    {
-        $this->status = $status;
-    }
 
 
 }

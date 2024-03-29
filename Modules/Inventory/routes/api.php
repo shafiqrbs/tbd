@@ -33,6 +33,7 @@ Route::prefix('/inventory')->middleware([HeaderAuthenticationMiddleware::class])
     Route::PATCH('/config-update', [ConfigController::class,'updateConfig'])->name('update_config');
     Route::apiResource('/category-group', CategoryGroupController::class)->middleware([HeaderAuthenticationMiddleware::class]);
     Route::apiResource('/product', ProductController::class)->middleware([HeaderAuthenticationMiddleware::class]);
+    Route::apiResource('/sales', ProductController::class)->middleware([HeaderAuthenticationMiddleware::class]);
     Route::get('/stock-item', [ProductController::class,'stockItem'])->name('get_stock_item');
 
 });

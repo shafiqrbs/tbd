@@ -6,10 +6,13 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Modules\Accounting\App\Models\AccountingModel;
 use Modules\AppsApi\App\Services\JsonRequestResponse;
 use Modules\Domain\App\Http\Requests\DomainRequest;
 use Modules\Core\App\Models\UserModel;
 use Modules\Domain\App\Models\DomainModel;
+use Modules\Inventory\App\Models\ConfigModel;
+use Modules\Utility\App\Models\SettingModel;
 
 class DomainController extends Controller
 {
@@ -50,6 +53,22 @@ class DomainController extends Controller
     {
         $data = $request->validated();
         $entity = DomainModel::create($data);
+        $password= "@123456";
+        $email = ($data['email']) ? $data['email'] : "{$data['username']}@gmail.com";
+        UserModel::create([
+            'username' => $data['username'],
+            'email' => $email,
+            'password' => bcrypt($password),
+            'domain_id'=> $entity->id
+        ]);
+        $business = SettingModel::whereSlug('general')->first();
+        ConfigModel::create([
+            'domain_id'=> $entity->id,
+            'business_model_id'=>$business->id
+        ]);
+        AccountingModel::create([
+            'domain_id'=> $entity->id
+        ]);
         $service = new JsonRequestResponse();
         return $service->returnJosnResponse($entity);
     }

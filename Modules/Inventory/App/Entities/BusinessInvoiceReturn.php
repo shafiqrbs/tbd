@@ -13,7 +13,7 @@ use Gedmo\Mapping\Annotation as Gedmo;
  * BusinessInvoiceReturn
  *
  * @ORM\Table( name ="inv_invoice_return")
- * @ORM\Entity(repositoryClass="Modules\Inventory\App\Repositories\BusinessInvoiceReturnRepository")
+ * @ORM\Entity()
  */
 class BusinessInvoiceReturn
 {

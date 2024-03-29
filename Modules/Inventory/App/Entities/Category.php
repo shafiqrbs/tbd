@@ -10,7 +10,7 @@ use Gedmo\Mapping\Annotation as Gedmo;
  * RestaurantCategory
  * @Gedmo\Tree(type="materializedPath")
  * @ORM\Table( name ="inv_category")
- * @ORM\Entity(repositoryClass="Modules\Inventory\App\Repositories\CategoryRepository")
+ * @ORM\Entity()
  */
 class Category
 {
@@ -25,7 +25,7 @@ class Category
 
 
     /**
-     * @ORM\ManyToOne(targetEntity="Modules\Inventory\App\Entities\Config", inversedBy="categories" , cascade={"detach","merge"} )
+     * @ORM\ManyToOne(targetEntity="Modules\Inventory\App\Entities\Config" , cascade={"detach","merge"} )
      * @ORM\JoinColumn(onDelete="CASCADE")
      **/
     private  $config;
@@ -96,190 +96,6 @@ class Category
      * @ORM\Column(name="updated_at", type="datetime")
      */
     private $updatedAt;
-
-
-    /**
-     * Get id
-     *
-     * @return integer
-     */
-    public function getId()
-    {
-        return $this->id;
-    }
-
-
-    /**
-     * @return Category
-     */
-    public function getName()
-    {
-        return $this->name;
-    }
-
-    /**
-     * @param Category $name
-     */
-    public function setName($name)
-    {
-        $this->name = $name;
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getCode()
-    {
-        return $this->code;
-    }
-
-    /**
-     * @param mixed $code
-     */
-    public function setCode($code)
-    {
-        $this->code = $code;
-    }
-
-
-    /**
-     * @return bool
-     */
-    public function getStatus()
-    {
-        return $this->status;
-    }
-
-    /**
-     * @param bool $status
-     */
-    public function setStatus($status)
-    {
-        $this->status = $status;
-    }
-
-    /**
-     * @return int
-     */
-    public function getSorting()
-    {
-        return $this->sorting;
-    }
-
-    /**
-     * @param int $sorting
-     */
-    public function setSorting($sorting)
-    {
-        $this->sorting = $sorting;
-    }
-
-    /**
-     * @return bool
-     */
-    public function getHasQuantity()
-    {
-        return $this->hasQuantity;
-    }
-
-    /**
-     * @param bool $hasQuantity
-     */
-    public function setHasQuantity($hasQuantity)
-    {
-        $this->hasQuantity = $hasQuantity;
-    }
-
-
-    /**
-     * @return string
-     */
-    public function getSlug()
-    {
-        return $this->slug;
-    }
-
-    /**
-     * @param string $slug
-     */
-    public function setSlug($slug)
-    {
-        $this->slug = $slug;
-    }
-
-
-    /**
-     * @return Config
-     */
-    public function getBusinessConfig()
-    {
-        return $this->config;
-    }
-
-    /**
-     * @param Config $businessConfig
-     */
-    public function setBusinessConfig($businessConfig)
-    {
-        $this->businessConfig = $config;
-    }
-
-    /**
-     * @return Product
-     */
-    public function getBusinessParticulars()
-    {
-        return $this->businessParticulars;
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getParent()
-    {
-        return $this->parent;
-    }
-
-    /**
-     * @param mixed $parent
-     */
-    public function setParent($parent)
-    {
-        $this->parent = $parent;
-    }
-
-    /**
-     * @return \DateTime
-     */
-    public function getCreatedAt()
-    {
-        return $this->createdAt;
-    }
-
-    /**
-     * @param \DateTime $createdAt
-     */
-    public function setCreatedAt($createdAt)
-    {
-        $this->createdAt = $createdAt;
-    }
-
-    /**
-     * @return \DateTime
-     */
-    public function getUpdatedAt()
-    {
-        return $this->updatedAt;
-    }
-
-    /**
-     * @param \DateTime $updatedAt
-     */
-    public function setUpdatedAt($updatedAt)
-    {
-        $this->updatedAt = $updatedAt;
-    }
-
 
 
 }

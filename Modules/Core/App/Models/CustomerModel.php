@@ -57,7 +57,7 @@ class CustomerModel extends Model
         'customerId',
         'customer_unique_name',
         'unique_id',
-        'global_option_id'
+        'domain_id'
     ];
     public static function getAllCustomers(){
         $data = self::where(['status'=>1])->whereNotNull('mobile')->orderBy('name','ASC')
@@ -120,12 +120,11 @@ class CustomerModel extends Model
     public static function getRecords($domain,$request){
 
         $global = $domain['global_id'];
-
         $page =  isset($request['page']) && $request['page'] > 0?($request['page'] - 1 ) : 0;
-        $perPage = isset($request['offset']) && $request['offset']!=''? (int)($request['offset']):0;
+        $perPage = isset($request['offset']) && $request['offset']!=''? (int)($request['offset']):50;
         $skip = isset($page) && $page!=''? (int)$page*$perPage:0;
 
-        $customers = self::where('global_option_id',$global)
+        $customers = self::where('domain_id',$global)
             ->select([
                 'id',
                 'name',

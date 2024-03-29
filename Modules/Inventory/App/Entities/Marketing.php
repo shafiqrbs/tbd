@@ -3,12 +3,13 @@
 namespace Modules\Inventory\App\Entities;
 
 use Doctrine\ORM\Mapping as ORM;
+use Gedmo\Mapping\Annotation as Gedmo;
 
 /**
  * BusinessWearHouse
  *
  * @ORM\Table( name ="inv_marketing")
- * @ORM\Entity(repositoryClass="")
+ * @ORM\Entity()
  */
 class Marketing
 {
@@ -23,15 +24,11 @@ class Marketing
 
 
     /**
-     * @ORM\ManyToOne(targetEntity="Modules\Inventory\App\Entities\Config", inversedBy="marketing" , cascade={"detach","merge"} )
+     * @ORM\ManyToOne(targetEntity="Modules\Inventory\App\Entities\Config", cascade={"detach","merge"} )
      * @ORM\JoinColumn(onDelete="CASCADE")
      **/
     private  $config;
 
-    /**
-     * @ORM\OneToMany(targetEntity="Modules\Inventory\App\Entities\BusinessInvoice", mappedBy="marketing")
-     **/
-    private $invoices;
 
 
     /**
@@ -51,28 +48,28 @@ class Marketing
     /**
      * @var string
      *
-     * @ORM\Column(name="mobileNo", type="string", length=100, nullable=true)
+     * @ORM\Column( type="string", length=100, nullable=true)
      */
     private $mobileNo;
 
     /**
      * @var string
      *
-     * @ORM\Column(name="companyName", type="string", length=200, nullable=true)
+     * @ORM\Column(type="string", length=200, nullable=true)
      */
     private $companyName;
 
      /**
      * @var float
      *
-     * @ORM\Column(name="monthlySales", type="float",nullable=true)
+     * @ORM\Column( type="float",nullable=true)
      */
     private $monthlySales;
 
     /**
      * @var float
      *
-     * @ORM\Column(name="yearlySales", type="float",nullable=true)
+     * @ORM\Column( type="float",nullable=true)
      */
     private $yearlySales;
 
@@ -85,9 +82,17 @@ class Marketing
 
     /**
      * @var \DateTime
-     * @ORM\Column(name="joiningDate", type="datetime",  nullable=true)
+     * @Gedmo\Timestampable(on="create")
+     * @ORM\Column(name="created_at", type="datetime")
      */
-    private $joiningDate;
+    private $createdAt;
+
+    /**
+     * @var \DateTime
+     * @Gedmo\Timestampable(on="create")
+     * @ORM\Column(name="updated_at", type="datetime")
+     */
+    private $updatedAt;
 
 
     /**
@@ -96,189 +101,6 @@ class Marketing
      * @ORM\Column(name="status", type="boolean" )
      */
     private $status= true;
-
-
-    /**
-     * Get id
-     *
-     * @return integer
-     */
-    public function getId()
-    {
-        return $this->id;
-    }
-
-
-    /**
-     * @return WearHouse
-     */
-    public function getName()
-    {
-        return $this->name;
-    }
-
-    /**
-     * @param WearHouse $name
-     */
-    public function setName($name)
-    {
-        $this->name = $name;
-    }
-
-    /**
-     * @return Config
-     */
-    public function getBusinessConfig()
-    {
-        return $this->config;
-    }
-
-    /**
-     * @param Config $businessConfig
-     */
-    public function setBusinessConfig($businessConfig)
-    {
-        $this->businessConfig = $config;
-    }
-
-    /**
-     * @return BusinessInvoice
-     */
-    public function getInvoices()
-    {
-        return $this->invoices;
-    }
-
-    /**
-     * @return string
-     */
-    public function getDesignation()
-    {
-        return $this->designation;
-    }
-
-    /**
-     * @param string $designation
-     */
-    public function setDesignation(string $designation)
-    {
-        $this->designation = $designation;
-    }
-
-    /**
-     * @return string
-     */
-    public function getMobileNo()
-    {
-        return $this->mobileNo;
-    }
-
-    /**
-     * @param string $mobileNo
-     */
-    public function setMobileNo(string $mobileNo)
-    {
-        $this->mobileNo = $mobileNo;
-    }
-
-    /**
-     * @return string
-     */
-    public function getCompanyName()
-    {
-        return $this->companyName;
-    }
-
-    /**
-     * @param string $companyName
-     */
-    public function setCompanyName(string $companyName)
-    {
-        $this->companyName = $companyName;
-    }
-
-    /**
-     * @return \DateTime
-     */
-    public function getJoiningDate()
-    {
-        return $this->joiningDate;
-    }
-
-    /**
-     * @param \DateTime $joiningDate
-     */
-    public function setJoiningDate($joiningDate)
-    {
-        $this->joiningDate = $joiningDate;
-    }
-
-    /**
-     * @return bool
-     */
-    public function isStatus()
-    {
-        return $this->status;
-    }
-
-    /**
-     * @param bool $status
-     */
-    public function setStatus($status)
-    {
-        $this->status = $status;
-    }
-
-    /**
-     * @return float
-     */
-    public function getMonthlySales()
-    {
-        return $this->monthlySales;
-    }
-
-    /**
-     * @param float $monthlySales
-     */
-    public function setMonthlySales($monthlySales)
-    {
-        $this->monthlySales = $monthlySales;
-    }
-
-    /**
-     * @return float
-     */
-    public function getYearlySales()
-    {
-        return $this->yearlySales;
-    }
-
-    /**
-     * @param float $yearlySales
-     */
-    public function setYearlySales($yearlySales)
-    {
-        $this->yearlySales = $yearlySales;
-    }
-
-    /**
-     * @return float
-     */
-    public function getDiscount()
-    {
-        return $this->discount;
-    }
-
-    /**
-     * @param float $discount
-     */
-    public function setDiscount($discount)
-    {
-        $this->discount = $discount;
-    }
-
-
-
 
 }
 
