@@ -97,7 +97,7 @@ class UserModel extends Model
     {
         $data = self::select(['dom_domain.id as global_id','inv_config.id as config_id','users.id as user_id','acc_config.id as acc_config_id'])
             ->join('dom_domain','dom_domain.id','=','users.domain_id')
-            ->join('inv_config','inv_config.domain_id','=','dom_domain.id')
+            ->leftjoin('inv_config','inv_config.domain_id','=','dom_domain.id')
             ->leftjoin('acc_config','acc_config.domain_id','=','dom_domain.id')
             ->where('users.id',$id)->first();
         return $data;
