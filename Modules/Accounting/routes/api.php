@@ -19,10 +19,13 @@ use Modules\Accounting\App\Http\Controllers\TransactionModeController;
 
 
 Route::prefix('/accounting/select')->middleware([HeaderAuthenticationMiddleware::class])->group(function() {
-    Route::get('/transactionmode', [AccountingController::class,'transactionmodedDropdown'])->name('transactionmode_dropdown');
+    Route::get('/transaction-mode', [AccountingController::class,'transactionmodedDropdown'])->name('transactionmode_dropdown');
 });
 
 Route::prefix('/accounting')->middleware([HeaderAuthenticationMiddleware::class])->group(function() {
-    Route::apiResource('/transactionmode', TransactionModeController::class)->middleware([HeaderAuthenticationMiddleware::class]);
+    Route::apiResource('/transaction-mode', TransactionModeController::class)->middleware([HeaderAuthenticationMiddleware::class]);
+
+    Route::get('/transaction-mode-data', [TransactionModeController::class,'transactionMode'])->name('transaction_mode');
+
 });
 

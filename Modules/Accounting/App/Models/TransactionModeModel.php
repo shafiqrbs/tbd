@@ -5,6 +5,7 @@ namespace Modules\Accounting\App\Models;
 use Cviebrock\EloquentSluggable\Sluggable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Support\Facades\DB;
 
 class TransactionModeModel extends Model
 {
@@ -83,6 +84,25 @@ class TransactionModeModel extends Model
 
         $data = array('count'=>$total,'entities'=>$entities);
         return $data;
+    }
+
+
+    public static function getTransactionsModeData($domain)
+    {
+        $entities = self::where([['acc_transaction_mode.config_id',$domain['acc_config_id']],['acc_transaction_mode.status',1]])
+            ->leftjoin('uti_transaction_method','uti_transaction_method.id','=','acc_transaction_mode.method_id')
+            ->select([
+                'acc_transaction_mode.id',
+                'acc_transaction_mode.authorised',
+                'acc_transaction_mode.service_charge',
+                'acc_transaction_mode.account_type',
+                'acc_transaction_mode.name',
+                'uti_transaction_method.name as method_name',
+                'uti_transaction_method.slug as method_slug',
+                DB::raw("CONCAT('".url('')."/image/accounting/transaction-mode/', acc_transaction_mode.path) AS path")
+        ])
+            ->get();
+        return $entities;
     }
 
 

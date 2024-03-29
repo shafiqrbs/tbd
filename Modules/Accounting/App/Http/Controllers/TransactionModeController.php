@@ -126,4 +126,11 @@ class TransactionModeController extends Controller
         $data = $service->returnJosnResponse($entity);
         return $data;
     }
+
+    public function transactionMode(Request $request)
+    {
+        $entity = TransactionModeModel::getTransactionsModeData($this->domain);
+        $service = new JsonRequestResponse();
+        return $service->returnJosnResponse($entity);
+    }
 }

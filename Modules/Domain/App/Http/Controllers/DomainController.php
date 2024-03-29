@@ -10,6 +10,7 @@ use Modules\Accounting\App\Models\AccountingModel;
 use Modules\AppsApi\App\Services\JsonRequestResponse;
 use Modules\Domain\App\Http\Requests\DomainRequest;
 use Modules\Core\App\Models\UserModel;
+use Modules\Domain\App\Models\CurrencyModel;
 use Modules\Domain\App\Models\DomainModel;
 use Modules\Inventory\App\Models\ConfigModel;
 use Modules\Utility\App\Models\SettingModel;
@@ -62,8 +63,11 @@ class DomainController extends Controller
             'domain_id'=> $entity->id
         ]);
         $business = SettingModel::whereSlug('general')->first();
+        $currency = CurrencyModel::find(1);
         ConfigModel::create([
             'domain_id'=> $entity->id,
+            'currency_id'=> $currency->id,
+            'zero_stock'=> true,
             'business_model_id'=>$business->id
         ]);
         AccountingModel::create([
