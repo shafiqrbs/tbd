@@ -12,7 +12,6 @@ use Modules\AppsApi\App\Services\JsonRequestResponse;
 use Modules\Domain\App\Http\Requests\DomainRequest;
 use Modules\Core\App\Models\UserModel;
 use Modules\Domain\App\Models\DomainModel;
-use Modules\Inventory\App\Models\AccountTransactionModel;
 use Modules\Inventory\App\Models\ConfigModel;
 use Modules\Utility\App\Models\SettingModel;
 
