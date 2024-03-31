@@ -4,6 +4,7 @@ use App\Http\Middleware\HeaderAuthenticationMiddleware;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Modules\Accounting\App\Http\Controllers\AccountingController;
+use Modules\Accounting\App\Http\Controllers\TransactionMethodController;
 use Modules\Accounting\App\Http\Controllers\TransactionModeController;
 
 /*
@@ -19,7 +20,7 @@ use Modules\Accounting\App\Http\Controllers\TransactionModeController;
 
 
 Route::prefix('/accounting/select')->middleware([HeaderAuthenticationMiddleware::class])->group(function() {
-    Route::get('/transaction-mode', [AccountingController::class,'transactionmodedDropdown'])->name('transactionmode_dropdown');
+    Route::get('/transaction-method', [TransactionMethodController::class,'transactionMethodDropdown'])->name('transaction_method_dropdown');
 });
 
 Route::prefix('/accounting')->middleware([HeaderAuthenticationMiddleware::class])->group(function() {
