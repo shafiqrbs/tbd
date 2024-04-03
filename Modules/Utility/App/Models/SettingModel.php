@@ -55,6 +55,7 @@ class SettingModel extends Model
                 'uti_settings.name',
                 'uti_settings.slug',
                 'uti_setting_types.name as type_name',
+                'uti_setting_types.slug as type_slug',
             ])
             ->where([
                 ['uti_setting_types.slug',$dropdownType],

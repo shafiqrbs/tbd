@@ -10,15 +10,23 @@ use Illuminate\Support\Facades\DB;
 class TransactionModeModel extends Model
 {
     use HasFactory,Sluggable;
-
     protected $table = 'acc_transaction_mode';
     public $timestamps = true;
     protected $guarded = ['id'];
     protected $fillable = [
-        'config_id',
+        'method_id',
         'name',
         'slug',
+        'short_name',
+        'authorised',
+        'authorised_mode_id',
+        'account_mode_id',
+        'account_type',
+        'service_charge',
+        'account_owner',
+        'path',
         'status',
+        'config_id',
     ];
 
     /**
@@ -65,19 +73,29 @@ class TransactionModeModel extends Model
         $perPage = isset($request['offset']) && $request['offset']!=''? (int)($request['offset']):0;
         $skip = isset($page) && $page!=''? (int)$page * $perPage:0;
 
-        $categories = self::where('acc_transaction_mode.config_id',$domain['acc_config_id'])
-            ->leftjoin('uti_transaction_method','uti_transaction_method.id','=','acc_transaction_mode.parent')
+        $tramsactionsMode = self::where('acc_transaction_mode.config_id',$domain['acc_config_id'])
+            ->leftjoin('uti_transaction_method','uti_transaction_method.id','=','acc_transaction_mode.method_id')
+            ->leftjoin('uti_settings as authorized','authorized.id','=','acc_transaction_mode.authorised_mode_id')
+            ->leftjoin('uti_settings as account_type','account_type.id','=','acc_transaction_mode.account_mode_id')
             ->select([
                 'acc_transaction_mode.id',
                 'acc_transaction_mode.name',
                 'acc_transaction_mode.slug',
+                'acc_transaction_mode.service_charge',
+                'acc_transaction_mode.account_owner',
+                'acc_transaction_mode.path',
+                'acc_transaction_mode.short_name',
+                'uti_transaction_method.name as method_name',
+                'authorized.name as authorized_name',
+                'account_type.name as account_type_name',
             ]);
 
         if (isset($request['term']) && !empty($request['term'])){
-            $categories = $categories->whereAny(['acc_transaction_mode.name','acc_transaction_mode.slug'],'LIKE','%'.$request['term'].'%');
+            $tramsactionsMode = $tramsactionsMode->whereAny(
+                ['acc_transaction_mode.name','acc_transaction_mode.slug','acc_transaction_mode.account_owner','acc_transaction_mode.short_name'],'LIKE','%'.$request['term'].'%');
         }
-        $total  = $categories->count();
-        $entities = $categories->skip($skip)
+        $total  = $tramsactionsMode->count();
+        $entities = $tramsactionsMode->skip($skip)
             ->take($perPage)
             ->orderBy('acc_transaction_mode.id','DESC')
             ->get();

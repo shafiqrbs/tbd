@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Modules\Accounting\App\Http\Requests\TransactionModeRequest;
 use Modules\Accounting\App\Models\AccountingModel;
 use Modules\Accounting\App\Models\TransactionModeModel;
 use Modules\AppsApi\App\Services\JsonRequestResponse;
@@ -34,7 +35,7 @@ class TransactionModeController extends Controller
 
     public function index(Request $request){
 
-        $data = TransactionModeModel::getRecords($request);
+        $data = TransactionModeModel::getRecords($request,$this->domain);
         $response = new Response();
         $response->headers->set('Content-Type','application/json');
         $response->setContent(json_encode([
@@ -50,26 +51,28 @@ class TransactionModeController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(DomainRequest $request)
+    public function store(TransactionModeRequest $request)
     {
         $data = $request->validated();
-        $entity = DomainModel::create($data);
-        $password= "@123456";
-        $email = ($data['email']) ? $data['email'] : "{$data['username']}@gmail.com";
-        UserModel::create([
-            'username' => $data['username'],
-            'email' => $email,
-            'password' => bcrypt($password),
-            'domain_id'=> $entity->id
-        ]);
-        $business = SettingModel::whereSlug('general')->first();
-        ConfigModel::create([
-            'domain_id'=> $entity->id,
-            'business_model_id'=>$business->id
-        ]);
-        AccountingModel::create([
-            'domain_id'=> $entity->id
-        ]);
+        $data['status'] = true;
+        $data['config_id'] = $this->domain['acc_config_id'];
+
+        $getAuthorized = SettingModel::find($data['authorised_mode_id']);
+        if ($getAuthorized){
+            $data['authorised'] = $getAuthorized->name;
+        }
+
+        $getAccountType = SettingModel::find($data['account_mode_id']);
+        if ($getAccountType){
+            $data['account_type'] = $getAccountType->name;
+        }
+
+        if ($request->file('path')) {
+            $imageName = time().'.'.$request->path->extension();
+            $request->path->move(public_path('image/accounting/transaction-mode/'), $imageName);
+             $data['path'] = $imageName;
+        }
+        $entity = TransactionModeModel::create($data);
         $service = new JsonRequestResponse();
         return $service->returnJosnResponse($entity);
     }
