@@ -17,8 +17,8 @@ class CoreRepository extends EntityRepository{
     {
         $entity = DB::table("users as e")
             ->select(DB::raw("CONCAT(e.username, ' - ', e.email) AS name"),'e.id as id')
-            ->where('e.is_delete', 0)
-            ->where('e.domain_id', $domain)
+          //  ->where('e.is_delete', 0)
+           // ->where('e.domain_id', $domain)
             ->where(function ($query) use ($term) {
                 $query->orWhere('e.username','LIKE','%'.$term.'%')
                     ->orWhere('e.name','LIKE','%'.$term.'%');

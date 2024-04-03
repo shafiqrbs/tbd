@@ -7,9 +7,22 @@ use Doctrine\ORM\EntityManagerInterface;
 use Illuminate\Http\Request;
 use Modules\AppsApi\App\Services\JsonRequestResponse;
 use Modules\Core\App\Entities\Core;
+use Modules\Core\App\Models\UserModel;
 
 class CoreController extends Controller
 {
+
+    protected $domain;
+
+    public function __construct(Request $request)
+    {
+        $userId = $request->header('X-Api-User');
+        if ($userId && !empty($userId)){
+            $userData = UserModel::getUserData($userId);
+            $this->domain = $userData;
+        }
+    }
+
     /**
      * Display a listing of the resource.
      */
@@ -27,8 +40,7 @@ class CoreController extends Controller
         $term = $request['term'];
         $entities = [];
         $service = new JsonRequestResponse();
-        $go = 64;
-        $entities = $em->getRepository(Core::class)->userAutoComplete($go,$term);
+        $entities = $em->getRepository(Core::class)->userAutoComplete($this->domain,$term);
         $data = $service->returnJosnResponse($entities);
         return $data;
     }

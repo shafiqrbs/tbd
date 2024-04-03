@@ -46,6 +46,9 @@ class SalesController extends Controller
         $service = new JsonRequestResponse();
         $input = $request->validated();
         $input['config_id'] = $this->domain['config_id'];
+
+
+
         $entity = SalesModel::create($input);
         $data = $service->returnJosnResponse($entity);
         return $data;

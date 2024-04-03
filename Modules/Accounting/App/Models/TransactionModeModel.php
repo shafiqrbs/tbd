@@ -101,6 +101,7 @@ class TransactionModeModel extends Model
                 'uti_transaction_method.slug as method_slug',
                 DB::raw("CONCAT('".url('')."/image/accounting/transaction-mode/', acc_transaction_mode.path) AS path")
         ])
+            ->limit(8)
             ->get();
         return $entities;
     }
