@@ -35,9 +35,9 @@ class BusinessArea
     private $location;
 
     /**
-     * @ORM\OneToMany(targetEntity="Modules\Inventory\App\Entities\BusinessInvoice", mappedBy="area")
+     * @ORM\OneToMany(targetEntity="Sales", mappedBy="area")
       **/
-    private $invoices;
+    private $sales;
 
     /**
      * @ORM\OneToMany(targetEntity="Modules\Inventory\App\Entities\BusinessStore", mappedBy="area")

@@ -5,13 +5,14 @@ namespace Modules\Inventory\App\Entities;
 use Doctrine\ORM\Mapping as ORM;
 use Gedmo\Mapping\Annotation as Gedmo;
 
+
 /**
- * BusinessWearHouse
- *
- * @ORM\Table( name ="inv_wearhouse")
+ * RestaurantCategory
+ * @Gedmo\Tree(type="materializedPath")
+ * @ORM\Table( name ="inv_category")
  * @ORM\Entity()
  */
-class WearHouse
+class Category
 {
     /**
      * @var integer
@@ -24,10 +25,20 @@ class WearHouse
 
 
     /**
-     * @ORM\ManyToOne(targetEntity="Modules\Inventory\App\Entities\Config", cascade={"detach","merge"} )
+     * @ORM\ManyToOne(targetEntity="Modules\Inventory\App\Entities\Config" , cascade={"detach","merge"} )
      * @ORM\JoinColumn(onDelete="CASCADE")
      **/
     private  $config;
+
+    /**
+     * @Gedmo\TreeParent
+     * @ORM\ManyToOne(targetEntity="Modules\Inventory\App\Entities\Category", inversedBy="children")
+     * @ORM\JoinColumns({
+     *   @ORM\JoinColumn(name="parent", referencedColumnName="id", onDelete="SET NULL", nullable=true)
+     * })
+     */
+    private $parent;
+
 
 
     /**
@@ -36,13 +47,6 @@ class WearHouse
      * @ORM\Column(name="name", type="string", length=50, nullable=true)
      */
     private $name;
-
-    /**
-     * @var string
-     *
-     * @ORM\Column(name="shortCode", type="string", length=5, nullable=true)
-     */
-    private $shortCode;
 
     /**
      * @var string
@@ -58,13 +62,6 @@ class WearHouse
      */
     private $code;
 
-     /**
-     * @var string
-     *
-     * @ORM\Column(type="string", length=10, nullable=true)
-     */
-    private $wearHouseCode;
-
     /**
      * @var int
      *
@@ -72,6 +69,12 @@ class WearHouse
      */
     private $sorting = 0;
 
+    /**
+     * @var boolean
+     *
+     * @ORM\Column(type="boolean",nullable=true )
+     */
+    private $hasQuantity = false;
 
     /**
      * @var boolean

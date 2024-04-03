@@ -2,22 +2,20 @@
 
 namespace Modules\Inventory\App\Models;
 
-use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Ramsey\Collection\Collection;
 
-class SalesModel extends Model
+class SalesItemModel extends Model
 {
     use HasFactory;
 
-    protected $table = 'inv_sales';
+    protected $table = 'inv_sales_item';
     public $timestamps = true;
     protected $guarded = ['id'];
 
     protected $fillable = [
     ];
-
 
     public static function boot() {
         parent::boot();
@@ -33,43 +31,10 @@ class SalesModel extends Model
     }
 
 
-    public function salesItems()
+    public function sales()
     {
-        return $this->hasMany(SalesItemModel::class);
+        return $this->belongsTo(SalesModel::class);
     }
-
-    public function insertSalesItems($sales,$items)
-    {
-
-
-        dump($items);
-        exit;
-        $array = [];
-
-
-      //  SalesItemModel::insert($data);
-        SalesItemModel::insert($items);
-
-        /*
-         *
-           $salesItems = new \Illuminate\Support\Collection();
-          foreach ($items as $row) {
-            $salesItems->push(
-                new SalesItemModel([
-                    'sales_id' => $sales->id,
-                    'product_id' => $row->product_id,
-                    'quanity'      => $row->quantity,
-                    'sale_price'   => $row->sales_price,
-                    'purchase_price'   => $row->purchase_price,
-                    'created_at' => $timestamp,
-                    'updated_at' => $timestamp,
-                ])
-            );
-        }
-       $sales->salesItems()->saveMany(new SalesItemModel($salesItems));*/
-
-    }
-
 
     public static function getRecords($request,$domain)
     {
@@ -126,7 +91,6 @@ class SalesModel extends Model
         $data = array('count'=>$total,'entities'=>$entities);
         return $data;
     }
-
 
     public static function getProductDetails($id,$domain)
     {

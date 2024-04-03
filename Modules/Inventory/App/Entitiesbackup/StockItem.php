@@ -9,10 +9,10 @@ use Modules\Utility\App\Entities\ProductUnit;
 /**
  * BusinessParticular
  *
- * @ORM\Table( name = "inv_product")
+ * @ORM\Table( name = "inv_stock_item")
  * @ORM\Entity()
  */
-class Product
+class StockItem
 {
     /**
      * @var integer
@@ -24,15 +24,9 @@ class Product
     private $id;
 
     /**
-     * @ORM\ManyToOne(targetEntity="Modules\Inventory\App\Entities\Config", cascade={"detach","merge"} )
+     * @ORM\ManyToOne(targetEntity="Modules\Inventory\App\Entities\Config" , cascade={"detach","merge"} )
      **/
     private  $config;
-
-
-    /**
-     * @ORM\ManyToOne(targetEntity="Modules\Utility\App\Entities\Setting")
-     **/
-    private  $productType;
 
     /**
      * @ORM\ManyToOne(targetEntity="Modules\Inventory\App\Entities\Category")
@@ -53,15 +47,9 @@ class Product
     private $wearHouse;
 
     /**
-     * @ORM\ManyToOne(targetEntity="Modules\Inventory\App\Entities\WearHouse")
+     * @ORM\ManyToOne(targetEntity="Product", inversedBy="businessParticulars" )
      **/
-    private $businessParticularType;
-
-
-     /**
-     * @ORM\ManyToOne(targetEntity="Particular")
-     **/
-    private $rackNo;
+    private $product;
 
 
     /**
@@ -69,33 +57,21 @@ class Product
      **/
     private  $unit;
 
-    /**
-     * @ORM\ManyToOne(targetEntity="Modules\Utility\App\Entities\ProductSize")
-     **/
-    private  $size;
 
     /**
-     * @ORM\ManyToOne(targetEntity="Modules\Utility\App\Entities\ProductColor")
-     **/
-    private  $color;
-
+     * @var string
+     *
+     * @ORM\Column(type="string", length=20, nullable=true)
+     */
+    private $productType;
 
 
     /**
      * @var string
      *
-     * @ORM\Column(type="string", length=255, nullable=true)
+     * @ORM\Column(name="name", type="string", length=255, nullable=true)
      */
     private $name;
-
-
-    /**
-     * @var string
-     *
-     * @ORM\Column(type="string", length=255, nullable=true)
-     */
-    private $alternativeName;
-
 
 
     /**
@@ -108,22 +84,23 @@ class Product
     /**
      * @var string
      *
-     * @ORM\Column(type="string", length=30,nullable = true)
+     * @ORM\Column( type="string", length=30,nullable = true)
      */
     private $productionType;
+
 
 
     /**
      * @var float
      *
-     * @ORM\Column(type="float", nullable=true)
+     * @ORM\Column(name="quantity", type="float", nullable=true)
      */
     private $quantity = 0;
 
     /**
      * @var float
      *
-     * @ORM\Column(type="float", nullable=true)
+     * @ORM\Column(name="openingQuantity", type="float", nullable=true)
      */
     private $openingQuantity;
 
@@ -131,14 +108,14 @@ class Product
      /**
      * @var integer
      *
-     * @ORM\Column(type="integer", nullable=true)
+     * @ORM\Column(name="adjustmentQuantity", type="integer", nullable=true)
      */
     private $adjustmentQuantity;
 
     /**
      * @var boolean
      *
-     * @ORM\Column( type="boolean",  nullable=true)
+     * @ORM\Column(name="openingApprove", type="boolean",  nullable=true)
      */
     private $openingApprove = false;
 
@@ -146,21 +123,14 @@ class Product
     /**
      * @var integer
      *
-     * @ORM\Column(type="integer", nullable=true)
+     * @ORM\Column(name="minQuantity", type="integer", nullable=true)
      */
     private $minQuantity;
 
     /**
-     * @var integer
-     *
-     * @ORM\Column(type="integer", nullable=true)
-     */
-    private $reorderQuantity;
-
-    /**
      * @var float
      *
-     * @ORM\Column(type="float", nullable=true)
+     * @ORM\Column(name="transferQuantity", type="float", nullable=true)
      */
     private $transferQuantity;
 
@@ -168,7 +138,7 @@ class Product
     /**
      * @var float
      *
-     * @ORM\Column(type="float", nullable=true)
+     * @ORM\Column(name="stockIn", type="float", nullable=true)
      */
     private $stockIn = 0;
 
@@ -176,14 +146,14 @@ class Product
     /**
      * @var float
      *
-     * @ORM\Column(type="float", nullable=true)
+     * @ORM\Column(name="purchaseQuantity", type="float", nullable=true)
      */
     private $purchaseQuantity;
 
     /**
      * @var float
      *
-     * @ORM\Column( type="float", nullable=true)
+     * @ORM\Column(name="salesQuantity", type="float", nullable=true)
      */
     private $salesQuantity;
 
@@ -191,7 +161,7 @@ class Product
     /**
      * @var float
      *
-     * @ORM\Column( type="float", nullable=true)
+     * @ORM\Column(name="remainingQuantity", type="float", nullable=true)
      */
     private $remainingQuantity = 0;
 
@@ -199,21 +169,21 @@ class Product
     /**
      * @var float
      *
-     * @ORM\Column(type="float", nullable=true)
+     * @ORM\Column(name="purchaseReturnQuantity", type="float", nullable=true)
      */
     private $purchaseReturnQuantity = 0;
 
     /**
      * @var float
      *
-     * @ORM\Column(type="float", nullable=true)
+     * @ORM\Column(name="salesReturnQuantity", type="float", nullable=true)
      */
     private $salesReturnQuantity = 0;
 
     /**
      * @var float
      *
-     * @ORM\Column(type="float", nullable=true)
+     * @ORM\Column(name="damageQuantity", type="float", nullable=true)
      */
     private $damageQuantity = 0;
 
@@ -221,7 +191,7 @@ class Product
     /**
      * @var float
      *
-     * @ORM\Column(type="float", nullable=true)
+     * @ORM\Column(name="bonusQuantity", type="float", nullable=true)
      */
     private $bonusQuantity = 0;
 
@@ -230,7 +200,7 @@ class Product
     /**
      * @var float
      *
-     * @ORM\Column(type="float", nullable=true)
+     * @ORM\Column(name="bonusAdjustment", type="float", nullable=true)
      */
     private $bonusAdjustment = 0;
 
@@ -238,7 +208,7 @@ class Product
     /**
      * @var float
      *
-     * @ORM\Column(type="float", nullable=true)
+     * @ORM\Column(name="returnBonusQuantity", type="float", nullable=true)
      */
     private $returnBonusQuantity = 0;
 
@@ -246,7 +216,7 @@ class Product
     /**
      * @var float
      *
-     * @ORM\Column(type="float", nullable=true)
+     * @ORM\Column(name="bonusPurchaseQuantity", type="float", nullable=true)
      */
     private $bonusPurchaseQuantity = 0;
 
@@ -254,7 +224,7 @@ class Product
     /**
      * @var float
      *
-     * @ORM\Column(type="float", nullable=true)
+     * @ORM\Column(name="bonusSalesQuantity", type="float", nullable=true)
      */
     private $bonusSalesQuantity = 0;
 
@@ -262,7 +232,7 @@ class Product
     /**
      * @var float
      *
-     * @ORM\Column(type="float", nullable=true)
+     * @ORM\Column(name="purchasePrice", type="float", nullable=true)
      */
     private $purchasePrice = 0;
 
@@ -270,7 +240,7 @@ class Product
 	/**
      * @var float
      *
-     * @ORM\Column(type="float", nullable=true)
+     * @ORM\Column(name="avgPurchasePrice", type="float", nullable=true)
      */
     private $avgPurchasePrice = 0;
 
@@ -278,7 +248,7 @@ class Product
 	/**
 	 * @var float
 	 *
-	 * @ORM\Column(type="float", nullable=true)
+	 * @ORM\Column(name="productionSalesPrice", type="float", nullable=true)
 	 */
 	private $productionSalesPrice;
 
@@ -294,7 +264,7 @@ class Product
     /**
      * @var string
      *
-     * @ORM\Column( type="text", nullable=true)
+     * @ORM\Column(name="content", type="text", nullable=true)
      */
     private $content;
 
@@ -302,88 +272,64 @@ class Product
     /**
      * @var float
      *
-     * @ORM\Column(type="float", nullable=true)
+     * @ORM\Column(name="salesPrice", type="float", nullable=true)
      */
     private $salesPrice = 0;
 
     /**
      * @var float
      *
-     * @ORM\Column(type="float", nullable=true)
+     * @ORM\Column(name="price", type="float", nullable=true)
      */
     private $price;
 
     /**
      * @var float
      *
-     * @ORM\Column(type="float", nullable=true)
+     * @ORM\Column(name="discountPrice", type="float", nullable=true)
      */
     private $discountPrice;
 
     /**
      * @var float
      *
-     * @ORM\Column(type="float", nullable=true)
+     * @ORM\Column(name="commission", type="float", nullable=true)
      */
     private $commission = 0;
 
     /**
      * @var float
      *
-     * @ORM\Column( type="float", nullable=true)
+     * @ORM\Column(name="minimumPrice", type="float", nullable=true)
      */
     private $minimumPrice = 0;
 
     /**
      * @var string
      *
-     * @ORM\Column(type="string", length=5, nullable=true)
+     * @ORM\Column(name="sorting", type="string", length=5, nullable=true)
      */
     private $sorting;
 
     /**
      * @var integer
      *
-     * @ORM\Column(type="integer",  nullable=true)
+     * @ORM\Column(name="code", type="integer",  nullable=true)
      */
     private $code;
 
     /**
      * @var string
      *
-     * @ORM\Column(type="string", length=100, nullable=true)
+     * @ORM\Column(name="particularCode", type="string", length=10, nullable=true)
      */
     private $particularCode;
 
 
     /**
-     * @var string
-     *
-     * @ORM\Column(type="string", length=100, nullable=true)
-     */
-    private $sku;
-
-
-     /**
-     * @var string
-     *
-     * @ORM\Column(type="string", length=100, nullable=true)
-     */
-    private $barcode;
-
-
-     /**
-     * @var string
-     *
-     * @ORM\Column(type="string", length=100, nullable=true)
-     */
-    private $modelNo;
-
-
-    /**
      * @var boolean
      *
-     * @ORM\Column(type="boolean" )
+     * @ORM\Column(name="status", type="boolean" )
      */
     private $status= true;
 
@@ -396,16 +342,33 @@ class Product
     /**
      * @var \DateTime
      * @Gedmo\Timestampable(on="create")
-     * @ORM\Column(type="datetime",nullable=true)
+     * @ORM\Column(name="created", type="datetime")
+     */
+    private $created;
+
+    /**
+     * @var \DateTime
+     * @Gedmo\Timestampable(on="update")
+     * @ORM\Column(name="updated", type="datetime")
+     */
+    private $updated;
+
+    /**
+     * @var \DateTime
+     * @Gedmo\Timestampable(on="create")
+     * @ORM\Column(name="created_at", type="datetime")
      */
     private $createdAt;
 
     /**
      * @var \DateTime
      * @Gedmo\Timestampable(on="create")
-     * @ORM\Column(type="datetime",nullable=true)
+     * @ORM\Column(name="updated_at", type="datetime")
      */
     private $updatedAt;
+
+
+
 
 
 }

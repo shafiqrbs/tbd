@@ -27,7 +27,7 @@ class BusinessProduction
      * @ORM\ManyToOne(targetEntity="Product", inversedBy="businessProductions" )
      * @ORM\JoinColumn(onDelete="CASCADE")
      **/
-    private  $businessParticular;
+    private  $product;
 
 	 /**
      * @ORM\OneToMany(targetEntity="Modules\Inventory\App\Entities\BusinessProductionExpense", mappedBy="businessProduction" )
@@ -226,10 +226,10 @@ class BusinessProduction
 	}
 
 	/**
-	 * @param Product $businessParticular
+	 * @param Product $product
 	 */
-	public function setBusinessParticular( $businessParticular ) {
-		$this->businessParticular = $businessParticular;
+	public function setBusinessParticular( $product ) {
+		$this->businessParticular = $product;
 	}
 
 	/**

@@ -32,7 +32,7 @@ class ProductTransfer
     /**
      * @ORM\ManyToOne(targetEntity="Product")
      **/
-    private $businessParticular;
+    private $product;
 
 
 	/**

@@ -30,10 +30,10 @@ class BusinessReverse
     protected $config;
 
     /**
-     * @ORM\OneToOne(targetEntity="Modules\Inventory\App\Entities\BusinessInvoice", inversedBy="businessReverse")
+     * @ORM\OneToOne(targetEntity="Sales", inversedBy="businessReverse")
      * @ORM\JoinColumn(onDelete="CASCADE")
      */
-    protected $businessInvoice;
+    protected $salesInvoice;
 
 
     /**
@@ -205,14 +205,14 @@ class BusinessReverse
     }
 
 	/**
-	 * @return BusinessPurchase
+	 * @return Purchase
 	 */
 	public function getBusinessPurchase() {
 		return $this->businessPurchase;
 	}
 
 	/**
-	 * @param BusinessPurchase $businessPurchase
+	 * @param Purchase $businessPurchase
 	 */
 	public function setBusinessPurchase( $businessPurchase ) {
 		$this->businessPurchase = $businessPurchase;
@@ -233,17 +233,17 @@ class BusinessReverse
 	}
 
 	/**
-	 * @return BusinessInvoice
+	 * @return Sales
 	 */
 	public function getBusinessInvoice() {
 		return $this->businessInvoice;
 	}
 
 	/**
-	 * @param BusinessInvoice $businessInvoice
+	 * @param Sales $salesInvoice
 	 */
-	public function setBusinessInvoice( $businessInvoice ) {
-		$this->businessInvoice = $businessInvoice;
+	public function setBusinessInvoice( $salesInvoice ) {
+		$this->businessInvoice = $salesInvoice;
 	}
 
 

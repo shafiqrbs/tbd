@@ -22,11 +22,6 @@ class BusinessProductionElement
      */
     private $id;
 
-    /**
-     * @ORM\ManyToOne(targetEntity="Product", inversedBy="productionElements" )
-     * @ORM\JoinColumn(onDelete="CASCADE")
-     **/
-    private  $businessParticular;
 
     /**
      * @ORM\ManyToOne(targetEntity="Product", inversedBy="production" )
@@ -137,11 +132,11 @@ class BusinessProductionElement
     }
 
     /**
-     * @param Product $businessParticular
+     * @param Product $product
      */
-    public function setBusinessParticular($businessParticular)
+    public function setBusinessParticular($product)
     {
-        $this->businessParticular = $businessParticular;
+        $this->businessParticular = $product;
     }
 
     /**

@@ -253,7 +253,7 @@ class BusinessPurchase
      *
      * @param string $invoice
      *
-     * @return BusinessPurchase
+     * @return Purchase
      */
     public function setInvoice($invoice)
     {
@@ -277,7 +277,7 @@ class BusinessPurchase
      *
      * @param string $memo
      *
-     * @return BusinessPurchase
+     * @return Purchase
      */
     public function setMemo($memo)
     {
@@ -302,7 +302,7 @@ class BusinessPurchase
      *
      * @param string $receiveDate
      *
-     * @return BusinessPurchase
+     * @return Purchase
      */
     public function setReceiveDate($receiveDate)
     {
@@ -326,7 +326,7 @@ class BusinessPurchase
      *
      * @param \DateTime $created
      *
-     * @return BusinessPurchase
+     * @return Purchase
      */
     public function setCreated($created)
     {
@@ -792,7 +792,7 @@ class BusinessPurchase
     /**
      * Sets file.
      *
-     * @param BusinessPurchase $file
+     * @param Purchase $file
      */
     public function setFile($file = null)
     {
@@ -802,7 +802,7 @@ class BusinessPurchase
     /**
      * Get file.
      *
-     * @return BusinessPurchase
+     * @return Purchase
      */
     public function getFile()
     {

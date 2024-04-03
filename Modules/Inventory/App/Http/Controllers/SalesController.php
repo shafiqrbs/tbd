@@ -8,7 +8,9 @@ use Illuminate\Http\Response;
 use Modules\AppsApi\App\Services\JsonRequestResponse;
 use Modules\Core\App\Models\UserModel;
 use Modules\Inventory\App\Http\Requests\ProductRequest;
+use Modules\Inventory\App\Http\Requests\SalesRequest;
 use Modules\Inventory\App\Models\SalesModel;
+use function Symfony\Component\HttpFoundation\Session\Storage\Handler\getInsertStatement;
 
 class SalesController extends Controller
 {
@@ -41,17 +43,17 @@ class SalesController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(ProductRequest $request)
+    public function store(SalesRequest $request)
     {
         $service = new JsonRequestResponse();
         $input = $request->validated();
         $input['config_id'] = $this->domain['config_id'];
-
-
-
         $entity = SalesModel::create($input);
+        $process = new SalesModel();
+        $process->insertSalesItems($entity,$input['items']);
         $data = $service->returnJosnResponse($entity);
         return $data;
+
     }
 
     /**

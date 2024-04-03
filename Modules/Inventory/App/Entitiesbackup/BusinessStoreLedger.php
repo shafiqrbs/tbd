@@ -32,7 +32,7 @@ class BusinessStoreLedger
     protected $config;
 
      /**
-     * @ORM\ManyToOne(targetEntity="Modules\Inventory\App\Entities\BusinessInvoice")
+     * @ORM\ManyToOne(targetEntity="Sales")
      * @ORM\JoinColumn(onDelete="CASCADE")
      * @ORM\OrderBy({"id" = "ASC"})
      **/

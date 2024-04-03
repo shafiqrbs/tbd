@@ -22,11 +22,6 @@ class BusinessProductionExpense
      */
     private $id;
 
-    /**
-     * @ORM\ManyToOne(targetEntity="Modules\Inventory\App\Entities\BusinessInvoiceParticular", inversedBy="businessProductionExpense" )
-     * @ORM\JoinColumn(onDelete="CASCADE")
-     **/
-    private  $businessInvoiceParticular;
 
     /**
      * @ORM\ManyToOne(targetEntity="Modules\Inventory\App\Entities\BusinessProduction", inversedBy="businessProductionExpense" )
@@ -141,7 +136,7 @@ class BusinessProductionExpense
     }
 
     /**
-     * @return BusinessInvoiceParticular
+     * @return SalesItem
      */
     public function getBusinessInvoiceParticular()
     {
@@ -149,11 +144,11 @@ class BusinessProductionExpense
     }
 
     /**
-     * @param BusinessInvoiceParticular $businessInvoiceParticular
+     * @param SalesItem $salesInvoiceItem
      */
-    public function setBusinessInvoiceParticular($businessInvoiceParticular)
+    public function setBusinessInvoiceParticular($salesInvoiceItem)
     {
-        $this->businessInvoiceParticular = $businessInvoiceParticular;
+        $this->businessInvoiceParticular = $salesInvoiceItem;
     }
 
     /**

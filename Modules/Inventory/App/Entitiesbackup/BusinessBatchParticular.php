@@ -35,7 +35,7 @@ class BusinessBatchParticular
      * @ORM\ManyToOne(targetEntity="Product")
      * @ORM\JoinColumn(onDelete="CASCADE")
      **/
-    private $businessParticular;
+    private $product;
 
     /**
      * @ORM\ManyToOne(targetEntity="Modules\Inventory\App\Entities\WearHouse")

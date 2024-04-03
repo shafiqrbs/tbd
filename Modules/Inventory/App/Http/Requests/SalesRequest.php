@@ -19,20 +19,20 @@ class SalesRequest extends FormRequest
 
         // Common validation rules for 'POST', 'PUT', and 'PATCH' methods
         return [
-            'product_type_id' => 'required|integer',
-            'category_id' => 'required|integer',
-            'unit_id' => 'required|integer',
-            'brand_id' => 'nullable|integer',
-            'name' => 'required|string',
-            'alternative_name' => 'nullable|string',
-            'sku' => 'nullable|string',
-            'barcode' => 'nullable|string',
-            'opening_quantity' => 'nullable|numeric|regex:/^\d+(\.\d{1,2})?$/',
-            'sales_price' => 'required|numeric|regex:/^\d+(\.\d{1,2})?$/',
-            'purchase_price' => 'nullable|numeric|regex:/^\d+(\.\d{1,2})?$/',
-            'min_quantity' => 'nullable|numeric|regex:/^\d+(\.\d{1,2})?$/',
-            'reorder_quantity' => 'nullable|numeric|regex:/^\d+(\.\d{1,2})?$/',
-            'status' => 'required|boolean',
+           /* 'customer_id' => 'required|integer|regex:/^\d+(\.\d{1,2})?$/',
+            'sub_total' => 'required|regex:/^\d+(\.\d{1,2})?$/',
+            'discount_calculation' => 'nullable|regex:/^\d+(\.\d{1,2})?$/',
+            'discount' => 'nullable|regex:/^\d+(\.\d{1,2})?$/',
+            'discount_type' => 'nullable|string',
+            'vat' => 'nullable|regex:/^\d+(\.\d{1,2})?$/',
+            'total_amount' => 'required|nullable|regex:/^\d+(\.\d{1,2})?$/',
+            'receive_amount' => 'nullable|regex:/^\d+(\.\d{1,2})?$/',
+            'transaction_mode_id' => 'nullable|integer|regex:/^\d+(\.\d{1,2})?$/',
+            'items' => 'required|json',
+            'sales_by' => 'nullable|integer',
+            'process' => 'nullable|string',
+            'narration' => 'nullable|string',*/
+
         ];
     }
 

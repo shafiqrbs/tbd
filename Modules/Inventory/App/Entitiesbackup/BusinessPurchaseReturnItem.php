@@ -35,7 +35,7 @@ class BusinessPurchaseReturnItem
      * @ORM\ManyToOne(targetEntity="Product")
      * @ORM\JoinColumn(onDelete="CASCADE")
      **/
-    private  $businessParticular;
+    private  $product;
 
     /**
      * @ORM\ManyToOne(targetEntity="Modules\Inventory\App\Entities\WearHouse")
@@ -188,11 +188,11 @@ class BusinessPurchaseReturnItem
     }
 
     /**
-     * @param Product $businessParticular
+     * @param Product $product
      */
-    public function setBusinessParticular($businessParticular)
+    public function setBusinessParticular($product)
     {
-        $this->businessParticular = $businessParticular;
+        $this->businessParticular = $product;
     }
 
     /**

@@ -33,10 +33,10 @@ class BusinessInvoiceReturn
     private  $config;
 
     /**
-     * @ORM\OneToOne(targetEntity="Modules\Inventory\App\Entities\BusinessInvoice", inversedBy="invoiceReturn")
+     * @ORM\OneToOne(targetEntity="Sales", inversedBy="invoiceReturn")
      * @ORM\JoinColumn(onDelete="CASCADE")
      **/
-    private  $businessInvoice;
+    private  $salesInvoice;
 
     /**
      * @ORM\OneToMany(targetEntity="Modules\Inventory\App\Entities\BusinessInvoiceReturnItem", mappedBy="invoiceReturn" , cascade={"remove"})
@@ -353,11 +353,11 @@ class BusinessInvoiceReturn
     }
 
     /**
-     * @param mixed $businessInvoice
+     * @param mixed $salesInvoice
      */
-    public function setBusinessInvoice($businessInvoice)
+    public function setBusinessInvoice($salesInvoice)
     {
-        $this->businessInvoice = $businessInvoice;
+        $this->businessInvoice = $salesInvoice;
     }
 
 
