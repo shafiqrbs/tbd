@@ -13,7 +13,7 @@ use Gedmo\Mapping\Annotation as Gedmo;
  * @ORM\Table(name ="acc_transaction_mode")
  * @ORM\Entity()
  */
-class AccountTransactionMode
+class TransactionMode
 {
     /**
      * @var integer

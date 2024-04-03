@@ -10,10 +10,10 @@ use Gedmo\Mapping\Annotation as Gedmo;
 /**
  * BusinessInvoiceParticular
  *
- * @ORM\Table( name = "inv_invoice_particular")
+ * @ORM\Table( name = "inv_sales_invoice_item")
  * @ORM\Entity()
  */
-class BusinessInvoiceParticular
+class SalesInvoiceItem
 {
     /**
      * @var integer
@@ -24,47 +24,6 @@ class BusinessInvoiceParticular
      */
     private $id;
 
-
-    /**
-     * @ORM\ManyToOne(targetEntity="Modules\Inventory\App\Entities\BusinessInvoice")
-     * @ORM\JoinColumn(onDelete="CASCADE")
-     * @ORM\OrderBy({"id" = "ASC"})
-     **/
-    private $businessInvoice;
-
-    /**
-     * @ORM\ManyToOne(targetEntity="Modules\Inventory\App\Entities\BusinessAndroidProcess")
-     * @ORM\JoinColumn(onDelete="CASCADE")
-     **/
-    private  $androidProcess;
-
-    /**
-     * @ORM\ManyToOne(targetEntity="Product", inversedBy="businessInvoiceParticulars", cascade={"persist"} )
-     * @ORM\JoinColumn(onDelete="CASCADE")
-     **/
-    private $businessParticular;
-
-    /**
-     * @ORM\ManyToOne(targetEntity="Modules\Core\App\Entities\Vendor", cascade={"persist"} )
-     * @ORM\JoinColumn(onDelete="CASCADE")
-     **/
-    private $vendor;
-
-
-    /**
-     * @ORM\ManyToOne(targetEntity="Modules\Inventory\App\Entities\BusinessVendorStockItem", cascade={"persist"} )
-     **/
-    private $vendorStockItem;
-
-     /**
-     * @ORM\ManyToOne(targetEntity="Modules\Inventory\App\Entities\BusinessBatchParticular")
-     **/
-    private $batchItem;
-
-    /**
-     * @ORM\ManyToOne(targetEntity="Modules\Inventory\App\Entities\WearHouse")
-     **/
-    private $wearhouse;
 
     /**
      * @var string
@@ -234,17 +193,6 @@ class BusinessInvoiceParticular
      * @ORM\Column(type="datetime")
      */
     private $updatedAt;
-
-
-    /**
-     * Get id
-     *
-     * @return integer
-     */
-    public function getId()
-    {
-        return $this->id;
-    }
 
 
 }

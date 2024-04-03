@@ -11,10 +11,10 @@ use Gedmo\Mapping\Annotation as Gedmo;
 /**
  * Invoice
  *
- * @ORM\Table( name ="inv_invoice")
+ * @ORM\Table( name ="inv_sales")
  * @ORM\Entity()
  */
-class BusinessInvoice
+class SalesInvoice
 {
     /**
      * @var integer

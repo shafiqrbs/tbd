@@ -29,7 +29,7 @@ class BusinessPurchaseItem
      * @ORM\ManyToOne(targetEntity="Product", inversedBy="businessPurchaseItems" )
      * @ORM\JoinColumn(onDelete="CASCADE")
      **/
-    private  $businessParticular;
+    private  $product;
 
 
     /**
@@ -258,7 +258,7 @@ class BusinessPurchaseItem
      *
      * @param float $purchasePrice
      *
-     * @return BusinessPurchase
+     * @return Purchase
      */
     public function setPurchasePrice($purchasePrice)
     {
@@ -354,7 +354,7 @@ class BusinessPurchaseItem
     }
 
     /**
-     * @return BusinessPurchase
+     * @return Purchase
      */
     public function getBusinessPurchase()
     {
@@ -362,7 +362,7 @@ class BusinessPurchaseItem
     }
 
     /**
-     * @param BusinessPurchase $businessPurchase
+     * @param Purchase $businessPurchase
      */
     public function setBusinessPurchase($businessPurchase)
     {
@@ -378,11 +378,11 @@ class BusinessPurchaseItem
     }
 
     /**
-     * @param Product $businessParticular
+     * @param Product $product
      */
-    public function setBusinessParticular($businessParticular)
+    public function setBusinessParticular($product)
     {
-        $this->businessParticular = $businessParticular;
+        $this->businessParticular = $product;
     }
 
     /**

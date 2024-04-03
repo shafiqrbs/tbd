@@ -25,13 +25,13 @@ class BusinessVendorStockItem
     private $id;
 
     /**
-     * @ORM\ManyToOne(targetEntity="Modules\Inventory\App\Entities\BusinessVendorStock")
+     * @ORM\ManyToOne(targetEntity="BusinessVendorStock")
      * @ORM\JoinColumn(onDelete="CASCADE")
      */
     protected $businessVendorStock;
 
     /**
-     * @ORM\ManyToOne(targetEntity="Product", inversedBy="businessVendorStockItems", cascade={"persist"} )
+     * @ORM\ManyToOne(targetEntity="Product")
      **/
     private $particular;
 

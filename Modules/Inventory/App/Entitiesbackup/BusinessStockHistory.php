@@ -48,7 +48,7 @@ class BusinessStockHistory
 
 
     /**
-     * @ORM\ManyToOne(targetEntity="Modules\Inventory\App\Entities\BusinessInvoiceParticular")
+     * @ORM\ManyToOne(targetEntity="SalesInvoiceItem")
      * @ORM\JoinColumn(onDelete="CASCADE")
      **/
     private $salesItem;

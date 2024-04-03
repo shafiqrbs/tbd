@@ -43,7 +43,7 @@ class BusinessAndroidProcess
 
 
     /**
-     * @ORM\OneToMany(targetEntity="Modules\Inventory\App\Entities\BusinessInvoice", mappedBy="androidProcess" )
+     * @ORM\OneToMany(targetEntity="Sales", mappedBy="androidProcess" )
      **/
     private  $sales;
 

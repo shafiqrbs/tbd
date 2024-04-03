@@ -34,7 +34,7 @@ class BusinessDamage
      * @ORM\ManyToOne(targetEntity="Product", inversedBy="businessDamages", cascade={"persist"} )
      * @ORM\JoinColumn(onDelete="CASCADE")
      **/
-    private $businessParticular;
+    private $product;
 
 
     /**

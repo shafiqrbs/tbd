@@ -35,16 +35,16 @@ class BusinessInvoiceReturnItem
      * @ORM\ManyToOne(targetEntity="Product")
      * @ORM\JoinColumn(onDelete="CASCADE")
      **/
-    private  $businessParticular;
+    private  $product;
 
     /**
-     * @ORM\ManyToOne(targetEntity="Modules\Inventory\App\Entities\BusinessInvoiceParticular")
+     * @ORM\ManyToOne(targetEntity="SalesInvoiceItem")
      * @ORM\JoinColumn(onDelete="CASCADE")
      **/
     private  $invoiceParticular;
 
     /**
-     * @ORM\ManyToOne(targetEntity="Modules\Inventory\App\Entities\BusinessInvoice", inversedBy="invoiceReturnItems" )
+     * @ORM\ManyToOne(targetEntity="Sales", inversedBy="invoiceReturnItems" )
      * @ORM\JoinColumn(onDelete="CASCADE")
      **/
     private  $invoice;
@@ -305,11 +305,11 @@ class BusinessInvoiceReturnItem
     }
 
     /**
-     * @param mixed $businessParticular
+     * @param mixed $product
      */
-    public function setBusinessParticular($businessParticular)
+    public function setBusinessParticular($product)
     {
-        $this->businessParticular = $businessParticular;
+        $this->businessParticular = $product;
     }
 
 
