@@ -114,16 +114,28 @@ class AccountTransactionMode
 
 
     /**
+     * @ORM\ManyToOne(targetEntity="Modules\Utility\App\Entities\Setting")
+     **/
+    private $authorisedMode;
+
+
+    /**
+     * @ORM\ManyToOne(targetEntity="Modules\Utility\App\Entities\Setting")
+     **/
+    private $accountMode;
+
+
+    /**
      * @var \DateTime
      * @Gedmo\Timestampable(on="create")
-     * @ORM\Column(name="created_at", type="datetime")
+     * @ORM\Column(name="created_at", type="datetime", nullable=true)
      */
     private $createdAt;
 
     /**
      * @var \DateTime
      * @Gedmo\Timestampable(on="create")
-     * @ORM\Column(name="updated_at", type="datetime")
+     * @ORM\Column(name="updated_at", type="datetime",nullable=true)
      */
     private $updatedAt;
 
