@@ -41,12 +41,6 @@ class SalesModel extends Model
     public function insertSalesItems($sales,$items)
     {
 
-
-        dump($items);
-        exit;
-        $array = [];
-
-
       //  SalesItemModel::insert($data);
         SalesItemModel::insert($items);
 

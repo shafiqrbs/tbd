@@ -43,14 +43,17 @@ class SalesController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(SalesRequest $request)
+    public function store(Request $request)
     {
         $service = new JsonRequestResponse();
-        $input = $request->validated();
+        $input = $request->all();
+        dd($input);
+        /*dd($input);
         $input['config_id'] = $this->domain['config_id'];
         $entity = SalesModel::create($input);
+        */
         $process = new SalesModel();
-        $process->insertSalesItems($entity,$input['items']);
+        $process->insertSalesItems(1,$input['items']);
         $data = $service->returnJosnResponse($entity);
         return $data;
 
