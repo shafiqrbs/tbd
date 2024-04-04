@@ -4,6 +4,7 @@ namespace Modules\Inventory\App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Modules\Utility\App\Models\ProductUnitModel;
 use Ramsey\Collection\Collection;
 
 class SalesItemModel extends Model
@@ -34,6 +35,11 @@ class SalesItemModel extends Model
     public function sales()
     {
         return $this->belongsTo(SalesModel::class);
+    }
+
+    public function unit()
+    {
+        return $this->belongsTo(ProductUnitModel::class,'unit_id');
     }
 
     public static function getRecords($request,$domain)

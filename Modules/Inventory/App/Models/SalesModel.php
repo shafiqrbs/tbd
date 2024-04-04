@@ -5,6 +5,7 @@ namespace Modules\Inventory\App\Models;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Support\Facades\DB;
 use Ramsey\Collection\Collection;
 
 class SalesModel extends Model
@@ -15,171 +16,139 @@ class SalesModel extends Model
     public $timestamps = true;
     protected $guarded = ['id'];
 
-    protected $fillable = [
-    ];
-
+    protected $fillable = [];
 
     public static function boot() {
         parent::boot();
         self::creating(function ($model) {
+            $model->invoice = self::quickRandom();
             $date =  new \DateTime("now");
             $model->created_at = $date;
         });
 
         self::updating(function ($model) {
+            $model->invoice = self::quickRandom();
             $date =  new \DateTime("now");
             $model->updated_at = $date;
         });
     }
 
+    public static function quickRandom($length = 12)
+    {
+        $pool = '0123456789';
+        return substr(str_shuffle(str_repeat($pool, $length)), 0, $length);
+    }
 
     public function salesItems()
     {
-        return $this->hasMany(SalesItemModel::class);
+        return $this->hasMany(SalesItemModel::class, 'sale_id');
     }
 
     public function insertSalesItems($sales,$items)
     {
-
-      //  SalesItemModel::insert($data);
-        SalesItemModel::insert($items);
-
-        /*
-         *
-           $salesItems = new \Illuminate\Support\Collection();
-          foreach ($items as $row) {
-            $salesItems->push(
-                new SalesItemModel([
-                    'sales_id' => $sales->id,
-                    'product_id' => $row->product_id,
-                    'quanity'      => $row->quantity,
-                    'sale_price'   => $row->sales_price,
-                    'purchase_price'   => $row->purchase_price,
-                    'created_at' => $timestamp,
-                    'updated_at' => $timestamp,
-                ])
-            );
+        $timestamp = Carbon::now();
+        foreach ($items as &$record) {
+            $record['sale_id'] = $sales->id;
+            $record['created_at'] = $timestamp;
+            $record['updated_at'] = $timestamp;
         }
-       $sales->salesItems()->saveMany(new SalesItemModel($salesItems));*/
-
+        SalesItemModel::insert($items);
     }
-
 
     public static function getRecords($request,$domain)
     {
         $page =  isset($request['page']) && $request['page'] > 0?($request['page'] - 1 ) : 0;
-        $perPage = isset($request['offset']) && $request['offset']!=''? (int)($request['offset']):0;
+        $perPage = isset($request['offset']) && $request['offset']!=''? (int)($request['offset']):50;
         $skip = isset($page) && $page!=''? (int)$page * $perPage:0;
 
-        $products = self::where([['inv_product.config_id',$domain['config_id']]])
-            ->leftjoin('inv_category','inv_category.id','=','inv_product.category_id')
-            ->leftjoin('uti_product_unit','uti_product_unit.id','=','inv_product.unit_id')
-            ->leftjoin('inv_brand','inv_brand.id','=','inv_product.brand_id')
-            ->leftjoin('uti_settings','uti_settings.id','=','inv_product.product_type_id')
+        $entities = self::where([['inv_sales.config_id',$domain['config_id']]])
+            ->leftjoin('cor_customers','cor_customers.id','=','inv_sales.customer_id')
+            ->leftjoin('users as createdBy','createdBy.id','=','inv_sales.created_by_id')
+            ->leftjoin('users as salesBy','salesBy.id','=','inv_sales.sales_by_id')
             ->select([
-                'inv_product.id',
-                'inv_product.name as product_name',
-                'inv_product.slug',
-                'inv_category.name as category_name',
-                'uti_product_unit.name as unit_name',
-                'inv_brand.name as brand_name',
-                'inv_product.opening_quantity',
-                'inv_product.min_quantity',
-                'inv_product.reorder_quantity',
-                'inv_product.purchase_price',
-                'inv_product.sales_price',
-                'inv_product.barcode',
-                'inv_product.alternative_name',
-                'uti_settings.name as product_type',
-            ]);
+                'inv_sales.id',
+                DB::raw('DATE_FORMAT(inv_sales.created_at, "%d-%m-%Y") as created'),
+                'inv_sales.invoice as invoice',
+                'inv_sales.sub_total as sub_total',
+                'inv_sales.total as total',
+                'inv_sales.payment as payment',
+                'inv_sales.discount as discount',
+                'inv_sales.discount_calculation as discount_calculation',
+                'inv_sales.discount_type as discount_type',
+                'cor_customers.id as customerId',
+                'cor_customers.name as customerName',
+                'cor_customers.mobile as customerMobile',
+                'createdBy.username as createdByUser',
+                'createdBy.name as createdByName',
+                'createdBy.id as createdById',
+                'salesBy.id as salesById',
+                'salesBy.username as salesByUser',
+                'salesBy.name as salesByName',
+            ])->with(['salesItems' => function ($query){
+                $query->select([
+                'id',
+                'sale_id',
+            'unit_id'
+            ])->with([
+                    'unit'
+                ]);
+            },]);
 
         if (isset($request['term']) && !empty($request['term'])){
-            $products = $products->whereAny(['inv_product.name','inv_product.slug','inv_category.name','uti_product_unit.name','inv_brand.name','inv_product.sales_price','uti_settings.name'],'LIKE','%'.$request['term'].'%');
+            $entities = $entities->whereAny(['inv_sales.name','inv_sales.slug','inv_category.name','uti_product_unit.name','inv_brand.name','inv_sales.sales_price','uti_settings.name'],'LIKE','%'.$request['term'].'%');
         }
 
-        if (isset($request['name']) && !empty($request['name'])){
-            $products = $products->where('inv_product.name',$request['name']);
-        }
-
-        if (isset($request['alternative_name']) && !empty($request['alternative_name'])){
-            $products = $products->where('inv_product.alternative_name',$request['alternative_name']);
-        }
-        if (isset($request['sku']) && !empty($request['sku'])){
-            $products = $products->where('inv_product.sku',$request['sku']);
-        }
-        if (isset($request['sales_price']) && !empty($request['sales_price'])){
-            $products = $products->where('inv_product.sales_price',$request['sales_price']);
-        }
-
-        $total  = $products->count();
-        $entities = $products->skip($skip)
+        $total  = $entities->count();
+        $entities = $entities->skip($skip)
             ->take($perPage)
-            ->orderBy('inv_product.id','DESC')
+            ->orderBy('inv_sales.updated_at','DESC')
             ->get();
-
         $data = array('count'=>$total,'entities'=>$entities);
         return $data;
     }
 
 
-    public static function getProductDetails($id,$domain)
+    public static function getShow($id,$domain)
     {
-        $product = self::where([['inv_product.config_id',$domain['config_id']],['inv_product.id',$id]])
-            ->leftjoin('inv_category','inv_category.id','=','inv_product.category_id')
-            ->leftjoin('uti_product_unit','uti_product_unit.id','=','inv_product.unit_id')
-            ->leftjoin('inv_brand','inv_brand.id','=','inv_product.brand_id')
-            ->leftjoin('uti_settings','uti_settings.id','=','inv_product.product_type_id')
+        $entity = self::where([['inv_sales.config_id',$domain['config_id'],'inv_sales.id',$id]])
+            ->leftjoin('cor_customers','cor_customers.id','=','inv_sales.customer_id')
+            ->leftjoin('users as createdBy','createdBy.id','=','inv_sales.created_by_id')
+            ->leftjoin('users as salesBy','salesBy.id','=','inv_sales.sales_by_id')
+            ->leftjoin('acc_transaction_mode as transactionMode','transactionMode.id','=','inv_sales.transaction_mode_id')
+            ->leftjoin('uti_transaction_method as method','method.id','=','acc_transaction_mode.method_id')
             ->select([
-                'inv_product.id',
-                'inv_product.name as product_name',
-                'inv_product.slug',
-                'inv_product.category_id',
-                'inv_category.name as category_name',
-                'inv_product.unit_id',
-                'uti_product_unit.name as unit_name',
-                'inv_product.brand_id',
-                'inv_brand.name as brand_name',
-                'inv_product.opening_quantity',
-                'inv_product.min_quantity',
-                'inv_product.reorder_quantity',
-                'inv_product.purchase_price',
-                'inv_product.sales_price',
-                'inv_product.barcode',
-                'inv_product.alternative_name',
-                'inv_product.product_type_id',
-                'uti_settings.name as product_type',
-                'inv_product.sku',
-                'inv_product.status'
-            ])->first();
+                'inv_sales.id',
+                '(DATE_FORMAT(inv_sales.updated_at,\'%Y-%m\')) as created',
+                'inv_sales.invoice as invoice',
+                'inv_sales.sub_total as sub_total',
+                'inv_sales.total as total',
+                'inv_sales.payment as payment',
+                'inv_sales.discount as discount',
+                'inv_sales.discount_calculation as discount_calculation',
+                'inv_sales.discount_type as discount_type',
+                'cor_customers.id as customerId',
+                'cor_customers.name as customerName',
+                'cor_customers.mobile as customerMobile',
+                'createdBy.username as createdByUser',
+                'createdBy.name as createdByName',
+                'createdBy.id as createdById',
+                'salesBy.id as salesById',
+                'salesBy.username as salesByUser',
+                'salesBy.name as salesByName',
+                'transactionMode.name as modeName',
+                'transactionMode.name as modeName',
 
-        return $product;
+            ])->with(['salesItems' => function ($query){
+                $query->select([
+                    'id',
+                    'sale_id',
+                    'unit_id'
+                ])->with([
+                    'unit'
+                ]);
+            }])->first();
+
+        return $entity;
     }
 
-
-    public static function getStockItem($domain)
-    {
-        $products = self::
-            leftjoin('inv_category','inv_category.id','=','inv_product.category_id')
-            ->leftjoin('uti_product_unit','uti_product_unit.id','=','inv_product.unit_id')
-            ->leftjoin('inv_brand','inv_brand.id','=','inv_product.brand_id')
-            ->leftjoin('uti_settings','uti_settings.id','=','inv_product.product_type_id')
-            ->select([
-                'inv_product.id',
-                'inv_product.name as display_name',
-                \DB::raw("CONCAT(inv_product.name, ' [',inv_product.remaining_quantity,'] ', uti_product_unit.name) AS product_name"),
-                'inv_product.slug',
-                'inv_category.name as category_name',
-                'uti_product_unit.name as unit_name',
-                'inv_brand.name as brand_name',
-                'inv_product.min_quantity',
-                'inv_product.remaining_quantity as quantity',
-                'inv_product.purchase_price',
-                'inv_product.sales_price',
-                'inv_product.barcode',
-                'inv_product.alternative_name',
-            ]);
-        $products = $products->orderBy('inv_product.id','DESC')->get();
-
-        return $products;
-    }
 }

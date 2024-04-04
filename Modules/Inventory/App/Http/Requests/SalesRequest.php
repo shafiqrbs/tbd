@@ -19,19 +19,20 @@ class SalesRequest extends FormRequest
 
         // Common validation rules for 'POST', 'PUT', and 'PATCH' methods
         return [
-           /* 'customer_id' => 'required|integer|regex:/^\d+(\.\d{1,2})?$/',
+            'customer_id' => 'required|integer|regex:/^\d+(\.\d{1,2})?$/',
             'sub_total' => 'required|regex:/^\d+(\.\d{1,2})?$/',
             'discount_calculation' => 'nullable|regex:/^\d+(\.\d{1,2})?$/',
             'discount' => 'nullable|regex:/^\d+(\.\d{1,2})?$/',
             'discount_type' => 'nullable|string',
             'vat' => 'nullable|regex:/^\d+(\.\d{1,2})?$/',
-            'total_amount' => 'required|nullable|regex:/^\d+(\.\d{1,2})?$/',
-            'receive_amount' => 'nullable|regex:/^\d+(\.\d{1,2})?$/',
+            'total' => 'required|nullable|regex:/^\d+(\.\d{1,2})?$/',
+            'payment' => 'nullable|regex:/^\d+(\.\d{1,2})?$/',
             'transaction_mode_id' => 'nullable|integer|regex:/^\d+(\.\d{1,2})?$/',
-            'items' => 'required|json',
-            'sales_by' => 'nullable|integer',
+            'items' => 'required|array',
+            'sales_by_id' => 'nullable|integer',
+            'created_by_id' => 'nullable|integer',
             'process' => 'nullable|string',
-            'narration' => 'nullable|string',*/
+            'narration' => 'nullable|string',
 
         ];
     }

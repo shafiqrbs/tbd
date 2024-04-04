@@ -6,6 +6,8 @@ namespace Modules\Utility\App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Support\Facades\DB;
+use Modules\Inventory\App\Models\SalesItemModel;
+use Modules\Inventory\App\Models\SalesModel;
 use Modules\Inventory\App\Models\SettingTypeModel;
 
 class ProductUnitModel extends Model
@@ -20,6 +22,8 @@ class ProductUnitModel extends Model
         'slug',
         'status'
     ];
+
+
 
     public static function getEntityDropdown()
     {

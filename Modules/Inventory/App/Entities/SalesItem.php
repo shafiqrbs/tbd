@@ -24,20 +24,35 @@ class SalesItem
      */
     private $id;
 
+    /**
+     * @ORM\ManyToOne(targetEntity="Sales")
+     **/
+    private  $sale;
+
+    /**
+     * @ORM\ManyToOne(targetEntity="Product")
+     * @ORM\JoinColumn(onDelete="CASCADE")
+     **/
+    private  $product;
+
+    /**
+     * @ORM\ManyToOne(targetEntity="Modules\Utility\App\Entities\ProductUnit")
+     **/
+    private  $unit;
+
+      /**
+     * @var string
+     *
+     * @ORM\Column(type="string", length=225, nullable=true)
+     */
+    private $uom;
 
     /**
      * @var string
      *
-     * @ORM\Column(name="unit", type="string", length=225, nullable=true)
+     * @ORM\Column(type="string", nullable=true)
      */
-    private $unit;
-
-    /**
-     * @var string
-     *
-     * @ORM\Column(name="particular", type="text", nullable=true)
-     */
-    private $particular;
+    private $itemName;
 
     /**
      * @var string
@@ -47,39 +62,54 @@ class SalesItem
     private $description;
 
     /**
-     * @var integer
+     * @var float
      *
-     * @ORM\Column(name="quantity", type="smallint",  nullable=true)
+     * @ORM\Column(name="quantity", type="float",  nullable=true)
      */
     private $quantity = 0;
 
     /**
-     * @var integer
+     * @var float
      *
-     * @ORM\Column(type="smallint", nullable=true)
+     * @ORM\Column(type="float", nullable=true)
      */
     private $returnQnt = 0;
 
-     /**
-     * @var integer
+    /**
+     * @var float
      *
-     * @ORM\Column(type="smallint", nullable=true)
+     * @ORM\Column(type="float", nullable=true)
      */
     private $damageQnt = 0;
 
-     /**
-     * @var integer
+    /**
+     * @var float
      *
-     * @ORM\Column(type="smallint", nullable=true)
+     * @ORM\Column(type="float", nullable=true)
      */
     private $spoilQnt= 0;
 
-     /**
-     * @var integer
+    /**
+     * @var float
      *
-     * @ORM\Column(type="smallint", nullable=true)
+     * @ORM\Column(type="float", nullable=true)
      */
     private $bonusQnt = 0;
+
+
+    /**
+     * @var float
+     *
+     * @ORM\Column(type="float", nullable=true)
+     */
+    private $salesPrice = 0;
+
+    /**
+     * @var float
+     *
+     * @ORM\Column(type="float", nullable=true)
+     */
+    private $purchasePrice = 0;
 
     /**
      * @var float
@@ -93,30 +123,44 @@ class SalesItem
      *
      * @ORM\Column(type="float", nullable=true)
      */
+    private $percent;
+
+    /**
+     * @var float
+     *
+     * @ORM\Column(type="float", nullable=true)
+     */
+    private $discountPrice;
+
+    /**
+     * @var float
+     *
+     * @ORM\Column(type="float", nullable=true)
+     */
     private $tloPrice;
 
-     /**
+    /**
      * @var float
      *
      * @ORM\Column(type="float", nullable=true)
      */
     private $srCommission;
 
-      /**
+    /**
      * @var float
      *
      * @ORM\Column(type="float", nullable=true)
      */
     private $srCommissionTotal;
 
-      /**
+    /**
      * @var float
      *
      * @ORM\Column(type="float", nullable=true)
      */
     private $tloTotal;
 
-     /**
+    /**
      * @var string
      *
      * @ORM\Column(type="string", nullable=true)
@@ -126,7 +170,7 @@ class SalesItem
     /**
      * @var float
      *
-     * @ORM\Column(name="height", type="float", nullable=true)
+     * @ORM\Column(type="float", nullable=true)
      */
     private $height = 0;
 
@@ -134,7 +178,7 @@ class SalesItem
     /**
      * @var float
      *
-     * @ORM\Column(name="width", type="float", nullable=true)
+     * @ORM\Column(type="float", nullable=true)
      */
     private $width = 0;
 
@@ -148,17 +192,11 @@ class SalesItem
     /**
      * @var float
      *
-     * @ORM\Column( type="float", nullable=true)
+     * @ORM\Column(type="float", nullable=true)
      */
     private $totalQuantity = 0;
 
 
-    /**
-     * @var float
-     *
-     * @ORM\Column(type="float", nullable=true)
-     */
-    private $purchasePrice = 0;
 
 
     /**
@@ -167,6 +205,7 @@ class SalesItem
      * @ORM\Column(type="float", nullable=true)
      */
     private $subTotal = 0;
+
 
     /**
      * @var \DateTime

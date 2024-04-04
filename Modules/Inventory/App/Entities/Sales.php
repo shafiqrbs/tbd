@@ -9,7 +9,7 @@ use Gedmo\Mapping\Annotation as Gedmo;
 
 
 /**
- * Invoice
+ * Sales
  *
  * @ORM\Table( name ="inv_sales")
  * @ORM\Entity()
