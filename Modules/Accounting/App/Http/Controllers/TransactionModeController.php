@@ -83,7 +83,7 @@ class TransactionModeController extends Controller
     public function show($id)
     {
         $service = new JsonRequestResponse();
-        $entity = DomainModel::find($id);
+        $entity = TransactionModeModel::find($id);
         if (!$entity){
             $entity = 'Data not found';
         }
@@ -94,16 +94,16 @@ class TransactionModeController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit($id)
+    /*public function edit($id)
     {
         $service = new JsonRequestResponse();
-        $entity = DomainModel::find($id);
+        $entity = TransactionModeModel::find($id);
         if (!$entity){
             $entity = 'Data not found';
         }
         $data = $service->returnJosnResponse($entity);
         return $data;
-    }
+    }*/
 
     /**
      * Update the specified resource in storage.

@@ -38,7 +38,6 @@ class TransactionModeRequest extends FormRequest
                     'service_name' => 'nullable|string',
                     'method_id' => 'required|integer',
                     'path' => 'required|image|mimes:jpeg,png,jpg,gif',
-//                    'path' => 'required',
                 ];
             }
 
