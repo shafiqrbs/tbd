@@ -74,7 +74,7 @@ class Customer
      /**
      * @var \DateTime
      *
-     * @ORM\Column(name="paymentMonth", type="date",  nullable=true)
+     * @ORM\Column(type="date",  nullable=true)
      */
     private $paymentMonth;
 
@@ -102,14 +102,14 @@ class Customer
     /**
      * @var string
      *
-     * @ORM\Column(name="postalCode", type="string", length=30, nullable =true)
+     * @ORM\Column( type="string", length=30, nullable =true)
      */
     private $postalCode;
 
      /**
-     * @var array
+     * @var string
      *
-     * @ORM\Column(name="namePrefix", type="array", nullable =true)
+     * @ORM\Column(type="string", nullable =true)
      */
     private $namePrefix;
 
@@ -158,14 +158,14 @@ class Customer
     /**
      * @var string
      *
-     * @ORM\Column(name="firstName", type="string", length=100, nullable =true)
+     * @ORM\Column(type="string", length=100, nullable =true)
      */
     private $firstName;
 
     /**
      * @var string
      *
-     * @ORM\Column(name="lastName", type="string", length=100, nullable =true)
+     * @ORM\Column(type="string", length=100, nullable =true)
      */
     private $lastName;
 
@@ -186,21 +186,21 @@ class Customer
     /**
      * @var string
      *
-     * @ORM\Column(name="permanentAddress", type="text",  nullable =true)
+     * @ORM\Column(type="text",  nullable =true)
      */
     private $permanentAddress;
 
     /**
      * @var string
      *
-     * @ORM\Column(name="fatherName", type="string", length=100, nullable =true)
+     * @ORM\Column(type="string", length=100, nullable =true)
      */
     private $fatherName;
 
     /**
      * @var string
      *
-     * @ORM\Column(name="motherName", type="string", length=100, nullable =true)
+     * @ORM\Column(type="string", length=100, nullable =true)
      */
     private $motherName;
 
@@ -228,7 +228,7 @@ class Customer
     /**
      * @var string
      *
-     * @ORM\Column(name="customerType", type="string", length=15, nullable =true)
+     * @ORM\Column(type="string", length=15, nullable =true)
      */
     private $customerType;
 
@@ -256,7 +256,7 @@ class Customer
     /**
      * @var string
      *
-     * @ORM\Column(name="facebookId", type="string", length=100, nullable =true)
+     * @ORM\Column( type="string", length=100, nullable =true)
      */
     private $facebookId;
 
@@ -284,7 +284,7 @@ class Customer
     /**
      * @var string
      *
-     * @ORM\Column(name="bloodGroup", type="string", length=20, nullable =true)
+     * @ORM\Column(type="string", length=20, nullable =true)
      */
     private $bloodGroup;
 
@@ -298,28 +298,28 @@ class Customer
     /**
      * @var string
      *
-     * @ORM\Column(name="ageGroup", type="string",length=10 , nullable = true)
+     * @ORM\Column(type="string",length=10 , nullable = true)
      */
     private $ageGroup;
 
     /**
      * @var string
      *
-     * @ORM\Column(name="maritalStatus", type="string",length=30 , nullable = true)
+     * @ORM\Column( type="string",length=30 , nullable = true)
      */
     private $maritalStatus;
 
     /**
      * @var string
      *
-     * @ORM\Column(name="alternativeContactPerson", type="string",length=200 , nullable = true)
+     * @ORM\Column(type="string",length=200 , nullable = true)
      */
     private $alternativeContactPerson;
 
     /**
      * @var string
      *
-     * @ORM\Column(name="alternativeContactMobile", type="string",length=50 , nullable = true)
+     * @ORM\Column(type="string",length=50 , nullable = true)
      */
     private $alternativeContactMobile;
 
@@ -327,7 +327,7 @@ class Customer
     /**
      * @var string
      *
-     * @ORM\Column(name="alternativeRelation", type="string",length=100 , nullable = true)
+     * @ORM\Column(type="string",length=100 , nullable = true)
      */
     private $alternativeRelation;
 
@@ -346,19 +346,6 @@ class Customer
      */
     private $weight;
 
-	/**
-     * @var string
-     *
-     * @ORM\Column(name="ssc", type="string",length=50, nullable = true)
-     */
-    private $ssc;
-
-	/**
-     * @var string
-     *
-     * @ORM\Column(name="hsc", type="string",length=50, nullable = true)
-     */
-    private $hsc;
 
 	/**
      * @var string
@@ -469,6 +456,14 @@ class Customer
      * @ORM\Column(name="opening_balance", type="float", nullable=true)
      */
     private $openingBalance;
+
+    /**
+     * @var float
+     *
+     * @ORM\Column(type="float", nullable=true)
+     */
+    private $balance;
+
 
     /**
      * @var string

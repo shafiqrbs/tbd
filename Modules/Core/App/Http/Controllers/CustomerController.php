@@ -51,10 +51,8 @@ class CustomerController extends Controller
 
         $input['domain_id'] = $this->domain['global_id'];
         $input['customer_unique_id'] = "{$this->domain['global_id']}@{$input['mobile']}-{$input['name']}";
-
         $params = ['domain' => $this->domain['global_id'],'table' => 'cor_customers','prefix' => 'EMP-'];
         $pattern = $patternCodeService->customerCode($params);
-
         $input['code'] = $pattern['code'];
         $input['customerId'] = $pattern['generateId'];
 
@@ -68,13 +66,12 @@ class CustomerController extends Controller
      */
     public function show($id)
     {
+
         $service = new JsonRequestResponse();
         $entity = CustomerModel::find($id);
-
         if (!$entity){
             $entity = 'Data not found';
         }
-
         $data = $service->returnJosnResponse($entity);
         return $data;
     }
@@ -86,11 +83,23 @@ class CustomerController extends Controller
     {
         $service = new JsonRequestResponse();
         $entity = CustomerModel::find($id);
-
         if (!$entity){
             $entity = 'Data not found';
         }
+        $data = $service->returnJosnResponse($entity);
+        return $data;
+    }
 
+    /**
+     * Show the specified resource.
+     */
+    public function ledger($id)
+    {
+        $service = new JsonRequestResponse();
+        $entity = CustomerModel::find($id);
+        if (!$entity){
+            $entity = 'Data not found';
+        }
         $data = $service->returnJosnResponse($entity);
         return $data;
     }
