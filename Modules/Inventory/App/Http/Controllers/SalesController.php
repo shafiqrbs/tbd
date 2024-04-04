@@ -43,17 +43,15 @@ class SalesController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(SalesRequest $request)
     {
         $service = new JsonRequestResponse();
-        $input = $request->all();
-        dd($input);
-        /*dd($input);
+        $input = $request->validated();
         $input['config_id'] = $this->domain['config_id'];
         $entity = SalesModel::create($input);
-        */
+
         $process = new SalesModel();
-        $process->insertSalesItems(1,$input['items']);
+        $process->insertSalesItems($entity,$input['items']);
         $data = $service->returnJosnResponse($entity);
         return $data;
 
@@ -65,12 +63,10 @@ class SalesController extends Controller
     public function show($id)
     {
         $service = new JsonRequestResponse();
-        $entity = SalesModel::getProductDetails($id, $this->domain);
-
+        $entity = SalesModel::getShow($id, $this->domain);
         if (!$entity) {
             $entity = 'Data not found';
         }
-
         $data = $service->returnJosnResponse($entity);
         return $data;
     }
@@ -95,17 +91,8 @@ class SalesController extends Controller
     {
         $service = new JsonRequestResponse();
         SalesModel::find($id)->delete();
-
         $entity = ['message' => 'delete'];
         return $service->returnJosnResponse($entity);
-    }
-
-    public function stockItem()
-    {
-        $service = new JsonRequestResponse();
-        $data = SalesModel::getStockItem($this->domain);
-
-        return $service->returnJosnResponse($data);
     }
 
 }
