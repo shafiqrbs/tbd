@@ -62,9 +62,10 @@ class SalesModel extends Model
         $skip = isset($page) && $page!=''? (int)$page * $perPage:0;
 
         $entities = self::where([['inv_sales.config_id',$domain['config_id']]])
-            ->leftjoin('cor_customers','cor_customers.id','=','inv_sales.customer_id')
             ->leftjoin('users as createdBy','createdBy.id','=','inv_sales.created_by_id')
             ->leftjoin('users as salesBy','salesBy.id','=','inv_sales.sales_by_id')
+            ->leftjoin('acc_transaction_mode','acc_transaction_mode.id','=','inv_sales.transaction_mode_id')
+            ->leftjoin('cor_customers','cor_customers.id','=','inv_sales.customer_id')
             ->select([
                 'inv_sales.id',
                 DB::raw('DATE_FORMAT(inv_sales.created_at, "%d-%m-%Y") as created'),
@@ -84,6 +85,10 @@ class SalesModel extends Model
                 'salesBy.id as salesById',
                 'salesBy.username as salesByUser',
                 'salesBy.name as salesByName',
+                'inv_sales.process as process',
+                'acc_transaction_mode.name as mode_name',
+                'cor_customers.address as customer_address',
+                'cor_customers.balance as balance',
             ])->with('salesItems');
 
         if (isset($request['term']) && !empty($request['term'])){
