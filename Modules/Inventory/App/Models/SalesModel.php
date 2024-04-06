@@ -84,15 +84,7 @@ class SalesModel extends Model
                 'salesBy.id as salesById',
                 'salesBy.username as salesByUser',
                 'salesBy.name as salesByName',
-            ])->with(['salesItems' => function ($query){
-                $query->select([
-                'id',
-                'sale_id',
-            'unit_id'
-            ])->with([
-                    'unit'
-                ]);
-            },]);
+            ])->with('salesItems');
 
         if (isset($request['term']) && !empty($request['term'])){
             $entities = $entities->whereAny(['inv_sales.name','inv_sales.slug','inv_category.name','uti_product_unit.name','inv_brand.name','inv_sales.sales_price','uti_settings.name'],'LIKE','%'.$request['term'].'%');
