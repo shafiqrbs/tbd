@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Modules\Domain\App\Models\DomainModel;
 use Modules\Utility\App\Models\CurrencyModel;
 use Modules\Utility\App\Models\SettingModel;
 
@@ -85,7 +86,12 @@ class ConfigModel extends Model
 
     ];
 
-    public function businessModel(): BelongsTo
+    public function domain(): BelongsTo
+    {
+        return $this->belongsTo(DomainModel::class,'domain_id','id');
+    }
+
+     public function businessModel(): BelongsTo
     {
         return $this->belongsTo(SettingModel::class,'business_model_id','id');
     }

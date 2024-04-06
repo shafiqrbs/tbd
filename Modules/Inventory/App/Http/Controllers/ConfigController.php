@@ -33,9 +33,7 @@ class ConfigController extends Controller
     {
         $id = $this->domain['config_id'];
         $service = new JsonRequestResponse();
-        $entity = ConfigModel::with('currency','businessModel')->find($id);
-
-
+        $entity = ConfigModel::with('domain','currency','businessModel')->find($id);
         if (!$entity){
             $entity = 'Data not found';
         }
