@@ -32,14 +32,14 @@ class Customer
     private $id;
 
     /**
-     * @ORM\ManyToOne(targetEntity="Modules\Domain\App\Entities\GlobalOption", inversedBy="customers")
+     * @ORM\ManyToOne(targetEntity="Modules\Domain\App\Entities\GlobalOption")
      * @ORM\JoinColumn(onDelete="CASCADE")
      **/
-
     protected $domain;
 
     /**
      * @ORM\ManyToOne(targetEntity="Modules\Core\App\Entities\Country")
+     * @ORM\JoinColumn(name="country_id", referencedColumnName="id", nullable=true, onDelete="SET NULL")
      */
     protected $country;
 

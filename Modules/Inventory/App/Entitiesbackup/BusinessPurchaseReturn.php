@@ -52,7 +52,7 @@ class BusinessPurchaseReturn
     /**
      * @var \DateTime
      * @Gedmo\Timestampable(on="create")
-     * @ORM\Column(name="created", type="datetime")
+     * @ORM\Column(name="created", type="datetime",nullable=true)
      */
     private $created;
 
@@ -60,7 +60,7 @@ class BusinessPurchaseReturn
     /**
      * @var \DateTime
      * @Gedmo\Timestampable(on="update")
-     * @ORM\Column(name="updated", type="datetime")
+     * @ORM\Column(name="updated", type="datetime",nullable=true)
      */
     private $updated;
 

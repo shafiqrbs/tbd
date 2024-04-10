@@ -25,6 +25,7 @@ class Product
 
     /**
      * @ORM\ManyToOne(targetEntity="Modules\Inventory\App\Entities\Config", cascade={"detach","merge"} )
+     * @ORM\JoinColumn(onDelete="CASCADE")
      **/
     private  $config;
 
@@ -35,47 +36,46 @@ class Product
     private  $productType;
 
     /**
-     * @ORM\ManyToOne(targetEntity="Modules\Inventory\App\Entities\Category")
-     * @ORM\OrderBy({"sorting" = "ASC"})
+     * @ORM\ManyToOne(targetEntity="Category")
+     * @ORM\JoinColumn(name="category_id", referencedColumnName="id", nullable=true, onDelete="SET NULL")
      **/
     private $category;
 
      /**
      * @ORM\ManyToOne(targetEntity="Brand")
-     * @ORM\OrderBy({"sorting" = "ASC"})
-     **/
+      * @ORM\JoinColumn(name="brand_id", referencedColumnName="id", nullable=true, onDelete="SET NULL")
+
+      **/
     private $brand;
 
      /**
-     * @ORM\ManyToOne(targetEntity="Modules\Inventory\App\Entities\WearHouse")
-     * @ORM\OrderBy({"sorting" = "ASC"})
-     **/
+     * @ORM\ManyToOne(targetEntity="WearHouse")
+      * @ORM\JoinColumn(name="wearhouse_id", referencedColumnName="id", nullable=true, onDelete="SET NULL")
+      **/
     private $wearHouse;
-
-    /**
-     * @ORM\ManyToOne(targetEntity="Modules\Inventory\App\Entities\WearHouse")
-     **/
-    private $businessParticularType;
 
 
      /**
      * @ORM\ManyToOne(targetEntity="Particular")
-     **/
+      * @ORM\JoinColumn(name="particular_id", referencedColumnName="id", nullable=true, onDelete="SET NULL")
+      **/
     private $rackNo;
-
 
     /**
      * @ORM\ManyToOne(targetEntity="Modules\Utility\App\Entities\ProductUnit")
+     * @ORM\JoinColumn(name="unit_id", referencedColumnName="id", nullable=true, onDelete="SET NULL")
      **/
     private  $unit;
 
     /**
-     * @ORM\ManyToOne(targetEntity="Modules\Utility\App\Entities\ProductSize")
+     * @ORM\ManyToOne(targetEntity="Particular")
+     * @ORM\JoinColumn(name="size_id", referencedColumnName="id", nullable=true, onDelete="SET NULL")
      **/
     private  $size;
 
     /**
-     * @ORM\ManyToOne(targetEntity="Modules\Utility\App\Entities\ProductColor")
+     * @ORM\ManyToOne(targetEntity="Particular")
+     * @ORM\JoinColumn(name="color_id", referencedColumnName="id", nullable=true, onDelete="SET NULL")
      **/
     private  $color;
 

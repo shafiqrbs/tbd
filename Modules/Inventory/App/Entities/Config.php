@@ -25,7 +25,7 @@ class Config
     private $id;
 
     /**
-     * @ORM\OneToOne(targetEntity="Modules\Domain\App\Entities\GlobalOption", cascade={"persist", "remove"})
+     * @ORM\OneToOne(targetEntity="Modules\Domain\App\Entities\GlobalOption")
      * @ORM\JoinColumn(onDelete="CASCADE")
      **/
     private $domain;
@@ -558,17 +558,22 @@ class Config
     /**
      * @var \DateTime
      * @Gedmo\Timestampable(on="create")
-     * @ORM\Column(name="created_at", type="datetime")
+     * @ORM\Column(name="created_at", type="datetime", nullable=true)
      */
     private $createdAt;
 
     /**
      * @var \DateTime
      * @Gedmo\Timestampable(on="create")
-     * @ORM\Column(name="updated_at", type="datetime")
+     * @ORM\Column(name="updated_at", type="datetime",nullable=true)
      */
     private $updatedAt;
 
+    public function __construct()
+    {
+        $this->createdAt = new \DateTime();
+        $this->updatedAt = new \DateTime();
+    }
 
 }
 

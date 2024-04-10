@@ -31,6 +31,12 @@ class PurchaseItem
      **/
     private  $product;
 
+    /**
+     * @ORM\ManyToOne(targetEntity="Purchase")
+     * @ORM\JoinColumn(onDelete="CASCADE")
+     **/
+    private  $purchase;
+
 
     /**
      * @ORM\ManyToOne(targetEntity="Modules\Utility\App\Entities\ProductUnit")
@@ -38,7 +44,7 @@ class PurchaseItem
     private  $unit;
 
     /**
-     * @ORM\ManyToOne(targetEntity="Modules\Inventory\App\Entities\WearHouse")
+     * @ORM\ManyToOne(targetEntity="WearHouse")
      **/
     private  $wearhouse;
 

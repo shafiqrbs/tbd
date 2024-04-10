@@ -26,6 +26,7 @@ class SalesItem
 
     /**
      * @ORM\ManyToOne(targetEntity="Sales")
+     * @ORM\JoinColumn(onDelete="CASCADE")
      **/
     private  $sale;
 
