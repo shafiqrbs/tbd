@@ -54,7 +54,7 @@ class CoreController extends Controller
         $term = $request['term'];
         $entities = [];
         $service = new JsonRequestResponse();
-        $go = 64;
+        $go = $this->domain['global_id'];
         $entities = $em->getRepository(Core::class)->userAutoComplete( $go,$term);
         $data = $service->returnJosnResponse($entities);
         return $data;
@@ -70,7 +70,7 @@ class CoreController extends Controller
         $entities = [];
         $service = new JsonRequestResponse();
         // $go = $this->getUser()->getGlobalOption();
-        $go = 64;
+        $go = $this->domain['global_id'];
         $entities = $em->getRepository(Core::class)->customerAutoComplete($go,$term);
         $data = $service->returnJosnResponse($entities);
         return $data;
@@ -85,8 +85,7 @@ class CoreController extends Controller
         $term = $request['term'];
         $entities = [];
         $service = new JsonRequestResponse();
-        // $go = $this->getUser()->getGlobalOption();
-        $go = 65;
+        $go = $this->domain['global_id'];
         $entities = $em->getRepository(Core::class)->vendorAutoComplete($go,$term);
         $data = $service->returnJosnResponse($entities);
         return $data;

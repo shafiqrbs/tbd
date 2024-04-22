@@ -48,55 +48,52 @@ class PurchaseItem
      **/
     private  $wearhouse;
 
-
     /**
      * @var float
      *
-     * @ORM\Column(name="quantity", type="float")
+     * @ORM\Column(name="quantity", type="float",nullable=true)
      */
     private $quantity;
-
-
 
     /**
      * @var integer
      *
-     * @ORM\Column(name="salesQuantity", type="integer",nullable=true)
+     * @ORM\Column(type="float",nullable=true)
      */
     private $salesQuantity = 0;
 
     /**
      * @var integer
      *
-     * @ORM\Column(name="salesReturnQuantity", type="integer",nullable=true)
+     * @ORM\Column( type="float",nullable=true)
      */
     private $salesReturnQuantity;
 
     /**
      * @var integer
      *
-     * @ORM\Column(name="salesReplaceQuantity", type="integer",nullable=true)
+     * @ORM\Column( type="float",nullable=true)
      */
     private $salesReplaceQuantity;
 
     /**
      * @var integer
      *
-     * @ORM\Column(name="purchaseReturnQuantity", type="integer",nullable=true)
+     * @ORM\Column(type="float",nullable=true)
      */
     private $purchaseReturnQuantity;
 
     /**
      * @var integer
      *
-     * @ORM\Column(name="damageQuantity", type="integer",nullable=true)
+     * @ORM\Column(type="float",nullable=true)
      */
     private $damageQuantity;
 
     /**
      * @var integer
      *
-     * @ORM\Column(name="bonusQuantity", type="integer", nullable=true)
+     * @ORM\Column(type="float", nullable=true)
      */
     private $bonusQuantity = 0;
 
@@ -104,7 +101,7 @@ class PurchaseItem
     /**
      * @var integer
      *
-     * @ORM\Column(name="remainingQuantity", type="integer",nullable=true)
+     * @ORM\Column( type="float",nullable=true)
      */
     private $remainingQuantity;
 
@@ -112,7 +109,7 @@ class PurchaseItem
     /**
      * @var float
      *
-     * @ORM\Column(name="purchasePrice", type="float")
+     * @ORM\Column(type="float", nullable=true)
      */
     private $purchasePrice;
 
@@ -120,7 +117,7 @@ class PurchaseItem
     /**
      * @var float
      *
-     * @ORM\Column(name="actualPurchasePrice", type="float")
+     * @ORM\Column(type="float", nullable=true)
      */
     private $actualPurchasePrice;
 
@@ -136,16 +133,16 @@ class PurchaseItem
     /**
      * @var float
      *
-     * @ORM\Column(name="salesPrice", type="float", nullable = true)
+     * @ORM\Column(type="float", nullable = true)
      */
     private $salesPrice;
 
     /**
      * @var float
      *
-     * @ORM\Column(name="purchaseSubTotal", type="float", nullable = true)
+     * @ORM\Column(type="float", nullable = true)
      */
-    private $purchaseSubTotal;
+    private $subTotal;
 
 
     /**
@@ -175,7 +172,7 @@ class PurchaseItem
 	/**
 	 * @var float
 	 *
-	 * @ORM\Column(name="particularType", type="float", nullable=true)
+	 * @ORM\Column(type="float", nullable=true)
 	 */
 	private $particularType;
 
@@ -191,23 +188,39 @@ class PurchaseItem
 	/**
 	 * @var float
 	 *
-	 * @ORM\Column(name="subQuantity", type="float", nullable=true)
+	 * @ORM\Column( type="float", nullable=true)
 	 */
 	private $subQuantity;
 
 	/**
 	 * @var float
 	 *
-	 * @ORM\Column(name="totalQuantity", type="float", nullable=true)
+	 * @ORM\Column(type="float", nullable=true)
 	 */
 	private $totalQuantity;
 
 	/**
 	 * @var boolean
 	 *
-	 * @ORM\Column(name="status", type="boolean")
+	 * @ORM\Column(name="status", type="boolean", nullable=true)
 	 */
 	private $status=false;
+
+    /**
+     * @var \DateTime
+     * @Gedmo\Timestampable(on="create")
+     * @ORM\Column(type="datetime")
+     */
+    private $createdAt;
+
+    /**
+     * @var \DateTime
+     * @Gedmo\Timestampable(on="update")
+     * @ORM\Column(type="datetime")
+     */
+    private $updatedAt;
+
+
 
 
 }

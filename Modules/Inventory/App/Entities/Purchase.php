@@ -26,6 +26,7 @@ class Purchase
 
     /**
      * @ORM\ManyToOne(targetEntity="Modules\Inventory\App\Entities\Config" , cascade={"detach","merge"} )
+     * @ORM\JoinColumn(onDelete="CASCADE")
      **/
     private  $config;
 
@@ -83,43 +84,18 @@ class Purchase
 
 
     /**
-     * @var \Datetime
-     *
-     * @ORM\Column(name="receiveDate", type="datetime", nullable=true)
-     */
-    private $receiveDate;
-
-
-
-    /**
-     * @var \DateTime
-     * @Gedmo\Timestampable(on="create")
-     * @ORM\Column(name="created", type="datetime",nullable=true)
-     */
-    private $created;
-
-
-    /**
-     * @var \DateTime
-     * @Gedmo\Timestampable(on="update")
-     * @ORM\Column(name="updated", type="datetime",nullable=true)
-     */
-    private $updated;
-
-
-    /**
      * @var float
      *
-     * @ORM\Column(name="subTotal", type="float", nullable=true)
+     * @ORM\Column(type="float", nullable=true)
      */
     private $subTotal;
 
     /**
      * @var float
      *
-     * @ORM\Column(name="netTotal", type="float", nullable=true)
+     * @ORM\Column(name="total", type="float", nullable=true)
      */
-    private $netTotal;
+    private $total;
 
     /**
      * @var float
@@ -145,28 +121,28 @@ class Purchase
     /**
      * @var string
      *
-     * @ORM\Column(name="discountType", type="string", length=20, nullable=true)
+     * @ORM\Column( type="string", length=20, nullable=true)
      */
     private $discountType ='flat';
 
     /**
      * @var float
      *
-     * @ORM\Column(name="discountCalculation", type="float" , nullable=true)
+     * @ORM\Column(type="float" , nullable=true)
      */
     private $discountCalculation;
 
     /**
      * @var boolean
      *
-     * @ORM\Column(name="status", type="boolean")
+     * @ORM\Column(name="status", type="boolean", nullable=true)
      */
     private $status=true;
 
     /**
      * @var boolean
      *
-     * @ORM\Column(name="asInvestment", type="boolean")
+     * @ORM\Column(type="boolean", nullable=true)
      */
     private $asInvestment = false;
 
@@ -174,7 +150,7 @@ class Purchase
 	/**
 	 * @var boolean
 	 *
-	 * @ORM\Column(name="isReversed", type="boolean")
+	 * @ORM\Column(type="boolean", nullable=true)
 	 */
 	private $isReversed = false;
 
@@ -182,7 +158,7 @@ class Purchase
 	/**
 	 * @var boolean
 	 *
-	 * @ORM\Column(name="commissionInvoice", type="boolean")
+	 * @ORM\Column(type="boolean", nullable=true)
 	 */
 	private $commissionInvoice = false;
 
@@ -219,6 +195,44 @@ class Purchase
      * @ORM\Column(type="string", length=255, nullable=true)
      */
     protected $path;
+
+    /**
+     * @var \DateTime
+     * @Gedmo\Timestampable(on="create")
+     * @ORM\Column(type="datetime")
+     */
+    private $createdAt;
+
+    /**
+     * @var \DateTime
+     * @Gedmo\Timestampable(on="update")
+     * @ORM\Column(type="datetime")
+     */
+    private $updatedAt;
+
+
+    /**
+     * @var \Datetime
+     *
+     * @ORM\Column(name="receiveDate", type="datetime", nullable=true)
+     */
+    private $receiveDate;
+
+
+    /**
+     * @var \DateTime
+     * @Gedmo\Timestampable(on="create")
+     * @ORM\Column(name="created", type="datetime",nullable=true)
+     */
+    private $created;
+
+
+    /**
+     * @var \DateTime
+     * @Gedmo\Timestampable(on="update")
+     * @ORM\Column(name="updated", type="datetime",nullable=true)
+     */
+    private $updated;
 
 }
 
