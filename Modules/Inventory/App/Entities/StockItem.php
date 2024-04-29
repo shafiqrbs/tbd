@@ -9,7 +9,7 @@ use Modules\Utility\App\Entities\ProductUnit;
 /**
  * BusinessParticular
  *
- * @ORM\Table( name = "inv_stock_item")
+ * @ORM\Table( name="inv_stock_item")
  * @ORM\Entity()
  */
 class StockItem

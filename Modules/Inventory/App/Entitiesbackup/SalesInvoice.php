@@ -45,7 +45,7 @@ class SalesInvoice
     private $businessReverse;
 
      /**
-     * @ORM\OneToOne(targetEntity="Modules\Inventory\App\Entities\BusinessInvoiceReturn")
+     * @ORM\OneToOne(targetEntity="SalesReturn")
      **/
     private $invoiceReturn;
 

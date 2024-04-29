@@ -10,7 +10,7 @@ use Gedmo\Mapping\Annotation as Gedmo;
 /**
  * BusinessPurchase
  *
- * @ORM\Table( name ="inv_purchase")
+ * @ORM\Table(name ="inv_purchase")
  * @ORM\Entity()
  */
 class Purchase
@@ -32,10 +32,10 @@ class Purchase
 
 
     /**
-     * @ORM\ManyToOne(targetEntity="Modules\Core\App\Entities\Vendor")
+     * @ORM\ManyToOne(targetEntity="Modules\Accounting\App\Entities\AccountHead")
+     * @ORM\JoinColumn(onDelete="CASCADE")
      **/
     private  $vendor;
-
 
     /**
      * @Gedmo\Blameable(on="create")
@@ -50,14 +50,9 @@ class Purchase
 
 
     /**
-     * @ORM\ManyToOne(targetEntity="Modules\Utility\App\Entities\TransactionMethod")
+     * @ORM\ManyToOne(targetEntity="Modules\Accounting\App\Entities\AccountHead")
      **/
-    private  $transactionMethod;
-
-    /**
-     * @ORM\ManyToOne(targetEntity="Modules\Accounting\App\Entities\TransactionMode")
-     **/
-    private  $transactionMode;
+    private $transaction;
 
 
     /**
@@ -218,21 +213,6 @@ class Purchase
      */
     private $receiveDate;
 
-
-    /**
-     * @var \DateTime
-     * @Gedmo\Timestampable(on="create")
-     * @ORM\Column(name="created", type="datetime",nullable=true)
-     */
-    private $created;
-
-
-    /**
-     * @var \DateTime
-     * @Gedmo\Timestampable(on="update")
-     * @ORM\Column(name="updated", type="datetime",nullable=true)
-     */
-    private $updated;
 
 }
 

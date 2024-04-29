@@ -36,7 +36,7 @@ class BusinessDistributionReturnItem
     private  $product;
 
      /**
-     * @ORM\OneToOne(targetEntity="Modules\Inventory\App\Entities\BusinessInvoiceReturnItem")
+     * @ORM\OneToOne(targetEntity="SalesReturnItem")
      * @ORM\JoinColumn(onDelete="CASCADE")
      **/
     private  $invoiceReturnItem;
@@ -148,7 +148,7 @@ class BusinessDistributionReturnItem
      *
      * @param integer $quantity
      *
-     * @return BusinessPurchaseReturnItem
+     * @return PurchaseReturnItem
      */
     public function setQuantity($quantity)
     {
@@ -172,7 +172,7 @@ class BusinessDistributionReturnItem
      *
      * @param float $purchasePrice
      *
-     * @return BusinessPurchaseReturnItem
+     * @return PurchaseReturnItem
      */
     public function setPurchasePrice($purchasePrice)
     {

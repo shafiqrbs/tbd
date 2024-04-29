@@ -8,7 +8,7 @@ use Gedmo\Mapping\Annotation as Gedmo;
 /**
  * BusinessWearHouse
  *
- * @ORM\Table( name ="inv_wearhouse")
+ * @ORM\Table( name="inv_wearhouse")
  * @ORM\Entity()
  */
 class WearHouse

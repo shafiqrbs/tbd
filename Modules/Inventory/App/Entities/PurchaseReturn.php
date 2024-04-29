@@ -10,12 +10,13 @@ use Gedmo\Mapping\Annotation as Gedmo;
 
 
 /**
- * BusinessInvoiceReturn
+ * BusinessPurchaseReturn
  *
- * @ORM\Table( name ="inv_invoice_return")
+ * @ORM\Table( name ="inv_purchase_return")
  * @ORM\Entity()
+ *
  */
-class BusinessInvoiceReturn
+class PurchaseReturn
 {
     /**
      * @var integer
@@ -27,28 +28,14 @@ class BusinessInvoiceReturn
 
 
     /**
-     * @ORM\ManyToOne(targetEntity="Modules\Inventory\App\Entities\Config", inversedBy="businessPurchasesReturns" , cascade={"detach","merge"} )
-     * @ORM\JoinColumn(onDelete="CASCADE")
+     * @ORM\ManyToOne(targetEntity="Modules\Inventory\App\Entities\Config")
      **/
     private  $config;
 
     /**
-     * @ORM\OneToOne(targetEntity="Sales", inversedBy="invoiceReturn")
+     * @ORM\ManyToOne(targetEntity="Modules\Accounting\App\Entities\AccountHead")
      * @ORM\JoinColumn(onDelete="CASCADE")
-     **/
-    private  $salesInvoice;
-
-    /**
-     * @ORM\OneToMany(targetEntity="SalesReturnItem", mappedBy="invoiceReturn" , cascade={"remove"})
-     * @ORM\OrderBy({"id" = "ASC"})
-     **/
-    private  $invoiceReturnItems;
-
-    /**
-     * @ORM\ManyToOne(targetEntity="Modules\Core\App\Entities\Customer", inversedBy="businessInvoices" ,cascade={"persist"} )
-     **/
-    private  $customer;
-
+    private  $vendor;
 
     /**
      * @Gedmo\Blameable(on="create")
@@ -72,7 +59,26 @@ class BusinessInvoiceReturn
      */
     private $updated;
 
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="invoice", type="string", length=255, nullable=true)
+     */
+    private $invoice;
 
+    /**
+     * @var integer
+     *
+     * @ORM\Column(name="salesInvoice", type="integer", nullable=true)
+     */
+    private $salesInvoice;
+
+     /**
+     * @var integer
+     *
+     * @ORM\Column(name="purchaseInvoice", type="integer", nullable=true)
+     */
+    private $purchaseInvoice;
 
     /**
      * @var integer
@@ -80,20 +86,6 @@ class BusinessInvoiceReturn
      * @ORM\Column(name="code", type="integer",  nullable=true)
      */
     private $code;
-
-     /**
-     * @var string
-     *
-     * @ORM\Column(name="invoice", type="string",  nullable=true)
-     */
-    private $invoice;
-
-    /**
-     * @var string
-     *
-     * @ORM\Column(name="mode", type="string",  nullable=true)
-     */
-    private $mode = "adjustment";
 
     /**
      * @var float
@@ -105,16 +97,23 @@ class BusinessInvoiceReturn
     /**
      * @var float
      *
-     * @ORM\Column(name="adjustment", type="float", nullable=true)
+     * @ORM\Column(name="spoilQuantity", type="float", nullable=true)
      */
-    private $adjustment=0;
+    private $spoilQuantity;
 
     /**
      * @var float
      *
-     * @ORM\Column(name="payment", type="float", nullable=true)
+     * @ORM\Column(name="damageQuantity", type="float", nullable=true)
      */
-    private $payment=0;
+    private $damageQuantity;
+
+     /**
+     * @var float
+     *
+     * @ORM\Column(name="quantity", type="float", nullable=true)
+     */
+    private $quantity;
 
     /**
      * @var string
@@ -122,6 +121,13 @@ class BusinessInvoiceReturn
      * @ORM\Column(name="process", type="string", nullable=true)
      */
     private $process = "created";
+
+     /**
+     * @var boolean
+     *
+     * @ORM\Column(name="mode", type="boolean", nullable=true)
+     */
+    private $mode = false;
 
     /**
      * Get id
@@ -217,6 +223,22 @@ class BusinessInvoiceReturn
     }
 
     /**
+     * @return string
+     */
+    public function getInvoice()
+    {
+        return $this->invoice;
+    }
+
+    /**
+     * @param string $invoice
+     */
+    public function setInvoice($invoice)
+    {
+        $this->invoice = $invoice;
+    }
+
+    /**
      * @return int
      */
     public function getCode()
@@ -230,6 +252,22 @@ class BusinessInvoiceReturn
     public function setCode($code)
     {
         $this->code = $code;
+    }
+
+    /**
+     * @return AccountVendor
+     */
+    public function getVendor()
+    {
+        return $this->vendor;
+    }
+
+    /**
+     * @param AccountVendor $vendor
+     */
+    public function setVendor($vendor)
+    {
+        $this->vendor = $vendor;
     }
 
     /**
@@ -251,113 +289,113 @@ class BusinessInvoiceReturn
     /**
      * @return mixed
      */
-    public function getInvoiceReturnItems()
+    public function getBusinessPurchaseReturnItems()
     {
-        return $this->invoiceReturnItems;
+        return $this->businessPurchaseReturnItems;
     }
 
     /**
-     * @param mixed $invoiceReturnItems
+     * @param mixed $businessPurchaseReturnItems
      */
-    public function setInvoiceReturnItems($invoiceReturnItems)
+    public function setBusinessPurchaseReturnItems($businessPurchaseReturnItems)
     {
-        $this->invoiceReturnItems = $invoiceReturnItems;
+        $this->businessPurchaseReturnItems = $businessPurchaseReturnItems;
     }
 
     /**
-     * @return mixed
+     * @return int
      */
-    public function getCustomer()
+    public function getSalesInvoice()
     {
-        return $this->customer;
+        return $this->salesInvoice;
     }
 
     /**
-     * @param mixed $customer
+     * @param int $salesInvoice
      */
-    public function setCustomer($customer)
+    public function setSalesInvoice($salesInvoice)
     {
-        $this->customer = $customer;
+        $this->salesInvoice = $salesInvoice;
     }
 
     /**
-     * @return string
+     * @return int
      */
-    public function getInvoice()
+    public function getPurchaseInvoice()
     {
-        return $this->invoice;
+        return $this->purchaseInvoice;
     }
 
     /**
-     * @param string $invoice
+     * @param int $purchaseInvoice
      */
-    public function setInvoice($invoice)
+    public function setPurchaseInvoice($purchaseInvoice)
     {
-        $this->invoice = $invoice;
+        $this->purchaseInvoice = $purchaseInvoice;
     }
 
     /**
-     * @return string
+     * @return float
      */
-    public function getMode()
+    public function getQuantity()
+    {
+        return $this->quantity;
+    }
+
+    /**
+     * @param float $quantity
+     */
+    public function setQuantity($quantity)
+    {
+        $this->quantity = $quantity;
+    }
+
+    /**
+     * @return float
+     */
+    public function getDamageQuantity()
+    {
+        return $this->damageQuantity;
+    }
+
+    /**
+     * @param float $damageQuantity
+     */
+    public function setDamageQuantity($damageQuantity)
+    {
+        $this->damageQuantity = $damageQuantity;
+    }
+
+    /**
+     * @return float
+     */
+    public function getSpoilQuantity()
+    {
+        return $this->spoilQuantity;
+    }
+
+    /**
+     * @param float $spoilQuantity
+     */
+    public function setSpoilQuantity($spoilQuantity)
+    {
+        $this->spoilQuantity = $spoilQuantity;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isMode()
     {
         return $this->mode;
     }
 
     /**
-     * @param string $mode
+     * @param bool $mode
      */
     public function setMode($mode)
     {
         $this->mode = $mode;
-    }
-
-    /**
-     * @return float
-     */
-    public function getAdjustment()
-    {
-        return $this->adjustment;
-    }
-
-    /**
-     * @param float $adjustment
-     */
-    public function setAdjustment($adjustment)
-    {
-        $this->adjustment = $adjustment;
-    }
-
-    /**
-     * @return float
-     */
-    public function getPayment()
-    {
-        return $this->payment;
-    }
-
-    /**
-     * @param float $payment
-     */
-    public function setPayment($payment)
-    {
-        $this->payment = $payment;
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getBusinessInvoice()
-    {
-        return $this->businessInvoice;
-    }
-
-    /**
-     * @param mixed $salesInvoice
-     */
-    public function setBusinessInvoice($salesInvoice)
-    {
-        $this->businessInvoice = $salesInvoice;
     }
 
 

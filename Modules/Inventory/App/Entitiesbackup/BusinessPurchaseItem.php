@@ -39,7 +39,7 @@ class BusinessPurchaseItem
     private  $businessPurchase;
 
     /**
-     * @ORM\OneToMany(targetEntity="Modules\Inventory\App\Entities\BusinessDamage", mappedBy="businessPurchaseItem" )
+     * @ORM\OneToMany(targetEntity="Damage", mappedBy="businessPurchaseItem" )
      * @ORM\JoinColumn(onDelete="CASCADE")
      **/
     private  $businessDamages;
@@ -514,7 +514,7 @@ class BusinessPurchaseItem
     }
 
     /**
-     * @return BusinessPurchaseReturnItem
+     * @return PurchaseReturnItem
      */
     public function getBusinessPurchaseReturnItems()
     {
@@ -522,7 +522,7 @@ class BusinessPurchaseItem
     }
 
     /**
-     * @return BusinessDamage
+     * @return Damage
      */
     public function getBusinessDamages()
     {

@@ -55,14 +55,14 @@ class BusinessStockHistory
 
 
      /**
-     * @ORM\ManyToOne(targetEntity="Modules\Inventory\App\Entities\BusinessInvoiceReturnItem")
+     * @ORM\ManyToOne(targetEntity="SalesReturnItem")
      * @ORM\JoinColumn(onDelete="CASCADE")
      **/
     private $salesReturnItem;
 
 
     /**
-     * @ORM\ManyToOne(targetEntity="Modules\Inventory\App\Entities\BusinessDamage")
+     * @ORM\ManyToOne(targetEntity="Damage")
      * @ORM\JoinColumn(onDelete="CASCADE")
      **/
     private $damageItem;

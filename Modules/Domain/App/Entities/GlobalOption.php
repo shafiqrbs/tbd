@@ -7,8 +7,6 @@ use Doctrine\ORM\Mapping as ORM;
 use Gedmo\Mapping\Annotation as Gedmo;
 
 
-
-
 /**
  * GlobalOption
  * @ORM\Table(name="dom_domain")

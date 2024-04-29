@@ -21,7 +21,6 @@ use Gedmo\Mapping\Annotation as Gedmo;
 class Customer
 {
 
-
     /**
      * @var integer
      *
@@ -36,6 +35,13 @@ class Customer
      * @ORM\JoinColumn(onDelete="CASCADE")
      **/
     protected $domain;
+
+     /**
+     * @ORM\OneToOne(targetEntity="Modules\Accounting\App\Entities\AccountHead")
+     * @ORM\JoinColumn(onDelete="CASCADE")
+     **/
+     protected $ledger;
+
 
     /**
      * @ORM\ManyToOne(targetEntity="Modules\Core\App\Entities\Country")

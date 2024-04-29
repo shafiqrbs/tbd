@@ -765,7 +765,7 @@ class Product
 
 
     /**
-     * @return BusinessDamage
+     * @return Damage
      */
     public function getBusinessDamages()
     {

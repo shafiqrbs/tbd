@@ -14,7 +14,7 @@ use Symfony\Component\Validator\Constraints as Assert;
  * @ORM\Table(name ="inv_invoice_return_item")
  * @ORM\Entity()
  */
-class BusinessInvoiceReturnItem
+class SalesReturnItem
 {
     /**
      * @var integer
@@ -38,20 +38,20 @@ class BusinessInvoiceReturnItem
     private  $product;
 
     /**
-     * @ORM\ManyToOne(targetEntity="SalesInvoiceItem")
+     * @ORM\ManyToOne(targetEntity="SalesItem")
      * @ORM\JoinColumn(onDelete="CASCADE")
      **/
-    private  $invoiceParticular;
+    private  $salesItem;
 
     /**
-     * @ORM\ManyToOne(targetEntity="Sales", inversedBy="invoiceReturnItems" )
+     * @ORM\ManyToOne(targetEntity="Sales")
      * @ORM\JoinColumn(onDelete="CASCADE")
      **/
     private  $invoice;
 
 
     /**
-     * @ORM\ManyToOne(targetEntity="SalesReturn", inversedBy="invoiceReturnItems" )
+     * @ORM\ManyToOne(targetEntity="SalesReturn")
      * @ORM\JoinColumn(onDelete="CASCADE")
      **/
     private  $invoiceReturn;

@@ -8,11 +8,12 @@
         "php": "^8.1",
         "barryvdh/laravel-form-bridge": "^0.7.1",
         "beberlei/doctrineextensions": "^1.4",
-        "bensampo/laravel-enum": "^6.10",
-        "cviebrock/eloquent-sluggable": "*",
         "gedmo/doctrine-extensions": "^3.14",
+        "symfony/doctrine-bridge": "^6.4",
         "guzzlehttp/guzzle": "^7.2",
         "laravel-doctrine/extensions": "^1.6",
+        "cviebrock/eloquent-sluggable": "*",
+        "bensampo/laravel-enum": "^6.10",
         "laravel/framework": "^10.10",
         "laravel/sanctum": "^3.3",
         "laravel/scout": "^10.8",
@@ -21,7 +22,7 @@
         "spatie/laravel-activitylog": "^4.7",
         "spatie/laravel-medialibrary": "^10.15",
         "spatie/laravel-query-builder": "^5.7",
-        "symfony/doctrine-bridge": "^6.4"
+
     },
 
     "require-dev": {

@@ -25,7 +25,6 @@ class Sales
      */
     private $id;
 
-
     /**
      * @ORM\ManyToOne(targetEntity="Modules\Inventory\App\Entities\Config")
      * @ORM\JoinColumn(onDelete="CASCADE")
@@ -33,12 +32,14 @@ class Sales
     private $config;
 
     /**
-     * @ORM\ManyToOne(targetEntity="Modules\Core\App\Entities\Customer")
+     * @ORM\ManyToOne(targetEntity="Modules\Accounting\App\Entities\AccountHead")
+     * @ORM\JoinColumn(onDelete="CASCADE")
      **/
     private  $customer;
 
     /**
-     * @ORM\ManyToOne(targetEntity="Modules\Core\App\Entities\Vendor")
+     * @ORM\ManyToOne(targetEntity="Modules\Accounting\App\Entities\AccountHead")
+     * @ORM\JoinColumn(onDelete="CASCADE")
      **/
     private  $vendor;
 
@@ -59,15 +60,9 @@ class Sales
     private  $approvedBy;
 
     /**
-     * @ORM\ManyToOne(targetEntity="Modules\Utility\App\Entities\TransactionMethod")
+     * @ORM\ManyToOne(targetEntity="Modules\Accounting\App\Entities\AccountHead")
      **/
-    private  $transactionMethod;
-
-    /**
-     * @ORM\ManyToOne(targetEntity="Modules\Accounting\App\Entities\TransactionMode")
-     **/
-    private  $transactionMode;
-
+    private $transaction;
 
 
     /**
@@ -93,13 +88,6 @@ class Sales
      */
     private $paymentInWord;
 
-
-    /**
-     * @var string
-     *
-     * @ORM\Column(type="string", length=100, nullable=true)
-     */
-    private $transactionId;
 
     /**
      * @var string

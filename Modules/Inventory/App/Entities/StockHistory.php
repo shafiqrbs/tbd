@@ -8,7 +8,7 @@ use Gedmo\Mapping\Annotation as Gedmo;
 /**
  * BusinessStockHistory
  *
- * @ORM\Table( name = "inv_stock_history")
+ * @ORM\Table( name="inv_stock_history")
  * @ORM\Entity()
  */
 class StockHistory

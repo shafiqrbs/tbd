@@ -34,10 +34,9 @@ class Vendor
 
 
     /**
-     * @ORM\ManyToOne(targetEntity="Modules\Domain\App\Entities\GlobalOption", inversedBy="customers")
+     * @ORM\ManyToOne(targetEntity="Modules\Domain\App\Entities\GlobalOption")
      * @ORM\JoinColumn(onDelete="CASCADE")
      **/
-
     protected $domain;
 
 
@@ -192,19 +191,6 @@ class Vendor
      */
     private $updatedAt;
 
-    /**
-     * @var \DateTime
-     * @Gedmo\Timestampable(on="create")
-     * @ORM\Column(name="created", type="datetime")
-     */
-    private $created;
-
-    /**
-     * @var \DateTime
-     * @Gedmo\Timestampable(on="update")
-     * @ORM\Column(name="updated", type="datetime")
-     */
-    private $updated;
 
 
 

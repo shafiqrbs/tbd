@@ -120,7 +120,7 @@ class BusinessPurchaseReturnItem
      *
      * @param integer $quantity
      *
-     * @return BusinessPurchaseReturnItem
+     * @return PurchaseReturnItem
      */
     public function setQuantity($quantity)
     {
@@ -144,7 +144,7 @@ class BusinessPurchaseReturnItem
      *
      * @param float $purchasePrice
      *
-     * @return BusinessPurchaseReturnItem
+     * @return PurchaseReturnItem
      */
     public function setPurchasePrice($purchasePrice)
     {
@@ -196,7 +196,7 @@ class BusinessPurchaseReturnItem
     }
 
     /**
-     * @return BusinessPurchaseReturn
+     * @return PurchaseReturn
      */
     public function getBusinessPurchaseReturn()
     {
@@ -204,7 +204,7 @@ class BusinessPurchaseReturnItem
     }
 
     /**
-     * @param BusinessPurchaseReturn $businessPurchaseReturn
+     * @param PurchaseReturn $businessPurchaseReturn
      */
     public function setBusinessPurchaseReturn($businessPurchaseReturn)
     {
