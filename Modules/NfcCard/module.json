@@ -1,0 +1,11 @@
+{
+    "name": "NfcCard",
+    "alias": "nfccard",
+    "description": "",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\NfcCard\\App\\Providers\\NfcCardServiceProvider"
+    ],
+    "files": []
+}
