@@ -91,6 +91,10 @@ class CategoryModel extends Model
             $categories = $categories->whereAny(['inv_category.name','inv_category.slug'],'LIKE','%'.$request['term'].'%');
         }
 
+        if (isset($request['name']) && !empty($request['name'])){
+            $categories = $categories->where('inv_category.name','LIKE','%'.$request['name'].'%');
+        }
+
         if (isset($request['type']) && $request['type'] === 'category'){
             $categories = $categories->whereNotNull('inv_category.parent');
         }
