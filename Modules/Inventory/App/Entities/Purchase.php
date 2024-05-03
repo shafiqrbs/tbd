@@ -50,9 +50,9 @@ class Purchase
 
 
     /**
-     * @ORM\ManyToOne(targetEntity="Modules\Accounting\App\Entities\AccountHead")
+     * @ORM\ManyToOne(targetEntity="Modules\Accounting\App\Entities\TransactionMode")
      **/
-    private $transaction;
+    private $transactionMode;
 
 
     /**

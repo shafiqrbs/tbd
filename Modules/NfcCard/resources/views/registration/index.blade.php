@@ -11,7 +11,6 @@
                 <div class="container">
                     <form method="post" role="form" id="search-form">
                         <table id="leave_settings" class="shop-table account-orders-table mb-6 mt-8">
-
                             <thead class="thead-dark">
                             <tr>
                                 <th class="order-id">S/N</th>
