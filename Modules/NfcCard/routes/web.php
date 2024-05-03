@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use Modules\NfcCard\App\Http\Controllers\NfcCardController;
+use Modules\NfcCard\App\Http\Controllers\RegistrationController;
 
 /*
 |--------------------------------------------------------------------------
@@ -14,6 +15,10 @@ use Modules\NfcCard\App\Http\Controllers\NfcCardController;
 |
 */
 
-Route::group([], function () {
-    Route::resource('nfccard', NfcCardController::class)->names('nfccard');
-});
+Route::group([],
+    function () {
+        Route::resource('nfccard', NfcCardController::class)->names('nfccard');
+        Route::get('registration', [RegistrationController::class, 'index']);
+        Route::get('registration/create', [RegistrationController::class, 'createUserForm']);
+        Route::post('registration/store', [RegistrationController::class, 'UserForm'])->name('validate.form');
+    });

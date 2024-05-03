@@ -133,7 +133,14 @@ class NfcUser
      *
      * @ORM\Column(type="string", length=255, nullable=true)
      */
-    private $path;
+    private $profile_pic;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(type="string", length=255, nullable=true)
+     */
+    private $company_logo;
 
 
     /**
