@@ -69,7 +69,7 @@ class TransactionModeController extends Controller
 
         if ($request->file('path')) {
             $imageName = time().'.'.$request->path->extension();
-            $request->path->move(public_path('image/accounting/transaction-mode/'), $imageName);
+            $request->path->move(public_path('uploads/accounting/transaction-mode/'), $imageName);
              $data['path'] = $imageName;
         }
         $entity = TransactionModeModel::create($data);

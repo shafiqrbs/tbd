@@ -117,7 +117,7 @@ class TransactionModeModel extends Model
                 'acc_transaction_mode.name',
                 'uti_transaction_method.name as method_name',
                 'uti_transaction_method.slug as method_slug',
-                DB::raw("CONCAT('".url('')."/image/accounting/transaction-mode/', acc_transaction_mode.path) AS path")
+                DB::raw("CONCAT('".url('')."/uploads/accounting/transaction-mode/', acc_transaction_mode.path) AS path")
         ])
             ->limit(8)
             ->get();
