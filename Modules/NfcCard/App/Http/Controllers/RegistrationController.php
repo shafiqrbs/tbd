@@ -9,11 +9,10 @@ use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
-use Modules\Appfiy\Entities\Component;
 use Modules\AppsApi\App\Services\JsonRequestResponse;
-use Modules\Core\App\Models\CustomerModel;
 use Modules\Core\App\Models\UserModel;
-use Modules\Nfccard\App\Models\NfcUserModel;
+use Modules\NfcCard\App\Models\NfcUserModel;
+
 
 class RegistrationController extends Controller
 {
