@@ -57,7 +57,7 @@ class NfcUser
     /**
      * @var string
      *
-     * @ORM\Column(name="name", type="text", length=255, nullable=true)
+     * @ORM\Column(type="text", length=255, nullable=true)
      */
     private $address;
 
