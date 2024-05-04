@@ -6,9 +6,11 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
 use Modules\Appfiy\Entities\Component;
+use Modules\AppsApi\App\Services\JsonRequestResponse;
 use Modules\Core\App\Models\CustomerModel;
 use Modules\Core\App\Models\UserModel;
 use Modules\Nfccard\App\Models\NfcUserModel;
@@ -24,6 +26,23 @@ class RegistrationController extends Controller
         return view('nfccard::registration/index',['entities'=>$components]);
     }
 
+    /**
+     * Display a listing of the resource.
+     */
+    public function indexApi()
+    {
+
+        $components = DB::table('nfc_user')
+            ->select([
+                'nfc_user.*',
+                DB::raw('CONCAT("/uploads/nfc-card/", nfc_user.profile_pic) AS profile_pic'),
+                DB::raw('CONCAT("/uploads/nfc-card/", nfc_user.company_logo) AS company_logo'),
+            ])
+            ->where('nfc_user.process','New')
+            ->get()->toArray();
+        $service = new JsonRequestResponse();
+        return $service->returnJosnResponse($components);
+    }
 
     // Create Form
     public function createUserForm(Request $request) {
@@ -35,18 +54,26 @@ class RegistrationController extends Controller
     public function UserForm(Request $request) {
         // Form validation
         $this->validate($request, [
+            'company_name' => 'required',
             'name' => 'required',
             'designation' => 'required',
             'email' => 'required|email',
-            'phone' => 'required|regex:/^([0-9\s\-\+\(\)]*)$/|min:10',
+            'company_email' => 'required|email',
+            'phone' => 'required|regex:/^([0-9\s\-\+\(\)]*)$/',
             'website'=>'required',
             'address' => 'required'
         ]);
 
         $input = $request->all();
 
-//        dd($request->all());
-
+        $username = $request->input('phone');
+        $email = $request->input('email');
+        $password= '123456';
+        $user = UserModel::create([
+            'username' => $username,
+            'email' => $email,
+            'password' => bcrypt($password),
+        ]);
         if ($request->file('profile_pic') != '') {
             $target_location = 'uploads/nfc-card/';
 //            File::delete(public_path().'/'.$target_location.$component->image);
@@ -84,8 +111,13 @@ class RegistrationController extends Controller
         }
 
         //  Store data in database
-        NfcUserModel::create($input);
-        return back()->with('success', 'Your form has been submitted.');
+        $entity = NfcUserModel::create($input);
+        $entity->update(array('employee_id' => $user['id']));
+        if($entity){
+            return back()->with('success', 'Your form has been submitted.');
+        }else{
+            return back()->with('success', 'Your form submit failed');
+        }
     }
 
 

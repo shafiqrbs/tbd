@@ -41,15 +41,15 @@ class NfcUserModel extends Model
         parent::boot();
         self::creating(function ($model) {
             $date =  new \DateTime("now");
-//            $model->unique_id = self::quickRandom();
+            $model->tracking_no = self::quickRandom();
             $model->created_at = $date;
             $model->updated_at = $date;
-            $datetime = new \DateTime("now");
+            $model->process = 'New';
         });
 
         self::updating(function ($model) {
             $date =  new \DateTime("now");
-//            $model->unique_id = self::quickRandom();
+            $model->tracking_no = self::quickRandom();
             $model->updated_at = $date;
         });
 

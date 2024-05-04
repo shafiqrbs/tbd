@@ -26,8 +26,8 @@
                                 @csrf
                                 <div class="form-group mb-2">
                                     <label>Company Name</label>
-                                    <input type="text" value="{{old('name')}}" class="form-control @error('name') is-invalid @enderror" name="name" id="name">
-                                    @error('name')
+                                    <input type="text" value="{{old('company_name')}}" class="form-control @error('company_name') is-invalid @enderror" name="company_name" id="company_name">
+                                    @error('company_name')
                                     <span class="invalid-feedback" role="alert">
                         <strong>{{ $message }}</strong>
                     </span>
@@ -45,7 +45,7 @@
                                  <div class="form-group mb-2">
                                     <label>Designation</label>
                                     <input type="text" class="form-control @error('designation') is-invalid @enderror" name="designation" id="designation">
-                                    @error('name')
+                                    @error('designation')
                                     <span class="invalid-feedback" role="alert">
                         <strong>{{ $message }}</strong>
                     </span>
@@ -70,9 +70,18 @@
                                     @enderror
                                 </div>
                                 <div class="form-group mb-2">
-                                    <label>Website</label>
+                                    <label>Company Website</label>
                                     <input type="text" class="form-control @error('website') is-invalid @enderror" name="website" id="website">
-                                    @error('subject')
+                                    @error('website')
+                                    <span class="invalid-feedback" role="alert">
+                        <strong>{{ $message }}</strong>
+                    </span>
+                                    @enderror
+                                </div>
+                                <div class="form-group mb-2">
+                                    <label>Company Email</label>
+                                    <input type="text" class="form-control @error('company_email') is-invalid @enderror" name="company_email" id="company_email">
+                                    @error('company_email')
                                     <span class="invalid-feedback" role="alert">
                         <strong>{{ $message }}</strong>
                     </span>

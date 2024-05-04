@@ -31,7 +31,7 @@ class NfcUser
     private  $user;
 
 
-    /**
+     /**
      * @var string
      *
      * @ORM\Column(type="string", length=255, nullable=true)
@@ -118,6 +118,13 @@ class NfcUser
      * @ORM\Column(type="string", length=255, nullable=true)
      */
     private $trackingNo;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(type="string", length=255, nullable=true)
+     */
+    private $process='New';
 
 
     /**

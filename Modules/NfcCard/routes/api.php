@@ -2,6 +2,7 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use Modules\NfcCard\App\Http\Controllers\RegistrationController;
 
 /*
     |--------------------------------------------------------------------------
@@ -14,4 +15,4 @@ use Illuminate\Support\Facades\Route;
     |
 */
 
-Route::get('nfccard', fn (Request $request) => $request->user())->name('nfccard');
+Route::get('registration', [RegistrationController::class, 'indexApi']);
