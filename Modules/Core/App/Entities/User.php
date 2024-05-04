@@ -10,7 +10,7 @@ use Modules\Domain\App\Entities\GlobalOption;
 
 /**
  * @ORM\Table(name="users")
- * @ORM\Entity(repositoryClass="Modules\Core\App\Repositories\UserRepository")
+ * @ORM\Entity()
  */
 class User
 {

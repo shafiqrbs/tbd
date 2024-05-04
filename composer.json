@@ -21,7 +21,7 @@
         "nwidart/laravel-modules": "^10.0",
         "spatie/laravel-activitylog": "^4.7",
         "spatie/laravel-medialibrary": "^10.15",
-        "spatie/laravel-query-builder": "^5.7",
+        "spatie/laravel-query-builder": "^5.7"
 
     },
 

@@ -1,6 +1,6 @@
 <?php
 
-namespace Modules\Nfccard\App\Models;
+namespace Modules\NfcCard\App\Models;
 
 use Cviebrock\EloquentSluggable\Sluggable;
 use Doctrine\ORM\EntityManagerInterface;
@@ -22,7 +22,7 @@ class NfcUserModel extends Model
     public $timestamps = true;
     protected $guarded = ['id'];
     protected $fillable = [
-        'employee_id','designation','unique_id','company_name','mobile','name','facebook','linkedin','xtwitter','instagram','company_email','website','slug','tracking_no','token_no','profile_pic','created_at','updated_at','company_logo'
+        'employee_id','designation','unique_id','company_name','mobile','name','facebook','linkedin','xtwitter','instagram','company_email','website','slug','tracking_no','token_no','address','profile_pic','created_at','updated_at','company_logo'
     ];
     public static function getAllCustomers(){
         $data = self::where(['status'=>1])->whereNotNull('mobile')->orderBy('name','ASC')

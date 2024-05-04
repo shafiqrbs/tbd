@@ -16,7 +16,7 @@ use Doctrine\ORM\Mapping as ORM;
 /**
 
  * @ORM\Table(name="cor_global_api")
- * @ORM\Entity(repositoryClass="")
+ * @ORM\Entity()
  * @ORM\HasLifecycleCallbacks
  */
 class GlobalApi
