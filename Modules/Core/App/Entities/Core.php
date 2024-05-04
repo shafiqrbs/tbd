@@ -18,7 +18,7 @@ use Doctrine\ORM\Mapping as ORM;
 /**
  * @ORM\Entity
  * @ORM\Table(name="cor_utility")
- * @ORM\Entity()
+ * @ORM\Entity(repositoryClass="Modules\Core\App\Repositories\CoreRepository")
  */
 class Core
 {
