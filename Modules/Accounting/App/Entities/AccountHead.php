@@ -27,6 +27,13 @@ class AccountHead
 
 
     /**
+     * @ORM\ManyToOne(targetEntity="Config", inversedBy="children", cascade={"detach","merge"})
+     * @ORM\JoinColumn(name="config_id", referencedColumnName="id", onDelete="CASCADE")
+     */
+    protected $config;
+
+
+     /**
      * @ORM\ManyToOne(targetEntity="AccountHead", inversedBy="children", cascade={"detach","merge"})
      * @ORM\JoinColumn(name="parent", referencedColumnName="id", onDelete="SET NULL")
      */
@@ -173,14 +180,14 @@ class AccountHead
     /**
      * @var boolean
      *
-     * @ORM\Column(name="status", type="boolean")
+     * @ORM\Column(name="status", type="boolean", nullable=true)
      */
     private $status = true;
 
     /**
      * @var boolean
      *
-     * @ORM\Column(name="showAmount", type="boolean")
+     * @ORM\Column(name="showAmount", type="boolean" ,nullable=true)
      */
     private $showAmount = false;
 

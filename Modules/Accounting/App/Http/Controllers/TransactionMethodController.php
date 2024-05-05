@@ -7,7 +7,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Modules\Accounting\App\Models\AccountingModel;
-use Modules\Accounting\App\Models\TransactionMethodModel;
+use Modules\Accounting\App\Models\AccountHeadModel;
 use Modules\Accounting\App\Models\TransactionModeModel;
 use Modules\AppsApi\App\Services\JsonRequestResponse;
 use Modules\Domain\App\Http\Requests\DomainRequest;
@@ -30,7 +30,7 @@ class TransactionMethodController extends Controller
     }
     public function transactionMethodDropdown(Request $request)
     {
-        $entity = TransactionMethodModel::getTransactionMethodDropdown();
+        $entity = AccountHeadModel::getTransactionMethodDropdown();
         $service = new JsonRequestResponse();
         return $service->returnJosnResponse($entity);
     }
