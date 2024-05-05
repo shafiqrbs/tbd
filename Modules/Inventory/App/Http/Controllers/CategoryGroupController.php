@@ -5,6 +5,7 @@ namespace Modules\Inventory\App\Http\Controllers;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Modules\Accounting\App\Models\AccountHeadModel;
 use Modules\AppsApi\App\Services\GeneratePatternCodeService;
 use Modules\AppsApi\App\Services\JsonRequestResponse;
 use Modules\Core\App\Models\UserModel;
@@ -47,8 +48,9 @@ class CategoryGroupController extends Controller
         $service = new JsonRequestResponse();
         $input = $request->validated();
         $input['config_id'] = $this->domain['config_id'];
-
         $entity = CategoryModel::create($input);
+        $accountConfig = $this->domain['acc_config_id'];
+        AccountHeadModel::insertProductGroup($accountConfig,$entity);
         $data = $service->returnJosnResponse($entity);
         return $data;
     }
