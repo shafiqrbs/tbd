@@ -155,5 +155,41 @@ class CustomerModel extends Model
         return $data;
     }
 
+    public static function getRecordsForLocalStorage($domain){
+
+        $global = $domain['global_id'];
+
+        $customers = self::where('cor_customers.domain_id',$global)
+            ->leftJoin('users','users.id','=','cor_customers.marketing_id')
+            ->leftJoin('cor_locations','cor_locations.id','=','cor_customers.location_id')
+            ->select([
+                'cor_customers.id',
+                'cor_customers.name',
+                'cor_customers.mobile',
+                'cor_customers.address',
+                'cor_customers.email',
+                'cor_customers.code',
+                'cor_customers.customerId as customer_id',
+                'cor_customers.alternative_mobile',
+                'cor_customers.reference_id',
+                'cor_customers.credit_Limit',
+                'cor_customers.customer_group',
+                'cor_customers.unique_id',
+                'cor_customers.slug',
+                'cor_customers.marketing_id',
+                'users.username as marketing_username',
+                'users.email as marketing_email',
+                'cor_customers.location_id',
+                'cor_locations.name as location_name',
+                DB::raw('DATE_FORMAT(cor_customers.created_at, "%d-%m-%Y") as created_date'),
+                'cor_customers.created_at'
+            ])
+            ->orderBy('cor_customers.id','DESC')
+            ->get();
+
+        $data = array('entities' => $customers);
+        return $data;
+    }
+
 
 }

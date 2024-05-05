@@ -6,6 +6,7 @@ namespace Modules\Core\App\Models;
 use Cviebrock\EloquentSluggable\Sluggable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Support\Facades\DB;
 
 class VendorModel extends Model
 {
@@ -70,6 +71,31 @@ class VendorModel extends Model
                         ->get();
 
         $data = array('count'=>$total,'entities'=>$entities);
+        return $data;
+    }
+
+
+    public static function getRecordsForLocalStorage($request,$domain): array
+    {
+        $vendors = self::where('cor_vendors.domain_id',$domain['global_id'])
+            ->select([
+                'cor_vendors.id',
+                'cor_vendors.name',
+                'cor_vendors.vendor_code',
+                'cor_vendors.code',
+                'cor_vendors.company_name',
+                'cor_vendors.slug',
+                'cor_vendors.address',
+                'cor_vendors.email',
+                'cor_vendors.mobile',
+                'cor_vendors.unique_id',
+                DB::raw('DATE_FORMAT(cor_vendors.created_at, "%d-%m-%Y") as created_date'),
+                'cor_vendors.created_at'
+            ])
+            ->orderBy('cor_vendors.id','DESC')
+            ->get();
+
+        $data = array('entities'=>$vendors);
         return $data;
     }
 

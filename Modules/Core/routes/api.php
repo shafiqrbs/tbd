@@ -32,7 +32,10 @@ Route::prefix('/core/select')->middleware([HeaderAuthenticationMiddleware::class
 
 Route::prefix('/core')->middleware([HeaderAuthenticationMiddleware::class])->group(function() {
     Route::get('/customer/details', [CustomerController::class,'details'])->name('customer_details');
+    Route::get('/customer/local-storage', [CustomerController::class,'localStorage'])->name('customer_local_storage');
+
     Route::get('/vendor/details', [VendorController::class,'details'])->name('vendor_details');
+    Route::get('/vendor/local-storage', [VendorController::class,'localStorage'])->name('vendor_local_storage');
 
     Route::apiResource('user', UserController::class)->middleware([HeaderAuthenticationMiddleware::class]);
     Route::apiResource('location', LocationController::class)->middleware([HeaderAuthenticationMiddleware::class]);

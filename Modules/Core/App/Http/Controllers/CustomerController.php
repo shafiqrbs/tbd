@@ -149,4 +149,21 @@ class CustomerController extends Controller
     }
 
 
+    /**
+     * Display a listing of the resource.
+     */
+    public function localStorage(Request $request,EntityManagerInterface $em){
+        $data = CustomerModel::getRecordsForLocalStorage($this->domain,$request);
+        $response = new Response();
+        $response->headers->set('Content-Type','application/json');
+        $response->setContent(json_encode([
+            'message' => 'success',
+            'status' => Response::HTTP_OK,
+            'data' => $data['entities']
+        ]));
+        $response->setStatusCode(Response::HTTP_OK);
+        return $response;
+    }
+
+
 }
