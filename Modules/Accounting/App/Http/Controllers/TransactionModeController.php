@@ -48,6 +48,7 @@ class TransactionModeController extends Controller
         return $response;
     }
 
+
     /**
      * Store a newly created resource in storage.
      */
@@ -135,5 +136,18 @@ class TransactionModeController extends Controller
         $entity = TransactionModeModel::getTransactionsModeData($this->domain);
         $service = new JsonRequestResponse();
         return $service->returnJosnResponse($entity);
+    }
+
+    public function LocalStorage(Request $request){
+        $data = TransactionModeModel::getRecordsForLocalStorage($request,$this->domain);
+        $response = new Response();
+        $response->headers->set('Content-Type','application/json');
+        $response->setContent(json_encode([
+            'message' => 'success',
+            'status' => Response::HTTP_OK,
+            'data' => $data['entities']
+        ]));
+        $response->setStatusCode(Response::HTTP_OK);
+        return $response;
     }
 }

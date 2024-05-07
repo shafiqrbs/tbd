@@ -24,9 +24,11 @@ Route::prefix('/accounting/select')->middleware([HeaderAuthenticationMiddleware:
 });
 
 Route::prefix('/accounting')->middleware([HeaderAuthenticationMiddleware::class])->group(function() {
-    Route::apiResource('/transaction-mode', TransactionModeController::class)->middleware([HeaderAuthenticationMiddleware::class]);
 
     Route::get('/transaction-mode-data', [TransactionModeController::class,'transactionMode'])->name('transaction_mode');
+    Route::get('/transaction-mode/local-storage', [TransactionModeController::class,'LocalStorage'])->name('transaction_mode_local_storage');
+
+    Route::apiResource('/transaction-mode', TransactionModeController::class)->middleware([HeaderAuthenticationMiddleware::class]);
 
 });
 

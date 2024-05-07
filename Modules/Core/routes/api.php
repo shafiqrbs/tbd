@@ -37,7 +37,9 @@ Route::prefix('/core')->middleware([HeaderAuthenticationMiddleware::class])->gro
     Route::get('/vendor/details', [VendorController::class,'details'])->name('vendor_details');
     Route::get('/vendor/local-storage', [VendorController::class,'localStorage'])->name('vendor_local_storage');
 
+    Route::get('/user/local-storage', [UserController::class,'localStorage'])->name('user_local_storage');
     Route::apiResource('user', UserController::class)->middleware([HeaderAuthenticationMiddleware::class]);
+
     Route::apiResource('location', LocationController::class)->middleware([HeaderAuthenticationMiddleware::class]);
     Route::apiResource('customer', CustomerController::class)->middleware([HeaderAuthenticationMiddleware::class]);
     Route::apiResource('vendor', VendorController::class)->middleware([HeaderAuthenticationMiddleware::class]);

@@ -125,5 +125,33 @@ class TransactionModeModel extends Model
     }
 
 
+    public static function getRecordsForLocalStorage($request,$domain)
+    {
+        $tramsactionsMode = self::where([['acc_transaction_mode.config_id',$domain['acc_config_id']],['acc_transaction_mode.status',1]])
+            ->leftjoin('uti_transaction_method','uti_transaction_method.id','=','acc_transaction_mode.method_id')
+            ->leftjoin('uti_settings as authorized','authorized.id','=','acc_transaction_mode.authorised_mode_id')
+            ->leftjoin('uti_settings as account_type','account_type.id','=','acc_transaction_mode.account_mode_id')
+            ->select([
+                'acc_transaction_mode.id',
+                'acc_transaction_mode.name',
+                'acc_transaction_mode.slug',
+                'acc_transaction_mode.service_charge',
+                'acc_transaction_mode.account_owner',
+                'acc_transaction_mode.path',
+                'acc_transaction_mode.short_name',
+                'authorized.name as authorized_name',
+                'account_type.name as account_type_name',
+                'uti_transaction_method.name as method_name',
+                'uti_transaction_method.slug as method_slug',
+                DB::raw("CONCAT('".url('')."/uploads/accounting/transaction-mode/', acc_transaction_mode.path) AS path")
+            ])
+            ->orderBy('acc_transaction_mode.id','DESC')
+            ->get();
+
+        $data = array('entities'=>$tramsactionsMode);
+        return $data;
+    }
+
+
 
 }

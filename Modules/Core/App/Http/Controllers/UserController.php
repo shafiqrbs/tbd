@@ -113,4 +113,17 @@ class UserController extends Controller
         $data = $service->returnJosnResponse($entity);
         return $data;
     }
+
+    public function localStorage(Request $request){
+        $data = UserModel::getRecordsForLocalStorage($request,$this->domain);
+        $response = new Response();
+        $response->headers->set('Content-Type','application/json');
+        $response->setContent(json_encode([
+            'message' => 'success',
+            'status' => Response::HTTP_OK,
+            'data' => $data['entities']
+        ]));
+        $response->setStatusCode(Response::HTTP_OK);
+        return $response;
+    }
 }

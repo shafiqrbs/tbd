@@ -3,6 +3,7 @@
 namespace Modules\Core\App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Support\Facades\DB;
 
 class UserModel extends Model
 {
@@ -101,6 +102,26 @@ class UserModel extends Model
             ->leftjoin('acc_config','acc_config.domain_id','=','dom_domain.id')
             ->where('users.id',$id)->first();
         return $data;
+    }
+
+    public static function getRecordsForLocalStorage($request,$domain){
+        $users = self::where('domain_id',$domain['global_id'])->whereNull('deleted_at')
+            ->select([
+                'id',
+                'name',
+                'username',
+                'email',
+                'mobile',
+                DB::raw('DATE_FORMAT(created_at, "%d-%m-%Y") as created_date'),
+                'created_at'
+            ])
+            ->orderBy('id','DESC')
+            ->get();
+
+        $data = array('entities' => $users);
+        return $data;
+
+
     }
 
 }
