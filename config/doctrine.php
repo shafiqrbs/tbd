@@ -39,7 +39,6 @@ return [
                 base_path('Modules/Core/App/Entities'),
                 base_path('Modules/Utility/App/Entities'),
                 base_path('Modules/Inventory/App/Entities'),
-                base_path('Modules/NfcCard/App/Entities'),
             ],
             'repository'    => Doctrine\ORM\EntityRepository::class,
 

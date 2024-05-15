@@ -6,6 +6,5 @@
     "AppsApi": true,
     "Configuration": true,
     "Utility": true,
-    "Accounting": true,
-    "NfcCard": true
+    "Accounting": true
 }

@@ -50,7 +50,7 @@ class LoginController extends Controller
             'email'=>$userExists->email,
             'username'=>$userExists->username,
             'user_group'=>$userExists->user_group,
-            'global_option_id'=>$userExists->global_option_id,
+            'domain_id'=>$userExists->domain_id,
         ];
         return new JsonResponse([
             'status'=>200,
