@@ -123,7 +123,7 @@ class Product
     /**
      * @var float
      *
-     * @ORM\Column(type="float", nullable=true)
+     * @ORM\Column(type="float", nullable=true,options={"default"="0"})
      */
     private $openingQuantity;
 
@@ -191,9 +191,9 @@ class Product
     /**
      * @var float
      *
-     * @ORM\Column( type="float", nullable=true)
+     * @ORM\Column( type="float", nullable=true,options={"default"="0"})
      */
-    private $remainingQuantity = 0;
+    private $remainingQuantity;
 
 
     /**

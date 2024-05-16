@@ -28,6 +28,7 @@ class ProductModel extends Model
         'purchase_price',
         'min_quantity',
         'reorder_quantity',
+        'remaining_quantity',
         'status',
         'config_id',
     /*name
