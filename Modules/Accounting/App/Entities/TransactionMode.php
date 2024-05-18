@@ -115,9 +115,9 @@ class TransactionMode
      /**
      * @var float
      *
-     * @ORM\Column(type="float", nullable=true)
+     * @ORM\Column(type="boolean",options={"default"="0"})
      */
-    private $isSelected = 0;
+    private $isSelected;
 
 
     /**

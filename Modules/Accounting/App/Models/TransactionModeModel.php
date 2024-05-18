@@ -115,6 +115,7 @@ class TransactionModeModel extends Model
                 'acc_transaction_mode.service_charge',
                 'acc_transaction_mode.account_type',
                 'acc_transaction_mode.name',
+                'acc_transaction_mode.is_selected',
                 'uti_transaction_method.name as method_name',
                 'uti_transaction_method.slug as method_slug',
                 DB::raw("CONCAT('".url('')."/uploads/accounting/transaction-mode/', acc_transaction_mode.path) AS path")
@@ -133,6 +134,7 @@ class TransactionModeModel extends Model
             ->leftjoin('uti_settings as account_type','account_type.id','=','acc_transaction_mode.account_mode_id')
             ->select([
                 'acc_transaction_mode.id',
+                'acc_transaction_mode.is_selected',
                 'acc_transaction_mode.name',
                 'acc_transaction_mode.slug',
                 'acc_transaction_mode.service_charge',

@@ -549,6 +549,11 @@ class Customer
      */
     private $path;
 
+    /**
+     * @var float
+     * @ORM\Column(type="boolean",options={"default"="0"})
+     */
+    private $isDefaultCustomer;
 
 
 }
