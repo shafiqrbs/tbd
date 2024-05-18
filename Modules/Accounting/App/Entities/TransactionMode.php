@@ -112,6 +112,14 @@ class TransactionMode
     private $serviceCharge = 0;
 
 
+     /**
+     * @var float
+     *
+     * @ORM\Column(type="float", nullable=true)
+     */
+    private $isSelected = 0;
+
+
     /**
      * @var boolean
      *

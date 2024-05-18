@@ -207,6 +207,20 @@ class Config
      */
     private $vatMode = false;
 
+    /**
+     * @var float
+     *
+     * @ORM\Column(type="boolean", nullable=true)
+     */
+    private $isActiveSms = false;
+
+    /**
+     * @var float
+     *
+     * @ORM\Column(type="boolean", nullable=true)
+     */
+    private $isZeroReceiveAllow = false;
+
      /**
      * @var string
      *
