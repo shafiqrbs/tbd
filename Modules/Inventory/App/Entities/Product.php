@@ -123,7 +123,7 @@ class Product
     /**
      * @var float
      *
-     * @ORM\Column(type="float", nullable=true,options={"default"="0"})
+     * @ORM\Column(type="float",options={"default"="0"})
      */
     private $openingQuantity;
 
