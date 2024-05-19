@@ -271,6 +271,12 @@ class Sales
      */
     private $isCondition;
 
+     /**
+     * @var boolean
+     * @ORM\Column(type="boolean", nullable=true)
+     */
+    private $isOnline;
+
     /**
      * @var boolean
      * @ORM\Column(type="boolean", nullable=true)
