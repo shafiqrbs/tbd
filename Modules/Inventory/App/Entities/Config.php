@@ -217,9 +217,9 @@ class Config
     /**
      * @var float
      *
-     * @ORM\Column(type="boolean", nullable=true)
+     * @ORM\Column(type="boolean", options={"default"="0"})
      */
-    private $isZeroReceiveAllow = false;
+    private $isZeroReceiveAllow;
 
      /**
      * @var string
