@@ -1,17 +1,17 @@
 <?php
 
-namespace Modules\Inventory\App\Entities;
+namespace Modules\Core\App\Entities;
 
 use Doctrine\ORM\Mapping as ORM;
 use Gedmo\Mapping\Annotation as Gedmo;
 
 /**
- * BusinessParticular
+ * SettingType
  *
- * @ORM\Table( name = "inv_particular_type")
+ * @ORM\Table( name = "cor_setting_type")
  * @ORM\Entity()
  */
-class ParticularType
+class SettingType
 {
     /**
      * @var integer
