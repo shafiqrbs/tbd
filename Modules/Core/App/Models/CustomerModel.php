@@ -182,7 +182,10 @@ class CustomerModel extends Model
                 'cor_customers.location_id',
                 'cor_locations.name as location_name',
                 DB::raw('DATE_FORMAT(cor_customers.created_at, "%d-%m-%Y") as created_date'),
-                'cor_customers.created_at'
+                'cor_customers.created_at',
+                DB::raw('"5000" as debit'),
+                DB::raw('"2000" as credit'),
+                DB::raw('"3000" as balance')
             ])
             ->orderBy('cor_customers.id','DESC')
             ->get();
