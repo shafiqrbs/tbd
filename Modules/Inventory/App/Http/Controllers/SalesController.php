@@ -70,6 +70,22 @@ class SalesController extends Controller
         $data = $service->returnJosnResponse($entity);
         return $data;
     }
+    /**
+     * Show the specified resource for edit.
+     */
+    public function edit($id)
+    {
+        $entity = SalesModel::getEditData($id, $this->domain);
+        $status = $entity ? Response::HTTP_OK : Response::HTTP_NOT_FOUND;
+
+        return response()->json([
+            'message' => 'success',
+            'status' => $status,
+            'data' => $entity ?? []
+        ], Response::HTTP_OK);
+
+    }
+
 
     /**
      * Update the specified resource in storage.

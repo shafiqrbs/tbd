@@ -148,4 +148,57 @@ class SalesModel extends Model
         return $entity;
     }
 
+
+    public static function getEditData($id,$domain)
+    {
+        $entity = self::where([
+            ['inv_sales.config_id', '=', $domain['config_id']],
+            ['inv_sales.id', '=', $id]
+        ])
+            ->leftjoin('cor_customers','cor_customers.id','=','inv_sales.customer_id')
+            ->leftjoin('users as createdBy','createdBy.id','=','inv_sales.created_by_id')
+            ->leftjoin('users as salesBy','salesBy.id','=','inv_sales.sales_by_id')
+            ->leftjoin('acc_transaction_mode as transactionMode','transactionMode.id','=','inv_sales.transaction_mode_id')
+//            ->leftjoin('uti_transaction_method as method','method.id','=','acc_transaction_mode.method_id')
+            ->select([
+                'inv_sales.id',
+                DB::raw('DATE_FORMAT(inv_sales.updated_at, "%d-%m-%Y") as created'),
+                'inv_sales.invoice as invoice',
+                'inv_sales.sub_total as sub_total',
+                'inv_sales.total as total',
+                'inv_sales.payment as payment',
+                'inv_sales.discount as discount',
+                'inv_sales.discount_calculation as discount_calculation',
+                'inv_sales.discount_type as discount_type',
+                'cor_customers.id as customerId',
+                'cor_customers.name as customerName',
+                'cor_customers.mobile as customerMobile',
+                'createdBy.username as createdByUser',
+                'createdBy.name as createdByName',
+                'createdBy.id as createdById',
+                'salesBy.id as salesById',
+                'salesBy.username as salesByUser',
+                'salesBy.name as salesByName',
+                'transactionMode.name as modeName',
+                'transactionMode.name as modeName',
+            ])
+            ->with(['salesItems' => function ($query) {
+                $query->select([
+                    'id',
+                    'sale_id',
+                    'unit_id',
+                    'item_name',
+                    'quantity',
+                    'sales_price',
+                    'purchase_price',
+                    'price',
+                    'sub_total',
+                ])->with('unit');
+            }])
+            ->first();
+
+        return $entity;
+    }
+
+
 }

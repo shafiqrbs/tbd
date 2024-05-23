@@ -33,9 +33,14 @@ Route::prefix('/inventory/select')->middleware([HeaderAuthenticationMiddleware::
 Route::prefix('/inventory')->middleware([HeaderAuthenticationMiddleware::class])->group(function() {
     Route::get('/config', [ConfigController::class,'getConfig'])->name('get_config');
     Route::PATCH('/config-update', [ConfigController::class,'updateConfig'])->name('update_config');
+
     Route::apiResource('/category-group', CategoryGroupController::class)->middleware([HeaderAuthenticationMiddleware::class]);
     Route::apiResource('/product', ProductController::class)->middleware([HeaderAuthenticationMiddleware::class]);
+
     Route::apiResource('/sales', SalesController::class)->middleware([HeaderAuthenticationMiddleware::class]);
+    Route::get('/sales/edit/{id}', [SalesController::class,'edit'])->name('get_edit_sales');
+
+
     Route::apiResource('/purchase', PurchaseController::class)->middleware([HeaderAuthenticationMiddleware::class]);
     Route::get('/stock-item', [ProductController::class,'stockItem'])->name('get_stock_item');
 
