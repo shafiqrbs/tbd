@@ -92,7 +92,21 @@ class SalesModel extends Model
             ])->with('salesItems');
 
         if (isset($request['term']) && !empty($request['term'])){
-            $entities = $entities->whereAny(['inv_sales.name','inv_sales.slug','inv_category.name','uti_product_unit.name','inv_brand.name','inv_sales.sales_price','uti_settings.name'],'LIKE','%'.$request['term'].'%');
+            $entities = $entities->whereAny(['inv_sales.invoice','cor_customers.name','cor_customers.mobile','salesBy.username','createdBy.username','acc_transaction_mode.name','inv_sales.total'],'LIKE','%'.$request['term'].'%');
+        }
+
+        if (isset($request['customer_id']) && !empty($request['customer_id'])){
+            $entities = $entities->where('inv_sales.customer_id',$request['customer_id']);
+        }
+        if (isset($request['start_date']) && !empty($request['start_date']) && empty($request['end_date'])){
+            $start_date = $request['start_date'].' 00:00:00';
+            $end_date = $request['start_date'].' 23:59:59';
+            $entities = $entities->whereBetween('inv_sales.created_at',[$start_date, $end_date]);
+        }
+        if (isset($request['start_date']) && !empty($request['start_date']) && isset($request['end_date']) && !empty($request['end_date'])){
+            $start_date = $request['start_date'].' 00:00:00';
+            $end_date = $request['end_date'].' 23:59:59';
+            $entities = $entities->whereBetween('inv_sales.created_at',[$start_date, $end_date]);
         }
 
         $total  = $entities->count();
@@ -100,6 +114,7 @@ class SalesModel extends Model
             ->take($perPage)
             ->orderBy('inv_sales.updated_at','DESC')
             ->get();
+//        dump($entities->toSql());
         $data = array('count'=>$total,'entities'=>$entities);
         return $data;
     }
