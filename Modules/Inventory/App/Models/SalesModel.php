@@ -114,7 +114,7 @@ class SalesModel extends Model
             ->take($perPage)
             ->orderBy('inv_sales.updated_at','DESC')
             ->get();
-//        dump($entities->toSql());
+
         $data = array('count'=>$total,'entities'=>$entities);
         return $data;
     }

@@ -208,18 +208,25 @@ class Config
     private $vatMode = false;
 
     /**
-     * @var float
-     *
+     * @var bool
      * @ORM\Column(type="boolean",options={"default"="0"})
      */
     private $isActiveSms = false;
 
     /**
-     * @var float
+     * @var bool
      *
      * @ORM\Column(type="boolean", options={"default"="0"})
      */
     private $isZeroReceiveAllow;
+
+
+    /**
+     * @var bool
+     *
+     * @ORM\Column(type="boolean", options={"default"="0"})
+     */
+    private $isPurchaseByPurchasePrice;
 
      /**
      * @var string
