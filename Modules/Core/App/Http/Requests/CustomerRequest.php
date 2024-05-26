@@ -29,16 +29,19 @@ class CustomerRequest extends FormRequest
             {
                 return [
                     'name' => 'required|max:255',
-                    'mobile' => 'required',
+                    'mobile' => [
+                        'required',
+                        Rule::unique('Modules\Core\App\Entities\Customer', 'mobile')
+                    ],
                     'location_id' => 'integer|nullable',
                     'marketing_id' => 'integer|nullable',
                     'customer_group' => 'string|nullable',
                     'credit_limit' => 'string|nullable',
+                    'opening_balance' => 'double|nullable',
                     'reference_id' => 'integer|nullable',
                     'alternative_mobile' => 'integer|nullable',
                     'address' => 'string|nullable',
                     'email' => 'email|nullable',
-//                    'customer_unique_id' => [Rule::unique('unique:domain_id,mobile,name')],
                 ];
             }
 

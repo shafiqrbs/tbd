@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Doctrine\ORM\EntityManagerInterface;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Modules\Accounting\App\Models\AccountHeadModel;
 use Modules\AppsApi\App\Services\GeneratePatternCodeService;
 use Modules\AppsApi\App\Services\JsonRequestResponse;
 use Modules\Core\App\Http\Requests\CustomerRequest;
@@ -48,15 +49,14 @@ class CustomerController extends Controller
     {
         $service = new JsonRequestResponse();
         $input = $request->validated();
-
         $input['domain_id'] = $this->domain['global_id'];
         $input['customer_unique_id'] = "{$this->domain['global_id']}@{$input['mobile']}-{$input['name']}";
         $params = ['domain' => $this->domain['global_id'],'table' => 'cor_customers','prefix' => 'EMP-'];
         $pattern = $patternCodeService->customerCode($params);
         $input['code'] = $pattern['code'];
         $input['customerId'] = $pattern['generateId'];
-
         $entity = CustomerModel::create($input);
+        AccountHeadModel::insertCustomerLedger( $this->domain['acc_config_id'],$entity);
         $data = $service->returnJosnResponse($entity);
         return $data;
     }

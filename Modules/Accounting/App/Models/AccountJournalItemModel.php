@@ -7,40 +7,23 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Support\Facades\DB;
 
-class AccountHeadModel extends Model
+class AccountJournalItemModel extends Model
 {
-    use HasFactory, Sluggable;
+    use HasFactory;
 
-    protected $table = 'acc_head';
+    protected $table = 'acc_journal_item';
     public $timestamps = true;
     protected $guarded = ['id'];
     protected $fillable = [
         'name',
         'config_id',
         'mother_account_id',
-        'parent_id',
-        'customer_id',
-        'vendor_id',
-        'product_group_id',
-        'category_id',
-        'code',
-        'slug',
-        'status',
+        'account_group_id',
+        'account_subgroup_id',
+        'amount',
+        'debit',
+        'credit',
     ];
-
-    /**
-     * Return the sluggable configuration array for this model.
-     *
-     * @return array
-     */
-    public function sluggable(): array
-    {
-        return [
-            'slug' => [
-                'source' => 'name'
-            ]
-        ];
-    }
 
     public static function boot()
     {
@@ -56,17 +39,17 @@ class AccountHeadModel extends Model
         });
     }
 
-    public static function insertCustomerLedger($config, $entity)
+    public static function insertCustomerJournalItem($config, $entity)
     {
 
-        $entity = self::create(
+        self::create(
             [
                 'name' => $entity['name'],
                 'customer_id' => $entity['id'],
                 'config_id' => $config
             ]
         );
-        AccountJournalModel::insertCustomerJournalVoucher($entity);
+        AccountJournalItemModel::insertCustomerJournalVoucher($entity);
     }
 
 

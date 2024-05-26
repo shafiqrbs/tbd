@@ -35,7 +35,7 @@ class AccountHead
 
      /**
      * @ORM\ManyToOne(targetEntity="AccountHead", inversedBy="children", cascade={"detach","merge"})
-     * @ORM\JoinColumn(name="parent", referencedColumnName="id", onDelete="SET NULL")
+     * @ORM\JoinColumn(name="parent_id", referencedColumnName="id", onDelete="SET NULL")
      */
     protected $parent;
 
@@ -83,12 +83,11 @@ class AccountHead
     private  $category;
 
 
+
     /**
-	 * @var string
-	 *
-	 * @ORM\Column(name="motherAccount", type="string", length=50, nullable=true)
-	 */
-	private $motherAccount;
+     * @ORM\ManyToOne(targetEntity="Setting")
+     **/
+    private $motherAccount;
 
 
 	/**
