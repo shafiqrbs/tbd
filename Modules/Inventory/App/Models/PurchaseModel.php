@@ -64,7 +64,7 @@ class PurchaseModel extends Model
         $entities = self::where([['inv_purchase.config_id',$domain['config_id']]])
             ->leftjoin('users as createdBy','createdBy.id','=','inv_purchase.created_by_id')
             ->leftjoin('acc_transaction_mode','acc_transaction_mode.id','=','inv_purchase.transaction_mode_id')
-            ->leftjoin('cor_vendors','cor_vendors.id','=','inv_purchase.customer_id')
+            ->leftjoin('cor_vendors','cor_vendors.id','=','inv_purchase.vendor_id')
             ->select([
                 'inv_purchase.id',
                 DB::raw('DATE_FORMAT(inv_purchase.created_at, "%d-%m-%Y") as created'),
@@ -84,8 +84,8 @@ class PurchaseModel extends Model
                 'inv_purchase.process as process',
                 'acc_transaction_mode.name as mode_name',
                 'cor_vendors.address as customer_address',
-                'cor_vendors.balance as balance',
-            ])->with('salesItems');
+                'cor_vendors.opening_balance as balance',
+            ])->with('purchaseItems');
 
         if (isset($request['term']) && !empty($request['term'])){
             $entities = $entities->whereAny(['inv_purchase.name','inv_purchase.slug','inv_category.name','uti_product_unit.name','inv_brand.name','inv_purchase.sales_price','uti_settings.name'],'LIKE','%'.$request['term'].'%');
