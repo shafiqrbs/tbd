@@ -21,7 +21,7 @@ class GeneratePatternCodeService
         $date = $datetime->format('Y-m-01');
         $entity = DB::table("{$table} as e")
             ->where('e.domain_id', $domain)
-            ->whereBetween('e.created', [
+            ->whereBetween('e.created_at', [
                 Carbon::parse($date),
                 Carbon::parse($date)->endOfMonth()
             ])->count('id');

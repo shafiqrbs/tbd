@@ -30,8 +30,10 @@ class VendorRequest extends FormRequest
                         'required',
                         Rule::unique('Modules\Core\App\Entities\Vendor', 'mobile')
                     ],
+                    'customer_id' => [
+                        'nullable',
+                    ],
                     'email' => 'email|nullable',
-                    'customer_id' => 'integer|nullable',
                     'address' => 'string|nullable',
                 ];
             }
