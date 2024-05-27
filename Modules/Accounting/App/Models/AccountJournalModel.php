@@ -48,7 +48,6 @@ class AccountJournalModel extends Model
             ]
         );
 
-
     }
 
 

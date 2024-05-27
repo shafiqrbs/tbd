@@ -2,6 +2,7 @@
 
 namespace Modules\Core\App\Http\Requests;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class VendorRequest extends FormRequest
 {
@@ -25,7 +26,10 @@ class VendorRequest extends FormRequest
                 return [
                     'company_name' => 'required|string',
                     'name' => 'required|string',
-                    'mobile' => 'required|numeric',
+                    'mobile' => [
+                        'required',
+                        Rule::unique('Modules\Core\App\Entities\Vendor', 'mobile')
+                    ],
                     'email' => 'email|nullable',
                     'customer_id' => 'integer|nullable',
                     'address' => 'string|nullable',
@@ -38,7 +42,10 @@ class VendorRequest extends FormRequest
                 return [
                     'company_name' => 'required|string',
                     'name' => 'required|string',
-                    'mobile' => 'required|numeric',
+                    'mobile' => [
+                        'required|numeric',
+                        Rule::unique('Modules\Core\App\Entities\Vendor', 'mobile')
+                    ],
                     'email' => 'email|nullable',
                     'customer_id' => 'integer|nullable',
                     'address' => 'string|nullable',

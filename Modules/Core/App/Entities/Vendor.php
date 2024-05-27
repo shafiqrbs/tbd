@@ -38,7 +38,7 @@ class Vendor
      * @ORM\JoinColumn(onDelete="CASCADE")
      **/
     protected $domain;
-    
+
 
 	/**
 	 * @ORM\OneToOne(targetEntity="Modules\Core\App\Entities\Customer", inversedBy="accountVendor")

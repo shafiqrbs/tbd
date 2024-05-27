@@ -61,12 +61,25 @@ class AccountHeadModel extends Model
 
         $entity = self::create(
             [
-                'name' => $entity['name'],
+                'name' => "{$entity['mobile']}-{$entity['name']}",
                 'customer_id' => $entity['id'],
                 'config_id' => $config
             ]
         );
-        AccountJournalModel::insertCustomerJournalVoucher($entity);
+        //AccountJournalModel::insertCustomerJournalVoucher($entity);
+    }
+
+    public static function insertVendorLedger($config, $entity)
+    {
+
+        $entity = self::create(
+            [
+                'name' => "{$entity['mobile']}-{$entity['name']}",
+                'vendor_id' => $entity['id'],
+                'config_id' => $config
+            ]
+        );
+        //AccountJournalModel::insertCustomerJournalVoucher($entity);
     }
 
 

@@ -37,7 +37,6 @@ class VendorModel extends Model
         $page =  isset($request['page']) && $request['page'] > 0?($request['page'] - 1 ) : 0;
         $perPage = isset($request['offset']) && $request['offset']!=''? (int)($request['offset']):0;
         $skip = isset($page) && $page!=''? (int)$page * $perPage:0;
-
         $vendors = self::where('domain_id',$domain['global_id'])
         ->select([
             'id',

@@ -5,6 +5,7 @@ namespace Modules\Core\App\Http\Controllers;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Modules\Accounting\App\Models\AccountHeadModel;
 use Modules\AppsApi\App\Services\GeneratePatternCodeService;
 use Modules\AppsApi\App\Services\JsonRequestResponse;
 use Modules\Core\App\Http\Requests\VendorRequest;
@@ -46,13 +47,17 @@ class VendorController extends Controller
     {
         $service = new JsonRequestResponse();
         $input = $request->validated();
-
         $input['domain_id'] = $this->domain['global_id'];
         $params = ['domain' => $this->domain['global_id'],'table' => 'cor_vendors','prefix' => ''];
         $pattern = $patternCodeService->customerCode($params);
         $input['code'] = $pattern['code'];
         $input['vendor_code'] = $pattern['generateId'];
         $entity = VendorModel::create($input);
+        $name = "{$entity->mobile}-{$entity->company_name}";
+        $ledgerExist = AccountHeadModel::where('name',$name)->where('config_id', $this->domain['acc_config_id'])->first();
+        if (empty($ledgerExist)){
+            AccountHeadModel::insertVendorLedger( $this->domain['acc_config_id'],$entity);
+        }
         $data = $service->returnJosnResponse($entity);
         return $data;
     }
