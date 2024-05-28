@@ -24,6 +24,7 @@ class AccountHeadModel extends Model
         'product_group_id',
         'category_id',
         'code',
+        'level',
         'slug',
         'status',
     ];
@@ -59,10 +60,50 @@ class AccountHeadModel extends Model
     public static function insertCustomerLedger($config, $entity)
     {
 
+        $name = "{$entity['mobile']}-{$entity['name']}";
         $entity = self::create(
             [
-                'name' => "{$entity['mobile']}-{$entity['name']}",
+                'name' => $name,
                 'customer_id' => $entity['id'],
+                'level' => '3',
+                'source' => 'customer',
+                'config_id' => $config
+            ]
+        );
+        //AccountJournalModel::insertCustomerJournalVoucher($entity);
+    }
+
+
+    public static function insertCategoryGroupLedger($config, $entity)
+    {
+
+        $name = "{$entity['name']}";
+        self::create(
+            [
+                'name' => $name,
+                'product_group_id' => $entity['id'],
+                'parent_id' => '5',
+                'level' => '2',
+                'source' => 'product-group',
+                'config_id' => $config
+            ]
+        );
+        //AccountJournalModel::insertCustomerJournalVoucher($entity);
+    }
+
+
+    public static function insertCategoryLedger($config, $entity)
+    {
+
+        $name = "{$entity['name']}";
+        $parent = AccountHeadModel::where('product_group_id',$entity->parent)->where('level', '2')->first();
+        self::create(
+            [
+                'name' => $name,
+                'category_id' => $entity->id,
+                'parent_id' => $parent->id,
+                'level' => '3',
+                'source' => 'category',
                 'config_id' => $config
             ]
         );
@@ -71,10 +112,12 @@ class AccountHeadModel extends Model
 
     public static function insertVendorLedger($config, $entity)
     {
-
+        $name = "{$entity['mobile']}-{$entity['company_name']}";
         $entity = self::create(
             [
-                'name' => "{$entity['mobile']}-{$entity['name']}",
+                'name' => $name,
+                'source' => 'vendor',
+                'level' => '3',
                 'vendor_id' => $entity['id'],
                 'config_id' => $config
             ]

@@ -49,8 +49,17 @@ class CategoryGroupController extends Controller
         $input = $request->validated();
         $input['config_id'] = $this->domain['config_id'];
         $entity = CategoryModel::create($input);
-        $accountConfig = $this->domain['acc_config_id'];
-        AccountHeadModel::insertProductGroup($accountConfig,$entity);
+        if($entity->parent){
+            $ledgerExist = AccountHeadModel::where('category_id',$entity->id)->where('config_id', $this->domain['acc_config_id'])->first();
+            if(empty($ledgerExist)){
+                AccountHeadModel::insertCategoryLedger( $this->domain['acc_config_id'],$entity);
+            }
+        }else{
+            $ledgerExist = AccountHeadModel::where('product_group_id',$entity->id)->where('config_id', $this->domain['acc_config_id'])->first();
+            if(empty($ledgerExist)){
+                AccountHeadModel::insertCategoryGroupLedger( $this->domain['acc_config_id'],$entity);
+            }
+        }
         $data = $service->returnJosnResponse($entity);
         return $data;
     }

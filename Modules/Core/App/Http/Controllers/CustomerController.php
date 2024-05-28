@@ -56,8 +56,7 @@ class CustomerController extends Controller
         $input['code'] = $pattern['code'];
         $input['customerId'] = $pattern['generateId'];
         $entity = CustomerModel::create($input);
-        $name = "{$entity->mobile}-{$entity->name}";
-        $ledgerExist = AccountHeadModel::where('name',$name)->where('config_id', $this->domain['acc_config_id'])->first();
+        $ledgerExist = AccountHeadModel::where('customer_id',$entity->id)->where('config_id', $this->domain['acc_config_id'])->first();
         if (empty($ledgerExist)){
             AccountHeadModel::insertCustomerLedger( $this->domain['acc_config_id'],$entity);
         }
