@@ -85,10 +85,39 @@ class PurchaseModel extends Model
                 'acc_transaction_mode.name as mode_name',
                 'cor_vendors.address as customer_address',
                 'cor_vendors.opening_balance as balance',
-            ])->with('purchaseItems');
+            ])->with(['purchaseItems' => function ($query){
+                    $query->select([
+                        'inv_purchase_item.id',
+                        'inv_purchase_item.purchase_id',
+                        'inv_product.name as item_name',
+                        'inv_product.slug as product_slug',
+                        'inv_purchase_item.quantity',
+                        'inv_purchase_item.purchase_price',
+                        'inv_purchase_item.sales_price',
+                        'inv_purchase_item.sub_total',
+                        'inv_product.unit_id',
+                        'uti_product_unit.name as unit_name',
+                    ])
+                        ->join('inv_product','inv_product.id','=','inv_purchase_item.product_id')
+                        ->join('uti_product_unit','uti_product_unit.id','=','inv_product.unit_id');
+                }]);
 
         if (isset($request['term']) && !empty($request['term'])){
-            $entities = $entities->whereAny(['inv_purchase.name','inv_purchase.slug','inv_category.name','uti_product_unit.name','inv_brand.name','inv_purchase.sales_price','uti_settings.name'],'LIKE','%'.$request['term'].'%');
+            $entities = $entities->whereAny(['inv_purchase.invoice','inv_purchase.sub_total','cor_vendors.name','cor_vendors.mobile','createdBy.username','acc_transaction_mode.name'],'LIKE','%'.$request['term'].'%');
+        }
+
+        if (isset($request['vendor_id']) && !empty($request['vendor_id'])){
+            $entities = $entities->where('inv_purchase.vendor_id',$request['vendor_id']);
+        }
+        if (isset($request['start_date']) && !empty($request['start_date']) && empty($request['end_date'])){
+            $start_date = $request['start_date'].' 00:00:00';
+            $end_date = $request['start_date'].' 23:59:59';
+            $entities = $entities->whereBetween('inv_purchase.created_at',[$start_date, $end_date]);
+        }
+        if (isset($request['start_date']) && !empty($request['start_date']) && isset($request['end_date']) && !empty($request['end_date'])){
+            $start_date = $request['start_date'].' 00:00:00';
+            $end_date = $request['end_date'].' 23:59:59';
+            $entities = $entities->whereBetween('inv_purchase.created_at',[$start_date, $end_date]);
         }
 
         $total  = $entities->count();
