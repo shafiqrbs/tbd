@@ -53,8 +53,7 @@ class VendorController extends Controller
         $input['code'] = $pattern['code'];
         $input['vendor_code'] = $pattern['generateId'];
         $entity = VendorModel::create($input);
-        $name = "{$entity->mobile}-{$entity->company_name}";
-        $ledgerExist = AccountHeadModel::where('name',$name)->where('config_id', $this->domain['acc_config_id'])->first();
+        $ledgerExist = AccountHeadModel::where('vendor_id',$entity->id)->where('source', 'vendor')->where('config_id', $this->domain['acc_config_id'])->first();
         if (empty($ledgerExist)){
             AccountHeadModel::insertVendorLedger( $this->domain['acc_config_id'],$entity);
         }
