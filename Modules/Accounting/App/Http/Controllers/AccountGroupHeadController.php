@@ -15,7 +15,7 @@ use Modules\Core\App\Models\UserModel;
 use Modules\Domain\App\Models\DomainModel;
 
 
-class AccountHeadController extends Controller
+class AccountGroupHeadController extends Controller
 {
     protected $domain;
 
@@ -122,7 +122,8 @@ class AccountHeadController extends Controller
     }
 
     public function LocalStorage(Request $request){
-        $data = TransactionModeModel::getRecordsForLocalStorage($request,$this->domain);
+
+        $data = AccountHeadModel::getRecordsForLocalStorage($request,$this->domain);
         $response = new Response();
         $response->headers->set('Content-Type','application/json');
         $response->setContent(json_encode([

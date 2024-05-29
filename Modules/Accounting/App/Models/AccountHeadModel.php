@@ -126,18 +126,18 @@ class AccountHeadModel extends Model
     }
 
 
-    public static function getLedger($domain)
+    public static function getLedger($request,$domain)
     {
-        $query = self::select(['name', 'slug', 'id'])
-            ->where([['status', 1], ['config_id', $domain['config_id']]]);
-        $query->whereNotNull('parent');
-        return $query->get();
+        dd($request->query('mode'));
+        $query = self::select(['name', 'slug', 'id','level'])
+            ->where([['level', 1], ['config_id', $domain['config_id']]]);
+        return $query->get()->toArray();
     }
 
     public static function getAccountSubHead($domain)
     {
         $query = self::select(['name', 'slug', 'id'])
-            ->where([['status', 1], ['config_id', $domain['config_id']]]);
+            ->where([['level', 2], ['config_id', $domain['config_id']]]);
         return $query->get();
     }
 
@@ -173,5 +173,41 @@ class AccountHeadModel extends Model
         $data = array('count' => $total, 'entities' => $entities);
         return $data;
     }
+
+
+    public static function getRecordsForLocalStorage($request,$domain)
+    {
+       // dd($request->query('mode'));
+        $entities = self::leftjoin('acc_head as parent','parent.id','=','acc_head.parent_id')
+            ->leftjoin('acc_setting as mother','acc_head.mother_account_id','=','mother.id')
+            ->select([
+                'acc_head.id',
+                'acc_head.level',
+                'acc_head.name',
+                'acc_head.slug',
+                'parent.name as parent_name',
+                'mother.name as mother_name'
+            ])
+            ->orderBy('acc_head.name','ASC')
+            ->get();
+
+        $data = [];
+        if(sizeof($entities)>0){
+            foreach ($entities as $val){
+                if ($val['level'] == 2){
+                    $data[$val['level'].'-Group'][] = $val;
+                }elseif ($val['level'] == 1){
+                    $data[$val['level'].'-SubGroup'][] = $val;
+                }else{
+                    $data[$val['level'].'-Ledger'][] = $val;
+                }
+            }
+        }
+
+
+        return $data;
+    }
+
+
 }
 
