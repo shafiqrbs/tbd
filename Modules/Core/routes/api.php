@@ -28,6 +28,7 @@ Route::prefix('/core/select')->middleware([HeaderAuthenticationMiddleware::class
     Route::get('/vendor', [CoreController::class,'vendor'])->name('vendor_autosearch');
     Route::get('/customer', [CoreController::class,'customer'])->name('customer_autosearch');
     Route::get('/location', [CoreController::class,'location'])->name('location_autosearch');
+    Route::get('/setting', [CoreController::class,'settingDropdown'])->name('core_setting_dropdown');
 });
 
 Route::prefix('/core')->middleware([HeaderAuthenticationMiddleware::class])->group(function() {

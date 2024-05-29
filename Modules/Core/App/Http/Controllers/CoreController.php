@@ -7,6 +7,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use Illuminate\Http\Request;
 use Modules\AppsApi\App\Services\JsonRequestResponse;
 use Modules\Core\App\Entities\Core;
+use Modules\Core\App\Models\SettingModel;
 use Modules\Core\App\Models\UserModel;
 
 class CoreController extends Controller
@@ -103,6 +104,19 @@ class CoreController extends Controller
         $entities = $em->getRepository(Core::class)->locationAutoComplete($term);
         $data = $service->returnJosnResponse($entities);
         return $data;
+    }
+
+    /**
+     * Show the form for creating a new resource.
+     */
+    public function settingDropdown(Request $request)
+    {
+        $entities = SettingModel::getSettingDropdown(
+            $request['dropdown-type'],
+            $this->domain->global_id
+        );
+
+        return (new JsonRequestResponse())->returnJosnResponse($entities);
     }
 
 }
