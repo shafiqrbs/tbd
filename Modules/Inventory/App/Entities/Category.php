@@ -68,6 +68,15 @@ class Category
      */
     private $sorting = 0;
 
+
+    /**
+     * @var int
+     *
+     * @ORM\Column( type="smallint",  length=2, nullable=true)
+     */
+    private $weightAvgPriceDuration = 0;
+
+
     /**
      * @var boolean
      *
