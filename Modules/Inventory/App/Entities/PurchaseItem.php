@@ -26,6 +26,22 @@ class PurchaseItem
     private $id;
 
     /**
+     * @ORM\ManyToOne(targetEntity="Modules\Inventory\App\Entities\Config" , cascade={"detach","merge"} )
+     * @ORM\JoinColumn(onDelete="CASCADE")
+     **/
+    private  $config;
+
+    /**
+     * @ORM\ManyToOne(targetEntity="Modules\Core\App\Entities\User")
+     **/
+    private  $createdBy;
+
+     /**
+     * @ORM\ManyToOne(targetEntity="Modules\Core\App\Entities\User")
+     **/
+    private  $approvedBy;
+
+    /**
      * @ORM\ManyToOne(targetEntity="Product")
      * @ORM\JoinColumn(onDelete="CASCADE")
      **/
@@ -54,6 +70,13 @@ class PurchaseItem
      * @ORM\Column(name="quantity", type="float",nullable=true)
      */
     private $quantity;
+
+     /**
+     * @var float
+     *
+     * @ORM\Column( type="float",nullable=true)
+     */
+    private $openingQuantity;
 
     /**
      * @var integer
@@ -151,6 +174,14 @@ class PurchaseItem
      * @ORM\Column(name="barcode", type="string",  nullable = true)
      */
     private $barcode;
+
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(type="string",  nullable = true)
+     */
+    private $mode="purchase";
 
 
 	/**

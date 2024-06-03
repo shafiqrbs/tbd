@@ -7,8 +7,10 @@ use Modules\Inventory\App\Http\Controllers\BusinessModelController;
 use Modules\Inventory\App\Http\Controllers\CategoryGroupController;
 use Modules\Inventory\App\Http\Controllers\ConfigController;
 use Modules\Inventory\App\Http\Controllers\InventoryController;
+use Modules\Inventory\App\Http\Controllers\OpeningStockController;
 use Modules\Inventory\App\Http\Controllers\ProductController;
 use Modules\Inventory\App\Http\Controllers\PurchaseController;
+use Modules\Inventory\App\Http\Controllers\PurchaseItemController;
 use Modules\Inventory\App\Http\Controllers\SalesController;
 
 /*
@@ -42,6 +44,8 @@ Route::prefix('/inventory')->middleware([HeaderAuthenticationMiddleware::class])
 
 
     Route::apiResource('/purchase', PurchaseController::class)->middleware([HeaderAuthenticationMiddleware::class]);
+    Route::apiResource('/purchase-item', PurchaseItemController::class)->middleware([HeaderAuthenticationMiddleware::class]);
+    Route::apiResource('/opening-stock', OpeningStockController::class)->middleware([HeaderAuthenticationMiddleware::class]);
     Route::get('/stock-item', [ProductController::class,'stockItem'])->name('get_stock_item');
 
 });
