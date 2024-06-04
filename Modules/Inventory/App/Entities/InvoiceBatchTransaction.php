@@ -11,10 +11,10 @@ use Gedmo\Mapping\Annotation as Gedmo;
 /**
  * Sales
  *
- * @ORM\Table( name ="inv_sales")
+ * @ORM\Table( name ="inv_invoice_batch_transaction")
  * @ORM\Entity()
  */
-class Sales
+class InvoiceBatchTransaction
 {
     /**
      * @var integer
@@ -33,22 +33,10 @@ class Sales
 
     /**
      * @ORM\ManyToOne(targetEntity="InvoiceBatch")
-     * @ORM\JoinColumn(name="invoice_batch_id", referencedColumnName="id", nullable=true, onDelete="SET NULL")
+     * @ORM\JoinColumn(name="invoice_batch_id", referencedColumnName="id", nullable=true, onDelete="CASCADE")
      **/
     private $invoiceBatch;
 
-
-    /**
-     * @ORM\ManyToOne(targetEntity="Modules\Core\App\Entities\Customer")
-     * @ORM\JoinColumn(onDelete="CASCADE")
-     **/
-    private  $customer;
-
-    /**
-     * @ORM\ManyToOne(targetEntity="Modules\Core\App\Entities\Vendor")
-     * @ORM\JoinColumn(onDelete="CASCADE")
-     **/
-    private  $vendor;
 
     /**
      * @Gedmo\Blameable(on="create")

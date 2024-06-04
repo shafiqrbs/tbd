@@ -1,0 +1,31 @@
+{
+    "name": "nwidart/nbrvattax",
+    "description": "",
+    "authors": [
+        {
+            "name": "Nicolas Widart",
+            "email": "n.widart@gmail.com"
+        }
+    ],
+    "extra": {
+        "laravel": {
+            "providers": [],
+            "aliases": {
+
+            }
+        }
+    },
+    "autoload": {
+        "psr-4": {
+            "Modules\\NbrVatTax\\": "",
+            "Modules\\NbrVatTax\\App\\": "app/",
+            "Modules\\NbrVatTax\\Database\\Factories\\": "database/factories/",
+            "Modules\\NbrVatTax\\Database\\Seeders\\": "database/seeders/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Modules\\NbrVatTax\\Tests\\": "tests/"
+        }
+    }
+}

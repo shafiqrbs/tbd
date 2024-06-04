@@ -6,5 +6,7 @@
     "AppsApi": true,
     "Configuration": true,
     "Utility": true,
-    "Accounting": true
+    "Accounting": true,
+    "VatTax": true,
+    "NbrVatTax": true
 }

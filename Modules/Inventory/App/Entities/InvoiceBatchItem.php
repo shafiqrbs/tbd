@@ -10,10 +10,10 @@ use Gedmo\Mapping\Annotation as Gedmo;
 /**
  * BusinessInvoiceParticular
  *
- * @ORM\Table( name = "inv_sales_item")
+ * @ORM\Table( name = "inv_invoice_batch_item")
  * @ORM\Entity()
  */
-class SalesItem
+class InvoiceBatchItem
 {
     /**
      * @var integer
@@ -197,48 +197,6 @@ class SalesItem
      */
     private $totalQuantity = 0;
 
-    /**
-     * @var string
-     *
-     * @ORM\Column(name="assuranceType", type="string", length=50, nullable = true)
-     */
-    private $assuranceType;
-
-
-    /**
-     * @var \DateTime
-     *
-     * @ORM\Column(name="effectedDate", type="datetime", nullable=true)
-     */
-    private $effectedDate;
-
-    /**
-     * @var \DateTime
-     *
-     * @ORM\Column(name="expiredDate", type="datetime", nullable=true)
-     */
-    private $expiredDate;
-
-    /**
-     * @var \DateTime
-     *
-     * @ORM\Column(name="issueDate", type="datetime", nullable=true)
-     */
-    private $issueDate;
-
-    /**
-     * @var array
-     *
-     * @ORM\Column(name="internalSerial", type="simple_array",  nullable = true)
-     */
-    private $internalSerial;
-
-    /**
-     * @var string
-     *
-     * @ORM\Column(name="externalSerial", type="text",  nullable = true)
-     */
-    private $externalSerial;
 
 
 
@@ -249,6 +207,18 @@ class SalesItem
      */
     private $subTotal = 0;
 
+
+    /**
+     * @var \DateTime
+     * @ORM\Column(type="datetime", nullable = true)
+     */
+    private $startDate;
+
+    /**
+     * @var \DateTime
+     * @ORM\Column(type="datetime", nullable = true)
+     */
+    private $endDate;
 
     /**
      * @var \DateTime

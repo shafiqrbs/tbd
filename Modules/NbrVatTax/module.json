@@ -1,0 +1,11 @@
+{
+    "name": "NbrVatTax",
+    "alias": "nbrvattax",
+    "description": "",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\NbrVatTax\\App\\Providers\\NbrVatTaxServiceProvider"
+    ],
+    "files": []
+}
