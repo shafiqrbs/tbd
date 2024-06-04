@@ -50,13 +50,10 @@ class OpeningStockController extends Controller
         $service = new JsonRequestResponse();
         $input = $request->validated();
         $input['config_id'] = $this->domain['config_id'];
+        $input['created_by_id'] = $this->domain['user_id'];
         $entity = PurchaseItemModel::create($input);
-
-        $process = new PurchaseModel();
-        $process->insertPurchaseItems($entity,$input['items']);
         $data = $service->returnJosnResponse($entity);
         return $data;
-
     }
 
     /**
@@ -95,6 +92,34 @@ class OpeningStockController extends Controller
         PurchaseModel::find($id)->delete();
         $entity = ['message' => 'delete'];
         return $service->returnJosnResponse($entity);
+    }
+
+    public function inlineUpdate(Request $request)
+    {
+        $getPurchaseItem = PurchaseItemModel::find($request->id);
+        if (!$getPurchaseItem){
+            $response = new Response();
+            $response->headers->set('Content-Type', 'application/json');
+            $response->setContent(json_encode([
+                'status' => Response::HTTP_NOT_FOUND,
+                'message' => 'Data not found',
+            ]));
+            $response->setStatusCode(Response::HTTP_OK);
+            return $response;
+        }
+
+        if ($request->field_name === 'approve' ){
+            $getPurchaseItem->update(['approved_by_id' => $this->domain['user_id']]);
+        }
+
+        $response = new Response();
+        $response->headers->set('Content-Type', 'application/json');
+        $response->setContent(json_encode([
+            'status' => Response::HTTP_OK,
+            'message' => 'update',
+        ]));
+        $response->setStatusCode(Response::HTTP_OK);
+        return $response;
     }
 
 }

@@ -19,10 +19,12 @@ class OpeningStockRequest extends FormRequest
 
         // Common validation rules for 'POST', 'PUT', and 'PATCH' methods
         return [
-            'product_id' => 'required|integer|regex:/^\d+(\.\d{1,2})?$/',
-            'opening_quantity' => 'required|regex:/^\d+(\.\d{1,2})?$/',
-            'purchase_price' => 'required|regex:/^\d+(\.\d{1,2})?$/',
-            'sales_price' => 'nullable|regex:/^\d+(\.\d{1,2})?$/',
+            'product_id' => 'required|integer',
+            'opening_quantity' => 'required|numeric|min:0.01',
+            'purchase_price' => 'required|numeric|min:0.01',
+            'sales_price' => 'required|numeric|min:0.01',
+            'sub_total' => 'required|numeric|min:0.01',
+            'mode' => 'required|string',
         ];
     }
 
