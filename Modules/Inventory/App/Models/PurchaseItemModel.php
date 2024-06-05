@@ -4,6 +4,7 @@ namespace Modules\Inventory\App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Support\Facades\DB;
 use Modules\Utility\App\Models\ProductUnitModel;
 use Ramsey\Collection\Collection;
 
@@ -49,12 +50,12 @@ class PurchaseItemModel extends Model
         $skip = $page * $perPage;
 
         $isApprovedCondition = $request['is_approved'] == 0 ? 'whereNull' : 'whereNotNull';
-        $products = self::where([
+        $purchaseItems = self::where([
             ['inv_purchase_item.config_id',$domain['config_id']],
             ['inv_purchase_item.mode', 'opening']
         ])->$isApprovedCondition('approved_by_id');
 
-        $products = $products->leftjoin('inv_product','inv_product.id','=','inv_purchase_item.product_id')
+        $purchaseItems = $purchaseItems->leftjoin('inv_product','inv_product.id','=','inv_purchase_item.product_id')
             ->leftjoin('inv_category','inv_category.id','=','inv_product.category_id')
             ->leftjoin('uti_product_unit','uti_product_unit.id','=','inv_product.unit_id')
             ->leftjoin('inv_brand','inv_brand.id','=','inv_product.brand_id')
@@ -74,35 +75,34 @@ class PurchaseItemModel extends Model
                 'inv_product.barcode',
                 'inv_product.alternative_name',
                 'uti_settings.name as product_type',
+                DB::raw('DATE_FORMAT(inv_purchase_item.updated_at, "%d-%M-%Y") as created'),
             ]);
 
-        $total = $products->count();
-        $entities = $products->skip($skip)
+        if (!empty($request['term'])) {
+            $purchaseItems = $purchaseItems->whereAny(
+                ['inv_product.name', 'inv_product.slug', 'inv_category.name', 'uti_product_unit.name', 'inv_brand.name', 'inv_product.sales_price', 'uti_settings.name'],
+                'LIKE',
+                '%' . $request['term'] . '%'
+            );
+        }
+
+        if (!empty($request['start_date'])) {
+            $start_date = $request['start_date'].' 00:00:00';
+            $end_date = (!empty($request['end_date']))
+                ? $request['end_date'].' 23:59:59'
+                : $request['start_date'].' 23:59:59';
+
+            $purchaseItems = $purchaseItems->whereBetween('inv_purchase_item.updated_at',[$start_date, $end_date]);
+        }
+
+        $total = $purchaseItems->count();
+        $entities = $purchaseItems->skip($skip)
             ->take($perPage)
             ->orderBy('inv_purchase_item.updated_at','DESC')
             ->get();
 
         $data = ['count' => $total, 'entities' => $entities];
         return $data;
-
-
-        /*if (isset($request['term']) && !empty($request['term'])){
-            $products = $products->whereAny(['inv_product.name','inv_product.slug','inv_category.name','uti_product_unit.name','inv_brand.name','inv_product.sales_price','uti_settings.name'],'LIKE','%'.$request['term'].'%');
-        }
-
-        if (isset($request['name']) && !empty($request['name'])){
-            $products = $products->where('inv_product.name',$request['name']);
-        }
-
-        if (isset($request['alternative_name']) && !empty($request['alternative_name'])){
-            $products = $products->where('inv_product.alternative_name',$request['alternative_name']);
-        }
-        if (isset($request['sku']) && !empty($request['sku'])){
-            $products = $products->where('inv_product.sku',$request['sku']);
-        }
-        if (isset($request['sales_price']) && !empty($request['sales_price'])){
-            $products = $products->where('inv_product.sales_price',$request['sales_price']);
-        }*/
 
     }
 

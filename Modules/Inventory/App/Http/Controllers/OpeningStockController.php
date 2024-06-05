@@ -89,7 +89,7 @@ class OpeningStockController extends Controller
     public function destroy($id)
     {
         $service = new JsonRequestResponse();
-        PurchaseModel::find($id)->delete();
+        PurchaseItemModel::find($id)->delete();
         $entity = ['message' => 'delete'];
         return $service->returnJosnResponse($entity);
     }
@@ -110,6 +110,12 @@ class OpeningStockController extends Controller
 
         if ($request->field_name === 'approve' ){
             $getPurchaseItem->update(['approved_by_id' => $this->domain['user_id']]);
+        }
+        if ($request->field_name === 'opening_quantity' ){
+            $getPurchaseItem->update(['opening_quantity' => $request->opening_quantity,'sub_total'=>$request->subTotal]);
+        }
+        if ($request->field_name === 'purchase_price' ){
+            $getPurchaseItem->update(['purchase_price' => $request->purchase_price,'sub_total'=>$request->subTotal]);
         }
 
         $response = new Response();
