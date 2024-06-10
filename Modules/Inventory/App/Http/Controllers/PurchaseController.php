@@ -72,6 +72,20 @@ class PurchaseController extends Controller
     }
 
     /**
+     * Show the specified resource.
+     */
+    public function edit($id)
+    {
+        $service = new JsonRequestResponse();
+        $entity = PurchaseModel::getEditData($id, $this->domain);
+        if (!$entity) {
+            $entity = 'Data not found';
+        }
+        $data = $service->returnJosnResponse($entity);
+        return $data;
+    }
+
+    /**
      * Update the specified resource in storage.
      */
     public function update(ProductRequest $request, $id)
