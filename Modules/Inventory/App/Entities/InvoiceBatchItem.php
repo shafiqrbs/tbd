@@ -25,10 +25,10 @@ class InvoiceBatchItem
     private $id;
 
     /**
-     * @ORM\ManyToOne(targetEntity="Sales")
+     * @ORM\ManyToOne(targetEntity="InvoiceBatch")
      * @ORM\JoinColumn(onDelete="CASCADE")
      **/
-    private  $sale;
+    private  $invoiceBatch;
 
     /**
      * @ORM\ManyToOne(targetEntity="Product")
@@ -37,11 +37,6 @@ class InvoiceBatchItem
     private  $product;
 
     /**
-     * @ORM\ManyToOne(targetEntity="Modules\Utility\App\Entities\ProductUnit")
-     **/
-    private  $unit;
-
-      /**
      * @var string
      *
      * @ORM\Column(type="string", length=225, nullable=true)
@@ -56,47 +51,11 @@ class InvoiceBatchItem
     private $itemName;
 
     /**
-     * @var string
-     *
-     * @ORM\Column(name="description", type="text", nullable=true)
-     */
-    private $description;
-
-    /**
      * @var float
      *
      * @ORM\Column(name="quantity", type="float",  nullable=true)
      */
     private $quantity = 0;
-
-    /**
-     * @var float
-     *
-     * @ORM\Column(type="float", nullable=true)
-     */
-    private $returnQnt = 0;
-
-    /**
-     * @var float
-     *
-     * @ORM\Column(type="float", nullable=true)
-     */
-    private $damageQnt = 0;
-
-    /**
-     * @var float
-     *
-     * @ORM\Column(type="float", nullable=true)
-     */
-    private $spoilQnt= 0;
-
-    /**
-     * @var float
-     *
-     * @ORM\Column(type="float", nullable=true)
-     */
-    private $bonusQnt = 0;
-
 
     /**
      * @var float
@@ -119,86 +78,6 @@ class InvoiceBatchItem
      */
     private $price;
 
-     /**
-     * @var float
-     *
-     * @ORM\Column(type="float", nullable=true)
-     */
-    private $percent;
-
-    /**
-     * @var float
-     *
-     * @ORM\Column(type="float", nullable=true)
-     */
-    private $discountPrice;
-
-    /**
-     * @var float
-     *
-     * @ORM\Column(type="float", nullable=true)
-     */
-    private $tloPrice;
-
-    /**
-     * @var float
-     *
-     * @ORM\Column(type="float", nullable=true)
-     */
-    private $srCommission;
-
-    /**
-     * @var float
-     *
-     * @ORM\Column(type="float", nullable=true)
-     */
-    private $srCommissionTotal;
-
-    /**
-     * @var float
-     *
-     * @ORM\Column(type="float", nullable=true)
-     */
-    private $tloTotal;
-
-    /**
-     * @var string
-     *
-     * @ORM\Column(type="string", nullable=true)
-     */
-    private $tloMode;
-
-    /**
-     * @var float
-     *
-     * @ORM\Column(type="float", nullable=true)
-     */
-    private $height = 0;
-
-
-    /**
-     * @var float
-     *
-     * @ORM\Column(type="float", nullable=true)
-     */
-    private $width = 0;
-
-    /**
-     * @var float
-     *
-     * @ORM\Column(type="float", nullable=true)
-     */
-    private $subQuantity = 0;
-
-    /**
-     * @var float
-     *
-     * @ORM\Column(type="float", nullable=true)
-     */
-    private $totalQuantity = 0;
-
-
-
 
     /**
      * @var float
@@ -207,18 +86,6 @@ class InvoiceBatchItem
      */
     private $subTotal = 0;
 
-
-    /**
-     * @var \DateTime
-     * @ORM\Column(type="datetime", nullable = true)
-     */
-    private $startDate;
-
-    /**
-     * @var \DateTime
-     * @ORM\Column(type="datetime", nullable = true)
-     */
-    private $endDate;
 
     /**
      * @var \DateTime

@@ -205,13 +205,12 @@ class Purchase
      */
     private $updatedAt;
 
-
     /**
-     * @var \Datetime
-     *
-     * @ORM\Column(name="receiveDate", type="datetime", nullable=true)
+     * @var \DateTime
+     * @ORM\Column(type="datetime", nullable=true)
      */
-    private $receiveDate;
+    private $invoiceDate;
+
 
 
 }

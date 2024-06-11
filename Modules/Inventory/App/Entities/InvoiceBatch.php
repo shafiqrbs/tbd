@@ -32,10 +32,32 @@ class InvoiceBatch
     private $config;
 
     /**
+     * @ORM\ManyToOne(targetEntity="Modules\Accounting\App\Entities\TransactionMode")
+     **/
+    private $transactionMode;
+
+    /**
      * @ORM\ManyToOne(targetEntity="Modules\Core\App\Entities\Customer")
      * @ORM\JoinColumn(onDelete="CASCADE")
      **/
     private  $customer;
+
+
+    /**
+     * @Gedmo\Blameable(on="create")
+     * @ORM\ManyToOne(targetEntity="Modules\Core\App\Entities\User")
+     **/
+    private  $createdBy;
+
+    /**
+     * @ORM\ManyToOne(targetEntity="Modules\Core\App\Entities\User")
+     **/
+    private $salesBy;
+
+    /**
+     * @ORM\ManyToOne(targetEntity="Modules\Core\App\Entities\User")
+     **/
+    private  $approvedBy;
 
     /**
      * @var string
@@ -50,7 +72,6 @@ class InvoiceBatch
      * @ORM\Column(name="invoice", type="string", length=50, nullable=true)
      */
     private $invoice;
-
 
 
     /**
@@ -76,14 +97,12 @@ class InvoiceBatch
      */
     private $discount;
 
-
     /**
      * @var float
      *
      * @ORM\Column(name="total", type="float", nullable=true)
      */
     private $total;
-
 
     /**
      * @var float
@@ -92,12 +111,34 @@ class InvoiceBatch
      */
     private $received;
 
+
+    /**
+     * @var float
+     *
+     * @ORM\Column(name="amount", type="float", nullable=true)
+     */
+    private $amount;
+
     /**
      * @var float
      *
      * @ORM\Column(name="commission", type="float", nullable=true)
      */
     private $commission;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(type="string", length=20, nullable=true)
+     */
+    private $discountType ='';
+
+    /**
+     * @var float
+     *
+     * @ORM\Column(type="float" , nullable=true)
+     */
+    private $discountCalculation;
 
 
     /**
@@ -134,6 +175,12 @@ class InvoiceBatch
      * @ORM\Column(type="datetime")
      */
     private $updatedAt;
+
+    /**
+     * @var \DateTime
+     * @ORM\Column(type="datetime", nullable=true)
+     */
+    private $invoiceDate;
 
 
 

@@ -59,29 +59,6 @@ class InvoiceBatchTransaction
      **/
     private $transactionMode;
 
-    /**
-     * @var string
-     *
-     * @ORM\Column(type="string", length=50, nullable=true)
-     */
-    private $paymentMobile;
-
-
-    /**
-     * @var string
-     *
-     * @ORM\Column(name="venue", type="string", length=256, nullable=true)
-     */
-    private $venue;
-
-
-    /**
-     * @var string
-     *
-     * @ORM\Column(type="string", length=255, nullable=true)
-     */
-    private $paymentInWord;
-
 
     /**
      * @var string
@@ -97,15 +74,6 @@ class InvoiceBatchTransaction
      */
     private $invoice;
 
-
-     /**
-     * @var string
-     *
-     * @ORM\Column(type="string", length=50, nullable=true)
-     */
-    private $deviceSalesId;
-
-
     /**
      * @var integer
      *
@@ -113,13 +81,6 @@ class InvoiceBatchTransaction
      */
     private $code;
 
-
-    /**
-     * @var string
-     *
-     * @ORM\Column(type="string", length=50, nullable=true)
-     */
-    private $paymentStatus = "Pending";
 
     /**
      * @var string
@@ -151,19 +112,6 @@ class InvoiceBatchTransaction
      */
     private $discount;
 
-    /**
-     * @var float
-     *
-     * @ORM\Column(name="vat", type="float", nullable=true)
-     */
-    private $vat;
-
-     /**
-     * @var float
-     *
-     * @ORM\Column(name="ait", type="float", nullable=true)
-     */
-    private $ait;
 
     /**
      * @var float
@@ -175,38 +123,9 @@ class InvoiceBatchTransaction
     /**
      * @var float
      *
-     * @ORM\Column(type="float", nullable=true)
+     * @ORM\Column(name="amount", type="float", nullable=true)
      */
-    private $tloPrice;
-
-    /**
-     * @var float
-     *
-     * @ORM\Column(type="float", nullable=true)
-     */
-    private $srCommission;
-
-
-    /**
-     * @var float
-     *
-     * @ORM\Column(name="payment", type="float", nullable=true)
-     */
-    private $payment;
-
-    /**
-     * @var float
-     *
-     * @ORM\Column(name="received", type="float", nullable=true)
-     */
-    private $received;
-
-    /**
-     * @var float
-     *
-     * @ORM\Column(name="commission", type="float", nullable=true)
-     */
-    private $commission;
+    private $amount;
 
 
     /**
@@ -218,53 +137,11 @@ class InvoiceBatchTransaction
 
 
     /**
-     * @var float
-     *
-     * @ORM\Column( type="float", nullable=true)
-     */
-    private $salesReturn;
-
-
-    /**
-     * @var float
-     *
-     * @ORM\Column(name="due", type="float", nullable=true)
-     */
-    private $due;
-
-
-    /**
-     * @var string
-     *
-     * @ORM\Column(name="mobile", type="text", nullable=true)
-     */
-    private $mobile;
-
-    /**
      * @var boolean
      *
      * @ORM\Column(type="boolean", nullable=true)
      */
     private $isReversed;
-
-    /**
-     * @var string
-     *
-     * @ORM\Column(type="string", length=50, nullable=true)
-     */
-    private $eventType;
-
-    /**
-     * @var \DateTime
-     * @ORM\Column(name="startDate", type="datetime", nullable=true)
-     */
-    private $startDate;
-
-    /**
-     * @var boolean
-     * @ORM\Column(type="boolean", nullable=true)
-     */
-    private $isCondition;
 
      /**
      * @var boolean
@@ -278,6 +155,11 @@ class InvoiceBatchTransaction
      */
     private $printPreviousDue = true;
 
+    /**
+     * @var \DateTime
+     * @ORM\Column(type="datetime", nullable=true)
+     */
+    private $invoiceDate;
 
     /**
      * @var \DateTime
@@ -292,8 +174,6 @@ class InvoiceBatchTransaction
      * @ORM\Column(type="datetime")
      */
     private $updatedAt;
-
-
 
 }
 

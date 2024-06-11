@@ -43,15 +43,12 @@ class InvoiceBatchController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store($request)
+    public function store(Request $request)
     {
-        $items = $_REQUEST['items'];
+        $items = $request['sales_id'];
         $service = new JsonRequestResponse();
         $config_id = $this->domain['config_id'];
         $entity = InvoiceBatchModel::insertBatch($config_id,$items);
-
-        $process = new InvoiceBatchModel();
-        $process->insertSalesItems($entity,$input['items']);
         $data = $service->returnJosnResponse($entity);
         return $data;
 
@@ -63,21 +60,22 @@ class InvoiceBatchController extends Controller
     public function show($id)
     {
         $service = new JsonRequestResponse();
-        $entity = InvoiceBatchModel::getShow($id, $this->domain);
+        $entity = InvoiceBatchModel::getEditData($id, $this->domain);
         if (!$entity) {
             $entity = 'Data not found';
         }
         $data = $service->returnJosnResponse($entity);
         return $data;
     }
+
     /**
      * Show the specified resource for edit.
      */
     public function edit($id)
     {
+
         $entity = InvoiceBatchModel::getEditData($id, $this->domain);
         $status = $entity ? Response::HTTP_OK : Response::HTTP_NOT_FOUND;
-
         return response()->json([
             'message' => 'success',
             'status' => $status,

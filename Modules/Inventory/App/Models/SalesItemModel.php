@@ -4,6 +4,7 @@ namespace Modules\Inventory\App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Modules\Inventory\App\Entities\Product;
 use Modules\Utility\App\Models\ProductUnitModel;
 use Ramsey\Collection\Collection;
 
@@ -19,12 +20,12 @@ class SalesItemModel extends Model
     ];
 
     public static function boot() {
+
         parent::boot();
         self::creating(function ($model) {
             $date =  new \DateTime("now");
             $model->created_at = $date;
         });
-
         self::updating(function ($model) {
             $date =  new \DateTime("now");
             $model->updated_at = $date;
@@ -35,6 +36,11 @@ class SalesItemModel extends Model
     public function sales()
     {
         return $this->belongsTo(SalesModel::class);
+    }
+
+    public function product()
+    {
+        return $this->belongsTo(ProductModel::class,'product_id');
     }
 
     public function unit()

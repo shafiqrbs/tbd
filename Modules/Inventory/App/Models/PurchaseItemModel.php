@@ -33,15 +33,11 @@ class PurchaseItemModel extends Model
     }
 
 
-    public function sales()
+    public function purchase()
     {
-        return $this->belongsTo(SalesModel::class);
+        return $this->belongsTo(PurchaseModel::class);
     }
 
-    public function unit()
-    {
-        return $this->belongsTo(ProductUnitModel::class,'unit_id');
-    }
 
     public static function getRecords($request,$domain)
     {

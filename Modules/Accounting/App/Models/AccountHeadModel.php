@@ -64,13 +64,13 @@ class AccountHeadModel extends Model
         $entity = self::create(
             [
                 'name' => $name,
+                'parent_id' => '4',
                 'customer_id' => $entity['id'],
                 'level' => '3',
                 'source' => 'customer',
                 'config_id' => $config
             ]
         );
-        //AccountJournalModel::insertCustomerJournalVoucher($entity);
     }
 
 
@@ -117,6 +117,7 @@ class AccountHeadModel extends Model
             [
                 'name' => $name,
                 'source' => 'vendor',
+                'parent_id' => '5',
                 'level' => '3',
                 'vendor_id' => $entity['id'],
                 'config_id' => $config

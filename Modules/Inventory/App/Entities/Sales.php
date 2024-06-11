@@ -293,6 +293,12 @@ class Sales
 
     /**
      * @var \DateTime
+     * @ORM\Column(type="datetime", nullable=true)
+     */
+    private $invoiceDate;
+
+    /**
+     * @var \DateTime
      * @Gedmo\Timestampable(on="create")
      * @ORM\Column(type="datetime")
      */
@@ -304,7 +310,6 @@ class Sales
      * @ORM\Column(type="datetime")
      */
     private $updatedAt;
-
 
 
 }

@@ -7,11 +7,11 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Modules\Utility\App\Models\ProductUnitModel;
 use Ramsey\Collection\Collection;
 
-class InvoiceBatchItemModel extends Model
+class InvoiceBatchTransactionModel extends Model
 {
     use HasFactory;
 
-    protected $table = 'inv_invoice_batch_item';
+    protected $table = 'inv_invoice_batch_transaction';
     public $timestamps = true;
     protected $guarded = ['id'];
 
@@ -36,12 +36,4 @@ class InvoiceBatchItemModel extends Model
     {
         return $this->belongsTo(InvoiceBatchModel::class);
     }
-
-    public function product()
-    {
-        return $this->belongsTo(ProductModel::class, 'product_id','id');
-    }
-
-
-
 }

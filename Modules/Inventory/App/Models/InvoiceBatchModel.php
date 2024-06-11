@@ -16,7 +16,9 @@ class InvoiceBatchModel extends Model
     public $timestamps = true;
     protected $guarded = ['id'];
 
-    protected $fillable = [];
+    protected $fillable = [
+        'config_id',
+    ];
 
     public static function boot() {
         parent::boot();
@@ -39,38 +41,69 @@ class InvoiceBatchModel extends Model
         return substr(str_shuffle(str_repeat($pool, $length)), 0, $length);
     }
 
-    public function salesItems()
+    public function invoiceBatchItems()
     {
         return $this->hasMany(InvoiceBatchItemModel::class, 'invoice_batch_id');
     }
 
-    public function insertBatch($config,$items)
+
+    public function invoiceBatchTransactions()
     {
-        $timestamp = Carbon::now();
+        return $this->hasMany(InvoiceBatchTransactionModel::class, 'invoice_batch_id');
+    }
+
+
+    public function batchInvoices()
+    {
+        return $this->hasMany(SalesModel::class, 'invoice_batch_id');
+    }
+
+
+    public static function insertBatch($config,$items)
+    {
+
         $entity = self::create(
             [
-                $record['config_id'] = $config,
-                $record['created_at'] = $timestamp,
-                $record['updated_at'] = $timestamp
+                'config_id' => $config,
             ]
         );
         $ids = $items;
-        DB::table('inv_sales')
+        DB::table('inv_invoice_batch')
             ->whereIn('id',$ids)
             ->update(['invoice_batch_id' => $entity->id]);
+        $batch = self::insertSalesItems($entity);
+        return $batch;
 
+    }
+
+    public static function insertSalesItems($entity)
+    {
+        $timestamp = Carbon::now();
+        $items = self::getSalesBatchRecords($entity);
+        foreach ($items as $record) {
+            InvoiceBatchItemModel::create(
+                [
+                    'invoice_batch_id' => $entity->id,
+                    'product_id' => $record->product_id,
+                    'quantity' =>  $record->quantity,
+                    'price' => $record->sales_price,
+                    'sales_price' => $record->sales_price,
+                    'sub_total' => $record->sub_total,
+                ]
+            );
+        }
         return $entity;
     }
 
-    public function insertSalesItems($sales,$items)
+    public static function getSalesBatchRecords($entity)
     {
-        $timestamp = Carbon::now();
-        foreach ($items as &$record) {
-            $record['sale_id'] = $sales->id;
-            $record['created_at'] = $timestamp;
-            $record['updated_at'] = $timestamp;
-        }
-        SalesItemModel::insert($items);
+        $results = DB::table('inv_invoice_batch_item')
+            ->selectRaw('product_id,SUM(quantity) as quantity, SUM(inv_invoice_batch_item.sub_total) as sub_total, (SUM(inv_invoice_batch_item.sub_total)/SUM(quantity)) as sales_price')
+            ->join('inv_invoice_batch', 'inv_invoice_batch_item.sale_id', '=', 'inv_invoice_batch.id')
+            ->where('inv_invoice_batch.invoice_batch_id', $entity->id)
+            ->groupBy('product_id')
+            ->get();
+        return $results;
     }
 
     public static function getRecords($request,$domain)
@@ -78,59 +111,52 @@ class InvoiceBatchModel extends Model
         $page =  isset($request['page']) && $request['page'] > 0?($request['page'] - 1 ) : 0;
         $perPage = isset($request['offset']) && $request['offset']!=''? (int)($request['offset']):50;
         $skip = isset($page) && $page!=''? (int)$page * $perPage:0;
-
-        $entities = self::where([['inv_sales.config_id',$domain['config_id']]])
-            ->leftjoin('users as createdBy','createdBy.id','=','inv_sales.created_by_id')
-            ->leftjoin('users as salesBy','salesBy.id','=','inv_sales.sales_by_id')
-            ->leftjoin('acc_transaction_mode','acc_transaction_mode.id','=','inv_sales.transaction_mode_id')
-            ->leftjoin('cor_customers','cor_customers.id','=','inv_sales.customer_id')
+        $entities = self::where([['inv_invoice_batch.config_id',$domain['config_id']]])
+            ->leftjoin('users as createdBy','createdBy.id','=','inv_invoice_batch.created_by_id')
+            ->leftjoin('cor_customers','cor_customers.id','=','inv_invoice_batch.customer_id')
             ->select([
-                'inv_sales.id',
-                DB::raw('DATE_FORMAT(inv_sales.created_at, "%d-%m-%Y") as created'),
-                'inv_sales.invoice as invoice',
-                'inv_sales.sub_total as sub_total',
-                'inv_sales.total as total',
-                'inv_sales.payment as payment',
-                'inv_sales.discount as discount',
-                'inv_sales.discount_calculation as discount_calculation',
-                'inv_sales.discount_type as discount_type',
-                'cor_customers.id as customerId',
-                'cor_customers.name as customerName',
-                'cor_customers.mobile as customerMobile',
-                'createdBy.username as createdByUser',
-                'createdBy.name as createdByName',
-                'createdBy.id as createdById',
-                'salesBy.id as salesById',
-                'salesBy.username as salesByUser',
-                'salesBy.name as salesByName',
-                'inv_sales.process as process',
-                'acc_transaction_mode.name as mode_name',
+                'inv_invoice_batch.id',
+                DB::raw('DATE_FORMAT(inv_invoice_batch.created_at, "%d-%m-%Y") as created'),
+                'inv_invoice_batch.invoice as invoice',
+                'inv_invoice_batch.sub_total as sub_total',
+                'inv_invoice_batch.total as total',
+                'inv_invoice_batch.amount as amount',
+                'inv_invoice_batch.discount as discount',
+                'inv_invoice_batch.discount_calculation as discount_calculation',
+                'inv_invoice_batch.discount_type as discount_type',
+                'cor_customers.id as customer_id',
+                'cor_customers.name as customer_name',
+                'cor_customers.mobile as customer_mobile',
+                'createdBy.username as created_by_user',
+                'createdBy.name as created_by_name',
+                'createdBy.id as created_by_id',
+                'inv_invoice_batch.process as process',
                 'cor_customers.address as customer_address',
                 'cor_customers.balance as balance',
-            ])->with('salesItems');
+            ])->with('invoiceBatchItems')->with('invoiceBatchTransactions');
 
         if (isset($request['term']) && !empty($request['term'])){
-            $entities = $entities->whereAny(['inv_sales.invoice','cor_customers.name','cor_customers.mobile','salesBy.username','createdBy.username','acc_transaction_mode.name','inv_sales.total'],'LIKE','%'.$request['term'].'%');
+            $entities = $entities->whereAny(['inv_invoice_batch.invoice','cor_customers.name','cor_customers.mobile','salesBy.username','createdBy.username','acc_transaction_mode.name','inv_invoice_batch.total'],'LIKE','%'.$request['term'].'%');
         }
 
         if (isset($request['customer_id']) && !empty($request['customer_id'])){
-            $entities = $entities->where('inv_sales.customer_id',$request['customer_id']);
+            $entities = $entities->where('inv_invoice_batch.customer_id',$request['customer_id']);
         }
         if (isset($request['start_date']) && !empty($request['start_date']) && empty($request['end_date'])){
             $start_date = $request['start_date'].' 00:00:00';
             $end_date = $request['start_date'].' 23:59:59';
-            $entities = $entities->whereBetween('inv_sales.created_at',[$start_date, $end_date]);
+            $entities = $entities->whereBetween('inv_invoice_batch.created_at',[$start_date, $end_date]);
         }
         if (isset($request['start_date']) && !empty($request['start_date']) && isset($request['end_date']) && !empty($request['end_date'])){
             $start_date = $request['start_date'].' 00:00:00';
             $end_date = $request['end_date'].' 23:59:59';
-            $entities = $entities->whereBetween('inv_sales.created_at',[$start_date, $end_date]);
+            $entities = $entities->whereBetween('inv_invoice_batch.created_at',[$start_date, $end_date]);
         }
 
         $total  = $entities->count();
         $entities = $entities->skip($skip)
             ->take($perPage)
-            ->orderBy('inv_sales.updated_at','DESC')
+            ->orderBy('inv_invoice_batch.updated_at','DESC')
             ->get();
 
         $data = array('count'=>$total,'entities'=>$entities);
@@ -139,71 +165,25 @@ class InvoiceBatchModel extends Model
 
     public static function getShow($id,$domain)
     {
-        $entity = self::where([['inv_sales.config_id',$domain['config_id'],'inv_sales.id',$id]])
-            ->leftjoin('cor_customers','cor_customers.id','=','inv_sales.customer_id')
-            ->leftjoin('users as createdBy','createdBy.id','=','inv_sales.created_by_id')
-            ->leftjoin('users as salesBy','salesBy.id','=','inv_sales.sales_by_id')
-            ->leftjoin('acc_transaction_mode as transactionMode','transactionMode.id','=','inv_sales.transaction_mode_id')
-            ->leftjoin('uti_transaction_method as method','method.id','=','acc_transaction_mode.method_id')
-            ->select([
-                'inv_sales.id',
-                '(DATE_FORMAT(inv_sales.updated_at,\'%Y-%m\')) as created',
-                'inv_sales.invoice as invoice',
-                'inv_sales.sub_total as sub_total',
-                'inv_sales.total as total',
-                'inv_sales.payment as payment',
-                'inv_sales.discount as discount',
-                'inv_sales.discount_calculation as discount_calculation',
-                'inv_sales.discount_type as discount_type',
-                'cor_customers.id as customerId',
-                'cor_customers.name as customerName',
-                'cor_customers.mobile as customerMobile',
-                'createdBy.username as createdByUser',
-                'createdBy.name as createdByName',
-                'createdBy.id as createdById',
-                'salesBy.id as salesById',
-                'salesBy.username as salesByUser',
-                'salesBy.name as salesByName',
-                'transactionMode.name as modeName',
-                'transactionMode.name as modeName',
-
-            ])->with(['salesItems' => function ($query){
-                $query->select([
-                    'id',
-                    'sale_id',
-                    'unit_id'
-                ])->with([
-                    'unit'
-                ]);
-            }])->first();
-
-        return $entity;
-    }
-
-
-    public static function getEditData($id,$domain)
-    {
         $entity = self::where([
-            ['inv_sales.config_id', '=', $domain['config_id']],
-            ['inv_sales.id', '=', $id]
+            ['inv_invoice_batch.config_id', '=', $domain['config_id']],
+            ['inv_invoice_batch.id', '=', $id]
         ])
-            ->leftjoin('cor_customers','cor_customers.id','=','inv_sales.customer_id')
-            ->leftjoin('users as createdBy','createdBy.id','=','inv_sales.created_by_id')
-            ->leftjoin('users as salesBy','salesBy.id','=','inv_sales.sales_by_id')
-            ->leftjoin('acc_transaction_mode as transactionMode','transactionMode.id','=','inv_sales.transaction_mode_id')
-//            ->leftjoin('uti_transaction_method as method','method.id','=','acc_transaction_mode.method_id')
+            ->leftjoin('cor_customers','cor_customers.id','=','inv_invoice_batch.customer_id')
+            ->leftjoin('users as createdBy','createdBy.id','=','inv_invoice_batch.created_by_id')
+            ->leftjoin('users as salesBy','salesBy.id','=','inv_invoice_batch.sales_by_id')
             ->select([
-                'inv_sales.id',
-                DB::raw('DATE_FORMAT(inv_sales.updated_at, "%d-%m-%Y") as created'),
-                'inv_sales.invoice as invoice',
-                'inv_sales.sub_total as sub_total',
-                'inv_sales.total as total',
-                'inv_sales.payment as payment',
-                'inv_sales.discount as discount',
-                'inv_sales.discount_calculation as discount_calculation',
-                'inv_sales.discount_type as discount_type',
-                'cor_customers.id as customerId',
-                'cor_customers.name as customerName',
+                'inv_invoice_batch.id',
+                DB::raw('DATE_FORMAT(inv_invoice_batch.updated_at, "%d-%m-%Y") as created'),
+                'inv_invoice_batch.invoice as invoice',
+                'inv_invoice_batch.sub_total as sub_total',
+                'inv_invoice_batch.total as total',
+                'inv_invoice_batch.amount as amount',
+                'inv_invoice_batch.discount as discount',
+                'inv_invoice_batch.discount_calculation as discount_calculation',
+                'inv_invoice_batch.discount_type as discount_type',
+                'cor_customers.id as customer_id',
+                'cor_customers.name as customer_name',
                 'cor_customers.mobile as customerMobile',
                 'createdBy.username as createdByUser',
                 'createdBy.name as createdByName',
@@ -214,21 +194,94 @@ class InvoiceBatchModel extends Model
                 'transactionMode.name as modeName',
                 'transactionMode.name as modeName',
             ])
-            ->with(['salesItems' => function ($query) {
+            ->with('invoiceBatchTransactions')
+            ->with('batchInvoices')
+            ->with(['batchInvoices' => function ($query){
+                $query->select(['*'])
+                    ->with(['salesItems' => function ($query) {
+                        $query->select(['*']);
+                    }]);
+            }])
+            ->with(['invoiceBatchItems' => function ($query){
                 $query->select([
                     'id',
-                    'sale_id',
-                    'unit_id',
+                    'invoice_batch_id',
+                    'product_id',
                     'item_name',
                     'quantity',
                     'sales_price',
-                    'purchase_price',
                     'price',
                     'sub_total',
-                ])->with('unit');
+                ])->with(['product' => function ($query) {
+                    $query->select([
+                        'id',
+                        'name',
+                    ]);
+                }]);
             }])
             ->first();
 
+        return $entity;
+    }
+
+
+    public static function getEditData($id,$domain)
+    {
+        $entity = self::where([
+            ['inv_invoice_batch.config_id', '=', $domain['config_id']],
+            ['inv_invoice_batch.id', '=', $id]
+        ])
+            ->leftjoin('cor_customers','cor_customers.id','=','inv_invoice_batch.customer_id')
+            ->leftjoin('users as createdBy','createdBy.id','=','inv_invoice_batch.created_by_id')
+            ->leftjoin('users as salesBy','salesBy.id','=','inv_invoice_batch.sales_by_id')
+            ->select([
+                'inv_invoice_batch.id',
+                DB::raw('DATE_FORMAT(inv_invoice_batch.updated_at, "%d-%m-%Y") as created'),
+                'inv_invoice_batch.invoice as invoice',
+                'inv_invoice_batch.sub_total as sub_total',
+                'inv_invoice_batch.total as total',
+                'inv_invoice_batch.amount as amount',
+                'inv_invoice_batch.discount as discount',
+                'inv_invoice_batch.discount_calculation as discount_calculation',
+                'inv_invoice_batch.discount_type as discount_type',
+                'cor_customers.id as customer_id',
+                'cor_customers.name as customer_name',
+                'cor_customers.mobile as customerMobile',
+                'createdBy.username as createdByUser',
+                'createdBy.name as createdByName',
+                'createdBy.id as createdById',
+                'salesBy.id as salesById',
+                'salesBy.username as salesByUser',
+                'salesBy.name as salesByName',
+                'transactionMode.name as modeName',
+                'transactionMode.name as modeName',
+            ])
+            ->with('invoiceBatchTransactions')
+            ->with('batchInvoices')
+            ->with(['batchInvoices' => function ($query){
+                $query->select(['*'])
+                    ->with(['salesItems' => function ($query) {
+                    $query->select(['*']);
+                }]);
+            }])
+            ->with(['invoiceBatchItems' => function ($query){
+                $query->select([
+                    'id',
+                    'invoice_batch_id',
+                    'product_id',
+                    'item_name',
+                    'quantity',
+                    'sales_price',
+                    'price',
+                    'sub_total',
+                ])->with(['product' => function ($query) {
+                    $query->select([
+                        'id',
+                        'name',
+                    ]);
+                }]);
+            }])
+            ->first();
         return $entity;
     }
 
