@@ -5,10 +5,15 @@ namespace Modules\Inventory\App\Http\Controllers;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Session;
 use Modules\AppsApi\App\Services\JsonRequestResponse;
 use Modules\Core\App\Models\UserModel;
+use Modules\Inventory\App\Entities\SalesItem;
 use Modules\Inventory\App\Http\Requests\ProductRequest;
 use Modules\Inventory\App\Http\Requests\SalesRequest;
+use Modules\Inventory\App\Models\SalesItemModel;
 use Modules\Inventory\App\Models\SalesModel;
 use function Symfony\Component\HttpFoundation\Session\Storage\Handler\getInsertStatement;
 
@@ -90,14 +95,45 @@ class SalesController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(ProductRequest $request, $id)
+    public function update(SalesRequest $request, $id)
     {
-        $data = $request->validated();
-        $entity = SalesModel::find($id);
-        $entity->update($data);
 
-        $service = new JsonRequestResponse();
-        return $service->returnJosnResponse($entity);
+        $data = $request->validated();
+        DB::beginTransaction();
+        try {
+            $getSales = SalesModel::findOrFail($id);
+            $getSales->fill($data);
+            $getSales->save();
+
+            SalesItemModel::where('sale_id', $id)->delete();
+            if (sizeof($data['items'])>0){
+                foreach ($data['items'] as $item){
+                    SalesItemModel::create($item);
+                }
+            }
+            DB::commit();
+
+            $response = new Response();
+            $response->headers->set('Content-Type', 'application/json');
+            $response->setContent(json_encode([
+                'message' => 'success',
+                'status' => Response::HTTP_OK,
+            ]));
+            $response->setStatusCode(Response::HTTP_OK);
+
+        } catch (\Exception $e) {
+            DB::rollback();
+            $response = new Response();
+            $response->headers->set('Content-Type', 'application/json');
+            $response->setContent(json_encode([
+                'message' => 'error',
+                'status' => Response::HTTP_INTERNAL_SERVER_ERROR,
+                'error' => $e->getMessage(),
+            ]));
+            $response->setStatusCode(Response::HTTP_OK);
+        }
+
+        return $response;
     }
 
     /**

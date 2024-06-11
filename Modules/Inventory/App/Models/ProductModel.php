@@ -217,6 +217,7 @@ class ProductModel extends Model
                 \DB::raw("CONCAT(inv_product.name, ' [',inv_product.remaining_quantity,'] ', uti_product_unit.name) AS product_name"),
                 'inv_product.slug',
                 'inv_category.name as category_name',
+                'uti_product_unit.id as unit_id',
                 'uti_product_unit.name as unit_name',
                 'inv_brand.name as brand_name',
                 'inv_product.min_quantity',
