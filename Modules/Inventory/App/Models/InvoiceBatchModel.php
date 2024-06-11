@@ -236,7 +236,7 @@ class InvoiceBatchModel extends Model
             ->leftjoin('users as salesBy','salesBy.id','=','inv_invoice_batch.sales_by_id')
             ->select([
                 'inv_invoice_batch.id',
-                DB::raw('DATE_FORMAT(inv_invoice_batch.updated_at, "%d-%m-%Y") as created'),
+                DB::raw('DATE_FORMAT(inv_invoice_batch.created_at, "%d-%m-%Y") as created'),
                 'inv_invoice_batch.invoice as invoice',
                 'inv_invoice_batch.sub_total as sub_total',
                 'inv_invoice_batch.total as total',
@@ -246,15 +246,13 @@ class InvoiceBatchModel extends Model
                 'inv_invoice_batch.discount_type as discount_type',
                 'cor_customers.id as customer_id',
                 'cor_customers.name as customer_name',
-                'cor_customers.mobile as customerMobile',
-                'createdBy.username as createdByUser',
-                'createdBy.name as createdByName',
-                'createdBy.id as createdById',
-                'salesBy.id as salesById',
-                'salesBy.username as salesByUser',
-                'salesBy.name as salesByName',
-                'transactionMode.name as modeName',
-                'transactionMode.name as modeName',
+                'cor_customers.mobile as customer_mobile',
+                'createdBy.username as created_by_user',
+                'createdBy.name as created_by_name',
+                'createdBy.id as created_by_id',
+                'inv_invoice_batch.process as process',
+                'cor_customers.address as customer_address',
+                'cor_customers.balance as balance',
             ])
             ->with('invoiceBatchTransactions')
             ->with('batchInvoices')
