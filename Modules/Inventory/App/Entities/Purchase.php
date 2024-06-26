@@ -206,8 +206,8 @@ class Purchase
     private $updatedAt;
 
     /**
-     * @var \DateTime
-     * @ORM\Column(type="datetime", nullable=true)
+     * @var \Date
+     * @ORM\Column(type="date", nullable=true)
      */
     private $invoiceDate;
 

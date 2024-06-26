@@ -32,7 +32,7 @@ class PurchaseRequest extends FormRequest
             'created_by_id' => 'nullable|integer',
             'process' => 'nullable|string',
             'narration' => 'nullable|string',
-
+            'invoice_date' => 'nullable|date',
         ];
     }
 
