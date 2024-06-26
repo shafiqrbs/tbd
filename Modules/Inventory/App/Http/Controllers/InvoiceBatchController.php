@@ -45,10 +45,11 @@ class InvoiceBatchController extends Controller
      */
     public function store(Request $request)
     {
+        $customer = $request['customer_id'];
         $items = $request['sales_id'];
         $service = new JsonRequestResponse();
         $config_id = $this->domain['config_id'];
-        $entity = InvoiceBatchModel::insertBatch($config_id,$items);
+        $entity = InvoiceBatchModel::insertBatch($config_id,$customer,$items);
         $data = $service->returnJosnResponse($entity);
         return $data;
 

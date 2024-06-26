@@ -59,12 +59,13 @@ class InvoiceBatchModel extends Model
     }
 
 
-    public static function insertBatch($config,$items)
+    public static function insertBatch($config,$customer,$items)
     {
 
         $entity = self::create(
             [
                 'config_id' => $config,
+                'customer_id' => $customer,
             ]
         );
         $ids = $items;
