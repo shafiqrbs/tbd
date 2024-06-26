@@ -6,15 +6,16 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Modules\Accounting\App\Entities\Setting;
 use Modules\Accounting\App\Http\Requests\TransactionModeRequest;
-use Modules\Accounting\App\Models\AccountingModel;
+use Modules\Accounting\App\Models\SettingModel;
 use Modules\Accounting\App\Models\TransactionModeModel;
 use Modules\AppsApi\App\Services\JsonRequestResponse;
 use Modules\Domain\App\Http\Requests\DomainRequest;
 use Modules\Core\App\Models\UserModel;
 use Modules\Domain\App\Models\DomainModel;
-use Modules\Inventory\App\Models\ConfigModel;
-use Modules\Utility\App\Models\SettingModel;
+
+
 
 class TransactionModeController extends Controller
 {
@@ -150,4 +151,6 @@ class TransactionModeController extends Controller
         $response->setStatusCode(Response::HTTP_OK);
         return $response;
     }
+
+
 }

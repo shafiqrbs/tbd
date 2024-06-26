@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Modules\AppsApi\App\Services\JsonRequestResponse;
+use Modules\Utility\App\Models\SettingModel;
 
 class AccountingController extends Controller
 {
@@ -18,50 +20,15 @@ class AccountingController extends Controller
     }
 
     /**
-     * Show the form for creating a new resource.
+     * dropdown the specified resource from storage.
      */
-    public function create()
+    public function transactionMethodDropdown(Request $request)
     {
-        return view('accounting::create');
+        $dropdown = SettingModel::getEntityDropdown('method');
+        $service = new JsonRequestResponse();
+        return $service->returnJosnResponse($dropdown);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request): RedirectResponse
-    {
-        //
-    }
 
-    /**
-     * Show the specified resource.
-     */
-    public function show($id)
-    {
-        return view('accounting::show');
-    }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit($id)
-    {
-        return view('accounting::edit');
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, $id): RedirectResponse
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy($id)
-    {
-        //
-    }
 }

@@ -21,7 +21,7 @@ use Modules\Accounting\App\Http\Controllers\TransactionModeController;
 
 
 Route::prefix('/accounting/select')->middleware([HeaderAuthenticationMiddleware::class])->group(function() {
-    Route::get('/transaction-method', [AccountHeadController::class,'transactionMethodDropdown'])->name('transaction_method_dropdown');
+    Route::get('/transaction-method', [AccountingController::class,'transactionMethodDropdown'])->name('transaction_method_dropdown');
 });
 
 Route::prefix('/accounting')->middleware([HeaderAuthenticationMiddleware::class])->group(function() {
