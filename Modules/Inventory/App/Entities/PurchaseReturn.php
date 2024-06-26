@@ -148,6 +148,6 @@ class PurchaseReturn
      * @ORM\Column(type="datetime", nullable=true)
      */
     private $invoiceDate;
-    
+
 }
 
