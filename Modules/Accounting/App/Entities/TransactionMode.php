@@ -31,7 +31,7 @@ class TransactionMode
     private $config;
 
     /**
-     * @ORM\ManyToOne(targetEntity="Modules\Utility\App\Entities\TransactionMethod")
+     * @ORM\ManyToOne(targetEntity="Modules\Utility\App\Entities\Setting")
      **/
     private $method;
 
@@ -97,14 +97,6 @@ class TransactionMode
 
 
     /**
-     * @var string
-     *
-     * @ORM\Column(type="string", length=50, nullable=true)
-     */
-    private $accountType;
-
-
-    /**
      * @var float
      *
      * @ORM\Column(type="float", nullable=true)
@@ -138,6 +130,22 @@ class TransactionMode
      * @ORM\ManyToOne(targetEntity="Modules\Utility\App\Entities\Setting")
      **/
     private $accountMode;
+
+
+
+    /**
+     * @ORM\ManyToOne(targetEntity="Modules\Utility\App\Entities\Setting")
+     **/
+    private $accountTypeMode;
+
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(type="string", length=50, nullable=true)
+     */
+    private $accountType;
+
 
 
     /**

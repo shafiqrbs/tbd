@@ -127,6 +127,22 @@ class AccountHeadModel extends Model
     }
 
 
+    public static function insertCurrentAssetsLedger($config, $entity)
+    {
+        $name = "{$entity['name']}";
+        $array=[
+            'name' => $name,
+            'source' => 'vendor',
+            'parent_id' => '5',
+            'level' => '3',
+            'vendor_id' => $entity['id'],
+            'config_id' => $config
+        ];
+        $entity = self::create($array);
+        //AccountJournalModel::insertCustomerJournalVoucher($entity);
+    }
+
+
     public static function getLedger($request,$domain)
     {
         dd($request->query('mode'));

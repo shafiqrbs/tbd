@@ -18,6 +18,7 @@ class InvoiceBatchModel extends Model
 
     protected $fillable = [
         'config_id',
+        'customer_id',
     ];
 
     public static function boot() {
@@ -62,6 +63,7 @@ class InvoiceBatchModel extends Model
     public static function insertBatch($config,$customer,$items)
     {
 
+
         $entity = self::create(
             [
                 'config_id' => $config,
@@ -69,7 +71,7 @@ class InvoiceBatchModel extends Model
             ]
         );
         $ids = $items;
-        DB::table('inv_invoice_batch')
+        DB::table('inv_sales')
             ->whereIn('id',$ids)
             ->update(['invoice_batch_id' => $entity->id]);
         $batch = self::insertSalesItems($entity);
@@ -98,10 +100,10 @@ class InvoiceBatchModel extends Model
 
     public static function getSalesBatchRecords($entity)
     {
-        $results = DB::table('inv_invoice_batch_item')
-            ->selectRaw('product_id,SUM(quantity) as quantity, SUM(inv_invoice_batch_item.sub_total) as sub_total, (SUM(inv_invoice_batch_item.sub_total)/SUM(quantity)) as sales_price')
-            ->join('inv_invoice_batch', 'inv_invoice_batch_item.sale_id', '=', 'inv_invoice_batch.id')
-            ->where('inv_invoice_batch.invoice_batch_id', $entity->id)
+        $results = DB::table('inv_sales_item as item')
+            ->selectRaw('product_id,SUM(quantity) as quantity, SUM(item.sub_total) as sub_total, (SUM(item.sub_total)/SUM(quantity)) as sales_price')
+            ->join('inv_sales', 'item.sale_id', '=', 'inv_sales.id')
+            ->where('inv_sales.invoice_batch_id', $entity->id)
             ->groupBy('product_id')
             ->get();
         return $results;

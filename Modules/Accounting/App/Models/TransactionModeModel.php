@@ -14,7 +14,6 @@ class TransactionModeModel extends Model
     public $timestamps = true;
     protected $guarded = ['id'];
     protected $fillable = [
-        'method_id',
         'name',
         'slug',
         'short_name',
@@ -24,6 +23,7 @@ class TransactionModeModel extends Model
         'account_type',
         'service_charge',
         'account_owner',
+        'method_id',
         'path',
         'status',
         'config_id',
@@ -74,7 +74,7 @@ class TransactionModeModel extends Model
         $skip = isset($page) && $page!=''? (int)$page * $perPage:0;
 
         $tramsactionsMode = self::where('acc_transaction_mode.config_id',$domain['acc_config_id'])
-            ->leftjoin('uti_transaction_method','uti_transaction_method.id','=','acc_transaction_mode.method_id')
+            ->leftjoin('uti_settings as method','method.id','=','acc_transaction_mode.method_id')
             ->leftjoin('uti_settings as authorized','authorized.id','=','acc_transaction_mode.authorised_mode_id')
             ->leftjoin('uti_settings as account_type','account_type.id','=','acc_transaction_mode.account_mode_id')
             ->select([
@@ -85,7 +85,7 @@ class TransactionModeModel extends Model
                 'acc_transaction_mode.account_owner',
                 'acc_transaction_mode.path',
                 'acc_transaction_mode.short_name',
-                'uti_transaction_method.name as method_name',
+                'method.name as method_name',
                 'authorized.name as authorized_name',
                 'account_type.name as account_type_name',
             ]);
@@ -100,7 +100,7 @@ class TransactionModeModel extends Model
             ->orderBy('acc_transaction_mode.id','DESC')
             ->get();
 
-        $data = array('count'=>$total,'entities'=>$entities);
+        $data = array('count' => $total,'entities' => $entities);
         return $data;
     }
 
@@ -108,7 +108,7 @@ class TransactionModeModel extends Model
     public static function getTransactionsModeData($domain)
     {
         $entities = self::where([['acc_transaction_mode.config_id',$domain['acc_config_id']],['acc_transaction_mode.status',1]])
-            ->leftjoin('uti_transaction_method','uti_transaction_method.id','=','acc_transaction_mode.method_id')
+            ->leftjoin('uti_settings as method','method.id','=','acc_transaction_mode.method_id')
             ->select([
                 'acc_transaction_mode.id',
                 'acc_transaction_mode.authorised',
@@ -116,8 +116,8 @@ class TransactionModeModel extends Model
                 'acc_transaction_mode.account_type',
                 'acc_transaction_mode.name',
                 'acc_transaction_mode.is_selected',
-                'uti_transaction_method.name as method_name',
-                'uti_transaction_method.slug as method_slug',
+                'method.name as method_name',
+                'method.slug as method_slug',
                 DB::raw("CONCAT('".url('')."/uploads/accounting/transaction-mode/', acc_transaction_mode.path) AS path")
         ])
             ->limit(8)
@@ -128,8 +128,9 @@ class TransactionModeModel extends Model
 
     public static function getRecordsForLocalStorage($request,$domain)
     {
-        $tramsactionsMode = self::where([['acc_transaction_mode.config_id',$domain['acc_config_id']],['acc_transaction_mode.status',1]])
-            ->leftjoin('uti_transaction_method','uti_transaction_method.id','=','acc_transaction_mode.method_id')
+
+        $tramsactionsMode = self::where('acc_transaction_mode.config_id',$domain['acc_config_id'])
+            ->leftjoin('uti_settings as method','method.id','=','acc_transaction_mode.method_id')
             ->leftjoin('uti_settings as authorized','authorized.id','=','acc_transaction_mode.authorised_mode_id')
             ->leftjoin('uti_settings as account_type','account_type.id','=','acc_transaction_mode.account_mode_id')
             ->select([
@@ -143,8 +144,8 @@ class TransactionModeModel extends Model
                 'acc_transaction_mode.short_name',
                 'authorized.name as authorized_name',
                 'account_type.name as account_type_name',
-                'uti_transaction_method.name as method_name',
-                'uti_transaction_method.slug as method_slug',
+                'method.name as method_name',
+                'method.slug as method_slug',
                 DB::raw("CONCAT('".url('')."/uploads/accounting/transaction-mode/', acc_transaction_mode.path) AS path")
             ])
             ->orderBy('acc_transaction_mode.id','DESC')

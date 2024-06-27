@@ -30,14 +30,14 @@ class TransactionModeRequest extends FormRequest
             {
                 return [
                     'name' => 'required|string',
-                    'authorised_mode_id' => 'required|string',
-                    'account_mode_id' => 'required|string',
+                    'authorised_mode_id' => 'required|integer',
+                    'account_mode_id' => 'required|integer',
                     'service_charge' => 'nullable|string',
                     'short_name' => 'required|string',
                     'account_owner' => 'nullable|string',
                     'service_name' => 'nullable|string',
                     'method_id' => 'required|integer',
-                    'path' => 'required|image|mimes:jpeg,png,jpg,gif',
+                    'path' => 'nullable|image|mimes:jpeg,png,jpg,gif',
                 ];
             }
 

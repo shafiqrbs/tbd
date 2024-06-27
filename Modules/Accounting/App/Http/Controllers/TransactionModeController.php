@@ -6,15 +6,13 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
-use Modules\Accounting\App\Entities\Setting;
 use Modules\Accounting\App\Http\Requests\TransactionModeRequest;
-use Modules\Accounting\App\Models\SettingModel;
 use Modules\Accounting\App\Models\TransactionModeModel;
 use Modules\AppsApi\App\Services\JsonRequestResponse;
 use Modules\Domain\App\Http\Requests\DomainRequest;
 use Modules\Core\App\Models\UserModel;
 use Modules\Domain\App\Models\DomainModel;
-
+use Modules\Utility\App\Models\SettingModel;
 
 
 class TransactionModeController extends Controller
@@ -58,7 +56,6 @@ class TransactionModeController extends Controller
         $data = $request->validated();
         $data['status'] = true;
         $data['config_id'] = $this->domain['acc_config_id'];
-
         $getAuthorized = SettingModel::find($data['authorised_mode_id']);
         if ($getAuthorized){
             $data['authorised'] = $getAuthorized->name;
@@ -68,7 +65,6 @@ class TransactionModeController extends Controller
         if ($getAccountType){
             $data['account_type'] = $getAccountType->name;
         }
-
         if ($request->file('path')) {
             $imageName = time().'.'.$request->path->extension();
             $request->path->move(public_path('uploads/accounting/transaction-mode/'), $imageName);
@@ -140,6 +136,7 @@ class TransactionModeController extends Controller
     }
 
     public function LocalStorage(Request $request){
+
         $data = TransactionModeModel::getRecordsForLocalStorage($request,$this->domain);
         $response = new Response();
         $response->headers->set('Content-Type','application/json');
