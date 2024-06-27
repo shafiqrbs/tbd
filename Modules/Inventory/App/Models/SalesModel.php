@@ -76,6 +76,7 @@ class SalesModel extends Model
                 'inv_sales.discount as discount',
                 'inv_sales.discount_calculation as discount_calculation',
                 'inv_sales.discount_type as discount_type',
+                'inv_sales.invoice_batch_id',
                 'cor_customers.id as customerId',
                 'cor_customers.name as customerName',
                 'cor_customers.mobile as customerMobile',

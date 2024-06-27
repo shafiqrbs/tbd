@@ -139,7 +139,7 @@ class InvoiceBatchModel extends Model
             ])->with('invoiceBatchItems')->with('invoiceBatchTransactions');
 
         if (isset($request['term']) && !empty($request['term'])){
-            $entities = $entities->whereAny(['inv_invoice_batch.invoice','cor_customers.name','cor_customers.mobile','salesBy.username','createdBy.username','acc_transaction_mode.name','inv_invoice_batch.total'],'LIKE','%'.$request['term'].'%');
+            $entities = $entities->whereAny(['inv_invoice_batch.invoice','cor_customers.name','cor_customers.mobile','createdBy.username','inv_invoice_batch.total'],'LIKE','%'.$request['term'].'%');
         }
 
         if (isset($request['customer_id']) && !empty($request['customer_id'])){
