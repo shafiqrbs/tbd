@@ -12,7 +12,7 @@ class SettingModel extends Model
 {
     use HasFactory;
 
-    protected $table = 'acc_settings';
+    protected $table = 'acc_setting';
     public $timestamps = true;
     protected $guarded = ['id'];
     protected $fillable = [
