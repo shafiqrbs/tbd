@@ -22,6 +22,10 @@ class ConfigModel extends Model
     protected $fillable = [
         'business_model_id',
         'stock_format',
+        'sku_wearhouse',
+        'sku_category',
+        'ait_enable',
+        'zakat_enable',
         'domain_id',
         'printer',
         'address',

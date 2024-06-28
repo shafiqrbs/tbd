@@ -5,6 +5,7 @@ namespace Modules\Inventory\App\Http\Controllers;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\File;
 use Modules\AppsApi\App\Services\GeneratePatternCodeService;
 use Modules\AppsApi\App\Services\JsonRequestResponse;
 use Modules\Core\App\Http\Requests\VendorRequest;
@@ -45,12 +46,27 @@ class ConfigController extends Controller
     /**
      * Update the specified resource in storage.
      */
+//    public function updateConfig(ConfigRequest $request)
     public function updateConfig(ConfigRequest $request)
     {
         $id = $this->domain['config_id'];
 
         $data = $request->validated();
+
         $entity = ConfigModel::find($id);
+
+        if ($request->file('logo')) {
+            $path = public_path('uploads/inventory/logo/');
+            File::delete($path.$entity->path);
+
+            if(!File::isDirectory($path)) {
+                File::makeDirectory($path, 0777, true, true);
+            }
+            $imageName = $this->domain['config_id'].time().'.'.$request->logo->extension();
+            $request->logo->move($path, $imageName);
+            $data['path'] = $imageName;
+        }
+
         $entity->update($data);
 
         $service = new JsonRequestResponse();

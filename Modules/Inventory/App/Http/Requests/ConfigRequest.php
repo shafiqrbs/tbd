@@ -21,14 +21,30 @@ class ConfigRequest extends FormRequest
         switch($this->method())
         {
             case 'PUT':
-            case 'PATCH':
+            case 'POST':
             {
                 return [
                     'business_model_id' => 'required|integer',
+                    'address' => 'nullable|string',
+                    'sku_wearhouse' => 'boolean',
+                    'sku_category' => 'boolean',
+                    'vat_enable' => 'boolean',
                     'vat_percent' => 'nullable|numeric|regex:/^\d+(\.\d{1,2})?$/',
+                    'ait_enable' => 'boolean',
                     'ait_percent' => 'nullable|numeric|regex:/^\d+(\.\d{1,2})?$/',
-                    'address' => 'string|nullable',
-                    'invoice_comment' => 'string|nullable'
+                    'zakat_enable' => 'boolean',
+                    'zakat_percent' => 'nullable|numeric|regex:/^\d+(\.\d{1,2})?$/',
+                    'invoice_comment' => 'string|nullable',
+                    'logo' => 'nullable',
+                    'remove_image' => 'boolean',
+                    'invoice_print_logo' => 'boolean',
+                    'print_outstanding' => 'boolean',
+                    'pos_print' => 'boolean',
+                    'is_print_header' => 'boolean',
+                    'is_invoice_title' => 'boolean',
+                    'is_print_footer' => 'boolean',
+                    'is_powered' => 'boolean',
+
 
                     /*'business_model' => 'required|integer',
                     'vat_percent' => 'integer|nullable',

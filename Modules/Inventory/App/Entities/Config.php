@@ -118,100 +118,100 @@ class Config
     /**
      * @var boolean
      *
-     * @ORM\Column(type="boolean",  nullable=true)
+     * @ORM\Column(type="boolean",options={"default"="false"})
      */
-    private $multiCompany = false;
+    private $multiCompany;
 
 
     /**
      * @var boolean
      *
-     * @ORM\Column(type="boolean",  nullable=true)
+     * @ORM\Column(type="boolean",options={"default"="false"})
      */
-    private $skuCategory = false;
+    private $skuCategory;
 
      /**
      * @var boolean
      *
-     * @ORM\Column(type="boolean",  nullable=true)
+     * @ORM\Column(type="boolean",options={"default"="false"})
      */
-    private $skuBrand = false;
+    private $skuBrand;
 
      /**
      * @var boolean
      *
-     * @ORM\Column(type="boolean",  nullable=true)
+     * @ORM\Column(type="boolean",options={"default"="false"})
      */
-    private $skuModel = false;
+    private $skuModel;
 
     /**
      * @var boolean
      *
-     * @ORM\Column(type="boolean",  nullable=true)
+     * @ORM\Column(type="boolean",options={"default"="false"})
      */
-    private $skuColor = false;
+    private $skuColor;
 
     /**
      * @var boolean
      *
-     * @ORM\Column(type="boolean",  nullable=true)
+     * @ORM\Column(type="boolean",options={"default"="false"})
      */
-    private $skuSize = false;
+    private $skuSize;
 
     /**
      * @var boolean
      *
-     * @ORM\Column(type="boolean",  nullable=true)
+     * @ORM\Column(type="boolean",options={"default"="false"})
      */
-    private $skuWearhouse = false;
+    private $skuWearhouse;
 
      /**
      * @var boolean
      *
-     * @ORM\Column(type="boolean",  nullable=true)
+     * @ORM\Column(type="boolean",options={"default"="false"})
      */
-    private $barcodePrint = false;
+    private $barcodePrint;
 
     /**
      * @var boolean
      *
-     * @ORM\Column(type="boolean",  nullable=true)
+     * @ORM\Column(type="boolean",options={"default"="false"})
      */
-    private $barcodePriceHide = false;
+    private $barcodePriceHide;
 
     /**
      * @var boolean
      *
-     * @ORM\Column(type="boolean",  nullable=true)
+     * @ORM\Column(type="boolean",options={"default"="false"})
      */
-    private $barcodeColor = false;
+    private $barcodeColor;
 
     /**
      * @var boolean
      *
-     * @ORM\Column(type="boolean",  nullable=true)
+     * @ORM\Column(type="boolean",options={"default"="false"})
      */
-    private $barcodeSize = false;
+    private $barcodeSize;
 
      /**
      * @var boolean
      *
-     * @ORM\Column(type="boolean",  nullable=true)
+     * @ORM\Column(type="boolean",options={"default"="false"})
      */
-    private $barcodeBrand = false;
+    private $barcodeBrand;
 
       /**
      * @var boolean
      *
-     * @ORM\Column(type="boolean",  nullable=true)
+     * @ORM\Column(type="boolean",options={"default"="false"})
      */
-    private $vatMode = false;
+    private $vatMode;
 
     /**
      * @var bool
      * @ORM\Column(type="boolean",options={"default"="0"})
      */
-    private $isActiveSms = false;
+    private $isActiveSms;
 
     /**
      * @var bool
@@ -238,88 +238,109 @@ class Config
      /**
      * @var boolean
      *
-     * @ORM\Column(type="boolean",  nullable=true)
+     * @ORM\Column(type="boolean",options={"default"="false"})
      */
-    private $vatEnable = false;
+    private $vatEnable;
+
+    /**
+     * @var boolean
+     *
+     * @ORM\Column(type="boolean",options={"default"="false"})
+     */
+    private $aitEnable;
+
+    /**
+     * @var boolean
+     *
+     * @ORM\Column(type="boolean",options={"default"="false"})
+     */
+    private $zakatEnable;
+
+    /**
+     * @var smallint
+     *
+     * @ORM\Column(type="smallint",  nullable=true)
+     */
+    private $zakatPercent;
 
      /**
      * @var boolean
      *
-     * @ORM\Column(type="boolean",  nullable=true)
+     * @ORM\Column(type="boolean",options={"default"="false"})
      */
-    private $bonusFromStock = false;
+    private $bonusFromStock;
 
      /**
      * @var boolean
      *
-     * @ORM\Column(type="boolean",  nullable=true)
+     * @ORM\Column(type="boolean",options={"default"="false"})
      */
-    private $conditionSales = false;
+    private $conditionSales;
 
       /**
      * @var boolean
      *
-     * @ORM\Column( type="boolean",  nullable=true)
+     * @ORM\Column( type="boolean",options={"default"="false"})
      */
-    private $isMarketingExecutive = false;
+    private $isMarketingExecutive;
 
 
     /**
      * @var boolean
      *
-     * @ORM\Column(type="boolean",  nullable=true)
+     * @ORM\Column(type="boolean",options={"default"="false"})
      */
-    private $posPrint = false;
+    private $posPrint;
 
      /**
      * @var boolean
      *
-     * @ORM\Column(type="boolean",  nullable=true)
+     * @ORM\Column(type="boolean",options={"default"="false"})
      */
-    private $fuelStation = false;
+    private $fuelStation;
 
      /**
      * @var boolean
      *
-     * @ORM\Column(type="boolean",  nullable=true)
+     * @ORM\Column(type="boolean",options={"default"="true"})
      */
-    private $zeroStock = true;
+    private $zeroStock;
 
     /**
      * @var boolean
      *
-     * @ORM\Column(type="boolean",  nullable=true)
+     * @ORM\Column(type="boolean",options={"default"="false"})
      */
-    private $systemReset = false;
+    private $systemReset;
 
 
     /**
      * @var boolean
      *
-     * @ORM\Column(type="boolean",  nullable=true)
+     * @ORM\Column(type="boolean",options={"default"="false"})
      */
-    private $tloCommission = false;
+    private $tloCommission;
 
     /**
      * @var boolean
      *
-     * @ORM\Column(type="boolean",  nullable=true)
+     * @ORM\Column(type="boolean",options={"default"="false"})
      */
-    private $srCommission = false;
+    private $srCommission;
 
     /**
      * @var boolean
      *
-     * @ORM\Column(type="boolean",  nullable=true)
+     * @ORM\Column(type="boolean",options={"default"="false"})
      */
-    private $salesReturn = false;
+    private $salesReturn;
 
     /**
      * @var boolean
      *
-     * @ORM\Column(type="boolean",  nullable=true)
+     * @ORM\Column(type="boolean",options={"default"="false"})
      */
-    private $storeLedger = false;
+    private $storeLedger;
 
     /**
      * @var smallint
@@ -371,39 +392,39 @@ class Config
     /**
      * @var boolean
      *
-     * @ORM\Column(type="boolean",  nullable=true)
+     * @ORM\Column(type="boolean",options={"default"="true"})
      */
-    private $isPrintHeader = true;
+    private $isPrintHeader;
 
     /**
      * @var boolean
      *
-     * @ORM\Column(type="boolean",  nullable=true)
+     * @ORM\Column(type="boolean",options={"default"="true"})
      */
-    private $isInvoiceTitle = true;
+    private $isInvoiceTitle;
 
 
      /**
      * @var boolean
      *
-     * @ORM\Column(type="boolean",  nullable=true)
+     * @ORM\Column(type="boolean",options={"default"="false"})
      */
-    private $printOutstanding = false;
+    private $printOutstanding;
 
 
     /**
      * @var boolean
      *
-     * @ORM\Column(type="boolean",  nullable=true)
+     * @ORM\Column(type="boolean",options={"default"="true"})
      */
-    private $isPrintFooter = true;
+    private $isPrintFooter;
 
      /**
      * @var boolean
      *
-     * @ORM\Column(type="boolean",  nullable=true)
+     * @ORM\Column(type="boolean",options={"default"="false"})
      */
-    private $isStockHistory = false;
+    private $isStockHistory;
 
     /**
      * @var string
@@ -504,9 +525,9 @@ class Config
     /**
      * @var boolean
      *
-     * @ORM\Column(type="boolean", nullable = true)
+     * @ORM\Column(type="boolean",options={"default"="false"})
      */
-    private $isUnitPrice = 0;
+    private $isUnitPrice;
 
     /**
      * @var integer
@@ -532,44 +553,44 @@ class Config
     /**
      * @var boolean
      *
-     * @ORM\Column(type="boolean",  nullable=true)
+     * @ORM\Column(type="boolean",options={"default"="true"})
      */
-    private $invoicePrintLogo = true;
+    private $invoicePrintLogo;
 
     /**
      * @var boolean
      *
-     * @ORM\Column( type="boolean",  nullable=true)
+     * @ORM\Column( type="boolean",options={"default"="false"})
      */
-    private $customInvoice = false;
+    private $customInvoice;
 
     /**
      * @var boolean
      *
-     * @ORM\Column( type="boolean",nullable=true)
+     * @ORM\Column( type="boolean",options={"default"="false"})
      */
-    private $customInvoicePrint = false;
+    private $customInvoicePrint;
 
     /**
      * @var boolean
      *
-     * @ORM\Column(type="boolean",  nullable=true)
+     * @ORM\Column(type="boolean",options={"default"="false"})
      */
-     private $showStock = false;
+     private $showStock;
 
 	/**
      * @var boolean
      *
-     * @ORM\Column(type="boolean",  nullable=true)
+     * @ORM\Column(type="boolean",options={"default"="false"})
      */
-     private $isPowered = false;
+     private $isPowered;
 
     /**
      * @var boolean
      *
-     * @ORM\Column(type="boolean" ,nullable=true)
+     * @ORM\Column(type="boolean" ,options={"default"="false"})
      */
-    private $removeImage = false;
+    private $removeImage;
 
     /**
      * @ORM\Column(type="string", length=255, nullable=true)
