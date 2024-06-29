@@ -25,6 +25,8 @@ class ConfigRequest extends FormRequest
             {
                 return [
                     'business_model_id' => 'required|integer',
+                    'currency_id' => 'required|integer',
+                    'country_id' => 'required|integer',
                     'address' => 'nullable|string',
                     'sku_wearhouse' => 'boolean',
                     'sku_category' => 'boolean',
@@ -44,50 +46,37 @@ class ConfigRequest extends FormRequest
                     'is_invoice_title' => 'boolean',
                     'is_print_footer' => 'boolean',
                     'is_powered' => 'boolean',
-
-
-                    /*'business_model' => 'required|integer',
-                    'vat_percent' => 'integer|nullable',
-                    'ait_percent' => 'integer|nullable',
-                    'address' => 'string|nullable',
-                    'vat_reg_no' => 'string|nullable',
-                    'invoice_comment' => 'string|nullable',
-                    'multi_company' => 'boolean|nullable',
-                    'vat_enable' => 'boolean|nullable',
-                    'bonus_from_stock' => 'boolean|nullable',
-                    'condition_sales' => 'boolean|nullable',
-                    'is_marketing_executive' => 'boolean|nullable',
-                    'pos_print' => 'boolean|nullable',
-                    'fuel_station' => 'boolean|nullable',
-                    'zero_stock' => 'boolean|nullable',
-                    'tlo_commission' => 'boolean|nullable',
-                    'sr_commission' => 'boolean|nullable',
-                    'sales_return' => 'boolean|nullable',
-                    'store_ledger' => 'boolean|nullable',
-                    'is_print_header' => 'boolean|nullable',
-                    'is_invoice_title' => 'boolean|nullable',
-                    'print_outstanding' => 'boolean|nullable',
-                    'show_stock' => 'boolean|nullable',
-                    'is_powered' => 'boolean|nullable',
-                    'remove_image' => 'boolean|nullable',
-                    'is_unit_price' => 'boolean|nullable',
-                    'barcode_print' => 'boolean|nullable',
-                    'custom_invoice' => 'boolean|nullable',
-                    'custom_invoice_print' => 'boolean|nullable',*/
+                    'print_footer_text' => 'nullable|string',
+                    'body_font_size' => 'nullable|numeric|regex:/^\d+(\.\d{1,2})?$/',
+                    'invoice_height' => 'nullable|numeric|regex:/^\d+(\.\d{1,2})?$/',
+                    'invoice_width' => 'nullable|numeric|regex:/^\d+(\.\d{1,2})?$/',
+                    'border_color' => 'nullable|string',
+                    'border_width' => 'nullable|numeric|regex:/^\d+(\.\d{1,2})?$/',
+                    'print_left_margin' => 'nullable|numeric|regex:/^\d+(\.\d{1,2})?$/',
+                    'print_top_margin' => 'nullable|numeric|regex:/^\d+(\.\d{1,2})?$/',
+                    'custom_invoice' => 'boolean',
+                    'bonus_from_stock' => 'boolean',
+                    'is_unit_price' => 'boolean',
+                    'zero_stock' => 'boolean',
+                    'stock_item' => 'boolean',
+                    'custom_invoice_print' => 'boolean',
+                    'is_stock_history' => 'boolean',
+                    'condition_sales' => 'boolean',
+                    'store_ledger' => 'boolean',
+                    'is_marketing_executive' => 'boolean',
+                    'tlo_commission' => 'boolean',
+                    'sales_return' => 'boolean',
+                    'sr_commission' => 'boolean',
+                    'due_sales_without_customer' => 'boolean',
+                    'is_description' => 'boolean',
+                    'is_zero_receive_allow' => 'boolean',
+                    'is_purchase_by_purchase_price' => 'boolean',
+                    'is_active_sms' => 'boolean',
                 ];
             }
             default:break;
         }
     }
-
-    /*public function messages()
-    {
-        return [
-            'business_model_id.required' => 'Business model field is required.',
-            'vat_percent.required' => 'Mobile Required .',
-            'customer_unique_id.unique' => 'Customer already exists.',
-        ];
-    }*/
 
     public function failedValidation(Validator $validator)
     {

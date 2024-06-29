@@ -86,7 +86,14 @@ class ConfigModel extends Model
         'show_stock',
         'is_powered',
         'remove_image',
-        'currency_id'
+        'stock_item',
+        'due_sales_without_customer',
+        'is_description',
+        'is_zero_receive_allow',
+        'is_purchase_by_purchase_price',
+        'is_active_sms',
+        'currency_id',
+        'country_id'
 
     ];
 

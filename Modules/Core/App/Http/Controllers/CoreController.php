@@ -7,6 +7,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use Illuminate\Http\Request;
 use Modules\AppsApi\App\Services\JsonRequestResponse;
 use Modules\Core\App\Entities\Core;
+use Modules\Core\App\Models\CountryModel;
 use Modules\Core\App\Models\SettingModel;
 use Modules\Core\App\Models\UserModel;
 
@@ -116,6 +117,15 @@ class CoreController extends Controller
             $this->domain->global_id
         );
 
+        return (new JsonRequestResponse())->returnJosnResponse($entities);
+    }
+
+    /**
+     * Show the form for creating a new resource.
+     */
+    public function countriesDropdown(Request $request)
+    {
+        $entities = CountryModel::getCountryDropdown();
         return (new JsonRequestResponse())->returnJosnResponse($entities);
     }
 

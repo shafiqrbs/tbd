@@ -41,6 +41,11 @@ class Config
      **/
     private $currency;
 
+     /**
+     * @ORM\ManyToOne(targetEntity="Modules\Core\App\Entities\Country")
+     **/
+    private $country;
+
 
     /**
      * @var string
@@ -241,6 +246,27 @@ class Config
      * @ORM\Column(type="boolean",options={"default"="false"})
      */
     private $vatEnable;
+
+     /**
+     * @var boolean
+     *
+     * @ORM\Column(type="boolean",options={"default"="false"})
+     */
+    private $stockItem;
+
+     /**
+     * @var boolean
+     *
+     * @ORM\Column(type="boolean",options={"default"="false"})
+     */
+    private $isDescription;
+
+     /**
+     * @var boolean
+     *
+     * @ORM\Column(type="boolean",options={"default"="false"})
+     */
+    private $dueSalesWithoutCustomer;
 
     /**
      * @var boolean

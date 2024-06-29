@@ -24,6 +24,7 @@ use Modules\Utility\App\Http\Controllers\UtilityController;
 Route::prefix('/utility/select')->middleware([HeaderAuthenticationMiddleware::class])->group(function() {
     Route::get('/setting', [UtilityController::class,'settingDropdown'])->name('utility_setting_dropdown');
     Route::get('/product-unit', [UtilityController::class,'productUnitDropdown'])->name('utility_product_unit');
+    Route::get('/currencies', [UtilityController::class,'currenciesDropdown'])->name('utility_currencies');
 });
 
 Route::prefix('/utility')->middleware([HeaderAuthenticationMiddleware::class])->group(function() {

@@ -46,7 +46,6 @@ class ConfigController extends Controller
     /**
      * Update the specified resource in storage.
      */
-//    public function updateConfig(ConfigRequest $request)
     public function updateConfig(ConfigRequest $request)
     {
         $id = $this->domain['config_id'];
