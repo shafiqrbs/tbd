@@ -3,9 +3,9 @@
 use App\Http\Middleware\HeaderAuthenticationMiddleware;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use Modules\Utility\App\Http\Controllers\SiteMapController;
 use Modules\Utility\App\Http\Controllers\UtilityController;
-use Modules\Utility\App\Models\ProductUnitModel;
-use Modules\Utility\App\Models\SettingModel;
+
 
 /*
     |--------------------------------------------------------------------------
@@ -25,3 +25,9 @@ Route::prefix('/utility/select')->middleware([HeaderAuthenticationMiddleware::cl
     Route::get('/setting', [UtilityController::class,'settingDropdown'])->name('utility_setting_dropdown');
     Route::get('/product-unit', [UtilityController::class,'productUnitDropdown'])->name('utility_product_unit');
 });
+
+Route::prefix('/utility')->middleware([HeaderAuthenticationMiddleware::class])->group(function() {
+    Route::apiResource('/sitemap', SiteMapController::class)->middleware([HeaderAuthenticationMiddleware::class]);
+
+});
+

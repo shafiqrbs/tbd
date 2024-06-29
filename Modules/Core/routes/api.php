@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Route;
 use Modules\Core\App\Http\Controllers\CoreController;
 use Modules\Core\App\Http\Controllers\CustomerController;
 use Modules\Core\App\Http\Controllers\LocationController;
+use Modules\Core\App\Http\Controllers\SiteMapController;
 use Modules\Core\App\Http\Controllers\UserController;
 use Modules\Core\App\Http\Controllers\VendorController;
 use Modules\Inventory\App\Http\Controllers\InventoryController;
