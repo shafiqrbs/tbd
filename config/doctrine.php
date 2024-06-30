@@ -40,6 +40,7 @@ return [
                 base_path('Modules/Utility/App/Entities'),
                 base_path('Modules/Inventory/App/Entities'),
                 base_path('Modules/NbrVatTax/App/Entities'),
+                base_path('Modules/Production/App/Entities'),
             ],
             'repository'    => Doctrine\ORM\EntityRepository::class,
 

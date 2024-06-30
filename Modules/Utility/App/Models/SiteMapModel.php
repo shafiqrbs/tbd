@@ -53,6 +53,6 @@ class SiteMapModel extends Model
             ->where('uti_sitemaps.status', '1')
             ->get();
     }
-    
+
 
 }

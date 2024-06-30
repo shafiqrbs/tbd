@@ -8,5 +8,6 @@
     "Utility": true,
     "Accounting": true,
     "VatTax": true,
-    "NbrVatTax": true
+    "NbrVatTax": true,
+    "Production": true
 }
