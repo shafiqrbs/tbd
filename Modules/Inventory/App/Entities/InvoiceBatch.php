@@ -93,6 +93,14 @@ class InvoiceBatch
     /**
      * @var float
      *
+     * @ORM\Column( type="float", nullable=true)
+     */
+    private $vat;
+
+
+    /**
+     * @var float
+     *
      * @ORM\Column(name="discount", type="float", nullable=true)
      */
     private $discount;
@@ -154,13 +162,6 @@ class InvoiceBatch
      * @ORM\Column(type="boolean", nullable=true)
      */
     private $isReversed;
-
-
-    /**
-     * @var \DateTime
-     * @ORM\Column(name="startDate", type="datetime", nullable=true)
-     */
-    private $startDate;
 
     /**
      * @var \DateTime

@@ -125,6 +125,9 @@ class InvoiceBatchModel extends Model
                 'inv_invoice_batch.total as total',
                 'inv_invoice_batch.amount as amount',
                 'inv_invoice_batch.discount as discount',
+                'inv_invoice_batch.received as received',
+                DB::raw('COALESCE(inv_invoice_batch.received, 0) as received'),
+                DB::raw('(inv_invoice_batch.total - COALESCE(inv_invoice_batch.received, 0)) as due'),
                 'inv_invoice_batch.discount_calculation as discount_calculation',
                 'inv_invoice_batch.discount_type as discount_type',
                 'cor_customers.id as customer_id',
@@ -136,7 +139,7 @@ class InvoiceBatchModel extends Model
                 'inv_invoice_batch.process as process',
                 'cor_customers.address as customer_address',
                 'cor_customers.balance as balance',
-            ])->with('invoiceBatchItems')->with('invoiceBatchTransactions');
+            ])->with('invoiceBatchItems');
 
         if (isset($request['term']) && !empty($request['term'])){
             $entities = $entities->whereAny(['inv_invoice_batch.invoice','cor_customers.name','cor_customers.mobile','createdBy.username','inv_invoice_batch.total'],'LIKE','%'.$request['term'].'%');
