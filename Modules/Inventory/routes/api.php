@@ -8,6 +8,7 @@ use Modules\Inventory\App\Http\Controllers\CategoryGroupController;
 use Modules\Inventory\App\Http\Controllers\ConfigController;
 use Modules\Inventory\App\Http\Controllers\InventoryController;
 use Modules\Inventory\App\Http\Controllers\InvoiceBatchController;
+use Modules\Inventory\App\Http\Controllers\InvoiceBatchTransactionController as InvoiceBatchTransactionControllerAlias;
 use Modules\Inventory\App\Http\Controllers\OpeningStockController;
 use Modules\Inventory\App\Http\Controllers\ProductController;
 use Modules\Inventory\App\Http\Controllers\PurchaseController;
@@ -41,8 +42,9 @@ Route::prefix('/inventory')->middleware([HeaderAuthenticationMiddleware::class])
     Route::apiResource('/product', ProductController::class)->middleware([HeaderAuthenticationMiddleware::class]);
 
     Route::apiResource('/sales', SalesController::class)->middleware([HeaderAuthenticationMiddleware::class]);
-    Route::apiResource('/invoice-batch', InvoiceBatchController::class)->middleware([HeaderAuthenticationMiddleware::class]);
     Route::get('/sales/edit/{id}', [SalesController::class,'edit'])->name('get_edit_sales');
+    Route::apiResource('/invoice-batch', InvoiceBatchController::class)->middleware([HeaderAuthenticationMiddleware::class]);
+    Route::apiResource('/invoice-batch-transaction', InvoiceBatchTransactionControllerAlias::class)->middleware([HeaderAuthenticationMiddleware::class]);
 
 
     Route::apiResource('/purchase', PurchaseController::class)->middleware([HeaderAuthenticationMiddleware::class]);

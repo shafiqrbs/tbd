@@ -54,11 +54,6 @@ class InvoiceBatchTransaction
      **/
     private  $approvedBy;
 
-    /**
-     * @ORM\ManyToOne(targetEntity="Modules\Accounting\App\Entities\TransactionMode")
-     **/
-    private $transactionMode;
-
 
     /**
      * @var string
@@ -96,13 +91,20 @@ class InvoiceBatchTransaction
      */
     private $discountCalculation;
 
-
-    /**
+     /**
      * @var float
      *
      * @ORM\Column( type="float", nullable=true)
      */
-    private $subTotal;
+    private $provisionDiscount;
+
+
+    /**
+     * @var string
+     *
+     * @ORM\Column( type="string", nullable=true)
+     */
+    private $provisionMode = 'item';
 
 
     /**
@@ -113,12 +115,6 @@ class InvoiceBatchTransaction
     private $discount;
 
 
-    /**
-     * @var float
-     *
-     * @ORM\Column(name="total", type="float", nullable=true)
-     */
-    private $total;
 
     /**
      * @var float
@@ -143,11 +139,6 @@ class InvoiceBatchTransaction
      */
     private $isReversed;
 
-     /**
-     * @var boolean
-     * @ORM\Column(type="boolean", nullable=true)
-     */
-    private $isOnline;
 
     /**
      * @var boolean

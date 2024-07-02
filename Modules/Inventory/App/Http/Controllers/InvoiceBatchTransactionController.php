@@ -14,7 +14,7 @@ use Modules\Inventory\App\Models\InvoiceBatchModel;
 use Modules\Inventory\App\Models\InvoiceBatchTransactionModel;
 use function Symfony\Component\HttpFoundation\Session\Storage\Handler\getInsertStatement;
 
-class InvoiceBatchController extends Controller
+class InvoiceBatchTransactionController extends Controller
 {
     protected $domain;
 
@@ -29,7 +29,7 @@ class InvoiceBatchController extends Controller
 
     public function index(Request $request)
     {
-        $data = InvoiceBatchModel::getRecords($request, $this->domain);
+        $data = InvoiceBatchTransactionModel::getRecords($request, $this->domain);
         $response = new Response();
         $response->headers->set('Content-Type', 'application/json');
         $response->setContent(json_encode([
@@ -42,30 +42,15 @@ class InvoiceBatchController extends Controller
         return $response;
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
-    {
-        $customer = $request['customer_id'];
-        $items = $request['sales_id'];
-        $service = new JsonRequestResponse();
-        $config_id = $this->domain['config_id'];
-        $entity = InvoiceBatchModel::insertBatch($config_id,$customer,$items);
-        $data = $service->returnJosnResponse($entity);
-        return $data;
-
-    }
 
      /**
      * Store a newly created resource in storage.
      */
-    public function provisionBill(InvoiceBatchTransactionRequest $request)
+    public function store(InvoiceBatchTransactionRequest $request)
     {
-        $batch_id = $request['batch_id'];
+
         $service = new JsonRequestResponse();
         $input = $request->validated();
-        $input['batch_id'] = $batch_id;
         $entity = InvoiceBatchTransactionModel::create($input);
         $data = $service->returnJosnResponse($entity);
         return $data;
