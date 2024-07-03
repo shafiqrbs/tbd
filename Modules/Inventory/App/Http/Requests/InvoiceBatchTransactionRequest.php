@@ -31,6 +31,7 @@ class InvoiceBatchTransactionRequest extends FormRequest
                     'discount_calculation' => 'integer|nullable',
                     'discount_type' => 'string|nullable',
                     'comment' => 'string|nullable',
+                    'invoice_date' => 'date|nullable',
                 ];
             }
 

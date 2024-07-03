@@ -3,7 +3,7 @@
 use App\Http\Middleware\HeaderAuthenticationMiddleware;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-use Modules\Production\App\Models\SettingModel;
+use Modules\Production\App\Http\Controllers\SettingController;
 
 /*
     |--------------------------------------------------------------------------
@@ -18,11 +18,11 @@ use Modules\Production\App\Models\SettingModel;
 
 
 Route::prefix('/production/select')->middleware([HeaderAuthenticationMiddleware::class])->group(function() {
-    Route::get('/setting', [SettingModel::class,'settingDropdown'])->name('pro_setting_dropdown');
+    Route::get('/setting', [SettingController::class,'settingDropdown'])->name('pro_setting_dropdown');
 });
 
 Route::prefix('/production')->middleware([HeaderAuthenticationMiddleware::class])->group(function() {
-    Route::apiResource('setting', SettingModel::class)
+    Route::apiResource('setting', SettingController::class)
         ->middleware([HeaderAuthenticationMiddleware::class])
         ->parameters(['setting' => 'production.setting'])
         ->names([
