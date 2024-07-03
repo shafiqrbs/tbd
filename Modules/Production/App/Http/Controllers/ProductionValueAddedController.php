@@ -1,6 +1,6 @@
 <?php
 
-namespace Modules\Inventory\App\Http\Controllers;
+namespace Modules\Production\App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
@@ -14,7 +14,7 @@ use Modules\Inventory\App\Models\InvoiceBatchModel;
 use Modules\Inventory\App\Models\InvoiceBatchTransactionModel;
 use function Symfony\Component\HttpFoundation\Session\Storage\Handler\getInsertStatement;
 
-class BomValueAddedController extends Controller
+class ProductionValueAddedController extends Controller
 {
     protected $domain;
 

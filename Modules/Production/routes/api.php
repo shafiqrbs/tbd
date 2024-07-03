@@ -1,7 +1,9 @@
 <?php
 
+use App\Http\Middleware\HeaderAuthenticationMiddleware;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use Modules\Production\App\Models\SettingModel;
 
 /*
     |--------------------------------------------------------------------------
@@ -14,6 +16,11 @@ use Illuminate\Support\Facades\Route;
     |
 */
 
-Route::middleware(['auth:sanctum'])->prefix('v1')->name('api.')->group(function () {
-    Route::get('production', fn (Request $request) => $request->user())->name('production');
+
+Route::prefix('/production/select')->middleware([HeaderAuthenticationMiddleware::class])->group(function() {
+    Route::get('/setting', [SettingModel::class,'settingDropdown'])->name('pro_setting_dropdown');
+});
+
+Route::prefix('/production')->middleware([HeaderAuthenticationMiddleware::class])->group(function() {
+    Route::apiResource('setting', SettingModel::class)->middleware([HeaderAuthenticationMiddleware::class])->parameters(['setting' => 'production.setting']);
 });
