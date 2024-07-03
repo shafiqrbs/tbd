@@ -22,5 +22,15 @@ Route::prefix('/production/select')->middleware([HeaderAuthenticationMiddleware:
 });
 
 Route::prefix('/production')->middleware([HeaderAuthenticationMiddleware::class])->group(function() {
-    Route::apiResource('setting', SettingModel::class)->middleware([HeaderAuthenticationMiddleware::class])->parameters(['setting' => 'production.setting']);
+    Route::apiResource('setting', SettingModel::class)
+        ->middleware([HeaderAuthenticationMiddleware::class])
+        ->parameters(['setting' => 'production.setting'])
+        ->names([
+            'index' => 'production.setting.index',
+            'store' => 'production.setting.store',
+            'show' => 'production.setting.show',
+            'update' => 'production.setting.update',
+            'destroy' => 'production.setting.destroy'
+        ]);
+    ;
 });
