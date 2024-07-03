@@ -14,7 +14,7 @@ use Modules\Inventory\App\Models\InvoiceBatchModel;
 use Modules\Inventory\App\Models\InvoiceBatchTransactionModel;
 use function Symfony\Component\HttpFoundation\Session\Storage\Handler\getInsertStatement;
 
-class InvoiceBatchTransactionController extends Controller
+class BomValueAddedController extends Controller
 {
     protected $domain;
 
