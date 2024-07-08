@@ -18,8 +18,8 @@ class CoreRepository extends EntityRepository{
         $entity = DB::table("users as e")
             ->select(DB::raw("CONCAT(e.username, ' - ', e.email) AS name"),'e.id as id')
           //  ->where('e.is_delete', 0)
-            ->where('e.domain_id', $domain->global_id)
-            ->where(function ($query) use ($term) {
+            ->where('e.domain_id', $domain)
+            ->Where(function ($query) use ($term) {
                 $query->orWhere('e.username','LIKE','%'.$term.'%')
                     ->orWhere('e.name','LIKE','%'.$term.'%');
             })
@@ -54,12 +54,12 @@ class CoreRepository extends EntityRepository{
         return $entity;
     }
 
-    public function locationAutoComplete($term)
+    public function locationAutoComplete($domain,$term)
     {
 
         $entity = DB::table("cor_locations as e")
             ->select(DB::raw("e.name AS name"),'e.id as id')
-            ->where('e.level', 2)
+            ->where('e.domain_id', $domain)
             ->where(function ($query) use ($term) {
                 $query->orWhere('e.name','LIKE','%'.$term.'%');
             })

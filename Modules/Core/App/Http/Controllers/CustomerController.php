@@ -131,10 +131,10 @@ class CustomerController extends Controller
 
         $data = $request->validated();
         $entity = CustomerModel::find($id);
+        echo  "{$entity['domain_id']}@{$data['mobile']}-{$data['name']}";
+        exit;
         $data['customer_unique_id'] = "{$entity['domain_id']}@{$data['mobile']}-{$data['name']}";
-
         $entity->update($data);
-
         $service = new JsonRequestResponse();
         return $service->returnJosnResponse($entity);
     }

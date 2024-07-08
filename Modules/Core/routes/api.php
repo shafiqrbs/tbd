@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Route;
 use Modules\Core\App\Http\Controllers\CoreController;
 use Modules\Core\App\Http\Controllers\CustomerController;
 use Modules\Core\App\Http\Controllers\LocationController;
+use Modules\Core\App\Http\Controllers\SettingController;
 use Modules\Core\App\Http\Controllers\SiteMapController;
 use Modules\Core\App\Http\Controllers\UserController;
 use Modules\Core\App\Http\Controllers\VendorController;
@@ -34,6 +35,7 @@ Route::prefix('/core/select')->middleware([HeaderAuthenticationMiddleware::class
 });
 
 Route::prefix('/core')->middleware([HeaderAuthenticationMiddleware::class])->group(function() {
+
     Route::get('/customer/details', [CustomerController::class,'details'])->name('customer_details');
     Route::get('/customer/local-storage', [CustomerController::class,'localStorage'])->name('customer_local_storage');
 
@@ -46,5 +48,12 @@ Route::prefix('/core')->middleware([HeaderAuthenticationMiddleware::class])->gro
     Route::apiResource('location', LocationController::class)->middleware([HeaderAuthenticationMiddleware::class]);
     Route::apiResource('customer', CustomerController::class)->middleware([HeaderAuthenticationMiddleware::class]);
     Route::apiResource('vendor', VendorController::class)->middleware([HeaderAuthenticationMiddleware::class]);
-});
+    Route::apiResource('setting', SettingController::class)
+        ->middleware([HeaderAuthenticationMiddleware::class])
+        ->parameters(['setting' => 'core.setting'])
+       ;
+    ;
+
+}
+);
 

@@ -35,10 +35,10 @@ class CustomerRequest extends FormRequest
                     ],
                     'location_id' => 'integer|nullable',
                     'marketing_id' => 'integer|nullable',
-                    'customer_group' => 'string|nullable',
+                    'customer_group' => 'integer|nullable',
                     'credit_limit' => 'string|nullable',
                     'reference_id' => 'integer|nullable',
-                    'alternative_mobile' => 'integer|nullable',
+                    'alternative_mobile' => 'string|nullable',
                     'address' => 'string|nullable',
                     'email' => 'email|nullable',
                 ];
@@ -58,10 +58,9 @@ class CustomerRequest extends FormRequest
                     'customer_group' => 'string|nullable',
                     'credit_limit' => 'string|nullable',
                     'reference_id' => 'integer|nullable',
-                    'alternative_mobile' => 'integer|nullable',
+                    'alternative_mobile' => 'string|nullable',
                     'address' => 'string|nullable',
-                    'email' => 'email|nullable',
-                    'customer_unique_id' => ['unique:domain_id,mobile,name']
+                    'email' => 'email|nullable'
                 ];
             }
             default:break;

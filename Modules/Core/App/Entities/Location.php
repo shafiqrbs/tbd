@@ -6,6 +6,7 @@ namespace Modules\Core\App\Entities;
 
 use Doctrine\ORM\Mapping as ORM;
 use Gedmo\Mapping\Annotation as Gedmo;
+use Modules\Domain\App\Entities\GlobalOption;
 
 
 /**
@@ -29,11 +30,18 @@ class Location
 
 
     /**
+     * @var GlobalOption
+     * @ORM\ManyToOne(targetEntity="Modules\Domain\App\Entities\GlobalOption")
+     * @ORM\JoinColumn(onDelete="CASCADE")
+     **/
+    protected $domain;
+
+
+    /**
      * @var string
      * @ORM\Column(name="name", type="string", length=255)
      */
     private $name;
-
 
     /**
      * @Gedmo\TreeParent

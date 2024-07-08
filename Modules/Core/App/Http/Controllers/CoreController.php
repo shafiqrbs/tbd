@@ -40,9 +40,9 @@ class CoreController extends Controller
     {
 
         $term = $request['term'];
-        $entities = [];
         $service = new JsonRequestResponse();
-        $entities = $em->getRepository(Core::class)->userAutoComplete($this->domain,$term);
+        $go = $this->domain['global_id'];
+        $entities = $em->getRepository(Core::class)->userAutoComplete($go,$term);
         $data = $service->returnJosnResponse($entities);
         return $data;
     }
@@ -54,7 +54,6 @@ class CoreController extends Controller
     {
 
         $term = $request['term'];
-        $entities = [];
         $service = new JsonRequestResponse();
         $go = $this->domain['global_id'];
         $entities = $em->getRepository(Core::class)->userAutoComplete( $go,$term);
@@ -69,9 +68,7 @@ class CoreController extends Controller
     {
 
         $term = $request['term'];
-        $entities = [];
         $service = new JsonRequestResponse();
-        // $go = $this->getUser()->getGlobalOption();
         $go = $this->domain['global_id'];
         $entities = $em->getRepository(Core::class)->customerAutoComplete($go,$term);
         $data = $service->returnJosnResponse($entities);
@@ -85,7 +82,6 @@ class CoreController extends Controller
     {
 
         $term = $request['term'];
-        $entities = [];
         $service = new JsonRequestResponse();
         $go = $this->domain['global_id'];
         $entities = $em->getRepository(Core::class)->vendorAutoComplete($go,$term);
@@ -100,9 +96,9 @@ class CoreController extends Controller
     {
 
         $term = $request['term'];
-        $entities = [];
         $service = new JsonRequestResponse();
-        $entities = $em->getRepository(Core::class)->locationAutoComplete($term);
+        $go = $this->domain['global_id'];
+        $entities = $em->getRepository(Core::class)->locationAutoComplete($go,$term);
         $data = $service->returnJosnResponse($entities);
         return $data;
     }
@@ -116,7 +112,6 @@ class CoreController extends Controller
             $request['dropdown-type'],
             $this->domain->global_id
         );
-
         return (new JsonRequestResponse())->returnJosnResponse($entities);
     }
 
