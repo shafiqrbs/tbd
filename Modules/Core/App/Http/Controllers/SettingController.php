@@ -94,7 +94,7 @@ class SettingController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(SettingRequest $request)
+    public function update(SettingRequest $request,$id)
     {
 
         $data = $request->validated();
