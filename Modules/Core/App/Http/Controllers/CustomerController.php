@@ -129,6 +129,7 @@ class CustomerController extends Controller
     public function update(CustomerRequest $request, $id)
     {
 
+
         $data = $request->validated();
         $entity = CustomerModel::find($id);
         $data['customer_unique_id'] = "{$entity['domain_id']}@{$data['mobile']}-{$data['name']}";
