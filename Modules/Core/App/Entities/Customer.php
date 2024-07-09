@@ -56,6 +56,12 @@ class Customer
      **/
     protected $location;
 
+     /**
+     * @ORM\ManyToOne(targetEntity="Modules\Core\App\Entities\Setting")
+     * @ORM\JoinColumn(name="customer_group_id", referencedColumnName="id", nullable=true, onDelete="SET NULL")
+     **/
+    protected $customerGroup;
+
     /**
      * @ORM\ManyToOne(targetEntity="Modules\Core\App\Entities\User")
      * @ORM\JoinColumn(name="marketing_id", referencedColumnName="id", nullable=true, onDelete="SET NULL")
@@ -280,12 +286,6 @@ class Customer
      */
     private $address;
 
-    /**
-     * @var string
-     *
-     * @ORM\Column(name="customer_group", type="string", length=100, nullable =true)
-     */
-    private $customerGroup;
 
     /**
      * @var string

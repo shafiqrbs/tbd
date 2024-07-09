@@ -43,14 +43,14 @@ class User
 	/**
 	 * @var string
 	 *
-	 * @ORM\Column(type="string", length = 30, nullable=true)
+	 * @ORM\Column(type="string", nullable=true)
 	 */
 	private $userGroup = "user";
 
 	/**
 	 * @var string
 	 *
-	 * @ORM\Column(name="username", type="string", length = 30, nullable=true)
+	 * @ORM\Column(name="username", type="string",nullable=true)
 	 */
 	private $username = "";
 
@@ -66,7 +66,7 @@ class User
 	/**
 	 * @var string
 	 *
-	 * @ORM\Column(name="email", type="string", length = 30, nullable=true)
+	 * @ORM\Column(name="email", type="string",nullable=true)
 	 */
 	private $email = "";
 
@@ -74,7 +74,7 @@ class User
 	/**
 	 * @var string
 	 *
-	 * @ORM\Column(name="name", type="string", length = 30, nullable=true)
+	 * @ORM\Column(name="name", type="string",nullable=true)
 	 */
 	private $name = "";
 
@@ -82,7 +82,7 @@ class User
 	/**
 	 * @var string
 	 *
-	 * @ORM\Column(name="mobile", type="string", length = 30, nullable=true)
+	 * @ORM\Column(name="mobile", type="string", nullable=true)
 	 */
 	private $mobile = "";
 

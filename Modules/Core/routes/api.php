@@ -51,7 +51,13 @@ Route::prefix('/core')->middleware([HeaderAuthenticationMiddleware::class])->gro
     Route::apiResource('setting', SettingController::class)
         ->middleware([HeaderAuthenticationMiddleware::class])
         ->parameters(['setting' => 'core.setting'])
-       ;
+        ->names([
+            'index' => 'core.setting.index',
+            'store' => 'core.setting.store',
+            'show' => 'core.setting.show',
+            'update' => 'core.setting.update',
+            'destroy' => 'core.setting.destroy'
+        ]);
     ;
 
 }

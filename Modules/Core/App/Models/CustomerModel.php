@@ -26,7 +26,7 @@ class CustomerModel extends Model
         'mobile',
         'location_id',
         'address',
-        'customer_group',
+        'customer_group_id',
         'email',
         'alternative_mobile',
         'credit_limit',
@@ -122,14 +122,22 @@ class CustomerModel extends Model
         $global = $domain['global_id'];
         $page =  isset($request['page']) && $request['page'] > 0?($request['page'] - 1 ) : 0;
         $perPage = isset($request['offset']) && $request['offset']!=''? (int)($request['offset']):50;
-        $skip = isset($page) && $page!=''? (int)$page*$perPage:0;
+        $skip = isset($page) && $page!=''? (int) $page * $perPage : 0;
 
-        $customers = self::where('domain_id',$global)
+        $customers = self::where('cor_customers.domain_id',$global)
+            ->leftJoin('users','users.id','=','cor_customers.marketing_id')
+            ->leftJoin('cor_setting','cor_setting.id','=','cor_customers.customer_group_id')
+            ->leftJoin('cor_locations','cor_locations.id','=','cor_customers.location_id')
             ->select([
-                'id',
-                'name',
-                'mobile',
-                'created_at'
+                'cor_customers.id as id',
+                'cor_customers.name as name',
+                'cor_customers.mobile as mobile',
+                'cor_customers.credit_limit as credit_limit',
+                'cor_setting.name as customer_group',
+                'cor_setting.id as customer_group_id',
+                'users.id as marketing_id',
+                'users.name as marketing_name',
+                'cor_customers.created_at as created_at'
             ]);
 
         if (isset($request['term']) && !empty($request['term'])){
@@ -172,8 +180,8 @@ class CustomerModel extends Model
                 'cor_customers.customerId as customer_id',
                 'cor_customers.alternative_mobile',
                 'cor_customers.reference_id',
-                'cor_customers.credit_Limit',
-                'cor_customers.customer_group',
+                'cor_customers.credit_limit',
+                'cor_customers.customer_group_id',
                 'cor_customers.unique_id',
                 'cor_customers.slug',
                 'cor_customers.marketing_id',
