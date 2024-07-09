@@ -68,12 +68,13 @@ class SettingController extends Controller
     public function show($id)
     {
         $service = new JsonRequestResponse();
-        $entity = TransactionModeModel::find($id);
+        dd($id);
+        /*$entity = TransactionModeModel::find($id);
         if (!$entity){
             $entity = 'Data not found';
         }
         $data = $service->returnJosnResponse($entity);
-        return $data;
+        return $data;*/
     }
 
     /**
