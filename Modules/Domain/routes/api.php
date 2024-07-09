@@ -19,5 +19,14 @@ use Modules\Domain\App\Http\Controllers\DomainController;
 
 Route::prefix('/domain')->middleware(array(HeaderAuthenticationMiddleware::class))->group(function() {
     Route::apiResource('/global', DomainController::class)->middleware([HeaderAuthenticationMiddleware::class]);
-    Route::apiResource('/setting', DomainController::class)->middleware([HeaderAuthenticationMiddleware::class]);
+//    Route::apiResource('/setting', DomainController::class)->middleware([HeaderAuthenticationMiddleware::class]);
+    Route::apiResource('/setting', DomainController::class)
+        ->middleware([HeaderAuthenticationMiddleware::class])
+        ->names([
+            'index' => 'domain.setting.index',
+            'store' => 'domain.setting.store',
+            'show' => 'domain.setting.show',
+            'update' => 'domain.setting.update',
+            'destroy' => 'domain.setting.destroy',
+        ]);
 });

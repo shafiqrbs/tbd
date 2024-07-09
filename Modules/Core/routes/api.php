@@ -48,9 +48,9 @@ Route::prefix('/core')->middleware([HeaderAuthenticationMiddleware::class])->gro
     Route::apiResource('location', LocationController::class)->middleware([HeaderAuthenticationMiddleware::class]);
     Route::apiResource('customer', CustomerController::class)->middleware([HeaderAuthenticationMiddleware::class]);
     Route::apiResource('vendor', VendorController::class)->middleware([HeaderAuthenticationMiddleware::class]);
+
     Route::apiResource('setting', SettingController::class)
         ->middleware([HeaderAuthenticationMiddleware::class])
-        ->parameters(['setting' => 'core.setting'])
         ->names([
             'index' => 'core.setting.index',
             'store' => 'core.setting.store',
