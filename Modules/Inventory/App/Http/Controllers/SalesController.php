@@ -57,7 +57,8 @@ class SalesController extends Controller
 
         $process = new SalesModel();
         $process->insertSalesItems($entity,$input['items']);
-        $data = $service->returnJosnResponse($entity);
+        $salesData = SalesModel::getShow($entity->id, $this->domain);
+        $data = $service->returnJosnResponse($salesData);
         return $data;
 
     }
@@ -113,11 +114,15 @@ class SalesController extends Controller
             }
             DB::commit();
 
+            $salesData = SalesModel::getShow($id, $this->domain);
+
+
             $response = new Response();
             $response->headers->set('Content-Type', 'application/json');
             $response->setContent(json_encode([
                 'message' => 'success',
                 'status' => Response::HTTP_OK,
+                'data' => $salesData ?? []
             ]));
             $response->setStatusCode(Response::HTTP_OK);
 
