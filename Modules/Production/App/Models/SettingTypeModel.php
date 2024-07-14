@@ -19,4 +19,8 @@ class SettingTypeModel extends Model
         'status'
     ];
 
+    public static function getDropdown($domain)
+    {
+        return self::where('status', 1)->select('id','name','slug')->orderBy('name')->get();
+    }
 }
