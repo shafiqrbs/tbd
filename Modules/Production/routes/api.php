@@ -24,7 +24,6 @@ Route::prefix('/production/select')->middleware([HeaderAuthenticationMiddleware:
 Route::prefix('/production')->middleware([HeaderAuthenticationMiddleware::class])->group(function() {
     Route::apiResource('setting', SettingController::class)
         ->middleware([HeaderAuthenticationMiddleware::class])
-        ->parameters(['setting' => 'production.setting'])
         ->names([
             'index' => 'production.setting.index',
             'store' => 'production.setting.store',

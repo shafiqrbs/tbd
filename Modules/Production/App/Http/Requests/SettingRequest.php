@@ -26,24 +26,18 @@ class SettingRequest extends FormRequest
         switch($this->method())
         {
 
+            case 'PATCH':
+            case 'PUT':
             case 'POST':
             {
                 return [
                     'name' => 'required|string|nullable',
-                    'parent_id' => 'required|integer|nullable',
+                    'setting_type_id' => 'required|integer|nullable',
                     'slug' => 'string|nullable',
-                    'code' => 'string|nullable',
+                    'status' => 'boolean',
                 ];
             }
 
-            case 'PUT':
-            case 'PATCH':
-            {
-                return [
-                    'name' => 'required|string',
-                    'account_mother_id' => 'string|nullable',
-                ];
-            }
             default:break;
         }
     }

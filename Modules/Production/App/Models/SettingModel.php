@@ -3,6 +3,7 @@
 namespace Modules\Production\App\Models;
 
 
+use Cviebrock\EloquentSluggable\Sluggable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Support\Facades\DB;
@@ -10,16 +11,45 @@ use Illuminate\Support\Facades\DB;
 
 class SettingModel extends Model
 {
-    use HasFactory;
+    use HasFactory,Sluggable;
 
     protected $table = 'pro_setting';
     public $timestamps = true;
     protected $guarded = ['id'];
     protected $fillable = [
-        'setting_type',
+        'setting_type_id',
         'name',
+        'slug',
         'status'
     ];
+
+    /**
+     * Return the sluggable configuration array for this model.
+     *
+     * @return array
+     */
+    public function sluggable(): array
+    {
+        return [
+            'slug' => [
+                'source' => 'name'
+            ]
+        ];
+    }
+
+
+    public static function boot() {
+        parent::boot();
+        self::creating(function ($model) {
+            $date =  new \DateTime("now");
+            $model->created_at = $date;
+        });
+
+        self::updating(function ($model) {
+            $date =  new \DateTime("now");
+            $model->updated_at = $date;
+        });
+    }
 
     public function setting_type(): BelongsTo
     {
@@ -32,16 +62,25 @@ class SettingModel extends Model
         $perPage = isset($request['offset']) && $request['offset']!=''? (int)($request['offset']):0;
         $skip = isset($page) && $page!=''? (int)$page*$perPage:0;
 
-        $entity = self::where('config_id',$domain['config_id'])
-            ->select(['e.id']);
+        $entity = self::join('pro_setting_type','pro_setting_type.id','=','pro_setting.setting_type_id')
+            ->select([
+                'pro_setting.id',
+                'pro_setting.name',
+                'pro_setting.slug',
+                'pro_setting.status',
+                DB::raw('DATE_FORMAT(pro_setting.created_at, "%d-%M-%Y") as created'),
+                'pro_setting_type.name as setting_type_name',
+                'pro_setting_type.slug as setting_type_slug',
+            ]);
 
         if (isset($request['term']) && !empty($request['term'])){
-            $entity = $entity->whereAny(['name'],'LIKE','%'.$request['term'].'%');
+            $entity = $entity->whereAny(['pro_setting.name','pro_setting.slug','pro_setting_type.slug'],'LIKE','%'.$request['term'].'%');
         }
 
-        if (isset($request['parent_id']) && !empty($request['parent_id'])){
+        /*if (isset($request['parent_id']) && !empty($request['parent_id'])){
             $entity = $entity->where('parent_id',$request['parent_id']);
-        }
+        }*/
+
         $total  = $entity->count();
         $entities = $entity->skip($skip)
             ->take($perPage)

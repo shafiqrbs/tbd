@@ -47,13 +47,11 @@ class SettingController extends Controller
      */
     public function store(SettingRequest $request)
     {
-
         $service = new JsonRequestResponse();
         $input = $request->validated();
         $entity = SettingModel::create($input);
         $data = $service->returnJosnResponse($entity);
         return $data;
-
     }
 
     /**
@@ -75,7 +73,6 @@ class SettingController extends Controller
      */
     public function edit($id)
     {
-
         $entity = SettingModel::find($id);
         $status = $entity ? Response::HTTP_OK : Response::HTTP_NOT_FOUND;
         return response()->json([
