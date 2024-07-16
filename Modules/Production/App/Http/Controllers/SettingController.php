@@ -108,6 +108,7 @@ class SettingController extends Controller
         return $service->returnJosnResponse($entity);
     }
 
+
     public function settingTypeDropdown()
     {
         $data = SettingTypeModel::getDropdown($this->domain);

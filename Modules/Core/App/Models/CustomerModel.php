@@ -141,15 +141,15 @@ class CustomerModel extends Model
             ]);
 
         if (isset($request['term']) && !empty($request['term'])){
-            $customers = $customers->whereAny(['name','mobile'],'LIKE','%'.$request['term'].'%');
+            $customers = $customers->whereAny(['cor_customers.name','cor_setting.name','users.name','cor_customers.mobile'],'LIKE','%'.$request['term'].'%');
         }
 
         if (isset($request['name']) && !empty($request['name'])){
-            $customers = $customers->where('name',$request['name']);
+            $customers = $customers->where('cor_customers.name',$request['name']);
         }
 
         if (isset($request['mobile']) && !empty($request['mobile'])){
-            $customers = $customers->where('mobile',$request['mobile']);
+            $customers = $customers->where('cor_customers.mobile',$request['mobile']);
         }
 
 

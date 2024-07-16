@@ -74,12 +74,16 @@ class SettingModel extends Model
             ]);
 
         if (isset($request['term']) && !empty($request['term'])){
-            $entity = $entity->whereAny(['pro_setting.name','pro_setting.slug','pro_setting_type.slug'],'LIKE','%'.$request['term'].'%');
+            $entity = $entity->whereAny(['pro_setting.name','pro_setting.slug','pro_setting_type.slug'],'LIKE','%'.trim($request['term']).'%');
         }
 
-        /*if (isset($request['parent_id']) && !empty($request['parent_id'])){
-            $entity = $entity->where('parent_id',$request['parent_id']);
-        }*/
+        if (isset($request['name']) && !empty($request['name'])){
+            $entity = $entity->where('pro_setting.name','LIKE','%'.trim($request['name']));
+        }
+
+        if (isset($request['setting_type_id']) && !empty($request['setting_type_id'])){
+            $entity = $entity->where('pro_setting.setting_type_id',$request['setting_type_id']);
+        }
 
         $total  = $entity->count();
         $entities = $entity->skip($skip)
