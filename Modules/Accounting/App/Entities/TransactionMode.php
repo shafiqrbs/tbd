@@ -31,10 +31,9 @@ class TransactionMode
     private $config;
 
     /**
-     * @ORM\ManyToOne(targetEntity="Modules\Utility\App\Entities\Setting")
+     * @ORM\ManyToOne(targetEntity="Modules\Accounting\App\Entities\Setting")
      **/
     private $method;
-
 
     /**
      * @var string
@@ -119,24 +118,24 @@ class TransactionMode
      */
     private $status = true;
 
-
     /**
-     * @ORM\ManyToOne(targetEntity="Modules\Utility\App\Entities\Setting")
+     * @ORM\ManyToOne(targetEntity="Modules\Accounting\App\Entities\Setting")
      **/
     private $authorisedMode;
 
 
     /**
-     * @ORM\ManyToOne(targetEntity="Modules\Utility\App\Entities\Setting")
+     * @ORM\ManyToOne(targetEntity="Modules\Accounting\App\Entities\Setting")
      **/
     private $accountMode;
 
 
 
     /**
-     * @ORM\ManyToOne(targetEntity="Modules\Utility\App\Entities\Setting")
+     * @ORM\ManyToOne(targetEntity="Modules\Accounting\App\Entities\Setting")
      **/
     private $accountTypeMode;
+
 
 
     /**

@@ -6,11 +6,28 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Modules\Accounting\App\Models\AccountHeadModel;
+use Modules\Accounting\App\Models\SettingModel;
+use Modules\Accounting\App\Models\SettingTypeModel;
 use Modules\AppsApi\App\Services\JsonRequestResponse;
-use Modules\Utility\App\Models\SettingModel;
+use Modules\Core\App\Models\UserModel;
+
 
 class AccountingController extends Controller
 {
+
+    protected $domain;
+
+    public function __construct(Request $request)
+    {
+        $entityId = $request->header('X-Api-User');
+        if ($entityId && !empty($entityId)){
+            $entityData = UserModel::getUserData($entityId);
+            $this->domain = $entityData;
+        }
+    }
+
+
     /**
      * Display a listing of the resource.
      */
@@ -25,6 +42,38 @@ class AccountingController extends Controller
     public function transactionMethodDropdown(Request $request)
     {
         $dropdown = SettingModel::getEntityDropdown('method');
+        $service = new JsonRequestResponse();
+        return $service->returnJosnResponse($dropdown);
+    }
+
+    /**
+     * Show the form for editing the specified resource.
+     */
+    public function settingDropdown(Request $request)
+    {
+        $mode = $request->get('dropdown-type');
+        $dropdown = SettingModel::getSettingDropdown($mode);
+        $service = new JsonRequestResponse();
+        return $service->returnJosnResponse($dropdown);
+    }
+
+    /**
+     * Show the form for editing the specified resource.
+     */
+    public function settingTypeDropdown(Request $request)
+    {
+        $dropdown = SettingTypeModel::all();
+        $service = new JsonRequestResponse();
+        return $service->returnJosnResponse($dropdown);
+    }
+
+    /**
+     * Show the form for editing the specified resource.
+     */
+    public function accountHeadDropdown(Request $request)
+    {
+        $mode = $request->get('dropdown-type');
+        $dropdown = AccountHeadModel::getAccountHeadDropdown($this->domain,$mode);
         $service = new JsonRequestResponse();
         return $service->returnJosnResponse($dropdown);
     }

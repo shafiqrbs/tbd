@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Route;
 use Modules\Accounting\App\Http\Controllers\AccountGroupHeadController;
 use Modules\Accounting\App\Http\Controllers\AccountingController;
 use Modules\Accounting\App\Http\Controllers\AccountHeadController;
+use Modules\Accounting\App\Http\Controllers\AccountSettingController;
 use Modules\Accounting\App\Http\Controllers\TransactionModeController;
 
 /*
@@ -22,6 +23,9 @@ use Modules\Accounting\App\Http\Controllers\TransactionModeController;
 
 Route::prefix('/accounting/select')->middleware([HeaderAuthenticationMiddleware::class])->group(function() {
     Route::get('/transaction-method', [AccountingController::class,'transactionMethodDropdown'])->name('transaction_method_dropdown');
+    Route::get('/setting', [AccountingController::class,'settingDropdown'])->name('setting_accounting_dropdown');
+    Route::get('/setting-type', [AccountingController::class,'settingTypeDropdown'])->name('setting_accounting_dropdown_type');
+    Route::get('/head', [AccountingController::class,'accountHeadDropdown'])->name('accounting_head_dropdown');
 });
 
 Route::prefix('/accounting')->middleware([HeaderAuthenticationMiddleware::class])->group(function() {
@@ -32,6 +36,18 @@ Route::prefix('/accounting')->middleware([HeaderAuthenticationMiddleware::class]
 
     Route::apiResource('/transaction-mode', TransactionModeController::class)->middleware([HeaderAuthenticationMiddleware::class]);
     Route::apiResource('/account-head', AccountHeadController::class)->middleware([HeaderAuthenticationMiddleware::class]);
+
+    Route::apiResource('/setting', AccountSettingController::class)
+        ->middleware([HeaderAuthenticationMiddleware::class])
+        ->parameters(['setting' => 'accounting.setting'])
+        ->names([
+            'index' => 'accounting.setting.index',
+            'store' => 'accounting.setting.store',
+            'show' => 'accounting.setting.show',
+            'update' => 'accounting.setting.update',
+            'destroy' => 'accounting.setting.destroy'
+        ]);
+    ;
 
 });
 

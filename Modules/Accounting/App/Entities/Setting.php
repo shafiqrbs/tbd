@@ -23,10 +23,10 @@ class Setting
     private $id;
 
     /**
-     * @ORM\ManyToOne(targetEntity="Modules\Domain\App\Entities\GlobalOption")
+     * @ORM\ManyToOne(targetEntity="Config", cascade={"persist", "remove"})
      * @ORM\JoinColumn(onDelete="CASCADE")
      **/
-    protected $domain;
+    private $config;
 
     /**
      * @ORM\ManyToOne(targetEntity="SettingType")

@@ -34,6 +34,8 @@ class AccountHeadRequest extends FormRequest
                     'parent_id' => 'integer|nullable',
                     'slug' => 'string|nullable',
                     'code' => 'string|nullable',
+                    'head_group' => 'string|nullable',
+                    'status' => 'boolean|nullable',
                 ];
             }
 
@@ -43,6 +45,8 @@ class AccountHeadRequest extends FormRequest
                 return [
                     'name' => 'required|string',
                     'account_mother_id' => 'string|nullable',
+                    'code' => 'string|nullable',
+                    'status' => 'boolean|nullable',
                 ];
             }
             default:break;

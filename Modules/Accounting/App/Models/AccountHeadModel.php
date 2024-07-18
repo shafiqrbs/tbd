@@ -23,6 +23,8 @@ class AccountHeadModel extends Model
         'vendor_id',
         'product_group_id',
         'category_id',
+        'group',
+        'head_group',
         'code',
         'level',
         'slug',
@@ -133,6 +135,7 @@ class AccountHeadModel extends Model
         $array=[
             'name' => $name,
             'source' => 'vendor',
+            '$entity' => 'vendor',
             'parent_id' => '5',
             'level' => '3',
             'vendor_id' => $entity['id'],
@@ -168,18 +171,30 @@ class AccountHeadModel extends Model
 
     public static function getRecords($request, $domain)
     {
-        $page = isset($request['page']) && $request['page'] > 0 ? ($request['page'] - 1) : 0;
-        $perPage = isset($request['offset']) && $request['offset'] != '' ? (int)($request['offset']) : 0;
+        $page = isset($request['page']) && $request['page'] > 0 ? ($request['page'] - 1) : 1;
+        $perPage = isset($request['offset']) && $request['offset'] != '' ? (int)($request['offset']) : 50;
         $skip = isset($page) && $page != '' ? (int)$page * $perPage : 0;
-        $entity = self::where('acc_head.config_id', $domain['acc_config_id'])
+        $entity = self:: where('acc_head.config_id', $domain['acc_config_id'])
+        ->leftjoin('acc_head as parent','parent.id','=','acc_head.parent_id')
+        ->leftjoin('acc_setting as mother','acc_head.mother_account_id','=','mother.id')
             ->select([
                 'acc_head.id',
-                'acc_head.name'
-            ]);
+                'acc_head.level',
+                'acc_head.name',
+                'acc_head.slug',
+                'acc_head.code',
+                'parent.name as parent_name',
+                'mother.name as mother_name'
+            ])
+            ->orderBy('acc_head.id','DESC');
 
         if (isset($request['term']) && !empty($request['term'])) {
             $entity = $entity->whereAny(
                 ['acc_head.name', 'acc_head.slug'], 'LIKE', '%' . $request['term'] . '%');
+        }
+        if (isset($request['group']) && !empty($request['group'])) {
+            $entity = $entity->where(
+                ['acc_head.head_group'=>$request['group']]);
         }
         $total = $entity->count();
         $entities = $entity->skip($skip)
@@ -224,6 +239,23 @@ class AccountHeadModel extends Model
 
         return $data;
     }
+
+    public static function getAccountHeadDropdown($domain,$head)
+    {
+        return DB::table('acc_head')
+            ->select([
+                'acc_head.id',
+                'acc_head.name',
+                'acc_head.slug',
+                'acc_head.code',
+            ])
+            ->where([
+                ['acc_head.config_id',$domain['acc_config_id']],
+                ['acc_head.head_group',$head]
+            ])
+            ->get();
+    }
+
 
 
 }

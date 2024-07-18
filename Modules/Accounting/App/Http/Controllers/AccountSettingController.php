@@ -7,7 +7,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Modules\Accounting\App\Http\Requests\AccountHeadRequest;
-use Modules\Accounting\App\Models\AccountHeadModel;
+use Modules\Accounting\App\Models\SettingModel;
 use Modules\Accounting\App\Models\TransactionModeModel;
 use Modules\AppsApi\App\Services\JsonRequestResponse;
 use Modules\Domain\App\Http\Requests\DomainRequest;
@@ -15,7 +15,7 @@ use Modules\Core\App\Models\UserModel;
 use Modules\Domain\App\Models\DomainModel;
 
 
-class AccountHeadController extends Controller
+class AccountSettingController extends Controller
 {
     protected $domain;
 
@@ -34,7 +34,7 @@ class AccountHeadController extends Controller
 
     public function index(Request $request){
 
-        $data = AccountHeadModel::getRecords($request,$this->domain);
+        $data = SettingModel::getRecords($request,$this->domain);
         $response = new Response();
         $response->headers->set('Content-Type','application/json');
         $response->setContent(json_encode([
@@ -56,7 +56,7 @@ class AccountHeadController extends Controller
         $data = $request->validated();
         $data['status'] = true;
         $data['config_id'] = $this->domain['acc_config_id'];
-        $entity = AccountHeadModel::create($data);
+        $entity = SettingModel::create($data);
         $service = new JsonRequestResponse();
         return $service->returnJosnResponse($entity);
     }
@@ -67,7 +67,7 @@ class AccountHeadController extends Controller
     public function show($id)
     {
         $service = new JsonRequestResponse();
-        $entity = AccountHeadModel::find($id);
+        $entity = SettingModel::find($id);
         if (!$entity){
             $entity = 'Data not found';
         }
@@ -81,7 +81,7 @@ class AccountHeadController extends Controller
     public function edit($id)
     {
         $service = new JsonRequestResponse();
-        $entity = AccountHeadModel::find($id);
+        $entity = SettingModel::find($id);
         if (!$entity){
             $entity = 'Data not found';
         }
@@ -96,7 +96,7 @@ class AccountHeadController extends Controller
     {
 
         $data = $request->validated();
-        $entity = AccountHeadModel::find($id);
+        $entity = SettingModel::find($id);
         $entity->update($data);
         $service = new JsonRequestResponse();
         return $service->returnJosnResponse($entity);
@@ -108,7 +108,7 @@ class AccountHeadController extends Controller
     public function destroy($id)
     {
         $service = new JsonRequestResponse();
-        AccountHeadModel::find($id)->delete();
+        SettingModel::find($id)->delete();
         $entity = ['message'=>'delete'];
         $data = $service->returnJosnResponse($entity);
         return $data;
@@ -116,7 +116,7 @@ class AccountHeadController extends Controller
 
 
     public function LocalStorage(Request $request){
-        $data = AccountHeadModel::getRecordsForLocalStorage($request,$this->domain);
+        $data = SettingModel::getRecordsForLocalStorage($request,$this->domain);
         $response = new Response();
         $response->headers->set('Content-Type','application/json');
         $response->setContent(json_encode([

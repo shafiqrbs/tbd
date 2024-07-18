@@ -29,40 +29,75 @@ class SettingModel extends Model
 
     public static function getSettingDropdown($dropdownType)
     {
-        return DB::table('uti_settings')
-            ->join('uti_setting_types','uti_setting_types.id','=','uti_settings.setting_type_id')
+        return DB::table('acc_setting')
+            ->join('acc_setting_type','acc_setting_type.id','=','acc_setting.setting_type_id')
             ->select([
-                'uti_settings.id',
-                'uti_settings.name',
-                'uti_settings.slug',
-                'uti_setting_types.name as type_name',
+                'acc_setting.id',
+                'acc_setting.name',
+                'acc_setting.slug',
+                'acc_setting_type.name as type_name',
             ])
             ->where([
-                ['uti_setting_types.slug',$dropdownType],
-                ['uti_setting_types.status','1'],
-                ['uti_settings.status','1'],
+                ['acc_setting_type.slug',$dropdownType],
+                ['acc_setting_type.status','1'],
+                ['acc_setting.status','1'],
             ])
             ->get();
     }
 
     public static function getEntityDropdown($dropdownType)
     {
-        return DB::table('uti_settings')
-            ->join('uti_setting_types','uti_setting_types.id','=','uti_settings.setting_type_id')
+        return DB::table('acc_setting')
+            ->join('acc_setting_type','acc_setting_type.id','=','acc_setting.setting_type_id')
             ->select([
-                'uti_settings.id',
-                'uti_settings.name',
-                'uti_settings.slug',
-                'uti_setting_types.name as type_name',
-                'uti_setting_types.slug as type_slug',
+                'acc_setting.id',
+                'acc_setting.name',
+                'acc_setting.slug',
+                'acc_setting_type.name as type_name',
+                'acc_setting_type.slug as type_slug',
             ])
             ->where([
-                ['uti_setting_types.slug',$dropdownType],
-                ['uti_setting_types.status','1'],
-                ['uti_settings.status','1'],
+                ['acc_setting_type.slug',$dropdownType],
+                ['acc_setting_type.status','1'],
+                ['acc_setting.status','1'],
             ])
             ->get();
     }
+
+    public static function getRecords($request, $domain)
+    {
+        $page = isset($request['page']) && $request['page'] > 0 ? ($request['page'] - 1) : 1;
+        $perPage = isset($request['offset']) && $request['offset'] != '' ? (int)($request['offset']) : 50;
+        $skip = isset($page) && $page != '' ? (int)$page * $perPage : 0;
+        $entity = self:: where('acc_setting.config_id', $domain['acc_config_id'])
+            ->join('acc_setting_type','acc_setting_type.id','=','acc_setting.setting_type_id')
+            ->select([
+                'acc_setting.id',
+                'acc_setting.name',
+                'acc_setting.slug',
+                'acc_setting_type.name as type_name',
+                'acc_setting_type.slug as type_slug',
+            ])
+            ->orderBy('acc_setting.name','ASC');
+
+        if (isset($request['term']) && !empty($request['term'])) {
+            $entity = $entity->whereAny(
+                ['acc_setting.name', 'acc_setting.slug'], 'LIKE', '%' . $request['term'] . '%');
+        }
+        if (isset($request['type']) && !empty($request['type'])) {
+            $entity = $entity->where(
+                ['acc_setting.setting_type_id'=>$request['type']]);
+        }
+        $total = $entity->count();
+        $entities = $entity->skip($skip)
+            ->take($perPage)
+            ->orderBy('acc_setting.id', 'DESC')
+            ->get();
+
+        $data = array('count' => $total, 'entities' => $entities);
+        return $data;
+    }
+
 
 
 

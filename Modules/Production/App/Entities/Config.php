@@ -26,13 +26,26 @@ class Config
      */
     private $id;
 
+    /**
+     * @ORM\OneToOne(targetEntity="Modules\Domain\App\Entities\GlobalOption")
+     * @ORM\JoinColumn(onDelete="CASCADE")
+     **/
+    private $domain;
+
 
     /**
-     * @var Integer
-     *
-     * @ORM\Column(name="sorting", type="smallint", length=2, nullable = true)
+     * @var \DateTime
+     * @Gedmo\Timestampable(on="create")
+     * @ORM\Column(type="datetime",nullable=true)
      */
-    private $sorting;
+    private $createdAt;
+
+    /**
+     * @var \DateTime
+     * @Gedmo\Timestampable(on="create")
+     * @ORM\Column(type="datetime",nullable=true)
+     */
+    private $updatedAt;
 
 
 

@@ -10,11 +10,11 @@ use Terminalbd\GenericBundle\Entity\Particular;
 /**
  * AccountHead
  *
- * @ORM\Table(name="acc_head")
+ * @ORM\Table(name="acc_head_master")
  * @ORM\Entity()
  *
  */
-class AccountHead
+class AccountMasterHead
 {
     /**
      * @var integer
@@ -24,14 +24,6 @@ class AccountHead
      * @ORM\GeneratedValue(strategy="AUTO")
      */
     private $id;
-
-
-    /**
-     * @ORM\ManyToOne(targetEntity="Config", inversedBy="children", cascade={"detach","merge"})
-     * @ORM\JoinColumn(name="config_id", referencedColumnName="id", onDelete="CASCADE")
-     */
-    protected $config;
-
 
      /**
      * @ORM\ManyToOne(targetEntity="AccountHead", inversedBy="children", cascade={"detach","merge"})
@@ -45,44 +37,6 @@ class AccountHead
      * @ORM\OrderBy({"name" = "ASC"})
      **/
     private $children;
-
-    /**
-     * @ORM\OneToOne(targetEntity="TransactionMode")
-     * @ORM\JoinColumn(name="account_id", referencedColumnName="id", nullable=true, onDelete="cascade")
-     **/
-    private $transaction;
-
-    /**
-     * @ORM\OneToOne(targetEntity="Modules\Core\App\Entities\User")
-     * @ORM\JoinColumn(name="employee_id", referencedColumnName="id", nullable=true, onDelete="cascade")
-     **/
-    private  $user;
-
-    /**
-     * @ORM\OneToOne(targetEntity="Modules\Core\App\Entities\Vendor")
-     * @ORM\JoinColumn(name="vendor_id", referencedColumnName="id", nullable=true, onDelete="cascade")
-     **/
-    private  $vendor;
-
-     /**
-     * @ORM\OneToOne(targetEntity="Modules\Core\App\Entities\Customer")
-     * @ORM\JoinColumn(name="customer_id", referencedColumnName="id", nullable=true, onDelete="cascade")
-     **/
-    private  $customer;
-
-    /**
-     * @ORM\OneToOne(targetEntity="Modules\Inventory\App\Entities\Category")
-     * @ORM\JoinColumn(name="product_group_id", referencedColumnName="id", nullable=true, onDelete="cascade")
-     **/
-    private  $productGroup;
-
-    /**
-     * @ORM\OneToOne(targetEntity="Modules\Inventory\App\Entities\Category")
-     * @ORM\JoinColumn(name="category_id", referencedColumnName="id", nullable=true, onDelete="cascade")
-     **/
-    private  $category;
-
-
 
     /**
      * @ORM\ManyToOne(targetEntity="Setting")
@@ -135,9 +89,17 @@ class AccountHead
     /**
      * @var string
      *
-     * @ORM\Column(type="string", length=30, nullable=true)
+     * @ORM\Column(name="source", type="string", length=30, nullable=true)
      */
-    private $headGroup;
+    private $source;
+
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="sourceId", type="string", length=30, nullable=true)
+     */
+    private $sourceId;
 
 
     /**

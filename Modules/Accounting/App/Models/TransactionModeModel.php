@@ -74,7 +74,7 @@ class TransactionModeModel extends Model
         $skip = isset($page) && $page!=''? (int)$page * $perPage:0;
 
         $tramsactionsMode = self::where('acc_transaction_mode.config_id',$domain['acc_config_id'])
-            ->leftjoin('uti_settings as method','method.id','=','acc_transaction_mode.method_id')
+            ->leftjoin('acc_setting as method','method.id','=','acc_transaction_mode.method_id')
             ->leftjoin('uti_settings as authorized','authorized.id','=','acc_transaction_mode.authorised_mode_id')
             ->leftjoin('uti_settings as account_type','account_type.id','=','acc_transaction_mode.account_mode_id')
             ->select([

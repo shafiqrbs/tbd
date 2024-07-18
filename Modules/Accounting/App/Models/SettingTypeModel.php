@@ -10,7 +10,7 @@ class SettingTypeModel extends Model
 {
     use HasFactory;
 
-    protected $table = 'acc_setting_types';
+    protected $table = 'acc_setting_type';
     public $timestamps = true;
     protected $guarded = ['id'];
     protected $fillable = [
