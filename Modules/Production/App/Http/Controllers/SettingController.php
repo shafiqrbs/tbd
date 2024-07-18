@@ -10,6 +10,7 @@ use Modules\AppsApi\App\Services\JsonRequestResponse;
 use Modules\Core\App\Models\UserModel;
 use Modules\Production\App\Http\Requests\SettingRequest;
 use Modules\Production\App\Models\SettingModel;
+use Modules\Production\App\Models\SettingTypeModel;
 use function Symfony\Component\HttpFoundation\Session\Storage\Handler\getInsertStatement;
 
 class SettingController extends Controller
@@ -46,13 +47,11 @@ class SettingController extends Controller
      */
     public function store(SettingRequest $request)
     {
-
         $service = new JsonRequestResponse();
         $input = $request->validated();
         $entity = SettingModel::create($input);
         $data = $service->returnJosnResponse($entity);
         return $data;
-
     }
 
     /**
@@ -74,7 +73,6 @@ class SettingController extends Controller
      */
     public function edit($id)
     {
-
         $entity = SettingModel::find($id);
         $status = $entity ? Response::HTTP_OK : Response::HTTP_NOT_FOUND;
         return response()->json([
@@ -108,6 +106,21 @@ class SettingController extends Controller
         SettingModel::find($id)->delete();
         $entity = ['message' => 'delete'];
         return $service->returnJosnResponse($entity);
+    }
+
+
+    public function settingTypeDropdown()
+    {
+        $data = SettingTypeModel::getDropdown($this->domain);
+        $response = new Response();
+        $response->headers->set('Content-Type', 'application/json');
+        $response->setContent(json_encode([
+            'message' => 'success',
+            'status' => Response::HTTP_OK,
+            'data' => sizeof($data)>0 ? $data : []
+        ]));
+        $response->setStatusCode(Response::HTTP_OK);
+        return $response;
     }
 
 }

@@ -18,13 +18,12 @@ use Modules\Production\App\Http\Controllers\SettingController;
 
 
 Route::prefix('/production/select')->middleware([HeaderAuthenticationMiddleware::class])->group(function() {
-    Route::get('/setting', [SettingController::class,'settingDropdown'])->name('pro_setting_dropdown');
+    Route::get('/setting-type', [SettingController::class,'settingTypeDropdown'])->name('pro_setting_type_dropdown');
 });
 
 Route::prefix('/production')->middleware([HeaderAuthenticationMiddleware::class])->group(function() {
     Route::apiResource('setting', SettingController::class)
         ->middleware([HeaderAuthenticationMiddleware::class])
-        ->parameters(['setting' => 'production.setting'])
         ->names([
             'index' => 'production.setting.index',
             'store' => 'production.setting.store',
