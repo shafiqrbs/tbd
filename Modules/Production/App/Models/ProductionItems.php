@@ -61,51 +61,55 @@ class ProductionItems extends Model
         $perPage = isset($request['offset']) && $request['offset']!=''? (int)($request['offset']):0;
         $skip = isset($page) && $page!=''? (int)$page*$perPage:0;
 
-        $entity = ProductModel::where(['inv_product.status' => 1])
-            ->whereIN('uti_settings.slug',['raw-materials','post-production','mid-production','mid-production'])
+        $entity = self::where([
+                    ['pro_item.status', '=', 1],
+                    ['pro_item.is_delete', '=', 0]
+                ])
+            ->whereIN('inv_setting.slug',['raw-materials','post-production','mid-production','pre-production'])
+            ->join('inv_stock','inv_stock.id','=','pro_item.item_id')
+            ->join('inv_product','inv_product.id','=','inv_stock.product_id')
             ->join('inv_category','inv_category.id','=','inv_product.category_id')
-            ->join('uti_product_unit','uti_product_unit.id','=','inv_product.unit_id')
-            ->join('uti_settings','uti_settings.id','=','inv_product.product_type_id')
+            ->leftjoin('uti_product_unit','uti_product_unit.id','=','inv_product.unit_id')
+            ->join('inv_setting','inv_setting.id','=','inv_product.product_type_id')
             ->select([
-                'inv_product.id',
-                'inv_product.category_id',
-                'inv_category.name as category_name',
-                'inv_product.unit_id',
-                'uti_product_unit.name as unit_name',
+                'pro_item.id',
                 'inv_product.name as product_name',
-                'inv_product.purchase_price as product_purchase_price',
-                'inv_product.sales_price as product_sales_price',
-                'uti_settings.name as product_type_name',
-
-//                'pro_setting.slug',
-//                'pro_setting.status',
-//                DB::raw('DATE_FORMAT(pro_setting.created_at, "%d-%M-%Y") as created'),
-//                'pro_setting_type.name as setting_type_name',
-//                'pro_setting_type.slug as setting_type_slug',
+                'uti_product_unit.name as unit_name',
+                'pro_item.waste_amount',
+                DB::raw('DATE_FORMAT(pro_item.license_date, "%d-%M-%Y") as license_date'),
+                DB::raw('DATE_FORMAT(pro_item.initiate_date, "%d-%M-%Y") as initiate_date'),
+                'pro_item.quantity',
+                'pro_item.waste_percent',
+                'pro_item.waste_amount',
+                'pro_item.material_amount',
+                'pro_item.material_quantity',
+                'pro_item.value_added_amount',
+                'pro_item.reminig_quantity',
+                'inv_setting.slug as product_type_slug',
+                'inv_category.name as category_name',
+                'pro_item.status',
             ]);
 
-        /*if (isset($request['term']) && !empty($request['term'])){
-            $entity = $entity->whereAny(['pro_setting.name','pro_setting.slug','pro_setting_type.slug'],'LIKE','%'.trim($request['term']).'%');
+        if (isset($request['term']) && !empty($request['term'])){
+            $entity = $entity->whereAny(['inv_product.name','uti_product_unit.name','inv_setting.slug'],'LIKE','%'.trim($request['term']).'%');
         }
 
-        if (isset($request['name']) && !empty($request['name'])){
-            $entity = $entity->where('pro_setting.name','LIKE','%'.trim($request['name']));
+        if (isset($request['product_name']) && !empty($request['product_name'])){
+            $entity = $entity->where('inv_product.name','LIKE','%'.trim($request['product_name']));
         }
 
-        if (isset($request['setting_type_id']) && !empty($request['setting_type_id'])){
+        /*if (isset($request['setting_type_id']) && !empty($request['setting_type_id'])){
             $entity = $entity->where('pro_setting.setting_type_id',$request['setting_type_id']);
         }*/
 
         $total  = $entity->count();
         $entities = $entity->skip($skip)
             ->take($perPage)
-            ->orderBy('inv_product.id','DESC')
+            ->orderBy('pro_item.id','DESC')
             ->get();
 
         $data = array('count'=>$total,'entities' => $entities);
         return $data;
-
-
     }
 
 
