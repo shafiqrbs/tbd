@@ -31,7 +31,7 @@ class ProductionItem
     private  $config;
 
     /**
-     * @ORM\ManyToOne(targetEntity="Modules\Inventory\App\Entities\Item")
+     * @ORM\ManyToOne(targetEntity="Modules\Inventory\App\Entities\StockItem")
      **/
     private  $item;
 

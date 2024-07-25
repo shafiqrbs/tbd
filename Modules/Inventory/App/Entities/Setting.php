@@ -8,10 +8,10 @@ use Gedmo\Mapping\Annotation as Gedmo;
 /**
  * BusinessParticular
  *
- * @ORM\Table( name = "inv_particular_type")
+ * @ORM\Table(name="inv_setting")
  * @ORM\Entity()
  */
-class ParticularType
+class Setting
 {
     /**
      * @var integer
@@ -23,18 +23,28 @@ class ParticularType
     private $id;
 
     /**
+     * @ORM\ManyToOne(targetEntity="Config", cascade={"detach","merge"} )
+     * @ORM\JoinColumn(onDelete="CASCADE")
+     **/
+    private  $config;
+
+    /**
+     * @ORM\ManyToOne(targetEntity="Modules\Utility\App\Entities\Setting")
+     **/
+    private  $setting;
+
+    /**
      * @var string
-     *
      * @ORM\Column(name="name", type="string", length=255, nullable=true)
      */
     private $name;
 
+
     /**
-     * @Gedmo\Translatable
-     * @Gedmo\Slug(fields={"name"})
-     * @ORM\Column(length=255, unique=true)
+     * @ORM\Column(name="slug", type="string", length=255, nullable=true)
      */
     private $slug;
+
 
     /**
      * @var boolean
@@ -119,7 +129,6 @@ class ParticularType
     {
         $this->slug = $slug;
     }
-
 
 
 }

@@ -5,6 +5,7 @@ namespace Modules\Production\App\Entities;
 use App\Entity\Application\Production;
 use Doctrine\ORM\Mapping as ORM;
 use Gedmo\Mapping\Annotation as Gedmo;
+use Modules\Inventory\App\Entities\StockItem;
 
 /**
  * Damage
@@ -24,14 +25,14 @@ class ProductionInventory
     private $id;
 
     /**
-     * @ORM\ManyToOne(targetEntity="Modules\Production\App\Entities\Config")
+     * @ORM\ManyToOne(targetEntity="Config")
      * @ORM\JoinColumn(onDelete="CASCADE")
      **/
     private  $config;
 
 
     /**
-     * @ORM\ManyToOne(targetEntity="Modules\Inventory\App\Entities\Item")
+     * @ORM\ManyToOne(targetEntity="Modules\Inventory\App\Entities\StockItem")
      **/
     private  $item;
 
@@ -125,7 +126,7 @@ class ProductionInventory
     }
 
     /**
-     * @return Item
+     * @return StockItem
      */
     public function getItem()
     {
@@ -133,7 +134,7 @@ class ProductionInventory
     }
 
     /**
-     * @param Item $item
+     * @param StockItem $item
      */
     public function setItem($item)
     {
@@ -141,7 +142,7 @@ class ProductionInventory
     }
 
     /**
-     * @return Production
+     * @return Config
      */
     public function getConfig()
     {
@@ -149,7 +150,7 @@ class ProductionInventory
     }
 
     /**
-     * @param Production $config
+     * @param Config $config
      */
     public function setConfig($config)
     {

@@ -24,41 +24,43 @@ class ProductionExpense
     private $id;
 
     /**
-     * @ORM\ManyToOne(targetEntity="Modules\Production\App\Entities\Config")
+     * @ORM\ManyToOne(targetEntity="Config")
      * @ORM\JoinColumn(onDelete="CASCADE")
      **/
     private  $config;
 
     /**
-     * @ORM\ManyToOne(targetEntity="Modules\Production\App\Entities\ProductionInventory")
+     * @ORM\ManyToOne(targetEntity="ProductionInventory")
      * @ORM\JoinColumn(onDelete="CASCADE")
      **/
     private  $productionInventory;
 
     /**
-     * @ORM\ManyToOne(targetEntity="Modules\Production\App\Entities\ProductionItem")
+     * @ORM\ManyToOne(targetEntity="ProductionItem")
      **/
     private  $productionItem;
 
-     /**
-     * @ORM\ManyToOne(targetEntity="Modules\Production\App\Entities\ProductionBatchItem")
+    /**
+     * @ORM\ManyToOne(targetEntity="ProductionIssueItem")
+     **/
+    private  $issueItem;
+
+
+    /**
+     * @ORM\ManyToOne(targetEntity="ProductionBatchItem")
       * @ORM\JoinColumn(onDelete="CASCADE")
       **/
     private  $productionBatchItem;
 
-    /**
-     * @ORM\ManyToOne(targetEntity="Modules\Inventory\App\Entities\Item")
-     **/
-    private  $item;
 
     /**
-     * @ORM\ManyToOne(targetEntity="Modules\Production\App\Entities\ProductionElement")
+     * @ORM\ManyToOne(targetEntity="ProductionElement")
      **/
     private  $productionElement;
 
 
     /**
-     * @ORM\ManyToOne(targetEntity="Modules\Production\App\Entities\ProductionReceiveBatchItem")
+     * @ORM\ManyToOne(targetEntity="ProductionReceiveBatchItem")
      * @ORM\JoinColumn(onDelete="CASCADE")
      **/
     private  $returnReceiveBatchItem;

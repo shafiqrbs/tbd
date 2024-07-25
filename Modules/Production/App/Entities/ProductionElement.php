@@ -25,25 +25,25 @@ class ProductionElement
     private $id;
 
     /**
-     * @ORM\ManyToOne(targetEntity="Modules\Production\App\Entities\Config")
+     * @ORM\ManyToOne(targetEntity="Config")
      * @ORM\JoinColumn(onDelete="CASCADE")
      **/
     private  $config;
 
     /**
-     * @ORM\ManyToOne(targetEntity="Modules\Production\App\Entities\ProductionItem", inversedBy="elements" )
+     * @ORM\ManyToOne(targetEntity="ProductionItem")
      * @ORM\JoinColumn(onDelete="CASCADE")
      **/
     private  $productionItem;
 
      /**
-     * @ORM\ManyToOne(targetEntity="Modules\Production\App\Entities\ProductionItemAmendment", inversedBy="elements" )
+     * @ORM\ManyToOne(targetEntity="ProductionItemAmendment")
      * @ORM\JoinColumn(onDelete="CASCADE")
      **/
     private  $productionItemAmendment;
 
     /**
-     * @ORM\ManyToOne(targetEntity="Modules\Inventory\App\Entities\Item")
+     * @ORM\ManyToOne(targetEntity="Modules\Inventory\App\Entities\StockItem")
      * @ORM\JoinColumn(onDelete="CASCADE")
      **/
     private  $material;

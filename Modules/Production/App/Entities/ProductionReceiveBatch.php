@@ -28,28 +28,20 @@ class ProductionReceiveBatch
     private $id;
 
     /**
-     * @ORM\ManyToOne(targetEntity="Modules\Production\App\Entities\Config")
+     * @ORM\ManyToOne(targetEntity="Config")
      * @ORM\JoinColumn(onDelete="CASCADE")
      **/
     private  $config;
 
 
-    /**
-     * @ORM\OneToMany(targetEntity="Modules\Production\App\Entities\InvoiceKeyValue", mappedBy="batch")
-     **/
-    private  $invoiceKeyValues;
 
      /**
-     * @ORM\ManyToOne(targetEntity="Modules\Production\App\Entities\ProductionBatch", inversedBy="receibeBatch")
+     * @ORM\ManyToOne(targetEntity="ProductionBatch")
       * @ORM\JoinColumn(onDelete="CASCADE")
       **/
      private  $batch;
 
 
-    /**
-     * @ORM\OneToMany(targetEntity="Modules\Production\App\Entities\ProductionReceiveBatchItem", mappedBy="receiveBatch")
-     **/
-     private  $receiveItems;
 
     /**
      * @var string
@@ -297,7 +289,7 @@ class ProductionReceiveBatch
     /**
      * @return string
      */
-    public function getProcess(): ? string
+    public function getProcess()
     {
         return $this->process;
     }
@@ -305,7 +297,7 @@ class ProductionReceiveBatch
     /**
      * @param string $process
      */
-    public function setProcess(string $process)
+    public function setProcess( $process)
     {
         $this->process = $process;
     }
@@ -313,7 +305,7 @@ class ProductionReceiveBatch
     /**
      * @return \DateTime
      */
-    public function getIssueDate(): ? \DateTime
+    public function getIssueDate()
     {
         return $this->issueDate;
     }
@@ -321,7 +313,7 @@ class ProductionReceiveBatch
     /**
      * @param \DateTime $issueDate
      */
-    public function setIssueDate(\DateTime $issueDate)
+    public function setIssueDate($issueDate)
     {
         $this->issueDate = $issueDate;
     }
@@ -329,7 +321,7 @@ class ProductionReceiveBatch
     /**
      * @return \DateTime
      */
-    public function getCreated(): \DateTime
+    public function getCreated()
     {
         return $this->created;
     }
@@ -337,7 +329,7 @@ class ProductionReceiveBatch
     /**
      * @param \DateTime $created
      */
-    public function setCreated(\DateTime $created)
+    public function setCreated($created)
     {
         $this->created = $created;
     }
@@ -345,7 +337,7 @@ class ProductionReceiveBatch
     /**
      * @return \DateTime
      */
-    public function getUpdated(): \DateTime
+    public function getUpdated()
     {
         return $this->updated;
     }
@@ -353,7 +345,7 @@ class ProductionReceiveBatch
     /**
      * @param \DateTime $updated
      */
-    public function setUpdated(\DateTime $updated)
+    public function setUpdated( $updated)
     {
         $this->updated = $updated;
     }
@@ -465,13 +457,6 @@ class ProductionReceiveBatch
         $this->code = $code;
     }
 
-    /**
-     * @return InvoiceKeyValue
-     */
-    public function getInvoiceKeyValues()
-    {
-        return $this->invoiceKeyValues;
-    }
 
     /**
      * @return string

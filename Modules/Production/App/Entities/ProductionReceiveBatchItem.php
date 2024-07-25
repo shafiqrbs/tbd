@@ -33,7 +33,7 @@ class ProductionReceiveBatchItem
 
 
     /**
-     * @ORM\ManyToOne(targetEntity="Modules\Inventory\App\Entities\Item", inversedBy="receiveItems")
+     * @ORM\ManyToOne(targetEntity="Modules\Inventory\App\Entities\StockItem", inversedBy="receiveItems")
      * @ORM\JoinColumn(onDelete="CASCADE")
      * @ORM\OrderBy({"created" = "DESC"})
      **/
@@ -41,7 +41,7 @@ class ProductionReceiveBatchItem
 
 
     /**
-     * @ORM\ManyToOne(targetEntity="Modules\Production\App\Entities\ProductionReceiveBatch", inversedBy="receiveItems")
+     * @ORM\ManyToOne(targetEntity="ProductionReceiveBatch", inversedBy="receiveItems")
      * @ORM\JoinColumn(onDelete="CASCADE")
      **/
     private  $receiveBatch;

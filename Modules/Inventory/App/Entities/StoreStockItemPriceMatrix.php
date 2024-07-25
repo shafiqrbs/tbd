@@ -1,15 +1,11 @@
 <?php
-
-namespace Terminalbd\InventoryBundle\Entity;
 namespace Modules\Inventory\App\Entities;
-
-
 
 use Doctrine\ORM\Mapping as ORM;
 use Gedmo\Mapping\Annotation as Gedmo;
 use Symfony\Component\Validator\Constraints\DateTime;
 use Modules\Core\App\Entities\User;
-use Modules\Inventory\App\Entities\Product;
+use Modules\Inventory\App\Entities\Producr;
 use Modules\Production\App\Entities\ProductionBatch;
 use Modules\Production\App\Entities\ProductionBatchItem;
 use Modules\Production\App\Entities\ProductionExpense;
@@ -20,10 +16,10 @@ use Modules\Production\App\Entities\ProductionReceiveBatchItem;
 /**
  * StockItem
  *
- * @ORM\Table("inv_stock")
- * @ORM\Entity(repositoryClass="Modules\Inventory\App\Repositories\StockItemRepository")
+ * @ORM\Table("inv_store_stock_item_price_matrix")
+ * @ORM\Entity(repositoryClass="Modules\Inventory\App\Repositories\StoreStockItemPriceMatrixRepository")
  */
-class StockItem
+class StoreStockItemPriceMatrix
 {
 
     /**

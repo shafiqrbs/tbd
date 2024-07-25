@@ -9,9 +9,11 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Modules\AppsApi\App\Services\JsonRequestResponse;
 use Modules\Core\App\Models\UserModel;
+use Modules\Inventory\App\Entities\Particular;
 use Modules\Inventory\App\Models\CategoryModel;
+use Modules\Inventory\App\Models\ParticularModel;
 use Modules\Inventory\App\Models\ProductBrandModel;
-use Modules\Utility\App\Models\SettingModel;
+use Modules\Inventory\App\Models\SettingModel;
 
 
 class InventoryController extends Controller
@@ -43,7 +45,7 @@ class InventoryController extends Controller
     public function settingDropdown(Request $request)
     {
         $mode = $request->get('dropdown-type');
-        $dropdown = SettingModel::getSettingDropdown($mode);
+        $dropdown = SettingModel::getSettingDropdown($this->domain,$mode);
         $service = new JsonRequestResponse();
         return $service->returnJosnResponse($dropdown);
     }
@@ -74,6 +76,16 @@ class InventoryController extends Controller
     public function categoryDropdown(Request $request)
     {
         $dropdown = CategoryModel::getCategoryDropdown($this->domain);
+        $service = new JsonRequestResponse();
+        return $service->returnJosnResponse($dropdown);
+    }
+
+    /**
+     * dropdown the specified resource from storage.
+     */
+    public function productUnitDropdown(Request $request)
+    {
+        $dropdown = ParticularModel::getProductUnitDropdown($this->domain,'product-unit');
         $service = new JsonRequestResponse();
         return $service->returnJosnResponse($dropdown);
     }

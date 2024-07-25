@@ -1,10 +1,11 @@
 <?php
 
 namespace Modules\Production\App\Repositories;
-use App\Entity\Application\Production;
 use Doctrine\ORM\EntityRepository;
-use Terminalbd\InventoryBundle\Entity\Item;
+use Modules\Inventory\App\Entities\StockItem;
+use Modules\Production\App\Entities\Config;
 use Modules\Production\App\Entities\ProductionInventory;
+use Modules\Production\App\Entities\ProductionIssue;
 
 
 /**
@@ -44,12 +45,12 @@ class ProductionInventoryRepository extends EntityRepository
     }
 
 
-    public function insertProductionInventory(Production $config,Item $item)
+    public function insertProductionInventory(Config $config,StockItem $item)
     {
 
         $em = $this->_em;
         $inventoryItem = $this->findOneBy(array('item'=>$item));
-        $productionQnt = $em->getRepository('TerminalbdInventoryBundle:ProductionIssue')->getIssueItem($item);
+        $productionQnt = $em->getRepository(ProductionIssue::class)->getIssueItem($item);
         if($inventoryItem){
             $entity = $inventoryItem;
         }else{

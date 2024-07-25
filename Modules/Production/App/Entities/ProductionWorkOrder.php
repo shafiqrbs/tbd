@@ -32,11 +32,6 @@ class ProductionWorkOrder
      **/
     private  $config;
 
-    /**
-     * @ORM\OneToMany(targetEntity="ProductionWorkOrderItem", mappedBy="productionWorkOrder")
-     **/
-    private  $productionWorkOrderItems;
-
 
     /**
      * @var integer

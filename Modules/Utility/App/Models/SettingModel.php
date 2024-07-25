@@ -45,6 +45,8 @@ class SettingModel extends Model
             ->get();
     }
 
+
+
     public static function getEntityDropdown($dropdownType)
     {
         return DB::table('uti_settings')

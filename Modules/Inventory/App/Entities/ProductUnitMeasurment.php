@@ -6,12 +6,12 @@ use Doctrine\ORM\Mapping as ORM;
 use Gedmo\Mapping\Annotation as Gedmo;
 
 /**
- * BusinessParticular
+ * ProductUnitMeasurment
  *
- * @ORM\Table( name = "inv_particular")
+ * @ORM\Table( name = "inv_product_unit_measurment")
  * @ORM\Entity()
  */
-class Particular
+class  ProductUnitMeasurment
 {
     /**
      * @var integer
@@ -23,30 +23,32 @@ class Particular
     private $id;
 
     /**
-     * @ORM\ManyToOne(targetEntity="Config", cascade={"detach","merge"} )
-     * @ORM\JoinColumn(onDelete="CASCADE")
+     * @ORM\ManyToOne(targetEntity="Product")
+     * @ORM\JoinColumn(name="product_id", referencedColumnName="id", nullable=true, onDelete="SET NULL")
      **/
-    private  $config;
+    private $product;
+
+    /**
+     * @ORM\ManyToOne(targetEntity="Particular")
+     * @ORM\JoinColumn(name="unit_id", referencedColumnName="id", nullable=true, onDelete="SET NULL")
+     **/
+    private $unit;
 
 
     /**
-     * @ORM\ManyToOne(targetEntity="ParticularType")
-     **/
-    private $particularType;
-
-    /**
-     * @var string
+     * @var integer
      *
-     * @ORM\Column(name="name", type="string", length=255, nullable=true)
+     * @ORM\Column(type="integer",  nullable=true)
      */
-    private $name;
+    private $quantity;
+
 
     /**
-     * @Gedmo\Translatable
-     * @Gedmo\Slug(fields={"name"})
-     * @ORM\Column(length=255, unique=true)
+     * @var boolean
+     *
+     * @ORM\Column(name="status", type="boolean" )
      */
-    private $slug;
+    private $status= true;
 
     /**
      * @var \DateTime
@@ -61,15 +63,6 @@ class Particular
      * @ORM\Column(name="updated_at", type="datetime")
      */
     private $updatedAt;
-
-
-    /**
-     * @var boolean
-     *
-     * @ORM\Column(name="status", type="boolean" )
-     */
-    private $status= true;
-
 
 
 }

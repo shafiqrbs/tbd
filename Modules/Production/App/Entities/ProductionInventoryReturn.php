@@ -15,7 +15,7 @@ use Gedmo\Mapping\Annotation as Gedmo;
  * ProductionStockReturn
  *
  * @ORM\Table("pro_production_inventory_return")
- * @ORM\Entity(repositoryClass="")
+ * @ORM\Entity()
  */
 class ProductionInventoryReturn
 {
@@ -35,7 +35,7 @@ class ProductionInventoryReturn
     private  $config;
 
     /**
-     * @ORM\ManyToOne(targetEntity="Modules\Inventory\App\Entities\Item")
+     * @ORM\ManyToOne(targetEntity="Modules\Inventory\App\Entities\StockItem")
      * @ORM\JoinColumn(onDelete="CASCADE")
      **/
     private  $item;
@@ -138,7 +138,7 @@ class ProductionInventoryReturn
     /**
      * @return string
      */
-    public function getProcess(): string
+    public function getProcess()
     {
         return $this->process;
     }
@@ -146,7 +146,7 @@ class ProductionInventoryReturn
     /**
      * @param string $process
      */
-    public function setProcess(string $process)
+    public function setProcess( $process)
     {
         $this->process = $process;
     }

@@ -10,7 +10,7 @@ use Gedmo\Mapping\Annotation as Gedmo;
 /**
  * BusinessParticular
  *
- * @ORM\Table( name ="nbr_setting")
+ * @ORM\Table(name="nbr_setting")
  * @ORM\Entity()
  */
 class Setting
@@ -26,7 +26,7 @@ class Setting
 
 
     /**
-     * @ORM\ManyToOne(targetEntity="Modules\Inventory\App\Entities\Config")
+     * @ORM\ManyToOne(targetEntity="Config")
      * @ORM\JoinColumn(onDelete="CASCADE")
      **/
      private $config;

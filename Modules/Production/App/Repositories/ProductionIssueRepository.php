@@ -1,8 +1,7 @@
 <?php
-
-namespace Modules\Inventory\App\Repositories;
+namespace Modules\Production\App\Repositories;
 use Doctrine\ORM\EntityRepository;
-use Modules\Inventory\App\Entities\Item;
+use Modules\Inventory\App\Entities\Product;
 
 /**
  * DamageRepository

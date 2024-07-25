@@ -18,12 +18,10 @@ class ProductModel extends Model
         'product_type_id',
         'category_id',
         'unit_id',
-        'brand_id',
         'name',
         'alternative_name',
         'sku',
         'barcode',
-        'opening_quantity',
         'sales_price',
         'purchase_price',
         'min_quantity',
@@ -31,57 +29,6 @@ class ProductModel extends Model
         'remaining_quantity',
         'status',
         'config_id',
-    /*name
-    quantity
-    content
-    price
-    code
-    status
-    path
-    product_type
-    sorting
-    production_type
-    commission
-    slug
-    tlo_price
-    opening_approve
-    brand_id
-    config_id
-    wear_house_id
-    business_particular_type_id
-    rack_no_id
-    opening_quantity
-    adjustment_quantity
-    min_quantity
-    reorder_quantity
-    transfer_quantity
-    stock_in
-    purchase_quantity
-    sales_quantity
-    remaining_quantity
-    purchase_return_quantity
-    sales_return_quantity
-    damage_quantity
-    bonus_quantity
-    bonus_adjustment
-    return_bonus_quantity
-    bonus_purchase_quantity
-    bonus_sales_quantity
-    purchase_price
-    avg_purchase_price
-    production_sales_price
-    sales_price
-    discount_price
-    minimum_price
-    particular_code
-    sku
-    barcode
-    model_no
-    created_at
-    updated_at
-    size_id
-    color_id
-    alternative_name*/
     ];
 
     /**
@@ -121,16 +68,14 @@ class ProductModel extends Model
 
         $products = self::where([['inv_product.config_id',$domain['config_id']]])
             ->leftjoin('inv_category','inv_category.id','=','inv_product.category_id')
-            ->leftjoin('uti_product_unit','uti_product_unit.id','=','inv_product.unit_id')
-            ->leftjoin('inv_brand','inv_brand.id','=','inv_product.brand_id')
-            ->leftjoin('uti_settings','uti_settings.id','=','inv_product.product_type_id')
+            ->leftjoin('inv_particular','inv_particular.id','=','inv_product.unit_id')
+            ->leftjoin('inv_setting','inv_setting.id','=','inv_product.product_type_id')
             ->select([
                 'inv_product.id',
                 'inv_product.name as product_name',
                 'inv_product.slug',
                 'inv_category.name as category_name',
-                'uti_product_unit.name as unit_name',
-                'inv_brand.name as brand_name',
+                'inv_particular.name as unit_name',
                 'inv_product.opening_quantity',
                 'inv_product.min_quantity',
                 'inv_product.reorder_quantity',
@@ -138,11 +83,11 @@ class ProductModel extends Model
                 'inv_product.sales_price',
                 'inv_product.barcode',
                 'inv_product.alternative_name',
-                'uti_settings.name as product_type',
+                'inv_setting.name as product_type',
             ]);
 
         if (isset($request['term']) && !empty($request['term'])){
-            $products = $products->whereAny(['inv_product.name','inv_product.slug','inv_category.name','uti_product_unit.name','inv_brand.name','inv_product.sales_price','uti_settings.name'],'LIKE','%'.$request['term'].'%');
+            $products = $products->whereAny(['inv_product.name','inv_product.slug','inv_category.name','inv_particular.name','inv_brand.name','inv_product.sales_price','inv_setting.name'],'LIKE','%'.$request['term'].'%');
         }
 
         if (isset($request['name']) && !empty($request['name'])){
@@ -174,9 +119,8 @@ class ProductModel extends Model
     {
         $product = self::where([['inv_product.config_id',$domain['config_id']],['inv_product.id',$id]])
             ->leftjoin('inv_category','inv_category.id','=','inv_product.category_id')
-            ->leftjoin('uti_product_unit','uti_product_unit.id','=','inv_product.unit_id')
-            ->leftjoin('inv_brand','inv_brand.id','=','inv_product.brand_id')
-            ->leftjoin('uti_settings','uti_settings.id','=','inv_product.product_type_id')
+            ->leftjoin('inv_particular','inv_particular.id','=','inv_product.unit_id')
+            ->leftjoin('inv_setting','inv_setting.id','=','inv_product.product_type_id')
             ->select([
                 'inv_product.id',
                 'inv_product.name as product_name',
@@ -184,9 +128,7 @@ class ProductModel extends Model
                 'inv_product.category_id',
                 'inv_category.name as category_name',
                 'inv_product.unit_id',
-                'uti_product_unit.name as unit_name',
-                'inv_product.brand_id',
-                'inv_brand.name as brand_name',
+                'inv_particular.name as unit_name',
                 'inv_product.opening_quantity',
                 'inv_product.min_quantity',
                 'inv_product.reorder_quantity',
@@ -195,7 +137,7 @@ class ProductModel extends Model
                 'inv_product.barcode',
                 'inv_product.alternative_name',
                 'inv_product.product_type_id',
-                'uti_settings.name as product_type',
+                'inv_setting.name as product_type',
                 'inv_product.sku',
                 'inv_product.status'
             ])->first();
@@ -208,18 +150,16 @@ class ProductModel extends Model
     {
         $products = self::where([['inv_product.config_id',$domain['config_id']]])
             ->leftjoin('inv_category','inv_category.id','=','inv_product.category_id')
-            ->leftjoin('uti_product_unit','uti_product_unit.id','=','inv_product.unit_id')
-            ->leftjoin('inv_brand','inv_brand.id','=','inv_product.brand_id')
-            ->leftjoin('uti_settings','uti_settings.id','=','inv_product.product_type_id')
+            ->leftjoin('inv_particular','inv_particular.id','=','inv_product.unit_id')
+            ->leftjoin('inv_setting','inv_setting.id','=','inv_product.product_type_id')
             ->select([
                 'inv_product.id',
                 'inv_product.name as display_name',
-                \DB::raw("CONCAT(inv_product.name, ' [',inv_product.remaining_quantity,'] ', uti_product_unit.name) AS product_name"),
+                \DB::raw("CONCAT(inv_product.name, ' [',inv_product.remaining_quantity,'] ', inv_particular.name) AS product_name"),
                 'inv_product.slug',
                 'inv_category.name as category_name',
-                'uti_product_unit.id as unit_id',
-                'uti_product_unit.name as unit_name',
-                'inv_brand.name as brand_name',
+                'inv_particular.id as unit_id',
+                'inv_particular.name as unit_name',
                 'inv_product.min_quantity',
                 'inv_product.remaining_quantity as quantity',
                 'inv_product.purchase_price',

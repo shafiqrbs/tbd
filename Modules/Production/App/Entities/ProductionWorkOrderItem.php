@@ -25,20 +25,14 @@ class ProductionWorkOrderItem
 
 
     /**
-     * @ORM\ManyToOne(targetEntity="ProductionItem", inversedBy="productionWorkOrderItems" )
+     * @ORM\ManyToOne(targetEntity="ProductionItem")
      **/
     private  $productionItem;
 
 
 
     /**
-     * @ORM\OneToMany(targetEntity="ProductionBatchItem", mappedBy="workorderItem" )
-     **/
-    private  $productionWorkOrderItems;
-
-
-    /**
-     * @ORM\ManyToOne(targetEntity="ProductionWorkOrder", inversedBy="productionWorkOrderItems")
+     * @ORM\ManyToOne(targetEntity="ProductionWorkOrder")
      * @ORM\JoinColumn(onDelete="CASCADE")
      **/
     private  $productionWorkOrder;

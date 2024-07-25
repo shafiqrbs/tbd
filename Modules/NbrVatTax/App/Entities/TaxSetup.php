@@ -25,7 +25,7 @@ class TaxSetup
     private $id;
 
     /**
-     * @ORM\ManyToOne(targetEntity="Modules\Inventory\App\Entities\Config")
+     * @ORM\ManyToOne(targetEntity="Config")
      * @ORM\JoinColumn(onDelete="CASCADE")
      **/
     private $config;
