@@ -90,7 +90,7 @@ class ProductionElement
     /**
      * @var float
      *
-     * @ORM\Column(name="subTotal", type="float", nullable = true)
+     * @ORM\Column( type="float", nullable = true)
      */
     private $subTotal;
 

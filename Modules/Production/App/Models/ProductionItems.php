@@ -63,10 +63,12 @@ class ProductionItems extends Model
 
         $entity = self::where([
                     ['pro_item.status', '=', 1],
-                    ['pro_item.is_delete', '=', 0]
+                    ['pro_item.is_delete', '=', 0],
+                    ['pro_config.domain_id', '=', $domain['global_id']],
                 ])
             ->whereIN('inv_setting.slug',['raw-materials','post-production','mid-production','pre-production'])
             ->join('inv_stock','inv_stock.id','=','pro_item.item_id')
+            ->join('pro_config','pro_config.id','=','pro_item.config_id')
             ->join('inv_product','inv_product.id','=','inv_stock.product_id')
             ->join('inv_category','inv_category.id','=','inv_product.category_id')
             ->leftjoin('uti_product_unit','uti_product_unit.id','=','inv_product.unit_id')
@@ -84,6 +86,7 @@ class ProductionItems extends Model
                 'pro_item.material_amount',
                 'pro_item.material_quantity',
                 'pro_item.value_added_amount',
+                'pro_item.sub_total',
                 'pro_item.reminig_quantity',
                 'inv_setting.slug as product_type_slug',
                 'inv_category.name as category_name',
