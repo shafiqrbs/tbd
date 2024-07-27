@@ -59,7 +59,7 @@ class ProductionItem
     /**
      * @var datetime
      *
-     * @ORM\Column(name="openingDate", type="datetime", nullable=true)
+     * @ORM\Column(type="datetime", nullable=true)
      */
     private $openingDate;
 
@@ -97,7 +97,7 @@ class ProductionItem
     /**
      * @var float
      *
-     * @ORM\Column(name="subTotal", type="float", nullable = true)
+     * @ORM\Column( type="float", nullable = true)
      */
     private $subTotal;
 
@@ -224,19 +224,20 @@ class ProductionItem
      */
     private $reminigQuantity;
 
-     /**
+    /**
      * @var boolean
      *
-     * @ORM\Column(type="boolean" , nullable=true)
+     * @ORM\Column(type="boolean", options={"default": true})
      */
-    private $status;
+    private $status = true;
 
-     /**
+
+    /**
      * @var boolean
      *
-     * @ORM\Column(type="boolean" , nullable=true)
+     * @ORM\Column(type="boolean" , options={"default": true})
      */
-    private $isDelete=0;
+    private $isDelete;
 
     /**
      * @var boolean

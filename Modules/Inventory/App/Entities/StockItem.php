@@ -45,12 +45,12 @@ class StockItem
      * @ORM\ManyToOne(targetEntity="Product")
      * @ORM\JoinColumn(onDelete="CASCADE")
      **/
-    protected  $item;
+    protected  $product;
 
 
     /**
      * @ORM\ManyToOne(targetEntity="Particular")
-     * @ORM\JoinColumn(name="particular_id", referencedColumnName="id", nullable=true, onDelete="SET NULL")
+     * @ORM\JoinColumn(referencedColumnName="id", nullable=true, onDelete="SET NULL")
      **/
     private $rackNo;
 
@@ -88,31 +88,31 @@ class StockItem
     /**
      * @var float
      *
-     * @ORM\Column(name="price", type="float", nullable = true)
+     * @ORM\Column(name="price", type="float", options={"default"="0"})
      */
-    private $price = 0;
+    private $price;
 
 
      /**
      * @var float
      *
-     * @ORM\Column(name="purchasePrice", type="float", nullable = true)
+     * @ORM\Column(type="float", options={"default"="0"})
      */
-    private $purchasePrice = 0;
+    private $purchasePrice;
 
 
     /**
      * @var float
      *
-     * @ORM\Column(name="salesPrice", type="float", nullable = true)
+     * @ORM\Column( type="float",options={"default"="0"})
      */
-    private $salesPrice = 0;
+    private $salesPrice;
 
 
      /**
      * @var float
      *
-     * @ORM\Column(name="actualPrice", type="float", nullable = true)
+     * @ORM\Column(type="float",options={"default"="0"})
      */
     private $actualPrice = 0;
 
@@ -120,61 +120,61 @@ class StockItem
 
     /**
      * @var float
-     * @ORM\Column(type="float", nullable = true)
+     * @ORM\Column(type="float",options={"default"="0"})
      */
-    private $subTotal = 0;
+    private $subTotal;
 
 
      /**
      * @var float
      *
-     * @ORM\Column(name="total", type="float", nullable = true)
+     * @ORM\Column(name="total", type="float", options={"default"="0"})
      */
-    private $total = 0;
+    private $total;
 
 
     /**
      * @var float
      *
-     * @ORM\Column(name="quantity", type="float", nullable = true)
+     * @ORM\Column(name="quantity", type="float", options={"default"="0"})
      */
-    private $quantity= 0.00;
+    private $quantity;
 
     /**
      * @var float
      *
-     * @ORM\Column(type="float", nullable = true)
+     * @ORM\Column(type="float", options={"default"="0"})
      */
-    private $openingQuantity= 0.00;
+    private $openingQuantity;
 
 
     /**
      * @var float
      *
-     * @ORM\Column(type="float", nullable = true)
+     * @ORM\Column(type="float", options={"default"="0"})
      */
-    private $openingBalance= 0.00;
+    private $openingBalance;
 
     /**
      * @var float
      *
-     * @ORM\Column(type="float", nullable = true)
+     * @ORM\Column(type="float", options={"default"="0"})
      */
-    private $closingQuantity= 0.00;
+    private $closingQuantity;
 
    /**
      * @var float
      *
-     * @ORM\Column(type="float", nullable = true)
+     * @ORM\Column(type="float",options={"default"="0"})
      */
-    private $closingBalance= 0.00;
+    private $closingBalance;
 
 
     /**
      * @var float
-     * @ORM\Column(type="float", nullable = true)
+     * @ORM\Column(type="float",options={"default"="0"})
      */
-    private $purchaseQuantity = 0.00;
+    private $purchaseQuantity;
 
     /**
      * @var float
@@ -290,7 +290,7 @@ class StockItem
     /**
      * @var string
      *
-     * @ORM\Column(name="serialNo", type="text", length=255, nullable = true)
+     * @ORM\Column( type="text", length=255, nullable = true)
      */
     private $serialNo;
 
@@ -298,7 +298,7 @@ class StockItem
     /**
      * @var DateTime
      *
-     * @ORM\Column(name="expiredDate", type="datetime", nullable=true)
+     * @ORM\Column( type="datetime", nullable=true)
      */
     private $expiredDate;
 
@@ -319,7 +319,7 @@ class StockItem
     /**
      * @var \DateTime
      *
-     * @ORM\Column(name="issueDate", type="datetime", nullable=true)
+     * @ORM\Column( type="datetime", nullable=true)
      */
     private $issueDate;
 
@@ -327,14 +327,14 @@ class StockItem
     /**
      * @var \DateTime
      * @Gedmo\Timestampable(on="create")
-     * @ORM\Column(name="created", type="datetime")
+     * @ORM\Column( type="datetime")
      */
     private $created;
 
     /**
      * @var \DateTime
      * @Gedmo\Timestampable(on="update")
-     * @ORM\Column(name="updated", type="datetime")
+     * @ORM\Column( type="datetime" , nullable=true)
      */
     private $updated;
 

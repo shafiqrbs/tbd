@@ -7,9 +7,9 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Modules\Core\App\Models\UserModel;
-use Modules\Production\App\Models\ProductionElements;
+use Modules\Production\App\Models\ProductionItems;
 
-class ProductionRecipeController extends Controller
+class ProductionRecipeItemsController extends Controller
 {
     protected $domain;
     public function __construct(Request $request)
@@ -25,7 +25,7 @@ class ProductionRecipeController extends Controller
      */
     public function index(Request $request)
     {
-        $data = ProductionElements::getRecords($request, $this->domain);
+        $data = ProductionItems::getRecords($request, $this->domain);
         $response = new Response();
         $response->headers->set('Content-Type', 'application/json');
         $response->setContent(json_encode([
@@ -51,7 +51,7 @@ class ProductionRecipeController extends Controller
      */
     public function store(Request $request): RedirectResponse
     {
-        dump($request->all());
+        //
     }
 
     /**

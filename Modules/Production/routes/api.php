@@ -4,6 +4,7 @@ use App\Http\Middleware\HeaderAuthenticationMiddleware;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Modules\Production\App\Http\Controllers\ProductionRecipeController;
+use Modules\Production\App\Http\Controllers\ProductionRecipeItemsController;
 use Modules\Production\App\Http\Controllers\SettingController;
 
 /*
@@ -34,7 +35,7 @@ Route::prefix('/production')->middleware([HeaderAuthenticationMiddleware::class]
         ]);
     ;
 
-    Route::apiResource('recipe-items', ProductionRecipeController::class)
+    Route::apiResource('recipe-items', ProductionRecipeItemsController::class)
         ->middleware([HeaderAuthenticationMiddleware::class])
         ->names([
             'index' => 'production.items.index',
@@ -42,6 +43,17 @@ Route::prefix('/production')->middleware([HeaderAuthenticationMiddleware::class]
             'show' => 'production.items.show',
             'update' => 'production.items.update',
             'destroy' => 'production.items.destroy'
+        ]);
+    ;
+
+    Route::apiResource('recipe', ProductionRecipeController::class)
+        ->middleware([HeaderAuthenticationMiddleware::class])
+        ->names([
+            'index' => 'production.recipe.index',
+            'store' => 'production.recipe.store',
+            'show' => 'production.recipe.show',
+            'update' => 'production.recipe.update',
+            'destroy' => 'production.recipe.destroy'
         ]);
     ;
 });

@@ -101,4 +101,11 @@ class ProductController extends Controller
         return $service->returnJosnResponse($data);
     }
 
+    public function productForRecipe()
+    {
+        $service = new JsonRequestResponse();
+        $data = ProductModel::getProductForRecipe($this->domain);
+        return $service->returnJosnResponse($data);
+    }
+
 }
