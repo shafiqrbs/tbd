@@ -18,6 +18,7 @@ class SettingModel extends Model
     protected $guarded = ['id'];
     protected $fillable = [
         'setting_type_id',
+        'config_id',
         'name',
         'slug',
         'status'
@@ -56,13 +57,22 @@ class SettingModel extends Model
         return $this->belongsTo(SettingTypeModel::class);
     }
 
+    public static function getConfigID($globalID)
+    {
+        return DB::table('pro_config')->where('domain_id', $globalID)->select('id')->first()->id;
+    }
+
+
+
     public static function getRecords($request,$domain){
 
         $page =  isset($request['page']) && $request['page'] > 0?($request['page'] - 1 ) : 0;
         $perPage = isset($request['offset']) && $request['offset']!=''? (int)($request['offset']):0;
         $skip = isset($page) && $page!=''? (int)$page*$perPage:0;
 
-        $entity = self::join('pro_setting_type','pro_setting_type.id','=','pro_setting.setting_type_id')
+        $entity = self::where('pro_config.domain_id',$domain['global_id'])
+            ->join('pro_setting_type','pro_setting_type.id','=','pro_setting.setting_type_id')
+            ->join('pro_config','pro_config.id','=','pro_setting.config_id')
             ->select([
                 'pro_setting.id',
                 'pro_setting.name',
@@ -95,6 +105,34 @@ class SettingModel extends Model
         return $data;
 
 
+    }
+
+    public static function getMeasurementInputGenerate($domain)
+    {
+        $entity = self::where('pro_config.domain_id', $domain)
+            ->join('pro_setting_type', 'pro_setting_type.id', '=', 'pro_setting.setting_type_id')
+            ->join('pro_config', 'pro_config.id', '=', 'pro_setting.config_id')
+            ->select([
+                'pro_setting.id',
+                'pro_setting.name',
+                'pro_setting.slug',
+                'pro_setting_type.name as setting_type_name',
+                'pro_setting_type.slug as setting_type_slug',
+            ])
+            ->get()
+            ->toArray();
+
+        $data = [];
+        if (sizeof($entity)>0) {
+            foreach ($entity as $item) {
+                $data[$item['setting_type_name']][] = $item;
+            }
+        }
+
+        $slugArray = array_map(function ($entity) {
+            return $entity['slug'];
+        }, $entity);
+        return ['datakey'=>$slugArray,'field'=>$data];
     }
 
     public static function getSettingDropdown($dropdownType)
