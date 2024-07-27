@@ -2,12 +2,12 @@
 
 namespace Modules\Production\App\Repositories;
 use Doctrine\ORM\EntityRepository;
-use Terminalbd\InventoryBundle\Entity\Item;
+use Modules\Inventory\App\Entities\StockItem;
 use Modules\Production\App\Entities\ProductionElement;
 use Modules\Production\App\Entities\ProductionInventory;
 use Modules\Production\App\Entities\ProductionItem;
 use Modules\Production\App\Entities\ProductionItemAmendment;
-use Modules\Production\App\Entities\ProductionStock;
+
 
 
 /**
@@ -21,38 +21,43 @@ class ProductionElementRepository extends EntityRepository
     public function insertProductionElement(ProductionItem $productionItem, $data)
     {
         $em = $this->_em;
-	    $existParticular = $this->_em->getRepository('TerminalbdProductionBundle:ProductionElement')->findOneBy(array('productionItem'=> $productionItem ,'material' => $data['productId']));
-	    if(empty($existParticular)){
-		    $entity = new ProductionElement();
-            $item = $em->getRepository(Item::class)->find($data['productId']);
+        $item = (isset($data['item_id']) and $data['item_id']) ?  $data['item_id']:'';
+        $quantity = (isset($data['quantity']) and $data['quantity']) ?  $data['quantity']:'';
+        $price = (isset($data['price']) and $data['price']) ?  $data['price']:'';
+        $wastagePercent = (isset($data['wastage_percent']) and $data['wastage_percent']) ?  $data['wastage_percent']:'';
+
+        $existParticular = $this->_em->getRepository(ProductionElement::class)->findOneBy(array('productionItem'=> $productionItem ,'material' => $item));
+        if(empty($existParticular)){
+	        $entity = new ProductionElement();
+            $item = $em->getRepository(StockItem::class)->find($data['productId']);
             $unit = !empty($item->getUnit() && !empty($item->getUnit()->getName())) ? $item->getUnit()->getName():'';
             $entity->setProductionItem($productionItem);
             $entity->setMaterial($item);
             $entity->setUom($unit);
-            $entity->setQuantity($data['quantity']);
-            $entity->setPrice($data['price']);
+            $entity->setQuantity($quantity);
+            $entity->setPrice($price);
             $entity->setSubTotal($entity->getPrice() * $entity->getQuantity());
-            if($data['wastagePercent']){
-                $entity->setWastagePercent($data['wastagePercent']);
+            if($wastagePercent){
+                $entity->setWastagePercent($wastagePercent);
                 $wsateQnt = $this->wastageCulculation($entity->getWastagePercent(),$entity->getQuantity());
                 $entity->setWastageQuantity($wsateQnt);
-                $entity->setWastageAmount($wsateQnt * $data['price']);
+                $entity->setWastageAmount($wsateQnt * $price);
             }elseif ($productionItem->getWastePercent()){
                 $entity->setWastagePercent($productionItem->getWastePercent());
                 $wsateQnt = $this->wastageCulculation($entity->getWastagePercent(),$entity->getQuantity());
                 $entity->setWastageQuantity($wsateQnt);
-                $entity->setWastageAmount($wsateQnt * $data['price']);
+                $entity->setWastageAmount($wsateQnt * $price);
             }
             $em->persist($entity);
             $em->flush();
                 $this->updateProductionElementPrice( $productionItem );
             }else{
                 $entity = $existParticular;
-                $entity->setQuantity($data['quantity']);
-                $entity->setPrice($data['price']);
+                $entity->setQuantity($quantity);
+                $entity->setPrice($price);
                 $entity->setSubTotal($entity->getPrice() * $entity->getQuantity());
-                if($data['wastagePercent']){
-                $entity->setWastagePercent($data['wastagePercent']);
+                if($wastagePercent){
+                $entity->setWastagePercent($wastagePercent);
                 $wsateQnt = $this->wastageCulculation($entity->getWastagePercent(), $entity->getQuantity());
                 $entity->setWastageQuantity($wsateQnt);
                 $entity->setWastageAmount($wsateQnt * $entity->getPrice());
@@ -62,7 +67,7 @@ class ProductionElementRepository extends EntityRepository
                 $this->updateProductionElementPrice( $productionItem );
             }
 
-}
+    }
 
     public function insertProductionAmendmentElement(ProductionItemAmendment $productionItem, $data)
     {
@@ -104,8 +109,9 @@ class ProductionElementRepository extends EntityRepository
     public function updateProductionElementPrice(ProductionItem $productionItem)
     {
         $em = $this->_em;
+
         $qb = $this->createQueryBuilder('e');
-        $qb->select('sum(e.subTotal) as subTotal','sum(e.wastageAmount) as wastageAmount','sum(e.quantity) as materialQuantity','sum(e.wastageQuantity) as wastageQuantity');
+        $qb->select('sum(e.sub_total) as subTotal','sum(e.wastage_mmount) as wastageAmount','sum(e.quantity) as materialQuantity','sum(e.wastage_quantity) as wastageQuantity');
         $qb->where('e.productionItem = :particular');
         $qb->setParameter('particular', $productionItem->getId());
         $qb->andWhere('e.status=1');
@@ -223,7 +229,6 @@ class ProductionElementRepository extends EntityRepository
                 $em->flush();
             endforeach;
         }
-
         return $amendment;
 
     }

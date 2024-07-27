@@ -42,7 +42,7 @@ class StockItem
     protected  $config;
 
     /**
-     * @ORM\ManyToOne(targetEntity="Product")
+     * @ORM\ManyToOne(targetEntity="Product", inversedBy="stockItems")
      * @ORM\JoinColumn(onDelete="CASCADE")
      **/
     protected  $product;
@@ -50,7 +50,7 @@ class StockItem
 
     /**
      * @ORM\ManyToOne(targetEntity="Particular")
-     * @ORM\JoinColumn(referencedColumnName="id", nullable=true, onDelete="SET NULL")
+     * @ORM\JoinColumn(name="rack_id", referencedColumnName="id", nullable=true, onDelete="SET NULL")
      **/
     private $rackNo;
 
@@ -86,6 +86,14 @@ class StockItem
 
 
     /**
+     * @var string
+     *
+     * @ORM\Column(type="name", nullable = true)
+     */
+    private $name;
+
+
+     /**
      * @var float
      *
      * @ORM\Column(name="price", type="float", options={"default"="0"})
@@ -96,26 +104,23 @@ class StockItem
      /**
      * @var float
      *
-     * @ORM\Column(type="float", options={"default"="0"})
-     */
+     * @ORM\Column(type="float", options={"default":0})
     private $purchasePrice;
 
 
     /**
      * @var float
      *
-     * @ORM\Column( type="float",options={"default"="0"})
+     * @ORM\Column( type="float",options={"default":0})
      */
-    private $salesPrice;
-
+     private $salesPrice;
 
      /**
      * @var float
      *
-     * @ORM\Column(type="float",options={"default"="0"})
+     * @ORM\Column( type="float",options={"default":0})
      */
-    private $actualPrice = 0;
-
+     private $actualPrice = 0;
 
 
     /**
@@ -329,14 +334,14 @@ class StockItem
      * @Gedmo\Timestampable(on="create")
      * @ORM\Column( type="datetime")
      */
-    private $created;
+    private $createdAt;
 
     /**
      * @var \DateTime
      * @Gedmo\Timestampable(on="update")
-     * @ORM\Column( type="datetime" , nullable=true)
+     * @ORM\Column( type="datetime")
      */
-    private $updated;
+    private $updatedAt;
 
 
 
@@ -350,89 +355,6 @@ class StockItem
         return $this->id;
     }
 
-
-
-    /**
-     * @return \DateTime
-     */
-    public function getCreated()
-    {
-        return $this->created;
-    }
-
-    /**
-     * @param \DateTime $created
-     */
-    public function setCreated($created)
-    {
-        $this->created = $created;
-    }
-
-
-    /**
-     * @return mixed
-     */
-    public function getCategory()
-    {
-        return $this->category;
-    }
-
-    /**
-     * @param mixed $category
-     */
-    public function setCategory($category)
-    {
-        $this->category = $category;
-    }
-
-    /**
-     * @return Item
-     */
-    public function getItem()
-    {
-        return $this->item;
-    }
-
-    /**
-     * @param Item $item
-     */
-    public function setItem($item)
-    {
-        $this->item = $item;
-    }
-
-    /**
-     * @return User
-     */
-    public function getCreatedBy()
-    {
-        return $this->createdBy;
-    }
-
-    /**
-     * @param User $createdBy
-     */
-    public function setCreatedBy($createdBy)
-    {
-        $this->createdBy = $createdBy;
-    }
-
-
-    /**
-     * @return PurchaseItem
-     */
-    public function getPurchaseItem()
-    {
-        return $this->purchaseItem;
-    }
-
-    /**
-     * @param PurchaseItem $purchaseItem
-     */
-    public function setPurchaseItem($purchaseItem)
-    {
-        $this->purchaseItem = $purchaseItem;
-    }
 
     /**
      * @return string
@@ -458,38 +380,7 @@ class StockItem
         $this->process = $process;
     }
 
-    /**
-     * @return mixed
-     */
-    public function getDamage()
-    {
-        return $this->damage;
-    }
 
-    /**
-     * @param mixed $damage
-     */
-    public function setDamage($damage)
-    {
-        $this->damage = $damage;
-    }
-
-
-    /**
-     * @return Sales
-     */
-    public function getSales()
-    {
-        return $this->sales;
-    }
-
-    /**
-     * @param Sales $sales
-     */
-    public function setSales($sales)
-    {
-        $this->sales = $sales;
-    }
 
     /**
      * @return float
@@ -539,213 +430,6 @@ class StockItem
         $this->actualPrice = $actualPrice;
     }
 
-    /**
-     * @return float
-     */
-    public function getCustomsDuty()
-    {
-        return $this->customsDuty;
-    }
-
-    /**
-     * @param float $customsDuty
-     */
-    public function setCustomsDuty($customsDuty)
-    {
-        $this->customsDuty = $customsDuty;
-    }
-
-    /**
-     * @return float
-     */
-    public function getSupplementaryDuty()
-    {
-        return $this->supplementaryDuty;
-    }
-
-    /**
-     * @param float $supplementaryDuty
-     */
-    public function setSupplementaryDuty($supplementaryDuty)
-    {
-        $this->supplementaryDuty = $supplementaryDuty;
-    }
-
-    /**
-     * @return float
-     */
-    public function getValueAddedTax()
-    {
-        return $this->valueAddedTax;
-    }
-
-    /**
-     * @param float $valueAddedTax
-     */
-    public function setValueAddedTax($valueAddedTax)
-    {
-        $this->valueAddedTax = $valueAddedTax;
-    }
-
-    /**
-     * @return float
-     */
-    public function getAdvanceIncomeTax()
-    {
-        return $this->advanceIncomeTax;
-    }
-
-    /**
-     * @param float $advanceIncomeTax
-     */
-    public function setAdvanceIncomeTax($advanceIncomeTax)
-    {
-        $this->advanceIncomeTax = $advanceIncomeTax;
-    }
-
-    /**
-     * @return float
-     */
-    public function getRecurringDeposit()
-    {
-        return $this->recurringDeposit;
-    }
-
-    /**
-     * @param float $recurringDeposit
-     */
-    public function setRecurringDeposit($recurringDeposit)
-    {
-        $this->recurringDeposit = $recurringDeposit;
-    }
-
-    /**
-     * @return float
-     */
-    public function getAdvanceTradeVat()
-    {
-        return $this->advanceTradeVat;
-    }
-
-    /**
-     * @param float $advanceTradeVat
-     */
-    public function setAdvanceTradeVat($advanceTradeVat)
-    {
-        $this->advanceTradeVat = $advanceTradeVat;
-    }
-
-    /**
-     * @return float
-     */
-    public function getTotalTaxIncidence()
-    {
-        return $this->totalTaxIncidence;
-    }
-
-    /**
-     * @param float $totalTaxIncidence
-     */
-    public function setTotalTaxIncidence($totalTaxIncidence)
-    {
-        $this->totalTaxIncidence = $totalTaxIncidence;
-    }
-
-    /**
-     * @return float
-     */
-    public function getAdvanceTradeVatPercent()
-    {
-        return $this->advanceTradeVatPercent;
-    }
-
-    /**
-     * @param float $advanceTradeVatPercent
-     */
-    public function setAdvanceTradeVatPercent($advanceTradeVatPercent)
-    {
-        $this->advanceTradeVatPercent = $advanceTradeVatPercent;
-    }
-
-    /**
-     * @return float
-     */
-    public function getRecurringDepositPercent()
-    {
-        return $this->recurringDepositPercent;
-    }
-
-    /**
-     * @param float $recurringDepositPercent
-     */
-    public function setRecurringDepositPercent($recurringDepositPercent)
-    {
-        $this->recurringDepositPercent = $recurringDepositPercent;
-    }
-
-    /**
-     * @return float
-     */
-    public function getAdvanceIncomeTaxPercent()
-    {
-        return $this->advanceIncomeTaxPercent;
-    }
-
-    /**
-     * @param float $advanceIncomeTaxPercent
-     */
-    public function setAdvanceIncomeTaxPercent($advanceIncomeTaxPercent)
-    {
-        $this->advanceIncomeTaxPercent = $advanceIncomeTaxPercent;
-    }
-
-    /**
-     * @return float
-     */
-    public function getValueAddedTaxPercent()
-    {
-        return $this->valueAddedTaxPercent;
-    }
-
-    /**
-     * @param float $valueAddedTaxPercent
-     */
-    public function setValueAddedTaxPercent($valueAddedTaxPercent)
-    {
-        $this->valueAddedTaxPercent = $valueAddedTaxPercent;
-    }
-
-    /**
-     * @return float
-     */
-    public function getSupplementaryDutyPercent()
-    {
-        return $this->supplementaryDutyPercent;
-    }
-
-    /**
-     * @param float $supplementaryDutyPercent
-     */
-    public function setSupplementaryDutyPercent($supplementaryDutyPercent)
-    {
-        $this->supplementaryDutyPercent = $supplementaryDutyPercent;
-    }
-
-    /**
-     * @return float
-     */
-    public function getCustomsDutyPercent()
-    {
-        return $this->customsDutyPercent;
-    }
-
-    /**
-     * @param float $customsDutyPercent
-     */
-    public function setCustomsDutyPercent($customsDutyPercent)
-    {
-        $this->customsDutyPercent = $customsDutyPercent;
-    }
 
     /**
      * @return float
@@ -795,53 +479,7 @@ class StockItem
         $this->serialNo = $serialNo;
     }
 
-    /**
-     * @return string
-     */
-    public function getAssuranceType()
-    {
-        return $this->assuranceType;
-    }
 
-    /**
-     * @param string $assuranceType
-     */
-    public function setAssuranceType($assuranceType)
-    {
-        $this->assuranceType = $assuranceType;
-    }
-
-    /**
-     * @return string
-     */
-    public function getAssuranceFromVendor()
-    {
-        return $this->assuranceFromVendor;
-    }
-
-    /**
-     * @param string $assuranceFromVendor
-     */
-    public function setAssuranceFromVendor($assuranceFromVendor)
-    {
-        $this->assuranceFromVendor = $assuranceFromVendor;
-    }
-
-    /**
-     * @return string
-     */
-    public function getAssuranceToCustomer()
-    {
-        return $this->assuranceToCustomer;
-    }
-
-    /**
-     * @param string $assuranceToCustomer
-     */
-    public function setAssuranceToCustomer($assuranceToCustomer)
-    {
-        $this->assuranceToCustomer = $assuranceToCustomer;
-    }
 
     /**
      * @return mixed
@@ -861,22 +499,6 @@ class StockItem
 
 
     /**
-     * @return AccountVendor
-     */
-    public function getVendor()
-    {
-        return $this->vendor;
-    }
-
-    /**
-     * @param AccountVendor $vendor
-     */
-    public function setVendor($vendor)
-    {
-        $this->vendor = $vendor;
-    }
-
-    /**
      * @return Brand
      */
     public function getBrand()
@@ -893,7 +515,7 @@ class StockItem
     }
 
     /**
-     * @return Inventory
+     * @return Config
      */
     public function getConfig()
     {
@@ -901,7 +523,7 @@ class StockItem
     }
 
     /**
-     * @param Inventory $config
+     * @param Config $config
      */
     public function setConfig($config)
     {
@@ -940,109 +562,6 @@ class StockItem
         $this->price = $price;
     }
 
-    /**
-     * @return TaxTariff
-     */
-    public function getHsCode()
-    {
-        return $this->hsCode;
-    }
-
-    /**
-     * @param TaxTariff $hsCode
-     */
-    public function setHsCode($hsCode)
-    {
-        $this->hsCode = $hsCode;
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getPurchaseStockReturn()
-    {
-        return $this->purchaseStockReturn;
-    }
-
-    /**
-     * @param mixed $purchaseStockReturn
-     */
-    public function setPurchaseStockReturn($purchaseStockReturn)
-    {
-        $this->purchaseStockReturn = $purchaseStockReturn;
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getSalesStockReturn()
-    {
-        return $this->salesStockReturn;
-    }
-
-    /**
-     * @param mixed $salesStockReturn
-     */
-    public function setSalesStockReturn($salesStockReturn)
-    {
-        $this->salesStockReturn = $salesStockReturn;
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getAssetsStockReturn()
-    {
-        return $this->assetsStockReturn;
-    }
-
-    /**
-     * @param mixed $assetsStockReturn
-     */
-    public function setAssetsStockReturn($assetsStockReturn)
-    {
-        $this->assetsStockReturn = $assetsStockReturn;
-    }
-
-    /**
-     * @return Purchase
-     */
-    public function getPurchase()
-    {
-        return $this->purchase;
-    }
-
-    /**
-     * @param Purchase $purchase
-     */
-    public function setPurchase($purchase)
-    {
-        $this->purchase = $purchase;
-    }
-
-    /**
-     * @return float
-     */
-    public function getRebatePercent()
-    {
-        return $this->rebatePercent;
-    }
-
-    /**
-     * @param float $rebatePercent
-     */
-    public function setRebatePercent($rebatePercent)
-    {
-        $this->rebatePercent = $rebatePercent;
-    }
-
-    /**
-     * @return float
-     */
-    public function getRebate()
-    {
-        return $this->rebate;
-    }
 
     /**
      * @param float $rebate
@@ -1068,43 +587,12 @@ class StockItem
         $this->mode = $mode;
     }
 
-    /**
-     * @return PurchaseReturn
-     */
-    public function getPurchaseReturn()
-    {
-        return $this->purchaseReturn;
-    }
-
-    /**
-     * @param PurchaseReturn $purchaseReturn
-     */
-    public function setPurchaseReturn($purchaseReturn)
-    {
-        $this->purchaseReturn = $purchaseReturn;
-    }
-
-    /**
-     * @return SalesItem
-     */
-    public function getSalesItem()
-    {
-        return $this->salesItem;
-    }
-
-    /**
-     * @param SalesItem $salesItem
-     */
-    public function setSalesItem($salesItem)
-    {
-        $this->salesItem = $salesItem;
-    }
 
 
     /**
      * @return float
      */
-    public function getQuantity(): ? float
+    public function getQuantity()
     {
         return $this->quantity;
     }
@@ -1112,7 +600,7 @@ class StockItem
     /**
      * @param float $quantity
      */
-    public function setQuantity(float $quantity)
+    public function setQuantity( $quantity)
     {
         $this->quantity = $quantity;
     }
@@ -1120,7 +608,7 @@ class StockItem
     /**
      * @return float
      */
-    public function getOpeningQuantity(): ? float
+    public function getOpeningQuantity()
     {
         return $this->openingQuantity;
     }
@@ -1128,7 +616,7 @@ class StockItem
     /**
      * @param float $openingQuantity
      */
-    public function setOpeningQuantity(float $openingQuantity)
+    public function setOpeningQuantity( $openingQuantity)
     {
         $this->openingQuantity = $openingQuantity;
     }
@@ -1136,7 +624,7 @@ class StockItem
     /**
      * @return float
      */
-    public function getClosingQuantity(): ? float
+    public function getClosingQuantity()
     {
         return $this->closingQuantity;
     }
@@ -1144,7 +632,7 @@ class StockItem
     /**
      * @param float $closingQuantity
      */
-    public function setClosingQuantity(float $closingQuantity)
+    public function setClosingQuantity( $closingQuantity)
     {
         $this->closingQuantity = $closingQuantity;
     }
@@ -1152,7 +640,7 @@ class StockItem
     /**
      * @return float
      */
-    public function getClosingBalance(): ? float
+    public function getClosingBalance()
     {
         return $this->closingBalance;
     }
@@ -1160,7 +648,7 @@ class StockItem
     /**
      * @param float $closingBalance
      */
-    public function setClosingBalance(float $closingBalance)
+    public function setClosingBalance( $closingBalance)
     {
         $this->closingBalance = $closingBalance;
     }
@@ -1168,7 +656,7 @@ class StockItem
     /**
      * @return float
      */
-    public function getPurchaseQuantity(): ? float
+    public function getPurchaseQuantity()
     {
         return $this->purchaseQuantity;
     }
@@ -1176,7 +664,7 @@ class StockItem
     /**
      * @param float $purchaseQuantity
      */
-    public function setPurchaseQuantity(float $purchaseQuantity)
+    public function setPurchaseQuantity( $purchaseQuantity)
     {
         $this->purchaseQuantity = $purchaseQuantity;
     }
@@ -1184,7 +672,7 @@ class StockItem
     /**
      * @return float
      */
-    public function getPurchaseReturnQuantity(): ? float
+    public function getPurchaseReturnQuantity()
     {
         return $this->purchaseReturnQuantity;
     }
@@ -1192,7 +680,7 @@ class StockItem
     /**
      * @param float $purchaseReturnQuantity
      */
-    public function setPurchaseReturnQuantity(float $purchaseReturnQuantity)
+    public function setPurchaseReturnQuantity( $purchaseReturnQuantity)
     {
         $this->purchaseReturnQuantity = $purchaseReturnQuantity;
     }
@@ -1200,7 +688,7 @@ class StockItem
     /**
      * @return float
      */
-    public function getSalesQuantity(): ? float
+    public function getSalesQuantity()
     {
         return $this->salesQuantity;
     }
@@ -1208,7 +696,7 @@ class StockItem
     /**
      * @param float $salesQuantity
      */
-    public function setSalesQuantity(float $salesQuantity)
+    public function setSalesQuantity( $salesQuantity)
     {
         $this->salesQuantity = $salesQuantity;
     }
@@ -1216,7 +704,7 @@ class StockItem
     /**
      * @return float
      */
-    public function getSalesReturnQuantity(): ? float
+    public function getSalesReturnQuantity()
     {
         return $this->salesReturnQuantity;
     }
@@ -1224,7 +712,7 @@ class StockItem
     /**
      * @param float $salesReturnQuantity
      */
-    public function setSalesReturnQuantity(float $salesReturnQuantity)
+    public function setSalesReturnQuantity( $salesReturnQuantity)
     {
         $this->salesReturnQuantity = $salesReturnQuantity;
     }
@@ -1232,7 +720,7 @@ class StockItem
     /**
      * @return float
      */
-    public function getAssetsQuantity(): ? float
+    public function getAssetsQuantity()
     {
         return $this->assetsQuantity;
     }
@@ -1240,7 +728,7 @@ class StockItem
     /**
      * @param float $assetsQuantity
      */
-    public function setAssetsQuantity(float $assetsQuantity)
+    public function setAssetsQuantity( $assetsQuantity)
     {
         $this->assetsQuantity = $assetsQuantity;
     }
@@ -1248,7 +736,7 @@ class StockItem
     /**
      * @return float
      */
-    public function getAssetsReturnQuantity(): ? float
+    public function getAssetsReturnQuantity()
     {
         return $this->assetsReturnQuantity;
     }
@@ -1256,7 +744,7 @@ class StockItem
     /**
      * @param float $assetsReturnQuantity
      */
-    public function setAssetsReturnQuantity(float $assetsReturnQuantity)
+    public function setAssetsReturnQuantity( $assetsReturnQuantity)
     {
         $this->assetsReturnQuantity = $assetsReturnQuantity;
     }
@@ -1264,7 +752,7 @@ class StockItem
     /**
      * @return float
      */
-    public function getDamageQuantity(): ? float
+    public function getDamageQuantity()
     {
         return $this->damageQuantity;
     }
@@ -1272,7 +760,7 @@ class StockItem
     /**
      * @param float $damageQuantity
      */
-    public function setDamageQuantity(float $damageQuantity)
+    public function setDamageQuantity( $damageQuantity)
     {
         $this->damageQuantity = $damageQuantity;
     }
@@ -1280,7 +768,7 @@ class StockItem
     /**
      * @return float
      */
-    public function getOpeningBalance(): ? float
+    public function getOpeningBalance()
     {
         return $this->openingBalance;
     }
@@ -1288,42 +776,11 @@ class StockItem
     /**
      * @param float $openingBalance
      */
-    public function setOpeningBalance(float $openingBalance)
+    public function setOpeningBalance( $openingBalance)
     {
         $this->openingBalance = $openingBalance;
     }
 
-    /**
-     * @return PurchaseReturnItem
-     */
-    public function getPurchaseReturnItem()
-    {
-        return $this->purchaseReturnItem;
-    }
-
-    /**
-     * @param PurchaseReturnItem $purchaseReturnItem
-     */
-    public function setPurchaseReturnItem($purchaseReturnItem)
-    {
-        $this->purchaseReturnItem = $purchaseReturnItem;
-    }
-
-    /**
-     * @return SalesReturnItem
-     */
-    public function getSalesReturnItem()
-    {
-        return $this->salesReturnItem;
-    }
-
-    /**
-     * @param SalesReturnItem $salesReturnItem
-     */
-    public function setSalesReturnItem($salesReturnItem)
-    {
-        $this->salesReturnItem = $salesReturnItem;
-    }
 
 
 
@@ -1335,23 +792,7 @@ class StockItem
         return $this->productionIssueQuantity;
     }
 
-    /**
-     * @param float $productionIssueQuantity
-     */
-    public function setProductionIssueQuantity( $productionIssueQuantity)
-    {
-        $this->productionIssueQuantity = $productionIssueQuantity;
-    }
 
-
-
-    /**
-     * @return ProductionInventory
-     */
-    public function getProductionInventoryReturn()
-    {
-        return $this->productionInventoryReturn;
-    }
 
     /**
      * @param ProductionInventory $productionInventoryReturn
@@ -1364,7 +805,7 @@ class StockItem
     /**
      * @return float
      */
-    public function getProductionInventoryReturnQuantity(): ? float
+    public function getProductionInventoryReturnQuantity()
     {
         return $this->productionInventoryReturnQuantity;
     }
@@ -1372,44 +813,11 @@ class StockItem
     /**
      * @param float $productionInventoryReturnQuantity
      */
-    public function setProductionInventoryReturnQuantity(float $productionInventoryReturnQuantity)
+    public function setProductionInventoryReturnQuantity( $productionInventoryReturnQuantity)
     {
         $this->productionInventoryReturnQuantity = $productionInventoryReturnQuantity;
     }
 
-
-
-    /**
-     * @return ProductionExpense
-     */
-    public function getProductionExpense()
-    {
-        return $this->productionExpense;
-    }
-
-    /**
-     * @param ProductionExpense $productionExpense
-     */
-    public function setProductionExpense($productionExpense)
-    {
-        $this->productionExpense = $productionExpense;
-    }
-
-    /**
-     * @return ProductionExpense
-     */
-    public function getProductionExpenseReturn()
-    {
-        return $this->productionExpenseReturn;
-    }
-
-    /**
-     * @param ProductionExpense $productionExpenseReturn
-     */
-    public function setProductionExpenseReturn($productionExpenseReturn)
-    {
-        $this->productionExpenseReturn = $productionExpenseReturn;
-    }
 
 
     /**
@@ -1428,45 +836,7 @@ class StockItem
         $this->productionExpenseQuantity = $productionExpenseQuantity;
     }
 
-    /**
-     * @return ProductionReceiveBatchItem
-     */
-    public function getProductionReceiveItem()
-    {
-        return $this->productionReceiveItem;
-    }
 
-    /**
-     * @param ProductionReceiveBatchItem $productionReceiveItem
-     */
-    public function setProductionReceiveItem($productionReceiveItem)
-    {
-        $this->productionReceiveItem = $productionReceiveItem;
-    }
-
-    /**
-     * @return ProductionBatchItem
-     */
-    public function getProductionBatchItem()
-    {
-        return $this->productionBatchItem;
-    }
-
-    /**
-     * @param ProductionBatchItem $productionBatchItem
-     */
-    public function setProductionBatchItem($productionBatchItem)
-    {
-        $this->productionBatchItem = $productionBatchItem;
-    }
-
-    /**
-     * @return ProductionBatchItem
-     */
-    public function getProductionBatchItemReturn()
-    {
-        return $this->productionBatchItemReturn;
-    }
 
     /**
      * @param ProductionBatchItem $productionBatchItemReturn
@@ -1487,7 +857,7 @@ class StockItem
     /**
      * @param float $productionBatchItemQuantity
      */
-    public function setProductionBatchItemQuantity(float $productionBatchItemQuantity)
+    public function setProductionBatchItemQuantity( $productionBatchItemQuantity)
     {
         $this->productionBatchItemQuantity = $productionBatchItemQuantity;
     }
@@ -1503,7 +873,7 @@ class StockItem
     /**
      * @param float $productionBatchItemReturnQuantity
      */
-    public function setProductionBatchItemReturnQuantity(float $productionBatchItemReturnQuantity)
+    public function setProductionBatchItemReturnQuantity( $productionBatchItemReturnQuantity)
     {
         $this->productionBatchItemReturnQuantity = $productionBatchItemReturnQuantity;
     }
@@ -1519,27 +889,12 @@ class StockItem
     /**
      * @param float $productionExpenseReturnQuantity
      */
-    public function setProductionExpenseReturnQuantity(float $productionExpenseReturnQuantity)
+    public function setProductionExpenseReturnQuantity( $productionExpenseReturnQuantity)
     {
         $this->productionExpenseReturnQuantity = $productionExpenseReturnQuantity;
     }
 
-    /**
-     * @return \App\Entity\Core\Setting
-     */
-    public function getBranch()
-    {
-        return $this->branch;
-    }
 
-
-    /**
-     * @param \App\Entity\Core\Setting $branch
-     */
-    public function setBranch($branch)
-    {
-        $this->branch = $branch;
-    }
 
     /**
      * @return float
@@ -1552,7 +907,7 @@ class StockItem
     /**
      * @param float $branchIssueQuantity
      */
-    public function setBranchIssueQuantity(float $branchIssueQuantity)
+    public function setBranchIssueQuantity( $branchIssueQuantity)
     {
         $this->branchIssueQuantity = $branchIssueQuantity;
     }
@@ -1568,7 +923,7 @@ class StockItem
     /**
      * @param float $branchIssueReturnQuantity
      */
-    public function setBranchIssueReturnQuantity(float $branchIssueReturnQuantity)
+    public function setBranchIssueReturnQuantity( $branchIssueReturnQuantity)
     {
         $this->branchIssueReturnQuantity = $branchIssueReturnQuantity;
     }
@@ -1584,7 +939,7 @@ class StockItem
     /**
      * @param int $code
      */
-    public function setCode(int $code)
+    public function setCode( $code)
     {
         $this->code = $code;
     }
@@ -1600,26 +955,12 @@ class StockItem
     /**
      * @param string $sku
      */
-    public function setSku(string $sku)
+    public function setSku( $sku)
     {
         $this->sku = $sku;
     }
 
-    /**
-     * @return float
-     */
-    public function getAdvanceTax()
-    {
-        return $this->advanceTax;
-    }
 
-    /**
-     * @param float $advanceTax
-     */
-    public function setAdvanceTax(float $advanceTax)
-    {
-        $this->advanceTax = $advanceTax;
-    }
 
     /**
      * @return string
@@ -1637,69 +978,7 @@ class StockItem
         $this->remark = $remark;
     }
 
-    /**
-     * @return SalesReturn
-     */
-    public function getSalesReturn()
-    {
-        return $this->salesReturn;
-    }
 
-    /**
-     * @param SalesReturn $salesReturn
-     */
-    public function setSalesReturn($salesReturn)
-    {
-        $this->salesReturn = $salesReturn;
-    }
-
-    /**
-     * @return ProductionReceiveBatch
-     */
-    public function getProductionReceive()
-    {
-        return $this->productionReceive;
-    }
-
-    /**
-     * @param ProductionReceiveBatch $productionReceive
-     */
-    public function setProductionReceive($productionReceive)
-    {
-        $this->productionReceive = $productionReceive;
-    }
-
-    /**
-     * @return ProductionBatch
-     */
-    public function getProductionBatch()
-    {
-        return $this->productionBatch;
-    }
-
-    /**
-     * @param ProductionBatch $productionBatch
-     */
-    public function setProductionBatch($productionBatch)
-    {
-        $this->productionBatch = $productionBatch;
-    }
-
-    /**
-     * @return \Terminalbd\NbrvatBundle\Entity\Setting
-     */
-    public function getTaxReturnNote()
-    {
-        return $this->taxReturnNote;
-    }
-
-    /**
-     * @param \Terminalbd\NbrvatBundle\Entity\Setting $taxReturnNote
-     */
-    public function setTaxReturnNote($taxReturnNote)
-    {
-        $this->taxReturnNote = $taxReturnNote;
-    }
 
     /**
      * @return \DateTime
@@ -1716,6 +995,136 @@ class StockItem
     {
         $this->issueDate = $issueDate;
     }
+
+    /**
+     * @return mixed
+     */
+    public function getItem()
+    {
+        return $this->item;
+    }
+
+    /**
+     * @param mixed $item
+     */
+    public function setItem($item)
+    {
+        $this->item = $item;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getRackNo()
+    {
+        return $this->rackNo;
+    }
+
+    /**
+     * @param mixed $rackNo
+     */
+    public function setRackNo($rackNo)
+    {
+        $this->rackNo = $rackNo;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getUnit()
+    {
+        return $this->unit;
+    }
+
+    /**
+     * @param mixed $unit
+     */
+    public function setUnit($unit)
+    {
+        $this->unit = $unit;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getGrade()
+    {
+        return $this->grade;
+    }
+
+    /**
+     * @param mixed $grade
+     */
+    public function setGrade($grade)
+    {
+        $this->grade = $grade;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getSize()
+    {
+        return $this->size;
+    }
+
+    /**
+     * @param mixed $size
+     */
+    public function setSize($size)
+    {
+        $this->size = $size;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getColor()
+    {
+        return $this->color;
+    }
+
+    /**
+     * @param mixed $color
+     */
+    public function setColor($color)
+    {
+        $this->color = $color;
+    }
+
+    /**
+     * @return \DateTime
+     */
+    public function getCreatedAt()
+    {
+        return $this->createdAt;
+    }
+
+    /**
+     * @param \DateTime $createdAt
+     */
+    public function setCreatedAt($createdAt)
+    {
+        $this->createdAt = $createdAt;
+    }
+
+    /**
+     * @return \DateTime
+     */
+    public function getUpdatedAt()
+    {
+        return $this->updatedAt;
+    }
+
+    /**
+     * @param \DateTime $updatedAt
+     */
+    public function setUpdatedAt($updatedAt)
+    {
+        $this->updatedAt = $updatedAt;
+    }
+
+
 
 
 }

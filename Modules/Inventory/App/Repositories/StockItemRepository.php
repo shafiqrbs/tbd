@@ -1,8 +1,10 @@
 <?php
 
 namespace Modules\Inventory\App\Repositories;
+use Doctrine\DBAL\DriverManager;
 use Doctrine\ORM\EntityRepository;
 use Modules\Inventory\App\Entities\Product;
+use Modules\Inventory\App\Entities\StockItem;
 
 /**
  * ItemTypeGroupingRepository
@@ -17,7 +19,6 @@ class StockItemRepository extends EntityRepository
      * @param $qb
      * @param $data
      */
-
     protected function handleWithSearch($qb,$data)
     {
         if(!empty($data))
@@ -80,6 +81,22 @@ class StockItemRepository extends EntityRepository
 
     }
 
+    public function insertStockItem($id){
+
+        $em = $this->_em;
+        /** @var  $product Product  */
+        $product = $em->getRepository(Product::class)->find($id);
+        if(empty($product->getStockItems())){
+            $entity = new StockItem();
+            $entity->setConfig($product->getConfig());
+            $entity->setItem($product);
+            $em->persist($entity);
+            $em->flush();
+        }
+
+
+    }
+
     public function checkAvailable($config ,$data)
     {
         $process = "true";
@@ -95,8 +112,6 @@ class StockItemRepository extends EntityRepository
         }
         return $process;
     }
-
-
 
     public function finishGoods($inventory,$modes = array(),$data = array())
     {

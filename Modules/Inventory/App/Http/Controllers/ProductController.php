@@ -3,12 +3,15 @@
 namespace Modules\Inventory\App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use Doctrine\ORM\EntityManagerInterface;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Modules\AppsApi\App\Services\JsonRequestResponse;
 use Modules\Core\App\Models\UserModel;
+use Modules\Inventory\App\Entities\StockItem;
 use Modules\Inventory\App\Http\Requests\ProductRequest;
 use Modules\Inventory\App\Models\ProductModel;
+use Modules\Inventory\App\Repositories\StockItemRepository;
 
 class ProductController extends Controller
 {
@@ -41,13 +44,14 @@ class ProductController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(ProductRequest $request)
+    public function store(ProductRequest $request,EntityManagerInterface $em)
     {
         $service = new JsonRequestResponse();
         $input = $request->validated();
         $input['config_id'] = $this->domain['config_id'];
-
         $entity = ProductModel::create($input);
+
+        $entities = $em->getRepository(StockItem::class)->insertStockItem($entity['id']);
         $data = $service->returnJosnResponse($entity);
         return $data;
     }
