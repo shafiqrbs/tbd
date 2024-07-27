@@ -49,11 +49,12 @@ Route::prefix('/production')->middleware([HeaderAuthenticationMiddleware::class]
     Route::apiResource('recipe', ProductionRecipeController::class)
         ->middleware([HeaderAuthenticationMiddleware::class])
         ->names([
-            'index' => 'production.recipe.index',
-            'store' => 'production.recipe.store',
-            'show' => 'production.recipe.show',
-            'update' => 'production.recipe.update',
-            'destroy' => 'production.recipe.destroy'
+            'index'     => 'production.recipe.index',
+            'restore'   => 'production.recipe.restore',
+            'store'     => 'production.recipe.store',
+            'show'      => 'production.recipe.show',
+            'update'    => 'production.recipe.update',
+            'destroy'   => 'production.recipe.destroy'
         ]);
     ;
 });
