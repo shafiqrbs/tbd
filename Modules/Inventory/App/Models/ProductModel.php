@@ -155,7 +155,7 @@ class ProductModel extends Model
             ->select([
                 'inv_product.id',
                 'inv_product.name as display_name',
-                \DB::raw("CONCAT(inv_product.name, ' [',inv_product.remaining_quantity,'] ', inv_particular.name) AS product_name"),
+                \DB::raw("CONCAT(inv_product.name, ' [',IFNULL(inv_product.remaining_quantity, 0),'] ', inv_particular.name) AS product_name"),
                 'inv_product.slug',
                 'inv_category.name as category_name',
                 'inv_particular.id as unit_id',
@@ -166,6 +166,9 @@ class ProductModel extends Model
                 'inv_product.sales_price',
                 'inv_product.barcode',
                 'inv_product.alternative_name',
+                'inv_particular.name as unitname',
+                'inv_product.name as productname',
+                'inv_product.remaining_quantity'
             ]);
         $products = $products->orderBy('inv_product.id','DESC')->get();
 
