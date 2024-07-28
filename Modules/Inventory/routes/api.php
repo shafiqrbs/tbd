@@ -14,6 +14,7 @@ use Modules\Inventory\App\Http\Controllers\ProductController;
 use Modules\Inventory\App\Http\Controllers\PurchaseController;
 use Modules\Inventory\App\Http\Controllers\PurchaseItemController;
 use Modules\Inventory\App\Http\Controllers\SalesController;
+use Modules\Inventory\App\Http\Controllers\StockItemController;
 
 /*
     |--------------------------------------------------------------------------
@@ -42,6 +43,8 @@ Route::prefix('/inventory')->middleware([HeaderAuthenticationMiddleware::class])
 
     Route::apiResource('/category-group', CategoryGroupController::class)->middleware([HeaderAuthenticationMiddleware::class]);
     Route::apiResource('/product', ProductController::class)->middleware([HeaderAuthenticationMiddleware::class]);
+    Route::apiResource('/stock', StockItemController::class)->middleware([HeaderAuthenticationMiddleware::class]);
+    Route::get('/stock-item', [StockItemController::class,'stockItem'])->name('get_stock_item');
 
     Route::apiResource('/sales', SalesController::class)->middleware([HeaderAuthenticationMiddleware::class]);
     Route::get('/sales/edit/{id}', [SalesController::class,'edit'])->name('get_edit_sales');
@@ -56,7 +59,7 @@ Route::prefix('/inventory')->middleware([HeaderAuthenticationMiddleware::class])
 
     Route::apiResource('/opening-stock', OpeningStockController::class)->middleware([HeaderAuthenticationMiddleware::class]);
     Route::post('/opening-stock/inline-update', [OpeningStockController::class,'inlineUpdate'])->name('opening_stock_inline_update');
-    Route::get('/stock-item', [ProductController::class,'stockItem'])->name('get_stock_item');
+
 
 });
 

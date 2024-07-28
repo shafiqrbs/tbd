@@ -94,6 +94,14 @@ class StockItem
 
 
      /**
+     * @var string
+     *
+     * @ORM\Column(type="text", nullable = true)
+     */
+    private $displayName;
+
+
+     /**
      * @var float
      *
      * @ORM\Column(name="price", type="float", options={"default":0})
@@ -105,6 +113,7 @@ class StockItem
      * @var float
      *
      * @ORM\Column(type="float", options={"default":0})
+     */
     private $purchasePrice;
 
 
@@ -180,6 +189,19 @@ class StockItem
      * @ORM\Column(type="float",options={"default"="0"})
      */
     private $purchaseQuantity;
+
+     /**
+     * @var float
+     * @ORM\Column(type="float",options={"default"="0"})
+     */
+    private $minQuantity;
+
+
+     /**
+     * @var float
+     * @ORM\Column(type="float",options={"default"="0"})
+     */
+    private $reorderQuantity;
 
     /**
      * @var float
@@ -271,6 +293,13 @@ class StockItem
     private $damageQuantity = 0.00;
 
 
+     /**
+     * @var float
+     * @ORM\Column(type="float", nullable = true)
+     */
+    private $remainingQuantity = 0.00;
+
+
     /**
      * @var string
      *
@@ -320,6 +349,20 @@ class StockItem
      * @ORM\Column(type="string", length=50, nullable=true)
      */
     private $sku;
+
+     /**
+     * @var string
+     *
+     * @ORM\Column(type="string", length=50, nullable=true)
+     */
+    private $barcode;
+
+     /**
+     * @var string
+     *
+     * @ORM\Column(type="string", length=50, nullable=true)
+     */
+    private $slug;
 
     /**
      * @var boolean
@@ -1185,6 +1228,124 @@ class StockItem
     {
         $this->isDelete = $isDelete;
     }
+
+    /**
+     * @return string
+     */
+    public function getDisplayName()
+    {
+        return $this->displayName;
+    }
+
+    /**
+     * @param string $displayName
+     */
+    public function setDisplayName($displayName)
+    {
+        $this->displayName = $displayName;
+    }
+
+    /**
+     * @return float
+     */
+    public function getMinQuantity()
+    {
+        return $this->minQuantity;
+    }
+
+    /**
+     * @param float $minQuantity
+     */
+    public function setMinQuantity($minQuantity)
+    {
+        $this->minQuantity = $minQuantity;
+    }
+
+    /**
+     * @return float
+     */
+    public function getReorderQuantity()
+    {
+        return $this->reorderQuantity;
+    }
+
+    /**
+     * @param float $reorderQuantity
+     */
+    public function setReorderQuantity($reorderQuantity)
+    {
+        $this->reorderQuantity = $reorderQuantity;
+    }
+
+    /**
+     * @return float
+     */
+    public function getPurchasePrice()
+    {
+        return $this->purchasePrice;
+    }
+
+    /**
+     * @param float $purchasePrice
+     */
+    public function setPurchasePrice($purchasePrice)
+    {
+        $this->purchasePrice = $purchasePrice;
+    }
+
+    /**
+     * @return float
+     */
+    public function getRemainingQuantity()
+    {
+        return $this->remainingQuantity;
+    }
+
+    /**
+     * @param float $remainingQuantity
+     */
+    public function setRemainingQuantity($remainingQuantity)
+    {
+        $this->remainingQuantity = $remainingQuantity;
+    }
+
+    /**
+     * @return string
+     */
+    public function getBarcode()
+    {
+        return $this->barcode;
+    }
+
+    /**
+     * @param string $barcode
+     */
+    public function setBarcode($barcode)
+    {
+        $this->barcode = $barcode;
+    }
+
+    /**
+     * @return string
+     */
+    public function getSlug()
+    {
+        return $this->slug;
+    }
+
+    /**
+     * @param string $slug
+     */
+    public function setSlug($slug)
+    {
+        $this->slug = $slug;
+    }
+
+
+
+
+
+
 
 
 
