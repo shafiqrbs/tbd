@@ -25,4 +25,7 @@ yarn-error.log
 .vscode
 composer.lock
 /storage/proxies
+/storage/framework
+/storage/logs
+/storage/app
 

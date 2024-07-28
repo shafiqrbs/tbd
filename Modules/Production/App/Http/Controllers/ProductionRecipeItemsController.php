@@ -3,10 +3,13 @@
 namespace Modules\Production\App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use Doctrine\ORM\EntityManager;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Modules\Core\App\Models\UserModel;
+use Modules\Inventory\App\Entities\StockItem;
+use Modules\Production\App\Entities\ProductionItem;
 use Modules\Production\App\Models\ProductionItems;
 
 class ProductionRecipeItemsController extends Controller
@@ -38,6 +41,23 @@ class ProductionRecipeItemsController extends Controller
         return $response;
     }
 
+    public function restore(Request $request, EntityManager $em)
+    {
+        $pro_config =  $this->domain['pro_config'];
+        $inv_config =  $this->domain['config_id'];
+        $entities = $em->getRepository(StockItem::class)->getProductionItems($inv_config);
+        $response = new Response();
+        foreach ($entities as $entity) {
+            $em->getRepository(ProductionItem::class)->insertUpdate($pro_config, $entity['id']);
+        }
+        $response->setContent(json_encode([
+            'message' => 'success',
+            'status' => Response::HTTP_OK
+        ]));
+        $response->setStatusCode(Response::HTTP_OK);
+        return $response;
+    }
+
     /**
      * Show the form for creating a new resource.
      */
@@ -49,7 +69,7 @@ class ProductionRecipeItemsController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request): RedirectResponse
+    public function store(Request $request)
     {
         //
     }

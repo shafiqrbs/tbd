@@ -63,6 +63,7 @@ class ProductionItemRepository extends EntityRepository
         }
         $entity->setItem($stockItem);
         $entity->setConfig($config);
+        $entity->setStatus(1);
         $em->persist($entity);
         $em->flush();
         return $entity->getId();

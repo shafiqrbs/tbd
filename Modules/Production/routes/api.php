@@ -62,6 +62,6 @@ Route::prefix('/production')->middleware([HeaderAuthenticationMiddleware::class]
     ;
 
     Route::prefix('restore')->middleware([HeaderAuthenticationMiddleware::class])->group(function() {
-        Route::get('/item', [ProductionRecipeController::class,'restore'])->name('pro_recipe_restore');
+        Route::get('/item', [ProductionRecipeItemsController::class,'restore'])->name('pro_item_restore');
     });
 });

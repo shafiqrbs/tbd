@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\DB;
 use Modules\AppsApi\App\Services\JsonRequestResponse;
 use Modules\Core\App\Models\UserModel;
 use Modules\Inventory\App\Entities\StockItem;
+use Modules\Production\App\Entities\ProductionElement;
 use Modules\Production\App\Entities\ProductionItem;
 use Modules\Production\App\Models\ProductionElements;
 use Modules\Production\App\Models\ProductionValueAdded;
@@ -45,32 +46,6 @@ class ProductionRecipeController extends Controller
         return $response;
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    /*public function restore(Request $request, EntityManager $em)
-    {
-
-         $pro_config =  $this->domain['pro_config'];
-         $inv_config =  $this->domain['config_id'];
-         $entities = $em->getRepository(StockItem::class)->getProductionItems($inv_config);
-         foreach ($entities as $entity):
-             $em->getRepository(ProductionItem::class)->insertUpdate($pro_config,$entity['id']);
-         endforeach;
-         exit;
-    }*/
-
-    public function restore(Request $request, EntityManager $em)
-    {
-        $pro_config =  $this->domain['pro_config'];
-        $inv_config =  $this->domain['config_id'];
-        $entities = $em->getRepository(StockItem::class)->getProductionItems($inv_config);
-
-        foreach ($entities as $entity) {
-            $em->getRepository(ProductionItem::class)->insertUpdate($pro_config, $entity['id']);
-        }
-        dump('ok');
-    }
 
     /**
      * Show the form for creating a new resource.
@@ -83,9 +58,11 @@ class ProductionRecipeController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request): RedirectResponse
+    public function store(Request $request, EntityManager $em)
     {
-        dump($request->all());
+        $data = $request->all();
+        $entities = $em->getRepository(ProductionElement::class)->insertProductionElement($data);
+
     }
 
     /**

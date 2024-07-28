@@ -30,7 +30,7 @@ class Product
 
 
      /**
-     * @ORM\OneToMany(targetEntity="StockItem", mappedBy="item" )
+     * @ORM\OneToMany(targetEntity="StockItem", mappedBy="product" )
      **/
     private  $stockItems;
 
@@ -79,15 +79,6 @@ class Product
     private $slug;
 
 
-
-    /**
-     * @var float
-     *
-     * @ORM\Column(type="float", nullable=true)
-     */
-    private $purchasePrice = 0;
-
-
     /**
      * @var string
      *
@@ -95,34 +86,6 @@ class Product
      */
     private $content;
 
-
-    /**
-     * @var float
-     *
-     * @ORM\Column(type="float", nullable=true)
-     */
-    private $salesPrice = 0;
-
-    /**
-     * @var float
-     *
-     * @ORM\Column(type="float", nullable=true)
-     */
-    private $price;
-
-    /**
-     * @var float
-     *
-     * @ORM\Column(type="float", nullable=true)
-     */
-    private $discountPrice;
-
-    /**
-     * @var string
-     *
-     * @ORM\Column(type="string", length=5, nullable=true)
-     */
-    private $sorting;
 
     /**
      * @var integer
@@ -137,54 +100,8 @@ class Product
      *
      * @ORM\Column(type="integer",  nullable=true)
      */
-     private $openingQuantity;
-
-    /**
-     * @var integer
-     *
-     * @ORM\Column(type="integer",  nullable=true)
-     */
-    private $minQuantity;
-
-
-     /**
-     * @var integer
-     *
-     * @ORM\Column(type="integer",  nullable=true)
-     */
-    private $reorderQuantity;
-
-
-      /**
-     * @var integer
-     *
-     * @ORM\Column(type="integer",  nullable=true)
-     */
-    private $remainingQuantity;
-
-
-     /**
-     * @var integer
-     *
-     * @ORM\Column(type="integer",  nullable=true)
-     */
     private $barcode;
 
-
-    /**
-     * @var string
-     *
-     * @ORM\Column(type="string", length=100, nullable=true)
-     */
-    private $sku;
-
-
-     /**
-     * @var string
-     *
-     * @ORM\Column(type="string", length=100, nullable=true)
-     */
-    private $modelNo;
 
 
     /**
@@ -342,21 +259,7 @@ class Product
         $this->slug = $slug;
     }
 
-    /**
-     * @return float
-     */
-    public function getPurchasePrice()
-    {
-        return $this->purchasePrice;
-    }
 
-    /**
-     * @param float $purchasePrice
-     */
-    public function setPurchasePrice($purchasePrice)
-    {
-        $this->purchasePrice = $purchasePrice;
-    }
 
     /**
      * @return string
@@ -374,69 +277,6 @@ class Product
         $this->content = $content;
     }
 
-    /**
-     * @return float
-     */
-    public function getSalesPrice()
-    {
-        return $this->salesPrice;
-    }
-
-    /**
-     * @param float $salesPrice
-     */
-    public function setSalesPrice($salesPrice)
-    {
-        $this->salesPrice = $salesPrice;
-    }
-
-    /**
-     * @return float
-     */
-    public function getPrice()
-    {
-        return $this->price;
-    }
-
-    /**
-     * @param float $price
-     */
-    public function setPrice($price)
-    {
-        $this->price = $price;
-    }
-
-    /**
-     * @return float
-     */
-    public function getDiscountPrice()
-    {
-        return $this->discountPrice;
-    }
-
-    /**
-     * @param float $discountPrice
-     */
-    public function setDiscountPrice($discountPrice)
-    {
-        $this->discountPrice = $discountPrice;
-    }
-
-    /**
-     * @return string
-     */
-    public function getSorting()
-    {
-        return $this->sorting;
-    }
-
-    /**
-     * @param string $sorting
-     */
-    public function setSorting($sorting)
-    {
-        $this->sorting = $sorting;
-    }
 
     /**
      * @return int
@@ -457,70 +297,6 @@ class Product
     /**
      * @return int
      */
-    public function getOpeningQuantity()
-    {
-        return $this->openingQuantity;
-    }
-
-    /**
-     * @param int $openingQuantity
-     */
-    public function setOpeningQuantity($openingQuantity)
-    {
-        $this->openingQuantity = $openingQuantity;
-    }
-
-    /**
-     * @return int
-     */
-    public function getMinQuantity()
-    {
-        return $this->minQuantity;
-    }
-
-    /**
-     * @param int $minQuantity
-     */
-    public function setMinQuantity($minQuantity)
-    {
-        $this->minQuantity = $minQuantity;
-    }
-
-    /**
-     * @return int
-     */
-    public function getReorderQuantity()
-    {
-        return $this->reorderQuantity;
-    }
-
-    /**
-     * @param int $reorderQuantity
-     */
-    public function setReorderQuantity($reorderQuantity)
-    {
-        $this->reorderQuantity = $reorderQuantity;
-    }
-
-    /**
-     * @return int
-     */
-    public function getRemainingQuantity()
-    {
-        return $this->remainingQuantity;
-    }
-
-    /**
-     * @param int $remainingQuantity
-     */
-    public function setRemainingQuantity($remainingQuantity)
-    {
-        $this->remainingQuantity = $remainingQuantity;
-    }
-
-    /**
-     * @return int
-     */
     public function getBarcode()
     {
         return $this->barcode;
@@ -532,38 +308,6 @@ class Product
     public function setBarcode($barcode)
     {
         $this->barcode = $barcode;
-    }
-
-    /**
-     * @return string
-     */
-    public function getSku()
-    {
-        return $this->sku;
-    }
-
-    /**
-     * @param string $sku
-     */
-    public function setSku($sku)
-    {
-        $this->sku = $sku;
-    }
-
-    /**
-     * @return string
-     */
-    public function getModelNo()
-    {
-        return $this->modelNo;
-    }
-
-    /**
-     * @param string $modelNo
-     */
-    public function setModelNo($modelNo)
-    {
-        $this->modelNo = $modelNo;
     }
 
     /**
@@ -631,14 +375,12 @@ class Product
     }
 
     /**
-     * @return mixed
+     * @return StockItem
      */
     public function getStockItems()
     {
         return $this->stockItems;
     }
-
-
 
 }
 
