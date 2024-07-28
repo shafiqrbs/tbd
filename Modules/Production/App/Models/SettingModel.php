@@ -110,6 +110,7 @@ class SettingModel extends Model
     public static function getMeasurementInputGenerate($domain)
     {
         $entity = self::where('pro_config.domain_id', $domain)
+            ->whereIN('pro_setting_type.slug',['value-added','utility'])
             ->join('pro_setting_type', 'pro_setting_type.id', '=', 'pro_setting.setting_type_id')
             ->join('pro_config', 'pro_config.id', '=', 'pro_setting.config_id')
             ->select([
