@@ -48,7 +48,7 @@ class ProductionRecipeController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function restore(Request $request, EntityManager $em)
+    /*public function restore(Request $request, EntityManager $em)
     {
 
          $pro_config =  $this->domain['pro_config'];
@@ -58,6 +58,18 @@ class ProductionRecipeController extends Controller
              $em->getRepository(ProductionItem::class)->insertUpdate($pro_config,$entity['id']);
          endforeach;
          exit;
+    }*/
+
+    public function restore(Request $request, EntityManager $em)
+    {
+        $pro_config =  $this->domain['pro_config'];
+        $inv_config =  $this->domain['config_id'];
+        $entities = $em->getRepository(StockItem::class)->getProductionItems($inv_config);
+
+        foreach ($entities as $entity) {
+            $em->getRepository(ProductionItem::class)->insertUpdate($pro_config, $entity['id']);
+        }
+        dump('ok');
     }
 
     /**
