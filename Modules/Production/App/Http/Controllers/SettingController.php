@@ -49,6 +49,8 @@ class SettingController extends Controller
     {
         $service = new JsonRequestResponse();
         $input = $request->validated();
+        $getConfigId = SettingModel::getConfigId($this->domain['global_id']);
+        $input['config_id'] = $getConfigId;
         $entity = SettingModel::create($input);
         $data = $service->returnJosnResponse($entity);
         return $data;
@@ -91,6 +93,8 @@ class SettingController extends Controller
     {
         $data = $request->validated();
         $entity = SettingModel::find($id);
+        $getConfigId = SettingModel::getConfigId($this->domain['global_id']);
+        $data['config_id'] = $getConfigId;
         $entity->update($data);
 
         $service = new JsonRequestResponse();
@@ -112,6 +116,20 @@ class SettingController extends Controller
     public function settingTypeDropdown()
     {
         $data = SettingTypeModel::getDropdown($this->domain);
+        $response = new Response();
+        $response->headers->set('Content-Type', 'application/json');
+        $response->setContent(json_encode([
+            'message' => 'success',
+            'status' => Response::HTTP_OK,
+            'data' => sizeof($data)>0 ? $data : []
+        ]));
+        $response->setStatusCode(Response::HTTP_OK);
+        return $response;
+    }
+
+    public function measurementInput()
+    {
+        $data = SettingModel::getMeasurementInputGenerate($this->domain['global_id']);
         $response = new Response();
         $response->headers->set('Content-Type', 'application/json');
         $response->setContent(json_encode([
