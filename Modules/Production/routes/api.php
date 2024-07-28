@@ -54,11 +54,14 @@ Route::prefix('/production')->middleware([HeaderAuthenticationMiddleware::class]
         ->middleware([HeaderAuthenticationMiddleware::class])
         ->names([
             'index'     => 'production.recipe.index',
-            'restore'   => 'production.recipe.restore',
             'store'     => 'production.recipe.store',
             'show'      => 'production.recipe.show',
             'update'    => 'production.recipe.update',
             'destroy'   => 'production.recipe.destroy'
         ]);
     ;
+
+    Route::prefix('restore')->middleware([HeaderAuthenticationMiddleware::class])->group(function() {
+        Route::get('/item', [ProductionRecipeController::class,'restore'])->name('pro_recipe_restore');
+    });
 });

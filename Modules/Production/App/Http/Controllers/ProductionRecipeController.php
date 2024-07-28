@@ -3,12 +3,15 @@
 namespace Modules\Production\App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use Doctrine\ORM\EntityManager;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
 use Modules\AppsApi\App\Services\JsonRequestResponse;
 use Modules\Core\App\Models\UserModel;
+use Modules\Inventory\App\Entities\StockItem;
+use Modules\Production\App\Entities\ProductionItem;
 use Modules\Production\App\Models\ProductionElements;
 use Modules\Production\App\Models\ProductionValueAdded;
 use Modules\Production\App\Models\SettingModel;
@@ -40,6 +43,21 @@ class ProductionRecipeController extends Controller
         ]));
         $response->setStatusCode(Response::HTTP_OK);
         return $response;
+    }
+
+    /**
+     * Show the form for editing the specified resource.
+     */
+    public function restore(Request $request, EntityManager $em)
+    {
+
+         $pro_config =  $this->domain['pro_config'];
+         $inv_config =  $this->domain['config_id'];
+         $entities = $em->getRepository(StockItem::class)->getProductionItems($inv_config);
+         foreach ($entities as $entity):
+             $em->getRepository(ProductionItem::class)->insertUpdate($pro_config,$entity['id']);
+         endforeach;
+         exit;
     }
 
     /**
@@ -102,6 +120,8 @@ class ProductionRecipeController extends Controller
     {
         return view('production::edit');
     }
+
+
 
     /**
      * Update the specified resource in storage.

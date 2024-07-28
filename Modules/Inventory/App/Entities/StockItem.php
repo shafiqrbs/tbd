@@ -88,7 +88,7 @@ class StockItem
     /**
      * @var string
      *
-     * @ORM\Column(type="name", nullable = true)
+     * @ORM\Column(type="text", nullable = true)
      */
     private $name;
 
@@ -96,7 +96,7 @@ class StockItem
      /**
      * @var float
      *
-     * @ORM\Column(name="price", type="float", options={"default"="0"})
+     * @ORM\Column(name="price", type="float", options={"default":0})
      */
     private $price;
 
@@ -322,6 +322,21 @@ class StockItem
     private $sku;
 
     /**
+     * @var boolean
+     *
+     * @ORM\Column(type="boolean",options={"default":0} )
+     */
+    private $status= true;
+
+    /**
+     * @var boolean
+     *
+     * @ORM\Column(type="boolean", options={"default":0})
+     */
+    private $isDelete;
+
+
+    /**
      * @var \DateTime
      *
      * @ORM\Column( type="datetime", nullable=true)
@@ -380,39 +395,6 @@ class StockItem
         $this->process = $process;
     }
 
-
-
-    /**
-     * @return float
-     */
-    public function getPurchasePrice()
-    {
-        return $this->purchasePrice;
-    }
-
-    /**
-     * @param float $purchasePrice
-     */
-    public function setPurchasePrice($purchasePrice)
-    {
-        $this->purchasePrice = $purchasePrice;
-    }
-
-    /**
-     * @return float
-     */
-    public function getSalesPrice()
-    {
-        return $this->salesPrice;
-    }
-
-    /**
-     * @param float $salesPrice
-     */
-    public function setSalesPrice($salesPrice)
-    {
-        $this->salesPrice = $salesPrice;
-    }
 
     /**
      * @return float
@@ -1123,6 +1105,88 @@ class StockItem
     {
         $this->updatedAt = $updatedAt;
     }
+
+    /**
+     * @return mixed
+     */
+    public function getProduct()
+    {
+        return $this->product;
+    }
+
+    /**
+     * @param mixed $product
+     */
+    public function setProduct($product)
+    {
+        $this->product = $product;
+    }
+
+    /**
+     * @return string
+     */
+    public function getName()
+    {
+        return $this->name;
+    }
+
+    /**
+     * @param string $name
+     */
+    public function setName($name)
+    {
+        $this->name = $name;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getSalesPrice()
+    {
+        return $this->salesPrice;
+    }
+
+    /**
+     * @param mixed $salesPrice
+     */
+    public function setSalesPrice($salesPrice)
+    {
+        $this->salesPrice = $salesPrice;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isStatus()
+    {
+        return $this->status;
+    }
+
+    /**
+     * @param bool $status
+     */
+    public function setStatus($status)
+    {
+        $this->status = $status;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isDelete()
+    {
+        return $this->isDelete;
+    }
+
+    /**
+     * @param bool $isDelete
+     */
+    public function setIsDelete($isDelete)
+    {
+        $this->isDelete = $isDelete;
+    }
+
+
 
 
 

@@ -2,7 +2,7 @@
 
 namespace Modules\Production\App\Entities;
 
-use App\Entity\Application\Production;
+
 use Modules\Core\App\Entities\User;
 use Doctrine\ORM\Mapping as ORM;
 use Gedmo\Mapping\Annotation as Gedmo;
@@ -25,6 +25,7 @@ class ProductionItem
     private $id;
 
     /**
+     * @var $config Config
      * @ORM\ManyToOne(targetEntity="Config")
      * @ORM\JoinColumn(onDelete="CASCADE")
      **/
@@ -305,7 +306,7 @@ class ProductionItem
     }
 
     /**
-     * @return Production
+     * @return Config
      */
     public function getConfig()
     {
@@ -313,7 +314,7 @@ class ProductionItem
     }
 
     /**
-     * @param Production $config
+     * @param Config $config
      */
     public function setConfig($config)
     {

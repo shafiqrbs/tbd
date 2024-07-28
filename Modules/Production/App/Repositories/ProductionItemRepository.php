@@ -4,6 +4,8 @@ namespace Modules\Production\App\Repositories;
 
 use Appstore\Bundle\TallyBundle\Entity\Damage;
 use Doctrine\ORM\EntityRepository;
+use Modules\Inventory\App\Entities\StockItem;
+use Modules\Production\App\Entities\Config;
 use Modules\Production\App\Entities\ProductionElement;
 use Modules\Production\App\Entities\ProductionItem;
 use Modules\Production\App\Entities\ProductionItemAmendment;
@@ -47,26 +49,20 @@ class ProductionItemRepository extends EntityRepository
         return  $result;
     }
 
-    public function insertUpdate(Production $config ,User $user , Item $item)
+    public function insertUpdate($config,$item)
     {
 
         $em = $this->_em;
-        $stock =  $this->findOneBy(array('item'=> $item->getId()));
+        $config = $em->getRepository(Config::class)->find($config);
+        $stockItem = $em->getRepository(StockItem::class)->find($item);
+        $stock =  $this->findOneBy(array('item'=> $item));
         if($stock){
          $entity = $stock;
         }else{
          $entity = new ProductionItem();
         }
-        $unit = !empty($item->getUnit() && !empty($item->getUnit()->getName())) ? $item->getUnit()->getName():'';
-        $entity->setName($item->getName());
-        $entity->setItem($item);
+        $entity->setItem($stockItem);
         $entity->setConfig($config);
-        $entity->setUom($unit);
-        $entity->setCreatedBy($user);
-        $entity->setIssueBy($user->getName());
-        if($user->getDesignation()){
-            $entity->setDesignation($user->getDesignation()->getName());
-        }
         $em->persist($entity);
         $em->flush();
         return $entity->getId();
