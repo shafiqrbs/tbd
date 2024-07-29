@@ -50,7 +50,7 @@ class Product
 
 
      /**
-     * @ORM\ManyToOne(targetEntity="Particular")
+     * @ORM\ManyToOne(targetEntity="Particular", inversedBy="product")
      * @ORM\JoinColumn(name="unit_id", referencedColumnName="id", nullable=true, onDelete="SET NULL")
      **/
     private $unit;
@@ -196,7 +196,7 @@ class Product
     }
 
     /**
-     * @return mixed
+     * @return Particular
      */
     public function getUnit()
     {
@@ -204,7 +204,7 @@ class Product
     }
 
     /**
-     * @param mixed $unit
+     * @param Particular $unit
      */
     public function setUnit($unit)
     {

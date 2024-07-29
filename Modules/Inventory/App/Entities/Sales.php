@@ -12,7 +12,7 @@ use Gedmo\Mapping\Annotation as Gedmo;
  * Sales
  *
  * @ORM\Table( name ="inv_sales")
- * @ORM\Entity()
+ * @ORM\Entity(repositoryClass="Modules\Inventory\App\Repositories\SalesRepository")
  */
 class Sales
 {

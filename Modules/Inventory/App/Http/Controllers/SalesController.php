@@ -3,6 +3,7 @@
 namespace Modules\Inventory\App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use Doctrine\ORM\EntityManager;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
@@ -48,15 +49,15 @@ class SalesController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(SalesRequest $request)
+    public function store(SalesRequest $request, EntityManager $em)
     {
         $service = new JsonRequestResponse();
         $input = $request->validated();
         $input['config_id'] = $this->domain['config_id'];
         $entity = SalesModel::create($input);
-
         $process = new SalesModel();
-        $process->insertSalesItems($entity,$input['items']);
+        $em->getRepository(SalesItem::class)->temporarySalesInsert($entity->id,$input);
+       // $process->insertSalesItems($entity,$input['items']);
         $salesData = SalesModel::getShow($entity->id, $this->domain);
         $data = $service->returnJosnResponse($salesData);
         return $data;

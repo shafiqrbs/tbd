@@ -87,7 +87,7 @@ class InvoiceBatchModel extends Model
             InvoiceBatchItemModel::create(
                 [
                     'invoice_batch_id' => $entity->id,
-                    'product_id' => $record->product_id,
+                    'stock_item_id' => $record->product_id,
                     'quantity' =>  $record->quantity,
                     'price' => $record->sales_price,
                     'sales_price' => $record->sales_price,

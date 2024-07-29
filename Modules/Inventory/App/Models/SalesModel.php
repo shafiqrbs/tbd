@@ -52,7 +52,7 @@ class SalesModel extends Model
             $record['created_at'] = $timestamp;
             $record['updated_at'] = $timestamp;
         }
-        SalesItemModel::insert($items);
+
     }
 
     public static function getRecords($request,$domain)
@@ -160,15 +160,14 @@ class SalesModel extends Model
                     'inv_sales_item.id',
                     'inv_sales_item.sale_id',
                     'inv_sales_item.product_id',
-                    'inv_sales_item.unit_id',
+                    'inv_sales_item.uom',
                     'inv_sales_item.item_name',
                     'inv_sales_item.quantity',
                     'inv_sales_item.sales_price',
                     'inv_sales_item.purchase_price',
                     'inv_sales_item.price',
                     'inv_sales_item.sub_total',
-                    'uti_product_unit.name as unit_name',
-                ])->join('uti_product_unit','uti_product_unit.id','=','inv_sales_item.unit_id');
+                ]);
             }])
             ->first();
 

@@ -30,11 +30,12 @@ class InvoiceBatchItem
      **/
     private  $invoiceBatch;
 
+
     /**
-     * @ORM\ManyToOne(targetEntity="Product")
-     * @ORM\JoinColumn(onDelete="CASCADE")
+     * @ORM\ManyToOne(targetEntity="StockItem")
+     * @ORM\JoinColumn(name="stock_item_id", referencedColumnName="id", nullable=true, onDelete="SET NULL")
      **/
-    private  $product;
+    private  $stockItem;
 
     /**
      * @var string
@@ -100,6 +101,241 @@ class InvoiceBatchItem
      * @ORM\Column(type="datetime")
      */
     private $updatedAt;
+
+    public function __construct()
+    {
+        $this->createdAt = new \DateTime();
+        $this->updatedAt = new \DateTime();
+    }
+
+    /**
+     * @ORM\PrePersist
+     */
+    public function prePersist()
+    {
+        $this->createdAt = new \DateTime();
+        $this->updatedAt = new \DateTime();
+    }
+
+    /**
+     * @ORM\PreUpdate
+     */
+    public function preUpdate()
+    {
+        $this->updatedAt = new \DateTime();
+    }
+
+    /**
+     * @return int
+     */
+    public function getId()
+    {
+        return $this->id;
+    }
+
+    /**
+     * @param int $id
+     */
+    public function setId($id)
+    {
+        $this->id = $id;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getInvoiceBatch()
+    {
+        return $this->invoiceBatch;
+    }
+
+    /**
+     * @param mixed $invoiceBatch
+     */
+    public function setInvoiceBatch($invoiceBatch)
+    {
+        $this->invoiceBatch = $invoiceBatch;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getProduct()
+    {
+        return $this->product;
+    }
+
+    /**
+     * @param mixed $product
+     */
+    public function setProduct($product)
+    {
+        $this->product = $product;
+    }
+
+    /**
+     * @return string
+     */
+    public function getUom()
+    {
+        return $this->uom;
+    }
+
+    /**
+     * @param string $uom
+     */
+    public function setUom($uom)
+    {
+        $this->uom = $uom;
+    }
+
+    /**
+     * @return string
+     */
+    public function getItemName()
+    {
+        return $this->itemName;
+    }
+
+    /**
+     * @param string $itemName
+     */
+    public function setItemName($itemName)
+    {
+        $this->itemName = $itemName;
+    }
+
+    /**
+     * @return float
+     */
+    public function getQuantity()
+    {
+        return $this->quantity;
+    }
+
+    /**
+     * @param float $quantity
+     */
+    public function setQuantity($quantity)
+    {
+        $this->quantity = $quantity;
+    }
+
+    /**
+     * @return float
+     */
+    public function getSalesPrice()
+    {
+        return $this->salesPrice;
+    }
+
+    /**
+     * @param float $salesPrice
+     */
+    public function setSalesPrice($salesPrice)
+    {
+        $this->salesPrice = $salesPrice;
+    }
+
+    /**
+     * @return float
+     */
+    public function getPurchasePrice()
+    {
+        return $this->purchasePrice;
+    }
+
+    /**
+     * @param float $purchasePrice
+     */
+    public function setPurchasePrice($purchasePrice)
+    {
+        $this->purchasePrice = $purchasePrice;
+    }
+
+    /**
+     * @return float
+     */
+    public function getPrice()
+    {
+        return $this->price;
+    }
+
+    /**
+     * @param float $price
+     */
+    public function setPrice($price)
+    {
+        $this->price = $price;
+    }
+
+    /**
+     * @return float
+     */
+    public function getSubTotal()
+    {
+        return $this->subTotal;
+    }
+
+    /**
+     * @param float $subTotal
+     */
+    public function setSubTotal($subTotal)
+    {
+        $this->subTotal = $subTotal;
+    }
+
+    /**
+     * @return \DateTime
+     */
+    public function getCreatedAt()
+    {
+        return $this->createdAt;
+    }
+
+    /**
+     * @param \DateTime $createdAt
+     */
+    public function setCreatedAt($createdAt)
+    {
+        $this->createdAt = $createdAt;
+    }
+
+    /**
+     * @return \DateTime
+     */
+    public function getUpdatedAt()
+    {
+        return $this->updatedAt;
+    }
+
+    /**
+     * @param \DateTime $updatedAt
+     */
+    public function setUpdatedAt($updatedAt)
+    {
+        $this->updatedAt = $updatedAt;
+    }
+
+    /**
+     * @return StockItem
+     */
+    public function getStockItem()
+    {
+        return $this->stockItem;
+    }
+
+    /**
+     * @param StockItem $stockItem
+     */
+    public function setStockItem($stockItem)
+    {
+        $this->stockItem = $stockItem;
+    }
+
+
+
+
 
 
 }

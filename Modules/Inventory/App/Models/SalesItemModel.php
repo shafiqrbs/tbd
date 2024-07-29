@@ -43,6 +43,11 @@ class SalesItemModel extends Model
         return $this->belongsTo(ProductModel::class,'product_id');
     }
 
+     public function inv_stock()
+    {
+        return $this->belongsTo(ProductModel::class,'stock_item_id');
+    }
+
     public function unit()
     {
         return $this->belongsTo(ProductUnitModel::class,'unit_id');

@@ -54,11 +54,6 @@ class StockItem
      **/
     private $rackNo;
 
-    /**
-     * @ORM\ManyToOne(targetEntity="Modules\Utility\App\Entities\ProductUnit")
-     * @ORM\JoinColumn(name="unit_id", referencedColumnName="id", nullable=true, onDelete="SET NULL")
-     **/
-    private  $unit;
 
     /**
      * @ORM\ManyToOne(targetEntity="Particular")
@@ -358,6 +353,13 @@ class StockItem
      * @ORM\Column(type="boolean",options={"default":0} )
      */
     private $status= true;
+
+     /**
+     * @var boolean
+     *
+     * @ORM\Column(type="boolean",options={"default":0} )
+     */
+    private $isMaster= false;
 
     /**
      * @var boolean
@@ -1012,21 +1014,6 @@ class StockItem
         $this->rackNo = $rackNo;
     }
 
-    /**
-     * @return mixed
-     */
-    public function getUnit()
-    {
-        return $this->unit;
-    }
-
-    /**
-     * @param mixed $unit
-     */
-    public function setUnit($unit)
-    {
-        $this->unit = $unit;
-    }
 
     /**
      * @return mixed
@@ -1110,7 +1097,7 @@ class StockItem
     }
 
     /**
-     * @return mixed
+     * @return Product
      */
     public function getProduct()
     {
@@ -1118,7 +1105,7 @@ class StockItem
     }
 
     /**
-     * @param mixed $product
+     * @param Product $product
      */
     public function setProduct($product)
     {
@@ -1300,6 +1287,23 @@ class StockItem
     {
         $this->slug = $slug;
     }
+
+    /**
+     * @return bool
+     */
+    public function isMaster()
+    {
+        return $this->isMaster;
+    }
+
+    /**
+     * @param bool $isMaster
+     */
+    public function setIsMaster($isMaster)
+    {
+        $this->isMaster = $isMaster;
+    }
+
 
 }
 

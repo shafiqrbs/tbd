@@ -137,25 +137,16 @@ class StockItemModel extends Model
             ->leftjoin('inv_particular','inv_particular.id','=','inv_product.unit_id')
             ->leftjoin('inv_setting','inv_setting.id','=','inv_product.product_type_id')
             ->select([
-                'inv_product.product_type_id',
-                'inv_setting.name as product_type',
-                'inv_category.name as category_name',
-                'inv_particular.name as unit_name',
-                'inv_product.id',
-                'inv_product.name as display_name',
-                \DB::raw("CONCAT(inv_stock.display_name, ' [',IFNULL(inv_stock.remaining_quantity, 0),'] ', inv_particular.name) AS product_name"),
-                'inv_product.alternative_name',
+                'inv_stock.id',
+                \DB::raw("CONCAT(inv_stock.display_name, '[',IFNULL(inv_stock.remaining_quantity, 0),'] ', inv_particular.name) AS product_name"),
+                'inv_stock.display_name as display_name',
                 'inv_product.slug',
                 'inv_product.category_id',
                 'inv_product.unit_id',
-                'inv_stock.opening_quantity',
-                'inv_stock.min_quantity',
-                'inv_stock.reorder_quantity',
+                'inv_stock.remaining_quantity as quantity',
                 'inv_stock.purchase_price',
                 'inv_stock.sales_price',
                 'inv_stock.barcode',
-                'inv_stock.sku',
-                'inv_stock.status'
             ]);
         $products = $products->orderBy('inv_product.id','DESC')->get();
 
@@ -179,7 +170,7 @@ class StockItemModel extends Model
                 'inv_category.name as category_name',
                 'inv_particular.id as unit_id',
                 'inv_particular.name as unit_name',
-                \DB::raw("CONCAT(inv_stock.display_name, ' [',IFNULL(inv_stock.remaining_quantity, 0),'] ', inv_particular.name) AS product_name"),
+                \DB::raw("CONCAT(inv_stock.name, ' [',IFNULL(inv_stock.remaining_quantity, 0),'] ', inv_particular.name) AS product_name"),
                 'inv_stock.display_name as display_name',
                 'inv_stock.slug',
                 'inv_stock.opening_quantity',
