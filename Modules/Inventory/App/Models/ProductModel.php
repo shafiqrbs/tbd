@@ -20,13 +20,7 @@ class ProductModel extends Model
         'unit_id',
         'name',
         'alternative_name',
-        'sku',
         'barcode',
-        'sales_price',
-        'purchase_price',
-        'min_quantity',
-        'reorder_quantity',
-        'remaining_quantity',
         'status',
         'config_id',
     ];
@@ -67,22 +61,15 @@ class ProductModel extends Model
         $skip = isset($page) && $page!=''? (int)$page * $perPage:0;
 
         $products = self::where([['inv_product.config_id',$domain['config_id']]])
-            ->join('inv_product','inv_product.id','=','inv_stock.product_id')
             ->leftjoin('inv_category','inv_category.id','=','inv_product.category_id')
             ->leftjoin('inv_particular','inv_particular.id','=','inv_product.unit_id')
             ->leftjoin('inv_setting','inv_setting.id','=','inv_product.product_type_id')
             ->select([
                 'inv_product.id',
-                'inv_stock.name as product_name',
-                'inv_stock.display_name as product_name',
+                'inv_product.name as product_name',
                 'inv_product.slug',
                 'inv_category.name as category_name',
                 'inv_particular.name as unit_name',
-                'inv_stock.opening_quantity',
-                'inv_stock.min_quantity',
-                'inv_stock.reorder_quantity',
-                'inv_stock.purchase_price',
-                'inv_stock.sales_price',
                 'inv_product.barcode',
                 'inv_product.alternative_name',
                 'inv_setting.name as product_type',
@@ -119,32 +106,24 @@ class ProductModel extends Model
 
     public static function getProductDetails($id,$domain)
     {
+
         $product = self::where([['inv_product.config_id',$domain['config_id']],['inv_product.id',$id]])
-            ->join('inv_product','inv_product.id','=','inv_stock.product_id')
             ->leftjoin('inv_category','inv_category.id','=','inv_product.category_id')
             ->leftjoin('inv_particular','inv_particular.id','=','inv_product.unit_id')
             ->leftjoin('inv_setting','inv_setting.id','=','inv_product.product_type_id')
             ->select([
-                'inv_stock.id',
-                'inv_setting.name as product_type',
-                'inv_setting.slug as product_slug',
-                'inv_category.id as category_id',
+                'inv_product.id',
+                'inv_product.name as product_name',
+                'inv_product.slug',
+                'inv_product.category_id',
                 'inv_category.name as category_name',
-                'inv_particular.id as unit_id',
+                'inv_product.unit_id',
                 'inv_particular.name as unit_name',
-                'inv_stock.display_name as product_name',
-                'inv_stock.display_name as display_name',
-                'inv_stock.slug',
-                'inv_stock.opening_quantity',
-                'inv_stock.min_quantity',
-                'inv_stock.reorder_quantity',
-                'inv_stock.remaining_quantity as quantity',
-                'inv_stock.purchase_price',
-                'inv_stock.sales_price',
-                'inv_stock.barcode',
+                'inv_product.barcode',
                 'inv_product.alternative_name',
-                'inv_stock.sku',
-                'inv_stock.status'
+                'inv_product.product_type_id',
+                'inv_setting.name as product_type',
+                'inv_product.status'
             ])->first();
 
         return $product;
@@ -159,61 +138,14 @@ class ProductModel extends Model
             ->leftjoin('inv_particular','inv_particular.id','=','inv_product.unit_id')
             ->leftjoin('inv_setting','inv_setting.id','=','inv_product.product_type_id')
             ->select([
-                'inv_stock.id',
-                \DB::raw("CONCAT(inv_stock.display_name, ' [',IFNULL(inv_stock.remaining_quantity, 0),'] ', inv_particular.name) AS product_name"),
-                'inv_stock.id',
-                'inv_setting.name as product_type',
-                'inv_setting.slug as product_slug',
-                'inv_category.id as category_id',
+                'inv_product.id',
+                'inv_product.name as display_name',
+                'inv_product.name as product_name',
+                'inv_product.slug',
                 'inv_category.name as category_name',
                 'inv_particular.id as unit_id',
                 'inv_particular.name as unit_name',
-                'inv_stock.display_name as product_name',
-                'inv_stock.display_name as display_name',
-                'inv_stock.slug',
-                'inv_stock.opening_quantity',
-                'inv_stock.min_quantity',
-                'inv_stock.reorder_quantity',
-                'inv_stock.remaining_quantity as quantity',
-                'inv_stock.purchase_price',
-                'inv_stock.sales_price',
-                'inv_stock.barcode',
-                'inv_product.alternative_name',
-                'inv_stock.sku',
-                'inv_stock.status'
-            ]);
-        $products = $products->orderBy('inv_stock.id','display_name')->get();
-
-        return $products;
-    }
-
-
-    public static function getProductForRecipe($domain)
-    {
-        $products = self::where([['inv_product.config_id',$domain['config_id']]])
-            ->join('inv_product','inv_product.id','=','inv_stock.product_id')
-            ->whereIN('inv_setting.slug',['raw-materials','stockable','mid-production'])
-            ->leftjoin('inv_category','inv_category.id','=','inv_product.category_id')
-            ->leftjoin('inv_particular','inv_particular.id','=','inv_product.unit_id')
-            ->join('inv_setting','inv_setting.id','=','inv_product.product_type_id')
-            ->select([
-                'inv_stock.id',
-                'inv_setting.name as product_type',
-                'inv_setting.slug as product_slug',
-                'inv_category.id as category_id',
-                'inv_category.name as category_name',
-                'inv_particular.id as unit_id',
-                'inv_particular.name as unit_name',
-                \DB::raw("CONCAT(inv_stock.display_name, ' [',IFNULL(inv_stock.remaining_quantity, 0),'] ', inv_particular.name) AS product_name"),
-                'inv_stock.display_name as display_name',
-                'inv_stock.slug',
-                'inv_stock.opening_quantity',
-                'inv_stock.min_quantity',
-                'inv_stock.reorder_quantity',
-                'inv_stock.remaining_quantity as quantity',
-                'inv_stock.purchase_price',
-                'inv_stock.sales_price',
-                'inv_stock.barcode',
+                'inv_product.barcode',
                 'inv_product.alternative_name',
                 'inv_stock.sku',
                 'inv_stock.status'

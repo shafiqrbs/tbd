@@ -106,7 +106,7 @@ class StockItem
      *
      * @ORM\Column(name="price", type="float", options={"default":0})
      */
-    private $price;
+    private $price=0;
 
 
      /**
@@ -114,7 +114,7 @@ class StockItem
      *
      * @ORM\Column(type="float", options={"default":0})
      */
-    private $purchasePrice;
+    private $purchasePrice=0;
 
 
     /**
@@ -122,7 +122,7 @@ class StockItem
      *
      * @ORM\Column( type="float",options={"default":0})
      */
-     private $salesPrice;
+     private $salesPrice=0;
 
      /**
      * @var float
@@ -132,19 +132,13 @@ class StockItem
      private $actualPrice = 0;
 
 
-    /**
-     * @var float
-     * @ORM\Column(type="float",options={"default"="0"})
-     */
-    private $subTotal;
-
 
      /**
      * @var float
      *
      * @ORM\Column(name="total", type="float", options={"default"="0"})
      */
-    private $total;
+    private $total=0;
 
 
     /**
@@ -152,14 +146,14 @@ class StockItem
      *
      * @ORM\Column(name="quantity", type="float", options={"default"="0"})
      */
-    private $quantity;
+    private $quantity=0;
 
     /**
      * @var float
      *
      * @ORM\Column(type="float", options={"default"="0"})
      */
-    private $openingQuantity;
+    private $openingQuantity=0;
 
 
     /**
@@ -167,41 +161,35 @@ class StockItem
      *
      * @ORM\Column(type="float", options={"default"="0"})
      */
-    private $openingBalance;
+    private $openingBalance=0;
 
     /**
      * @var float
      *
      * @ORM\Column(type="float", options={"default"="0"})
      */
-    private $closingQuantity;
+    private $closingQuantity=0;
 
-   /**
-     * @var float
-     *
-     * @ORM\Column(type="float",options={"default"="0"})
-     */
-    private $closingBalance;
 
 
     /**
      * @var float
      * @ORM\Column(type="float",options={"default"="0"})
      */
-    private $purchaseQuantity;
+    private $purchaseQuantity=0;
 
      /**
      * @var float
      * @ORM\Column(type="float",options={"default"="0"})
      */
-    private $minQuantity;
+    private $minQuantity=0;
 
 
      /**
      * @var float
      * @ORM\Column(type="float",options={"default"="0"})
      */
-    private $reorderQuantity;
+    private $reorderQuantity=0;
 
     /**
      * @var float
@@ -376,7 +364,7 @@ class StockItem
      *
      * @ORM\Column(type="boolean", options={"default":0})
      */
-    private $isDelete;
+    private $isDelete = false;
 
 
     /**
@@ -390,16 +378,16 @@ class StockItem
     /**
      * @var \DateTime
      * @Gedmo\Timestampable(on="create")
-     * @ORM\Column( type="datetime")
+     * @ORM\Column( type="datetime", options={"default": "CURRENT_TIMESTAMP"}, nullable=true)
      */
     private $createdAt;
 
     /**
      * @var \DateTime
      * @Gedmo\Timestampable(on="update")
-     * @ORM\Column( type="datetime")
+     * @ORM\Column( type="datetime",options={"default": "CURRENT_TIMESTAMP"},nullable=true)
      */
-    private $updatedAt;
+    private $updatedAt ;
 
 
 
@@ -456,21 +444,6 @@ class StockItem
     }
 
 
-    /**
-     * @return float
-     */
-    public function getSubTotal()
-    {
-        return $this->subTotal;
-    }
-
-    /**
-     * @param float $subTotal
-     */
-    public function setSubTotal($subTotal)
-    {
-        $this->subTotal = $subTotal;
-    }
 
     /**
      * @return \DateTime
@@ -662,21 +635,7 @@ class StockItem
         $this->closingQuantity = $closingQuantity;
     }
 
-    /**
-     * @return float
-     */
-    public function getClosingBalance()
-    {
-        return $this->closingBalance;
-    }
 
-    /**
-     * @param float $closingBalance
-     */
-    public function setClosingBalance( $closingBalance)
-    {
-        $this->closingBalance = $closingBalance;
-    }
 
     /**
      * @return float
@@ -1126,12 +1085,13 @@ class StockItem
     }
 
     /**
-     * @param \DateTime $createdAt
+     * @ORM\PrePersist
      */
     public function setCreatedAt($createdAt)
     {
         $this->createdAt = $createdAt;
     }
+
 
     /**
      * @return \DateTime
@@ -1340,17 +1300,6 @@ class StockItem
     {
         $this->slug = $slug;
     }
-
-
-
-
-
-
-
-
-
-
-
 
 }
 

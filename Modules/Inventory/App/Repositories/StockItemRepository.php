@@ -5,6 +5,7 @@ use Doctrine\DBAL\DriverManager;
 use Doctrine\ORM\EntityRepository;
 use Modules\Inventory\App\Entities\Product;
 use Modules\Inventory\App\Entities\StockItem;
+use function Doctrine\Common\Collections\exists;
 
 /**
  * ItemTypeGroupingRepository
@@ -81,20 +82,24 @@ class StockItemRepository extends EntityRepository
 
     }
 
-    public function insertStockItem($id){
+    public function insertStockItem($id,$data){
 
         $em = $this->_em;
         /** @var  $product Product  */
         $product = $em->getRepository(Product::class)->find($id);
-        if(empty($product->getStockItems())){
+        if($product->getStockItems()){
             $entity = new StockItem();
             $entity->setConfig($product->getConfig());
-            $entity->setItem($product);
+            $entity->setProduct($product);
+            $entity->setName($product->getName());
+            $entity->setDisplayName($product->getName());
+            $entity->setPurchasePrice($data['purchase_price']);
+            $entity->setPrice($data['sales_price']);
+            $entity->setSalesPrice($data['sales_price']);
+            $entity->setMinQuantity($data['min_quantity']);
             $em->persist($entity);
             $em->flush();
         }
-
-
     }
 
     public function checkAvailable($config ,$data)

@@ -50,8 +50,8 @@ class ProductController extends Controller
         $input = $request->validated();
         $input['config_id'] = $this->domain['config_id'];
         $entity = ProductModel::create($input);
-
-        $entities = $em->getRepository(StockItem::class)->insertStockItem($entity['id']);
+        $productId = $entity['id'];
+        $em->getRepository(StockItem::class)->insertStockItem($productId,$input);
         $data = $service->returnJosnResponse($entity);
         return $data;
     }

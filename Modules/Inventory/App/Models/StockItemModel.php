@@ -167,23 +167,31 @@ class StockItemModel extends Model
     {
         $products = self::where([['inv_product.config_id',$domain['config_id']]])
             ->whereIN('inv_setting.slug',['raw-materials','stockable','mid-production'])
+            ->join('inv_product','inv_product.id','=','inv_stock.product_id')
             ->leftjoin('inv_category','inv_category.id','=','inv_product.category_id')
             ->leftjoin('inv_particular','inv_particular.id','=','inv_product.unit_id')
             ->join('inv_setting','inv_setting.id','=','inv_product.product_type_id')
             ->select([
-                'inv_product.id',
-                'inv_product.name as display_name',
-                \DB::raw("CONCAT(inv_product.name, ' [',inv_product.remaining_quantity,'] ', inv_particular.name) AS product_name"),
-                'inv_product.slug',
+                'inv_stock.id',
+                'inv_setting.name as product_type',
+                'inv_setting.slug as product_slug',
+                'inv_category.id as category_id',
                 'inv_category.name as category_name',
                 'inv_particular.id as unit_id',
                 'inv_particular.name as unit_name',
-                'inv_product.min_quantity',
-                'inv_product.remaining_quantity as quantity',
-                'inv_product.purchase_price',
-                'inv_product.sales_price',
-                'inv_product.barcode',
+                \DB::raw("CONCAT(inv_stock.display_name, ' [',IFNULL(inv_stock.remaining_quantity, 0),'] ', inv_particular.name) AS product_name"),
+                'inv_stock.display_name as display_name',
+                'inv_stock.slug',
+                'inv_stock.opening_quantity',
+                'inv_stock.min_quantity',
+                'inv_stock.reorder_quantity',
+                'inv_stock.remaining_quantity as quantity',
+                'inv_stock.purchase_price',
+                'inv_stock.sales_price',
+                'inv_stock.barcode',
                 'inv_product.alternative_name',
+                'inv_stock.sku',
+                'inv_stock.status'
             ]);
         $products = $products->orderBy('inv_product.id','DESC')->get();
         return $products;
