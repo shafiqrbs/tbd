@@ -3,10 +3,12 @@
 namespace Modules\Inventory\App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use Doctrine\ORM\EntityManager;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Modules\AppsApi\App\Services\JsonRequestResponse;
 use Modules\Core\App\Models\UserModel;
+use Modules\Inventory\App\Entities\InvoiceBatch;
 use Modules\Inventory\App\Http\Requests\InvoiceBatchTransactionRequest;
 use Modules\Inventory\App\Http\Requests\ProductRequest;
 use Modules\Inventory\App\Http\Requests\SalesRequest;
@@ -45,13 +47,14 @@ class InvoiceBatchController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(Request $request, EntityManager $em)
     {
         $customer = $request['customer_id'];
         $items = $request['sales_id'];
         $service = new JsonRequestResponse();
         $config_id = $this->domain['config_id'];
         $entity = InvoiceBatchModel::insertBatch($config_id,$customer,$items);
+        $em->getRepository(InvoiceBatch::class)->invoiceBatchInsert($entity['id']);
         $data = $service->returnJosnResponse($entity);
         return $data;
 

@@ -87,7 +87,9 @@ class InvoiceBatchModel extends Model
             InvoiceBatchItemModel::create(
                 [
                     'invoice_batch_id' => $entity->id,
-                    'stock_item_id' => $record->product_id,
+                    'stock_item_id' => $record->stock_item_id,
+                    'name' => $record->name,
+                    'uom' => $record->uom,
                     'quantity' =>  $record->quantity,
                     'price' => $record->sales_price,
                     'sales_price' => $record->sales_price,
@@ -101,10 +103,10 @@ class InvoiceBatchModel extends Model
     public static function getSalesBatchRecords($entity)
     {
         $results = DB::table('inv_sales_item as item')
-            ->selectRaw('product_id,SUM(quantity) as quantity, SUM(item.sub_total) as sub_total, (SUM(item.sub_total)/SUM(quantity)) as sales_price')
+            ->selectRaw('stock_item_id,name,uom,SUM(quantity) as quantity, SUM(item.sub_total) as sub_total, (SUM(item.sub_total)/SUM(quantity)) as sales_price')
             ->join('inv_sales', 'item.sale_id', '=', 'inv_sales.id')
             ->where('inv_sales.invoice_batch_id', $entity->id)
-            ->groupBy('product_id')
+            ->groupBy('stock_item_id','uom','name')
             ->get();
         return $results;
     }
@@ -139,7 +141,20 @@ class InvoiceBatchModel extends Model
                 'inv_invoice_batch.process as process',
                 'cor_customers.address as customer_address',
                 'cor_customers.balance as balance',
-            ])->with('invoiceBatchItems');
+            ]) ->with(['invoiceBatchItems' => function ($query){
+               // $query->leftjoin('inv_stock','inv_stock.id','=','inv_invoice_batch_item.stock_item_id');
+                $query->select([
+                    'id',
+                    'invoice_batch_id',
+                    'name as name',
+                    'name as item_name',
+                    'uom as uom',
+                    'quantity as quantity',
+                    'sales_price as sales_price',
+                    'price as price',
+                    'sub_total as sub_total',
+                ]);
+            }]);
 
         if (isset($request['term']) && !empty($request['term'])){
             $entities = $entities->whereAny(['inv_invoice_batch.invoice','cor_customers.name','cor_customers.mobile','createdBy.username','inv_invoice_batch.total'],'LIKE','%'.$request['term'].'%');
@@ -212,18 +227,14 @@ class InvoiceBatchModel extends Model
                 $query->select([
                     'id',
                     'invoice_batch_id',
-                    'product_id',
-                    'item_name',
-                    'quantity',
-                    'sales_price',
-                    'price',
-                    'sub_total',
-                ])->with(['product' => function ($query) {
-                    $query->select([
-                        'id',
-                        'name',
-                    ]);
-                }]);
+                    'name as name',
+                    'name as item_name',
+                    'uom as uom',
+                    'quantity as quantity',
+                    'sales_price as sales_price',
+                    'price as price',
+                    'sub_total as sub_total',
+                ]);
             }])
             ->first();
 
@@ -272,18 +283,14 @@ class InvoiceBatchModel extends Model
                 $query->select([
                     'id',
                     'invoice_batch_id',
-                    'product_id',
-                    'item_name',
-                    'quantity',
-                    'sales_price',
-                    'price',
-                    'sub_total',
-                ])->with(['product' => function ($query) {
-                    $query->select([
-                        'id',
-                        'name',
-                    ]);
-                }]);
+                    'name as name',
+                    'name as item_name',
+                    'uom as uom',
+                    'quantity as quantity',
+                    'sales_price as sales_price',
+                    'price as price',
+                    'sub_total as sub_total',
+                ]);
             }])
             ->first();
         return $entity;

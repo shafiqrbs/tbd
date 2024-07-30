@@ -60,7 +60,7 @@ class SalesItem
      *
      * @ORM\Column(type="string", nullable=true)
      */
-    private $itemName;
+    private $name;
 
     /**
      * @var string
@@ -367,21 +367,6 @@ class SalesItem
         $this->uom = $uom;
     }
 
-    /**
-     * @return string
-     */
-    public function getItemName()
-    {
-        return $this->itemName;
-    }
-
-    /**
-     * @param string $itemName
-     */
-    public function setItemName($itemName)
-    {
-        $this->itemName = $itemName;
-    }
 
     /**
      * @return string
@@ -846,6 +831,24 @@ class SalesItem
     {
         $this->updatedAt = $updatedAt;
     }
+
+    /**
+     * @return string
+     */
+    public function getName()
+    {
+        return $this->name;
+    }
+
+    /**
+     * @param string $name
+     */
+    public function setName($name)
+    {
+        $this->name = $name;
+    }
+
+
 
 
 

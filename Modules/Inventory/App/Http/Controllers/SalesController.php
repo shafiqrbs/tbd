@@ -56,7 +56,7 @@ class SalesController extends Controller
         $input['config_id'] = $this->domain['config_id'];
         $entity = SalesModel::create($input);
         $process = new SalesModel();
-        $em->getRepository(SalesItem::class)->temporarySalesInsert($entity->id,$input);
+        $em->getRepository(SalesItem::class)->salesInsert($entity->id,$input);
        // $process->insertSalesItems($entity,$input['items']);
         $salesData = SalesModel::getShow($entity->id, $this->domain);
         $data = $service->returnJosnResponse($salesData);

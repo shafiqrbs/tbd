@@ -39,9 +39,7 @@ class InvoiceBatchItemModel extends Model
 
     public function product()
     {
-        return $this->belongsTo(ProductModel::class, 'product_id','id');
+        return $this->belongsTo(StockItemModel::class, 'stock_item_id','id');
     }
-
-
 
 }

@@ -161,7 +161,7 @@ class SalesModel extends Model
                     'inv_sales_item.sale_id',
                     'inv_sales_item.product_id',
                     'inv_sales_item.uom',
-                    'inv_sales_item.item_name',
+                    'inv_sales_item.name as item_name',
                     'inv_sales_item.quantity',
                     'inv_sales_item.sales_price',
                     'inv_sales_item.purchase_price',

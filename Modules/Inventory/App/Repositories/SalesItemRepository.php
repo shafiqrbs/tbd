@@ -15,7 +15,7 @@ use Modules\Inventory\App\Entities\StockItem;
  */
 class SalesItemRepository extends EntityRepository
 {
-    public function temporarySalesInsert($salesId, $datas)
+    public function salesInsert($salesId, $datas)
     {
 
         $em = $this->_em;
@@ -35,7 +35,7 @@ class SalesItemRepository extends EntityRepository
             $entity = new SalesItem();
             $entity->setSale($sales);
             $entity->setStockItem($item);
-            $entity->setItemName($item->getName());
+            $entity->setName($item->getName());
             $entity->setUom(($item->getProduct() and $item->getProduct()->getUnit()) ? $item->getProduct()->getUnit()->getName():null);
             $entity->setProduct($item->getProduct());
             $entity->setQuantity($quantity);

@@ -49,7 +49,7 @@ class InvoiceBatchItem
      *
      * @ORM\Column(type="string", nullable=true)
      */
-    private $itemName;
+    private $name;
 
     /**
      * @var float
@@ -142,68 +142,13 @@ class InvoiceBatchItem
     }
 
     /**
-     * @return mixed
+     * @return InvoiceBatch
      */
     public function getInvoiceBatch()
     {
         return $this->invoiceBatch;
     }
 
-    /**
-     * @param mixed $invoiceBatch
-     */
-    public function setInvoiceBatch($invoiceBatch)
-    {
-        $this->invoiceBatch = $invoiceBatch;
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getProduct()
-    {
-        return $this->product;
-    }
-
-    /**
-     * @param mixed $product
-     */
-    public function setProduct($product)
-    {
-        $this->product = $product;
-    }
-
-    /**
-     * @return string
-     */
-    public function getUom()
-    {
-        return $this->uom;
-    }
-
-    /**
-     * @param string $uom
-     */
-    public function setUom($uom)
-    {
-        $this->uom = $uom;
-    }
-
-    /**
-     * @return string
-     */
-    public function getItemName()
-    {
-        return $this->itemName;
-    }
-
-    /**
-     * @param string $itemName
-     */
-    public function setItemName($itemName)
-    {
-        $this->itemName = $itemName;
-    }
 
     /**
      * @return float
@@ -333,9 +278,37 @@ class InvoiceBatchItem
         $this->stockItem = $stockItem;
     }
 
+    /**
+     * @return string
+     */
+    public function getUom()
+    {
+        return $this->uom;
+    }
 
+    /**
+     * @param string $uom
+     */
+    public function setUom($uom)
+    {
+        $this->uom = $uom;
+    }
 
+    /**
+     * @return string
+     */
+    public function getName()
+    {
+        return $this->name;
+    }
 
+    /**
+     * @param string $name
+     */
+    public function setName($name)
+    {
+        $this->name = $name;
+    }
 
 
 }
