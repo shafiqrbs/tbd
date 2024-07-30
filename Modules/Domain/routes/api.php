@@ -19,7 +19,6 @@ use Modules\Domain\App\Http\Controllers\DomainController;
 
 Route::prefix('/domain')->middleware(array(HeaderAuthenticationMiddleware::class))->group(function() {
     Route::apiResource('/global', DomainController::class)->middleware([HeaderAuthenticationMiddleware::class]);
-//    Route::apiResource('/setting', DomainController::class)->middleware([HeaderAuthenticationMiddleware::class]);
     Route::apiResource('/setting', DomainController::class)
         ->middleware([HeaderAuthenticationMiddleware::class])
         ->names([
@@ -29,4 +28,9 @@ Route::prefix('/domain')->middleware(array(HeaderAuthenticationMiddleware::class
             'update' => 'domain.setting.update',
             'destroy' => 'domain.setting.destroy',
         ]);
+
+    Route::prefix('restore')->middleware([HeaderAuthenticationMiddleware::class])->group(function() {
+        Route::get('/reset', [DomainController::class,'resetData'])->name('domain_reset');
+        Route::get('/delete', [DomainController::class,'deleteData'])->name('domain_delete');
+    });
 });

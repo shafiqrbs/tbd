@@ -110,6 +110,9 @@ class SalesController extends Controller
             SalesItemModel::where('sale_id', $id)->delete();
             if (sizeof($data['items'])>0){
                 foreach ($data['items'] as $item){
+                    $item['stock_item_id'] = $item['product_id'];
+                    $item['name'] = $item['item_name'];
+                    $item['unit_name'] = $item['uom'];
                     SalesItemModel::create($item);
                 }
             }

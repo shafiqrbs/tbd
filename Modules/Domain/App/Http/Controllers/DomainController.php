@@ -129,4 +129,28 @@ class DomainController extends Controller
         $data = $service->returnJosnResponse($entity);
         return $data;
     }
+
+    /**
+     * Remove the specified resource from storage.
+     */
+    public function resetData($id)
+    {
+        $service = new JsonRequestResponse();
+        DomainModel::find($id)->delete();
+        $entity = ['message'=>'delete'];
+        $data = $service->returnJosnResponse($entity);
+        return $data;
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     */
+    public function deleteData($id)
+    {
+        $service = new JsonRequestResponse();
+        DomainModel::find($id)->delete();
+        $entity = ['message'=>'delete'];
+        $data = $service->returnJosnResponse($entity);
+        return $data;
+    }
 }

@@ -17,6 +17,7 @@ class SalesItemModel extends Model
     protected $guarded = ['id'];
 
     protected $fillable = [
+
     ];
 
     public static function boot() {

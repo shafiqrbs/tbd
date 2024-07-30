@@ -216,16 +216,17 @@ class SalesModel extends Model
                 $query->select([
                     'inv_sales_item.id',
                     'inv_sales_item.sale_id',
-                    'inv_sales_item.product_id',
+                    'inv_sales_item.stock_item_id as product_id',
                     'inv_sales_item.unit_id',
-                    'inv_sales_item.item_name',
+                    'inv_sales_item.name as item_name',
+                    'inv_sales_item.name as name',
+                    'inv_sales_item.uom as uom',
                     'inv_sales_item.quantity',
                     'inv_sales_item.sales_price',
                     'inv_sales_item.purchase_price',
                     'inv_sales_item.price',
                     'inv_sales_item.sub_total',
-                    'uti_product_unit.name as unit_name',
-                ])->join('uti_product_unit','uti_product_unit.id','=','inv_sales_item.unit_id');
+                ]);
             }])
             ->first();
 

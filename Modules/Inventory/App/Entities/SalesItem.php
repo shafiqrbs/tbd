@@ -30,12 +30,6 @@ class SalesItem
      **/
     private  $sale;
 
-    /**
-     * @ORM\ManyToOne(targetEntity="Product")
-     * @ORM\JoinColumn(onDelete="CASCADE")
-     **/
-    private  $product;
-
      /**
      * @ORM\ManyToOne(targetEntity="StockItem")
      * @ORM\JoinColumn(onDelete="CASCADE")
