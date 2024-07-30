@@ -112,7 +112,7 @@ class SalesController extends Controller
                 foreach ($data['items'] as $item){
                     $item['stock_item_id'] = $item['product_id'];
                     $item['name'] = $item['item_name'];
-                    $item['unit_name'] = $item['uom'];
+                    $item['uom'] = $item['uom'];
                     SalesItemModel::create($item);
                 }
             }

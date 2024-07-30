@@ -148,6 +148,7 @@ class StockItemModel extends Model
                 'inv_stock.purchase_price',
                 'inv_stock.sales_price',
                 'inv_stock.barcode',
+                'inv_particular.name as uom',
             ]);
         $products = $products->orderBy('inv_product.id','DESC')->get();
 

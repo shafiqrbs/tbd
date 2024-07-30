@@ -159,7 +159,7 @@ class SalesModel extends Model
                 $query->select([
                     'inv_sales_item.id',
                     'inv_sales_item.sale_id',
-                    'inv_sales_item.product_id',
+                    'inv_sales_item.stock_item_id as product_id',
                     'inv_sales_item.uom',
                     'inv_sales_item.name as item_name',
                     'inv_sales_item.quantity',
