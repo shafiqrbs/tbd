@@ -10,10 +10,12 @@ use Modules\Inventory\App\Http\Controllers\InventoryController;
 use Modules\Inventory\App\Http\Controllers\InvoiceBatchController;
 use Modules\Inventory\App\Http\Controllers\InvoiceBatchTransactionController as InvoiceBatchTransactionControllerAlias;
 use Modules\Inventory\App\Http\Controllers\OpeningStockController;
+use Modules\Inventory\App\Http\Controllers\ParticularController;
 use Modules\Inventory\App\Http\Controllers\ProductController;
 use Modules\Inventory\App\Http\Controllers\PurchaseController;
 use Modules\Inventory\App\Http\Controllers\PurchaseItemController;
 use Modules\Inventory\App\Http\Controllers\SalesController;
+use Modules\Inventory\App\Http\Controllers\SettingController;
 use Modules\Inventory\App\Http\Controllers\StockItemController;
 
 /*
@@ -35,11 +37,17 @@ Route::prefix('/inventory/select')->middleware([HeaderAuthenticationMiddleware::
     Route::get('/product-brand', [InventoryController::class,'brandDropdown'])->name('product_brand_dropdown');
     Route::get('/product-unit', [InventoryController::class,'productUnitDropdown'])->name('product_unit_dropdown');
     Route::get('/product-for-recipe', [ProductController::class,'productForRecipe'])->name('product_for_recipe_dropdown');
+    Route::get('/particular-type', [ParticularController::class,'particularTypeDropdown'])->name('get_particular_type');
 });
 
 Route::prefix('/inventory')->middleware([HeaderAuthenticationMiddleware::class])->group(function() {
     Route::get('/config', [ConfigController::class,'getConfig'])->name('get_config');
     Route::POST('/config-update', [ConfigController::class,'updateConfig'])->name('update_config');
+
+    Route::apiResource('/setting', SettingController::class)->middleware([HeaderAuthenticationMiddleware::class]);
+    Route::get('/setting/setting-type', [SettingController::class,'settingTypeDropdown'])->name('get_setting_type');
+
+    Route::apiResource('/particular', ParticularController::class)->middleware([HeaderAuthenticationMiddleware::class]);
 
     Route::apiResource('/category-group', CategoryGroupController::class)->middleware([HeaderAuthenticationMiddleware::class]);
     Route::apiResource('/product', ProductController::class)->middleware([HeaderAuthenticationMiddleware::class]);

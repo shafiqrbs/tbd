@@ -3,50 +3,172 @@
 namespace Modules\Inventory\App\Models;
 
 
+use Cviebrock\EloquentSluggable\Sluggable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Support\Facades\DB;
-use Modules\Utility\App\Entities\Setting;
-use Modules\Utility\App\Models\SettingModel as SettingUtilityModel;
-use Modules\Utility\App\Models\SettingTypeModel;
 
 
 class SettingModel extends Model
 {
-    use HasFactory;
+    use HasFactory,Sluggable;
 
     protected $table = 'inv_setting';
     public $timestamps = true;
     protected $guarded = ['id'];
     protected $fillable = [
-        'setting_type',
+        'setting_type_id',
+        'config_id',
         'name',
+        'slug',
         'status'
     ];
 
-
-    public function setting():BelongsTo
+    /**
+     * Return the sluggable configuration array for this model.
+     *
+     * @return array
+     */
+    public function sluggable(): array
     {
-        return $this->belongsTo(Setting::class);
+        return [
+            'slug' => [
+                'source' => 'name'
+            ]
+        ];
     }
 
 
-    public static function getSettingDropdown($domain,$dropdownType)
+    public static function boot() {
+        parent::boot();
+        self::creating(function ($model) {
+            $date =  new \DateTime("now");
+            $model->created_at = $date;
+        });
+
+        self::updating(function ($model) {
+            $date =  new \DateTime("now");
+            $model->updated_at = $date;
+        });
+    }
+
+    public function setting_type(): BelongsTo
+    {
+        return $this->belongsTo(SettingTypeModel::class);
+    }
+
+    public static function getConfigID($globalID)
+    {
+        return DB::table('inv_config')->where('domain_id', $globalID)->select('id')->first()->id;
+    }
+
+
+
+    public static function getRecords($request,$domain){
+
+        $page =  isset($request['page']) && $request['page'] > 0?($request['page'] - 1 ) : 0;
+        $perPage = isset($request['offset']) && $request['offset']!=''? (int)($request['offset']):0;
+        $skip = isset($page) && $page!=''? (int)$page*$perPage:0;
+
+        $entity = self::where('inv_config.domain_id',$domain['global_id'])
+            ->join('inv_setting_type','inv_setting_type.id','=','inv_setting.setting_type_id')
+            ->join('inv_config','inv_config.id','=','inv_setting.config_id')
+            ->select([
+                'inv_setting.id',
+                'inv_setting.name',
+                'inv_setting.slug',
+                'inv_setting.status',
+                DB::raw('DATE_FORMAT(inv_setting.created_at, "%d-%M-%Y") as created'),
+                'inv_setting_type.name as setting_type_name',
+                'inv_setting_type.slug as setting_type_slug',
+            ]);
+
+        if (isset($request['term']) && !empty($request['term'])){
+            $entity = $entity->whereAny(['inv_setting.name','inv_setting.slug','inv_setting_type.slug'],'LIKE','%'.trim($request['term']).'%');
+        }
+
+        if (isset($request['name']) && !empty($request['name'])){
+            $entity = $entity->where('inv_setting.name','LIKE','%'.trim($request['name']));
+        }
+
+        if (isset($request['setting_type_id']) && !empty($request['setting_type_id'])){
+            $entity = $entity->where('inv_setting.setting_type_id',$request['setting_type_id']);
+        }
+
+        $total  = $entity->count();
+        $entities = $entity->skip($skip)
+            ->take($perPage)
+            ->orderBy('id','DESC')
+            ->get();
+
+        $data = array('count'=>$total,'entities' => $entities);
+        return $data;
+
+
+    }
+
+    public static function getMeasurementInputGenerate($domain)
+    {
+        $entity = self::where('inv_config.domain_id', $domain)
+            ->whereIN('inv_setting_type.slug',['value-added','utility'])
+            ->join('inv_setting_type', 'inv_setting_type.id', '=', 'inv_setting.setting_type_id')
+            ->join('inv_config', 'inv_config.id', '=', 'inv_setting.config_id')
+            ->select([
+                'inv_setting.id',
+                'inv_setting.name',
+                'inv_setting.slug',
+                'inv_setting_type.name as setting_type_name',
+                'inv_setting_type.slug as setting_type_slug',
+            ])
+            ->get()
+            ->toArray();
+
+        $data = [];
+        if (sizeof($entity)>0) {
+            foreach ($entity as $item) {
+                $data[$item['setting_type_name']][] = $item;
+            }
+        }
+
+        $slugArray = array_map(function ($entity) {
+            return $entity['slug'];
+        }, $entity);
+        return ['datakey'=>$slugArray,'field'=>$data];
+    }
+
+    public static function getSettingDropdown($dropdownType)
     {
         return DB::table('inv_setting')
-            ->join('uti_settings','uti_settings.id','=','inv_setting.setting_id')
-            ->join('uti_setting_types','uti_setting_types.id','=','uti_settings.setting_type_id')
+            ->join('inv_setting_type','inv_setting_type.id','=','inv_setting.setting_type_id')
             ->select([
-                'uti_settings.id',
-                'uti_settings.name',
-                'uti_settings.slug',
-                'uti_setting_types.name as type_name',
+                'inv_setting.id',
+                'inv_setting.name',
+                'inv_setting.slug',
+                'inv_setting_type.name as type_name',
             ])
             ->where([
-                ['uti_setting_types.slug',$dropdownType],
-                ['uti_setting_types.status','1'],
-                ['inv_setting.config_id',$domain['config_id']],
-                ['uti_settings.status','1'],
+                ['inv_setting_type.slug',$dropdownType],
+                ['inv_setting_type.status','1'],
+                ['inv_setting.status','1'],
+            ])
+            ->get();
+    }
+
+    public static function getEntityDropdown($dropdownType)
+    {
+        return DB::table('inv_setting')
+            ->join('inv_setting_type','inv_setting_type.id','=','inv_setting.setting_type_id')
+            ->select([
+                'inv_setting.id',
+                'inv_setting.name',
+                'inv_setting.slug',
+                'inv_setting_type.name as type_name',
+                'inv_setting_type.slug as type_slug',
+            ])
+            ->where([
+                ['inv_setting_type.slug',$dropdownType],
+                ['inv_setting_type.status','1'],
+                ['inv_setting.status','1'],
             ])
             ->get();
     }
