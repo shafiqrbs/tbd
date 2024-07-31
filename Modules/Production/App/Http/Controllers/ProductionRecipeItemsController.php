@@ -7,10 +7,14 @@ use Doctrine\ORM\EntityManager;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\DB;
 use Modules\Core\App\Models\UserModel;
 use Modules\Inventory\App\Entities\StockItem;
 use Modules\Production\App\Entities\ProductionItem;
+use Modules\Production\App\Http\Requests\RecipeItemsRequest;
 use Modules\Production\App\Models\ProductionItems;
+use Modules\Production\App\Models\ProductionValueAdded;
+use Modules\Production\App\Models\SettingModel;
 
 class ProductionRecipeItemsController extends Controller
 {
@@ -69,9 +73,44 @@ class ProductionRecipeItemsController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(RecipeItemsRequest $request)
     {
-        //
+        $response = new Response();
+
+        $pro_item_id = $request->validated()['pro_item_id'];
+        $findItems = ProductionItems::find($pro_item_id);
+
+        if (!$findItems){
+            $response->setContent(json_encode([
+                'message' => 'Production Item not found',
+                'status' => Response::HTTP_NOT_FOUND
+            ]));
+            $response->setStatusCode(Response::HTTP_OK);
+            return $response;
+        }
+        $getMeasurementInputGenerate = SettingModel::getMeasurementInput($this->domain['pro_config']);
+//        dump($getMeasurementInputGenerate);
+        if (sizeof($getMeasurementInputGenerate) > 0) {
+            foreach ($getMeasurementInputGenerate as $key => $value) {
+//                dump($value);
+                $valueAddedExists = ProductionValueAdded::where([['production_item_id', '=', $pro_item_id],['value_added_id', '=', $value['id']]])->first();
+                dump($valueAddedExists);
+                /*$id = DB::table('pro_setting')->where('slug', $key)->select('id')->first()->id;
+                ProductionValueAdded::create([
+                    'production_item_id' => $itemId,
+                    'value_added_id' => $id,
+                    'amount' => $value,
+                ]);*/
+            }
+        }
+        $response = new Response();
+        $response->headers->set('Content-Type', 'application/json');
+        $response->setContent(json_encode([
+            'message' => 'success',
+            'status' => Response::HTTP_OK,
+        ]));
+        $response->setStatusCode(Response::HTTP_OK);
+        return $response;
     }
 
     /**

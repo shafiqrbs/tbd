@@ -3,6 +3,7 @@
 namespace Modules\Production\App\Repositories;
 use Doctrine\ORM\EntityRepository;
 use Modules\Inventory\App\Entities\StockItem;
+use Modules\Production\App\Entities\Config;
 use Modules\Production\App\Entities\ProductionElement;
 use Modules\Production\App\Entities\ProductionInventory;
 use Modules\Production\App\Entities\ProductionItem;
@@ -18,17 +19,18 @@ use Modules\Production\App\Entities\ProductionItemAmendment;
  */
 class ProductionElementRepository extends EntityRepository
 {
-    public function insertProductionElement($data)
+    public function insertProductionElement($data,$domain)
     {
         $em = $this->_em;
         $meterialItem = (isset($data['inv_stock_id']) and $data['inv_stock_id']) ?  $data['inv_stock_id']:'';
         $productionid = (isset($data['item_id']) and $data['item_id']) ?  $data['item_id']:'';
         $quantity = (isset($data['quantity']) and $data['quantity']) ?  $data['quantity']:'';
         $price = (isset($data['price']) and $data['price']) ?  $data['price']:'';
-        $wastagePercent = (isset($data['wastage_percent']) and $data['wastage_percent']) ?  $data['wastage_percent']:'';
+        $wastagePercent = (isset($data['percent']) and $data['percent']) ?  $data['percent']:'';
         $productionItem = $em->getRepository(ProductionItem::class)->find($productionid);
         $item = $em->getRepository(StockItem::class)->find($meterialItem);
         $existParticular = $em->getRepository(ProductionElement::class)->findOneBy(array('productionItem'=> $productionid ,'material' => $meterialItem));
+        $findProConfig = $em->getRepository(Config::class)->find($domain['pro_config']);
 
         if(empty($existParticular) and $productionItem){
 	        $entity = new ProductionElement();
@@ -39,6 +41,8 @@ class ProductionElementRepository extends EntityRepository
             $entity->setQuantity($quantity);
             $entity->setPrice($price);
             $entity->setSubTotal($entity->getPrice() * $entity->getQuantity());
+            $entity->setConfig($findProConfig);
+            $entity->setCreatedAt(now());
             if($wastagePercent){
                 $entity->setWastagePercent($wastagePercent);
                 $wsateQnt = $this->wastageCulculation($entity->getWastagePercent(),$entity->getQuantity());
@@ -64,6 +68,7 @@ class ProductionElementRepository extends EntityRepository
                 $entity->setWastageQuantity($wsateQnt);
                 $entity->setWastageAmount($wsateQnt * $entity->getPrice());
                 }
+                $entity->setUpdatedAt(now());
                 $em->persist($entity);
                 $em->flush();
                 $this->updateProductionElementPrice( $productionItem );

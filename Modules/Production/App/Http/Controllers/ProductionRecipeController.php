@@ -61,14 +61,13 @@ class ProductionRecipeController extends Controller
     public function store(Request $request, EntityManager $em)
     {
         $data = $request->all();
-        $entities = $em->getRepository(ProductionElement::class)->insertProductionElement($data);
-
+        $entities = $em->getRepository(ProductionElement::class)->insertProductionElement($data,$this->domain);
     }
 
     /**
      * Store a newly created resource in storage.
      */
-    public function measurementInputStore(Request $request)
+    /*public function measurementInputStore(Request $request)
     {
         $itemId = $request->input('item_id');
         $input = $request->all();
@@ -92,7 +91,7 @@ class ProductionRecipeController extends Controller
         ]));
         $response->setStatusCode(Response::HTTP_OK);
         return $response;
-    }
+    }*/
 
     /**
      * Show the specified resource.

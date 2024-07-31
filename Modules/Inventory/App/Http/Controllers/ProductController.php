@@ -11,6 +11,7 @@ use Modules\Core\App\Models\UserModel;
 use Modules\Inventory\App\Entities\StockItem;
 use Modules\Inventory\App\Http\Requests\ProductRequest;
 use Modules\Inventory\App\Models\ProductModel;
+use Modules\Inventory\App\Models\StockItemModel;
 use Modules\Inventory\App\Repositories\StockItemRepository;
 
 class ProductController extends Controller
@@ -108,7 +109,7 @@ class ProductController extends Controller
     public function productForRecipe()
     {
         $service = new JsonRequestResponse();
-        $data = ProductModel::getProductForRecipe($this->domain);
+        $data = StockItemModel::getProductForRecipe($this->domain);
         return $service->returnJosnResponse($data);
     }
 

@@ -44,16 +44,15 @@ class ProductionElements extends Model
 
         $entity = self::where([
                     ['pro_element.status', '=', 1],
-                    ['pro_config.domain_id', '=', $domain['global_id']],
+                    ['pro_element.config_id', '=', $domain['pro_config']],
                 ])
-            ->join('pro_config','pro_config.id','=','pro_element.config_id')
             ->join('inv_stock','inv_stock.id','=','pro_element.material_id')
             ->join('inv_product','inv_product.id','=','inv_stock.product_id')
-            ->leftjoin('uti_product_unit','uti_product_unit.id','=','inv_product.unit_id')
+            ->leftjoin('inv_particular','inv_particular.id','=','inv_product.unit_id')
             ->select([
                 'pro_element.id',
-                'inv_product.name as product_name',
-                'uti_product_unit.name as unit_name',
+                'inv_stock.display_name as product_name',
+                'inv_particular.name as unit_name',
                 'pro_element.quantity',
                 'pro_element.material_quantity',
                 'pro_element.price',

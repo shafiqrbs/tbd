@@ -107,6 +107,22 @@ class SettingModel extends Model
 
     }
 
+    public static function getMeasurementInput($config)
+    {
+        return self::where('pro_setting.config_id', $config)
+            ->whereIN('pro_setting_type.slug',['value-added','utility'])
+            ->join('pro_setting_type', 'pro_setting_type.id', '=', 'pro_setting.setting_type_id')
+            ->select([
+                'pro_setting.id',
+                'pro_setting.name',
+                'pro_setting.slug',
+                'pro_setting_type.name as setting_type_name',
+                'pro_setting_type.slug as setting_type_slug',
+            ])
+            ->get()
+            ->toArray();
+    }
+
     public static function getMeasurementInputGenerate($domain)
     {
         $entity = self::where('pro_config.domain_id', $domain)
