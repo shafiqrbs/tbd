@@ -127,18 +127,4 @@ class SettingController extends Controller
         return $response;
     }
 
-    public function measurementInput()
-    {
-        $data = SettingModel::getMeasurementInputGenerate($this->domain['global_id']);
-        $response = new Response();
-        $response->headers->set('Content-Type', 'application/json');
-        $response->setContent(json_encode([
-            'message' => 'success',
-            'status' => Response::HTTP_OK,
-            'data' => sizeof($data)>0 ? $data : []
-        ]));
-        $response->setStatusCode(Response::HTTP_OK);
-        return $response;
-    }
-
 }

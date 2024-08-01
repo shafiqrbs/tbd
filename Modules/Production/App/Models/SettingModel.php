@@ -123,52 +123,7 @@ class SettingModel extends Model
             ->toArray();
     }
 
-    public static function getMeasurementInputGenerate($domain)
-    {
-        $entity = self::where('pro_config.domain_id', $domain)
-            ->whereIN('pro_setting_type.slug',['value-added','utility'])
-            ->join('pro_setting_type', 'pro_setting_type.id', '=', 'pro_setting.setting_type_id')
-            ->join('pro_config', 'pro_config.id', '=', 'pro_setting.config_id')
-            ->select([
-                'pro_setting.id',
-                'pro_setting.name',
-                'pro_setting.slug',
-                'pro_setting_type.name as setting_type_name',
-                'pro_setting_type.slug as setting_type_slug',
-            ])
-            ->get()
-            ->toArray();
 
-        $data = [];
-        if (sizeof($entity)>0) {
-            foreach ($entity as $item) {
-                $data[$item['setting_type_name']][] = $item;
-            }
-        }
-
-        $slugArray = array_map(function ($entity) {
-            return $entity['slug'];
-        }, $entity);
-        return ['datakey'=>$slugArray,'field'=>$data];
-    }
-
-    public static function getSettingDropdown($dropdownType)
-    {
-        return DB::table('pro_setting')
-            ->join('pro_setting_type','pro_setting_type.id','=','pro_setting.setting_type_id')
-            ->select([
-                'pro_setting.id',
-                'pro_setting.name',
-                'pro_setting.slug',
-                'pro_setting_type.name as type_name',
-            ])
-            ->where([
-                ['pro_setting_type.slug',$dropdownType],
-                ['pro_setting_type.status','1'],
-                ['pro_setting.status','1'],
-            ])
-            ->get();
-    }
 
     public static function getEntityDropdown($dropdownType)
     {
