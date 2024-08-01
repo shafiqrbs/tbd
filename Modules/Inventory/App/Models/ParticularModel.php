@@ -52,16 +52,10 @@ class ParticularModel extends Model
         });
     }
 
-    public function setting_type(): BelongsTo
+    public function particular_type(): BelongsTo
     {
-        return $this->belongsTo(SettingTypeModel::class);
+        return $this->belongsTo(ParticularTypeModel::class);
     }
-
-    public static function getConfigID($globalID)
-    {
-        return DB::table('inv_config')->where('domain_id', $globalID)->select('id')->first()->id;
-    }
-
 
 
     public static function getRecords($request,$domain){

@@ -6,12 +6,12 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Modules\AppsApi\App\Services\JsonRequestResponse;
-
 use Modules\Core\App\Models\UserModel;
-use Modules\Inventory\App\Http\Requests\SettingRequest;
+use Modules\Inventory\App\Http\Requests\ParticularRequest;
+use Modules\Inventory\App\Models\ParticularModel;
 use Modules\Inventory\App\Models\ParticularTypeModel;
-use Modules\Inventory\App\Models\SettingModel;
-use Modules\Inventory\App\Models\SettingTypeModel;
+
+
 
 
 class ParticularController extends Controller
@@ -29,7 +29,7 @@ class ParticularController extends Controller
 
     public function index(Request $request)
     {
-        $data = SettingModel::getRecords($request, $this->domain);
+        $data = ParticularModel::getRecords($request, $this->domain);
         $response = new Response();
         $response->headers->set('Content-Type', 'application/json');
         $response->setContent(json_encode([
@@ -46,13 +46,12 @@ class ParticularController extends Controller
      /**
      * Store a newly created resource in storage.
      */
-    public function store(SettingRequest $request)
+    public function store(ParticularRequest $request)
     {
         $service = new JsonRequestResponse();
         $input = $request->validated();
-        $getConfigId = SettingModel::getConfigId($this->domain['global_id']);
-        $input['config_id'] = $getConfigId;
-        $entity = SettingModel::create($input);
+        $input['config_id'] = $this->domain['config_id'];
+        $entity = ParticularModel::create($input);
         $data = $service->returnJosnResponse($entity);
         return $data;
     }
@@ -63,7 +62,7 @@ class ParticularController extends Controller
     public function show($id)
     {
         $service = new JsonRequestResponse();
-        $entity = SettingModel::find($id);
+        $entity = ParticularModel::find($id);
         if (!$entity) {
             $entity = 'Data not found';
         }
@@ -76,7 +75,7 @@ class ParticularController extends Controller
      */
     public function edit($id)
     {
-        $entity = SettingModel::find($id);
+        $entity = ParticularModel::find($id);
         $status = $entity ? Response::HTTP_OK : Response::HTTP_NOT_FOUND;
         return response()->json([
             'message' => 'success',
@@ -90,12 +89,11 @@ class ParticularController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(SettingRequest $request, $id)
+    public function update(ParticularRequest $request, $id)
     {
         $data = $request->validated();
-        $entity = SettingModel::find($id);
-        $getConfigId = SettingModel::getConfigId($this->domain['global_id']);
-        $data['config_id'] = $getConfigId;
+        $entity = ParticularModel::find($id);
+        $input['config_id'] = $this->domain['config_id'];
         $entity->update($data);
 
         $service = new JsonRequestResponse();
@@ -108,7 +106,7 @@ class ParticularController extends Controller
     public function destroy($id)
     {
         $service = new JsonRequestResponse();
-        SettingModel::find($id)->delete();
+        ParticularModel::find($id)->delete();
         $entity = ['message' => 'delete'];
         return $service->returnJosnResponse($entity);
     }

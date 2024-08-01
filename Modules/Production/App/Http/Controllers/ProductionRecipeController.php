@@ -61,7 +61,7 @@ class ProductionRecipeController extends Controller
     public function store(Request $request, EntityManager $em)
     {
         $data = $request->all();
-        $entities = $em->getRepository(ProductionElement::class)->insertProductionElement($data,$this->domain);
+        $em->getRepository(ProductionElement::class)->insertProductionElement($data,$this->domain);
     }
 
     /**
