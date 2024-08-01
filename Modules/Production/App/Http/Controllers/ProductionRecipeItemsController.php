@@ -76,7 +76,6 @@ class ProductionRecipeItemsController extends Controller
     public function store(RecipeItemsRequest $request)
     {
         $response = new Response();
-
         $pro_item_id = $request->validated()['pro_item_id'];
         $findItems = ProductionItems::find($pro_item_id);
 
@@ -88,26 +87,29 @@ class ProductionRecipeItemsController extends Controller
             $response->setStatusCode(Response::HTTP_OK);
             return $response;
         }
+
         $getMeasurementInputGenerate = SettingModel::getMeasurementInput($this->domain['pro_config']);
-//        dump($getMeasurementInputGenerate);
+
         if (sizeof($getMeasurementInputGenerate) > 0) {
-            foreach ($getMeasurementInputGenerate as $key => $value) {
-//                dump($value);
+            foreach ($getMeasurementInputGenerate as $value) {
                 $valueAddedExists = ProductionValueAdded::where([['production_item_id', '=', $pro_item_id],['value_added_id', '=', $value['id']]])->first();
-                dump($valueAddedExists);
-                /*$id = DB::table('pro_setting')->where('slug', $key)->select('id')->first()->id;
-                ProductionValueAdded::create([
-                    'production_item_id' => $itemId,
-                    'value_added_id' => $id,
-                    'amount' => $value,
-                ]);*/
+                if (!$valueAddedExists){
+                    ProductionValueAdded::firstOrCreate([
+                        'production_item_id' => $pro_item_id,
+                        'value_added_id' => $value['id'],
+                    ]);
+                }
             }
         }
+
+        $getValueAdded = ProductionValueAdded::getValueAddedWithInputGenerate($pro_item_id);
+
         $response = new Response();
         $response->headers->set('Content-Type', 'application/json');
         $response->setContent(json_encode([
-            'message' => 'success',
             'status' => Response::HTTP_OK,
+            'message' => 'success',
+            'data' => $getValueAdded,
         ]));
         $response->setStatusCode(Response::HTTP_OK);
         return $response;

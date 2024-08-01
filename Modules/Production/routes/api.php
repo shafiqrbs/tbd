@@ -25,9 +25,6 @@ Route::prefix('/production/select')->middleware([HeaderAuthenticationMiddleware:
 
 Route::prefix('/production')->middleware([HeaderAuthenticationMiddleware::class])->group(function() {
 
-    Route::get('/measurement-input', [SettingController::class,'measurementInput'])->name('pro_measurement_input');
-    Route::post('/recipe-measurement', [ProductionRecipeController::class,'measurementInputStore'])->name('pro_measurement_input_store');
-
     Route::apiResource('setting', SettingController::class)
         ->middleware([HeaderAuthenticationMiddleware::class])
         ->names([

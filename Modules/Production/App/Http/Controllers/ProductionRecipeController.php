@@ -65,35 +65,6 @@ class ProductionRecipeController extends Controller
     }
 
     /**
-     * Store a newly created resource in storage.
-     */
-    /*public function measurementInputStore(Request $request)
-    {
-        $itemId = $request->input('item_id');
-        $input = $request->all();
-        unset($input['item_id']);
-
-        if (sizeof($input) > 0) {
-            foreach ($input as $key => $value) {
-                $id = DB::table('pro_setting')->where('slug', $key)->select('id')->first()->id;
-                ProductionValueAdded::create([
-                    'production_item_id' => $itemId,
-                    'value_added_id' => $id,
-                    'amount' => $value,
-                ]);
-            }
-        }
-        $response = new Response();
-        $response->headers->set('Content-Type', 'application/json');
-        $response->setContent(json_encode([
-            'message' => 'success',
-            'status' => Response::HTTP_OK,
-        ]));
-        $response->setStatusCode(Response::HTTP_OK);
-        return $response;
-    }*/
-
-    /**
      * Show the specified resource.
      */
     public function show($id)
