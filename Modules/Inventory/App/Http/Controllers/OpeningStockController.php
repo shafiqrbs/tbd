@@ -3,10 +3,12 @@
 namespace Modules\Inventory\App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use Doctrine\ORM\EntityManager;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Modules\AppsApi\App\Services\JsonRequestResponse;
 use Modules\Core\App\Models\UserModel;
+use Modules\Inventory\App\Entities\StockItemHistory;
 use Modules\Inventory\App\Http\Requests\OpeningStockRequest;
 use Modules\Inventory\App\Http\Requests\ProductRequest;
 use Modules\Inventory\App\Http\Requests\PurchaseRequest;
@@ -51,6 +53,7 @@ class OpeningStockController extends Controller
         $input = $request->validated();
         $input['config_id'] = $this->domain['config_id'];
         $input['created_by_id'] = $this->domain['user_id'];
+        $input['stock_item_id'] = $input['product_id'];
         $entity = PurchaseItemModel::create($input);
         $data = $service->returnJosnResponse($entity);
         return $data;
@@ -94,7 +97,7 @@ class OpeningStockController extends Controller
         return $service->returnJosnResponse($entity);
     }
 
-    public function inlineUpdate(Request $request)
+    public function inlineUpdate(Request $request, EntityManager $em)
     {
         $getPurchaseItem = PurchaseItemModel::find($request->id);
         if (!$getPurchaseItem){
@@ -107,9 +110,10 @@ class OpeningStockController extends Controller
             $response->setStatusCode(Response::HTTP_OK);
             return $response;
         }
-
         if ($request->field_name === 'approve' ){
             $getPurchaseItem->update(['approved_by_id' => $this->domain['user_id']]);
+
+            $em->getRepository(StockItemHistory::class)->openingStockQuantity($getPurchaseItem->id);
         }
         if ($request->field_name === 'opening_quantity' ){
             $getPurchaseItem->update(['opening_quantity' => $request->opening_quantity,'sub_total'=>$request->subTotal]);
@@ -117,7 +121,6 @@ class OpeningStockController extends Controller
         if ($request->field_name === 'purchase_price' ){
             $getPurchaseItem->update(['purchase_price' => $request->purchase_price,'sub_total'=>$request->subTotal]);
         }
-
         $response = new Response();
         $response->headers->set('Content-Type', 'application/json');
         $response->setContent(json_encode([

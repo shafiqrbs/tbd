@@ -42,12 +42,6 @@ class PurchaseItem
     private  $approvedBy;
 
     /**
-     * @ORM\ManyToOne(targetEntity="Product")
-     * @ORM\JoinColumn(onDelete="CASCADE")
-     **/
-    private  $product;
-
-    /**
      * @ORM\ManyToOne(targetEntity="StockItem")
      * @ORM\JoinColumn(onDelete="CASCADE")
      **/
@@ -322,7 +316,7 @@ class PurchaseItem
     }
 
     /**
-     * @return mixed
+     * @return Product
      */
     public function getProduct()
     {
@@ -338,7 +332,7 @@ class PurchaseItem
     }
 
     /**
-     * @return mixed
+     * @return StockItem
      */
     public function getStockItem()
     {

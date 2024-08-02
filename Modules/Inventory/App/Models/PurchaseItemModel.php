@@ -51,26 +51,23 @@ class PurchaseItemModel extends Model
             ['inv_purchase_item.mode', 'opening']
         ])->$isApprovedCondition('approved_by_id');
 
-        $purchaseItems = $purchaseItems->leftjoin('inv_product','inv_product.id','=','inv_purchase_item.product_id')
+        $purchaseItems = $purchaseItems->leftjoin('inv_stock','inv_stock.id','=','inv_purchase_item.stock_item_id')
+            ->leftjoin('inv_product','inv_product.id','=','inv_stock.product_id')
             ->leftjoin('inv_category','inv_category.id','=','inv_product.category_id')
-            ->leftjoin('uti_product_unit','uti_product_unit.id','=','inv_product.unit_id')
-            ->leftjoin('inv_brand','inv_brand.id','=','inv_product.brand_id')
-            ->leftjoin('uti_settings','uti_settings.id','=','inv_product.product_type_id')
+            ->leftjoin('inv_particular as unit','unit.id','=','inv_product.unit_id')
+            ->leftjoin('inv_setting','inv_setting.id','=','inv_product.product_type_id')
             ->select([
                 'inv_purchase_item.id',
-                'inv_purchase_item.product_id',
+                'inv_purchase_item.stock_item_id',
                 'inv_purchase_item.opening_quantity',
                 'inv_purchase_item.sales_price',
                 'inv_purchase_item.purchase_price',
                 'inv_purchase_item.sub_total',
-                'inv_product.name as product_name',
-                'inv_product.slug',
+                'inv_stock.name as product_name',
                 'inv_category.name as category_name',
-                'uti_product_unit.name as unit_name',
-                'inv_brand.name as brand_name',
-                'inv_product.barcode',
-                'inv_product.alternative_name',
-                'uti_settings.name as product_type',
+                'unit.name as unit_name',
+                'inv_stock.barcode',
+                'inv_setting.name as product_type',
                 DB::raw('DATE_FORMAT(inv_purchase_item.updated_at, "%d-%M-%Y") as created'),
             ]);
 

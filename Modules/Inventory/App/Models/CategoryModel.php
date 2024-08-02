@@ -78,6 +78,7 @@ class CategoryModel extends Model
                 'inv_category.id',
                 'inv_category.name',
                 'inv_category.slug',
+                'inv_category.status',
                 'inv_category.parent as parent_id',
             ]);
 

@@ -43,21 +43,22 @@ class CategoryGroupController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(CategoryGroupRequest $request, GeneratePatternCodeService $patternCodeService)
+    public function store(CategoryGroupRequest $request)
     {
         $service = new JsonRequestResponse();
         $input = $request->validated();
         $input['config_id'] = $this->domain['config_id'];
         $entity = CategoryModel::create($input);
+
         if($entity->parent){
-            $ledgerExist = AccountHeadModel::where('category_id',$entity->id)->where('config_id', $this->domain['acc_config_id'])->first();
+            $ledgerExist = AccountHeadModel::where('category_id',$entity->id)->where('config_id', $this->domain['acc_config'])->first();
             if(empty($ledgerExist)){
-                AccountHeadModel::insertCategoryLedger( $this->domain['acc_config_id'],$entity);
+                AccountHeadModel::insertCategoryLedger( $this->domain['acc_config'],$entity);
             }
         }else{
-            $ledgerExist = AccountHeadModel::where('product_group_id',$entity->id)->where('config_id', $this->domain['acc_config_id'])->first();
+            $ledgerExist = AccountHeadModel::where('product_group_id',$entity->id)->where('config_id', $this->domain['acc_config'])->first();
             if(empty($ledgerExist)){
-                AccountHeadModel::insertCategoryGroupLedger( $this->domain['acc_config_id'],$entity);
+                AccountHeadModel::insertCategoryGroupLedger( $this->domain['acc_config'],$entity);
             }
         }
         $data = $service->returnJosnResponse($entity);
@@ -102,12 +103,10 @@ class CategoryGroupController extends Controller
     public function edit($id)
     {
         $service = new JsonRequestResponse();
-        $entity = VendorModel::find($id);
-
+        $entity = CategoryModel::find($id);
         if (!$entity){
             $entity = 'Data not found';
         }
-
         $data = $service->returnJosnResponse($entity);
         return $data;
     }
@@ -120,7 +119,13 @@ class CategoryGroupController extends Controller
         $data = $request->validated();
         $entity = CategoryModel::find($id);
         $entity->update($data);
-
+        if($entity->parent){
+            $head = AccountHeadModel::where('category_id',$entity->id)->first();
+        }else{
+            $head = AccountHeadModel::where('product_group_id',$entity->id)->first();
+        }
+        $head->name = $entity->name;
+        $head->save();
         $service = new JsonRequestResponse();
         return $service->returnJosnResponse($entity);
     }

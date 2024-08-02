@@ -78,18 +78,20 @@ class AccountHeadModel extends Model
 
     public static function insertCategoryGroupLedger($config, $entity)
     {
-
         $name = "{$entity['name']}";
-        self::create(
-            [
-                'name' => $name,
-                'product_group_id' => $entity['id'],
-                'parent_id' => '5',
-                'level' => '2',
-                'source' => 'product-group',
-                'config_id' => $config
-            ]
-        );
+        $parent = AccountHeadModel::where('config_id',$config)->where('slug', 'inventory-assets')->where('head_group', 'account-head')->first();
+        if($parent){
+            self::create(
+                [
+                    'name' => $name,
+                    'product_group_id' => $entity['id'],
+                    'parent_id' => $parent['id'],
+                    'level' => '2',
+                    'source' => 'product-group',
+                    'config_id' => $config
+                ]
+            );
+        }
         //AccountJournalModel::insertCustomerJournalVoucher($entity);
     }
 

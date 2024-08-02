@@ -136,19 +136,21 @@ class SettingModel extends Model
         return ['datakey'=>$slugArray,'field'=>$data];
     }
 
-    public static function getSettingDropdown($dropdownType)
+    public static function getSettingDropdown($domain,$dropdownType)
     {
+
         return DB::table('inv_setting')
-            ->join('inv_setting_type','inv_setting_type.id','=','inv_setting.setting_type_id')
+            ->join('uti_settings','uti_settings.id','=','inv_setting.setting_id')
+            ->join('uti_setting_types','uti_setting_types.id','=','uti_settings.setting_type_id')
             ->select([
                 'inv_setting.id',
                 'inv_setting.name',
                 'inv_setting.slug',
-                'inv_setting_type.name as type_name',
             ])
             ->where([
-                ['inv_setting_type.slug',$dropdownType],
-                ['inv_setting_type.status','1'],
+                ['inv_setting.config_id',$domain],
+                ['uti_setting_types.slug',$dropdownType],
+                ['uti_settings.status','1'],
                 ['inv_setting.status','1'],
             ])
             ->get();

@@ -45,7 +45,7 @@ class InventoryController extends Controller
     public function settingDropdown(Request $request)
     {
         $mode = $request->get('dropdown-type');
-        $dropdown = SettingModel::getSettingDropdown($this->domain,$mode);
+        $dropdown = SettingModel::getSettingDropdown($this->domain['inv_config'],$mode);
         $service = new JsonRequestResponse();
         return $service->returnJosnResponse($dropdown);
     }

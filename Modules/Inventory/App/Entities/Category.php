@@ -105,6 +105,200 @@ class Category
      */
     private $updatedAt;
 
+    /**
+     * @return int
+     */
+    public function getId()
+    {
+        return $this->id;
+    }
+
+    /**
+     * @param int $id
+     */
+    public function setId($id)
+    {
+        $this->id = $id;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getConfig()
+    {
+        return $this->config;
+    }
+
+    /**
+     * @param mixed $config
+     */
+    public function setConfig($config)
+    {
+        $this->config = $config;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getParent()
+    {
+        return $this->parent;
+    }
+
+    /**
+     * @param mixed $parent
+     */
+    public function setParent($parent)
+    {
+        $this->parent = $parent;
+    }
+
+    /**
+     * @return string
+     */
+    public function getName()
+    {
+        return $this->name;
+    }
+
+    /**
+     * @param string $name
+     */
+    public function setName($name)
+    {
+        $this->name = $name;
+    }
+
+    /**
+     * @return string
+     */
+    public function getSlug()
+    {
+        return $this->slug;
+    }
+
+    /**
+     * @param string $slug
+     */
+    public function setSlug($slug)
+    {
+        $this->slug = $slug;
+    }
+
+    /**
+     * @return string
+     */
+    public function getCode()
+    {
+        return $this->code;
+    }
+
+    /**
+     * @param string $code
+     */
+    public function setCode($code)
+    {
+        $this->code = $code;
+    }
+
+    /**
+     * @return int
+     */
+    public function getSorting()
+    {
+        return $this->sorting;
+    }
+
+    /**
+     * @param int $sorting
+     */
+    public function setSorting($sorting)
+    {
+        $this->sorting = $sorting;
+    }
+
+    /**
+     * @return int
+     */
+    public function getWeightAvgPriceDuration()
+    {
+        return $this->weightAvgPriceDuration;
+    }
+
+    /**
+     * @param int $weightAvgPriceDuration
+     */
+    public function setWeightAvgPriceDuration($weightAvgPriceDuration)
+    {
+        $this->weightAvgPriceDuration = $weightAvgPriceDuration;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isHasQuantity()
+    {
+        return $this->hasQuantity;
+    }
+
+    /**
+     * @param bool $hasQuantity
+     */
+    public function setHasQuantity($hasQuantity)
+    {
+        $this->hasQuantity = $hasQuantity;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isStatus()
+    {
+        return $this->status;
+    }
+
+    /**
+     * @param bool $status
+     */
+    public function setStatus($status)
+    {
+        $this->status = $status;
+    }
+
+    /**
+     * @return \DateTime
+     */
+    public function getCreatedAt()
+    {
+        return $this->createdAt;
+    }
+
+    /**
+     * @param \DateTime $createdAt
+     */
+    public function setCreatedAt($createdAt)
+    {
+        $this->createdAt = $createdAt;
+    }
+
+    /**
+     * @return \DateTime
+     */
+    public function getUpdatedAt()
+    {
+        return $this->updatedAt;
+    }
+
+    /**
+     * @param \DateTime $updatedAt
+     */
+    public function setUpdatedAt($updatedAt)
+    {
+        $this->updatedAt = $updatedAt;
+    }
+
+
+
 
 }
 

@@ -499,7 +499,7 @@ class StockItem
 
 
     /**
-     * @return Brand
+     * @return Particular
      */
     public function getBrand()
     {
@@ -507,7 +507,7 @@ class StockItem
     }
 
     /**
-     * @param Brand $brand
+     * @param Particular $brand
      */
     public function setBrand($brand)
     {
@@ -1032,7 +1032,7 @@ class StockItem
     }
 
     /**
-     * @return mixed
+     * @return Particular
      */
     public function getSize()
     {
@@ -1040,7 +1040,7 @@ class StockItem
     }
 
     /**
-     * @param mixed $size
+     * @param Particular $size
      */
     public function setSize($size)
     {
@@ -1048,7 +1048,7 @@ class StockItem
     }
 
     /**
-     * @return mixed
+     * @return Particular
      */
     public function getColor()
     {
@@ -1056,7 +1056,7 @@ class StockItem
     }
 
     /**
-     * @param mixed $color
+     * @param Particular $color
      */
     public function setColor($color)
     {
