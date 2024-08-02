@@ -43,7 +43,7 @@ class ProductionElements extends Model
         $skip = isset($page) && $page!=''? (int)$page*$perPage:0;
 
         $entity = self::where([
-                    ['pro_element.status', '=', 1],
+//                    ['pro_element.status', '=', 1],
                     ['pro_element.config_id', '=', $domain['pro_config']],
                 ])
             ->join('inv_stock','inv_stock.id','=','pro_element.material_id')
@@ -51,6 +51,7 @@ class ProductionElements extends Model
             ->leftjoin('inv_particular','inv_particular.id','=','inv_product.unit_id')
             ->select([
                 'pro_element.id',
+                'pro_element.material_id',
                 'inv_stock.display_name as product_name',
                 'inv_particular.name as unit_name',
                 'pro_element.quantity',
@@ -63,6 +64,9 @@ class ProductionElements extends Model
                 'pro_element.status',
             ]);
 
+        if (isset($request['pro_item_id']) && $request['pro_item_id']!='') {
+            $entity = $entity->where('pro_element.production_item_id', $request['pro_item_id']);
+        }
 
         $total  = $entity->count();
         $entities = $entity->skip($skip)
