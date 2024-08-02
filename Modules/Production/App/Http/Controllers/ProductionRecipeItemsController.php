@@ -104,7 +104,6 @@ class ProductionRecipeItemsController extends Controller
 
         $getValueAdded = ProductionValueAdded::getValueAddedWithInputGenerate($pro_item_id);
 
-        $response = new Response();
         $response->headers->set('Content-Type', 'application/json');
         $response->setContent(json_encode([
             'status' => Response::HTTP_OK,
@@ -145,5 +144,30 @@ class ProductionRecipeItemsController extends Controller
     public function destroy($id)
     {
         //
+    }
+
+    public function inlineUpdateValueAdded(Request $request)
+    {
+        $response = new Response();
+        $getValueAdded = ProductionValueAdded::find($request->get('value_added_id'));
+        if (!$getValueAdded){
+            $response->setContent(json_encode([
+                'message' => 'Value added not found',
+                'status' => Response::HTTP_NOT_FOUND
+            ]));
+            $response->setStatusCode(Response::HTTP_OK);
+            return $response;
+        }
+        $getValueAdded->update([
+            'amount'=> $request->get('amount'),
+        ]);
+
+        $response->headers->set('Content-Type', 'application/json');
+        $response->setContent(json_encode([
+            'status' => Response::HTTP_OK,
+            'message' => 'success',
+        ]));
+        $response->setStatusCode(Response::HTTP_OK);
+        return $response;
     }
 }
