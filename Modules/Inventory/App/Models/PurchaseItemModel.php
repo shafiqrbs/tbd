@@ -38,6 +38,11 @@ class PurchaseItemModel extends Model
         return $this->belongsTo(PurchaseModel::class);
     }
 
+    public function stockItems()
+    {
+        return $this->hasMany(StockItemHistoryModel::class,'purchase_item_id');
+    }
+
 
     public static function getRecords($request,$domain)
     {

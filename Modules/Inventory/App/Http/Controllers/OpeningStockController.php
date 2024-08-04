@@ -112,8 +112,9 @@ class OpeningStockController extends Controller
         }
         if ($request->field_name === 'approve' ){
             $getPurchaseItem->update(['approved_by_id' => $this->domain['user_id']]);
-
-            $em->getRepository(StockItemHistory::class)->openingStockQuantity($getPurchaseItem->id);
+            if(empty($getPurchaseItem->stockItems)){
+                $em->getRepository(StockItemHistory::class)->openingStockQuantity($getPurchaseItem->id);
+            }
         }
         if ($request->field_name === 'opening_quantity' ){
             $getPurchaseItem->update(['opening_quantity' => $request->opening_quantity,'sub_total'=>$request->subTotal]);
