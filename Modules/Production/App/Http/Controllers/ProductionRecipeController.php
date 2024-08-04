@@ -95,6 +95,9 @@ class ProductionRecipeController extends Controller
      */
     public function destroy($id)
     {
-        //
+        $service = new JsonRequestResponse();
+        ProductionElements::find($id)->delete();
+        $entity = ['message' => 'delete'];
+        return $service->returnJosnResponse($entity);
     }
 }

@@ -12,6 +12,7 @@ use Modules\Core\App\Models\UserModel;
 use Modules\Inventory\App\Entities\StockItem;
 use Modules\Production\App\Entities\ProductionItem;
 use Modules\Production\App\Http\Requests\RecipeItemsRequest;
+use Modules\Production\App\Models\ProductionElements;
 use Modules\Production\App\Models\ProductionItems;
 use Modules\Production\App\Models\ProductionValueAdded;
 use Modules\Production\App\Models\SettingModel;
@@ -104,7 +105,6 @@ class ProductionRecipeItemsController extends Controller
 
         $getValueAdded = ProductionValueAdded::getValueAddedWithInputGenerate($pro_item_id);
 
-        $response = new Response();
         $response->headers->set('Content-Type', 'application/json');
         $response->setContent(json_encode([
             'status' => Response::HTTP_OK,
@@ -145,5 +145,57 @@ class ProductionRecipeItemsController extends Controller
     public function destroy($id)
     {
         //
+    }
+
+    public function inlineUpdateValueAdded(Request $request)
+    {
+        $response = new Response();
+        $getValueAdded = ProductionValueAdded::find($request->get('value_added_id'));
+        if (!$getValueAdded){
+            $response->setContent(json_encode([
+                'message' => 'Value added not found',
+                'status' => Response::HTTP_NOT_FOUND
+            ]));
+            $response->setStatusCode(Response::HTTP_OK);
+            return $response;
+        }
+        $getValueAdded->update([
+            'amount'=> $request->get('amount'),
+        ]);
+
+        $response->headers->set('Content-Type', 'application/json');
+        $response->setContent(json_encode([
+            'status' => Response::HTTP_OK,
+            'message' => 'success',
+        ]));
+        $response->setStatusCode(Response::HTTP_OK);
+        return $response;
+    }
+
+    public function inlineUpdateElementStatus(Request $request)
+    {
+        $response = new Response();
+
+        $getElement = ProductionElements::find($request->get('id'));
+
+        if (!$getElement){
+            $response->setContent(json_encode([
+                'message' => 'Element not found',
+                'status' => Response::HTTP_NOT_FOUND
+            ]));
+            $response->setStatusCode(Response::HTTP_OK);
+            return $response;
+        }
+        $getElement->update([
+            'status' => $request->get('status')==true?1:0
+        ]);
+
+        $response->headers->set('Content-Type', 'application/json');
+        $response->setContent(json_encode([
+            'status' => Response::HTTP_OK,
+            'message' => 'success',
+        ]));
+        $response->setStatusCode(Response::HTTP_OK);
+        return $response;
     }
 }
