@@ -91,6 +91,7 @@ class ProductionItems extends Model
                 'inv_setting.slug as product_type_slug',
                 'inv_category.name as category_name',
                 'pro_item.status',
+                'pro_item.process',
             ]);
 
         if (isset($request['term']) && !empty($request['term'])){

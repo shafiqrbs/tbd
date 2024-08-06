@@ -7,7 +7,6 @@ use Doctrine\ORM\EntityManager;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
-use Illuminate\Support\Facades\DB;
 use Modules\Core\App\Models\UserModel;
 use Modules\Inventory\App\Entities\StockItem;
 use Modules\Production\App\Entities\ProductionItem;
@@ -104,12 +103,16 @@ class ProductionRecipeItemsController extends Controller
         }
 
         $getValueAdded = ProductionValueAdded::getValueAddedWithInputGenerate($pro_item_id);
+        $getProductionItem = ProductionItems::find($pro_item_id);
 
         $response->headers->set('Content-Type', 'application/json');
         $response->setContent(json_encode([
             'status' => Response::HTTP_OK,
             'message' => 'success',
-            'data' => $getValueAdded,
+            'data' => [
+                'field' => $getValueAdded,
+                'item' => $getProductionItem
+            ],
         ]));
         $response->setStatusCode(Response::HTTP_OK);
         return $response;
@@ -188,6 +191,33 @@ class ProductionRecipeItemsController extends Controller
         }
         $getElement->update([
             'status' => $request->get('status')==true?1:0
+        ]);
+
+        $response->headers->set('Content-Type', 'application/json');
+        $response->setContent(json_encode([
+            'status' => Response::HTTP_OK,
+            'message' => 'success',
+        ]));
+        $response->setStatusCode(Response::HTTP_OK);
+        return $response;
+    }
+
+    public function updateProcess(Request $request)
+    {
+        $response = new Response();
+
+        $getProductionItems = ProductionItems::find($request->get('pro_item_id'));
+
+        if (!$getProductionItems){
+            $response->setContent(json_encode([
+                'message' => 'Production item not found',
+                'status' => Response::HTTP_NOT_FOUND
+            ]));
+            $response->setStatusCode(Response::HTTP_OK);
+            return $response;
+        }
+        $getProductionItems->update([
+            'process' => $request->get('process')
         ]);
 
         $response->headers->set('Content-Type', 'application/json');
