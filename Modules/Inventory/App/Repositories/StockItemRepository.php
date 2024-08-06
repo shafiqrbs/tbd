@@ -85,18 +85,23 @@ class StockItemRepository extends EntityRepository
     public function insertStockItem($id,$data){
 
         $em = $this->_em;
+
         /** @var  $product Product  */
+
         $product = $em->getRepository(Product::class)->find($id);
-        if($product->getStockItems()){
+        $exist = $em->getRepository(StockItem::class)->findOneBy(['product' => $id,'isMaster' => 1]);
+        if(empty($exist)){
             $entity = new StockItem();
             $entity->setConfig($product->getConfig());
             $entity->setProduct($product);
             $entity->setName($product->getName());
             $entity->setDisplayName($product->getName());
+            $entity->setUom($product->getUnit()->getName());
             $entity->setPurchasePrice($data['purchase_price']);
             $entity->setPrice($data['sales_price']);
             $entity->setSalesPrice($data['sales_price']);
-            $entity->setMinQuantity($data['min_quantity']);
+            $min = (isset($data['min_quantity']) and $data['min_quantity'] > 1 ) ? $data['min_quantity']:0;
+            $entity->setMinQuantity($min);
             $entity->setIsMaster(1);
             $em->persist($entity);
             $em->flush();

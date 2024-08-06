@@ -5,6 +5,7 @@ use Doctrine\DBAL\DriverManager;
 use Doctrine\ORM\EntityRepository;
 use Modules\Inventory\App\Entities\Product;
 use Modules\Inventory\App\Entities\PurchaseItem;
+use Modules\Inventory\App\Entities\StockInventoryHistory;
 use Modules\Inventory\App\Entities\StockItem;
 use Modules\Inventory\App\Entities\StockItemHistory;
 
@@ -140,7 +141,7 @@ class StockItemHistoryRepository extends EntityRepository
 
     }
 
-    public function openingStockQuantity($id){
+    public function openingStockQuantity($id,$process = "opening"){
 
         $em = $this->_em;
 
@@ -165,14 +166,9 @@ class StockItemHistoryRepository extends EntityRepository
             $entity->setCategory($item->getStockItem()->getProduct()->getCategory()->getName());
         }
         $entity->setPurchaseItem($item);
-        $entity->setPrice($item->getPurchasePrice());
-        $entity->setPurchasePrice($item->getPurchasePrice());
-        $entity->setSalesPrice($item->getSalesPrice());
-        $entity->setSubTotal($item->getSubTotal());
-        $entity->setTotal($entity->getSubTotal());
         $closingQuantity = $entity->getOpeningQuantity();
         $openingBalance = $entity->getSubTotal();
-        $entity ->setClosingQuantity(floatval($closingQuantity));
+        $entity->setClosingQuantity(floatval($closingQuantity));
         $entity->setClosingBalance(floatval($openingBalance));
         $entity->setCreatedAt(now());
         $entity->setUpdatedAt(now());
@@ -181,7 +177,12 @@ class StockItemHistoryRepository extends EntityRepository
         $entity->setProcess('approved');
         $em->persist($entity);
         $em->flush();
+        if($process == "opening"){
+            $em->getRepository(StockInventoryHistory::class)->openingInventoryHistory($entity,$item);
+        }
     }
+
+
 
 
     public function processStockQuantity($item , $fieldName = ''){

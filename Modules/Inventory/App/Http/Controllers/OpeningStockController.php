@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Doctrine\ORM\EntityManager;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Modules\Accounting\App\Entities\AccountJournal;
 use Modules\AppsApi\App\Services\JsonRequestResponse;
 use Modules\Core\App\Models\UserModel;
 use Modules\Inventory\App\Entities\StockItemHistory;
@@ -114,6 +115,9 @@ class OpeningStockController extends Controller
             $getPurchaseItem->update(['approved_by_id' => $this->domain['user_id']]);
             if(empty($getPurchaseItem->stockItems)){
                 $em->getRepository(StockItemHistory::class)->openingStockQuantity($getPurchaseItem->id);
+            }
+            if(empty($getPurchaseItem->stockItems)){
+                $em->getRepository(AccountJournal::class)->openingStockQuantity($getPurchaseItem->id);
             }
         }
         if ($request->field_name === 'opening_quantity' ){

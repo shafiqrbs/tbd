@@ -32,7 +32,7 @@ class StockInventoryHistory
      * @ORM\OneToOne(targetEntity="StockItemHistory")
      * @ORM\JoinColumn(onDelete="CASCADE")
      **/
-    protected  $stockHistory;
+    protected  $stockItemHistory;
 
 
     /**
@@ -255,28 +255,6 @@ class StockInventoryHistory
      */
     private $expiredDate;
 
-    /**
-     * @var integer
-     *
-     * @ORM\Column(type="integer", length=50, nullable=true)
-     */
-    private $code;
-
-    /**
-     * @var string
-     *
-     * @ORM\Column(type="string", length=50, nullable=true)
-     */
-    private $sku;
-
-    /**
-     * @var \DateTime
-     *
-     * @ORM\Column(name="issueDate", type="datetime", nullable=true)
-     */
-    private $issueDate;
-
-
 
     /**
      * @var \DateTime
@@ -324,37 +302,6 @@ class StockInventoryHistory
         $this->config = $config;
     }
 
-    /**
-     * @return StockItem
-     */
-    public function getStockItem()
-    {
-        return $this->stockItem;
-    }
-
-    /**
-     * @param StockItem $stockItem
-     */
-    public function setStockItem($stockItem)
-    {
-        $this->stockItem = $stockItem;
-    }
-
-    /**
-     * @return string
-     */
-    public function getItemName()
-    {
-        return $this->itemName;
-    }
-
-    /**
-     * @param string $itemName
-     */
-    public function setItemName($itemName)
-    {
-        $this->itemName = $itemName;
-    }
 
     /**
      * @return mixed
@@ -516,21 +463,6 @@ class StockInventoryHistory
         $this->damage = $damage;
     }
 
-    /**
-     * @return string
-     */
-    public function getCreatedBy()
-    {
-        return $this->createdBy;
-    }
-
-    /**
-     * @param string $createdBy
-     */
-    public function setCreatedBy($createdBy)
-    {
-        $this->createdBy = $createdBy;
-    }
 
     /**
      * @return string
@@ -708,69 +640,6 @@ class StockInventoryHistory
         $this->quantity = $quantity;
     }
 
-    /**
-     * @return float
-     */
-    public function getOpeningQuantity()
-    {
-        return $this->openingQuantity;
-    }
-
-    /**
-     * @param float $openingQuantity
-     */
-    public function setOpeningQuantity($openingQuantity)
-    {
-        $this->openingQuantity = $openingQuantity;
-    }
-
-    /**
-     * @return float
-     */
-    public function getOpeningBalance()
-    {
-        return $this->openingBalance;
-    }
-
-    /**
-     * @param float $openingBalance
-     */
-    public function setOpeningBalance($openingBalance)
-    {
-        $this->openingBalance = $openingBalance;
-    }
-
-    /**
-     * @return float
-     */
-    public function getClosingQuantity()
-    {
-        return $this->closingQuantity;
-    }
-
-    /**
-     * @param float $closingQuantity
-     */
-    public function setClosingQuantity($closingQuantity)
-    {
-        $this->closingQuantity = $closingQuantity;
-    }
-
-    /**
-     * @return float
-     */
-    public function getClosingBalance()
-    {
-        return $this->closingBalance;
-    }
-
-    /**
-     * @param float $closingBalance
-     */
-    public function setClosingBalance($closingBalance)
-    {
-        $this->closingBalance = $closingBalance;
-    }
 
     /**
      * @return float
@@ -916,29 +785,6 @@ class StockInventoryHistory
         $this->damageQuantity = $damageQuantity;
     }
 
-    /**
-     * @return string
-     */
-    public function getProcess()
-    {
-        return $this->process;
-    }
-
-    /**
-     * @param string $process
-     */
-    public function setProcess($process)
-    {
-        $this->process = $process;
-    }
-
-    /**
-     * @return string
-     */
-    public function getMode()
-    {
-        return $this->mode;
-    }
 
     /**
      * @param string $mode
@@ -946,22 +792,6 @@ class StockInventoryHistory
     public function setMode($mode)
     {
         $this->mode = $mode;
-    }
-
-    /**
-     * @return string
-     */
-    public function getRemark()
-    {
-        return $this->remark;
-    }
-
-    /**
-     * @param string $remark
-     */
-    public function setRemark($remark)
-    {
-        $this->remark = $remark;
     }
 
     /**
@@ -997,54 +827,6 @@ class StockInventoryHistory
     }
 
     /**
-     * @return int
-     */
-    public function getCode()
-    {
-        return $this->code;
-    }
-
-    /**
-     * @param int $code
-     */
-    public function setCode($code)
-    {
-        $this->code = $code;
-    }
-
-    /**
-     * @return string
-     */
-    public function getSku()
-    {
-        return $this->sku;
-    }
-
-    /**
-     * @param string $sku
-     */
-    public function setSku($sku)
-    {
-        $this->sku = $sku;
-    }
-
-    /**
-     * @return \DateTime
-     */
-    public function getIssueDate()
-    {
-        return $this->issueDate;
-    }
-
-    /**
-     * @param \DateTime $issueDate
-     */
-    public function setIssueDate($issueDate)
-    {
-        $this->issueDate = $issueDate;
-    }
-
-    /**
      * @return \DateTime
      */
     public function getCreatedAt()
@@ -1076,10 +858,21 @@ class StockInventoryHistory
         $this->updatedAt = $updatedAt;
     }
 
+    /**
+     * @return StockItemHistory
+     */
+    public function getStockItemHistory()
+    {
+        return $this->stockItemHistory;
+    }
 
-
-
-
+    /**
+     * @param StockItemHistory $stockItemHistory
+     */
+    public function setStockItemHistory($stockItemHistory)
+    {
+        $this->stockItemHistory = $stockItemHistory;
+    }
 
 
 

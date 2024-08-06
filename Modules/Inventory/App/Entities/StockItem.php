@@ -96,6 +96,14 @@ class StockItem
     private $displayName;
 
 
+      /**
+     * @var string
+     *
+     * @ORM\Column(type="text", nullable = true)
+     */
+    private $uom;
+
+
      /**
      * @var float
      *
@@ -1302,6 +1310,22 @@ class StockItem
     public function setIsMaster($isMaster)
     {
         $this->isMaster = $isMaster;
+    }
+
+    /**
+     * @return string
+     */
+    public function getUom()
+    {
+        return $this->uom;
+    }
+
+    /**
+     * @param string $uom
+     */
+    public function setUom($uom)
+    {
+        $this->uom = $uom;
     }
 
 
