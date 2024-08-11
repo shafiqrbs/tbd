@@ -40,10 +40,10 @@ class SalesItemRepository extends EntityRepository
             $entity->setProduct($item->getProduct());
             $entity->setQuantity($quantity);
             $entity->setPercent($percent);
-            $entity->setPrice($price);
+            $entity->setPrice($item->getPrice());
             $entity->setSalesPrice($sales_price);
             $entity->setPurchasePrice($purchase_price);
-            $entity->setSubTotal($entity->getQuantity() * $entity->getPrice());
+            $entity->setSubTotal($entity->getQuantity() * $entity->getSalesPrice());
             $entity->setPurchasePrice( $item->getPurchasePrice() );
             $entity->setCreatedAt(new \DateTime());
             $entity->setUpdatedAt(new \DateTime());
