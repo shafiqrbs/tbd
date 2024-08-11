@@ -51,11 +51,11 @@ class CustomerRequest extends FormRequest
                     'name' => 'required'.$this->get('id').'|max:255',
                     'mobile' => [
                         'required',
-                        Rule::unique('Modules\Core\App\Entities\Customer', 'mobile')
+                        Rule::unique('Modules\Core\App\Entities\Customer', 'mobile')->ignore($this->route('customer'))
                     ],
                     'location_id' => 'integer|nullable',
                     'marketing_id' => 'integer|nullable',
-                    'customer_group_id' => 'string|nullable',
+                    'customer_group_id' => 'integer|nullable',
                     'credit_limit' => 'string|nullable',
                     'reference_id' => 'integer|nullable',
                     'alternative_mobile' => 'string|nullable',
