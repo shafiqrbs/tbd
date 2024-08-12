@@ -26,7 +26,7 @@ class ProductRequest extends FormRequest
             'name' => 'required|string',
             'alternative_name' => 'nullable|string',
             'sku' => 'nullable|string',
-            'barcode' => 'nullable|string',
+            'barcode' => 'nullable',
             'opening_quantity' => 'nullable|numeric|regex:/^\d+(\.\d{1,2})?$/',
             'sales_price' => 'required|numeric|regex:/^\d+(\.\d{1,2})?$/',
             'purchase_price' => 'nullable|numeric|regex:/^\d+(\.\d{1,2})?$/',
