@@ -74,12 +74,13 @@ class ProductController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(ProductRequest $request, $id)
+    public function update(ProductRequest $request, $id,EntityManagerInterface $em)
     {
         $data = $request->validated();
         $entity = ProductModel::find($id);
         $entity->update($data);
-
+        $productId = $entity['id'];
+        $em->getRepository(StockItem::class)->updateStockItem($productId,$data);
         $service = new JsonRequestResponse();
         return $service->returnJosnResponse($entity);
     }

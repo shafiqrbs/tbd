@@ -110,6 +110,34 @@ class StockItemRepository extends EntityRepository
         }
     }
 
+    public function updateStockItem($id,$data){
+
+        $em = $this->_em;
+
+        /** @var  $product Product  */
+
+        $product = $em->getRepository(Product::class)->find($id);
+        $entity = $em->getRepository(StockItem::class)->findOneBy(['product' => $id,'isMaster' => 1]);
+        if($entity){
+            $entity->setName($product->getName());
+            $entity->setDisplayName($product->getName());
+            $entity->setUom($product->getUnit()->getName());
+            $entity->setPurchasePrice($data['purchase_price']);
+            $entity->setPrice($data['sales_price']);
+            $entity->setSalesPrice($data['sales_price']);
+            $entity->setSku($data['sku']);
+            $min = (isset($data['min_quantity']) and $data['min_quantity'] > 1 ) ? $data['min_quantity']:0;
+            $entity->setMinQuantity($min);
+            $entity->setIsMaster(1);
+            $entity->setCreatedAt(new \DateTime());
+            $entity->setUpdatedAt(new \DateTime());
+            $em->persist($entity);
+            $em->flush();
+        }
+    }
+
+
+
     public function checkAvailable($config ,$data)
     {
         $process = "true";
