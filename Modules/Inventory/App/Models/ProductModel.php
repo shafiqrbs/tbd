@@ -5,6 +5,7 @@ namespace Modules\Inventory\App\Models;
 use Cviebrock\EloquentSluggable\Sluggable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Support\Facades\DB;
 
 class ProductModel extends Model
 {
@@ -107,10 +108,12 @@ class ProductModel extends Model
     public static function getProductDetails($id,$domain)
     {
 
-        $product = self::where([['inv_product.config_id',$domain['config_id']],['inv_product.id',$id]])
+        $product = DB::table('inv_stock as inv_stock')
+            ->join('inv_product', 'inv_stock.product_id', '=', 'inv_product.id')
             ->leftjoin('inv_category','inv_category.id','=','inv_product.category_id')
             ->leftjoin('inv_particular','inv_particular.id','=','inv_product.unit_id')
             ->leftjoin('inv_setting','inv_setting.id','=','inv_product.product_type_id')
+            ->where([['inv_product.config_id',$domain['config_id']],['inv_stock.product_id',$id],['inv_stock.is_master',1]])
             ->select([
                 'inv_product.id',
                 'inv_product.name as product_name',
@@ -123,6 +126,10 @@ class ProductModel extends Model
                 'inv_product.alternative_name',
                 'inv_product.product_type_id',
                 'inv_setting.name as product_type',
+                'inv_stock.purchase_price as purchase_price',
+                'inv_stock.sales_price as sales_price',
+                'inv_stock.min_quantity as min_quantity',
+                'inv_stock.sku as sku',
                 'inv_product.status'
             ])->first();
 

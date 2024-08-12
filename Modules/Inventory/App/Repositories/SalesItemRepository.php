@@ -27,7 +27,6 @@ class SalesItemRepository extends EntityRepository
             $purchase_price     = (isset( $data['purchase_price']) and  $data['purchase_price']) ?  $data['purchase_price']:0;
             $quantity           = (isset( $data['quantity']) and  $data['quantity']) ?  $data['quantity']:0;
             $percent            = (isset( $data['percent']) and  $data['percent']) ?  $data['percent']:0;
-            $price              = (isset( $data['price']) and  $data['price']) ?  $data['price']:0;
 
             /* @var $item StockItem */
 

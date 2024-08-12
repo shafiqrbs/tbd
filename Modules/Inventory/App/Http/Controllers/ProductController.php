@@ -64,11 +64,9 @@ class ProductController extends Controller
     {
         $service = new JsonRequestResponse();
         $entity = ProductModel::getProductDetails($id, $this->domain);
-
         if (!$entity) {
             $entity = 'Data not found';
         }
-
         $data = $service->returnJosnResponse($entity);
         return $data;
     }
@@ -102,7 +100,6 @@ class ProductController extends Controller
     {
         $service = new JsonRequestResponse();
         $data = ProductModel::getStockItem($this->domain);
-
         return $service->returnJosnResponse($data);
     }
 
