@@ -136,13 +136,10 @@ class StockItemRepository extends EntityRepository
         }
     }
 
-
-
     public function checkAvailable($config ,$data)
     {
         $process = "true";
         $name = isset($data['name']) ? $data['name'] : '';
-
         $qb = $this->createQueryBuilder('e');
         $qb->select('COUNT(e.id) as count');
         $qb->where("e.config = :inventory")->setParameter('inventory', $config);
