@@ -3,10 +3,12 @@
 namespace Modules\Inventory\App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use Doctrine\ORM\EntityManager;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Modules\AppsApi\App\Services\JsonRequestResponse;
 use Modules\Core\App\Models\UserModel;
+use Modules\Inventory\App\Entities\PurchaseItem;
 use Modules\Inventory\App\Http\Requests\ProductRequest;
 use Modules\Inventory\App\Http\Requests\PurchaseRequest;
 use Modules\Inventory\App\Models\PurchaseModel;
@@ -43,15 +45,15 @@ class PurchaseController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(PurchaseRequest $request)
+    public function store(PurchaseRequest $request,EntityManager $em)
     {
         $service = new JsonRequestResponse();
         $input = $request->validated();
         $input['config_id'] = $this->domain['config_id'];
         $entity = PurchaseModel::create($input);
-
         $process = new PurchaseModel();
         $process->insertPurchaseItems($entity,$input['items']);
+       // $em->getRepository(PurchaseItem::class)->insert($entity,$input['items']);
         $data = $service->returnJosnResponse($entity);
         return $data;
 

@@ -20,6 +20,7 @@ class PurchaseItemModel extends Model
     ];
 
     public static function boot() {
+
         parent::boot();
         self::creating(function ($model) {
             $date =  new \DateTime("now");

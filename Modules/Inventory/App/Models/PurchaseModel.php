@@ -47,8 +47,15 @@ class PurchaseModel extends Model
     public function insertPurchaseItems($sales,$items)
     {
         $timestamp = Carbon::now();
+
+        $items = array_map(function($item) {
+            $item['stock_item_id'] = $item['product_id'];
+            unset($item['product_id']);
+            return $item;
+        }, $items);
         foreach ($items as &$record) {
             $record['purchase_id'] = $sales->id;
+            $record['config_id'] = $sales->config_id;
             $record['created_at'] = $timestamp;
             $record['updated_at'] = $timestamp;
         }
@@ -89,17 +96,16 @@ class PurchaseModel extends Model
                     $query->select([
                         'inv_purchase_item.id',
                         'inv_purchase_item.purchase_id',
-                        'inv_product.name as item_name',
-                        'inv_product.slug as product_slug',
+                        'inv_stock.name as item_name',
                         'inv_purchase_item.quantity',
                         'inv_purchase_item.purchase_price',
                         'inv_purchase_item.sales_price',
                         'inv_purchase_item.sub_total',
-                        'inv_product.unit_id',
-                        'uti_product_unit.name as unit_name',
+                        'inv_particular.name as unit_name',
                     ])
-                        ->join('inv_product','inv_product.id','=','inv_purchase_item.product_id')
-                        ->join('uti_product_unit','uti_product_unit.id','=','inv_product.unit_id');
+                        ->join('inv_stock','inv_stock.id','=','inv_purchase_item.stock_item_id')
+                        ->join('inv_product','inv_product.id','=','inv_stock.product_id')
+                        ->leftjoin('inv_particular','inv_particular.id','=','inv_product.unit_id');
                 }]);
 
         if (isset($request['term']) && !empty($request['term'])){
@@ -156,7 +162,7 @@ class PurchaseModel extends Model
                 'transactionMode.name as modeName',
                 'transactionMode.name as modeName',
 
-            ])->with(['salesItems' => function ($query){
+            ])->with(['purchaseItems' => function ($query){
                 $query->select([
                     'id',
                     'purchase_id',
