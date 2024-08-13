@@ -51,28 +51,54 @@ class TransactionModeController extends Controller
     /**
      * Store a newly created resource in storage.
      */
+
     public function store(TransactionModeRequest $request)
     {
         $data = $request->validated();
         $data['status'] = true;
-        $data['config_id'] = $this->domain['acc_config_id'];
-        $getAuthorized = SettingModel::find($data['authorised_mode_id']);
-        if ($getAuthorized){
-            $data['authorised'] = $getAuthorized->name;
+        $data['config_id'] = $this->domain['acc_config'];
+        $data['is_selected'] = $data['is_selected'] ?? false;
+        $data['authorised'] = $this->getSettingName($data['authorised_mode_id']);
+        $data['account_type'] = $this->getSettingName($data['account_mode_id']);
+        $data['path'] = $this->processFileUpload($request, 'uploads/accounting/transaction-mode/');
+
+        $entity = TransactionModeModel::create($data);
+
+        if ($data['is_selected']) {
+            $this->updateIsSelected($entity->id);
         }
 
-        $getAccountType = SettingModel::find($data['account_mode_id']);
-        if ($getAccountType){
-            $data['account_type'] = $getAccountType->name;
-        }
+        return (new JsonRequestResponse())->returnJosnResponse($entity);
+    }
+
+    private function getSettingName($id)
+    {
+        $setting = SettingModel::find($id);
+        return $setting ? $setting->name : null;
+    }
+
+    private function processFileUpload($request, $uploadDir)
+    {
         if ($request->file('path')) {
-            $imageName = time().'.'.$request->path->extension();
-            $request->path->move(public_path('uploads/accounting/transaction-mode/'), $imageName);
-             $data['path'] = $imageName;
+            $imageName = time() . '.' . $request->path->extension();
+            $request->path->move(public_path($uploadDir), $imageName);
+            return $imageName;
         }
-        $entity = TransactionModeModel::create($data);
-        $service = new JsonRequestResponse();
-        return $service->returnJosnResponse($entity);
+
+        return null;
+    }
+
+    private function updateIsSelected($id)
+    {
+        $getData = TransactionModeModel::where('config_id', $this->domain['acc_config'])
+                                                ->where('id', '<>', $id)
+                                                ->get();
+        if (sizeof($getData) > 0){
+            foreach ($getData as $data) {
+                $updateEntity = TransactionModeModel::find($data->id);
+                $updateEntity->update(['is_selected' => false]);
+            }
+        }
     }
 
     /**
@@ -112,6 +138,9 @@ class TransactionModeController extends Controller
         $data = $request->validated();
         $entity = DomainModel::find($id);
         $entity->update($data);
+        if ($data['is_selected']==1) {
+            $this->updateIsSelected($entity->id);
+        }
         $service = new JsonRequestResponse();
         return $service->returnJosnResponse($entity);
     }
