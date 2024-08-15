@@ -26,10 +26,13 @@ class TransactionModeRequest extends FormRequest
         switch($this->method())
         {
 
+            case 'PATCH':
+            case 'PUT':
             case 'POST':
             {
                 return [
                     'name' => 'required|string',
+                    'is_selected' => 'nullable',
                     'authorised_mode_id' => 'required|integer',
                     'account_mode_id' => 'required|integer',
                     'service_charge' => 'nullable|string',
@@ -41,17 +44,6 @@ class TransactionModeRequest extends FormRequest
                 ];
             }
 
-            case 'PUT':
-            case 'PATCH':
-            {
-                return [
-                    'name' => 'required|string',
-                    'mobile' => 'required|numeric',
-                    'email' => 'required|email',
-                    'address' => 'string',
-                    'company_name' => 'required|string',
-                ];
-            }
             default:break;
         }
     }

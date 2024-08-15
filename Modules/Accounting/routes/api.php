@@ -34,6 +34,7 @@ Route::prefix('/accounting')->middleware([HeaderAuthenticationMiddleware::class]
     Route::get('/transaction-mode/local-storage', [TransactionModeController::class,'LocalStorage'])->name('transaction_mode_local_storage');
     Route::get('/account-head/local-storage', [AccountGroupHeadController::class,'LocalStorage'])->name('head_group_local_storage');
 
+    Route::post('/transaction-mode-update/{id}', [TransactionModeController::class,'update'])->name('transaction-mode.update-customize');
     Route::apiResource('/transaction-mode', TransactionModeController::class)->middleware([HeaderAuthenticationMiddleware::class]);
     Route::apiResource('/account-head', AccountHeadController::class)->middleware([HeaderAuthenticationMiddleware::class]);
 

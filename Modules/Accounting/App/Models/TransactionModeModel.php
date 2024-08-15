@@ -27,6 +27,7 @@ class TransactionModeModel extends Model
         'path',
         'status',
         'config_id',
+        'is_selected',
     ];
 
     /**
@@ -58,22 +59,13 @@ class TransactionModeModel extends Model
     }
 
 
-    public static function getCategoryDropdown($domain)
-    {
-        $query = self::select(['name', 'slug', 'id'])
-            ->where([['status', 1],['config_id', $domain['config_id']]]);
-        $query->whereNotNull('parent');
-        return $query->get();
-    }
-
-
     public static function getRecords($request,$domain)
     {
         $page =  isset($request['page']) && $request['page'] > 0?($request['page'] - 1 ) : 0;
         $perPage = isset($request['offset']) && $request['offset']!=''? (int)($request['offset']):0;
         $skip = isset($page) && $page!=''? (int)$page * $perPage:0;
 
-        $tramsactionsMode = self::where('acc_transaction_mode.config_id',$domain['acc_config_id'])
+        $tramsactionsMode = self::where('acc_transaction_mode.config_id',$domain['acc_config'])
             ->leftjoin('acc_setting as method','method.id','=','acc_transaction_mode.method_id')
             ->leftjoin('uti_settings as authorized','authorized.id','=','acc_transaction_mode.authorised_mode_id')
             ->leftjoin('uti_settings as account_type','account_type.id','=','acc_transaction_mode.account_mode_id')
@@ -83,11 +75,11 @@ class TransactionModeModel extends Model
                 'acc_transaction_mode.slug',
                 'acc_transaction_mode.service_charge',
                 'acc_transaction_mode.account_owner',
-                'acc_transaction_mode.path',
                 'acc_transaction_mode.short_name',
                 'method.name as method_name',
                 'authorized.name as authorized_name',
                 'account_type.name as account_type_name',
+                DB::raw("CONCAT('".url('')."/uploads/accounting/transaction-mode/', acc_transaction_mode.path) AS path")
             ]);
 
         if (isset($request['term']) && !empty($request['term'])){
@@ -107,7 +99,7 @@ class TransactionModeModel extends Model
 
     public static function getTransactionsModeData($domain)
     {
-        $entities = self::where([['acc_transaction_mode.config_id',$domain['acc_config_id']],['acc_transaction_mode.status',1]])
+        $entities = self::where([['acc_transaction_mode.config_id',$domain['acc_config']],['acc_transaction_mode.status',1]])
             ->leftjoin('uti_settings as method','method.id','=','acc_transaction_mode.method_id')
             ->select([
                 'acc_transaction_mode.id',
@@ -129,7 +121,7 @@ class TransactionModeModel extends Model
     public static function getRecordsForLocalStorage($request,$domain)
     {
 
-        $tramsactionsMode = self::where('acc_transaction_mode.config_id',$domain['acc_config_id'])
+        $tramsactionsMode = self::where('acc_transaction_mode.config_id',$domain['acc_config'])
             ->leftjoin('uti_settings as method','method.id','=','acc_transaction_mode.method_id')
             ->leftjoin('uti_settings as authorized','authorized.id','=','acc_transaction_mode.authorised_mode_id')
             ->leftjoin('uti_settings as account_type','account_type.id','=','acc_transaction_mode.account_mode_id')
