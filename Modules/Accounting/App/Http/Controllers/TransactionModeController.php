@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Log;
 use Modules\Accounting\App\Http\Requests\TransactionModeRequest;
 use Modules\Accounting\App\Models\TransactionModeModel;
 use Modules\AppsApi\App\Services\JsonRequestResponse;
@@ -46,7 +48,6 @@ class TransactionModeController extends Controller
         $response->setStatusCode(Response::HTTP_OK);
         return $response;
     }
-
 
     /**
      * Store a newly created resource in storage.
@@ -108,6 +109,7 @@ class TransactionModeController extends Controller
     {
         $service = new JsonRequestResponse();
         $entity = TransactionModeModel::find($id);
+
         if (!$entity){
             $entity = 'Data not found';
         }
@@ -116,29 +118,27 @@ class TransactionModeController extends Controller
     }
 
     /**
-     * Show the form for editing the specified resource.
-     */
-    /*public function edit($id)
-    {
-        $service = new JsonRequestResponse();
-        $entity = TransactionModeModel::find($id);
-        if (!$entity){
-            $entity = 'Data not found';
-        }
-        $data = $service->returnJosnResponse($entity);
-        return $data;
-    }*/
-
-    /**
      * Update the specified resource in storage.
      */
-    public function update(DomainRequest $request, $id)
+    public function update(TransactionModeRequest $request, $id)
     {
-
         $data = $request->validated();
-        $entity = DomainModel::find($id);
+
+        $entity = TransactionModeModel::find($id);
+        $data['config_id'] = $this->domain['acc_config'];
+        $data['is_selected'] = $data['is_selected'] ?? false;
+        $data['authorised'] = $this->getSettingName($data['authorised_mode_id']);
+        $data['account_type'] = $this->getSettingName($data['account_mode_id']);
+        $path = $this->processFileUpload($request, 'uploads/accounting/transaction-mode/');
+        if ($path){
+            if ($entity->path){
+                $target_location = 'uploads/accounting/transaction-mode/';
+                File::delete(public_path().'/'.$target_location.$entity->path);
+            }
+            $data['path'] = $path;
+        }
         $entity->update($data);
-        if ($data['is_selected']==1) {
+        if ($data['is_selected']) {
             $this->updateIsSelected($entity->id);
         }
         $service = new JsonRequestResponse();

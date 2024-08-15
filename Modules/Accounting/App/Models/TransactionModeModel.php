@@ -59,15 +59,6 @@ class TransactionModeModel extends Model
     }
 
 
-    public static function getCategoryDropdown($domain)
-    {
-        $query = self::select(['name', 'slug', 'id'])
-            ->where([['status', 1],['config_id', $domain['config_id']]]);
-        $query->whereNotNull('parent');
-        return $query->get();
-    }
-
-
     public static function getRecords($request,$domain)
     {
         $page =  isset($request['page']) && $request['page'] > 0?($request['page'] - 1 ) : 0;
