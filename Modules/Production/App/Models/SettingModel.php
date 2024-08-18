@@ -123,8 +123,6 @@ class SettingModel extends Model
             ->toArray();
     }
 
-
-
     public static function getEntityDropdown($dropdownType)
     {
         return DB::table('pro_setting')
@@ -144,6 +142,33 @@ class SettingModel extends Model
             ->get();
     }
 
+    public static function getConfigResult($slug, $configId) {
+        return self::join('pro_setting_type','pro_setting_type.id','=','pro_setting.setting_type_id')
+            ->select([
+                'pro_setting.id',
+                'pro_setting.name',
+                'pro_setting.slug',
+                'pro_setting_type.name as type_name',
+                'pro_setting_type.slug as type_slug',
+            ])
+            ->where([
+                ['pro_setting_type.slug',$slug],
+                ['pro_setting.config_id', $configId],
+                ['pro_setting_type.status',true],
+                ['pro_setting.status',true],
+            ])
+            ->get();
+    }
 
+    public static function getConfigDropdown($domain)
+    {
+        $getProductionProcedure = self::getConfigResult('production-procedure', $domain['pro_config']);
+        $getConsumptionMethod = self::getConfigResult('consumption-method', $domain['pro_config']);
+
+        return [
+            'ProductionProcedure' => $getProductionProcedure,
+            'ConsumptionMethod' => $getConsumptionMethod
+        ];
+    }
 
 }

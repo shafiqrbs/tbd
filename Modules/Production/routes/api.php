@@ -3,6 +3,7 @@
 use App\Http\Middleware\HeaderAuthenticationMiddleware;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use Modules\Production\App\Http\Controllers\ConfigController;
 use Modules\Production\App\Http\Controllers\ProductionRecipeController;
 use Modules\Production\App\Http\Controllers\ProductionRecipeItemsController;
 use Modules\Production\App\Http\Controllers\SettingController;
@@ -18,9 +19,9 @@ use Modules\Production\App\Http\Controllers\SettingController;
     |
 */
 
-
 Route::prefix('/production/select')->middleware([HeaderAuthenticationMiddleware::class])->group(function() {
     Route::get('/setting-type', [SettingController::class,'settingTypeDropdown'])->name('pro_setting_type_dropdown');
+    Route::get('/config-dropdown', [ConfigController::class,'configDropdown'])->name('pro_config_dropdown');
 });
 
 Route::prefix('/production')->middleware([HeaderAuthenticationMiddleware::class])->group(function() {
@@ -35,6 +36,9 @@ Route::prefix('/production')->middleware([HeaderAuthenticationMiddleware::class]
             'destroy' => 'production.setting.destroy'
         ]);
     ;
+
+    Route::get('/config', [ConfigController::class,'show'])->name('pro_config_show');
+    Route::patch('/config-update', [ConfigController::class,'update'])->name('pro_config_update');
 
     Route::post('/inline-update-value-added', [ProductionRecipeItemsController::class,'inlineUpdateValueAdded'])->name('pro_inline_update_value_added');
     Route::post('/inline-update-element-status', [ProductionRecipeItemsController::class,'inlineUpdateElementStatus'])->name('pro_inline_update_element_status');
