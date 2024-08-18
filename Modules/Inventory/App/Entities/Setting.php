@@ -53,6 +53,14 @@ class Setting
      */
     private $status= true;
 
+
+    /**
+     * @var boolean
+     *
+     * @ORM\Column(type="boolean" )
+     */
+    private $isProduction= false;
+
     /**
      * @var \DateTime
      * @Gedmo\Timestampable(on="create")
@@ -129,6 +137,88 @@ class Setting
     {
         $this->slug = $slug;
     }
+
+    /**
+     * @return mixed
+     */
+    public function getConfig()
+    {
+        return $this->config;
+    }
+
+    /**
+     * @param mixed $config
+     */
+    public function setConfig($config)
+    {
+        $this->config = $config;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getSetting()
+    {
+        return $this->setting;
+    }
+
+    /**
+     * @param mixed $setting
+     */
+    public function setSetting($setting)
+    {
+        $this->setting = $setting;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isProduction()
+    {
+        return $this->isProduction;
+    }
+
+    /**
+     * @param bool $isProduction
+     */
+    public function setIsProduction($isProduction)
+    {
+        $this->isProduction = $isProduction;
+    }
+
+    /**
+     * @return \DateTime
+     */
+    public function getCreatedAt()
+    {
+        return $this->createdAt;
+    }
+
+    /**
+     * @param \DateTime $createdAt
+     */
+    public function setCreatedAt($createdAt)
+    {
+        $this->createdAt = $createdAt;
+    }
+
+    /**
+     * @return \DateTime
+     */
+    public function getUpdatedAt()
+    {
+        return $this->updatedAt;
+    }
+
+    /**
+     * @param \DateTime $updatedAt
+     */
+    public function setUpdatedAt($updatedAt)
+    {
+        $this->updatedAt = $updatedAt;
+    }
+
+
 
 
 }

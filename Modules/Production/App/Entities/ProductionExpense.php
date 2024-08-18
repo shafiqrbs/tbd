@@ -218,7 +218,7 @@ class ProductionExpense
     /**
      * @param float $purchasePrice
      */
-    public function setPurchasePrice(float $purchasePrice)
+    public function setPurchasePrice($purchasePrice)
     {
         $this->purchasePrice = $purchasePrice;
     }
@@ -234,7 +234,7 @@ class ProductionExpense
     /**
      * @param float $salesPrice
      */
-    public function setSalesPrice(float $salesPrice)
+    public function setSalesPrice($salesPrice)
     {
         $this->salesPrice = $salesPrice;
     }
@@ -258,7 +258,7 @@ class ProductionExpense
     /**
      * @return float
      */
-    public function getReturnQuantity(): float
+    public function getReturnQuantity()
     {
         return $this->returnQuantity;
     }
@@ -266,7 +266,7 @@ class ProductionExpense
     /**
      * @param float $returnQuantity
      */
-    public function setReturnQuantity(float $returnQuantity)
+    public function setReturnQuantity($returnQuantity)
     {
         $this->returnQuantity = $returnQuantity;
     }
@@ -314,10 +314,44 @@ class ProductionExpense
     /**
      * @param \DateTime $issueDate
      */
-    public function setIssueDate(\DateTime $issueDate)
+    public function setIssueDate($issueDate)
     {
         $this->issueDate = $issueDate;
     }
+
+    /**
+     * @return mixed
+     */
+    public function getConfig()
+    {
+        return $this->config;
+    }
+
+    /**
+     * @param mixed $config
+     */
+    public function setConfig($config)
+    {
+        $this->config = $config;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getIssueItem()
+    {
+        return $this->issueItem;
+    }
+
+    /**
+     * @param mixed $issueItem
+     */
+    public function setIssueItem($issueItem)
+    {
+        $this->issueItem = $issueItem;
+    }
+
+
 
 
 

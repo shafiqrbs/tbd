@@ -171,15 +171,14 @@ class StockItemRepository extends EntityRepository
 
     public function getProductionItems($inventory,$modes = array())
     {
-        $modes = array('raw-materials','mid-production');
         $qb = $this->createQueryBuilder('item');
         $qb->join('item.product','mi');
         $qb->join('mi.productType','g');
         $qb->join('g.setting','setting');
         $qb->select('item.id');
         $qb->where("mi.config = :inventory")->setParameter('inventory', $inventory);
-        $qb->andWhere("g.slug IN (:slugs)")->setParameter('slugs',$modes);
-     //   $qb->andWhere("item.status = 1");
+        $qb->andWhere("g.isProduction = 1");
+        $qb->andWhere("item.status = 1");
         $result = $qb->getQuery()->getArrayResult();
         return  $result;
 

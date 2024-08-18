@@ -66,17 +66,16 @@ class ProductionItems extends Model
                     ['pro_item.is_delete', '=', 0],
                     ['pro_config.domain_id', '=', $domain['global_id']],
                 ])
-            ->whereIN('inv_setting.slug',['raw-materials','post-production','mid-production','pre-production'])
+            ->whereIN('inv_setting.slug',['post-production','mid-production','pre-production'])
             ->join('inv_stock','inv_stock.id','=','pro_item.item_id')
             ->join('pro_config','pro_config.id','=','pro_item.config_id')
             ->join('inv_product','inv_product.id','=','inv_stock.product_id')
             ->join('inv_category','inv_category.id','=','inv_product.category_id')
-            ->leftjoin('uti_product_unit','uti_product_unit.id','=','inv_product.unit_id')
             ->join('inv_setting','inv_setting.id','=','inv_product.product_type_id')
             ->select([
                 'pro_item.id',
-                'inv_product.name as product_name',
-                'uti_product_unit.name as unit_name',
+                'inv_stock.name as product_name',
+                'inv_stock.uom as unit_name',
                 'pro_item.waste_amount',
                 DB::raw('DATE_FORMAT(pro_item.license_date, "%d-%M-%Y") as license_date'),
                 DB::raw('DATE_FORMAT(pro_item.initiate_date, "%d-%M-%Y") as initiate_date'),
@@ -95,17 +94,12 @@ class ProductionItems extends Model
             ]);
 
         if (isset($request['term']) && !empty($request['term'])){
-            $entity = $entity->whereAny(['inv_product.name','uti_product_unit.name','inv_setting.slug'],'LIKE','%'.trim($request['term']).'%');
+            $entity = $entity->whereAny(['inv_stock.name','inv_setting.slug'],'LIKE','%'.trim($request['term']).'%');
         }
 
         if (isset($request['product_name']) && !empty($request['product_name'])){
-            $entity = $entity->where('inv_product.name','LIKE','%'.trim($request['product_name']));
+            $entity = $entity->where('inv_stock.name','LIKE','%'.trim($request['product_name']));
         }
-
-        /*if (isset($request['setting_type_id']) && !empty($request['setting_type_id'])){
-            $entity = $entity->where('pro_setting.setting_type_id',$request['setting_type_id']);
-        }*/
-
         $total  = $entity->count();
         $entities = $entity->skip($skip)
             ->take($perPage)
