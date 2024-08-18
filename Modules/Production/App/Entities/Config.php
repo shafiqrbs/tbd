@@ -48,6 +48,18 @@ class Config
     private $updatedAt;
 
     /**
+     * @ORM\OneToOne(targetEntity="Setting")
+     * @ORM\JoinColumn(onDelete="CASCADE")
+     **/
+    private $productionProcedure;
+
+    /**
+     * @ORM\OneToOne(targetEntity="Setting")
+     * @ORM\JoinColumn(onDelete="CASCADE")
+     **/
+    private $consumptionMethod;
+
+    /**
      * @return int
      */
     public function getId()
