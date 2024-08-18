@@ -66,7 +66,7 @@ class ProductionItems extends Model
                     ['pro_item.is_delete', '=', 0],
                     ['pro_config.domain_id', '=', $domain['global_id']],
                 ])
-            ->whereIN('inv_setting.slug',['post-production','mid-production','pre-production'])
+            ->where('inv_setting.is_production', '=', 1)
             ->join('inv_stock','inv_stock.id','=','pro_item.item_id')
             ->join('pro_config','pro_config.id','=','pro_item.config_id')
             ->join('inv_product','inv_product.id','=','inv_stock.product_id')
