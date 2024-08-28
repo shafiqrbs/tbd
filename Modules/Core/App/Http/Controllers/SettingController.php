@@ -68,13 +68,12 @@ class SettingController extends Controller
     public function show($id)
     {
         $service = new JsonRequestResponse();
-        dd($id);
-        /*$entity = TransactionModeModel::find($id);
+        $entity = SettingModel::find($id);
         if (!$entity){
             $entity = 'Data not found';
         }
         $data = $service->returnJosnResponse($entity);
-        return $data;*/
+        return $data;
     }
 
     /**
@@ -87,6 +86,21 @@ class SettingController extends Controller
         if (!$entity){
             $entity = 'Data not found';
         }
+        $data = $service->returnJosnResponse($entity);
+        return $data;
+    }
+
+     /**
+     * Show the form for editing the specified resource.
+     */
+    public function inlineStatus($id)
+    {
+        $service = new JsonRequestResponse();
+        $entity = SettingModel::find($id);
+        if (!$entity){
+            $entity = 'Data not found';
+        }
+        $entity->update(['status'=> $entity->status == 1 ? 0 :1]);
         $data = $service->returnJosnResponse($entity);
         return $data;
     }

@@ -31,6 +31,7 @@ Route::prefix('/core/select')->middleware([HeaderAuthenticationMiddleware::class
     Route::get('/customer', [CoreController::class,'customer'])->name('customer_autosearch');
     Route::get('/location', [CoreController::class,'location'])->name('location_autosearch');
     Route::get('/setting', [CoreController::class,'settingDropdown'])->name('core_setting_dropdown');
+    Route::get('/setting-type', [CoreController::class,'settingTypeDropdown'])->name('core_setting_type_dropdown');
     Route::get('/countries', [CoreController::class,'countriesDropdown'])->name('core_countries_dropdown');
 });
 
@@ -56,9 +57,11 @@ Route::prefix('/core')->middleware([HeaderAuthenticationMiddleware::class])->gro
             'store' => 'core.setting.store',
             'show' => 'core.setting.show',
             'update' => 'core.setting.update',
-            'destroy' => 'core.setting.destroy'
+            'destroy' => 'core.setting.destroy',
         ]);
     ;
+    Route::get('/setting/inline-status/{id}', [SettingController::class,'inlineStatus'])->name('core_setting_inline_status');
+
 
 }
 );

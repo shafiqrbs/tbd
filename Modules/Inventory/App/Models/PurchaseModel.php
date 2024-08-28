@@ -201,12 +201,13 @@ class PurchaseModel extends Model
                 'createdBy.id as createdById',
                 'transactionMode.name as modeName',
             ])->with(['purchaseItems' => function ($query){
+                $query->leftjoin('inv_stock','inv_stock.id','=','inv_purchase_item.stock_item_id');
+                $query->leftjoin('inv_product','inv_product.id','=','inv_stock.product_id');
+                $query->leftjoin('inv_particular as unit','unit.id','=','inv_product.unit_id');
                 $query->select([
-                    'id',
+                    'inv_purchase_item.id',
                     'purchase_id',
-                    'unit_id'
-                ])->with([
-                    'unit'
+                    'inv_product.unit_id as unit_id'
                 ]);
             }])->first();
 

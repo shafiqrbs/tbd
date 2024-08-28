@@ -9,6 +9,7 @@ use Modules\AppsApi\App\Services\JsonRequestResponse;
 use Modules\Core\App\Entities\Core;
 use Modules\Core\App\Models\CountryModel;
 use Modules\Core\App\Models\SettingModel;
+use Modules\Core\App\Models\SettingTypeModel;
 use Modules\Core\App\Models\UserModel;
 
 class CoreController extends Controller
@@ -112,6 +113,15 @@ class CoreController extends Controller
             $request['dropdown-type'],
             $this->domain->global_id
         );
+        return (new JsonRequestResponse())->returnJosnResponse($entities);
+    }
+
+     /**
+     * Show the form for creating a new resource.
+     */
+    public function settingTypeDropdown(Request $request)
+    {
+        $entities = SettingTypeModel::getSettingTypeDropdown();
         return (new JsonRequestResponse())->returnJosnResponse($entities);
     }
 

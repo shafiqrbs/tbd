@@ -10,7 +10,7 @@ class SettingTypeModel extends Model
 {
     use HasFactory;
 
-    protected $table = 'cor_setting_types';
+    protected $table = 'cor_setting_type';
     public $timestamps = true;
     protected $guarded = ['id'];
     protected $fillable = [
@@ -18,5 +18,10 @@ class SettingTypeModel extends Model
         'slug',
         'status'
     ];
+
+    public static function getSettingTypeDropdown()
+    {
+        return self::where('status', 1)->select('id','name','slug')->orderBy('name')->get();
+    }
 
 }

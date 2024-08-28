@@ -106,7 +106,7 @@ class ProductionItems extends Model
             ->orderBy('pro_item.id','DESC')
             ->get();
 
-        $data = array('count'=>$total,'entities' => $entities);
+        $data = array('count'=> $total,'entities' => $entities);
         return $data;
     }
 

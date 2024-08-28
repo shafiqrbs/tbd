@@ -72,6 +72,7 @@ class SettingModel extends Model
             ->select([
                 'cor_setting.id as id',
                 'cor_setting.name as name',
+                'cor_setting.status as status',
                 'cst.name as setting_name',
                 'cst.id as setting_id'
             ]);
@@ -102,5 +103,9 @@ class SettingModel extends Model
 
         return $entity;
     }
+
+
+
+
 
 }
