@@ -6,12 +6,16 @@ use App\Http\Controllers\Controller;
 use Doctrine\ORM\EntityManager;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\DB;
 use Modules\AppsApi\App\Services\JsonRequestResponse;
 use Modules\Core\App\Models\UserModel;
 use Modules\Inventory\App\Entities\PurchaseItem;
 use Modules\Inventory\App\Http\Requests\ProductRequest;
 use Modules\Inventory\App\Http\Requests\PurchaseRequest;
+use Modules\Inventory\App\Models\PurchaseItemModel;
 use Modules\Inventory\App\Models\PurchaseModel;
+use Modules\Inventory\App\Models\SalesItemModel;
+use Modules\Inventory\App\Models\SalesModel;
 use function Symfony\Component\HttpFoundation\Session\Storage\Handler\getInsertStatement;
 
 class PurchaseController extends Controller
@@ -90,14 +94,64 @@ class PurchaseController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(ProductRequest $request, $id)
+    public function update(PurchaseRequest $request, $id)
     {
         $data = $request->validated();
+
+        DB::beginTransaction();
+        try {
+            $getPurchase = PurchaseModel::findOrFail($id);
+            $data['remark']=$request->narration;
+            $data['due'] = ($data['total'] ?? 0) - ($data['payment'] ?? 0);
+            $getPurchase->fill($data);
+            $getPurchase->save();
+
+            PurchaseItemModel::class::where('purchase_id', $id)->delete();
+            if (sizeof($data['items'])>0){
+                foreach ($data['items'] as $item){
+                    $item['stock_item_id'] = $item['product_id'];
+                    $item['config_id'] = $getPurchase->config_id;
+                    $item['purchase_id'] = $id;
+                    $item['quantity'] = $item['quantity'] ?? 0;
+                    $item['purchase_price'] = $item['purchase_price'] ?? 0;
+                    $item['sub_total'] = $item['sub_total'] ?? 0;
+                    $item['mode'] = 'purchase';
+                    PurchaseItemModel::create($item);
+                }
+            }
+            DB::commit();
+
+//            $purchaseData = PurchaseModel::getShow($id, $this->domain);
+
+            $response = new Response();
+            $response->headers->set('Content-Type', 'application/json');
+            $response->setContent(json_encode([
+                'message' => 'success',
+                'status' => Response::HTTP_OK,
+//                'data' => $purchaseData ?? []
+            ]));
+            $response->setStatusCode(Response::HTTP_OK);
+
+        } catch (\Exception $e) {
+            DB::rollback();
+            $response = new Response();
+            $response->headers->set('Content-Type', 'application/json');
+            $response->setContent(json_encode([
+                'message' => 'error',
+                'status' => Response::HTTP_INTERNAL_SERVER_ERROR,
+                'error' => $e->getMessage(),
+            ]));
+            $response->setStatusCode(Response::HTTP_OK);
+        }
+
+        return $response;
+//        dump($request->all(),$id);
+        /*$data = $request->validated();
         $entity = PurchaseModel::find($id);
         $entity->update($data);
 
         $service = new JsonRequestResponse();
-        return $service->returnJosnResponse($entity);
+        return $service->returnJosnResponse($entity);*/
     }
 
     /**
