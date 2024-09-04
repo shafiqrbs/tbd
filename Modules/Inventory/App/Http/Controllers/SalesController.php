@@ -99,7 +99,6 @@ class SalesController extends Controller
      */
     public function update(SalesRequest $request, $id)
     {
-
         $data = $request->validated();
         DB::beginTransaction();
         try {

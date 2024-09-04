@@ -179,34 +179,29 @@ class PurchaseModel extends Model
     public static function getEditData($id,$domain)
     {
         $entity = self::where([['inv_purchase.config_id',$domain['config_id']],['inv_purchase.id',$id]])
-            ->leftjoin('cor_vendors','cor_vendors.id','=','inv_purchase.vendor_id')
-            ->leftjoin('users as createdBy','createdBy.id','=','inv_purchase.created_by_id')
-            ->leftjoin('acc_transaction_mode as transactionMode','transactionMode.id','=','inv_purchase.transaction_mode_id')
-//            ->leftjoin('uti_transaction_method as method','method.id','=','acc_transaction_mode.method_id')
             ->select([
                 'inv_purchase.id',
-                DB::raw('DATE_FORMAT(inv_purchase.updated_at, "%d-%m-%Y") as created'),
-                'inv_purchase.invoice as invoice',
-                'inv_purchase.sub_total as sub_total',
-                'inv_purchase.total as total',
+                'inv_purchase.vendor_id',
+                'inv_purchase.transaction_mode_id',
                 'inv_purchase.payment as payment',
                 'inv_purchase.discount as discount',
                 'inv_purchase.discount_calculation as discount_calculation',
                 'inv_purchase.discount_type as discount_type',
-                'cor_vendors.id as customerId',
-                'cor_vendors.name as customerName',
-                'cor_vendors.mobile as customerMobile',
-                'createdBy.username as createdByUser',
-                'createdBy.name as createdByName',
-                'createdBy.id as createdById',
-                'transactionMode.name as modeName',
+                'inv_purchase.process',
+                'inv_purchase.remark',
             ])->with(['purchaseItems' => function ($query){
                 $query->leftjoin('inv_stock','inv_stock.id','=','inv_purchase_item.stock_item_id');
                 $query->leftjoin('inv_product','inv_product.id','=','inv_stock.product_id');
                 $query->leftjoin('inv_particular as unit','unit.id','=','inv_product.unit_id');
                 $query->select([
                     'inv_purchase_item.id',
+                    'inv_purchase_item.stock_item_id as product_id',
                     'purchase_id',
+                    'inv_stock.name as display_name',
+                    'unit.name as unit_name',
+                    'inv_purchase_item.quantity',
+                    'inv_purchase_item.purchase_price',
+                    'inv_purchase_item.sub_total',
                     'inv_product.unit_id as unit_id'
                 ]);
             }])->first();
