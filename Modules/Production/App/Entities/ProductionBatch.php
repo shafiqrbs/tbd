@@ -74,7 +74,7 @@ class ProductionBatch
      *
      * @ORM\Column(type="string" , nullable=true)
      */
-     private $requsitionNo;
+     private $requisitionNo;
 
 
     /**
