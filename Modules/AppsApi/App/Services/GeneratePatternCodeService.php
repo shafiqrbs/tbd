@@ -66,4 +66,32 @@ class GeneratePatternCodeService
 
     }
 
+    public function productBatch($queryParams = [])
+    {
+
+        $prefix     = $queryParams['prefix'];
+        $config     = $queryParams['config'];
+        $table      = $queryParams['table'];
+
+        $datetime = new \DateTime("now");
+        $date = $datetime->format('Y-m-01');
+        $entity = DB::table("{$table} as e")
+            ->where('e.config_id', $config)
+            ->whereBetween('e.created_at',[
+                Carbon::parse($date),
+                Carbon::parse($date)->endOfMonth()
+            ])->count('id');
+        $lastCode = $entity;
+        $code = (int)$lastCode + 1;
+        if(empty($prefix)) {
+            $generateId = sprintf("%s%s", $datetime->format('my'), str_pad($lastCode, 5, '0', STR_PAD_LEFT));
+        }else{
+            $generateId = sprintf("%s%s%s",$prefix, $datetime->format('my'), str_pad($lastCode, 5, '0', STR_PAD_LEFT));
+        }
+        $data = array('code' => $code,'generateId' => $generateId);
+        return $data;
+
+
+    }
+
 }

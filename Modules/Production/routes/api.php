@@ -4,6 +4,7 @@ use App\Http\Middleware\HeaderAuthenticationMiddleware;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Modules\Production\App\Http\Controllers\ConfigController;
+use Modules\Production\App\Http\Controllers\ProductionBatchController;
 use Modules\Production\App\Http\Controllers\ProductionRecipeController;
 use Modules\Production\App\Http\Controllers\ProductionRecipeItemsController;
 use Modules\Production\App\Http\Controllers\SettingController;
@@ -66,7 +67,23 @@ Route::prefix('/production')->middleware([HeaderAuthenticationMiddleware::class]
         ]);
     ;
 
+
+    Route::apiResource('batch', ProductionBatchController::class)
+        ->middleware([HeaderAuthenticationMiddleware::class])
+        ->names([
+            'index'     => 'production.batch.index',
+            'store'     => 'production.batch.store',
+            'show'      => 'production.batch.show',
+            'update'    => 'production.batch.update',
+            'destroy'   => 'production.batch.destroy'
+        ]);
+    ;
+    Route::post('/batch/create-batch-item', [ProductionBatchController::class,'insertBatchItem'])->name('production_insert_batch_item');
+
+
     Route::prefix('restore')->middleware([HeaderAuthenticationMiddleware::class])->group(function() {
         Route::get('/item', [ProductionRecipeItemsController::class,'restore'])->name('pro_item_restore');
     });
+
+
 });
