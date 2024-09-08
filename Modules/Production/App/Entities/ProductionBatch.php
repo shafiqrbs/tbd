@@ -181,7 +181,373 @@ class ProductionBatch
      */
     protected $file;
 
+    /**
+     * @return int
+     */
+    public function getId()
+    {
+        return $this->id;
+    }
 
+    /**
+     * @param int $id
+     */
+    public function setId($id)
+    {
+        $this->id = $id;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getConfig()
+    {
+        return $this->config;
+    }
+
+    /**
+     * @param mixed $config
+     */
+    public function setConfig($config)
+    {
+        $this->config = $config;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getVendor()
+    {
+        return $this->vendor;
+    }
+
+    /**
+     * @param mixed $vendor
+     */
+    public function setVendor($vendor)
+    {
+        $this->vendor = $vendor;
+    }
+
+    /**
+     * @return int
+     */
+    public function getCode()
+    {
+        return $this->code;
+    }
+
+    /**
+     * @param int $code
+     */
+    public function setCode($code)
+    {
+        $this->code = $code;
+    }
+
+    /**
+     * @return string
+     */
+    public function getMode()
+    {
+        return $this->mode;
+    }
+
+    /**
+     * @param string $mode
+     */
+    public function setMode($mode)
+    {
+        $this->mode = $mode;
+    }
+
+    /**
+     * @return string
+     */
+    public function getInvoice()
+    {
+        return $this->invoice;
+    }
+
+    /**
+     * @param string $invoice
+     */
+    public function setInvoice($invoice)
+    {
+        $this->invoice = $invoice;
+    }
+
+    /**
+     * @return string
+     */
+    public function getRemark()
+    {
+        return $this->remark;
+    }
+
+    /**
+     * @param string $remark
+     */
+    public function setRemark($remark)
+    {
+        $this->remark = $remark;
+    }
+
+    /**
+     * @return string
+     */
+    public function getRequsitionNo()
+    {
+        return $this->requsitionNo;
+    }
+
+    /**
+     * @param string $requsitionNo
+     */
+    public function setRequsitionNo($requsitionNo)
+    {
+        $this->requsitionNo = $requsitionNo;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getCreatedBy()
+    {
+        return $this->createdBy;
+    }
+
+    /**
+     * @param mixed $createdBy
+     */
+    public function setCreatedBy($createdBy)
+    {
+        $this->createdBy = $createdBy;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getCheckedBy()
+    {
+        return $this->checkedBy;
+    }
+
+    /**
+     * @param mixed $checkedBy
+     */
+    public function setCheckedBy($checkedBy)
+    {
+        $this->checkedBy = $checkedBy;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getApprovedBy()
+    {
+        return $this->approvedBy;
+    }
+
+    /**
+     * @param mixed $approvedBy
+     */
+    public function setApprovedBy($approvedBy)
+    {
+        $this->approvedBy = $approvedBy;
+    }
+
+    /**
+     * @return string
+     */
+    public function getProcess()
+    {
+        return $this->process;
+    }
+
+    /**
+     * @param string $process
+     */
+    public function setProcess($process)
+    {
+        $this->process = $process;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isStatus()
+    {
+        return $this->status;
+    }
+
+    /**
+     * @param bool $status
+     */
+    public function setStatus($status)
+    {
+        $this->status = $status;
+    }
+
+    /**
+     * @return string
+     */
+    public function getAddress()
+    {
+        return $this->address;
+    }
+
+    /**
+     * @param string $address
+     */
+    public function setAddress($address)
+    {
+        $this->address = $address;
+    }
+
+    /**
+     * @return string
+     */
+    public function getIssuePerson()
+    {
+        return $this->issuePerson;
+    }
+
+    /**
+     * @param string $issuePerson
+     */
+    public function setIssuePerson($issuePerson)
+    {
+        $this->issuePerson = $issuePerson;
+    }
+
+    /**
+     * @return string
+     */
+    public function getIssueDesignation()
+    {
+        return $this->issueDesignation;
+    }
+
+    /**
+     * @param string $issueDesignation
+     */
+    public function setIssueDesignation($issueDesignation)
+    {
+        $this->issueDesignation = $issueDesignation;
+    }
+
+    /**
+     * @return string
+     */
+    public function getIssueTime()
+    {
+        return $this->issueTime;
+    }
+
+    /**
+     * @param string $issueTime
+     */
+    public function setIssueTime($issueTime)
+    {
+        $this->issueTime = $issueTime;
+    }
+
+    /**
+     * @return \DateTime
+     */
+    public function getIssueDate()
+    {
+        return $this->issueDate;
+    }
+
+    /**
+     * @param \DateTime $issueDate
+     */
+    public function setIssueDate($issueDate)
+    {
+        $this->issueDate = $issueDate;
+    }
+
+    /**
+     * @return \DateTime
+     */
+    public function getReceiveDate()
+    {
+        return $this->receiveDate;
+    }
+
+    /**
+     * @param \DateTime $receiveDate
+     */
+    public function setReceiveDate($receiveDate)
+    {
+        $this->receiveDate = $receiveDate;
+    }
+
+    /**
+     * @return \DateTime
+     */
+    public function getCreatedAt()
+    {
+        return $this->createdAt;
+    }
+
+    /**
+     * @param \DateTime $createdAt
+     */
+    public function setCreatedAt($createdAt)
+    {
+        $this->createdAt = $createdAt;
+    }
+
+    /**
+     * @return \DateTime
+     */
+    public function getUpdatedAt()
+    {
+        return $this->updatedAt;
+    }
+
+    /**
+     * @param \DateTime $updatedAt
+     */
+    public function setUpdatedAt($updatedAt)
+    {
+        $this->updatedAt = $updatedAt;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getPath()
+    {
+        return $this->path;
+    }
+
+    /**
+     * @param mixed $path
+     */
+    public function setPath($path)
+    {
+        $this->path = $path;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getFile()
+    {
+        return $this->file;
+    }
+
+    /**
+     * @param mixed $file
+     */
+    public function setFile($file)
+    {
+        $this->file = $file;
+    }
 
 
 }

@@ -59,6 +59,7 @@ class Config
      **/
     private $consumptionMethod;
 
+
     /**
      * @return int
      */
@@ -123,6 +124,37 @@ class Config
         $this->updatedAt = $updatedAt;
     }
 
+    /**
+     * @return mixed
+     */
+    public function getProductionProcedure()
+    {
+        return $this->productionProcedure;
+    }
+
+    /**
+     * @param mixed $productionProcedure
+     */
+    public function setProductionProcedure($productionProcedure)
+    {
+        $this->productionProcedure = $productionProcedure;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getConsumptionMethod()
+    {
+        return $this->consumptionMethod;
+    }
+
+    /**
+     * @param mixed $consumptionMethod
+     */
+    public function setConsumptionMethod($consumptionMethod)
+    {
+        $this->consumptionMethod = $consumptionMethod;
+    }
 
 
 }
