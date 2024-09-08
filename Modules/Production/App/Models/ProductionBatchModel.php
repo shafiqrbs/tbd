@@ -4,6 +4,7 @@ namespace Modules\Production\App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
 
@@ -21,6 +22,7 @@ class ProductionBatchModel extends Model
         'process',
         'mode',
         'invoice',
+        'created_by_id',
         'code'
     ];
 
@@ -76,9 +78,50 @@ class ProductionBatchModel extends Model
 
         $data = array('count'=>$total,'entities' => $entities);
         return $data;
-
-
     }
+
+    public static function getShow($id,$domain)
+    {
+        $entity = self::where([
+            ['pro_batch.config_id', '=', $domain['pro_config']],
+            ['pro_batch.id', '=', $id]
+        ])
+//            ->leftjoin('cor_customers','cor_customers.id','=','inv_sales.customer_id')
+//            ->leftjoin('users as createdBy','createdBy.id','=','inv_sales.created_by_id')
+//            ->leftjoin('users as salesBy','salesBy.id','=','inv_sales.sales_by_id')
+//            ->leftjoin('acc_transaction_mode as transactionMode','transactionMode.id','=','inv_sales.transaction_mode_id')
+//            ->leftjoin('uti_transaction_method as method','method.id','=','acc_transaction_mode.method_id')
+            ->select([
+                'pro_batch.id',
+                DB::raw('DATE_FORMAT(pro_batch.created_at, "%d-%m-%Y") as created_date'),
+                'pro_batch.invoice as invoice',
+                'pro_batch.code',
+                'pro_batch.mode',
+                'pro_batch.process',
+                'pro_batch.status',
+                'pro_batch.issue_date',
+                'pro_batch.receive_date',
+                'pro_batch.remark',
+            ])
+            /*->with(['salesItems' => function ($query) {
+                $query->select([
+                    'inv_sales_item.id',
+                    'inv_sales_item.sale_id',
+                    'inv_sales_item.stock_item_id as product_id',
+                    'inv_sales_item.uom',
+                    'inv_sales_item.name as item_name',
+                    'inv_sales_item.quantity',
+                    'inv_sales_item.sales_price',
+                    'inv_sales_item.purchase_price',
+                    'inv_sales_item.price',
+                    'inv_sales_item.sub_total',
+                ]);
+            }])*/
+            ->first();
+
+        return $entity;
+    }
+
 
 
 }
