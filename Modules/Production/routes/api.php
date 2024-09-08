@@ -4,6 +4,7 @@ use App\Http\Middleware\HeaderAuthenticationMiddleware;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Modules\Production\App\Http\Controllers\ConfigController;
+use Modules\Production\App\Http\Controllers\ProductionInhouseController;
 use Modules\Production\App\Http\Controllers\ProductionBatchController;
 use Modules\Production\App\Http\Controllers\ProductionRecipeController;
 use Modules\Production\App\Http\Controllers\ProductionRecipeItemsController;
@@ -84,6 +85,17 @@ Route::prefix('/production')->middleware([HeaderAuthenticationMiddleware::class]
     Route::prefix('restore')->middleware([HeaderAuthenticationMiddleware::class])->group(function() {
         Route::get('/item', [ProductionRecipeItemsController::class,'restore'])->name('pro_item_restore');
     });
+
+    Route::apiResource('inhouse', ProductionInhouseController::class)
+        ->middleware([HeaderAuthenticationMiddleware::class])
+        ->names([
+            'index'     => 'production.inhouse.index',
+            'store'     => 'production.inhouse.store',
+            'show'      => 'production.inhouse.show',
+            'update'    => 'production.inhouse.update',
+            'destroy'   => 'production.inhouse.destroy'
+        ]);
+    ;
 
 
 });
