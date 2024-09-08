@@ -84,7 +84,13 @@ class ProductionBatchController extends Controller
      */
     public function show($id)
     {
-        return view('production::show');
+        $service = new JsonRequestResponse();
+        $entity = ProductionBatchModel::getShow($id, $this->domain);
+        if (!$entity) {
+            $entity = 'Data not found';
+        }
+        $data = $service->returnJosnResponse($entity);
+        return $data;
     }
 
     /**

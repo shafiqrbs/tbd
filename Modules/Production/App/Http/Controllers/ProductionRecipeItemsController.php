@@ -228,4 +228,18 @@ class ProductionRecipeItemsController extends Controller
         $response->setStatusCode(Response::HTTP_OK);
         return $response;
     }
+
+    public function dropdown()
+    {
+        $data = ProductionItems::dropdown($this->domain);
+        $response = new Response();
+        $response->headers->set('Content-Type', 'application/json');
+        $response->setContent(json_encode([
+            'message' => 'success',
+            'status' => Response::HTTP_OK,
+            'data' => $data
+        ]));
+        $response->setStatusCode(Response::HTTP_OK);
+        return $response;
+    }
 }
