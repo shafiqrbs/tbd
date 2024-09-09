@@ -111,8 +111,12 @@ class ProductionBatchModel extends Model
                     'pro_batch_item.issue_quantity',
                     'pro_batch_item.receive_quantity',
                     'pro_batch_item.damage_quantity',
+                    'inv_stock.name',
                     DB::raw('DATE_FORMAT(pro_batch_item.created_at, "%d-%m-%Y") as created_date')
-                ])->with(['productionItems' => function ($query) {
+                ])
+                    ->join('pro_item','pro_item.id','=','pro_batch_item.production_item_id')
+                    ->join('inv_stock','inv_stock.id','=','pro_item.item_id')
+                    ->with(['productionItems' => function ($query) {
                         $query->select([
                             'pro_element.id',
                             'pro_element.production_item_id',
