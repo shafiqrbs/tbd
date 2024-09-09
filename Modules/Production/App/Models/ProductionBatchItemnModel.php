@@ -36,5 +36,10 @@ class ProductionBatchItemnModel extends Model
         });
     }
 
+    public function productionItems()
+    {
+        return $this->hasMany(ProductionElements::class, 'production_item_id','production_item_id');
+    }
+
 
 }
