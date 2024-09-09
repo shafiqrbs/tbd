@@ -8,7 +8,9 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Support\Facades\DB;
 use Modules\Inventory\App\Entities\Product;
+use Modules\Inventory\App\Entities\StockItem;
 use Modules\Inventory\App\Models\ProductModel;
+use Modules\Inventory\App\Models\StockItemModel;
 
 
 class ProductionElements extends Model
@@ -35,6 +37,12 @@ class ProductionElements extends Model
             $model->updated_at = $date;
         });
     }
+
+    public function invStock()
+    {
+        return $this->belongsTo(StockItemModel::class, 'material_id','id');
+    }
+
 
     public static function getRecords($request,$domain){
 
