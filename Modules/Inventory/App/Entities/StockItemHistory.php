@@ -9,7 +9,7 @@ use Symfony\Component\Validator\Constraints\DateTime;
 /**
  * BusinessStockHistory
  *
- * @ORM\Table( name="inv_stock_history")
+ * @ORM\Table( name="inv_stock_item_history")
  * @ORM\Entity(repositoryClass="Modules\Inventory\App\Repositories\StockItemHistoryRepository")
  */
 class StockItemHistory
@@ -28,11 +28,19 @@ class StockItemHistory
      **/
     private  $config;
 
-     /**
+    /**
+     *
+     * @ORM\ManyToOne(targetEntity="Modules\Core\App\Entities\Setting")
+     * @ORM\JoinColumn(onDelete="CASCADE")
+     **/
+    private  $wearhouse;
+
+    /**
      * @ORM\ManyToOne(targetEntity="StockItem")
      * @ORM\JoinColumn(onDelete="CASCADE")
      **/
     protected  $stockItem;
+
 
     /**
      * @var string
@@ -92,7 +100,6 @@ class StockItemHistory
     private $closingBalance= 0.00;
 
 
-
     /**
      * @var string
      *
@@ -140,14 +147,14 @@ class StockItemHistory
 
     /**
      * @var \DateTime
-     * @Gedmo\Timestampable(on="create")
+     * @Gedmo\Timestampable(on="create_at")
      * @ORM\Column(type="datetime")
      */
     private $createdAt;
 
     /**
      * @var \DateTime
-     * @Gedmo\Timestampable(on="update")
+     * @Gedmo\Timestampable(on="update_at")
      * @ORM\Column(type="datetime")
      */
     private $updatedAt;
@@ -456,7 +463,22 @@ class StockItemHistory
         $this->updatedAt = $updatedAt;
     }
 
+    /**
+     * @return mixed
+     */
+    public function getWearhouse()
+    {
+        return $this->wearhouse;
+    }
+
+    /**
+     * @param mixed $wearhouse
+     */
+    public function setWearhouse($wearhouse)
+    {
+        $this->wearhouse = $wearhouse;
+    }
+
 
 
 }
-

@@ -10,12 +10,12 @@ use Modules\Accounting\App\Entities\AccountJournal;
 use Modules\AppsApi\App\Services\JsonRequestResponse;
 use Modules\Core\App\Models\UserModel;
 use Modules\Inventory\App\Entities\StockItemHistory;
+use Modules\Inventory\App\Entities\StockItemInventoryHistory;
 use Modules\Inventory\App\Http\Requests\OpeningStockRequest;
 use Modules\Inventory\App\Http\Requests\ProductRequest;
-use Modules\Inventory\App\Http\Requests\PurchaseRequest;
 use Modules\Inventory\App\Models\PurchaseItemModel;
 use Modules\Inventory\App\Models\PurchaseModel;
-use function Symfony\Component\HttpFoundation\Session\Storage\Handler\getInsertStatement;
+
 
 class OpeningStockController extends Controller
 {
@@ -32,6 +32,7 @@ class OpeningStockController extends Controller
 
     public function index(Request $request)
     {
+
         $data = PurchaseItemModel::getRecords($request, $this->domain);
         $response = new Response();
         $response->headers->set('Content-Type', 'application/json');
@@ -55,6 +56,7 @@ class OpeningStockController extends Controller
         $input['config_id'] = $this->domain['config_id'];
         $input['created_by_id'] = $this->domain['user_id'];
         $input['stock_item_id'] = $input['product_id'];
+        $input['quantity'] = $input['opening_quantity'];
         $entity = PurchaseItemModel::create($input);
         $data = $service->returnJosnResponse($entity);
         return $data;
@@ -100,6 +102,7 @@ class OpeningStockController extends Controller
 
     public function inlineUpdate(Request $request, EntityManager $em)
     {
+
         $getPurchaseItem = PurchaseItemModel::find($request->id);
         if (!$getPurchaseItem){
             $response = new Response();
@@ -111,20 +114,23 @@ class OpeningStockController extends Controller
             $response->setStatusCode(Response::HTTP_OK);
             return $response;
         }
+      //  dd($getPurchaseItem);
+
         if ($request->field_name === 'approve' ){
-            $getPurchaseItem->update(['approved_by_id' => $this->domain['user_id']]);
-            if(empty($getPurchaseItem->stockItems)){
+
+            //  $getPurchaseItem->update(['approved_by_id' => $this->domain['user_id']]);
+            if($getPurchaseItem){
                 $em->getRepository(StockItemHistory::class)->openingStockQuantity($getPurchaseItem->id);
             }
-            if(empty($getPurchaseItem->stockItems)){
-                $em->getRepository(AccountJournal::class)->openingStockQuantity($getPurchaseItem->id);
+            if($getPurchaseItem){
+                $em->getRepository(AccountJournal::class)->openingProductInsert($getPurchaseItem->id);
             }
         }
         if ($request->field_name === 'opening_quantity' ){
-            $getPurchaseItem->update(['opening_quantity' => $request->opening_quantity,'sub_total'=>$request->subTotal]);
+            $getPurchaseItem->update(['opening_quantity' => $request->opening_quantity,'quantity' => $request->opening_quantity,'sub_total'=>$request->subTotal]);
         }
         if ($request->field_name === 'purchase_price' ){
-            $getPurchaseItem->update(['purchase_price' => $request->purchase_price,'sub_total'=>$request->subTotal]);
+            $getPurchaseItem->update(['purchase_price' => $request->purchase_price,'sub_total' => $request->subTotal]);
         }
         $response = new Response();
         $response->headers->set('Content-Type', 'application/json');
@@ -135,5 +141,32 @@ class OpeningStockController extends Controller
         $response->setStatusCode(Response::HTTP_OK);
         return $response;
     }
+
+
+    public function openingApprove(Request $request, EntityManager $em)
+    {
+
+        $getPurchaseItem = PurchaseItemModel::find($request->id);
+        if ($request->field_name === 'approve' ){
+            //  $getPurchaseItem->update(['approved_by_id' => $this->domain['user_id']]);
+            if(empty($getPurchaseItem->stockItems)){
+                $em->getRepository(StockItemInventoryHistory::class)->openingStockQuantity($getPurchaseItem->id);
+            }
+            if(empty($getPurchaseItem->stockItems)){
+                $em->getRepository(AccountJournal::class)->openingStockQuantity($getPurchaseItem->id);
+            }
+        }
+
+        $response = new Response();
+        $response->headers->set('Content-Type', 'application/json');
+        $response->setContent(json_encode([
+            'status' => Response::HTTP_OK,
+            'message' => 'update',
+        ]));
+        $response->setStatusCode(Response::HTTP_OK);
+        return $response;
+    }
+
+
 
 }

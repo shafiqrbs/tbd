@@ -86,6 +86,9 @@ class CategoryModel extends Model
             $categories = $categories->addSelect([
                 'p.name as parent_name'
             ]);
+            if (isset($request['parent']) && !empty($request['parent'])){
+                $categories = $categories->where('p.name','LIKE','%'.$request['parent'].'%');
+            }
         }
 
         if (isset($request['term']) && !empty($request['term'])){

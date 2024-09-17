@@ -55,7 +55,7 @@ class AccountHeadController extends Controller
     {
         $data = $request->validated();
         $data['status'] = true;
-        $data['config_id'] = $this->domain['acc_config_id'];
+        $data['config_id'] = $this->domain['acc_config'];
         $entity = AccountHeadModel::create($data);
         $service = new JsonRequestResponse();
         return $service->returnJosnResponse($entity);

@@ -32,7 +32,7 @@ class AccountVoucher
     /**
      * @var string
      *
-     * @ORM\Column(name="name", type="string", length=255, nullable=true)
+     * @ORM\Column(name="name", type="string", length=100, nullable=true)
      */
     private $name;
 
@@ -46,7 +46,7 @@ class AccountVoucher
     /**
      * @var string
      *
-     * @ORM\Column(name="shortCode", type="string", length=255, nullable=true)
+     * @ORM\Column(name="shortCode", type="string", length=100, nullable=true)
      */
     private $shortCode;
 
@@ -60,7 +60,7 @@ class AccountVoucher
     /**
      * @var string
      *
-     * @ORM\Column(name="slug", type="string", length=255, nullable=true)
+     * @ORM\Column(name="slug", type="string", length=100, nullable=true)
      */
     private $slug;
 

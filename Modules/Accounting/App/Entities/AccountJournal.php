@@ -11,11 +11,12 @@ use Symfony\Component\Validator\Constraints as Assert;
 
 
 /**
- * AccountExpense
+ * AccountJournal
  *
  * @ORM\Table(name="acc_journal")
- * @ORM\Entity()
+ * @ORM\Entity(repositoryClass="Modules\Accounting\App\Repositories\AccountJournalRepository")
  */
+
 class AccountJournal
 {
     /**
@@ -64,6 +65,13 @@ class AccountJournal
     private  $purchase;
 
 
+     /**
+     * @ORM\ManyToOne(targetEntity="Modules\Inventory\App\Entities\PurchaseItem")
+     * @ORM\JoinColumn(name="purchase_item_id", referencedColumnName="id", nullable=true, onDelete="SET NULL")
+     **/
+    private  $purchaseItem;
+
+
     /**
      * @ORM\ManyToOne(targetEntity="Modules\Inventory\App\Entities\SalesReturn")
      * @ORM\JoinColumn(name="purchase_return_id", referencedColumnName="id", nullable=true, onDelete="SET NULL")
@@ -82,8 +90,6 @@ class AccountJournal
      * @ORM\JoinColumn(name="damage_id", referencedColumnName="id", nullable=true, onDelete="SET NULL")
      **/
     private  $damage;
-
-
 
 
     /**
@@ -236,6 +242,529 @@ class AccountJournal
      * @ORM\Column(type="datetime",nullable=true)
      */
     private $updatedAt;
+
+    /**
+     * @return int
+     */
+    public function getId()
+    {
+        return $this->id;
+    }
+
+    /**
+     * @param int $id
+     */
+    public function setId($id)
+    {
+        $this->id = $id;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getConfig()
+    {
+        return $this->config;
+    }
+
+    /**
+     * @param mixed $config
+     */
+    public function setConfig($config)
+    {
+        $this->config = $config;
+    }
+
+    /**
+     * @return AccountJournalItem
+     */
+    public function getJournalItems()
+    {
+        return $this->journalItems;
+    }
+
+    /**
+     * @return AccountVoucher
+     */
+    public function getVoucher()
+    {
+        return $this->voucher;
+    }
+
+    /**
+     * @param AccountVoucher $voucher
+     */
+    public function setVoucher($voucher)
+    {
+        $this->voucher = $voucher;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getSales()
+    {
+        return $this->sales;
+    }
+
+    /**
+     * @param mixed $sales
+     */
+    public function setSales($sales)
+    {
+        $this->sales = $sales;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getSalesReturn()
+    {
+        return $this->salesReturn;
+    }
+
+    /**
+     * @param mixed $salesReturn
+     */
+    public function setSalesReturn($salesReturn)
+    {
+        $this->salesReturn = $salesReturn;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getPurchase()
+    {
+        return $this->purchase;
+    }
+
+    /**
+     * @param mixed $purchase
+     */
+    public function setPurchase($purchase)
+    {
+        $this->purchase = $purchase;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getPurchaseItem()
+    {
+        return $this->purchaseItem;
+    }
+
+    /**
+     * @param mixed $purchaseItem
+     */
+    public function setPurchaseItem($purchaseItem)
+    {
+        $this->purchaseItem = $purchaseItem;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getPurchaseReturn()
+    {
+        return $this->purchaseReturn;
+    }
+
+    /**
+     * @param mixed $purchaseReturn
+     */
+    public function setPurchaseReturn($purchaseReturn)
+    {
+        $this->purchaseReturn = $purchaseReturn;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getStockAdjustment()
+    {
+        return $this->stockAdjustment;
+    }
+
+    /**
+     * @param mixed $stockAdjustment
+     */
+    public function setStockAdjustment($stockAdjustment)
+    {
+        $this->stockAdjustment = $stockAdjustment;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getDamage()
+    {
+        return $this->damage;
+    }
+
+    /**
+     * @param mixed $damage
+     */
+    public function setDamage($damage)
+    {
+        $this->damage = $damage;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isSignature()
+    {
+        return $this->isSignature;
+    }
+
+    /**
+     * @param bool $isSignature
+     */
+    public function setIsSignature($isSignature)
+    {
+        $this->isSignature = $isSignature;
+    }
+
+    /**
+     * @return int
+     */
+    public function getProcessOrdering()
+    {
+        return $this->processOrdering;
+    }
+
+    /**
+     * @param int $processOrdering
+     */
+    public function setProcessOrdering($processOrdering)
+    {
+        $this->processOrdering = $processOrdering;
+    }
+
+    /**
+     * @return string
+     */
+    public function getEntryMode()
+    {
+        return $this->entryMode;
+    }
+
+    /**
+     * @param string $entryMode
+     */
+    public function setEntryMode($entryMode)
+    {
+        $this->entryMode = $entryMode;
+    }
+
+    /**
+     * @return string
+     */
+    public function getProcess()
+    {
+        return $this->process;
+    }
+
+    /**
+     * @param string $process
+     */
+    public function setProcess($process)
+    {
+        $this->process = $process;
+    }
+
+    /**
+     * @return string
+     */
+    public function getModule()
+    {
+        return $this->module;
+    }
+
+    /**
+     * @param string $module
+     */
+    public function setModule($module)
+    {
+        $this->module = $module;
+    }
+
+    /**
+     * @return string
+     */
+    public function getWaitingProcess()
+    {
+        return $this->waitingProcess;
+    }
+
+    /**
+     * @param string $waitingProcess
+     */
+    public function setWaitingProcess($waitingProcess)
+    {
+        $this->waitingProcess = $waitingProcess;
+    }
+
+    /**
+     * @return float
+     */
+    public function getAmount()
+    {
+        return $this->amount;
+    }
+
+    /**
+     * @param float $amount
+     */
+    public function setAmount($amount)
+    {
+        $this->amount = $amount;
+    }
+
+    /**
+     * @return float
+     */
+    public function getDebit()
+    {
+        return $this->debit;
+    }
+
+    /**
+     * @param float $debit
+     */
+    public function setDebit($debit)
+    {
+        $this->debit = $debit;
+    }
+
+    /**
+     * @return float
+     */
+    public function getCredit()
+    {
+        return $this->credit;
+    }
+
+    /**
+     * @param float $credit
+     */
+    public function setCredit($credit)
+    {
+        $this->credit = $credit;
+    }
+
+    /**
+     * @return float
+     */
+    public function getBalance()
+    {
+        return $this->balance;
+    }
+
+    /**
+     * @param float $balance
+     */
+    public function setBalance($balance)
+    {
+        $this->balance = $balance;
+    }
+
+    /**
+     * @return string
+     */
+    public function getPaymentMethod()
+    {
+        return $this->paymentMethod;
+    }
+
+    /**
+     * @param string $paymentMethod
+     */
+    public function setPaymentMethod($paymentMethod)
+    {
+        $this->paymentMethod = $paymentMethod;
+    }
+
+    /**
+     * @return string
+     */
+    public function getAccountRefNo()
+    {
+        return $this->accountRefNo;
+    }
+
+    /**
+     * @param string $accountRefNo
+     */
+    public function setAccountRefNo($accountRefNo)
+    {
+        $this->accountRefNo = $accountRefNo;
+    }
+
+    /**
+     * @return int
+     */
+    public function getCode()
+    {
+        return $this->code;
+    }
+
+    /**
+     * @param int $code
+     */
+    public function setCode($code)
+    {
+        $this->code = $code;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getCreatedBy()
+    {
+        return $this->createdBy;
+    }
+
+    /**
+     * @param mixed $createdBy
+     */
+    public function setCreatedBy($createdBy)
+    {
+        $this->createdBy = $createdBy;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getApprovedBy()
+    {
+        return $this->approvedBy;
+    }
+
+    /**
+     * @param mixed $approvedBy
+     */
+    public function setApprovedBy($approvedBy)
+    {
+        $this->approvedBy = $approvedBy;
+    }
+
+    /**
+     * @return string
+     */
+    public function getDescription()
+    {
+        return $this->description;
+    }
+
+    /**
+     * @param string $description
+     */
+    public function setDescription($description)
+    {
+        $this->description = $description;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getReportTo()
+    {
+        return $this->reportTo;
+    }
+
+    /**
+     * @param mixed $reportTo
+     */
+    public function setReportTo($reportTo)
+    {
+        $this->reportTo = $reportTo;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getPath()
+    {
+        return $this->path;
+    }
+
+    /**
+     * @param mixed $path
+     */
+    public function setPath($path)
+    {
+        $this->path = $path;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getFile()
+    {
+        return $this->file;
+    }
+
+    /**
+     * @param mixed $file
+     */
+    public function setFile($file)
+    {
+        $this->file = $file;
+    }
+
+    /**
+     * @return \DateTime
+     */
+    public function getIssueDate()
+    {
+        return $this->issueDate;
+    }
+
+    /**
+     * @param \DateTime $issueDate
+     */
+    public function setIssueDate($issueDate)
+    {
+        $this->issueDate = $issueDate;
+    }
+
+    /**
+     * @return \DateTime
+     */
+    public function getCreatedAt()
+    {
+        return $this->createdAt;
+    }
+
+    /**
+     * @param \DateTime $createdAt
+     */
+    public function setCreatedAt($createdAt)
+    {
+        $this->createdAt = $createdAt;
+    }
+
+    /**
+     * @return \DateTime
+     */
+    public function getUpdatedAt()
+    {
+        return $this->updatedAt;
+    }
+
+    /**
+     * @param \DateTime $updatedAt
+     */
+    public function setUpdatedAt($updatedAt)
+    {
+        $this->updatedAt = $updatedAt;
+    }
+
+
+
 
 
 

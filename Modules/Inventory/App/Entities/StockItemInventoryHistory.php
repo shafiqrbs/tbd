@@ -9,10 +9,10 @@ use Symfony\Component\Validator\Constraints\DateTime;
 /**
  * BusinessStockHistory
  *
- * @ORM\Table( name="inv_inventory_history")
- * @ORM\Entity(repositoryClass="Modules\Inventory\App\Repositories\StockInventoryHistoryRepository")
+ * @ORM\Table( name="inv_stock_item_inventory_history")
+ * @ORM\Entity(repositoryClass="Modules\Inventory\App\Repositories\StockItemInventoryHistoryRepository")
  */
-class StockInventoryHistory
+class StockItemInventoryHistory
 {
     /**
      * @var integer
@@ -82,13 +82,6 @@ class StockInventoryHistory
      * @ORM\JoinColumn(onDelete="CASCADE")
      **/
     protected  $salesReturn;
-
-    /**
-     *
-     * @ORM\ManyToOne(targetEntity="Modules\Core\App\Entities\Setting")
-     * @ORM\JoinColumn(onDelete="CASCADE")
-     **/
-    private  $wearhouse;
 
 
     /**
@@ -258,14 +251,14 @@ class StockInventoryHistory
 
     /**
      * @var \DateTime
-     * @Gedmo\Timestampable(on="create")
+     * @Gedmo\Timestampable(on="create_at")
      * @ORM\Column(type="datetime")
      */
     private $createdAt;
 
     /**
      * @var \DateTime
-     * @Gedmo\Timestampable(on="update")
+     * @Gedmo\Timestampable(on="update_at")
      * @ORM\Column(type="datetime")
      */
     private $updatedAt;

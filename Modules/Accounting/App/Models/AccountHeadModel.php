@@ -59,23 +59,6 @@ class AccountHeadModel extends Model
         });
     }
 
-    public static function insertCustomerLedger($config, $entity)
-    {
-
-        $name = "{$entity['mobile']}-{$entity['name']}";
-        $entity = self::create(
-            [
-                'name' => $name,
-                'parent_id' => '4',
-                'customer_id' => $entity['id'],
-                'level' => '3',
-                'source' => 'customer',
-                'config_id' => $config
-            ]
-        );
-    }
-
-
     public static function insertCategoryGroupLedger($config, $entity)
     {
         $name = "{$entity['name']}";
@@ -88,6 +71,7 @@ class AccountHeadModel extends Model
                     'parent_id' => $parent['id'],
                     'level' => '2',
                     'source' => 'product-group',
+                    'head_group' => 'sub-head',
                     'config_id' => $config
                 ]
             );
@@ -95,6 +79,22 @@ class AccountHeadModel extends Model
         //AccountJournalModel::insertCustomerJournalVoucher($entity);
     }
 
+    public static function insertCustomerLedger($config, $entity)
+    {
+
+        $name = "{$entity['mobile']}-{$entity['name']}";
+        $entity = self::create(
+            [
+                'name' => $name,
+                'parent_id' => '4',
+                'customer_id' => $entity['id'],
+                'level' => '3',
+                'source' => 'customer',
+                'head_group' => 'ledger',
+                'config_id' => $config
+            ]
+        );
+    }
 
     public static function insertCategoryLedger($config, $entity)
     {
@@ -108,6 +108,7 @@ class AccountHeadModel extends Model
                 'parent_id' => $parent->id,
                 'level' => '3',
                 'source' => 'category',
+                'head_group' => 'ledger',
                 'config_id' => $config
             ]
         );
@@ -124,6 +125,7 @@ class AccountHeadModel extends Model
                 'parent_id' => '5',
                 'level' => '3',
                 'vendor_id' => $entity['id'],
+                'head_group' => 'ledger',
                 'config_id' => $config
             ]
         );
@@ -137,10 +139,10 @@ class AccountHeadModel extends Model
         $array=[
             'name' => $name,
             'source' => 'vendor',
-            '$entity' => 'vendor',
             'parent_id' => '5',
             'level' => '3',
             'vendor_id' => $entity['id'],
+            'head_group' => 'ledger',
             'config_id' => $config
         ];
         $entity = self::create($array);
@@ -173,10 +175,11 @@ class AccountHeadModel extends Model
 
     public static function getRecords($request, $domain)
     {
+
         $page = isset($request['page']) && $request['page'] > 0 ? ($request['page'] - 1) : 1;
         $perPage = isset($request['offset']) && $request['offset'] != '' ? (int)($request['offset']) : 50;
         $skip = isset($page) && $page != '' ? (int)$page * $perPage : 0;
-        $entity = self:: where('acc_head.config_id', $domain['acc_config_id'])
+        $entity = self:: where('acc_head.config_id', $domain['acc_config'])
         ->leftjoin('acc_head as parent','parent.id','=','acc_head.parent_id')
         ->leftjoin('acc_setting as mother','acc_head.mother_account_id','=','mother.id')
             ->select([
@@ -185,6 +188,7 @@ class AccountHeadModel extends Model
                 'acc_head.name',
                 'acc_head.slug',
                 'acc_head.code',
+                'acc_head.amount',
                 'parent.name as parent_name',
                 'mother.name as mother_name'
             ])

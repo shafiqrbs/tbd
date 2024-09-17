@@ -8,6 +8,7 @@ use Modules\Inventory\App\Entities\PurchaseItem;
 use Modules\Inventory\App\Entities\StockInventoryHistory;
 use Modules\Inventory\App\Entities\StockItem;
 use Modules\Inventory\App\Entities\StockItemHistory;
+use Modules\Inventory\App\Entities\StockItemInventoryHistory;
 
 
 /**
@@ -147,43 +148,35 @@ class StockItemHistoryRepository extends EntityRepository
 
         /* @var $item PurchaseItem */
         $item = $em->getRepository(PurchaseItem::class)->find($id);
+
         $config = $item->getStockItem()->getProduct()->getConfig();
 
         /* @var $entity StockItemHistory */
 
         $entity = new StockItemHistory();
-        $exist = $this->findOneBy(array('config' => $config,'purchaseItem' => $id ,'mode' => 'opening'));
+        $exist = $this->findOneBy(array('config' => $config,'stockItem' => $item ,'mode' => 'opening'));
         if($exist){
             $entity = $exist;
         }
         $entity->setQuantity($item->getQuantity());
         $entity->setOpeningQuantity($item->getQuantity());
         $entity->setStockItem($item->getStockItem());
-        if($item->getStockItem()->getBrand()){
-            $entity->setBrand($item->getStockItem()->getBrand()->getName());
-        }
-        if($item->getStockItem()->getProduct()->getCategory()){
-            $entity->setCategory($item->getStockItem()->getProduct()->getCategory()->getName());
-        }
-        $entity->setPurchaseItem($item);
         $closingQuantity = $entity->getOpeningQuantity();
-        $openingBalance = $entity->getSubTotal();
+        $openingBalance = $item->getSubTotal();
         $entity->setClosingQuantity(floatval($closingQuantity));
         $entity->setClosingBalance(floatval($openingBalance));
         $entity->setCreatedAt(now());
         $entity->setUpdatedAt(now());
         $entity->setMode('opening');
+        $entity->setWearhouse($config);
         $entity->setConfig($config);
         $entity->setProcess('approved');
         $em->persist($entity);
         $em->flush();
         if($process == "opening"){
-            $em->getRepository(StockInventoryHistory::class)->openingInventoryHistory($entity,$item);
+            $em->getRepository(StockItemInventoryHistory::class)->openingInventoryHistory($entity,$item);
         }
     }
-
-
-
 
     public function processStockQuantity($item , $fieldName = ''){
 

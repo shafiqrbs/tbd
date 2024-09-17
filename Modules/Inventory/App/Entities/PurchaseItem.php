@@ -12,7 +12,7 @@ use Symfony\Component\Validator\Constraints as Assert;
  * PurchaseItem
  *
  * @ORM\Table(name ="inv_purchase_item")
- * @ORM\Entity()
+ * @ORM\Entity(repositoryClass="Modules\Inventory\App\Repositories\PurchaseItemRepository")
  */
 class PurchaseItem
 {

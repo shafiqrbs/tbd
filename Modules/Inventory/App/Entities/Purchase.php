@@ -8,10 +8,10 @@ use Gedmo\Mapping\Annotation as Gedmo;
 
 
 /**
- * BusinessPurchase
+ * Purchase
  *
  * @ORM\Table(name ="inv_purchase")
- * @ORM\Entity()
+ * @ORM\Entity(repositoryClass="Modules\Inventory\App\Repositories\PurchaseRepository")
  */
 class Purchase
 {
