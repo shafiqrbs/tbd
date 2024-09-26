@@ -34,7 +34,7 @@ class ProductionBatchController extends Controller
 
     public function index(Request $request)
     {
-        $data = InvoiceBatchTransactionModel::getRecords($request, $this->domain);
+        $data = ProductionBatchModel::getRecords($request, $this->domain);
         $response = new Response();
         $response->headers->set('Content-Type', 'application/json');
         $response->setContent(json_encode([

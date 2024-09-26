@@ -23,6 +23,7 @@ class ProductionBatchModel extends Model
         'mode',
         'invoice',
         'created_by_id',
+        'status',
         'code'
     ];
 
@@ -30,6 +31,7 @@ class ProductionBatchModel extends Model
         parent::boot();
         self::creating(function ($model) {
             $date =  new \DateTime("now");
+            $model->status = 1;
             $model->created_at = $date;
             $model->issue_date = $date;
             $model->receive_date = $date;
@@ -45,34 +47,29 @@ class ProductionBatchModel extends Model
         return $this->hasMany(ProductionBatchItemnModel::class, 'batch_id');
     }
     public static function getRecords($request,$domain){
-
         $page =  isset($request['page']) && $request['page'] > 0?($request['page'] - 1 ) : 0;
         $perPage = isset($request['offset']) && $request['offset']!=''? (int)($request['offset']):0;
         $skip = isset($page) && $page!=''? (int)$page*$perPage:0;
+//        dump($domain['pro_config']);
 
-        $entity = self::where('pro_config.domain_id',$domain['global_id'])
-            ->join('pro_setting_type','pro_setting_type.id','=','pro_setting.setting_type_id')
-            ->join('pro_config','pro_config.id','=','pro_setting.config_id')
+        $entity = self::where('pro_batch.config_id',$domain['pro_config'])
+            ->join('users','users.id','=','pro_batch.created_by_id')
             ->select([
-                'pro_setting.id',
-                'pro_setting.name',
-                'pro_setting.slug',
-                'pro_setting.status',
-                DB::raw('DATE_FORMAT(pro_setting.created_at, "%d-%M-%Y") as created'),
-                'pro_setting_type.name as setting_type_name',
-                'pro_setting_type.slug as setting_type_slug',
+                'pro_batch.id',
+                'pro_batch.invoice',
+                'pro_batch.status',
+                'pro_batch.process',
+                'pro_batch.created_by_id',
+                'users.name as created_by_name',
+                DB::raw('DATE_FORMAT(pro_batch.created_at, "%d-%M-%Y") as created_date'),
+                DB::raw('DATE_FORMAT(pro_batch.issue_date, "%d-%M-%Y") as issue_date'),
             ]);
 
         if (isset($request['term']) && !empty($request['term'])){
-            $entity = $entity->whereAny(['pro_setting.name','pro_setting.slug','pro_setting_type.slug'],'LIKE','%'.trim($request['term']).'%');
+            $entity = $entity->whereAny(['pro_batch.invoice','pro_batch.process','users.name'],'LIKE','%'.trim($request['term']).'%');
         }
-
-        if (isset($request['name']) && !empty($request['name'])){
-            $entity = $entity->where('pro_setting.name','LIKE','%'.trim($request['name']));
-        }
-
-        if (isset($request['setting_type_id']) && !empty($request['setting_type_id'])){
-            $entity = $entity->where('pro_setting.setting_type_id',$request['setting_type_id']);
+        if (isset($request['created_at']) && !empty($request['created_at'])) {
+            $entity = $entity->whereDate('pro_batch.created_at', trim($request['created_at']));
         }
 
         $total  = $entity->count();
