@@ -14,6 +14,12 @@ namespace Modules\Accounting\App\Repositories;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\Query;
 use Modules\Accounting\App\Entities\AccountHead;
+use Modules\Accounting\App\Entities\AccountMasterHead;
+use Modules\Accounting\App\Entities\Config;
+use Modules\Accounting\App\Entities\TransactionMode;
+use Modules\Core\App\Entities\Customer;
+use Modules\Core\App\Entities\User;
+use Modules\Core\App\Entities\Vendor;
 
 
 /**
@@ -26,6 +32,7 @@ use Modules\Accounting\App\Entities\AccountHead;
  */
 class AccountHeadRepository extends EntityRepository
 {
+
 
 
     public function getMotherGroupAccount()
@@ -242,5 +249,281 @@ class AccountHeadRepository extends EntityRepository
         return $accountHeads;
 
     }
+
+
+    public function generateAccountHead($configId)
+    {
+
+        $em = $this->_em;
+        $qb = $this->getEntityManager()
+            ->getConnection()
+            ->createQueryBuilder()
+            ->delete('acc_head')
+            ->where('config_id =:config_id')
+            ->setParameter('config_id', $configId);
+        $qb->execute();
+
+
+        /** @var  Config $config */
+        $config = $em->getRepository(Config::class)->find($configId);
+        $parentHeads = $em->getRepository(AccountMasterHead::class)->findBy(['parent'=> NULL]);
+
+        /** @var AccountMasterHead $head */
+
+        foreach ($parentHeads as $head){
+
+            $entity = new AccountHead();
+            $entity->setConfig($config);
+            $entity->setMotherAccount($head->getMotherAccount());
+            $entity->setAccountMasterHead($head);
+            $entity->setName($head->getName());
+            $entity->setSlug($head->getSlug());
+            $entity->setHeadGroup($head->getHeadGroup());
+            $entity->setLevel(1);
+            $em->persist($entity);
+            $em->flush();
+            if($head->getChildren()){
+                foreach ($head->getChildren() as $child){
+                    $subHead = new AccountHead();
+                    $subHead->setConfig($config);
+                    $subHead->setMotherAccount($child->getMotherAccount());
+                    $subHead->setAccountMasterHead($child);
+                    $subHead->setParent($entity);
+                    $subHead->setName($child->getName());
+                    $subHead->setSlug($child->getSlug());
+                    $subHead->setHeadGroup($child->getHeadGroup());
+                    $subHead->setLevel(2);
+                    $em->persist($subHead);
+                    $em->flush();
+                }
+            }
+        }
+        $currentAssets = $em->getRepository(TransactionMode::class)->findBy(['config' => $configId,'status'=>1]);
+        foreach ($currentAssets as $asset){
+            $this->insertTransactionAccount($asset);
+        }
+
+        $customers = $em->getRepository(Customer::class)->findBy(['domain' => $config->getDomain(),'status'=>1]);
+        foreach ($customers as $customer){
+            $this->insertCustomerAccount($config,$customer);
+        }
+
+        $vendors = $em->getRepository(Vendor::class)->findBy(['domain' => $config->getDomain(),'status'=>1]);
+        foreach ($vendors as $customer){
+            $this->insertVendorAccount($config,$customer);
+        }
+
+        $users = $em->getRepository(User::class)->findBy(['domain' => $config->getDomain(),'userGroup'=>'user','enabled'=>1]);
+        foreach ($users as $user){
+            $this->insertUserAccount($config,$user);
+        }
+
+        $investors = $em->getRepository(User::class)->findBy(['domain' => $config->getDomain(),'userGroup'=>'investor','enabled'=>1]);
+        foreach ($investors as $investor){
+             $this->insertCapitalInvestmentAccount($config,$investor);
+        }
+    }
+
+    public function resetAccountHead($configId)
+    {
+
+        $em = $this->_em;
+        $qb = $this->getEntityManager()
+            ->getConnection()
+            ->createQueryBuilder()
+            ->delete('acc_head')
+            ->where('config_id =:config_id')
+            ->setParameter('config_id', $configId);
+        $qb->execute();
+        $config = $em->getRepository(Config::class)->find($configId);
+        $parentHeads = $em->getRepository(AccountMasterHead::class)->findBy(['parent'=> NULL]);
+
+        /** @var AccountMasterHead $head */
+
+        foreach ($parentHeads as $head){
+
+            $entity = new AccountHead();
+            $entity->setConfig($config);
+            $entity->setMotherAccount($head->getMotherAccount());
+            $entity->setAccountMasterHead($head);
+            $entity->setName($head->getName());
+            $entity->setSlug($head->getSlug());
+            $entity->setHeadGroup($head->getHeadGroup());
+            $entity->setLevel(1);
+            $em->persist($entity);
+            $em->flush();
+            if($head->getChildren()){
+                foreach ($head->getChildren() as $child){
+                    $subHead = new AccountHead();
+                    $subHead->setConfig($config);
+                    $subHead->setMotherAccount($child->getMotherAccount());
+                    $subHead->setAccountMasterHead($child);
+                    $subHead->setParent($entity);
+                    $subHead->setName($child->getName());
+                    $subHead->setSlug($child->getSlug());
+                    $subHead->setHeadGroup($child->getHeadGroup());
+                    $subHead->setLevel(2);
+                    $em->persist($subHead);
+                    $em->flush();
+                }
+            }
+        }
+
+        /*
+         $elem = "INSERT INTO acc_head(config_id,account_master_head_id,mother_account_id,parent_id,name,slug,code,head_group,created_at,updated_at)
+ SELECT $config,id,mother_account_id,parent_id,name,slug,code,head_group,now(),now()
+ FROM acc_head_master";
+         $qb1 = $this->getEntityManager()->getConnection()->prepare($elem);
+         $qb1->execute();
+
+        $elem = "INSERT INTO acc_head(config_id,name)
+ SELECT id,name,brandName,salesPrice,purchasePrice,averagePurchasePrice,medicineConfig_id,'month','{$month}','{$year}',now(),now()
+ FROM medicine_stock as ms
+ WHERE medicineConfig_id ={$config} AND (openingQuantity > 0 OR remainingQuantity > 0 OR salesQuantity > 0 OR adjustmentQuantity > 0 OR purchaseQuantity > 0)
+ AND NOT EXISTS ( SELECT 1 FROM medicine_stock_report d WHERE d.stockId = ms.id AND d.configId = ms.medicineConfig_id AND reportMonth='{$month}' AND reportYear='{$year}')";
+         $qb1 = $this->getEntityManager()->getConnection()->prepare($elem);
+         $qb1->execute();*/
+
+    }
+
+    public function insertTransactionAccount(TransactionMode $entity)
+    {
+
+        $em = $this->_em;
+        $exist = $this->findOneBy(array('transaction' => $entity));
+        if (empty($exist)) {
+            $head = new AccountHead();
+            if($entity->getMethod()->getSlug() == 'cash'){
+                $parent = $this->findOneBy(array('config' => $entity->getConfig(),'accountMasterHead' => 2));
+            }elseif($entity->getMethod()->getSlug() == 'bank'){
+                $parent = $this->findOneBy(array('config' => $entity->getConfig(),'accountMasterHead' => 3));
+            }elseif($entity->getMethod()->getSlug() == 'mobile'){
+                $parent = $this->findOneBy(array('config' => $entity->getConfig(),'accountMasterHead' => 10));
+            }
+            if($parent){
+                $head->setConfig($entity->getConfig());
+                $head->setName($entity->getName());
+                $head->setSlug($entity->getSlug());
+                $head->setParent($parent);
+                $head->setHeadGroup('ledger');
+                $head->setLevel(3);
+                $head->setTransaction($entity);
+                $em->persist($head);
+                $em->flush();
+            }
+
+        }
+
+    }
+
+    public function insertCustomerAccount(Config $config , Customer $entity)
+    {
+
+        /* @var $entity Customer */
+
+        $em = $this->_em;
+        $exist = $this->findOneBy(array('customer' => $entity));
+        if(empty($exist)){
+            $head = new AccountHead();
+            $parent = $this->findOneBy(array('config' => $config ,'accountMasterHead' => 4));
+            $head->setConfig($config);
+            $head->setName($entity->getName());
+            $head->setSlug($entity->getSlug());
+            $head->setHeadGroup('ledger');
+            $head->setParent($parent);
+            $head->setCustomer($entity);
+            $em->persist($head);
+            $em->flush();
+        }
+    }
+
+    public function insertVendorAccount(Config $config , Vendor $entity)
+    {
+
+        /* @var $entity Vendor */
+
+        $em = $this->_em;
+        $exist = $this->findOneBy(array('vendor' => $entity));
+        if(empty($exist)){
+            $head = new AccountHead();
+            $parent = $this->findOneBy(array('config' => $config ,'accountMasterHead' => 13));
+            $head->setConfig($config);
+            $head->setName($entity->getName());
+            $head->setSlug($entity->getSlug());
+            $head->setHeadGroup('ledger');
+            $head->setParent($parent);
+            $head->setVendor($entity);
+            $em->persist($head);
+            $em->flush();
+        }
+    }
+
+    public function insertUserAccount(Config $config , User $user)
+    {
+
+        $em = $this->_em;
+        /* @var $exist AccountHead */
+
+        $exist = $this->findOneBy(array('user' => $user));
+        if(empty($exist)){
+            $parent = $this->findOneBy(array('config' => $config ,'accountMasterHead' => 25));
+            $head = new AccountHead();
+            $head->setConfig($config);
+            $head->setParent($parent);
+            $head->setName($user->getName());
+            $head->setSlug($user->getName());
+            $head->setHeadGroup('ledger');
+            $head->setUser($user);
+            $em->persist($head);
+            $em->flush();
+        }
+    }
+
+    public function insertCapitalInvestmentAccount(Config $config , User $user)
+    {
+
+        $em = $this->_em;
+
+        /* @var $exist AccountHead */
+        $exist = $this->findOneBy(array('user' => $user));
+        if(empty($exist)){
+            $parent = $this->findOneBy(array('config' => $config ,'accountMasterHead' => 49));
+            $head = new AccountHead();
+            $head->setConfig($config);
+            $head->setParent($parent);
+            $head->setName($user->getName());
+            $head->setSlug($user->getName());
+            $head->setHeadGroup('ledger');
+            $head->setUser($user);
+            $em->persist($head);
+            $em->flush();
+        }
+    }
+
+    public function insertCapitalAssetsAccount(GlobalOption $option ,PurchaseItem $entity)
+    {
+
+        /* @var $exist AccountHead */
+
+        $exist = $this->findOneBy(array('assetsItem' => $entity->getItem()));
+        if ($exist) {
+            $exist->setName($entity->getItem()->getName());
+            $this->_em->flush();
+            return $exist;
+        } else {
+            $head = new AccountHead();
+            $head->setGlobalOption($option);
+            $head->setName($entity->getItem()->getName());
+            $head->setSource('Assets');
+            $head->setAssetsItem($entity->getItem());
+            $head->setParent($entity->getItem()->getCategory()->getAccountHead());
+            $this->_em->persist($head);
+            $this->_em->flush();
+            return $head;
+        }
+    }
+
+
+
 
 }

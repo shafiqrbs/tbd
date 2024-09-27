@@ -18,12 +18,14 @@
         "laravel/scout": "^10.8",
         "laravel/tinker": "^2.8",
         "nwidart/laravel-modules": "^10.0",
+        "rappasoft/laravel-authentication-log": "^4.0",
         "spatie/browsershot": "^4.0",
         "spatie/image": "^2.2",
         "spatie/laravel-activitylog": "^4.7",
         "spatie/laravel-medialibrary": "^10.15",
         "spatie/laravel-query-builder": "^5.7",
-        "symfony/doctrine-bridge": "^6.4"
+        "symfony/doctrine-bridge": "^6.4",
+        "torann/geoip": "^3.0"
     },
 
     "require-dev": {

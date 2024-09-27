@@ -123,23 +123,23 @@ class TransactionRepository extends EntityRepository
 
     }
 
-    private function insertOpeningAccountPayable(Purchase $purchase)
+    private function insertOpeningAccountPayable(AccountJournal $journal , Purchase $purchase)
     {
         $em = $this->_em;
         $amount = $purchase->getTotal();
         $account = $em->getRepository(AccountHead::class)->findOneBy(['slug' => 'opening-balance']);
         $exist = $this->findOneBy(['processHead' => 'Opening-Inventory','accountRefNo' => $purchase->getId(),'accountHead'=>$account]);
         if(empty($exist)){
-            $transaction = new Transaction();
+            $transaction = new AccountJournalItem();
             $transaction->setProcess('Current Liabilities');
-            $transaction->setProcessHead('Opening-Inventory');
-            $transaction->setAccountRefNo($purchase->getId());
             /* Current Liabilities-Purchase Account payable */
             $transaction->setAccountHead($account);
+            $transaction->setAccountSubHead($account);
             $transaction->setAmount('-'.$amount);
             $transaction->setCredit($amount);
             $em->persist($transaction);
             $em->flush();
+            $this->updateAccountHeadBalance($account,'ledger');
             $this->updateAccountHeadBalance($account,'head');
         }
     }

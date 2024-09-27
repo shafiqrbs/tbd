@@ -11,7 +11,7 @@ use Terminalbd\GenericBundle\Entity\Particular;
  * AccountHead
  *
  * @ORM\Table(name="acc_head")
- * @ORM\Entity(repositoryClass="Modules\Accounting\App\Repositories\TransactionRepository")
+ * @ORM\Entity(repositoryClass="Modules\Accounting\App\Repositories\AccountHeadRepository")
  *
  */
 class AccountHead
@@ -31,6 +31,13 @@ class AccountHead
      * @ORM\JoinColumn(name="config_id", referencedColumnName="id", onDelete="CASCADE")
      */
     protected $config;
+
+
+      /**
+     * @ORM\ManyToOne(targetEntity="AccountMasterHead", inversedBy="children", cascade={"detach","merge"})
+     * @ORM\JoinColumn(name="account_master_head_id", referencedColumnName="id", onDelete="CASCADE")
+     */
+    protected $accountMasterHead;
 
 
      /**
@@ -54,7 +61,7 @@ class AccountHead
 
     /**
      * @ORM\OneToOne(targetEntity="Modules\Core\App\Entities\User")
-     * @ORM\JoinColumn(name="employee_id", referencedColumnName="id", nullable=true, onDelete="cascade")
+     * @ORM\JoinColumn(name="user_id", referencedColumnName="id", nullable=true, onDelete="cascade")
      **/
     private  $user;
 
@@ -81,8 +88,6 @@ class AccountHead
      * @ORM\JoinColumn(name="category_id", referencedColumnName="id", nullable=true, onDelete="cascade")
      **/
     private  $category;
-
-
 
     /**
      * @ORM\ManyToOne(targetEntity="Setting")
@@ -613,9 +618,21 @@ class AccountHead
         $this->updatedAt = $updatedAt;
     }
 
+    /**
+     * @return mixed
+     */
+    public function getAccountMasterHead()
+    {
+        return $this->accountMasterHead;
+    }
 
-
-
+    /**
+     * @param mixed $accountMasterHead
+     */
+    public function setAccountMasterHead($accountMasterHead)
+    {
+        $this->accountMasterHead = $accountMasterHead;
+    }
 
 }
 

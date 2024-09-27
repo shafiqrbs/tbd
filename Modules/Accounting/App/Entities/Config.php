@@ -58,6 +58,104 @@ class Config
      */
     private $updatedAt;
 
+    /**
+     * @return int
+     */
+    public function getId()
+    {
+        return $this->id;
+    }
+
+    /**
+     * @param int $id
+     */
+    public function setId($id)
+    {
+        $this->id = $id;
+    }
+
+    /**
+     * @return GlobalOption
+     */
+    public function getDomain()
+    {
+        return $this->domain;
+    }
+
+    /**
+     * @param GlobalOption $domain
+     */
+    public function setDomain($domain)
+    {
+        $this->domain = $domain;
+    }
+
+    /**
+     * @return \DateTime
+     */
+    public function getFinancialStartDate()
+    {
+        return $this->financialStartDate;
+    }
+
+    /**
+     * @param \DateTime $financialStartDate
+     */
+    public function setFinancialStartDate($financialStartDate)
+    {
+        $this->financialStartDate = $financialStartDate;
+    }
+
+    /**
+     * @return \DateTime
+     */
+    public function getFinancialEndDate()
+    {
+        return $this->financialEndDate;
+    }
+
+    /**
+     * @param \DateTime $financialEndDate
+     */
+    public function setFinancialEndDate($financialEndDate)
+    {
+        $this->financialEndDate = $financialEndDate;
+    }
+
+    /**
+     * @return \DateTime
+     */
+    public function getCreatedAt()
+    {
+        return $this->createdAt;
+    }
+
+    /**
+     * @param \DateTime $createdAt
+     */
+    public function setCreatedAt($createdAt)
+    {
+        $this->createdAt = $createdAt;
+    }
+
+    /**
+     * @return \DateTime
+     */
+    public function getUpdatedAt()
+    {
+        return $this->updatedAt;
+    }
+
+    /**
+     * @param \DateTime $updatedAt
+     */
+    public function setUpdatedAt($updatedAt)
+    {
+        $this->updatedAt = $updatedAt;
+    }
+
+
+
 
 }
 

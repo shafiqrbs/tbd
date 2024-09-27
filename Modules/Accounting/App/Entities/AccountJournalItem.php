@@ -31,16 +31,19 @@ class AccountJournalItem
      **/
     protected $accountLedger;
 
-      /**
+    /**
      * @ORM\ManyToOne(targetEntity="AccountJournal")
-     * @ORM\JoinColumn(onDelete="CASCADE")
+     * @ORM\JoinColumn(name="account_journal_id", referencedColumnName="id", nullable=true, onDelete="cascade")
      **/
-    protected $accountJournal;
+    private  $accountJournal;
+
 
     /**
      * @ORM\ManyToOne(targetEntity="AccountHead")
+     * @ORM\JoinColumn(name="account_head_id", referencedColumnName="id", nullable=true, onDelete="cascade")
      **/
-    protected $accountHead;
+    private  $accountHead;
+
 
     /**
      * @ORM\ManyToOne(targetEntity="AccountHead")

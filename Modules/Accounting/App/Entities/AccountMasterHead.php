@@ -25,23 +25,23 @@ class AccountMasterHead
      */
     private $id;
 
+    /**
+     * @ORM\ManyToOne(targetEntity="Setting")
+     **/
+    private $motherAccount;
+
      /**
-     * @ORM\ManyToOne(targetEntity="AccountHead", inversedBy="children", cascade={"detach","merge"})
+     * @ORM\ManyToOne(targetEntity="AccountMasterHead", inversedBy="children", cascade={"detach","merge"})
      * @ORM\JoinColumn(name="parent_id", referencedColumnName="id", onDelete="SET NULL")
      */
     protected $parent;
 
 
     /**
-     * @ORM\OneToMany(targetEntity="AccountHead" , mappedBy="parent")
+     * @ORM\OneToMany(targetEntity="AccountMasterHead" , mappedBy="parent")
      * @ORM\OrderBy({"name" = "ASC"})
      **/
     private $children;
-
-    /**
-     * @ORM\ManyToOne(targetEntity="Setting")
-     **/
-    private $motherAccount;
 
 
 	/**
@@ -58,48 +58,13 @@ class AccountMasterHead
      */
     private $name;
 
-     /**
-     * @var float
-     *
-     * @ORM\Column(name="amount", type="float", nullable=true)
-     */
-    private $amount = 0;
-
-    /**
-     * @var float
-     *
-     * @ORM\Column(name="credit",type="float", nullable=true)
-     */
-    private $credit = 0;
-
-    /**
-     * @var float
-     *
-     * @ORM\Column(name="debit",type="float", nullable=true)
-     */
-    private $debit = 0;
-
-     /**
-     * @var integer
-     *
-     * @ORM\Column(name="level", type="integer", nullable=true)
-     */
-    private $level = 3;
 
     /**
      * @var string
      *
-     * @ORM\Column(name="source", type="string", length=30, nullable=true)
+     * @ORM\Column(type="string", length=30, nullable=true)
      */
-    private $source;
-
-
-    /**
-     * @var string
-     *
-     * @ORM\Column(name="sourceId", type="string", length=30, nullable=true)
-     */
-    private $sourceId;
+    private $headGroup;
 
 
     /**
@@ -108,21 +73,6 @@ class AccountMasterHead
      */
     private $slug;
 
-
-    /**
-     * @var string
-     *
-     * @ORM\Column(name="toIncrease", type="string", length=20, nullable=true)
-     */
-    private $toIncrease;
-
-
-	/**
-	 * @var integer
-	 *
-	 * @ORM\Column(name="sorting", type="integer", length=10, nullable=true)
-	 */
-	private $sorting;
 
     /**
      * @var boolean
@@ -138,12 +88,6 @@ class AccountMasterHead
      */
     private $status = true;
 
-    /**
-     * @var boolean
-     *
-     * @ORM\Column(name="showAmount", type="boolean" ,nullable=true)
-     */
-    private $showAmount = false;
 
     /**
      * @var \DateTime
@@ -159,6 +103,197 @@ class AccountMasterHead
      */
     private $updatedAt;
 
+    /**
+     * @return int
+     */
+    public function getId()
+    {
+        return $this->id;
+    }
+
+    /**
+     * @param int $id
+     */
+    public function setId($id)
+    {
+        $this->id = $id;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getMotherAccount()
+    {
+        return $this->motherAccount;
+    }
+
+    /**
+     * @param mixed $motherAccount
+     */
+    public function setMotherAccount($motherAccount)
+    {
+        $this->motherAccount = $motherAccount;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getParent()
+    {
+        return $this->parent;
+    }
+
+    /**
+     * @param mixed $parent
+     */
+    public function setParent($parent)
+    {
+        $this->parent = $parent;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getChildren()
+    {
+        return $this->children;
+    }
+
+    /**
+     * @param mixed $children
+     */
+    public function setChildren($children)
+    {
+        $this->children = $children;
+    }
+
+    /**
+     * @return string
+     */
+    public function getCode()
+    {
+        return $this->code;
+    }
+
+    /**
+     * @param string $code
+     */
+    public function setCode($code)
+    {
+        $this->code = $code;
+    }
+
+    /**
+     * @return string
+     */
+    public function getName()
+    {
+        return $this->name;
+    }
+
+    /**
+     * @param string $name
+     */
+    public function setName($name)
+    {
+        $this->name = $name;
+    }
+
+    /**
+     * @return string
+     */
+    public function getHeadGroup()
+    {
+        return $this->headGroup;
+    }
+
+    /**
+     * @param string $headGroup
+     */
+    public function setHeadGroup($headGroup)
+    {
+        $this->headGroup = $headGroup;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getSlug()
+    {
+        return $this->slug;
+    }
+
+    /**
+     * @param mixed $slug
+     */
+    public function setSlug($slug)
+    {
+        $this->slug = $slug;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isParent()
+    {
+        return $this->isParent;
+    }
+
+    /**
+     * @param bool $isParent
+     */
+    public function setIsParent($isParent)
+    {
+        $this->isParent = $isParent;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isStatus()
+    {
+        return $this->status;
+    }
+
+    /**
+     * @param bool $status
+     */
+    public function setStatus($status)
+    {
+        $this->status = $status;
+    }
+
+    /**
+     * @return \DateTime
+     */
+    public function getCreatedAt()
+    {
+        return $this->createdAt;
+    }
+
+    /**
+     * @param \DateTime $createdAt
+     */
+    public function setCreatedAt($createdAt)
+    {
+        $this->createdAt = $createdAt;
+    }
+
+    /**
+     * @return \DateTime
+     */
+    public function getUpdatedAt()
+    {
+        return $this->updatedAt;
+    }
+
+    /**
+     * @param \DateTime $updatedAt
+     */
+    public function setUpdatedAt($updatedAt)
+    {
+        $this->updatedAt = $updatedAt;
+    }
 
 
 }

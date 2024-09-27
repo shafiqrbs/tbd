@@ -33,9 +33,10 @@ class PurchaseReturn
     private  $config;
 
     /**
-     * @ORM\ManyToOne(targetEntity="Modules\Accounting\App\Entities\AccountHead")
+     * @ORM\ManyToOne(targetEntity="Modules\Core\App\Entities\Vendor")
      * @ORM\JoinColumn(onDelete="CASCADE")
-    private  $vendor;
+     **/
+     private  $vendor;
 
     /**
      * @Gedmo\Blameable(on="create")

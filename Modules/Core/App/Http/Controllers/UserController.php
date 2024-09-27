@@ -94,7 +94,6 @@ class UserController extends Controller
      */
     public function update(UserRequest $request, $id)
     {
-
         $data = $request->validated();
         $entity = UserModel::find($id);
         $entity->update($data);

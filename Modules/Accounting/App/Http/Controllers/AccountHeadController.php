@@ -3,9 +3,12 @@
 namespace Modules\Accounting\App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\EntityRepository;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Modules\Accounting\App\Entities\AccountHead;
 use Modules\Accounting\App\Http\Requests\AccountHeadRequest;
 use Modules\Accounting\App\Models\AccountHeadModel;
 use Modules\Accounting\App\Models\TransactionModeModel;
@@ -49,6 +52,28 @@ class AccountHeadController extends Controller
 
 
     /**
+     * Store a newly created resource in storage.
+     */
+    public function generateAccountHead(EntityManager $em)
+    {
+        $config_id = $this->domain['acc_config'];
+        $entity = $em->getRepository(AccountHead::class)->generateAccountHead($config_id);
+        $service = new JsonRequestResponse();
+        return $service->returnJosnResponse($entity);
+    }
+
+     /**
+     * Store a newly created resource in storage.
+     */
+    public function resetAccountHead(EntityManager $em)
+    {
+        $config_id = $this->domain['acc_config'];
+        $entity = $em->getRepository(AccountHead::class)->resetAccountHead($config_id);
+        $service = new JsonRequestResponse();
+        return $service->returnJosnResponse($entity);
+    }
+
+     /**
      * Store a newly created resource in storage.
      */
     public function store(AccountHeadRequest $request)

@@ -40,7 +40,7 @@ class SalesReturn
 
 
     /**
-     * @ORM\ManyToOne(targetEntity="Modules\Accounting\App\Entities\AccountHead")
+     * @ORM\ManyToOne(targetEntity="Modules\Core\App\Entities\Customer")
      * @ORM\JoinColumn(onDelete="CASCADE")
      **/
     private  $customer;

@@ -31,7 +31,8 @@ class TransactionMode
     private $config;
 
     /**
-     * @ORM\ManyToOne(targetEntity="Modules\Accounting\App\Entities\Setting")
+     * @var Setting
+     * @ORM\ManyToOne(targetEntity="Setting")
      **/
     private $method;
 
@@ -160,6 +161,328 @@ class TransactionMode
      * @ORM\Column(name="updated_at", type="datetime",nullable=true)
      */
     private $updatedAt;
+
+    /**
+     * @return int
+     */
+    public function getId()
+    {
+        return $this->id;
+    }
+
+    /**
+     * @param int $id
+     */
+    public function setId($id)
+    {
+        $this->id = $id;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getConfig()
+    {
+        return $this->config;
+    }
+
+    /**
+     * @param mixed $config
+     */
+    public function setConfig($config)
+    {
+        $this->config = $config;
+    }
+
+    /**
+     * @return Setting
+     */
+    public function getMethod()
+    {
+        return $this->method;
+    }
+
+    /**
+     * @param Setting $method
+     */
+    public function setMethod($method)
+    {
+        $this->method = $method;
+    }
+
+    /**
+     * @return string
+     */
+    public function getAccountOwner()
+    {
+        return $this->accountOwner;
+    }
+
+    /**
+     * @param string $accountOwner
+     */
+    public function setAccountOwner($accountOwner)
+    {
+        $this->accountOwner = $accountOwner;
+    }
+
+    /**
+     * @return string
+     */
+    public function getAuthorised()
+    {
+        return $this->authorised;
+    }
+
+    /**
+     * @param string $authorised
+     */
+    public function setAuthorised($authorised)
+    {
+        $this->authorised = $authorised;
+    }
+
+    /**
+     * @return string
+     */
+    public function getServiceName()
+    {
+        return $this->serviceName;
+    }
+
+    /**
+     * @param string $serviceName
+     */
+    public function setServiceName($serviceName)
+    {
+        $this->serviceName = $serviceName;
+    }
+
+    /**
+     * @return string
+     */
+    public function getName()
+    {
+        return $this->name;
+    }
+
+    /**
+     * @param string $name
+     */
+    public function setName($name)
+    {
+        $this->name = $name;
+    }
+
+    /**
+     * @return string
+     */
+    public function getShortName()
+    {
+        return $this->shortName;
+    }
+
+    /**
+     * @param string $shortName
+     */
+    public function setShortName($shortName)
+    {
+        $this->shortName = $shortName;
+    }
+
+    /**
+     * @return string
+     */
+    public function getSlug()
+    {
+        return $this->slug;
+    }
+
+    /**
+     * @param string $slug
+     */
+    public function setSlug($slug)
+    {
+        $this->slug = $slug;
+    }
+
+    /**
+     * @return string
+     */
+    public function getMobile()
+    {
+        return $this->mobile;
+    }
+
+    /**
+     * @param string $mobile
+     */
+    public function setMobile($mobile)
+    {
+        $this->mobile = $mobile;
+    }
+
+    /**
+     * @return string
+     */
+    public function getPath()
+    {
+        return $this->path;
+    }
+
+    /**
+     * @param string $path
+     */
+    public function setPath($path)
+    {
+        $this->path = $path;
+    }
+
+    /**
+     * @return float
+     */
+    public function getServiceCharge()
+    {
+        return $this->serviceCharge;
+    }
+
+    /**
+     * @param float $serviceCharge
+     */
+    public function setServiceCharge($serviceCharge)
+    {
+        $this->serviceCharge = $serviceCharge;
+    }
+
+    /**
+     * @return float
+     */
+    public function getIsSelected()
+    {
+        return $this->isSelected;
+    }
+
+    /**
+     * @param float $isSelected
+     */
+    public function setIsSelected($isSelected)
+    {
+        $this->isSelected = $isSelected;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isStatus()
+    {
+        return $this->status;
+    }
+
+    /**
+     * @param bool $status
+     */
+    public function setStatus($status)
+    {
+        $this->status = $status;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getAuthorisedMode()
+    {
+        return $this->authorisedMode;
+    }
+
+    /**
+     * @param mixed $authorisedMode
+     */
+    public function setAuthorisedMode($authorisedMode)
+    {
+        $this->authorisedMode = $authorisedMode;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getAccountMode()
+    {
+        return $this->accountMode;
+    }
+
+    /**
+     * @param mixed $accountMode
+     */
+    public function setAccountMode($accountMode)
+    {
+        $this->accountMode = $accountMode;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getAccountTypeMode()
+    {
+        return $this->accountTypeMode;
+    }
+
+    /**
+     * @param mixed $accountTypeMode
+     */
+    public function setAccountTypeMode($accountTypeMode)
+    {
+        $this->accountTypeMode = $accountTypeMode;
+    }
+
+    /**
+     * @return string
+     */
+    public function getAccountType()
+    {
+        return $this->accountType;
+    }
+
+    /**
+     * @param string $accountType
+     */
+    public function setAccountType($accountType)
+    {
+        $this->accountType = $accountType;
+    }
+
+    /**
+     * @return \DateTime
+     */
+    public function getCreatedAt()
+    {
+        return $this->createdAt;
+    }
+
+    /**
+     * @param \DateTime $createdAt
+     */
+    public function setCreatedAt($createdAt)
+    {
+        $this->createdAt = $createdAt;
+    }
+
+    /**
+     * @return \DateTime
+     */
+    public function getUpdatedAt()
+    {
+        return $this->updatedAt;
+    }
+
+    /**
+     * @param \DateTime $updatedAt
+     */
+    public function setUpdatedAt($updatedAt)
+    {
+        $this->updatedAt = $updatedAt;
+    }
+
+
 
 
 }
