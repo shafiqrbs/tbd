@@ -56,12 +56,22 @@ class Profile
     protected $designation;
 
 
+     /**
+     * @ORM\ManyToOne(targetEntity="Setting")
+     **/
+    protected $employeeGroup;
+
+
     /**
      * @ORM\ManyToOne(targetEntity="Setting")
      * @ORM\JoinColumn(name="department_id", referencedColumnName="id", nullable=true, onDelete="cascade")
      */
     protected $department;
 
+    /**
+     * @ORM\ManyToOne(targetEntity="Modules\Utility\App\Entities\Bank")
+     **/
+    private  $bank;
 
 
     /**
@@ -247,11 +257,6 @@ class Profile
      * @ORM\Column(name="leaveDate", type="datetime", nullable=true)
      */
     private $leaveDate;
-
-    /**
-     * @ORM\ManyToOne(targetEntity="Modules\Utility\App\Entities\Bank")
-     **/
-    private  $bank;
 
     /**
      * @var string
@@ -897,6 +902,20 @@ class Profile
         $this->signatureFile = $signatureFile;
     }
 
+    /**
+     * @return mixed
+     */
+    public function getEmployeeGroup()
+    {
+        return $this->employeeGroup;
+    }
 
+    /**
+     * @param mixed $employeeGroup
+     */
+    public function setEmployeeGroup($employeeGroup)
+    {
+        $this->employeeGroup = $employeeGroup;
+    }
 
 }
