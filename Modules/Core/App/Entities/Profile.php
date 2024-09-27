@@ -14,6 +14,7 @@ namespace Modules\Core\App\Entities;
 use Appstore\Bundle\DomainUserBundle\Entity\Branches;
 use Appstore\Bundle\EcommerceBundle\Entity\DeliveryLocation;
 use Doctrine\ORM\Mapping as ORM;
+use Gedmo\Mapping\Annotation as Gedmo;
 use Setting\Bundle\ToolBundle\Entity\Designation;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\Validator\Constraints as Assert;
@@ -84,21 +85,21 @@ class Profile
     /**
      * @var string
      *
-     * @ORM\Column(name="fatherName", type="string", nullable=true)
+     * @ORM\Column(name="father_name", type="string", nullable=true)
      */
     private $fatherName;
 
     /**
      * @var string
      *
-     * @ORM\Column(name="motherName", type="string", nullable=true)
+     * @ORM\Column(name="mother_name", type="string", nullable=true)
      */
     private $motherName;
 
     /**
      * @var string
      *
-     * @ORM\Column(name="userGroup", type="string", length = 30, nullable=true)
+     * @ORM\Column(name="user_group", type="string", length = 30, nullable=true)
      */
     private $userGroup;
 
@@ -113,7 +114,7 @@ class Profile
     /**
      * @var string
      *
-     * @ORM\Column(name="phoneNo", type="string", length=15, nullable=true)
+     * @ORM\Column(name="phone_no", type="string", length=15, nullable=true)
      */
     private $phoneNo;
 
@@ -127,7 +128,7 @@ class Profile
     /**
      * @var string
      *
-     * @ORM\Column(name="facebookId", type="string", nullable=true)
+     * @ORM\Column(name="facebook_id", type="string", nullable=true)
      */
     private $facebookId;
 
@@ -157,21 +158,21 @@ class Profile
     /**
      * @var text
      *
-     * @ORM\Column(name="permanentAddress", type="text", nullable=true)
+     * @ORM\Column(name="permanent_address", type="text", nullable=true)
      */
     private $permanentAddress;
 
     /**
      * @var string
      *
-     * @ORM\Column(name="postalCode", type="string", nullable=true)
+     * @ORM\Column(name="postal_code", type="string", nullable=true)
      */
     private $postalCode;
 
     /**
      * @var string
      *
-     * @ORM\Column(name="additionalPhone", type="string", nullable=true)
+     * @ORM\Column(name="additional_phone", type="string", nullable=true)
      */
     private $additionalPhone;
 
@@ -208,7 +209,7 @@ class Profile
     /**
      * @var string
      *
-     * @ORM\Column(name="bloodGroup", type="string", nullable=true)
+     * @ORM\Column(name="blood_group", type="string", nullable=true)
      */
     private $bloodGroup;
 
@@ -216,7 +217,7 @@ class Profile
      /**
      * @var string
      *
-     * @ORM\Column(name="religionStatus", type="string", nullable=true)
+     * @ORM\Column(name="religion_status", type="string", nullable=true)
      */
     private $religionStatus;
 
@@ -224,7 +225,7 @@ class Profile
     /**
      * @var string
      *
-     * @ORM\Column(name="maritalStatus", type="string", nullable=true)
+     * @ORM\Column(name="marital_status", type="string", nullable=true)
      */
     private $maritalStatus;
 
@@ -232,7 +233,7 @@ class Profile
       /**
      * @var string
      *
-     * @ORM\Column(name="employeeType", type="string", nullable=true)
+     * @ORM\Column(name="employee_type", type="string", nullable=true)
      */
     private $employeeType;
 
@@ -247,21 +248,21 @@ class Profile
     /**
      * @var string
      *
-     * @ORM\Column(name="joiningDate", type="datetime", nullable=true)
+     * @ORM\Column(name="joining_date", type="datetime", nullable=true)
      */
     private $joiningDate;
 
     /**
      * @var string
      *
-     * @ORM\Column(name="leaveDate", type="datetime", nullable=true)
+     * @ORM\Column(name="leave_date", type="datetime", nullable=true)
      */
     private $leaveDate;
 
     /**
      * @var string
      *
-     * @ORM\Column(name="accountNo", type="string", length=255, nullable = true)
+     * @ORM\Column(name="account_no", type="string", length=255, nullable = true)
      */
     private $accountNo;
 
@@ -275,7 +276,7 @@ class Profile
     /**
      * @var boolean
      *
-     * @ORM\Column(name="termsConditionAccept", type="boolean", nullable=true)
+     * @ORM\Column(name="terms_condition_accept", type="boolean", nullable=true)
      */
     private $termsConditionAccept = true;
 
@@ -299,6 +300,21 @@ class Profile
      * @Assert\File(maxSize="8388608")
      */
     protected $signatureFile;
+
+
+    /**
+     * @var \DateTime
+     * @Gedmo\Timestampable(on="create")
+     * @ORM\Column(name="created_at", type="datetime")
+     */
+    private $createdAt;
+
+    /**
+     * @var \DateTime
+     * @Gedmo\Timestampable(on="update")
+     * @ORM\Column(name="updated_at", type="datetime" , nullable=true)
+     */
+    private $updatedAt;
 
     public $temp;
 

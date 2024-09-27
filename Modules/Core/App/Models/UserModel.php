@@ -21,6 +21,7 @@ class UserModel extends Model
         'is_delete',
         'domain_id',
         'email_verified_at',
+        'enabled',
     ];
 
     public static function getRecords($request,$domain){
@@ -87,13 +88,6 @@ class UserModel extends Model
 
     }
 
-    public static function quickRandom($length = 32)
-    {
-        $pool = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
-        return substr(str_shuffle(str_repeat($pool, $length)), 0, $length);
-    }
-
-
     public static function getUserData($id)
     {
         $data = self::select(['dom_domain.id as global_id','users.id as user_id','inv_config.id as config_id','inv_config.id as inv_config','acc_config.id as acc_config','pro_config.id as pro_config'])
@@ -122,6 +116,37 @@ class UserModel extends Model
         $data = array('entities' => $users);
         return $data;
 
+
+    }
+
+    public static function showUserDetails($id)
+    {
+        $data = self::select([
+            'users.id',
+            'users.name',
+            'users.username',
+            'users.email',
+            'users.roles',
+            'users.domain_id',
+            'users.app_roles',
+            DB::raw('DATE_FORMAT(users.email_verified_at, "%d-%m-%Y") as email_verified_at'),
+            DB::raw('COALESCE(DATE_FORMAT(users.created_at, "%d-%m-%Y"), "") as created'),
+            DB::raw('COALESCE(DATE_FORMAT(users.updated_at, "%d-%m-%Y"), "") as updated'),
+            'users.mobile',
+            'users.enabled',
+            'core_user_profiles.location_id',
+            'core_user_profiles.designation_id',
+            'core_user_profiles.employee_group_id',
+            'core_user_profiles.department_id',
+            'core_user_profiles.address',
+            DB::raw("CONCAT('".url('')."/uploads/core/user/profile/', core_user_profiles.path) AS path"),
+            DB::raw("CONCAT('".url('')."/uploads/core/user/signature/', core_user_profiles.signature_path) AS signature_path")
+        ])
+            ->join('core_user_profiles', 'core_user_profiles.user_id', '=', 'users.id')
+            ->where('users.id', $id)
+            ->first();
+
+        return $data;
 
     }
 
