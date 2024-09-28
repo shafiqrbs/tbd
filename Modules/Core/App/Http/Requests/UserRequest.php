@@ -3,6 +3,7 @@
 namespace Modules\Core\App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class UserRequest extends FormRequest
 {
@@ -24,12 +25,57 @@ class UserRequest extends FormRequest
         // Check if we are updating (when an 'id' is present) or creating (when 'id' is not present)
         $isUpdating = $this->route('id');
 
-        return [
-//            'name' => 'required|string',
-//            'username' => 'required',
-//            'mobile' => 'required|numeric',
-//            'email' => 'required|email',
-            'password' => !$isUpdating ? 'required|min:6' : 'nullable|min:6', // Required for creating, nullable for updating
+        switch($this->method())
+        {
+            case 'GET':
+            case 'DELETE':
+            {
+                return [];
+            }
+            case 'POST':
+            {
+                return [
+                    'name' => 'required|string',
+                    'username' => 'required',
+                    'mobile' => 'required|numeric',
+                    'email' => 'required|email',
+                    'password' =>  'required|min:6',
+                    'confirm_password' => 'required|same:password' ,
+                ];
+            }
+
+            case 'PUT':
+            case 'PATCH':
+            {
+                return [
+                    'name' => 'required|string',
+                    'username' => 'required',
+                    'mobile' => 'required|numeric',
+                    'email' => 'required|email',
+                    'profile_image' => 'nullable|image|mimes:jpeg,png,jpg,gif',
+                    'digital_signature' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg',
+                    'alternative_email' => 'nullable|email',
+                    'designation_id' => 'nullable',
+                    'department_id' => 'nullable',
+                    'location_id' => 'nullable',
+                    'address' => 'nullable|string',
+                    'about_me' => 'nullable|string',
+                    'enabled' => 'required',
+                    'employee_group_id' => 'required',
+                    'access_control_role' => 'nullable|array',
+                    'android_control_role' => 'nullable|array',
+                ];
+            }
+            default:break;
+        }
+
+
+        /*return [
+            'name' => 'required|string',
+            'username' => 'required',
+            'mobile' => 'required|numeric',
+            'email' => 'required|email',
+            'password' => !$isUpdating ? 'required|min:6' : 'nullable|min:6',
             'confirm_password' => !$isUpdating ? 'required|same:password' : 'nullable|same:password',
             'profile_image' => 'nullable|image|mimes:jpeg,png,jpg,gif',
             'digital_signature' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg',
@@ -40,10 +86,10 @@ class UserRequest extends FormRequest
             'address' => 'nullable|string',
             'about_me' => 'nullable|string',
 //            'enabled' => 'required|boolean',
-//            'employee_group_id' => 'required|string',
+            'employee_group_id' => 'required|string',
             'access_control_role' => 'nullable|array',
             'android_control_role' => 'nullable|array',
-        ];
+        ];*/
     }
 
     /**

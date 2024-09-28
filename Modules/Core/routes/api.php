@@ -45,7 +45,7 @@ Route::prefix('/core')->middleware([HeaderAuthenticationMiddleware::class])->gro
 
     Route::get('/user/local-storage', [UserController::class,'localStorage'])->name('user_local_storage');
 
-    Route::post('/user/{id}', [UserController::class,'update'])->name('core_user_update');
+    Route::post('/user/image-inline/{id}', [UserController::class,'updateImage'])->name('core_user_update_image');
     Route::apiResource('user', UserController::class)->middleware([HeaderAuthenticationMiddleware::class]);
 
     Route::apiResource('location', LocationController::class)->middleware([HeaderAuthenticationMiddleware::class]);

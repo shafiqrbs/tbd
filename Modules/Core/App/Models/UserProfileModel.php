@@ -28,7 +28,7 @@ class UserProfileModel extends Model
         'email',
         'facebook_id',
         'profession',
-        'about',
+        'about_me',
         'address',
         'permanent_address',
         'postal_code',
@@ -48,6 +48,7 @@ class UserProfileModel extends Model
         'branch',
         'terms_condition_accept',
         'path',
+        'alternative_email',
         'signature_path'
     ];
 

@@ -79,6 +79,7 @@ class UserModel extends Model
          self::creating(function ($model) {
             $date =  new \DateTime("now");
             $model->created_at = $date;
+            $model->enabled = 1;
         });
 
         self::updating(function ($model) {
@@ -126,28 +127,54 @@ class UserModel extends Model
             'users.name',
             'users.username',
             'users.email',
-            'users.roles',
             'users.domain_id',
-            'users.app_roles',
             DB::raw('DATE_FORMAT(users.email_verified_at, "%d-%m-%Y") as email_verified_at'),
             DB::raw('COALESCE(DATE_FORMAT(users.created_at, "%d-%m-%Y"), "") as created'),
             DB::raw('COALESCE(DATE_FORMAT(users.updated_at, "%d-%m-%Y"), "") as updated'),
             'users.mobile',
             'users.enabled',
+            'core_user_profiles.alternative_email',
             'core_user_profiles.location_id',
             'core_user_profiles.designation_id',
+            'core_user_profiles.about_me',
             'core_user_profiles.employee_group_id',
             'core_user_profiles.department_id',
             'core_user_profiles.address',
             DB::raw("CONCAT('".url('')."/uploads/core/user/profile/', core_user_profiles.path) AS path"),
             DB::raw("CONCAT('".url('')."/uploads/core/user/signature/', core_user_profiles.signature_path) AS signature_path")
         ])
-            ->join('core_user_profiles', 'core_user_profiles.user_id', '=', 'users.id')
+            ->leftJoin('core_user_profiles', 'core_user_profiles.user_id', '=', 'users.id')
             ->where('users.id', $id)
             ->first();
-
         return $data;
 
+    }
+
+    public static function getAccessControlRoles($userId,$type)
+    {
+        $roles = DB::table('cor_user_role_group')
+            ->select('group_name', 'role_name as id', 'role_label as label')
+            ->where('user_id', $userId)
+            ->where('role_type', $type)
+            ->get()
+            ->toArray();
+        $formattedRoles = [];
+
+        foreach ($roles as $role) {
+            if (!isset($formattedRoles[$role->group_name])) {
+                $formattedRoles[$role->group_name] = [
+                    'Group' => $role->group_name,
+                    'actions' => []
+                ];
+            }
+            if ($role->id) {
+                $formattedRoles[$role->group_name]['actions'][] = [
+                    'id' => $role->id,
+                    'label' => $role->label
+                ];
+            }
+        }
+        return array_values($formattedRoles);
     }
 
 }

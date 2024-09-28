@@ -17,9 +17,9 @@ use Doctrine\ORM\Mapping as ORM;
 
 /**
  * @ORM\Entity
- * @ORM\Table(name="cor_user_role_group")
+ * @ORM\Table(name="cor_user_role")
  */
-class UserRoleGroup
+class UserRole
 {
     /**
      * @ORM\Id
@@ -29,34 +29,25 @@ class UserRoleGroup
     protected $id;
 
     /**
-     * @ORM\ManyToOne(targetEntity="User")
+     * @ORM\OneToOne(targetEntity="User", inversedBy="profile")
      * @ORM\JoinColumns({
-     *   @ORM\JoinColumn(name="user_id", referencedColumnName="id", onDelete="CASCADE")
+     *   @ORM\JoinColumn(name="user_id", referencedColumnName="id", unique=true, onDelete="CASCADE")
      * })
      */
 
     protected $user;
 
     /**
-     * @ORM\Column(type="string", name="group_name" ,length=50, nullable=true)
+     * @var array
+     * @ORM\Column(name="access_control_role", type="json", nullable=true)
      */
-    protected $groupName;
-
-
-    /**
-     * @ORM\Column(type="string", name="role_name" ,length=50, nullable=true)
-     */
-    protected $roleName;
+    private $accessControlRoles;
 
     /**
-     * @ORM\Column(type="string", name="role_label" ,length=50, nullable=true)
+     * @var array
+     * @ORM\Column(name="android_control_role", type="json", nullable=true)
      */
-    protected $roleLabel;
-
-    /**
-     * @ORM\Column(type="string", name="role_type" ,length=50, nullable=true)
-     */
-    protected $roleType;
+    private $androidControlRoles;
 
 
     /**
@@ -116,33 +107,37 @@ class UserRoleGroup
     /**
      * @return mixed
      */
-    public function getGroupName()
+    public function getUser()
     {
-        return $this->groupName;
+        return $this->user;
     }
 
     /**
-     * @param mixed $groupName
+     * @param mixed $user
      */
-    public function setGroupName($groupName): void
+    public function setUser($user): void
     {
-        $this->groupName = $groupName;
+        $this->user = $user;
     }
 
-    /**
-     * @return mixed
-     */
-    public function getRoleName()
+    public function getAccessControlRoles(): array
     {
-        return $this->roleName;
+        return $this->accessControlRoles;
     }
 
-    /**
-     * @param mixed $roleName
-     */
-    public function setRoleName($roleName): void
+    public function setAccessControlRoles(array $accessControlRoles): void
     {
-        $this->roleName = $roleName;
+        $this->accessControlRoles = $accessControlRoles;
+    }
+
+    public function getAndroidControlRoles(): array
+    {
+        return $this->androidControlRoles;
+    }
+
+    public function setAndroidControlRoles(array $androidControlRoles): void
+    {
+        $this->androidControlRoles = $androidControlRoles;
     }
 
 

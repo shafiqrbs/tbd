@@ -9,10 +9,13 @@ use Illuminate\Http\Response;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Hash;
 use Modules\AppsApi\App\Services\JsonRequestResponse;
+use Modules\Core\App\Entities\UserRole;
 use Modules\Core\App\Http\Requests\UserLoginRequest;
 use Modules\Core\App\Http\Requests\UserRequest;
 use Modules\Core\App\Models\UserModel;
 use Modules\Core\App\Models\UserProfileModel;
+use Modules\Core\App\Models\UserRoleGroupModel;
+use Modules\Core\App\Models\UserRoleModel;
 
 class UserController extends Controller
 {
@@ -70,6 +73,10 @@ class UserController extends Controller
     {
         $service = new JsonRequestResponse();
         $entity = UserModel::showUserDetails($id);
+        $accessControlRole = UserModel::getAccessControlRoles($id,'access_control_role');
+        $andriodControlRole = UserModel::getAccessControlRoles($id,'android_control_role');
+        $entity['access_control_roles'] = $accessControlRole;
+        $entity['android_control_role'] = $andriodControlRole;
         if (!$entity){
             $entity = 'Data not found';
         }
@@ -97,12 +104,14 @@ class UserController extends Controller
     public function update(UserRequest $request, $id)
     {
         $data = $request->validated();
+
         $entity = UserModel::find($id);
         if (!empty($data['confirm_password'])) {
             $data['password'] = Hash::make($data['confirm_password']);
         }
         $entity->update($data);
 
+        //user profile update
         $userProfile = UserProfileModel::where('user_id', $id)->first();
         $data['user_id'] = $id;
 
@@ -133,8 +142,113 @@ class UserController extends Controller
         }else{
             $userProfile->update($data);
         }
+
+        // user role update
+        $userRole = UserRoleModel::where('user_id', $id)->first();
+
+        // Get all "id" values
+        $accessControlRolesJson = null;
+        if (isset($data['access_control_role'])) {
+            $accessControlRoles = [];
+            UserRoleGroupModel::where('user_id',$id)->where('role_type','access_control_role')->delete();
+            foreach ($data['access_control_role'] as $group) {
+                if ($group){
+                    foreach ($group["actions"] as $action) {
+                        $accessControlRoles[] = $action["id"];
+                        //insert role group
+                        UserRoleGroupModel::create([
+                            'user_id' => $id,
+                            'group_name' => $group["Group"],
+                            'role_name' => $action["id"],
+                            'role_label' => $action["label"],
+                            'role_type' => 'access_control_role',
+                        ]);
+                    }
+                }
+            }
+            $accessControlRolesJson = json_encode($accessControlRoles, JSON_PRETTY_PRINT);
+        }
+
+        $androidControlRolesJson = null;
+        if (isset($data['android_control_role'])){
+            $androidControlRoles = [];
+            UserRoleGroupModel::where('user_id',$id)->where('role_type','android_control_role')->delete();
+            foreach ($data['android_control_role'] as $group) {
+                if ($group){
+                    foreach ($group["actions"] as $action) {
+                        $androidControlRoles[] = $action["id"];
+                        // insert role group
+                        UserRoleGroupModel::create([
+                            'user_id' => $id,
+                            'group_name' => $group["Group"],
+                            'role_name' => $action["id"],
+                            'role_label' => $action["label"],
+                            'role_type' => 'android_control_role',
+                        ]);
+                    }
+                }
+            }
+            $androidControlRolesJson = json_encode($androidControlRoles, JSON_PRETTY_PRINT);
+        }
+
+        if (!$userRole){
+            UserRoleModel::create([
+                'user_id' => $id,
+                'access_control_role' => $accessControlRolesJson,
+                'android_control_role' => $androidControlRolesJson,
+            ]);
+        }else{
+            $userRole->update([
+                'user_id' => $id,
+                'access_control_role' => $accessControlRolesJson,
+                'android_control_role' => $androidControlRolesJson,
+            ]);
+        }
+
         $service = new JsonRequestResponse();
         return $service->returnJosnResponse($entity);
+    }
+
+    public function updateImage(Request $request,$id)
+    {
+        $userProfile = UserProfileModel::where('user_id', $id)->first();
+        $data['user_id'] = $id;
+
+        if ($request->file('profile_image')) {
+            $profileImage = $this->processFileUpload($request->file('profile_image'), 'uploads/core/user/profile');
+            if ($profileImage) {
+                if ($userProfile && $userProfile->path) {
+                    $target_location = 'uploads/core/user/profile/';
+                    File::delete(public_path($target_location . $userProfile->path));
+                }
+                $data['path'] = $profileImage;
+            }
+        }
+
+        if ($request->file('digital_signature')) {
+            $digitalSign = $this->processFileUpload($request->file('digital_signature'), 'uploads/core/user/signature');
+            if ($digitalSign) {
+                if ($userProfile && $userProfile->signature_path) {
+                    $target_location = 'uploads/core/user/signature/';
+                    File::delete(public_path($target_location . $userProfile->signature_path));
+                }
+                $data['signature_path'] = $digitalSign;
+            }
+        }
+
+        if (!$userProfile){
+            UserProfileModel::create($data);
+        }else{
+            $userProfile->update($data);
+        }
+        $response = new Response();
+        $response->headers->set('Content-Type','application/json');
+        $response->setContent(json_encode([
+            'message' => 'success',
+            'status' => Response::HTTP_OK,
+        ]));
+        $response->setStatusCode(Response::HTTP_OK);
+        return $response;
     }
 
     /**

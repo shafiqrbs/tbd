@@ -2,7 +2,7 @@
     Category
         - Base
             - Default
-            - Group Category
+            - UserRole Category
                 - Image
                 - Icon
             - Category Banner
@@ -116,7 +116,7 @@
             visibility: visible;
         }
     }
-    
+
 }
 
 // Categoty-default1
@@ -160,7 +160,7 @@
     }
 }
 
-// Group Category
+// UserRole Category
 .category-group-image,
 .category-group-icon {
     display: flex;
@@ -258,7 +258,7 @@
             top: 50%;
             transform: translate( if-ltr(-50%,50%), -50% );
         }
-    } 
+    }
 }
 
 // Icon Category
@@ -315,7 +315,7 @@
     }
 }
 
-// Category with Content positioned center 
+// Category with Content positioned center
 .category-center {
     .category-content {
         position: absolute;

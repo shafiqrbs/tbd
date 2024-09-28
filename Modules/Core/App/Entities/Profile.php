@@ -128,6 +128,13 @@ class Profile
     /**
      * @var string
      *
+     * @ORM\Column(name="alternative_email", type="string", nullable=true)
+     */
+    private $alternativeEmail;
+
+    /**
+     * @var string
+     *
      * @ORM\Column(name="facebook_id", type="string", nullable=true)
      */
     private $facebookId;
@@ -143,7 +150,7 @@ class Profile
      /**
      * @var text
      *
-     * @ORM\Column(name="about", type="text", nullable=true)
+     * @ORM\Column(name="about_me", type="text", nullable=true)
      */
     private $about;
 

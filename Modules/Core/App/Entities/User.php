@@ -112,28 +112,12 @@ class User
 	private $appPassword = "@123456";
 
 	/**
-	 * @var array
-	 *
-	 * @ORM\Column(name="roles", type="array", nullable=true)
-	 */
-	private $roles;
-
-
-	/**
-	 * @var array
-	 *
-	 * @ORM\Column( type="array", nullable=true)
-	 */
-	private $appRoles;
-
-
-	/**
 	 * @ORM\Column(type="string", length=255, nullable=true)
 	 */
 	protected $avatar;
 
 	/**
-	 * @ORM\ManyToMany(targetEntity="Group", inversedBy="users")
+	 * @ORM\ManyToMany(targetEntity="UserRole", inversedBy="users")
 	 * @ORM\JoinTable(name="user_user_group",
 	 *      joinColumns={@ORM\JoinColumn(name="user_id", referencedColumnName="id")},
 	 *      inverseJoinColumns={@ORM\JoinColumn(name="group_id", referencedColumnName="id")}

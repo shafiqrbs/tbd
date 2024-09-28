@@ -7,20 +7,19 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Builder;
 
 
-class UserRoleGroupModel extends Model
+class UserRoleModel extends Model
 {
     use HasFactory;
 
-    protected $table = 'cor_user_role_group';
+    protected $table = 'cor_user_role';
     public $timestamps = true;
     protected $guarded = ['id'];
     protected $fillable = [
         'user_id',
-        'group_name',
-        'role_name',
-        'role_label',
-        'role_type',
+        'access_control_role',
+        'android_control_role',
     ];
+
     public static function boot() {
         parent::boot();
         self::creating(function ($model) {

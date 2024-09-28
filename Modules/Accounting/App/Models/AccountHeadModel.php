@@ -233,7 +233,7 @@ class AccountHeadModel extends Model
         if(sizeof($entities)>0){
             foreach ($entities as $val){
                 if ($val['level'] == 2){
-                    $data[$val['level'].'-Group'][] = $val;
+                    $data[$val['level'].'-UserRole'][] = $val;
                 }elseif ($val['level'] == 1){
                     $data[$val['level'].'-SubGroup'][] = $val;
                 }else{
