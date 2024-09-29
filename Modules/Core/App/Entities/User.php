@@ -117,13 +117,9 @@ class User
 	protected $avatar;
 
 	/**
-	 * @ORM\ManyToMany(targetEntity="UserRole", inversedBy="users")
-	 * @ORM\JoinTable(name="user_user_group",
-	 *      joinColumns={@ORM\JoinColumn(name="user_id", referencedColumnName="id")},
-	 *      inverseJoinColumns={@ORM\JoinColumn(name="group_id", referencedColumnName="id")}
-	 * )
+	 * @ORM\OneToOne(targetEntity="UserRole", inversedBy="user")
 	 */
-	protected $groups;
+	protected $userRole;
 
 
 	/**

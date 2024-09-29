@@ -621,6 +621,81 @@ class Config
     /**
      * @var boolean
      *
+     * @ORM\Column(type="boolean",options={"default"="false"})
+     */
+    private $isBrand;
+
+    /**
+     * @var boolean
+     *
+     * @ORM\Column(type="boolean",options={"default"="false"})
+     */
+    private $isColor;
+
+    /**
+     * @var boolean
+     *
+     * @ORM\Column(type="boolean",options={"default"="false"})
+     */
+    private $isSize;
+
+    /**
+     * @var boolean
+     *
+     * @ORM\Column(type="boolean",options={"default"="false"})
+     */
+    private $isGrade;
+
+    /**
+     * @var boolean
+     *
+     * @ORM\Column(type="boolean",options={"default"="false"})
+     */
+    private $isModel;
+
+
+     /**
+     * @var boolean
+     *
+     * @ORM\Column(type="boolean",options={"default"="false"})
+     */
+    private $isMultiPrice;
+
+
+    /**
+     * @var boolean
+     *
+     * @ORM\Column(type="boolean",options={"default"="false"})
+     */
+    private $isMeasurement;
+
+
+     /**
+     * @var boolean
+     *
+     * @ORM\Column(type="boolean",options={"default"="false"})
+     */
+    private $isProductGallery;
+
+
+    /**
+     * @var boolean
+     *
+     * @ORM\Column(type="boolean",options={"default"="false"})
+     */
+    private $isBatchInvoice;
+
+    /**
+     * @var boolean
+     *
+     * @ORM\Column(type="boolean",options={"default"="false"})
+     */
+    private $isProvision;
+
+
+    /**
+     * @var boolean
+     *
      * @ORM\Column(type="boolean" ,options={"default"="false"})
      */
     private $removeImage;
@@ -2049,6 +2124,168 @@ class Config
     {
         $this->updatedAt = $updatedAt;
     }
+
+    /**
+     * @return bool
+     */
+    public function isBrand()
+    {
+        return $this->isBrand;
+    }
+
+    /**
+     * @param bool $isBrand
+     */
+    public function setIsBrand($isBrand)
+    {
+        $this->isBrand = $isBrand;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isColor()
+    {
+        return $this->isColor;
+    }
+
+    /**
+     * @param bool $isColor
+     */
+    public function setIsColor($isColor)
+    {
+        $this->isColor = $isColor;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isSize()
+    {
+        return $this->isSize;
+    }
+
+    /**
+     * @param bool $isSize
+     */
+    public function setIsSize($isSize)
+    {
+        $this->isSize = $isSize;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isGrade()
+    {
+        return $this->isGrade;
+    }
+
+    /**
+     * @param bool $isGrade
+     */
+    public function setIsGrade($isGrade)
+    {
+        $this->isGrade = $isGrade;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isModel()
+    {
+        return $this->isModel;
+    }
+
+    /**
+     * @param bool $isModel
+     */
+    public function setIsModel($isModel)
+    {
+        $this->isModel = $isModel;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isMultiPrice()
+    {
+        return $this->isMultiPrice;
+    }
+
+    /**
+     * @param bool $isMultiPrice
+     */
+    public function setIsMultiPrice($isMultiPrice)
+    {
+        $this->isMultiPrice = $isMultiPrice;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isMeasurement()
+    {
+        return $this->isMeasurement;
+    }
+
+    /**
+     * @param bool $isMeasurement
+     */
+    public function setIsMeasurement($isMeasurement)
+    {
+        $this->isMeasurement = $isMeasurement;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isProductGallery()
+    {
+        return $this->isProductGallery;
+    }
+
+    /**
+     * @param bool $isProductGallery
+     */
+    public function setIsProductGallery($isProductGallery)
+    {
+        $this->isProductGallery = $isProductGallery;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isBatchInvoice()
+    {
+        return $this->isBatchInvoice;
+    }
+
+    /**
+     * @param bool $isBatchInvoice
+     */
+    public function setIsBatchInvoice($isBatchInvoice)
+    {
+        $this->isBatchInvoice = $isBatchInvoice;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isProvision()
+    {
+        return $this->isProvision;
+    }
+
+    /**
+     * @param bool $isProvision
+     */
+    public function setIsProvision($isProvision)
+    {
+        $this->isProvision = $isProvision;
+    }
+
+
 
 
 

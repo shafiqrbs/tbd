@@ -29,12 +29,11 @@ class UserRole
     protected $id;
 
     /**
-     * @ORM\OneToOne(targetEntity="User", inversedBy="profile")
+     * @ORM\OneToOne(targetEntity="User", inversedBy="userRole")
      * @ORM\JoinColumns({
      *   @ORM\JoinColumn(name="user_id", referencedColumnName="id", unique=true, onDelete="CASCADE")
      * })
      */
-
     protected $user;
 
     /**
