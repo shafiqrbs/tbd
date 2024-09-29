@@ -3,15 +3,16 @@
 namespace Modules\Inventory\App\Entities;
 
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
 use Gedmo\Mapping\Annotation as Gedmo;
 
 /**
  * ProductUnitMeasurment
  *
- * @ORM\Table( name = "inv_product_unit_measurment")
+ * @ORM\Table( name="inv_product_gallery")
  * @ORM\Entity()
  */
-class  ProductUnitMeasurment
+class  ProductGallery
 {
     /**
      * @var integer
@@ -29,18 +30,9 @@ class  ProductUnitMeasurment
     private $product;
 
     /**
-     * @ORM\ManyToOne(targetEntity="Particular")
-     * @ORM\JoinColumn(name="unit_id", referencedColumnName="id", nullable=true, onDelete="SET NULL")
-     **/
-    private $unit;
-
-
-    /**
-     * @var integer
-     *
-     * @ORM\Column(type="integer",  nullable=true)
+     * @ORM\Column(type="string", length=255, nullable=true)
      */
-    private $quantity;
+    private $path;
 
 
     /**
@@ -73,14 +65,6 @@ class  ProductUnitMeasurment
     }
 
     /**
-     * @param int $id
-     */
-    public function setId($id)
-    {
-        $this->id = $id;
-    }
-
-    /**
      * @return mixed
      */
     public function getProduct()
@@ -99,34 +83,19 @@ class  ProductUnitMeasurment
     /**
      * @return mixed
      */
-    public function getUnit()
+    public function getPath()
     {
-        return $this->unit;
+        return $this->path;
     }
 
     /**
-     * @param mixed $unit
+     * @param mixed $path
      */
-    public function setUnit($unit)
+    public function setPath($path)
     {
-        $this->unit = $unit;
+        $this->path = $path;
     }
 
-    /**
-     * @return int
-     */
-    public function getQuantity()
-    {
-        return $this->quantity;
-    }
-
-    /**
-     * @param int $quantity
-     */
-    public function setQuantity($quantity)
-    {
-        $this->quantity = $quantity;
-    }
 
     /**
      * @return bool
@@ -175,7 +144,6 @@ class  ProductUnitMeasurment
     {
         $this->updatedAt = $updatedAt;
     }
-
 
 
 

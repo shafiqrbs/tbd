@@ -48,6 +48,7 @@ class  StockItemPriceMatrix
      */
     private $price = 0;
 
+
     /**
      * @var boolean
      *
@@ -68,6 +69,126 @@ class  StockItemPriceMatrix
      * @ORM\Column(name="updated_at", type="datetime")
      */
     private $updatedAt;
+
+    /**
+     * @return int
+     */
+    public function getId()
+    {
+        return $this->id;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getProduct()
+    {
+        return $this->product;
+    }
+
+    /**
+     * @param mixed $product
+     */
+    public function setProduct($product)
+    {
+        $this->product = $product;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getStockItem()
+    {
+        return $this->stockItem;
+    }
+
+    /**
+     * @param mixed $stockItem
+     */
+    public function setStockItem($stockItem)
+    {
+        $this->stockItem = $stockItem;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getPriceUnit()
+    {
+        return $this->priceUnit;
+    }
+
+    /**
+     * @param mixed $priceUnit
+     */
+    public function setPriceUnit($priceUnit)
+    {
+        $this->priceUnit = $priceUnit;
+    }
+
+    /**
+     * @return float
+     */
+    public function getPrice()
+    {
+        return $this->price;
+    }
+
+    /**
+     * @param float $price
+     */
+    public function setPrice($price)
+    {
+        $this->price = $price;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isStatus()
+    {
+        return $this->status;
+    }
+
+    /**
+     * @param bool $status
+     */
+    public function setStatus($status)
+    {
+        $this->status = $status;
+    }
+
+    /**
+     * @return \DateTime
+     */
+    public function getCreatedAt()
+    {
+        return $this->createdAt;
+    }
+
+    /**
+     * @param \DateTime $createdAt
+     */
+    public function setCreatedAt($createdAt)
+    {
+        $this->createdAt = $createdAt;
+    }
+
+    /**
+     * @return \DateTime
+     */
+    public function getUpdatedAt()
+    {
+        return $this->updatedAt;
+    }
+
+    /**
+     * @param \DateTime $updatedAt
+     */
+    public function setUpdatedAt($updatedAt)
+    {
+        $this->updatedAt = $updatedAt;
+    }
 
 
 }

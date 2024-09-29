@@ -245,6 +245,13 @@ class Config
      *
      * @ORM\Column(type="boolean",options={"default"="false"})
      */
+    private $vatIntegration;
+
+    /**
+     * @var boolean
+     *
+     * @ORM\Column(type="boolean",options={"default"="false"})
+     */
     private $vatEnable;
 
      /**
@@ -642,6 +649,1408 @@ class Config
         $this->createdAt = new \DateTime();
         $this->updatedAt = new \DateTime();
     }
+
+    /**
+     * @return int
+     */
+    public function getId()
+    {
+        return $this->id;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getDomain()
+    {
+        return $this->domain;
+    }
+
+    /**
+     * @param mixed $domain
+     */
+    public function setDomain($domain)
+    {
+        $this->domain = $domain;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getBusinessModel()
+    {
+        return $this->businessModel;
+    }
+
+    /**
+     * @param mixed $businessModel
+     */
+    public function setBusinessModel($businessModel)
+    {
+        $this->businessModel = $businessModel;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getCurrency()
+    {
+        return $this->currency;
+    }
+
+    /**
+     * @param mixed $currency
+     */
+    public function setCurrency($currency)
+    {
+        $this->currency = $currency;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getCountry()
+    {
+        return $this->country;
+    }
+
+    /**
+     * @param mixed $country
+     */
+    public function setCountry($country)
+    {
+        $this->country = $country;
+    }
+
+    /**
+     * @return string
+     */
+    public function getPrinter()
+    {
+        return $this->printer;
+    }
+
+    /**
+     * @param string $printer
+     */
+    public function setPrinter($printer)
+    {
+        $this->printer = $printer;
+    }
+
+    /**
+     * @return string
+     */
+    public function getAddress()
+    {
+        return $this->address;
+    }
+
+    /**
+     * @param string $address
+     */
+    public function setAddress($address)
+    {
+        $this->address = $address;
+    }
+
+    /**
+     * @return string
+     */
+    public function getPrintFooterText()
+    {
+        return $this->printFooterText;
+    }
+
+    /**
+     * @param string $printFooterText
+     */
+    public function setPrintFooterText($printFooterText)
+    {
+        $this->printFooterText = $printFooterText;
+    }
+
+    /**
+     * @return string
+     */
+    public function getInvoiceComment()
+    {
+        return $this->invoiceComment;
+    }
+
+    /**
+     * @param string $invoiceComment
+     */
+    public function setInvoiceComment($invoiceComment)
+    {
+        $this->invoiceComment = $invoiceComment;
+    }
+
+    /**
+     * @return smallint
+     */
+    public function getVatPercent()
+    {
+        return $this->vatPercent;
+    }
+
+    /**
+     * @param smallint $vatPercent
+     */
+    public function setVatPercent($vatPercent)
+    {
+        $this->vatPercent = $vatPercent;
+    }
+
+    /**
+     * @return smallint
+     */
+    public function getAitPercent()
+    {
+        return $this->aitPercent;
+    }
+
+    /**
+     * @param smallint $aitPercent
+     */
+    public function setAitPercent($aitPercent)
+    {
+        $this->aitPercent = $aitPercent;
+    }
+
+    /**
+     * @return smallint
+     */
+    public function getFontSizeLabel()
+    {
+        return $this->fontSizeLabel;
+    }
+
+    /**
+     * @param smallint $fontSizeLabel
+     */
+    public function setFontSizeLabel($fontSizeLabel)
+    {
+        $this->fontSizeLabel = $fontSizeLabel;
+    }
+
+    /**
+     * @return smallint
+     */
+    public function getFontSizeValue()
+    {
+        return $this->fontSizeValue;
+    }
+
+    /**
+     * @param smallint $fontSizeValue
+     */
+    public function setFontSizeValue($fontSizeValue)
+    {
+        $this->fontSizeValue = $fontSizeValue;
+    }
+
+    /**
+     * @return string
+     */
+    public function getVatRegNo()
+    {
+        return $this->vatRegNo;
+    }
+
+    /**
+     * @param string $vatRegNo
+     */
+    public function setVatRegNo($vatRegNo)
+    {
+        $this->vatRegNo = $vatRegNo;
+    }
+
+    /**
+     * @return float
+     */
+    public function getUnitCommission()
+    {
+        return $this->unitCommission;
+    }
+
+    /**
+     * @param float $unitCommission
+     */
+    public function setUnitCommission($unitCommission)
+    {
+        $this->unitCommission = $unitCommission;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isMultiCompany()
+    {
+        return $this->multiCompany;
+    }
+
+    /**
+     * @param bool $multiCompany
+     */
+    public function setMultiCompany($multiCompany)
+    {
+        $this->multiCompany = $multiCompany;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isSkuCategory()
+    {
+        return $this->skuCategory;
+    }
+
+    /**
+     * @param bool $skuCategory
+     */
+    public function setSkuCategory($skuCategory)
+    {
+        $this->skuCategory = $skuCategory;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isSkuBrand()
+    {
+        return $this->skuBrand;
+    }
+
+    /**
+     * @param bool $skuBrand
+     */
+    public function setSkuBrand($skuBrand)
+    {
+        $this->skuBrand = $skuBrand;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isSkuModel()
+    {
+        return $this->skuModel;
+    }
+
+    /**
+     * @param bool $skuModel
+     */
+    public function setSkuModel($skuModel)
+    {
+        $this->skuModel = $skuModel;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isSkuColor()
+    {
+        return $this->skuColor;
+    }
+
+    /**
+     * @param bool $skuColor
+     */
+    public function setSkuColor($skuColor)
+    {
+        $this->skuColor = $skuColor;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isSkuSize()
+    {
+        return $this->skuSize;
+    }
+
+    /**
+     * @param bool $skuSize
+     */
+    public function setSkuSize($skuSize)
+    {
+        $this->skuSize = $skuSize;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isSkuWearhouse()
+    {
+        return $this->skuWearhouse;
+    }
+
+    /**
+     * @param bool $skuWearhouse
+     */
+    public function setSkuWearhouse($skuWearhouse)
+    {
+        $this->skuWearhouse = $skuWearhouse;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isBarcodePrint()
+    {
+        return $this->barcodePrint;
+    }
+
+    /**
+     * @param bool $barcodePrint
+     */
+    public function setBarcodePrint($barcodePrint)
+    {
+        $this->barcodePrint = $barcodePrint;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isBarcodePriceHide()
+    {
+        return $this->barcodePriceHide;
+    }
+
+    /**
+     * @param bool $barcodePriceHide
+     */
+    public function setBarcodePriceHide($barcodePriceHide)
+    {
+        $this->barcodePriceHide = $barcodePriceHide;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isBarcodeColor()
+    {
+        return $this->barcodeColor;
+    }
+
+    /**
+     * @param bool $barcodeColor
+     */
+    public function setBarcodeColor($barcodeColor)
+    {
+        $this->barcodeColor = $barcodeColor;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isBarcodeSize()
+    {
+        return $this->barcodeSize;
+    }
+
+    /**
+     * @param bool $barcodeSize
+     */
+    public function setBarcodeSize($barcodeSize)
+    {
+        $this->barcodeSize = $barcodeSize;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isBarcodeBrand()
+    {
+        return $this->barcodeBrand;
+    }
+
+    /**
+     * @param bool $barcodeBrand
+     */
+    public function setBarcodeBrand($barcodeBrand)
+    {
+        $this->barcodeBrand = $barcodeBrand;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isVatMode()
+    {
+        return $this->vatMode;
+    }
+
+    /**
+     * @param bool $vatMode
+     */
+    public function setVatMode($vatMode)
+    {
+        $this->vatMode = $vatMode;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isActiveSms()
+    {
+        return $this->isActiveSms;
+    }
+
+    /**
+     * @param bool $isActiveSms
+     */
+    public function setIsActiveSms($isActiveSms)
+    {
+        $this->isActiveSms = $isActiveSms;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isZeroReceiveAllow()
+    {
+        return $this->isZeroReceiveAllow;
+    }
+
+    /**
+     * @param bool $isZeroReceiveAllow
+     */
+    public function setIsZeroReceiveAllow($isZeroReceiveAllow)
+    {
+        $this->isZeroReceiveAllow = $isZeroReceiveAllow;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isPurchaseByPurchasePrice()
+    {
+        return $this->isPurchaseByPurchasePrice;
+    }
+
+    /**
+     * @param bool $isPurchaseByPurchasePrice
+     */
+    public function setIsPurchaseByPurchasePrice($isPurchaseByPurchasePrice)
+    {
+        $this->isPurchaseByPurchasePrice = $isPurchaseByPurchasePrice;
+    }
+
+    /**
+     * @return string
+     */
+    public function getShopName()
+    {
+        return $this->shopName;
+    }
+
+    /**
+     * @param string $shopName
+     */
+    public function setShopName($shopName)
+    {
+        $this->shopName = $shopName;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isVatIntegration()
+    {
+        return $this->vatIntegration;
+    }
+
+    /**
+     * @param bool $vatIntegration
+     */
+    public function setVatIntegration($vatIntegration)
+    {
+        $this->vatIntegration = $vatIntegration;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isVatEnable()
+    {
+        return $this->vatEnable;
+    }
+
+    /**
+     * @param bool $vatEnable
+     */
+    public function setVatEnable($vatEnable)
+    {
+        $this->vatEnable = $vatEnable;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isStockItem()
+    {
+        return $this->stockItem;
+    }
+
+    /**
+     * @param bool $stockItem
+     */
+    public function setStockItem($stockItem)
+    {
+        $this->stockItem = $stockItem;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isDescription()
+    {
+        return $this->isDescription;
+    }
+
+    /**
+     * @param bool $isDescription
+     */
+    public function setIsDescription($isDescription)
+    {
+        $this->isDescription = $isDescription;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isDueSalesWithoutCustomer()
+    {
+        return $this->dueSalesWithoutCustomer;
+    }
+
+    /**
+     * @param bool $dueSalesWithoutCustomer
+     */
+    public function setDueSalesWithoutCustomer($dueSalesWithoutCustomer)
+    {
+        $this->dueSalesWithoutCustomer = $dueSalesWithoutCustomer;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isAitEnable()
+    {
+        return $this->aitEnable;
+    }
+
+    /**
+     * @param bool $aitEnable
+     */
+    public function setAitEnable($aitEnable)
+    {
+        $this->aitEnable = $aitEnable;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isZakatEnable()
+    {
+        return $this->zakatEnable;
+    }
+
+    /**
+     * @param bool $zakatEnable
+     */
+    public function setZakatEnable($zakatEnable)
+    {
+        $this->zakatEnable = $zakatEnable;
+    }
+
+    /**
+     * @return smallint
+     */
+    public function getZakatPercent()
+    {
+        return $this->zakatPercent;
+    }
+
+    /**
+     * @param smallint $zakatPercent
+     */
+    public function setZakatPercent($zakatPercent)
+    {
+        $this->zakatPercent = $zakatPercent;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isBonusFromStock()
+    {
+        return $this->bonusFromStock;
+    }
+
+    /**
+     * @param bool $bonusFromStock
+     */
+    public function setBonusFromStock($bonusFromStock)
+    {
+        $this->bonusFromStock = $bonusFromStock;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isConditionSales()
+    {
+        return $this->conditionSales;
+    }
+
+    /**
+     * @param bool $conditionSales
+     */
+    public function setConditionSales($conditionSales)
+    {
+        $this->conditionSales = $conditionSales;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isMarketingExecutive()
+    {
+        return $this->isMarketingExecutive;
+    }
+
+    /**
+     * @param bool $isMarketingExecutive
+     */
+    public function setIsMarketingExecutive($isMarketingExecutive)
+    {
+        $this->isMarketingExecutive = $isMarketingExecutive;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isPosPrint()
+    {
+        return $this->posPrint;
+    }
+
+    /**
+     * @param bool $posPrint
+     */
+    public function setPosPrint($posPrint)
+    {
+        $this->posPrint = $posPrint;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isFuelStation()
+    {
+        return $this->fuelStation;
+    }
+
+    /**
+     * @param bool $fuelStation
+     */
+    public function setFuelStation($fuelStation)
+    {
+        $this->fuelStation = $fuelStation;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isZeroStock()
+    {
+        return $this->zeroStock;
+    }
+
+    /**
+     * @param bool $zeroStock
+     */
+    public function setZeroStock($zeroStock)
+    {
+        $this->zeroStock = $zeroStock;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isSystemReset()
+    {
+        return $this->systemReset;
+    }
+
+    /**
+     * @param bool $systemReset
+     */
+    public function setSystemReset($systemReset)
+    {
+        $this->systemReset = $systemReset;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isTloCommission()
+    {
+        return $this->tloCommission;
+    }
+
+    /**
+     * @param bool $tloCommission
+     */
+    public function setTloCommission($tloCommission)
+    {
+        $this->tloCommission = $tloCommission;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isSrCommission()
+    {
+        return $this->srCommission;
+    }
+
+    /**
+     * @param bool $srCommission
+     */
+    public function setSrCommission($srCommission)
+    {
+        $this->srCommission = $srCommission;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isSalesReturn()
+    {
+        return $this->salesReturn;
+    }
+
+    /**
+     * @param bool $salesReturn
+     */
+    public function setSalesReturn($salesReturn)
+    {
+        $this->salesReturn = $salesReturn;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isStoreLedger()
+    {
+        return $this->storeLedger;
+    }
+
+    /**
+     * @param bool $storeLedger
+     */
+    public function setStoreLedger($storeLedger)
+    {
+        $this->storeLedger = $storeLedger;
+    }
+
+    /**
+     * @return smallint
+     */
+    public function getInvoiceWidth()
+    {
+        return $this->invoiceWidth;
+    }
+
+    /**
+     * @param smallint $invoiceWidth
+     */
+    public function setInvoiceWidth($invoiceWidth)
+    {
+        $this->invoiceWidth = $invoiceWidth;
+    }
+
+    /**
+     * @return smallint
+     */
+    public function getPrintTopMargin()
+    {
+        return $this->printTopMargin;
+    }
+
+    /**
+     * @param smallint $printTopMargin
+     */
+    public function setPrintTopMargin($printTopMargin)
+    {
+        $this->printTopMargin = $printTopMargin;
+    }
+
+    /**
+     * @return smallint
+     */
+    public function getPrintMarginBottom()
+    {
+        return $this->printMarginBottom;
+    }
+
+    /**
+     * @param smallint $printMarginBottom
+     */
+    public function setPrintMarginBottom($printMarginBottom)
+    {
+        $this->printMarginBottom = $printMarginBottom;
+    }
+
+    /**
+     * @return string
+     */
+    public function getHeaderLeftWidth()
+    {
+        return $this->headerLeftWidth;
+    }
+
+    /**
+     * @param string $headerLeftWidth
+     */
+    public function setHeaderLeftWidth($headerLeftWidth)
+    {
+        $this->headerLeftWidth = $headerLeftWidth;
+    }
+
+    /**
+     * @return string
+     */
+    public function getHeaderRightWidth()
+    {
+        return $this->headerRightWidth;
+    }
+
+    /**
+     * @param string $headerRightWidth
+     */
+    public function setHeaderRightWidth($headerRightWidth)
+    {
+        $this->headerRightWidth = $headerRightWidth;
+    }
+
+    /**
+     * @return smallint
+     */
+    public function getPrintMarginReportTop()
+    {
+        return $this->printMarginReportTop;
+    }
+
+    /**
+     * @param smallint $printMarginReportTop
+     */
+    public function setPrintMarginReportTop($printMarginReportTop)
+    {
+        $this->printMarginReportTop = $printMarginReportTop;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isPrintHeader()
+    {
+        return $this->isPrintHeader;
+    }
+
+    /**
+     * @param bool $isPrintHeader
+     */
+    public function setIsPrintHeader($isPrintHeader)
+    {
+        $this->isPrintHeader = $isPrintHeader;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isInvoiceTitle()
+    {
+        return $this->isInvoiceTitle;
+    }
+
+    /**
+     * @param bool $isInvoiceTitle
+     */
+    public function setIsInvoiceTitle($isInvoiceTitle)
+    {
+        $this->isInvoiceTitle = $isInvoiceTitle;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isPrintOutstanding()
+    {
+        return $this->printOutstanding;
+    }
+
+    /**
+     * @param bool $printOutstanding
+     */
+    public function setPrintOutstanding($printOutstanding)
+    {
+        $this->printOutstanding = $printOutstanding;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isPrintFooter()
+    {
+        return $this->isPrintFooter;
+    }
+
+    /**
+     * @param bool $isPrintFooter
+     */
+    public function setIsPrintFooter($isPrintFooter)
+    {
+        $this->isPrintFooter = $isPrintFooter;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isStockHistory()
+    {
+        return $this->isStockHistory;
+    }
+
+    /**
+     * @param bool $isStockHistory
+     */
+    public function setIsStockHistory($isStockHistory)
+    {
+        $this->isStockHistory = $isStockHistory;
+    }
+
+    /**
+     * @return string
+     */
+    public function getInvoicePrefix()
+    {
+        return $this->invoicePrefix;
+    }
+
+    /**
+     * @param string $invoicePrefix
+     */
+    public function setInvoicePrefix($invoicePrefix)
+    {
+        $this->invoicePrefix = $invoicePrefix;
+    }
+
+    /**
+     * @return string
+     */
+    public function getInvoiceProcess()
+    {
+        return $this->invoiceProcess;
+    }
+
+    /**
+     * @param string $invoiceProcess
+     */
+    public function setInvoiceProcess($invoiceProcess)
+    {
+        $this->invoiceProcess = $invoiceProcess;
+    }
+
+    /**
+     * @return string
+     */
+    public function getCustomerPrefix()
+    {
+        return $this->customerPrefix;
+    }
+
+    /**
+     * @param string $customerPrefix
+     */
+    public function setCustomerPrefix($customerPrefix)
+    {
+        $this->customerPrefix = $customerPrefix;
+    }
+
+    /**
+     * @return string
+     */
+    public function getProductionType()
+    {
+        return $this->productionType;
+    }
+
+    /**
+     * @param string $productionType
+     */
+    public function setProductionType($productionType)
+    {
+        $this->productionType = $productionType;
+    }
+
+    /**
+     * @return string
+     */
+    public function getInvoiceType()
+    {
+        return $this->invoiceType;
+    }
+
+    /**
+     * @param string $invoiceType
+     */
+    public function setInvoiceType($invoiceType)
+    {
+        $this->invoiceType = $invoiceType;
+    }
+
+    /**
+     * @return string
+     */
+    public function getBorderWidth()
+    {
+        return $this->borderWidth;
+    }
+
+    /**
+     * @param string $borderWidth
+     */
+    public function setBorderWidth($borderWidth)
+    {
+        $this->borderWidth = $borderWidth;
+    }
+
+    /**
+     * @return string
+     */
+    public function getBorderColor()
+    {
+        return $this->borderColor;
+    }
+
+    /**
+     * @param string $borderColor
+     */
+    public function setBorderColor($borderColor)
+    {
+        $this->borderColor = $borderColor;
+    }
+
+    /**
+     * @return string
+     */
+    public function getBodyFontSize()
+    {
+        return $this->bodyFontSize;
+    }
+
+    /**
+     * @param string $bodyFontSize
+     */
+    public function setBodyFontSize($bodyFontSize)
+    {
+        $this->bodyFontSize = $bodyFontSize;
+    }
+
+    /**
+     * @return string
+     */
+    public function getSidebarFontSize()
+    {
+        return $this->sidebarFontSize;
+    }
+
+    /**
+     * @param string $sidebarFontSize
+     */
+    public function setSidebarFontSize($sidebarFontSize)
+    {
+        $this->sidebarFontSize = $sidebarFontSize;
+    }
+
+    /**
+     * @return string
+     */
+    public function getInvoiceFontSize()
+    {
+        return $this->invoiceFontSize;
+    }
+
+    /**
+     * @param string $invoiceFontSize
+     */
+    public function setInvoiceFontSize($invoiceFontSize)
+    {
+        $this->invoiceFontSize = $invoiceFontSize;
+    }
+
+    /**
+     * @return smallint
+     */
+    public function getPrintLeftMargin()
+    {
+        return $this->printLeftMargin;
+    }
+
+    /**
+     * @param smallint $printLeftMargin
+     */
+    public function setPrintLeftMargin($printLeftMargin)
+    {
+        $this->printLeftMargin = $printLeftMargin;
+    }
+
+    /**
+     * @return int
+     */
+    public function getInvoiceHeight()
+    {
+        return $this->invoiceHeight;
+    }
+
+    /**
+     * @param int $invoiceHeight
+     */
+    public function setInvoiceHeight($invoiceHeight)
+    {
+        $this->invoiceHeight = $invoiceHeight;
+    }
+
+    /**
+     * @return int
+     */
+    public function getLeftTopMargin()
+    {
+        return $this->leftTopMargin;
+    }
+
+    /**
+     * @param int $leftTopMargin
+     */
+    public function setLeftTopMargin($leftTopMargin)
+    {
+        $this->leftTopMargin = $leftTopMargin;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isUnitPrice()
+    {
+        return $this->isUnitPrice;
+    }
+
+    /**
+     * @param bool $isUnitPrice
+     */
+    public function setIsUnitPrice($isUnitPrice)
+    {
+        $this->isUnitPrice = $isUnitPrice;
+    }
+
+    /**
+     * @return int
+     */
+    public function getBodyTopMargin()
+    {
+        return $this->bodyTopMargin;
+    }
+
+    /**
+     * @param int $bodyTopMargin
+     */
+    public function setBodyTopMargin($bodyTopMargin)
+    {
+        $this->bodyTopMargin = $bodyTopMargin;
+    }
+
+    /**
+     * @return string
+     */
+    public function getSidebarWidth()
+    {
+        return $this->sidebarWidth;
+    }
+
+    /**
+     * @param string $sidebarWidth
+     */
+    public function setSidebarWidth($sidebarWidth)
+    {
+        $this->sidebarWidth = $sidebarWidth;
+    }
+
+    /**
+     * @return string
+     */
+    public function getBodyWidth()
+    {
+        return $this->bodyWidth;
+    }
+
+    /**
+     * @param string $bodyWidth
+     */
+    public function setBodyWidth($bodyWidth)
+    {
+        $this->bodyWidth = $bodyWidth;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isInvoicePrintLogo()
+    {
+        return $this->invoicePrintLogo;
+    }
+
+    /**
+     * @param bool $invoicePrintLogo
+     */
+    public function setInvoicePrintLogo($invoicePrintLogo)
+    {
+        $this->invoicePrintLogo = $invoicePrintLogo;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isCustomInvoice()
+    {
+        return $this->customInvoice;
+    }
+
+    /**
+     * @param bool $customInvoice
+     */
+    public function setCustomInvoice($customInvoice)
+    {
+        $this->customInvoice = $customInvoice;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isCustomInvoicePrint()
+    {
+        return $this->customInvoicePrint;
+    }
+
+    /**
+     * @param bool $customInvoicePrint
+     */
+    public function setCustomInvoicePrint($customInvoicePrint)
+    {
+        $this->customInvoicePrint = $customInvoicePrint;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isShowStock()
+    {
+        return $this->showStock;
+    }
+
+    /**
+     * @param bool $showStock
+     */
+    public function setShowStock($showStock)
+    {
+        $this->showStock = $showStock;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isPowered()
+    {
+        return $this->isPowered;
+    }
+
+    /**
+     * @param bool $isPowered
+     */
+    public function setIsPowered($isPowered)
+    {
+        $this->isPowered = $isPowered;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isRemoveImage()
+    {
+        return $this->removeImage;
+    }
+
+    /**
+     * @param bool $removeImage
+     */
+    public function setRemoveImage($removeImage)
+    {
+        $this->removeImage = $removeImage;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getPath()
+    {
+        return $this->path;
+    }
+
+    /**
+     * @param mixed $path
+     */
+    public function setPath($path)
+    {
+        $this->path = $path;
+    }
+
+    /**
+     * @return \DateTime
+     */
+    public function getCreatedAt()
+    {
+        return $this->createdAt;
+    }
+
+    /**
+     * @param \DateTime $createdAt
+     */
+    public function setCreatedAt($createdAt)
+    {
+        $this->createdAt = $createdAt;
+    }
+
+    /**
+     * @return \DateTime
+     */
+    public function getUpdatedAt()
+    {
+        return $this->updatedAt;
+    }
+
+    /**
+     * @param \DateTime $updatedAt
+     */
+    public function setUpdatedAt($updatedAt)
+    {
+        $this->updatedAt = $updatedAt;
+    }
+
+
 
 }
 

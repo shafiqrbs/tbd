@@ -139,7 +139,6 @@ class SalesTax
      */
     private $shippingAddress;
 
-
     /**
      * @var string
      * @ORM\Column(name="lcNo", type="string", length = 50, nullable=true)

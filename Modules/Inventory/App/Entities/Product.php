@@ -63,7 +63,6 @@ class Product
      */
     private $name;
 
-
     /**
      * @var string
      *

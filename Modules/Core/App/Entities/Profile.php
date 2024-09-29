@@ -11,11 +11,9 @@
 
 namespace Modules\Core\App\Entities;
 
-use Appstore\Bundle\DomainUserBundle\Entity\Branches;
-use Appstore\Bundle\EcommerceBundle\Entity\DeliveryLocation;
+
 use Doctrine\ORM\Mapping as ORM;
 use Gedmo\Mapping\Annotation as Gedmo;
-use Setting\Bundle\ToolBundle\Entity\Designation;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
