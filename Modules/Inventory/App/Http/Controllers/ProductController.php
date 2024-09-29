@@ -9,7 +9,9 @@ use Illuminate\Http\Response;
 use Modules\AppsApi\App\Services\JsonRequestResponse;
 use Modules\Core\App\Models\UserModel;
 use Modules\Inventory\App\Entities\StockItem;
+use Modules\Inventory\App\Http\Requests\ProductMeasurementRequest;
 use Modules\Inventory\App\Http\Requests\ProductRequest;
+use Modules\Inventory\App\Models\ProductMeasurementModel;
 use Modules\Inventory\App\Models\ProductModel;
 use Modules\Inventory\App\Models\StockItemModel;
 use Modules\Inventory\App\Repositories\StockItemRepository;
@@ -109,6 +111,53 @@ class ProductController extends Controller
         $service = new JsonRequestResponse();
         $data = StockItemModel::getProductForRecipe($this->domain);
         return $service->returnJosnResponse($data);
+    }
+
+    public function measurementAdded(ProductMeasurementRequest $request)
+    {
+        $service = new JsonRequestResponse();
+        $input = $request->validated();
+        $existsByUnit = ProductMeasurementModel::where('product_id', $input['product_id'])->where('unit_id',$input['unit_id'])->first();
+        if ($existsByUnit){
+            $response = new Response();
+            $response->headers->set('Content-Type', 'application/json');
+            $response->setContent(json_encode([
+                'message' => 'unit_exists',
+                'status' => Response::HTTP_OK,
+            ]));
+            $response->setStatusCode(Response::HTTP_OK);
+            return $response;
+        }
+        $entity = ProductMeasurementModel::create($input);
+        return $service->returnJosnResponse($entity);
+    }
+
+    public function measurementList(Request $request,$id)
+    {
+        $data = ProductMeasurementModel::getRecords($id);
+        $response = new Response();
+        $response->headers->set('Content-Type', 'application/json');
+        $response->setContent(json_encode([
+            'message' => 'success',
+            'status' => Response::HTTP_OK,
+            'data' => $data
+        ]));
+        $response->setStatusCode(Response::HTTP_OK);
+        return $response;
+    }
+
+    public function measurementDelete($id)
+    {
+        $data = ProductMeasurementModel::find($id);
+        $data->delete();
+        $response = new Response();
+        $response->headers->set('Content-Type', 'application/json');
+        $response->setContent(json_encode([
+            'message' => 'success',
+            'status' => Response::HTTP_OK,
+        ]));
+        $response->setStatusCode(Response::HTTP_OK);
+        return $response;
     }
 
 }
