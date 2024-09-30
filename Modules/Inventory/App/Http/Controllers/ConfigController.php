@@ -46,14 +46,11 @@ class ConfigController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function updateConfig(ConfigRequest $request)
+    public function updateConfig(Request $request,$id)
     {
-        $id = $this->domain['config_id'];
+        $data = $request->all();
 
-        $data = $request->validated();
-
-        $entity = ConfigModel::find($id);
-
+        $entity = ConfigModel::where('domain_id',$id)->first();
         if ($request->file('logo')) {
             $path = public_path('uploads/inventory/logo/');
             File::delete($path.$entity->path);

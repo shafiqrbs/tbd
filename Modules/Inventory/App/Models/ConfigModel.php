@@ -93,6 +93,16 @@ class ConfigModel extends Model
         'is_purchase_by_purchase_price',
         'is_active_sms',
         'currency_id',
+        'is_brand',
+        'is_color',
+        'is_size',
+        'is_grade',
+        'is_model',
+        'is_multi_price',
+        'is_measurement',
+        'is_product_gallery',
+        'is_batch_invoice',
+        'is_provision',
         'country_id'
 
     ];
