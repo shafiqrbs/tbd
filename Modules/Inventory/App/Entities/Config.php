@@ -646,6 +646,13 @@ class Config
      */
     private $isGrade;
 
+     /**
+     * @var boolean
+     *
+     * @ORM\Column(type="boolean",options={"default"="false"})
+     */
+    private $isSku;
+
     /**
      * @var boolean
      *
@@ -2285,9 +2292,21 @@ class Config
         $this->isProvision = $isProvision;
     }
 
+    /**
+     * @return bool
+     */
+    public function isSku()
+    {
+        return $this->isSku;
+    }
 
-
-
+    /**
+     * @param bool $isSku
+     */
+    public function setIsSku($isSku)
+    {
+        $this->isSku = $isSku;
+    }
 
 }
 
