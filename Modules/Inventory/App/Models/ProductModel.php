@@ -113,6 +113,7 @@ class ProductModel extends Model
             ->leftjoin('inv_category','inv_category.id','=','inv_product.category_id')
             ->leftjoin('inv_particular','inv_particular.id','=','inv_product.unit_id')
             ->leftjoin('inv_setting','inv_setting.id','=','inv_product.product_type_id')
+            ->leftjoin('inv_product_gallery','inv_product_gallery.product_id','=','inv_product.id')
             ->where([['inv_product.config_id',$domain['config_id']],['inv_stock.product_id',$id],['inv_stock.is_master',1]])
             ->select([
                 'inv_product.id',
@@ -130,6 +131,11 @@ class ProductModel extends Model
                 'inv_stock.sales_price as sales_price',
                 'inv_stock.min_quantity as min_quantity',
                 'inv_stock.sku as sku',
+                DB::raw("CONCAT('".url('')."/uploads/inventory/product/feature_image/', inv_product_gallery.feature_image) AS feature_image"),
+                DB::raw("CONCAT('".url('')."/uploads/inventory/product/path_one/', inv_product_gallery.path_one) AS path_one"),
+                DB::raw("CONCAT('".url('')."/uploads/inventory/product/path_two/', inv_product_gallery.path_two) AS path_two"),
+                DB::raw("CONCAT('".url('')."/uploads/inventory/product/path_three/', inv_product_gallery.path_three) AS path_three"),
+                DB::raw("CONCAT('".url('')."/uploads/inventory/product/path_four/', inv_product_gallery.path_four) AS path_four"),
                 'inv_product.status'
             ])->first();
 

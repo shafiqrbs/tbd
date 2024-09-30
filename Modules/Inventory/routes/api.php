@@ -56,6 +56,8 @@ Route::prefix('/inventory')->middleware([HeaderAuthenticationMiddleware::class])
         Route::post('/measurement', [ProductController::class,'measurementAdded'])->name('product_measurement_added');
         Route::get('/measurement/{product}', [ProductController::class,'measurementList'])->name('product_measurement_list');
         Route::delete('/measurement/{product}', [ProductController::class,'measurementDelete'])->name('product_measurement_delete');
+
+        Route::post('/gallery', [ProductController::class,'galleryAdded'])->name('product_gallery_added');
     });
 
     Route::apiResource('/stock', StockItemController::class)->middleware([HeaderAuthenticationMiddleware::class]);

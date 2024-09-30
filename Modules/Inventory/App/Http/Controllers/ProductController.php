@@ -6,11 +6,14 @@ use App\Http\Controllers\Controller;
 use Doctrine\ORM\EntityManagerInterface;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\File;
 use Modules\AppsApi\App\Services\JsonRequestResponse;
 use Modules\Core\App\Models\UserModel;
 use Modules\Inventory\App\Entities\StockItem;
+use Modules\Inventory\App\Http\Requests\ProductGalleryRequest;
 use Modules\Inventory\App\Http\Requests\ProductMeasurementRequest;
 use Modules\Inventory\App\Http\Requests\ProductRequest;
+use Modules\Inventory\App\Models\ProductGalleryModel;
 use Modules\Inventory\App\Models\ProductMeasurementModel;
 use Modules\Inventory\App\Models\ProductModel;
 use Modules\Inventory\App\Models\StockItemModel;
@@ -159,5 +162,57 @@ class ProductController extends Controller
         $response->setStatusCode(Response::HTTP_OK);
         return $response;
     }
+
+    public function galleryAdded(ProductGalleryRequest $request)
+    {
+        $data = $request->validated();
+        $findProduct = ProductGalleryModel::where('product_id', $data['product_id'])->first();
+
+        $targetMap = [
+            'feature_image' => 'uploads/inventory/product/feature_image',
+            'path_one' => 'uploads/inventory/product/path_one',
+            'path_two' => 'uploads/inventory/product/path_two',
+            'path_three' => 'uploads/inventory/product/path_three',
+            'path_four' => 'uploads/inventory/product/path_four',
+        ];
+
+        $targetLocation = $targetMap[$data['type']] ?? null;
+        $deletePath = $findProduct ? $findProduct->{$data['type']} : null;
+
+        $productPath = $this->processFileUpload($request->file('image'), $targetLocation);
+
+        if ($findProduct) {
+            File::delete(public_path($targetLocation . '/' . $deletePath));
+        }
+
+        $data[$data['type']] = $productPath;
+
+        $findProduct ? $findProduct->update($data) : ProductGalleryModel::create($data);
+
+        return response()->json([
+            'message' => 'success',
+            'status' => Response::HTTP_OK,
+            'data' => $findProduct ?? ProductGalleryModel::where('product_id', $data['product_id'])->first(),
+        ], Response::HTTP_OK);
+    }
+
+
+    private function processFileUpload($file, $uploadDir)
+    {
+        if ($file) {
+            $uploadDirPath = public_path($uploadDir);
+            if (!file_exists($uploadDirPath)) {
+                mkdir($uploadDirPath, 0777, true);
+            }
+
+            $fileName = time() . '.' . $file->extension();
+
+            $file->move($uploadDirPath, $fileName);
+            return $fileName;
+        }
+
+        return null;
+    }
+
 
 }

@@ -7,7 +7,6 @@ use Symfony\Component\Validator\Constraints as Assert;
 use Gedmo\Mapping\Annotation as Gedmo;
 
 /**
- * ProductUnitMeasurment
  *
  * @ORM\Table( name="inv_product_gallery")
  * @ORM\Entity()
@@ -24,16 +23,34 @@ class  ProductGallery
     private $id;
 
     /**
-     * @ORM\ManyToOne(targetEntity="Product")
+     * @ORM\OneToOne(targetEntity="Product")
      * @ORM\JoinColumn(name="product_id", referencedColumnName="id", nullable=true, onDelete="SET NULL")
      **/
     private $product;
 
     /**
-     * @ORM\Column(type="string", length=255, nullable=true)
+     * @ORM\Column(name="feature_image", type="string", length=255, nullable=true)
      */
-    private $path;
+    private $featureImage;
 
+    /**
+     * @ORM\Column(name="path_one", type="string", length=255, nullable=true)
+     */
+    private $pathOne;
+
+    /**
+     * @ORM\Column(name="path_two", type="string", length=255, nullable=true)
+     */
+    private $pathTwo;
+
+    /**
+     * @ORM\Column(name="path_three", type="string", length=255, nullable=true)
+     */
+    private $pathThree;
+    /**
+     * @ORM\Column(name="path_four", type="string", length=255, nullable=true)
+     */
+    private $pathFour;
 
     /**
      * @var boolean
