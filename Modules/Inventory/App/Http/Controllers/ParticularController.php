@@ -126,5 +126,18 @@ class ParticularController extends Controller
         $response->setStatusCode(Response::HTTP_OK);
         return $response;
     }
+    public function particularDropdown(Request $request)
+    {
+        $data = ParticularModel::getEntityDropdown($request->get('dropdown-type'));
+        $response = new Response();
+        $response->headers->set('Content-Type', 'application/json');
+        $response->setContent(json_encode([
+            'message' => 'success',
+            'status' => Response::HTTP_OK,
+            'data' => sizeof($data)>0 ? $data : []
+        ]));
+        $response->setStatusCode(Response::HTTP_OK);
+        return $response;
+    }
 
 }

@@ -38,6 +38,8 @@ Route::prefix('/inventory/select')->middleware([HeaderAuthenticationMiddleware::
     Route::get('/product-unit', [InventoryController::class,'productUnitDropdown'])->name('product_unit_dropdown');
     Route::get('/product-for-recipe', [ProductController::class,'productForRecipe'])->name('product_for_recipe_dropdown');
     Route::get('/particular-type', [ParticularController::class,'particularTypeDropdown'])->name('get_particular_type');
+    Route::get('/particular', [ParticularController::class,'particularDropdown'])->name('get_particular_dropdown');
+
 });
 
 Route::prefix('/inventory')->middleware([HeaderAuthenticationMiddleware::class])->group(function() {
