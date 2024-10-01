@@ -36,6 +36,20 @@ class Product
 
 
     /**
+     * @ORM\ManyToOne(targetEntity="Product", inversedBy="children", cascade={"detach","merge"})
+     * @ORM\JoinColumn(name="parent_id", referencedColumnName="id", onDelete="SET NULL")
+     */
+    protected $parent;
+
+
+    /**
+     * @ORM\OneToMany(targetEntity="Product" , mappedBy="parent")
+     * @ORM\OrderBy({"name" = "ASC"})
+     **/
+    private $children;
+
+
+    /**
      * @ORM\ManyToOne(targetEntity="Setting")
      * @ORM\JoinColumn(name="product_type_id", referencedColumnName="id", nullable=true, onDelete="SET NULL")
      **/
@@ -380,6 +394,40 @@ class Product
     {
         return $this->stockItems;
     }
+
+    /**
+     * @return mixed
+     */
+    public function getParent()
+    {
+        return $this->parent;
+    }
+
+    /**
+     * @param mixed $parent
+     */
+    public function setParent($parent)
+    {
+        $this->parent = $parent;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getChildren()
+    {
+        return $this->children;
+    }
+
+    /**
+     * @param mixed $children
+     */
+    public function setChildren($children)
+    {
+        $this->children = $children;
+    }
+
+
 
 }
 

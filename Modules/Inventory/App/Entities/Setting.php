@@ -9,7 +9,7 @@ use Gedmo\Mapping\Annotation as Gedmo;
  * BusinessParticular
  *
  * @ORM\Table(name="inv_setting")
- * @ORM\Entity()
+ * @ORM\Entity(repositoryClass="Modules\Inventory\App\Repositories\SettingRepository")
  */
 class Setting
 {

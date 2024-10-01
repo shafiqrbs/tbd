@@ -3,15 +3,20 @@
 namespace Modules\Domain\App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use Doctrine\ORM\EntityManager;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Modules\Accounting\App\Models\AccountingModel;
 use Modules\AppsApi\App\Services\JsonRequestResponse;
+use Modules\Domain\App\Entities\DomainChild;
+use Modules\Domain\App\Entities\GlobalOption;
+use Modules\Domain\App\Entities\SubDomain;
 use Modules\Domain\App\Http\Requests\DomainRequest;
 use Modules\Core\App\Models\UserModel;
 use Modules\Domain\App\Models\CurrencyModel;
 use Modules\Domain\App\Models\DomainModel;
+use Modules\Inventory\App\Entities\Setting;
 use Modules\Inventory\App\Models\ConfigModel;
 use Modules\Utility\App\Models\SettingModel;
 
@@ -114,6 +119,32 @@ class DomainController extends Controller
         $data = $request->validated();
         $entity = DomainModel::find($id);
         $entity->update($data);
+        $service = new JsonRequestResponse();
+        return $service->returnJosnResponse($entity);
+    }
+
+    /**
+     * Update the specified resource in storage.
+     */
+    public function subDomain(Request $request,$id, EntityManager $em)
+    {
+
+        $subDomain = $request->sub_domain;
+        $entity = $em->getRepository(GlobalOption::class)->find($id);
+        $em->getRepository(SubDomain::class)->insertUpdate($entity,$subDomain);
+        $service = new JsonRequestResponse();
+        return $service->returnJosnResponse($entity);
+    }
+
+     /**
+     * Update the specified resource in storage.
+     */
+    public function inventorySetting(Request $request,$id, EntityManager $em)
+    {
+
+        $subDomain = $request->sub_domain;
+        $entity = $em->getRepository(GlobalOption::class)->find($id);
+        $em->getRepository(Setting::class)->insertUpdate($entity,$subDomain);
         $service = new JsonRequestResponse();
         return $service->returnJosnResponse($entity);
     }

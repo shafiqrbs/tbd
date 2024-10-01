@@ -66,8 +66,6 @@ class GlobalOption
      */
     private $monthlyAmount;
 
-
-
     /**
      * @var string
      *
