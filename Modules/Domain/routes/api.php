@@ -30,7 +30,7 @@ Route::prefix('/domain')->middleware(array(HeaderAuthenticationMiddleware::class
         ]);
     Route::prefix('/manage')->middleware([HeaderAuthenticationMiddleware::class])->group(function() {
         Route::post('/sub-domain/{id}', [DomainController::class,'subDomain'])->name('sub_domain');
-        Route::get('/inventory/{id}', [DomainController::class,'inventory'])->name('domain_inventory');
+        Route::post('/inventory/{id}', [DomainController::class,'inventorySetting'])->name('domain_inventory_setting');
     });
     Route::prefix('restore')->middleware([HeaderAuthenticationMiddleware::class])->group(function() {
         Route::get('/reset', [DomainController::class,'resetData'])->name('domain_reset');

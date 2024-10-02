@@ -141,10 +141,9 @@ class DomainController extends Controller
      */
     public function inventorySetting(Request $request,$id, EntityManager $em)
     {
-
-        $subDomain = $request->sub_domain;
+        $setting_id = $request->setting_id;
         $entity = $em->getRepository(GlobalOption::class)->find($id);
-        $em->getRepository(Setting::class)->insertUpdate($entity,$subDomain);
+        $em->getRepository(Setting::class)->insertUpdate($entity,$setting_id);
         $service = new JsonRequestResponse();
         return $service->returnJosnResponse($entity);
     }
