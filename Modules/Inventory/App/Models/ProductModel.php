@@ -128,6 +128,8 @@ class ProductModel extends Model
                 'inv_product.product_type_id',
                 'inv_setting.name as product_type',
                 'inv_stock.purchase_price as purchase_price',
+                'inv_stock.price as price',
+                'inv_stock.display_name',
                 'inv_stock.sales_price as sales_price',
                 'inv_stock.min_quantity as min_quantity',
                 'inv_stock.sku as sku',

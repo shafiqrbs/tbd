@@ -103,7 +103,8 @@ class ConfigModel extends Model
         'is_product_gallery',
         'is_batch_invoice',
         'is_provision',
-        'country_id'
+        'country_id',
+        'is_sku'
 
     ];
 

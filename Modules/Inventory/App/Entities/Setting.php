@@ -47,6 +47,12 @@ class Setting
 
 
     /**
+     * @ORM\Column(name="parent_slug", type="string", length=255, nullable=true)
+     */
+    private $parentSlug;
+
+
+    /**
      * @var boolean
      *
      * @ORM\Column(name="status", type="boolean" )

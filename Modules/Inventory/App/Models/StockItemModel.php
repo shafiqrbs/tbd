@@ -24,8 +24,15 @@ class StockItemModel extends Model
         'remaining_quantity',
         'status',
         'config_id',
+        'brand_id',
+        'color_id',
+        'size_id',
+        'grade_id',
+        'price',
+        'name',
+        'display_name',
+        'uom',
     ];
-
 
     public static function boot() {
         parent::boot();
@@ -189,4 +196,29 @@ class StockItemModel extends Model
         $products = $products->orderBy('inv_product.id','DESC')->get();
         return $products;
     }
+
+    public static function getStockSkuItem($product_id,$domain)
+    {
+        return self::where([['inv_stock.config_id',$domain['config_id']]])->where('product_id',$product_id)->where('is_master',0)
+            ->leftjoin('inv_particular as grade','grade.id','=','inv_stock.grade_id')
+            ->leftjoin('inv_particular as color','color.id','=','inv_stock.color_id')
+            ->leftjoin('inv_particular as brand','brand.id','=','inv_stock.brand_id')
+            ->leftjoin('inv_particular as size','size.id','=','inv_stock.size_id')
+            ->select([
+                'inv_stock.id as stock_id',
+                'inv_stock.product_id',
+                'inv_stock.name',
+                'inv_stock.display_name',
+                'inv_stock.price',
+                'inv_stock.grade_id',
+                'grade.name as grade_name',
+                'inv_stock.color_id',
+                'color.name as color_name',
+                'inv_stock.brand_id',
+                'brand.name as brand_name',
+                'inv_stock.size_id',
+                'size.name as size_name'
+            ])->get()->toArray();
+    }
+
 }
