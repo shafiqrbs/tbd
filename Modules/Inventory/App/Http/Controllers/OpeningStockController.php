@@ -117,13 +117,12 @@ class OpeningStockController extends Controller
       //  dd($getPurchaseItem);
 
         if ($request->field_name === 'approve' ){
-
-            //  $getPurchaseItem->update(['approved_by_id' => $this->domain['user_id']]);
+            $getPurchaseItem->update(['approved_by_id' => $this->domain['user_id']]);
             if($getPurchaseItem){
                 $em->getRepository(StockItemHistory::class)->openingStockQuantity($getPurchaseItem->id);
             }
             if($getPurchaseItem){
-                $em->getRepository(AccountJournal::class)->openingProductInsert($getPurchaseItem->id);
+               // $em->getRepository(AccountJournal::class)->openingProductInsert($getPurchaseItem->id);
             }
         }
         if ($request->field_name === 'opening_quantity' ){

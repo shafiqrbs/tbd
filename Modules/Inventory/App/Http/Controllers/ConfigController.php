@@ -65,12 +65,10 @@ class ConfigController extends Controller
     public function updateConfig(Request $request,$id)
     {
         $data = $request->all();
-
         $entity = ConfigModel::where('domain_id',$id)->first();
         if ($request->file('logo')) {
             $path = public_path('uploads/inventory/logo/');
             File::delete($path.$entity->path);
-
             if(!File::isDirectory($path)) {
                 File::makeDirectory($path, 0777, true, true);
             }
@@ -78,9 +76,7 @@ class ConfigController extends Controller
             $request->logo->move($path, $imageName);
             $data['path'] = $imageName;
         }
-
         $entity->update($data);
-
         $service = new JsonRequestResponse();
         return $service->returnJosnResponse($data);
     }
