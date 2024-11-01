@@ -107,12 +107,15 @@ class TransactionRepository extends EntityRepository
     private function insertOpeningInventoryAsset(AccountJournal $journal,PurchaseItem $opening,$category)
     {
         $em = $this->_em;
+        /* @var $accountLedger AccountHead */
         $accountLedger = $em->getRepository(AccountHead::class)->findOneBy(['category' => $category]);
         $amount = $opening->getSubTotal();
         if(empty($journal->getJournalItems())){
             $transaction = new AccountJournalItem();
             $transaction->setAccountLedger($accountLedger);
-            $transaction->setAccountHead($accountLedger->getParent());
+            if($accountLedger->getParent()){
+                $transaction->setAccountHead($accountLedger->getParent());
+            }
             $transaction->setAmount($amount);
             $transaction->setDebit($amount);
             $em->persist($transaction);
