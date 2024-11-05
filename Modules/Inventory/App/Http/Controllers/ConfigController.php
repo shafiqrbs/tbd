@@ -44,6 +44,22 @@ class ConfigController extends Controller
     }
 
     /**
+     * Show the form for editing the specified resource.
+     */
+    public function getConfigById($id)
+    {
+        $service = new JsonRequestResponse();
+        $dataModel = ConfigModel::with('domain','currency','businessModel')->where('domain_id',$id)->first();
+        $entity = ConfigModel::with('domain','currency','businessModel')->find($dataModel->id);
+        if (!$entity){
+            $entity = 'Data not found';
+        }
+
+        $data = $service->returnJosnResponse($entity);
+        return $data;
+    }
+
+    /**
      * Update the specified resource in storage.
      */
     public function updateConfig(Request $request,$id)

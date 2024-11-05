@@ -44,7 +44,8 @@ Route::prefix('/inventory/select')->middleware([HeaderAuthenticationMiddleware::
 
 Route::prefix('/inventory')->middleware([HeaderAuthenticationMiddleware::class])->group(function() {
     Route::get('/config', [ConfigController::class,'getConfig'])->name('get_config');
-    Route::patch('/config-update/{id}', [ConfigController::class,'updateConfig'])->name('update_config');
+    Route::get('/config/{id}', [ConfigController::class,'getConfigById'])->name('get_config_by_id');
+    Route::post('/config-update/{id}', [ConfigController::class,'updateConfig'])->name('update_config');
 
     Route::apiResource('/setting', SettingController::class)->middleware([HeaderAuthenticationMiddleware::class]);
     Route::get('/setting/setting-type', [SettingController::class,'settingTypeDropdown'])->name('get_setting_type');
