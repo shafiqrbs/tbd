@@ -74,9 +74,9 @@ class UserController extends Controller
         $service = new JsonRequestResponse();
         $entity = UserModel::showUserDetails($id);
         $accessControlRole = UserModel::getAccessControlRoles($id,'access_control_role');
-        $andriodControlRole = UserModel::getAccessControlRoles($id,'android_control_role');
+        $androidControlRole = UserModel::getAccessControlRoles($id,'android_control_role');
         $entity['access_control_roles'] = $accessControlRole;
-        $entity['android_control_role'] = $andriodControlRole;
+        $entity['android_control_role'] = $androidControlRole;
         if (!$entity){
             $entity = 'Data not found';
         }

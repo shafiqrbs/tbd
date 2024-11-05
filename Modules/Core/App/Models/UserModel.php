@@ -150,14 +150,20 @@ class UserModel extends Model
 
     }
 
-    public static function getAccessControlRoles($userId,$type)
+    public static function getAccessControlRoles($userId, $type)
     {
+        // Set the base group based on the provided type
+        $baseGroup = ($type == 'access_control_role') ? ['Accounting', 'HR & Payroll'] : ['Android Accounting', 'Android HR & Payroll'];
+
+        // Fetch user roles from the database
         $roles = DB::table('cor_user_role_group')
             ->select('group_name', 'role_name as id', 'role_label as label')
             ->where('user_id', $userId)
             ->where('role_type', $type)
             ->get()
             ->toArray();
+
+        // Initialize the formatted roles array
         $formattedRoles = [];
 
         foreach ($roles as $role) {
@@ -174,7 +180,26 @@ class UserModel extends Model
                 ];
             }
         }
-        return array_values($formattedRoles);
+
+        // Merge missing groups from the base group into the formatted roles
+        $result = self::mergeGroups($baseGroup, $formattedRoles);
+
+        // Convert associative array to indexed array for frontend consumption
+        return array_values($result);
+    }
+
+    public static function mergeGroups($baseGroups, $formattedRoles)
+    {
+        // Iterate through each base group and ensure it exists in the formatted roles
+        foreach ($baseGroups as $group) {
+            if (!isset($formattedRoles[$group])) {
+                $formattedRoles[$group] = [
+                    'Group' => $group,
+                    'actions' => []
+                ];
+            }
+        }
+        return $formattedRoles;
     }
 
 }
