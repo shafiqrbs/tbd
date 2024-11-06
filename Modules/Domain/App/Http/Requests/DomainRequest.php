@@ -37,6 +37,8 @@ class DomainRequest extends FormRequest
                     'alternative_mobile' => 'string',
                     'username' => 'required|string',
                     'address' => 'string',
+                    'business_model_id' => 'required',
+                    'modules' => 'nullable|array',
                 ];
             }
 

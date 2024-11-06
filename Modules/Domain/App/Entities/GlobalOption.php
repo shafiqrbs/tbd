@@ -276,6 +276,17 @@ class GlobalOption
      */
     protected $path;
 
+    /**
+     * @ORM\ManyToOne(targetEntity="Modules\Utility\App\Entities\Setting")
+     * @ORM\Column(name="business_model_id",type="integer", nullable=true)
+     */
+    protected $businessModelId;
+
+    /**
+     * @ORM\Column(name="modules",type="json", nullable=true)
+     */
+    protected $modules;
+
 
 
     /**

@@ -18,6 +18,8 @@ class DomainModel extends Model
         'email',
         'unique_code',
         'slug',
+        'business_model_id',
+        'modules',
     ];
 
     public function sluggable(): array

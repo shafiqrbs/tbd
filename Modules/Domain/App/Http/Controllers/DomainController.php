@@ -58,6 +58,7 @@ class DomainController extends Controller
     public function store(DomainRequest $request)
     {
         $data = $request->validated();
+        $data['modules'] = json_encode($data['modules'], JSON_PRETTY_PRINT);
         $entity = DomainModel::create($data);
         $password= "@123456";
         $email = ($data['email']) ? $data['email'] : "{$data['username']}@gmail.com";
@@ -76,7 +77,9 @@ class DomainController extends Controller
             'business_model_id'=>$business->id
         ]);
         AccountingModel::create([
-            'domain_id'=> $entity->id
+            'domain_id'=> $entity->id,
+            'financial_start_date'=> date('Y-m-d'),
+            'financial_end_date'=> date('Y-m-d'),
         ]);
         $service = new JsonRequestResponse();
         return $service->returnJosnResponse($entity);
