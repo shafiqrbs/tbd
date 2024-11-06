@@ -124,7 +124,8 @@ class OpeningStockController extends Controller
             }
             if($getPurchaseItem){
                 $item = $em->getRepository(PurchaseItem::class)->find($getPurchaseItem->id);
-                $em->getRepository(AccountJournal::class)->insertOpeningPurchase($item);
+                $config = $this->domain['acc_config'];
+                $em->getRepository(AccountJournal::class)->insertOpeningPurchase($config,$item);
             }
         }
         if ($request->field_name === 'opening_quantity' ){

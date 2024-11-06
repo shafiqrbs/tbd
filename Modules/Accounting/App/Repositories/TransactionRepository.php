@@ -99,18 +99,35 @@ class TransactionRepository extends EntityRepository
     public function openingStockTransaction(AccountJournal $journal ,PurchaseItem $opening)
     {
         $em = $this->_em;
+        $parentHead = '';
+        $parent = ($opening->getStockItem()->getProduct()->getCategory()->getParent()) ? $opening->getStockItem()->getProduct()->getCategory()->getParent():'';
         $category = $opening->getStockItem()->getProduct()->getCategory();
+
+        $accountHead = $em->getRepository(AccountHead::class)->findOneBy(['productGroup' => $parent]);
+        if(empty($accountHead)){
+            $parentHead = $em->getRepository(AccountHead::class)->insertCategoryGroupAccount($journal->getConfig(),$parent);
+        }
+
+        $accountLedger = $em->getRepository(AccountHead::class)->findOneBy(['category' => $category]);
+        if(empty($accountLedger)){
+            $em->getRepository(AccountHead::class)->insertCategoryAccount($parentHead,$category);
+        }
+
         $this->insertOpeningInventoryAsset($journal,$opening,$category);
         $this->insertOpeningAccountPayable($journal,$opening);
     }
 
     private function insertOpeningInventoryAsset(AccountJournal $journal,PurchaseItem $opening,$category)
     {
+
+
         $em = $this->_em;
         /* @var $accountLedger AccountHead */
         $accountLedger = $em->getRepository(AccountHead::class)->findOneBy(['category' => $category]);
+
         $amount = $opening->getSubTotal();
         if(empty($journal->getJournalItems())){
+
             $transaction = new AccountJournalItem();
             $transaction->setAccountLedger($accountLedger);
             if($accountLedger->getParent()){
@@ -126,24 +143,25 @@ class TransactionRepository extends EntityRepository
 
     }
 
-    private function insertOpeningAccountPayable(AccountJournal $journal , Purchase $purchase)
+    private function insertOpeningAccountPayable(AccountJournal $journal , PurchaseItem $opening)
     {
         $em = $this->_em;
-        $amount = $purchase->getTotal();
-        $account = $em->getRepository(AccountHead::class)->findOneBy(['slug' => 'opening-balance']);
-        $exist = $this->findOneBy(['processHead' => 'Opening-Inventory','accountRefNo' => $purchase->getId(),'accountHead'=>$account]);
+        $amount = $opening->getSubTotal();
+        $account = $em->getRepository(AccountHead::class)->findOneBy(['config' => $journal->getConfig(),'slug' => 'opening-balance']);
+        $exist = $em->getRepository(AccountJournalItem::class)->findOneBy(['purchase' => 'Opening-Inventory','accountHead'=>$account]);
         if(empty($exist)){
             $transaction = new AccountJournalItem();
             $transaction->setProcess('Current Liabilities');
             /* Current Liabilities-Purchase Account payable */
-            $transaction->setAccountHead($account);
-            $transaction->setAccountSubHead($account);
+            $transaction->setAccountJournal($journal);
+          //  $transaction->setAccountHead($account->getParent());
+          // $transaction->setAccountSubHead($account);
             $transaction->setAmount('-'.$amount);
             $transaction->setCredit($amount);
             $em->persist($transaction);
             $em->flush();
-            $this->updateAccountHeadBalance($account,'ledger');
-            $this->updateAccountHeadBalance($account,'head');
+         //   $this->updateAccountHeadBalance($account,'ledger');
+         //   $this->updateAccountHeadBalance($account,'head');
         }
     }
 
@@ -230,12 +248,13 @@ class TransactionRepository extends EntityRepository
     public function updateAccountHeadBalance(AccountHead $account,$process = 'head'){
 
         $em = $this->_em;
-        $qb = $this->createQueryBuilder('e');
+        $qb = $em->createQueryBuilder('e');
+        $qb->from(AccountJournalItem::class,'e');
         $qb->select('COALESCE(SUM(e.debit),0) as debit','COALESCE(SUM(e.credit),0) as credit');
         if($process == 'head'){
             $qb->where("e.accountHead = :account")->setParameter('account', $account->getId());
         }else{
-            $qb->where("e.subAccountHead = :account")->setParameter('account', $account->getId());
+            $qb->where("e.accountLedger = :account")->setParameter('account', $account->getId());
         }
         $result = $qb->getQuery()->getSingleResult();
         if($account->getToIncrease() == "Debit"){

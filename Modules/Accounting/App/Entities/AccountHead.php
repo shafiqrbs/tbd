@@ -147,9 +147,10 @@ class AccountHead
 
     /**
      * @Gedmo\Slug(fields={"name"})
-     * @Doctrine\ORM\Mapping\Column(length=255)
+     * @Doctrine\ORM\Mapping\Column(length=255,nullable=true)
      */
     private $slug;
+
 
 
     /**
@@ -491,7 +492,7 @@ class AccountHead
     }
 
     /**
-     * @return mixed
+     * @return string
      */
     public function getSlug()
     {
@@ -499,7 +500,7 @@ class AccountHead
     }
 
     /**
-     * @param mixed $slug
+     * @param string $slug
      */
     public function setSlug($slug)
     {

@@ -11,7 +11,7 @@ use Gedmo\Mapping\Annotation as Gedmo;
  * Config
  *
  * @ORM\Table(name="acc_config")
- * @ORM\Entity()
+ * @ORM\Entity(repositoryClass="Modules\Accounting\App\Repositories\ConfigRepository")
  */
 class Config
 {
