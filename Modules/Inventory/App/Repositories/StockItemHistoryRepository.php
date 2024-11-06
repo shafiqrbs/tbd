@@ -168,7 +168,9 @@ class StockItemHistoryRepository extends EntityRepository
         $entity->setCreatedAt(now());
         $entity->setUpdatedAt(now());
         $entity->setMode('opening');
-        $entity->setWearhouse($config);
+        if($item->getWearhouse()){
+            $entity->setWearhouse($item->getWearhouse());
+        }
         $entity->setConfig($config);
         $entity->setProcess('approved');
         $em->persist($entity);

@@ -9,6 +9,7 @@ use Illuminate\Http\Response;
 use Modules\Accounting\App\Entities\AccountJournal;
 use Modules\AppsApi\App\Services\JsonRequestResponse;
 use Modules\Core\App\Models\UserModel;
+use Modules\Inventory\App\Entities\PurchaseItem;
 use Modules\Inventory\App\Entities\StockItemHistory;
 use Modules\Inventory\App\Entities\StockItemInventoryHistory;
 use Modules\Inventory\App\Http\Requests\OpeningStockRequest;
@@ -117,13 +118,14 @@ class OpeningStockController extends Controller
       //  dd($getPurchaseItem);
 
         if ($request->field_name === 'approve' ){
-
-            //  $getPurchaseItem->update(['approved_by_id' => $this->domain['user_id']]);
+          //  $getPurchaseItem->update(['approved_by_id' => $this->domain['user_id']]);
             if($getPurchaseItem){
                 $em->getRepository(StockItemHistory::class)->openingStockQuantity($getPurchaseItem->id);
             }
             if($getPurchaseItem){
-                $em->getRepository(AccountJournal::class)->openingProductInsert($getPurchaseItem->id);
+                $item = $em->getRepository(PurchaseItem::class)->find($getPurchaseItem->id);
+                $config = $this->domain['acc_config'];
+                $em->getRepository(AccountJournal::class)->insertOpeningPurchase($config,$item);
             }
         }
         if ($request->field_name === 'opening_quantity' ){

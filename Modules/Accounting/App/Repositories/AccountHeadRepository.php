@@ -17,9 +17,11 @@ use Modules\Accounting\App\Entities\AccountHead;
 use Modules\Accounting\App\Entities\AccountMasterHead;
 use Modules\Accounting\App\Entities\Config;
 use Modules\Accounting\App\Entities\TransactionMode;
+use Modules\Accounting\App\Models\AccountHeadModel;
 use Modules\Core\App\Entities\Customer;
 use Modules\Core\App\Entities\User;
 use Modules\Core\App\Entities\Vendor;
+use Modules\Inventory\App\Entities\Category;
 
 
 /**
@@ -368,22 +370,6 @@ class AccountHeadRepository extends EntityRepository
                 }
             }
         }
-
-        /*
-         $elem = "INSERT INTO acc_head(config_id,account_master_head_id,mother_account_id,parent_id,name,slug,code,head_group,created_at,updated_at)
- SELECT $config,id,mother_account_id,parent_id,name,slug,code,head_group,now(),now()
- FROM acc_head_master";
-         $qb1 = $this->getEntityManager()->getConnection()->prepare($elem);
-         $qb1->execute();
-
-        $elem = "INSERT INTO acc_head(config_id,name)
- SELECT id,name,brandName,salesPrice,purchasePrice,averagePurchasePrice,medicineConfig_id,'month','{$month}','{$year}',now(),now()
- FROM medicine_stock as ms
- WHERE medicineConfig_id ={$config} AND (openingQuantity > 0 OR remainingQuantity > 0 OR salesQuantity > 0 OR adjustmentQuantity > 0 OR purchaseQuantity > 0)
- AND NOT EXISTS ( SELECT 1 FROM medicine_stock_report d WHERE d.stockId = ms.id AND d.configId = ms.medicineConfig_id AND reportMonth='{$month}' AND reportYear='{$year}')";
-         $qb1 = $this->getEntityManager()->getConnection()->prepare($elem);
-         $qb1->execute();*/
-
     }
 
     public function insertTransactionAccount(TransactionMode $entity)
@@ -500,27 +486,43 @@ class AccountHeadRepository extends EntityRepository
         }
     }
 
-    public function insertCapitalAssetsAccount(GlobalOption $option ,PurchaseItem $entity)
+    public function insertCategoryGroupAccount(Config $config,Category $entity)
     {
 
         /* @var $exist AccountHead */
 
-        $exist = $this->findOneBy(array('assetsItem' => $entity->getItem()));
-        if ($exist) {
-            $exist->setName($entity->getItem()->getName());
-            $this->_em->flush();
-            return $exist;
-        } else {
-            $head = new AccountHead();
-            $head->setGlobalOption($option);
-            $head->setName($entity->getItem()->getName());
-            $head->setSource('Assets');
-            $head->setAssetsItem($entity->getItem());
-            $head->setParent($entity->getItem()->getCategory()->getAccountHead());
-            $this->_em->persist($head);
-            $this->_em->flush();
-            return $head;
-        }
+        $parent = $this->findOneBy(array('config'=>$config,'headGroup' => 'account-head','slug' => 'inventory-assets'));
+        $em = $this->_em;
+        $head = new AccountHead();
+        $head->setConfig($config);
+        $head->setName($entity->getName());
+        $head->setParent($parent);
+        $head->setProductGroup($entity);
+        $head->setHeadGroup('account-head');
+        $head->setLevel(2);
+        $em->persist($head);
+        $em->flush();
+        return $head;
+
+    }
+
+    public function insertCategoryAccount(AccountHead $parent,Category $entity)
+    {
+
+        /* @var $exist AccountHead */
+
+        $em = $this->_em;
+        $head = new AccountHead();
+        $head->setConfig($parent->getConfig());
+        $head->setName($entity->getName());
+        $head->setParent($parent);
+        $head->setCategory($entity);
+        $head->setLevel(3);
+        $head->setHeadGroup('ledger');
+        $em->persist($head);
+        $em->flush();
+        return $head;
+
     }
 
 

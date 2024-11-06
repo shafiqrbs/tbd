@@ -17,6 +17,7 @@ use Doctrine\ORM\Query;
 use Modules\Accounting\App\Entities\AccountJournal;
 use Modules\Accounting\App\Entities\AccountJournalItem;
 use Modules\Accounting\App\Entities\AccountVoucher;
+use Modules\Accounting\App\Entities\Config;
 use Modules\Accounting\App\Entities\Transaction;
 use Modules\Core\App\Entities\User;
 use Modules\Inventory\App\Entities\PurchaseItem;
@@ -128,11 +129,21 @@ class AccountJournalRepository extends EntityRepository
         return $result;
     }
 
-    public function insertOpeningPurchase(PurchaseItem $purchaseItem)
+    public function insertOpeningPurchase($configId , PurchaseItem $purchaseItem)
     {
         $em  = $this->_em;
+        $config = $em->getRepository(Config::class)->find($configId);
         $exist = $this->findOneBy(['purchaseItem' => $purchaseItem]);
         $voucherType = $em->getRepository(AccountVoucher::class)->findOneBy(['slug'=>'ov']);
+        $entity = new AccountJournal();
+        $entity->setConfig($config);
+        $entity->setPurchaseItem($purchaseItem);
+        $entity->setVoucher($voucherType);
+        $em->persist($entity);
+        $em->flush();
+        $em->getRepository(Transaction::class)->openingStockTransaction($entity,$purchaseItem);
+        return $entity;
+
         if(empty($exist)){
             $entity = new AccountJournal();
             $entity->setPurchaseItem($purchaseItem);
