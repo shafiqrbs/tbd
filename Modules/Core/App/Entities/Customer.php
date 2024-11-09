@@ -134,6 +134,13 @@ class Customer
      */
     private $name;
 
+     /**
+     * @var string
+     *
+     * @ORM\Column(name="proprietor_name", type="string", length=100, nullable =true)
+     */
+    private $proprietorName;
+
     /**
      * @Gedmo\Slug(fields={"name"})
      * @Doctrine\ORM\Mapping\Column(length=255)
