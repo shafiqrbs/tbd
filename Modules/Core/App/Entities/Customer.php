@@ -38,7 +38,7 @@ class Customer
 
 
     /**
-     * @ORM\ManyToOne(targetEntity="Modules\Domain\App\Entities\SubDomain")
+     * @ORM\ManyToOne(targetEntity="Modules\Domain\App\Entities\GlobalOption")
      * @ORM\JoinColumn(onDelete="CASCADE")
      **/
     protected $subDomain;
