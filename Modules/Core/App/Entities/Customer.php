@@ -36,6 +36,14 @@ class Customer
      **/
     protected $domain;
 
+
+    /**
+     * @ORM\ManyToOne(targetEntity="Modules\Domain\App\Entities\SubDomain")
+     * @ORM\JoinColumn(onDelete="CASCADE")
+     **/
+    protected $subDomain;
+
+
     /**
      * @ORM\ManyToOne(targetEntity="Modules\Core\App\Entities\Country")
      * @ORM\JoinColumn(name="country_id", referencedColumnName="id", nullable=true, onDelete="SET NULL")
@@ -60,6 +68,7 @@ class Customer
      * @ORM\JoinColumn(name="marketing_id", referencedColumnName="id", nullable=true, onDelete="SET NULL")
      **/
     protected $marketing;
+
 
 
     /**
@@ -483,9 +492,31 @@ class Customer
     /**
      * @var float
      *
-     * @ORM\Column(name="credit_Limit", type="float", nullable=true)
+     * @ORM\Column(name="credit_limit", type="float", nullable=true)
      */
     private $creditLimit;
+
+    /**
+     * @var float
+     *
+     * @ORM\Column(name="discount_percent", type="float",nullable=true)
+     */
+    private $discountPercent;
+
+
+    /**
+     * @var float
+     *
+     * @ORM\Column(name="bonus_percent", type="float",nullable=true)
+     */
+    private $bonusPercent;
+
+    /**
+     * @var float
+     *
+     * @ORM\Column(name="monthly_target_amount", type="float",nullable=true)
+     */
+    private $monthlyTargetAmount;
 
 
     /**
@@ -1732,8 +1763,69 @@ class Customer
         $this->isDefaultCustomer = $isDefaultCustomer;
     }
 
+    /**
+     * @return mixed
+     */
+    public function getSubDomain()
+    {
+        return $this->subDomain;
+    }
 
+    /**
+     * @param mixed $subDomain
+     */
+    public function setSubDomain($subDomain)
+    {
+        $this->subDomain = $subDomain;
+    }
 
+    /**
+     * @return float
+     */
+    public function getDiscountPercent()
+    {
+        return $this->discountPercent;
+    }
+
+    /**
+     * @param float $discountPercent
+     */
+    public function setDiscountPercent($discountPercent)
+    {
+        $this->discountPercent = $discountPercent;
+    }
+
+    /**
+     * @return float
+     */
+    public function getBonusPercent()
+    {
+        return $this->bonusPercent;
+    }
+
+    /**
+     * @param float $bonusPercent
+     */
+    public function setBonusPercent($bonusPercent)
+    {
+        $this->bonusPercent = $bonusPercent;
+    }
+
+    /**
+     * @return float
+     */
+    public function getMonthlyTargetAmount()
+    {
+        return $this->monthlyTargetAmount;
+    }
+
+    /**
+     * @param float $monthlyTargetAmount
+     */
+    public function setMonthlyTargetAmount($monthlyTargetAmount)
+    {
+        $this->monthlyTargetAmount = $monthlyTargetAmount;
+    }
 
 }
 
