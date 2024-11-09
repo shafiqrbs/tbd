@@ -4,9 +4,11 @@ namespace Modules\Domain\App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use Doctrine\ORM\EntityManager;
+use Exception;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\DB;
 use Modules\Accounting\App\Models\AccountingModel;
 use Modules\AppsApi\App\Services\JsonRequestResponse;
 use Modules\Domain\App\Entities\DomainChild;
@@ -19,6 +21,7 @@ use Modules\Domain\App\Models\DomainModel;
 use Modules\Inventory\App\Entities\Setting;
 use Modules\Inventory\App\Models\ConfigModel;
 use Modules\Utility\App\Models\SettingModel;
+use Modules\Inventory\App\Models\SettingModel as InventorySettingModel;
 
 class DomainController extends Controller
 {
@@ -55,35 +58,75 @@ class DomainController extends Controller
     /**
      * Store a newly created resource in storage.
      */
+
     public function store(DomainRequest $request)
     {
         $data = $request->validated();
-        $data['modules'] = json_encode($data['modules'], JSON_PRETTY_PRINT);
-        $entity = DomainModel::create($data);
-        $password= "@123456";
-        $email = ($data['email']) ? $data['email'] : "{$data['username']}@gmail.com";
-        UserModel::create([
-            'username' => $data['username'],
-            'email' => $email,
-            'password' => bcrypt($password),
-            'domain_id'=> $entity->id
-        ]);
-        $business = SettingModel::whereSlug('general')->first();
-        $currency = CurrencyModel::find(1);
-        ConfigModel::create([
-            'domain_id'=> $entity->id,
-            'currency_id'=> $currency->id,
-            'zero_stock'=> true,
-            'business_model_id'=>$business->id
-        ]);
-        AccountingModel::create([
-            'domain_id'=> $entity->id,
-            'financial_start_date'=> date('Y-m-d'),
-            'financial_end_date'=> date('Y-m-d'),
-        ]);
-        $service = new JsonRequestResponse();
-        return $service->returnJosnResponse($entity);
+
+        // Start the transaction
+        DB::beginTransaction();
+
+        try {
+            // Step 1: Create the domain the entity
+            $data['modules'] = json_encode($data['modules'], JSON_PRETTY_PRINT);
+            $entity = DomainModel::create($data);
+
+            // Step 2: Prepare email and password, then create user
+            $password = "@123456";
+            $email = $data['email'] ?? "{$data['username']}@gmail.com"; // If email is not present, default to username@gmail.com
+
+            UserModel::create([
+                'username' => $data['username'],
+                'email' => $email,
+                'password' => bcrypt($password),
+                'domain_id' => $entity->id,
+            ]);
+
+            // Step 3: Create the inventory configuration (config)
+            $business = SettingModel::whereSlug('general')->first();
+            $currency = CurrencyModel::find(1);
+
+            ConfigModel::create([
+                'domain_id' => $entity->id,
+                'currency_id' => $currency->id,
+                'zero_stock' => true,
+                'business_model_id' => $business->id,
+            ]);
+
+            // Step 4: Create the accounting data
+            AccountingModel::create([
+                'domain_id' => $entity->id,
+                'financial_start_date' => date('Y-m-d'),
+                'financial_end_date' => date('Y-m-d'),
+            ]);
+
+            // Commit all database operations
+            DB::commit();
+
+            // Return the response
+            $service = new JsonRequestResponse();
+            return $service->returnJosnResponse($entity);
+
+        } catch (Exception $e) {
+            // Something went wrong, rollback the transaction
+            DB::rollBack();
+
+            // Optionally log the exception for debugging purposes
+            \Log::error('Error storing domain and related data: ' . $e->getMessage());
+
+            // Return an error response
+            $response = new Response();
+            $response->headers->set('Content-Type', 'application/json');
+            $response->setContent(json_encode([
+                'message' => 'An error occurred while saving the domain and related data.',
+                'error' => $e->getMessage(),
+                'status' => Response::HTTP_INTERNAL_SERVER_ERROR,
+            ]));
+            $response->setStatusCode(Response::HTTP_INTERNAL_SERVER_ERROR);
+            return $response;
+        }
     }
+
 
     /**
      * Show the specified resource.
@@ -91,13 +134,48 @@ class DomainController extends Controller
     public function show($id)
     {
         $service = new JsonRequestResponse();
+
+        // Fetch the domain entity
         $entity = DomainModel::find($id);
-        if (!$entity){
-            $entity = 'Data not found';
+
+        if (!$entity) {
+            return $service->returnJosnResponse([
+                'message' => 'Domain not found',
+                'status' => Response::HTTP_NOT_FOUND,
+            ]);
         }
-        $data = $service->returnJosnResponse($entity);
-        return $data;
+
+        // Retrieve the inventory config id based on domain_id
+        $config = ConfigModel::where('domain_id', $id)->first();
+
+        if (!$config) {
+            return $service->returnJosnResponse([
+                'message' => 'Inventory config not found for this domain',
+                'status' => Response::HTTP_NOT_FOUND,
+            ]);
+        }
+
+        $getInvConfigId = $config->id;
+
+        // Fetch relevant product types settings as setting_id array
+        $getInvProductType = InventorySettingModel::where('config_id', $getInvConfigId)
+            ->where('parent_slug', 'product_type')
+            ->where('status', 1)
+            ->get('setting_id')
+            ->toArray();
+
+        // Extract ids as strings
+        $ids = array_map(function($module) {
+            return (string)$module['setting_id'];
+        }, $getInvProductType);
+
+        // Attach the product types to the entity
+        $entity['product_types'] = $ids;
+
+        // Return a structured JSON response using your service
+        return $service->returnJosnResponse($entity);
     }
+
 
     /**
      * Show the form for editing the specified resource.
@@ -116,15 +194,87 @@ class DomainController extends Controller
     /**
      * Update the specified resource in storage.
      */
+
     public function update(DomainRequest $request, $id)
     {
-
         $data = $request->validated();
-        $entity = DomainModel::find($id);
-        $entity->update($data);
-        $service = new JsonRequestResponse();
-        return $service->returnJosnResponse($entity);
+
+        // Start the transaction.
+        DB::beginTransaction();
+
+        try {
+            if (count($data['product_types']) > 0) {
+                // Find inventory config id.
+                $getInvConfigId = ConfigModel::where('domain_id', $id)->first('id')->id;
+
+                // If no inventory config found, return JSON response.
+                if (!$getInvConfigId) {
+                    DB::rollBack();  // Rollback if inventory config is not found.
+
+                    $response = new Response();
+                    $response->headers->set('Content-Type', 'application/json');
+                    $response->setContent(json_encode([
+                        'message' => 'Inventory config not found',
+                        'status' => Response::HTTP_NOT_FOUND,
+                    ]));
+                    $response->setStatusCode(Response::HTTP_OK);
+                    return $response;
+                }
+
+                // Loop through each product type and either find or create inventory setting.
+                foreach ($data['product_types'] as $type) {
+                    $getInvSetting = InventorySettingModel::where('config_id', $getInvConfigId)
+                        ->where('setting_id', $type)
+                        ->first();
+
+                    // If the inventory setting is not found, create a new one.
+                    if (!$getInvSetting) {
+                        $getSettingData = SettingModel::find($type);
+
+                        InventorySettingModel::create([
+                            'config_id' => $getInvConfigId,
+                            'setting_id' => $type,
+                            'name' => $getSettingData->name,
+                            'slug' => $getSettingData->slug,
+                            'parent_slug' => 'product_type',
+                            'is_production' => in_array($getSettingData->slug,
+                                ['post-production', 'mid-production', 'pre-production']) ? 1 : 0,
+                        ]);
+                    }
+                }
+            }
+
+            // Find and update the domain entity.
+            $entity = DomainModel::find($id);
+            $entity->update($data);
+
+            // If we got this far, everything is okay, commit the transaction.
+            DB::commit();
+
+            // Return a json response using your service.
+            $service = new JsonRequestResponse();
+            return $service->returnJosnResponse($entity);
+
+        } catch (Exception $e) {
+            // If there's an exception, rollback the transaction.
+            DB::rollBack();
+
+            // Optionally log the exception (for debugging purposes)
+            \Log::error('Error updating domain and inventory settings: '.$e->getMessage());
+
+            // Return an error response.
+            $response = new Response();
+            $response->headers->set('Content-Type', 'application/json');
+            $response->setContent(json_encode([
+                'message' => 'An error occurred while updating.',
+                'error' => $e->getMessage(),
+                'status' => Response::HTTP_INTERNAL_SERVER_ERROR,
+            ]));
+            $response->setStatusCode(Response::HTTP_INTERNAL_SERVER_ERROR);
+            return $response;
+        }
     }
+
 
     /**
      * Update the specified resource in storage.

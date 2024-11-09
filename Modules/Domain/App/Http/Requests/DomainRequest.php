@@ -49,8 +49,12 @@ class DomainRequest extends FormRequest
                     'name' => 'required|string',
                     'mobile' => 'required|numeric',
                     'email' => 'required|email',
-                    'address' => 'string',
                     'company_name' => 'required|string',
+                    'alternative_mobile' => 'string',
+                    'address' => 'string',
+                    'business_model_id' => 'required',
+                    'modules' => 'nullable|array',
+                    'product_types' => 'nullable|array',
                 ];
             }
             default:break;

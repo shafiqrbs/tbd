@@ -288,6 +288,22 @@ class GlobalOption
     protected $modules;
 
 
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="alternative_mobile", type="string", length=255  , nullable=true )
+     */
+    private $alternativeMobile;
+
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="company_name", type="string", length=255  , nullable=true )
+     */
+    private $companyName;
+
+
 
     /**
      * Get id

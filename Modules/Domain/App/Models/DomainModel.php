@@ -20,6 +20,9 @@ class DomainModel extends Model
         'slug',
         'business_model_id',
         'modules',
+        'address',
+        'alternative_mobile',
+        'company_name',
     ];
 
     public function sluggable(): array
@@ -79,6 +82,7 @@ class DomainModel extends Model
             $date =  new \DateTime("now");
             $model->unique_code = self::quickRandom();
             $model->created_at = $date;
+            $model->status = true;
         });
 
         self::updating(function ($model) {

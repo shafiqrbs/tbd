@@ -21,6 +21,9 @@ class SettingModel extends Model
         'config_id',
         'name',
         'slug',
+        'is_production',
+        'parent_slug',
+        'setting_id',
         'status'
     ];
 
@@ -44,6 +47,7 @@ class SettingModel extends Model
         self::creating(function ($model) {
             $date =  new \DateTime("now");
             $model->created_at = $date;
+            $model->status = true;
         });
 
         self::updating(function ($model) {
