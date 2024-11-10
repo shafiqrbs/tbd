@@ -5,6 +5,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Modules\Core\App\Http\Controllers\CoreController;
 use Modules\Core\App\Http\Controllers\CustomerController;
+use Modules\Core\App\Http\Controllers\FileUploadController;
 use Modules\Core\App\Http\Controllers\LocationController;
 use Modules\Core\App\Http\Controllers\SettingController;
 use Modules\Core\App\Http\Controllers\SiteMapController;
@@ -46,6 +47,7 @@ Route::prefix('/core')->middleware([HeaderAuthenticationMiddleware::class])->gro
     Route::get('/user/local-storage', [UserController::class,'localStorage'])->name('user_local_storage');
 
     Route::post('/user/image-inline/{id}', [UserController::class,'updateImage'])->name('core_user_update_image');
+
     Route::apiResource('user', UserController::class)->middleware([HeaderAuthenticationMiddleware::class]);
 
     Route::apiResource('location', LocationController::class)->middleware([HeaderAuthenticationMiddleware::class]);
@@ -64,7 +66,8 @@ Route::prefix('/core')->middleware([HeaderAuthenticationMiddleware::class])->gro
     ;
     Route::get('/setting/inline-status/{id}', [SettingController::class,'inlineStatus'])->name('core_setting_inline_status');
 
-
+    Route::get('/file-upload', [FileUploadController::class,'index'])->name('index_file_upload');
+    Route::post('/file-upload/store', [FileUploadController::class,'store'])->name('store_file_upload');
 }
 );
 
