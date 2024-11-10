@@ -47,7 +47,7 @@ class SettingModel extends Model
         self::creating(function ($model) {
             $date =  new \DateTime("now");
             $model->created_at = $date;
-            $model->status = true;
+            $model->status = false;
         });
 
         self::updating(function ($model) {

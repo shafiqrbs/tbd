@@ -20,7 +20,7 @@ use Modules\Domain\App\Models\CurrencyModel;
 use Modules\Domain\App\Models\DomainModel;
 use Modules\Inventory\App\Entities\Setting;
 use Modules\Inventory\App\Models\ConfigModel;
-use Modules\Utility\App\Models\SettingModel;
+use Modules\Utility\App\Models\SettingModel as UtilitySettingModel;
 use Modules\Inventory\App\Models\SettingModel as InventorySettingModel;
 
 class DomainController extends Controller
@@ -83,10 +83,10 @@ class DomainController extends Controller
             ]);
 
             // Step 3: Create the inventory configuration (config)
-            $business = SettingModel::whereSlug('general')->first();
+            $business = UtilitySettingModel::whereSlug('general')->first();
             $currency = CurrencyModel::find(1);
 
-            ConfigModel::create([
+            $config=ConfigModel::create([
                 'domain_id' => $entity->id,
                 'currency_id' => $currency->id,
                 'zero_stock' => true,
@@ -99,6 +99,38 @@ class DomainController extends Controller
                 'financial_start_date' => date('Y-m-d'),
                 'financial_end_date' => date('Y-m-d'),
             ]);
+
+            $getProductType = UtilitySettingModel::getEntityDropdown('product-type');
+
+            if (count($getProductType) > 0) {
+                // If no inventory config found, return JSON response.
+                if (!$config) {
+                    DB::rollBack();
+
+                    $response = new Response();
+                    $response->headers->set('Content-Type', 'application/json');
+                    $response->setContent(json_encode([
+                        'message' => 'Inventory config not found',
+                        'status' => Response::HTTP_NOT_FOUND,
+                    ]));
+                    $response->setStatusCode(Response::HTTP_OK);
+                    return $response;
+                }
+
+                // Loop through each product type and either find or create inventory setting.
+                foreach ($getProductType as $type) {
+                    // If the inventory setting is not found, create a new one.
+                    InventorySettingModel::create([
+                        'config_id' => $config->id,
+                        'setting_id' => $type->id,
+                        'name' => $type->name,
+                        'slug' => $type->slug,
+                        'parent_slug' => 'product_type',
+                        'is_production' => in_array($type->slug,
+                            ['post-production', 'mid-production', 'pre-production']) ? 1 : 0,
+                    ]);
+                }
+            }
 
             // Commit all database operations
             DB::commit();
@@ -161,16 +193,23 @@ class DomainController extends Controller
         $getInvProductType = InventorySettingModel::where('config_id', $getInvConfigId)
             ->where('parent_slug', 'product_type')
             ->where('status', 1)
-            ->get('setting_id')
+            ->get('id')
             ->toArray();
 
         // Extract ids as strings
         $ids = array_map(function($module) {
-            return (string)$module['setting_id'];
+            return (string)$module['id'];
         }, $getInvProductType);
 
         // Attach the product types to the entity
         $entity['product_types'] = $ids;
+
+        // fetch inventory setting product type for generate checkbox
+        $getInvProductTypeForCheckbox = InventorySettingModel::where('config_id', $getInvConfigId)
+            ->where('parent_slug', 'product_type')
+            ->get()
+            ->toArray();
+        $entity['product_types_checkbox'] = $getInvProductTypeForCheckbox;
 
         // Return a structured JSON response using your service
         return $service->returnJosnResponse($entity);
@@ -203,44 +242,33 @@ class DomainController extends Controller
         DB::beginTransaction();
 
         try {
-            if (count($data['product_types']) > 0) {
-                // Find inventory config id.
-                $getInvConfigId = ConfigModel::where('domain_id', $id)->first('id')->id;
+            // Find inventory config id.
+            $getInvConfigId = ConfigModel::where('domain_id', $id)->first('id')->id;
 
-                // If no inventory config found, return JSON response.
-                if (!$getInvConfigId) {
-                    DB::rollBack();  // Rollback if inventory config is not found.
+            // If no inventory config found, return JSON response.
+            if (!$getInvConfigId) {
+                DB::rollBack();  // Rollback if inventory config is not found.
 
-                    $response = new Response();
-                    $response->headers->set('Content-Type', 'application/json');
-                    $response->setContent(json_encode([
-                        'message' => 'Inventory config not found',
-                        'status' => Response::HTTP_NOT_FOUND,
-                    ]));
-                    $response->setStatusCode(Response::HTTP_OK);
-                    return $response;
-                }
+                $response = new Response();
+                $response->headers->set('Content-Type', 'application/json');
+                $response->setContent(json_encode([
+                    'message' => 'Inventory config not found',
+                    'status' => Response::HTTP_NOT_FOUND,
+                ]));
+                $response->setStatusCode(Response::HTTP_OK);
+                return $response;
+            }
 
-                // Loop through each product type and either find or create inventory setting.
-                foreach ($data['product_types'] as $type) {
-                    $getInvSetting = InventorySettingModel::where('config_id', $getInvConfigId)
-                        ->where('setting_id', $type)
-                        ->first();
+            $getInvSetting = InventorySettingModel::where('config_id', $getInvConfigId)
+                ->where('parent_slug', 'product_type')
+                ->get();
 
-                    // If the inventory setting is not found, create a new one.
-                    if (!$getInvSetting) {
-                        $getSettingData = SettingModel::find($type);
-
-                        InventorySettingModel::create([
-                            'config_id' => $getInvConfigId,
-                            'setting_id' => $type,
-                            'name' => $getSettingData->name,
-                            'slug' => $getSettingData->slug,
-                            'parent_slug' => 'product_type',
-                            'is_production' => in_array($getSettingData->slug,
-                                ['post-production', 'mid-production', 'pre-production']) ? 1 : 0,
-                        ]);
-                    }
+            // Loop through each product type and either find or create inventory setting.
+            foreach ($getInvSetting as $type) {
+                if (in_array($type->id, $data['product_types'])) {
+                    $type->update(['status'=>true]);
+                }else{
+                    $type->update(['status'=>false]);
                 }
             }
 
