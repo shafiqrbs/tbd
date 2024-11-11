@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Session;
 use Modules\Accounting\App\Models\AccountHeadModel;
 use Modules\AppsApi\App\Services\GeneratePatternCodeService;
 use Modules\AppsApi\App\Services\JsonRequestResponse;
@@ -130,5 +131,96 @@ class FileUploadController extends Controller
         $entity = ['message'=>'delete'];
         return $service->returnJosnResponse($entity);
 
+    }
+
+    /**
+     * process file data to DB.
+     */
+    public function fileProcessToDB(Request $request){
+        /*set_time_limit(0);
+        $fileID = $request->file_id;
+        $getFile = FileUploadModel::find($fileID);
+
+        $reader = new \PhpOffice\PhpSpreadsheet\Reader\Csv();
+        $targetLocation = public_path('/uploads/core/file-upload/');
+        $spreadSheet = $reader->load($targetLocation.$getFile->file);
+        $excelSheet = $spreadSheet->getActiveSheet();
+        $allData = $excelSheet->toArray();
+
+        dump($allData);*/
+
+        set_time_limit(0);
+        $fileID = $request->file_id;
+        $getFile = FileUploadModel::find($fileID);
+
+        $targetLocation = public_path('/uploads/core/file-upload/');
+        $filePath = $targetLocation . $getFile->file;
+
+        $extension = pathinfo($filePath, PATHINFO_EXTENSION);
+
+        if ($extension == 'xlsx') {
+            $reader = new Xlsx();
+        } elseif ($extension == 'csv') {
+            $reader = new \PhpOffice\PhpSpreadsheet\Reader\Csv();
+        } else {
+            throw new Exception('Unsupported file format.');
+        }
+
+        $spreadSheet = $reader->load($filePath);
+        $excelSheet = $spreadSheet->getActiveSheet();
+        $allData = $excelSheet->toArray();
+
+        dump($allData);
+
+        /*$excelFile = ExcelImport::find($id);
+
+        set_time_limit(0);
+        $reader = new Xlsx();
+
+        $targetLocation = public_path('upload/excel_file/');
+        $spreadSheet = $reader->load($targetLocation.$excelFile->file_name);
+        $excelSheet = $spreadSheet->getActiveSheet();
+        $allData = $excelSheet->toArray();
+        $keys = array_shift($allData); //remove Excel column heading
+        $totalHeading = count($keys);
+        $keys = array_map('trim', array_filter($keys)); //remove all spaces from string
+
+        if ($excelFile->file_type == 'Ayat'){
+            $totalHeading = count($keys);
+            if ($totalHeading == 9) {
+                foreach ($allData as $data) {
+                    $values = array_slice($data, null, count($keys));
+                    if ($values[0] && $values[1]) {
+                        $suraInfo = Sura::where('name_en',$values[0])->first();
+                        if ($suraInfo){
+                            $input['sura_id']=$suraInfo->id;
+                        }
+                        $paraInfo = Para::where('name_en',$values[1])->first();
+                        if ($paraInfo){
+                            $input['para_id']=$paraInfo->id;
+                        }
+
+                        $input['aya_number'] = $values[2];
+                        $input['verse_key'] = $input['sura_id'].':'.$input['aya_number'];
+                        $input['name_ar'] = $values[3];
+                        $input['name_en'] = $values[4];
+                        $input['name_bn'] = $values[5];
+                        $ayatData = Ayat::create($input);
+
+                        if ($ayatData) {
+                            $ayatTafsir = new AyatTafsir();
+                            $ayatTafsir->tafsir_en = $values[7];
+                            $ayatTafsir->tafsir_bn = $values[8];
+                            $ayatTafsir->tafsir_by = $values[6];
+                            $ayatData->ayatTafsir()->save($ayatTafsir);
+                        }
+                    }
+                }
+                ExcelImport::find($id)->update(['is_import' => 1]);
+            } else {
+                Session::flash('validate', 'Please follow recommend structure');
+                return redirect()->route('excel_import_list', app()->getLocale());
+            }
+        }*/
     }
 }
