@@ -48,11 +48,12 @@ class DomainRequest extends FormRequest
             case 'PUT':
             case 'PATCH':
             {
+                $domainId = $this->route('global');
                 return [
                     'name' => 'required|string',
                     'mobile' => [
                         'required',
-                        Rule::unique('Modules\Domain\App\Entities\GlobalOption', 'mobile')
+                        Rule::unique('Modules\Domain\App\Entities\GlobalOption', 'mobile')->ignore($domainId)
                     ],
                     'email' => 'required|email',
                     'company_name' => 'required|string',
