@@ -9,6 +9,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
+use Modules\Accounting\App\Entities\AccountHead;
 use Modules\Accounting\App\Models\AccountingModel;
 use Modules\AppsApi\App\Services\JsonRequestResponse;
 use Modules\Domain\App\Entities\DomainChild;
@@ -59,7 +60,7 @@ class DomainController extends Controller
      * Store a newly created resource in storage.
      */
 
-    public function store(DomainRequest $request)
+    public function store(DomainRequest $request , EntityManager $em)
     {
         $data = $request->validated();
 
@@ -86,7 +87,7 @@ class DomainController extends Controller
             $business = UtilitySettingModel::whereSlug('general')->first();
             $currency = CurrencyModel::find(1);
 
-            $config=ConfigModel::create([
+            $config =  ConfigModel::create([
                 'domain_id' => $entity->id,
                 'currency_id' => $currency->id,
                 'zero_stock' => true,
@@ -94,19 +95,16 @@ class DomainController extends Controller
             ]);
 
             // Step 4: Create the accounting data
-            AccountingModel::create([
+            $accountingConfig = AccountingModel::create([
                 'domain_id' => $entity->id,
                 'financial_start_date' => date('Y-m-d'),
                 'financial_end_date' => date('Y-m-d'),
             ]);
-
             $getProductType = UtilitySettingModel::getEntityDropdown('product-type');
-
             if (count($getProductType) > 0) {
                 // If no inventory config found, return JSON response.
                 if (!$config) {
                     DB::rollBack();
-
                     $response = new Response();
                     $response->headers->set('Content-Type', 'application/json');
                     $response->setContent(json_encode([
@@ -132,9 +130,10 @@ class DomainController extends Controller
                 }
             }
 
+
             // Commit all database operations
             DB::commit();
-
+            $em->getRepository(AccountHead::class)->generateAccountHead($accountingConfig->id);
             // Return the response
             $service = new JsonRequestResponse();
             return $service->returnJosnResponse($entity);

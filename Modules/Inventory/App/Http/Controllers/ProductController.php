@@ -67,6 +67,7 @@ class ProductController extends Controller
      */
     public function show($id)
     {
+
         $service = new JsonRequestResponse();
         $entity = ProductModel::getProductDetails($id, $this->domain);
         if (!$entity) {

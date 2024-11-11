@@ -255,7 +255,6 @@ class AccountHeadRepository extends EntityRepository
 
     public function generateAccountHead($configId)
     {
-
         $em = $this->_em;
         $qb = $this->getEntityManager()
             ->getConnection()

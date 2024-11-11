@@ -128,7 +128,9 @@ class ParticularController extends Controller
     }
     public function particularDropdown(Request $request)
     {
-        $data = ParticularModel::getEntityDropdown($request->get('dropdown-type'));
+
+        $config = $this->domain['config_id'];
+        $data = ParticularModel::getEntityDropdown($config,$request->get('dropdown-type'));
         $response = new Response();
         $response->headers->set('Content-Type', 'application/json');
         $response->setContent(json_encode([

@@ -120,7 +120,7 @@ class ParticularModel extends Model
             ->get();
     }
 
-    public static function getEntityDropdown($dropdownType)
+    public static function getEntityDropdown($config,$dropdownType)
     {
         return DB::table('inv_particular')
             ->join('inv_particular_type','inv_particular_type.id','=','inv_particular.particular_type_id')
@@ -132,6 +132,7 @@ class ParticularModel extends Model
                 'inv_particular_type.slug as type_slug',
             ])
             ->where([
+                ['inv_particular.config_id',$config],
                 ['inv_particular_type.slug',$dropdownType],
                 ['inv_particular_type.status','1'],
                 ['inv_particular.status','1'],

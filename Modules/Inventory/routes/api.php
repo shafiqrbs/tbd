@@ -63,8 +63,6 @@ Route::prefix('/inventory')->middleware([HeaderAuthenticationMiddleware::class])
         Route::post('/stock/sku', [StockItemController::class,'stockSkuAdded'])->name('product_stock_sku');
         Route::get('/stock/sku/{product}', [StockItemController::class,'stockSkuList'])->name('product_stock_list');
         Route::post('/stock/sku/inline-update/{stock_id}', [StockItemController::class,'stockSkuInlineUpdate'])->name('product_stock_sku_inline_update');
-
-
         Route::post('/gallery', [ProductController::class,'galleryAdded'])->name('product_gallery_added');
     });
 
@@ -84,6 +82,7 @@ Route::prefix('/inventory')->middleware([HeaderAuthenticationMiddleware::class])
 
     Route::apiResource('/opening-stock', OpeningStockController::class)->middleware([HeaderAuthenticationMiddleware::class]);
     Route::post('/opening-stock/inline-update', [OpeningStockController::class,'inlineUpdate'])->name('opening_stock_inline_update');
+    Route::post('/inventory/branch-management', [BranchManagementController::class,'branchManagement'])->name('branch_management_update');
 
 
 });

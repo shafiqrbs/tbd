@@ -31,12 +31,15 @@ class DomainRequest extends FormRequest
             {
                 return [
                     'name' => 'required|string',
-                    'mobile' => 'required|numeric',
+                    'mobile' => [
+                        'required',
+                        Rule::unique('Modules\Domain\App\Entities\GlobalOption', 'mobile')
+                    ],
                     'email' => 'required|email',
                     'company_name' => 'required|string',
-                    'alternative_mobile' => 'string',
+                    'alternative_mobile' => 'string|nullable',
                     'username' => 'required|string',
-                    'address' => 'string',
+                    'address' => 'string|nullable',
                     'business_model_id' => 'required',
                     'modules' => 'nullable|array',
                 ];
@@ -47,11 +50,14 @@ class DomainRequest extends FormRequest
             {
                 return [
                     'name' => 'required|string',
-                    'mobile' => 'required|numeric',
+                    'mobile' => [
+                        'required',
+                        Rule::unique('Modules\Domain\App\Entities\GlobalOption', 'mobile')
+                    ],
                     'email' => 'required|email',
                     'company_name' => 'required|string',
-                    'alternative_mobile' => 'string',
-                    'address' => 'string',
+                    'alternative_mobile' => 'string|nullable',
+                    'address' => 'string|nullable',
                     'business_model_id' => 'required',
                     'modules' => 'nullable|array',
                     'product_types' => 'nullable|array',
