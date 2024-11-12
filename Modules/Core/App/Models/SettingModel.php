@@ -62,9 +62,9 @@ class SettingModel extends Model
     }
 
 
-    public static function getRecords($domain,$request){
+    public static function getRecords($request,$domain){
 
-        $global = $domain['global_id'];
+        $domain = $domain['global_id'];
         $page =  isset($request['page']) && $request['page'] > 0?($request['page'] - 1 ) : 0;
         $perPage = isset($request['offset']) && $request['offset']!=''? (int)($request['offset']):50;
         $skip = isset($page) && $page != '' ? (int)$page * $perPage : 0;
@@ -75,7 +75,12 @@ class SettingModel extends Model
                 'cor_setting.status as status',
                 'cst.name as setting_name',
                 'cst.id as setting_id'
-            ]);
+            ]) ->where([
+                ['cor_setting.domain_id', $domain],
+            ])
+
+        ;
+
 
         if (isset($request['term']) && !empty($request['term'])){
             $entities = $entities->whereAny(['name'],'LIKE','%'.$request['term'].'%');

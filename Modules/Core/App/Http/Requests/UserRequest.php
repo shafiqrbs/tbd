@@ -36,10 +36,20 @@ class UserRequest extends FormRequest
             {
                 return [
                     'name' => 'required|string',
-                    'username' => 'required',
-                    'mobile' => 'required|numeric',
-                    'email' => 'required|email',
+                    'username' => [
+                        'required',
+                        Rule::unique('Modules\Core\App\Entities\User', 'username')
+                    ],
+                    'mobile' => [
+                        'required',
+                        Rule::unique('Modules\Core\App\Entities\User', 'mobile')
+                    ],
+                    'email' => [
+                        'required|email',
+                        Rule::unique('Modules\Core\App\Entities\User', 'email')
+                    ],
                     'password' =>  'required|min:6',
+                    'employee_group_id' => 'required',
                     'confirm_password' => 'required|same:password' ,
                 ];
             }
@@ -47,11 +57,22 @@ class UserRequest extends FormRequest
             case 'PUT':
             case 'PATCH':
             {
+                $entity = $this->route('user');
                 return [
                     'name' => 'required|string',
-                    'username' => 'required',
-                    'mobile' => 'required|numeric',
-                    'email' => 'required|email',
+                    'username' => [
+                        'required',
+                         Rule::unique('Modules\Core\App\Entities\User', 'username')->ignore($entity)
+                    ],
+                    'mobile' => [
+                        'required',
+                        Rule::unique('Modules\Core\App\Entities\User', 'mobile')->ignore($entity)
+                    ],
+                    'email' => [
+                        'required',
+                        'email',
+                        Rule::unique('Modules\Core\App\Entities\User', 'email')->ignore($entity)
+                    ],
                     'profile_image' => 'nullable|image|mimes:jpeg,png,jpg,gif',
                     'digital_signature' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg',
                     'alternative_email' => 'nullable|email',

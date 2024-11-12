@@ -20,6 +20,7 @@ class UserModel extends Model
         'password',
         'is_delete',
         'domain_id',
+        'employee_group_id',
         'email_verified_at',
         'enabled',
     ];

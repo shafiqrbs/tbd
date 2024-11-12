@@ -35,6 +35,7 @@ class SettingController extends Controller
 
     public function index(Request $request){
 
+
         $data = SettingModel::getRecords($request,$this->domain);
         $response = new Response();
         $response->headers->set('Content-Type','application/json');
@@ -54,6 +55,7 @@ class SettingController extends Controller
      */
     public function store(SettingRequest $request)
     {
+
         $data = $request->validated();
         $data['status'] = true;
         $data['domain_id'] = $this->domain['global_id'];

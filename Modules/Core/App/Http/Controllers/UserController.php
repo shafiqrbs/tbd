@@ -104,7 +104,6 @@ class UserController extends Controller
     public function update(UserRequest $request, $id)
     {
         $data = $request->validated();
-
         $entity = UserModel::find($id);
         if (!empty($data['confirm_password'])) {
             $data['password'] = Hash::make($data['confirm_password']);

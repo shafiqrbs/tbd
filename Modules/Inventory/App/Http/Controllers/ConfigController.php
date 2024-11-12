@@ -38,7 +38,6 @@ class ConfigController extends Controller
         if (!$entity){
             $entity = 'Data not found';
         }
-
         $data = $service->returnJosnResponse($entity);
         return $data;
     }
