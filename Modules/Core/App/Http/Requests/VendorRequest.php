@@ -11,52 +11,6 @@ class VendorRequest extends FormRequest
      *
      * @return array<string, \Illuminate\Contracts\Validation\Rule|array|string>
      */
-    /*public function rules(): array
-    {
-
-        switch($this->method())
-        {
-            case 'GET':
-            case 'DELETE':
-            {
-                return [];
-            }
-            case 'POST':
-            {
-                return [
-                    'company_name' => 'required|string',
-                    'name' => 'required|string',
-                    'mobile' => [
-                        'required',
-                        Rule::unique('Modules\Core\App\Entities\Vendor', 'mobile')
-                    ],
-                    'customer_id' => [
-                        'nullable',
-                    ],
-                    'email' => 'email|nullable',
-                    'address' => 'string|nullable',
-                ];
-            }
-
-            case 'PUT':
-            case 'PATCH':
-            {
-                return [
-                    'company_name' => 'required|string',
-                    'name' => 'required|string',
-                    'mobile' => [
-                        'required|numeric',
-                        Rule::unique('Modules\Core\App\Entities\Vendor', 'mobile')
-                    ],
-                    'email' => 'email|nullable',
-                    'customer_id' => 'integer|nullable',
-                    'address' => 'string|nullable',
-                ];
-            }
-            default:break;
-        }
-    }*/
-
     public function rules(): array
     {
         // Check if we are updating (when an 'id' is present) or creating (when 'id' is not present)
