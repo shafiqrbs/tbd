@@ -1,5 +1,4 @@
 <?php
-
 namespace Modules\Core\App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
@@ -23,10 +22,9 @@ class UserRequest extends FormRequest
     public function rules(): array
     {
         // Check if we are updating (when an 'id' is present) or creating (when 'id' is not present)
-        $isUpdating = $this->route('id');
+        $user = $this->route('user'); // Make sure to match the route parameter name.
 
-        switch($this->method())
-        {
+        switch ($this->method()) {
             case 'GET':
             case 'DELETE':
             {
@@ -38,40 +36,40 @@ class UserRequest extends FormRequest
                     'name' => 'required|string',
                     'username' => [
                         'required',
-                        Rule::unique('Modules\Core\App\Entities\User', 'username')
+                        Rule::unique('Modules\Core\App\Entities\User', 'username')  // Ensure using `users` table - check your actual table
                     ],
                     'mobile' => [
                         'required',
-                        Rule::unique('Modules\Core\App\Entities\User', 'mobile')
+                        Rule::unique('Modules\Core\App\Entities\User', 'mobile')  // Ensure using `users` table
                     ],
                     'email' => [
-                        'required|email',
-                        Rule::unique('Modules\Core\App\Entities\User', 'email')
+                        'required',
+                        'email',
+                        Rule::unique('Modules\Core\App\Entities\User', 'email')  // Ensure using `users` table
                     ],
-                    'password' =>  'required|min:6',
+                    'password' => 'required|min:6',
                     'employee_group_id' => 'required',
-                    'confirm_password' => 'required|same:password' ,
+                    'confirm_password' => 'required|same:password',
                 ];
             }
 
             case 'PUT':
             case 'PATCH':
             {
-                $entity = $this->route('user');
                 return [
                     'name' => 'required|string',
                     'username' => [
                         'required',
-                         Rule::unique('Modules\Core\App\Entities\User', 'username')->ignore($entity)
+                        Rule::unique('Modules\Core\App\Entities\User', 'username')->ignore($user) // Ignore the current user's username on update
                     ],
                     'mobile' => [
                         'required',
-                        Rule::unique('Modules\Core\App\Entities\User', 'mobile')->ignore($entity)
+                        Rule::unique('Modules\Core\App\Entities\User', 'mobile')->ignore($user) // Ignore on update
                     ],
                     'email' => [
                         'required',
                         'email',
-                        Rule::unique('Modules\Core\App\Entities\User', 'email')->ignore($entity)
+                        Rule::unique('Modules\Core\App\Entities\User', 'email')->ignore($user) // Ignore on update
                     ],
                     'profile_image' => 'nullable|image|mimes:jpeg,png,jpg,gif',
                     'digital_signature' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg',
@@ -87,30 +85,9 @@ class UserRequest extends FormRequest
                     'android_control_role' => 'nullable|array',
                 ];
             }
-            default:break;
+            default:
+                break;
         }
-
-
-        /*return [
-            'name' => 'required|string',
-            'username' => 'required',
-            'mobile' => 'required|numeric',
-            'email' => 'required|email',
-            'password' => !$isUpdating ? 'required|min:6' : 'nullable|min:6',
-            'confirm_password' => !$isUpdating ? 'required|same:password' : 'nullable|same:password',
-            'profile_image' => 'nullable|image|mimes:jpeg,png,jpg,gif',
-            'digital_signature' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg',
-            'alternative_email' => 'nullable|email',
-            'designation_id' => 'nullable|string',
-            'department_id' => 'nullable|string',
-            'location_id' => 'nullable|string',
-            'address' => 'nullable|string',
-            'about_me' => 'nullable|string',
-//            'enabled' => 'required|boolean',
-            'employee_group_id' => 'required|string',
-            'access_control_role' => 'nullable|array',
-            'android_control_role' => 'nullable|array',
-        ];*/
     }
 
     /**

@@ -130,6 +130,14 @@ class User
 	protected $domain;
 
 
+	/**
+     * @var GlobalOption
+	 * @ORM\ManyToOne(targetEntity="Modules\Core\App\Entities\Setting")
+	 * @ORM\JoinColumn(onDelete="CASCADE")
+	 **/
+	protected $employeeGroup;
+
+
     /**
      * @Column(type="integer", name="login_count", nullable=false, options={"unsigned":true, "default":0})
      */

@@ -11,7 +11,7 @@ class VendorRequest extends FormRequest
      *
      * @return array<string, \Illuminate\Contracts\Validation\Rule|array|string>
      */
-    public function rules(): array
+    /*public function rules(): array
     {
 
         switch($this->method())
@@ -55,7 +55,57 @@ class VendorRequest extends FormRequest
             }
             default:break;
         }
+    }*/
+
+    public function rules(): array
+    {
+        // Check if we are updating (when an 'id' is present) or creating (when 'id' is not present)
+        $vendor = $this->route('vendor'); // Make sure to match the route parameter name.
+        switch($this->method())
+        {
+            case 'GET':
+            case 'DELETE':
+            {
+                return [];
+            }
+            case 'POST':
+            {
+                return [
+                    'company_name' => 'required|string',
+                    'name' => 'required|string',
+                    'mobile' => [
+                        'required',
+                        Rule::unique('Modules\Core\App\Entities\Vendor', 'mobile')
+                    ],
+                    'customer_id' => [
+                        'nullable',
+                    ],
+                    'email' => 'email|nullable',
+                    'address' => 'string|nullable',
+                ];
+            }
+
+            case 'PUT':
+            case 'PATCH':
+            {
+                return [
+                    'company_name' => 'required|string',
+                    'name' => 'required|string',
+                    'mobile' => [
+                        'required',
+                        'numeric',
+                        Rule::unique('Modules\Core\App\Entities\Vendor', 'mobile')->ignore($vendor),
+                    ],
+                    'email' => 'email|nullable',
+                    'customer_id' => 'integer|nullable',
+                    'address' => 'string|nullable',
+                ];
+            }
+            default:
+                break;
+        }
     }
+
 
     public function messages()
     {
