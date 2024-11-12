@@ -41,6 +41,7 @@ class DomainModel extends Model
         $skip = isset($page) && $page!=''? (int)$page * $perPage:0;
         $entities = self::select([
             'id',
+            'company_name',
             'name',
             'email',
             'mobile',
