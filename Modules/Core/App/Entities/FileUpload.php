@@ -66,6 +66,18 @@ class FileUpload
     private $updatedAt;
 
     /**
+     * @var boolean
+     * @ORM\Column(name="is_process", type="boolean")
+     */
+    private $isProcess;
+
+    /**
+     * @var integer
+     * @ORM\Column(name="process_row", type="integer",nullable=true)
+     */
+    private $processRow;
+
+    /**
      * @return mixed
      */
     public function getId()

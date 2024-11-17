@@ -17,6 +17,8 @@ class FileUploadModel extends Model
         'domain_id',
         'file_type',
         'original_name',
+        'is_process',
+        'process_row',
         'file'
     ];
 
@@ -33,8 +35,8 @@ class FileUploadModel extends Model
             'original_name',
             'file',
             'domain_id',
-            DB::raw('DATE_FORMAT(created_at, "%d-%m-%Y") as created'),
-
+            'is_process',
+            DB::raw('DATE_FORMAT(created_at, "%d-%m-%Y %h:%i:%s %p") as created')
         ]);
 
         if (isset($request['term']) && !empty($request['term'])){
@@ -64,6 +66,7 @@ class FileUploadModel extends Model
         self::creating(function ($model) {
             $date =  new \DateTime("now");
             $model->created_at = $date;
+            $model->is_process = false;
         });
 
     }

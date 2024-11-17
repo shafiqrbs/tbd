@@ -3,6 +3,7 @@
 namespace Modules\Core\App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use Doctrine\ORM\EntityManagerInterface;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
@@ -17,8 +18,14 @@ use Modules\Core\App\Models\FileUploadModel;
 use Modules\Core\App\Models\UserModel;
 use Modules\Core\App\Models\VendorModel;
 use Modules\Domain\App\Models\DomainModel;
+use Modules\Inventory\App\Entities\StockItem;
+use Modules\Inventory\App\Models\CategoryModel;
 use Modules\Inventory\App\Models\ConfigModel;
+use Modules\Inventory\App\Models\ParticularModel;
+use Modules\Inventory\App\Models\ProductModel;
 use Modules\Inventory\App\Models\SettingModel as InventorySettingModel;
+use PhpOffice\PhpSpreadsheet\Exception;
+use PhpOffice\PhpSpreadsheet\Reader\Xlsx;
 
 class FileUploadController extends Controller
 {
@@ -136,91 +143,106 @@ class FileUploadController extends Controller
     /**
      * process file data to DB.
      */
-    public function fileProcessToDB(Request $request){
-        /*set_time_limit(0);
-        $fileID = $request->file_id;
-        $getFile = FileUploadModel::find($fileID);
 
-        $reader = new \PhpOffice\PhpSpreadsheet\Reader\Csv();
-        $targetLocation = public_path('/uploads/core/file-upload/');
-        $spreadSheet = $reader->load($targetLocation.$getFile->file);
-        $excelSheet = $spreadSheet->getActiveSheet();
-        $allData = $excelSheet->toArray();
 
-        dump($allData);*/
-
+    public function fileProcessToDB(Request $request, EntityManagerInterface $em)
+    {
         set_time_limit(0);
         $fileID = $request->file_id;
         $getFile = FileUploadModel::find($fileID);
 
-        $targetLocation = public_path('/uploads/core/file-upload/');
-        $filePath = $targetLocation . $getFile->file;
+        $filePath = public_path('/uploads/core/file-upload/') . $getFile->file;
 
-        $extension = pathinfo($filePath, PATHINFO_EXTENSION);
+        // Load file based on extension
+        $reader = match (pathinfo($filePath, PATHINFO_EXTENSION)) {
+            'xlsx' => new Xlsx(),
+            'csv' => new \PhpOffice\PhpSpreadsheet\Reader\Csv(),
+            default => throw new Exception('Unsupported file format.')
+        };
 
-        if ($extension == 'xlsx') {
-            $reader = new Xlsx();
-        } elseif ($extension == 'csv') {
-            $reader = new \PhpOffice\PhpSpreadsheet\Reader\Csv();
+        $allData = $reader->load($filePath)->getActiveSheet()->toArray();
+
+        // Remove headers
+        $keys = array_map('trim', array_shift($allData));
+
+        // Only proceed if it's 'Product' and structure is correct
+        if ($getFile->file_type === 'Product' && count($keys) === 5) {
+            $isInsert = $this->insertProductsInBatches($allData, $em);
         } else {
-            throw new Exception('Unsupported file format.');
+            return response()->json([
+                'message' => 'Invalid file type or structure',
+                'status' => Response::HTTP_INTERNAL_SERVER_ERROR
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
 
-        $spreadSheet = $reader->load($filePath);
-        $excelSheet = $spreadSheet->getActiveSheet();
-        $allData = $excelSheet->toArray();
+        if ($isInsert['is_insert']) {
+            $getFile->update(['is_process' => true, 'process_row' => $isInsert['row_count']]);
 
-        dump($allData);
-
-        /*$excelFile = ExcelImport::find($id);
-
-        set_time_limit(0);
-        $reader = new Xlsx();
-
-        $targetLocation = public_path('upload/excel_file/');
-        $spreadSheet = $reader->load($targetLocation.$excelFile->file_name);
-        $excelSheet = $spreadSheet->getActiveSheet();
-        $allData = $excelSheet->toArray();
-        $keys = array_shift($allData); //remove Excel column heading
-        $totalHeading = count($keys);
-        $keys = array_map('trim', array_filter($keys)); //remove all spaces from string
-
-        if ($excelFile->file_type == 'Ayat'){
-            $totalHeading = count($keys);
-            if ($totalHeading == 9) {
-                foreach ($allData as $data) {
-                    $values = array_slice($data, null, count($keys));
-                    if ($values[0] && $values[1]) {
-                        $suraInfo = Sura::where('name_en',$values[0])->first();
-                        if ($suraInfo){
-                            $input['sura_id']=$suraInfo->id;
-                        }
-                        $paraInfo = Para::where('name_en',$values[1])->first();
-                        if ($paraInfo){
-                            $input['para_id']=$paraInfo->id;
-                        }
-
-                        $input['aya_number'] = $values[2];
-                        $input['verse_key'] = $input['sura_id'].':'.$input['aya_number'];
-                        $input['name_ar'] = $values[3];
-                        $input['name_en'] = $values[4];
-                        $input['name_bn'] = $values[5];
-                        $ayatData = Ayat::create($input);
-
-                        if ($ayatData) {
-                            $ayatTafsir = new AyatTafsir();
-                            $ayatTafsir->tafsir_en = $values[7];
-                            $ayatTafsir->tafsir_bn = $values[8];
-                            $ayatTafsir->tafsir_by = $values[6];
-                            $ayatData->ayatTafsir()->save($ayatTafsir);
-                        }
-                    }
-                }
-                ExcelImport::find($id)->update(['is_import' => 1]);
-            } else {
-                Session::flash('validate', 'Please follow recommend structure');
-                return redirect()->route('excel_import_list', app()->getLocale());
-            }
-        }*/
+            return response()->json([
+                'message' => 'success',
+                'status' => Response::HTTP_OK,
+                'row' => $isInsert['row_count']
+            ], Response::HTTP_OK);
+        }
     }
+
+    private function insertProductsInBatches($allData, EntityManagerInterface $em)
+    {
+        $batchSize = 1000;
+        $batch = [];
+        $rowsProcessed = 0;
+
+        foreach ($allData as $index => $data) {
+            $values = array_map('trim', $data);
+
+            // Fetch related IDs
+            $productType = InventorySettingModel::where('name', 'like', '%' . $values[0] . '%')->first('id');
+            $productCategory = CategoryModel::where('name', 'like', '%' . $values[1] . '%')->first('id');
+            $productUnit = ParticularModel::where('name', 'like', '%' . $values[2] . '%')->first('id');
+
+            // Ensure valid data
+            if ($productType && $productCategory && $productUnit && $values[3] && $values[4]) {
+                $productData = [
+                    'product_type_id' => $productType->id,
+                    'category_id' => $productCategory->id,
+                    'unit_id' => $productUnit->id,
+                    'name' => $values[3],
+                    'alternative_name' => $values[3],
+                    'config_id' => $this->domain['config_id'],
+                    'status' => 1
+                ];
+
+                $batch[] = $productData;
+
+                // Batch insert when batch size reached
+                if (count($batch) === $batchSize) {
+                    $rowsProcessed += $this->processBatch($batch, $em);
+                    $batch = [];  // Reset batch after processing
+                }
+            }
+        }
+
+        // Process any remaining items
+        if (count($batch) > 0) {
+            $rowsProcessed += $this->processBatch($batch, $em);
+        }
+
+        return ['is_insert' => true, 'row_count' => $rowsProcessed];
+    }
+
+    private function processBatch(array $batch, EntityManagerInterface $em)
+    {
+        $rowCount = 0;
+
+        foreach ($batch as $productData) {
+            $product = ProductModel::create($productData);
+            $em->getRepository(StockItem::class)->insertStockItem($product->id, $productData);
+            $rowCount++;
+        }
+
+        return $rowCount;
+    }
+
+
+
 }
