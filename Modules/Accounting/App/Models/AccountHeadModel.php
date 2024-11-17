@@ -83,10 +83,11 @@ class AccountHeadModel extends Model
     {
 
         $name = "{$entity['mobile']}-{$entity['name']}";
+        $parent = AccountHeadModel::where('config_id',$config)->where('slug', 'account-receivable')->where('level', 2)->where('head_group', 'sub-head')->first();
         $entity = self::create(
             [
                 'name' => $name,
-                'parent_id' => '4',
+                'parent_id' => $parent['id'],
                 'customer_id' => $entity['id'],
                 'level' => '3',
                 'source' => 'customer',
@@ -118,14 +119,15 @@ class AccountHeadModel extends Model
     public static function insertVendorLedger($config, $entity)
     {
         $name = "{$entity['mobile']}-{$entity['company_name']}";
+        $parent = AccountHeadModel::where('config_id',$config)->where('slug', 'account-payable')->where('level', 2)->where('head_group','sub-head')->first();
         $entity = self::create(
             [
                 'name' => $name,
-                'source' => 'vendor',
-                'parent_id' => '5',
+                'parent_id' => $parent['id'],
                 'level' => '3',
                 'vendor_id' => $entity['id'],
                 'head_group' => 'ledger',
+                'source' => 'vendor',
                 'config_id' => $config
             ]
         );

@@ -52,7 +52,7 @@ class Customer
 
 
     /**
-     * @ORM\ManyToOne(targetEntity="Modules\Core\App\Entities\Location")
+     * @ORM\ManyToOne(targetEntity="Modules\Core\App\Entities\Setting")
      * @ORM\JoinColumn(name="location_id", referencedColumnName="id", nullable=true, onDelete="SET NULL")
      **/
     protected $location;

@@ -96,10 +96,12 @@ class CoreController extends Controller
     public function location(Request $request,EntityManagerInterface $em)
     {
 
-        $term = $request['term'];
         $service = new JsonRequestResponse();
-        $go = $this->domain['global_id'];
-        $entities = $em->getRepository(Core::class)->locationAutoComplete($go,$term);
+        $entities = SettingModel::getSettingDropdown(
+            'location',
+            $this->domain->global_id
+        );
+        //$entities = $em->getRepository(Core::class)->locationAutoComplete($go,$term);
         $data = $service->returnJosnResponse($entities);
         return $data;
     }

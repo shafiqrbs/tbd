@@ -60,7 +60,6 @@ class UserController extends Controller
         $data['email_verified_at']= now();
         $data['password']= Hash::make($data['password']);
         $data['is_delete']= 0;
-
         $user = UserModel::create($data);
         $service = new JsonRequestResponse();
         return $service->returnJosnResponse($user);
