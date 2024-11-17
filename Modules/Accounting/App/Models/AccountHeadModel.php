@@ -79,58 +79,64 @@ class AccountHeadModel extends Model
         //AccountJournalModel::insertCustomerJournalVoucher($entity);
     }
 
-    public static function insertCustomerLedger($config, $entity)
-    {
-
-        $name = "{$entity['mobile']}-{$entity['name']}";
-        $parent = AccountHeadModel::where('config_id',$config)->where('slug', 'account-receivable')->where('level', 2)->where('head_group', 'sub-head')->first();
-        $entity = self::create(
-            [
-                'name' => $name,
-                'parent_id' => $parent['id'],
-                'customer_id' => $entity['id'],
-                'level' => '3',
-                'source' => 'customer',
-                'head_group' => 'ledger',
-                'config_id' => $config
-            ]
-        );
-    }
-
     public static function insertCategoryLedger($config, $entity)
     {
 
         $name = "{$entity['name']}";
         $parent = AccountHeadModel::where('product_group_id',$entity->parent)->where('level', '2')->first();
-        self::create(
-            [
-                'name' => $name,
-                'category_id' => $entity->id,
-                'parent_id' => $parent->id,
-                'level' => '3',
-                'source' => 'category',
-                'head_group' => 'ledger',
-                'config_id' => $config
-            ]
-        );
+        if($parent) {
+            self::create(
+                [
+                    'name' => $name,
+                    'category_id' => $entity->id,
+                    'parent_id' => $parent->id,
+                    'level' => '3',
+                    'source' => 'category',
+                    'head_group' => 'ledger',
+                    'config_id' => $config
+                ]
+            );
+        }
         //AccountJournalModel::insertCustomerJournalVoucher($entity);
+    }
+
+    public static function insertCustomerLedger($config, $entity)
+    {
+        $name = "{$entity['mobile']}-{$entity['name']}";
+        $parent = AccountHeadModel::where('config_id',$config)->where('slug','account-receivable')->where('level', 2)->where('head_group', 'sub-head')->first();
+        if($parent){
+            self::create(
+                [
+                    'name' => $name,
+                    'parent_id' => $parent['id'],
+                    'customer_id' => $entity['id'],
+                    'level' => '3',
+                    'source' => 'customer',
+                    'head_group' => 'ledger',
+                    'config_id' => $config
+                ]
+            );
+        }
+
     }
 
     public static function insertVendorLedger($config, $entity)
     {
         $name = "{$entity['mobile']}-{$entity['company_name']}";
-        $parent = AccountHeadModel::where('config_id',$config)->where('slug', 'account-payable')->where('level', 2)->where('head_group','sub-head')->first();
-        $entity = self::create(
-            [
-                'name' => $name,
-                'parent_id' => $parent['id'],
-                'level' => '3',
-                'vendor_id' => $entity['id'],
-                'head_group' => 'ledger',
-                'source' => 'vendor',
-                'config_id' => $config
-            ]
-        );
+        $parent = AccountHeadModel::where('config_id',$config)->where('slug','account-payable')->where('level', 2)->where('head_group','sub-head')->first();
+        if($parent) {
+            self::create(
+                [
+                    'name' => $name,
+                    'parent_id' => $parent['id'],
+                    'level' => '3',
+                    'vendor_id' => $entity['id'],
+                    'head_group' => 'ledger',
+                    'source' => 'vendor',
+                    'config_id' => $config
+                ]
+            );
+        }
         //AccountJournalModel::insertCustomerJournalVoucher($entity);
     }
 
@@ -154,7 +160,7 @@ class AccountHeadModel extends Model
 
     public static function getLedger($request,$domain)
     {
-        dd($request->query('mode'));
+
         $query = self::select(['name', 'slug', 'id','level'])
             ->where([['level', 1], ['config_id', $domain['config_id']]]);
         return $query->get()->toArray();
