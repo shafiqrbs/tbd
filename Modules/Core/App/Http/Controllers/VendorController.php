@@ -55,7 +55,7 @@ class VendorController extends Controller
         $entity = VendorModel::create($input);
         $ledgerExist = AccountHeadModel::where('vendor_id',$entity->id)->where('config_id',$this->domain['acc_config_id'])->first();
         if (empty($ledgerExist)){
-            AccountHeadModel::insertVendorLedger($this->domain['acc_config_id'],$entity);
+            AccountHeadModel::insertVendorLedger($this->domain['acc_config'],$entity);
         }
         $data = $service->returnJosnResponse($entity);
         return $data;
