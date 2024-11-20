@@ -41,7 +41,7 @@ class Vendor
 
 
 	/**
-	 * @ORM\ManyToOne(targetEntity="Modules\Core\App\Entities\Customer")
+	 * @ORM\OneToOne(targetEntity="Modules\Core\App\Entities\Customer")
 	 * @ORM\JoinColumn(name="customer_id", referencedColumnName="id", nullable=true, onDelete="cascade")
 	 */
 	protected $customer;

@@ -33,6 +33,7 @@ class VendorRequest extends FormRequest
                     ],
                     'customer_id' => [
                         'nullable',
+                        Rule::unique('Modules\Core\App\Entities\Customer', 'id')
                     ],
                     'email' => 'email|nullable',
                     'address' => 'string|nullable',
@@ -48,10 +49,13 @@ class VendorRequest extends FormRequest
                     'mobile' => [
                         'required',
                         'numeric',
-                        Rule::unique('Modules\Core\App\Entities\Vendor', 'mobile')->ignore($vendor),
+                        Rule::unique('Modules\Core\App\Entities\Vendor', 'mobile')->ignore($vendor)
                     ],
                     'email' => 'email|nullable',
-                    'customer_id' => 'integer|nullable',
+                    'customer_id' => [
+                        'nullable',
+                        Rule::unique('Modules\Core\App\Entities\Customer', 'id')->ignore($vendor)
+                    ],
                     'address' => 'string|nullable',
                 ];
             }
@@ -70,6 +74,7 @@ class VendorRequest extends FormRequest
             'name.string' => 'Name field must be string',
             'mobile.required' => 'Mobile field must be required',
             'mobile.integer' => 'Mobile field must be number',
+            'customer_id.unique' => 'The customer has already been taken.',
         ];
     }
 
