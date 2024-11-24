@@ -3,6 +3,7 @@
 use App\Http\Middleware\HeaderAuthenticationMiddleware;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use Modules\Domain\App\Http\Controllers\BranchController;
 use Modules\Domain\App\Http\Controllers\DomainController;
 
 /*
@@ -29,6 +30,12 @@ Route::prefix('/domain')->middleware(array(HeaderAuthenticationMiddleware::class
             'destroy' => 'domain.setting.destroy',
         ]);
     Route::prefix('/manage')->middleware([HeaderAuthenticationMiddleware::class])->group(function() {
+
+        Route::prefix('branch')->middleware([HeaderAuthenticationMiddleware::class])->group(function() {
+            Route::get('/', [BranchController::class,'domainForBranch'])->name('get_domain_for_branch');
+            Route::post('/create', [BranchController::class,'store'])->name('store_branch');
+        });
+
         Route::post('/sub-domain/{id}', [DomainController::class,'subDomain'])->name('sub_domain');
         Route::post('/inventory/{id}', [DomainController::class,'inventorySetting'])->name('domain_inventory_setting');
     });

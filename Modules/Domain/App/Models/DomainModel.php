@@ -34,6 +34,20 @@ class DomainModel extends Model
         ];
     }
 
+    public static function getDomainsForBranch($exceptIds)
+    {
+        $entities = self::select([
+            'id',
+            'name',
+            'email',
+            'mobile',
+        ])
+            ->whereNotIn('id', [$exceptIds]) // Exclude multiple IDs
+            ->get()->toArray();
+
+        return $entities; // Return the result
+    }
+
     public static function getRecords($request){
 
         $page =  isset($request['page']) && $request['page'] > 0?($request['page'] - 1 ) : 0;
