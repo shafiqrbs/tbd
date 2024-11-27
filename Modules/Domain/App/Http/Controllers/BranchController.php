@@ -22,6 +22,7 @@ use Modules\Core\App\Models\VendorModel;
 use Modules\Domain\App\Entities\DomainChild;
 use Modules\Domain\App\Entities\GlobalOption;
 use Modules\Domain\App\Entities\SubDomain;
+use Modules\Domain\App\Http\Requests\BranchPriceUpdateRequest;
 use Modules\Domain\App\Http\Requests\BranchRequest;
 use Modules\Domain\App\Http\Requests\DomainRequest;
 use Modules\Core\App\Models\UserModel;
@@ -216,5 +217,14 @@ class BranchController extends Controller
             AccountHeadModel::insertVendorLedger($childAccConfig, $vendor);
         }
     }
+
+
+    public function priceUpdate(BranchPriceUpdateRequest $request)
+    {
+        $input = $request->validated();
+        CustomerModel::findOrFail($input['customer_id'])->update([$input['field_name'] => $input['value']]);
+        return response()->json(['status'=>200,'success' => true,'data'=>$input]);
+    }
+
 
 }
