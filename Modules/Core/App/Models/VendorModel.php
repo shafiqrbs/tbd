@@ -29,6 +29,7 @@ class VendorModel extends Model
         'code',
         'vendor_code',
         'customer_id',
+        'sub_domain_id',
         'domain_id'
     ];
 

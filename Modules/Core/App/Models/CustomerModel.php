@@ -57,7 +57,12 @@ class CustomerModel extends Model
         'customerId',
         'customer_unique_name',
         'unique_id',
-        'domain_id'
+        'status',
+        'sub_domain_id',
+        'domain_id',
+        'discount_percent',
+        'bonus_percent',
+        'monthly_target_amount'
     ];
     public static function getAllCustomers(){
         $data = self::where(['status'=>1])->whereNotNull('mobile')->orderBy('name','ASC')
@@ -202,5 +207,27 @@ class CustomerModel extends Model
         return $data;
     }
 
-
+    public static function getCustomerDetails($id)
+    {
+        return self::query()
+            ->where('cor_customers.id', $id)
+            ->leftJoin('users', 'users.id', '=', 'cor_customers.marketing_id')
+            ->leftJoin('cor_setting', 'cor_setting.id', '=', 'cor_customers.customer_group_id')
+            ->leftJoin('cor_locations', 'cor_locations.id', '=', 'cor_customers.location_id')
+            ->select([
+                'cor_customers.id as id',
+                'cor_customers.name as name',
+                'cor_customers.mobile as mobile',
+                'cor_customers.credit_limit as credit_limit',
+                'cor_setting.name as customer_group',
+                'cor_setting.id as customer_group_id',
+                'users.id as marketing_id',
+                'users.name as marketing_name',
+                DB::raw('DATE_FORMAT(cor_customers.created_at, "%d-%m-%Y") as created_date'),
+                'cor_customers.discount_percent',
+                'cor_customers.bonus_percent',
+                'cor_customers.monthly_target_amount',
+            ])
+            ->first();
+    }
 }

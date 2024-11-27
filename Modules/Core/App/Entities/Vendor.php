@@ -102,7 +102,7 @@ class Vendor
 
     /**
      * @Gedmo\Slug(fields={"companyName"})
-     * @Doctrine\ORM\Mapping\Column(length=255)
+     * @Doctrine\ORM\Mapping\Column(length=255,nullable=true)
      */
     private $slug;
 
@@ -190,6 +190,12 @@ class Vendor
      * @ORM\Column(name="updated_at", type="datetime")
      */
     private $updatedAt;
+
+    /**
+     * @ORM\ManyToOne(targetEntity="Modules\Domain\App\Entities\GlobalOption")
+     * @ORM\JoinColumn(onDelete="CASCADE")
+     **/
+    protected $subDomain;
 
     /**
      * @return int

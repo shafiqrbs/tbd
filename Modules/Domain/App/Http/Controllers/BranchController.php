@@ -9,11 +9,16 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 use Modules\Accounting\App\Entities\AccountHead;
+use Modules\Accounting\App\Entities\Config;
+use Modules\Accounting\App\Models\AccountHeadModel;
 use Modules\Accounting\App\Models\AccountingModel;
+use Modules\AppsApi\App\Services\GeneratePatternCodeService;
 use Modules\AppsApi\App\Services\JsonRequestResponse;
 use Modules\Core\App\Entities\Customer;
 use Modules\Core\App\Models\CustomerModel;
+use Modules\Core\App\Models\VendorModel;
 use Modules\Domain\App\Entities\DomainChild;
 use Modules\Domain\App\Entities\GlobalOption;
 use Modules\Domain\App\Entities\SubDomain;
@@ -87,103 +92,129 @@ class BranchController extends Controller
      * Store a newly created resource in storage.
      */
 
-    public function store(BranchRequest $request , EntityManager $em)
-    {
-        $data = $request->validated();
+    public function store(BranchRequest $request, GeneratePatternCodeService $patternCodeService, JsonRequestResponse $service) {
+        // Validate input
+        $input = $request->validated();
 
-        dump($data);
-
-        /*// Start the transaction
         DB::beginTransaction();
 
         try {
-            // Step 1: Create the domain the entity
-            $data['modules'] = json_encode($data['modules'], JSON_PRETTY_PRINT);
-            $entity = DomainModel::create($data);
+            // Fetch the child and parent domains
+            $childDomain = DomainModel::findOrFail($input['child_domain_id']);
+            $parentDomain = DomainModel::findOrFail($input['parent_domain_id']);
 
-            // Step 2: Prepare email and password, then create user
-            $password = "@123456";
-            $email = $data['email'] ?? "{$data['username']}@gmail.com"; // If email is not present, default to username@gmail.com
+            // Create customer
+            $customerData = $this->prepareCustomerData($childDomain, $patternCodeService);
+            $customer = CustomerModel::create($customerData);
+            $this->ensureCustomerLedger($customer);
 
-            UserModel::create([
-                'username' => $data['username'],
-                'email' => $email,
-                'password' => bcrypt($password),
-                'domain_id' => $entity->id,
-            ]);
+            // Create vendor
+            $vendorData = $this->prepareVendorData($childDomain, $parentDomain, $patternCodeService);
+            $vendor = VendorModel::create($vendorData);
+            $this->ensureVendorLedger($vendor, $childDomain->id);
 
-            // Step 3: Create the inventory configuration (config)
-            $business = UtilitySettingModel::whereSlug('general')->first();
-            $currency = CurrencyModel::find(1);
-
-            $config =  ConfigModel::create([
-                'domain_id' => $entity->id,
-                'currency_id' => $currency->id,
-                'zero_stock' => true,
-                'business_model_id' => $business->id,
-            ]);
-
-            // Step 4: Create the accounting data
-            $accountingConfig = AccountingModel::create([
-                'domain_id' => $entity->id,
-                'financial_start_date' => date('Y-m-d'),
-                'financial_end_date' => date('Y-m-d'),
-            ]);
-            $getProductType = UtilitySettingModel::getEntityDropdown('product-type');
-            if (count($getProductType) > 0) {
-                // If no inventory config found, return JSON response.
-                if (!$config) {
-                    DB::rollBack();
-                    $response = new Response();
-                    $response->headers->set('Content-Type', 'application/json');
-                    $response->setContent(json_encode([
-                        'message' => 'Inventory config not found',
-                        'status' => Response::HTTP_NOT_FOUND,
-                    ]));
-                    $response->setStatusCode(Response::HTTP_OK);
-                    return $response;
-                }
-
-                // Loop through each product type and either find or create inventory setting.
-                foreach ($getProductType as $type) {
-                    // If the inventory setting is not found, create a new one.
-                    InventorySettingModel::create([
-                        'config_id' => $config->id,
-                        'setting_id' => $type->id,
-                        'name' => $type->name,
-                        'slug' => $type->slug,
-                        'parent_slug' => 'product_type',
-                        'is_production' => in_array($type->slug,
-                            ['post-production', 'mid-production', 'pre-production']) ? 1 : 0,
-                    ]);
-                }
-            }
-
-
-            // Commit all database operations
+            // Commit transaction
             DB::commit();
-            $em->getRepository(AccountHead::class)->generateAccountHead($accountingConfig->id);
-            // Return the response
-            $service = new JsonRequestResponse();
-            return $service->returnJosnResponse($entity);
 
-        } catch (Exception $e) {
-            // Something went wrong, rollback the transaction
+            //get customer
+
+            // Return success response
+            return $service->returnJosnResponse(CustomerModel::getCustomerDetails($customer->id));
+        } catch (\Exception $e) {
+            // Rollback transaction on failure
             DB::rollBack();
 
-            // Optionally log the exception for debugging purposes
-            \Log::error('Error storing domain and related data: ' . $e->getMessage());
-
-            // Return an error response
-            $response = new Response();
-            $response->headers->set('Content-Type', 'application/json');
-            $response->setContent(json_encode([
-                'message' => 'An error occurred while saving the domain and related data.',
+            // Handle the exception and return error response
+            return response()->json([
+                'status' => 'error',
+                'message' => 'An error occurred while storing the branch data.',
                 'error' => $e->getMessage(),
-                'status' => Response::HTTP_INTERNAL_SERVER_ERROR,
-            ]));
-            $response->setStatusCode(Response::HTTP_INTERNAL_SERVER_ERROR);
-            return $response;
-        }*/
+            ], 500);
+        }
     }
+
+    private function prepareCustomerData($childDomain, $patternCodeService): array
+    {
+        $code = $this->generateCustomerCode($patternCodeService);
+
+        return [
+            'domain_id' => $this->domain['global_id'],
+            'customer_unique_id' => "{$this->domain['global_id']}@{$childDomain->mobile}-{$childDomain->name}",
+            'code' => $code['code'],
+            'name' => $childDomain->name,
+            'mobile' => $childDomain->mobile,
+            'email' => $childDomain->email,
+            'status' => true,
+            'address' => $childDomain->address,
+            'customer_group_id' => 1, // Default group
+            'slug' => Str::slug($childDomain->name),
+            'sub_domain_id' => $childDomain->id,
+            'customerId' => $code['generateId'], // Generated ID from the pattern code
+        ];
+    }
+
+    private function generateCustomerCode($patternCodeService): array
+    {
+        $params = [
+            'domain' => $this->domain['global_id'],
+            'table' => 'cor_customers',
+            'prefix' => 'EMP-',
+        ];
+
+        $pattern = $patternCodeService->customerCode($params);
+
+        return $pattern;
+    }
+
+
+    private function prepareVendorData($childDomain, $parentDomain, $patternCodeService): array
+    {
+        $params = [
+            'domain' => $this->domain['global_id'],
+            'table' => 'cor_vendors',
+            'prefix' => '',
+        ];
+
+        $pattern = $patternCodeService->customerCode($params);
+
+        return [
+            'name' => $parentDomain->name,
+            'company_name' => $parentDomain->company_name,
+            'mobile' => $parentDomain->mobile,
+            'email' => $parentDomain->email,
+            'status' => true,
+            'domain_id' => $childDomain->id,
+            'sub_domain_id' => $this->domain['global_id'],
+            'slug' => Str::slug($childDomain->name),
+            'code' => $pattern['code'],
+            'vendor_code' => $pattern['generateId'],
+        ];
+    }
+
+    private function ensureCustomerLedger(CustomerModel $customer)
+    {
+        $ledgerExist = AccountHeadModel::where('customer_id', $customer->id)
+            ->where('config_id', $this->domain['acc_config'])
+            ->exists();
+
+        if (!$ledgerExist) {
+            AccountHeadModel::insertCustomerLedger($this->domain['acc_config'], $customer);
+        }
+    }
+
+    private function ensureVendorLedger(VendorModel $vendor, $childDomainId)
+    {
+        $childAccConfig = DB::table('acc_config')
+            ->where('domain_id', $childDomainId)
+            ->value('id');
+
+        $ledgerExist = AccountHeadModel::where('vendor_id', $vendor->id)
+            ->where('config_id', $childAccConfig)
+            ->exists();
+
+        if (!$ledgerExist) {
+            AccountHeadModel::insertVendorLedger($childAccConfig, $vendor);
+        }
+    }
+
 }

@@ -137,7 +137,6 @@ class AccountHeadModel extends Model
                 ]
             );
         }
-        //AccountJournalModel::insertCustomerJournalVoucher($entity);
     }
 
 

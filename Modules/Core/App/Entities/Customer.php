@@ -143,7 +143,7 @@ class Customer
 
     /**
      * @Gedmo\Slug(fields={"name"})
-     * @Doctrine\ORM\Mapping\Column(length=255)
+     * @Doctrine\ORM\Mapping\Column(length=255,nullable=true)
      */
     private $slug;
 
