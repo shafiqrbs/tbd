@@ -35,6 +35,7 @@ Route::prefix('/domain')->middleware(array(HeaderAuthenticationMiddleware::class
             Route::get('/', [BranchController::class,'domainForBranch'])->name('get_domain_for_branch');
             Route::post('/create', [BranchController::class,'store'])->name('store_branch');
             Route::post('price/update', [BranchController::class,'priceUpdate'])->name('branch_price_update');
+            Route::post('category/update', [BranchController::class,'categoryUpdate'])->name('branch_category_update');
         });
 
         Route::post('/sub-domain/{id}', [DomainController::class,'subDomain'])->name('sub_domain');

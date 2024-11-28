@@ -28,6 +28,7 @@ use Modules\Domain\App\Http\Requests\DomainRequest;
 use Modules\Core\App\Models\UserModel;
 use Modules\Domain\App\Models\CurrencyModel;
 use Modules\Domain\App\Models\DomainModel;
+use Modules\Domain\App\Models\SubdomainCategory;
 use Modules\Inventory\App\Entities\Setting;
 use Modules\Inventory\App\Models\CategoryModel;
 use Modules\Inventory\App\Models\ConfigModel;
@@ -54,17 +55,23 @@ class BranchController extends Controller
 
         if (count($domains) > 0) {
             foreach ($domains as $domain) {
-                $getCustomerPriceData = CustomerModel::where('domain_id', $domain['id'])
-                    ->select('discount_percent', 'bonus_percent', 'monthly_target_amount')
+                // sub domain exists
+                $getCustomerPriceData = CustomerModel::where('sub_domain_id', $domain['id'])
+                    ->where('domain_id', $this->domain['global_id'])
+                    ->select('discount_percent', 'bonus_percent', 'monthly_target_amount','id')
                     ->first();
 
                 if ($getCustomerPriceData) {
+                    $domain['customer_id'] = $getCustomerPriceData->id;
+                    $domain['is_sub_domain'] = true;
                     $domain['prices'] = [
                         ['discount_percent' => $getCustomerPriceData->discount_percent,'label'=> 'Discount Percent'],
                         ['bonus_percent' => $getCustomerPriceData->bonus_percent,'label'=> 'Bonus Percent'],
                         ['monthly_target_amount' => $getCustomerPriceData->monthly_target_amount,'label'=> 'Monthly Target Amount'],
                     ];
                 } else {
+                    $domain['customer_id'] = null;
+                    $domain['is_sub_domain'] = false;
                     $domain['prices'] = [
                         ['discount_percent' => null,'label'=> 'Discount Percent'],
                         ['bonus_percent' => null,'label'=> 'Bonus Percent'],
@@ -72,6 +79,28 @@ class BranchController extends Controller
                     ];
                 }
                 $domain['categories'] = CategoryModel::getCategoryDropdown($this->domain);
+
+                // get assign category
+                $invConfig = ConfigModel::where('domain_id', $domain['id'])->value('id');
+
+                $categories = SubdomainCategory::where('config_id', $invConfig)
+                    ->pluck('category_id')
+                    ->toArray();
+
+                // Directly map "category_id" to the required format "category_id#domain_id"
+                $checkCategory = array_map(fn($categoryId) => $categoryId . '#' . $domain['id'], $categories);
+
+                $domain['check_category'] = $checkCategory;
+
+                /*$invConfig = ConfigModel::where('domain_id', $domain['id'])->value('id');
+                $categories = SubdomainCategory::where('config_id', $invConfig)->select('category_id')->get()->toArray();
+                $checkCategory = [];
+                if (count($categories) > 0) {
+                    foreach ($categories as $subCategory) {
+                        $checkCategory[] = $subCategory['category_id'].'#'.$domain['id'];
+                    }
+                }
+                $domain['check_category'] = $checkCategory;*/
                 $data[] = $domain;
             }
         }
@@ -225,6 +254,74 @@ class BranchController extends Controller
         CustomerModel::findOrFail($input['customer_id'])->update([$input['field_name'] => $input['value']]);
         return response()->json(['status'=>200,'success' => true,'data'=>$input]);
     }
+
+
+    public function categoryUpdate(Request $request)
+    {
+        try {
+            // Validate the input
+            $request->validate([
+                'value' => ['required', 'string', 'regex:/^\d+#\d+$/']
+            ], [
+                'value.regex' => 'The value must be in the format "categoryId#domainId".',
+            ]);
+
+            // Split and parse the input
+            [$categoryId, $domainId] = explode('#', $request->input('value'));
+
+            // Validate numeric IDs
+            if (!is_numeric($categoryId) || !is_numeric($domainId)) {
+                return response()->json(['status' => 422, 'success' => false, 'message' => 'Category ID or Domain ID is invalid.']);
+            }
+
+            // Fetch configuration
+            $childAccConfig = ConfigModel::where('domain_id', $domainId)->value('id');
+            if (!$childAccConfig) {
+                return response()->json(['status' => 404, 'success' => false, 'message' => 'Configuration not found.']);
+            }
+
+            // Fetch category and category group
+            $category = CategoryModel::find($categoryId);
+            if (!$category) {
+                return response()->json(['status' => 404, 'success' => false, 'message' => 'Category not found.']);
+            }
+            $categoryGroup = $category->parent;
+
+            // Fetch or create SubdomainCategory
+            $subCategory = SubdomainCategory::where('category_id', $categoryId)
+                ->where('config_id', $childAccConfig)
+                ->first();
+
+            if (!$subCategory) {
+                $subCategory = SubdomainCategory::create([
+                    'category_id' => $categoryId,
+                    'config_id' => $childAccConfig,
+                    'category_group_id' => $categoryGroup ?? null,
+                    'created_by_id' => $this->domain['user_id'],
+                ]);
+            } else {
+                $subCategory->update([
+                    'category_id' => $categoryId,
+                    'config_id' => $childAccConfig,
+                    'category_group_id' => $categoryGroup ?? null,
+                ]);
+            }
+
+            // Success response
+            return response()->json([
+                'status' => 200,
+                'success' => true,
+                'message' => 'Category updated successfully.',
+                'data' => $subCategory,
+            ]);
+
+        } catch (\Exception $e) {
+            // Log and return error response
+            \Log::error('Category update failed: ' . $e->getMessage());
+            return response()->json(['status' => 500, 'success' => false, 'message' => 'An internal error occurred.']);
+        }
+    }
+
 
 
 }
