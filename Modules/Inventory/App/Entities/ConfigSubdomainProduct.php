@@ -48,6 +48,12 @@ class ConfigSubdomainProduct
      **/
     private $category;
 
+    /**
+     * @var boolean
+     * @ORM\Column(type="boolean" )
+     */
+    private $status;
+
 
     /**
      * @var \DateTime

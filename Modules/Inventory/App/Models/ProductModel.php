@@ -24,6 +24,7 @@ class ProductModel extends Model
         'barcode',
         'status',
         'config_id',
+        'parent_id',
     ];
 
     /**
@@ -46,6 +47,7 @@ class ProductModel extends Model
         self::creating(function ($model) {
             $date =  new \DateTime("now");
             $model->created_at = $date;
+            $model->status = true;
         });
 
         self::updating(function ($model) {

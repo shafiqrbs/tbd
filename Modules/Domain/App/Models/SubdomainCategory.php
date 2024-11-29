@@ -17,7 +17,8 @@ class SubdomainCategory extends Model
         'category_group_id',
         'category_id',
         'notes',
-        'process'
+        'process',
+        'status',
     ];
 
     public static function boot() {
@@ -25,7 +26,7 @@ class SubdomainCategory extends Model
         self::creating(function ($model) {
             $date =  new \DateTime("now");
             $model->created_at = $date;
-            #$model->created_by_id = auth()->user()->id;
+            $model->status = true;
         });
 
         self::updating(function ($model) {

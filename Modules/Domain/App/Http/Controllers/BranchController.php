@@ -4,6 +4,7 @@ namespace Modules\Domain\App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -30,8 +31,11 @@ use Modules\Domain\App\Models\CurrencyModel;
 use Modules\Domain\App\Models\DomainModel;
 use Modules\Domain\App\Models\SubdomainCategory;
 use Modules\Inventory\App\Entities\Setting;
+use Modules\Inventory\App\Entities\StockItem;
 use Modules\Inventory\App\Models\CategoryModel;
 use Modules\Inventory\App\Models\ConfigModel;
+use Modules\Inventory\App\Models\ProductModel;
+use Modules\Inventory\App\Models\StockItemModel;
 use Modules\Utility\App\Models\SettingModel as UtilitySettingModel;
 use Modules\Inventory\App\Models\SettingModel as InventorySettingModel;
 
@@ -58,12 +62,12 @@ class BranchController extends Controller
                 // sub domain exists
                 $getCustomerPriceData = CustomerModel::where('sub_domain_id', $domain['id'])
                     ->where('domain_id', $this->domain['global_id'])
-                    ->select('discount_percent', 'bonus_percent', 'monthly_target_amount','id')
+                    ->select('discount_percent', 'bonus_percent', 'monthly_target_amount','id','status')
                     ->first();
 
                 if ($getCustomerPriceData) {
                     $domain['customer_id'] = $getCustomerPriceData->id;
-                    $domain['is_sub_domain'] = true;
+                    $domain['is_sub_domain'] = $getCustomerPriceData->status==1?true:false;
                     $domain['prices'] = [
                         ['discount_percent' => $getCustomerPriceData->discount_percent,'label'=> 'Discount Percent'],
                         ['bonus_percent' => $getCustomerPriceData->bonus_percent,'label'=> 'Bonus Percent'],
@@ -83,7 +87,7 @@ class BranchController extends Controller
                 // get assign category
                 $invConfig = ConfigModel::where('domain_id', $domain['id'])->value('id');
 
-                $categories = SubdomainCategory::where('config_id', $invConfig)
+                $categories = SubdomainCategory::where('config_id', $invConfig)->where('status',true)
                     ->pluck('category_id')
                     ->toArray();
 
@@ -92,15 +96,6 @@ class BranchController extends Controller
 
                 $domain['check_category'] = $checkCategory;
 
-                /*$invConfig = ConfigModel::where('domain_id', $domain['id'])->value('id');
-                $categories = SubdomainCategory::where('config_id', $invConfig)->select('category_id')->get()->toArray();
-                $checkCategory = [];
-                if (count($categories) > 0) {
-                    foreach ($categories as $subCategory) {
-                        $checkCategory[] = $subCategory['category_id'].'#'.$domain['id'];
-                    }
-                }
-                $domain['check_category'] = $checkCategory;*/
                 $data[] = $domain;
             }
         }
@@ -133,20 +128,38 @@ class BranchController extends Controller
             $childDomain = DomainModel::findOrFail($input['child_domain_id']);
             $parentDomain = DomainModel::findOrFail($input['parent_domain_id']);
 
-            // Create customer
-            $customerData = $this->prepareCustomerData($childDomain, $patternCodeService);
-            $customer = CustomerModel::create($customerData);
-            $this->ensureCustomerLedger($customer);
+            // Handle Customer
+            $customer = $this->handleEntity(
+                CustomerModel::class,
+                [
+                    'sub_domain_id' => $input['child_domain_id'],
+                    'domain_id' => $input['parent_domain_id']
+                ],
+                $input['checked'],
+                fn() => $this->prepareCustomerData($childDomain, $patternCodeService)
+            );
 
-            // Create vendor
-            $vendorData = $this->prepareVendorData($childDomain, $parentDomain, $patternCodeService);
-            $vendor = VendorModel::create($vendorData);
-            $this->ensureVendorLedger($vendor, $childDomain->id);
+            if ($customer) {
+                $this->ensureCustomerLedger($customer);
+            }
+
+            // Handle Vendor
+            $vendor = $this->handleEntity(
+                VendorModel::class,
+                [
+                    'sub_domain_id' => $input['parent_domain_id'],
+                    'domain_id' => $input['child_domain_id']
+                ],
+                $input['checked'],
+                fn() => $this->prepareVendorData($childDomain, $parentDomain, $patternCodeService)
+            );
+
+            if ($vendor) {
+                $this->ensureVendorLedger($vendor, $childDomain->id);
+            }
 
             // Commit transaction
             DB::commit();
-
-            //get customer
 
             // Return success response
             return $service->returnJosnResponse(CustomerModel::getCustomerDetails($customer->id));
@@ -160,6 +173,27 @@ class BranchController extends Controller
                 'message' => 'An error occurred while storing the branch data.',
                 'error' => $e->getMessage(),
             ], 500);
+        }
+    }
+
+    // Helper function to handle customer/vendor creation and update
+    protected function handleEntity($modelClass, $whereConditions, $isChecked, $createCallback)
+    {
+        $entity = $modelClass::where($whereConditions)->first();
+
+        if ($isChecked) {
+            // Create or Update the entity
+            if (!$entity) {
+                $entityData = $createCallback();
+                return $modelClass::create($entityData);
+            }
+            $entity->update(['status' => true]);
+            return $entity->fresh();
+        } else {
+            if ($entity) {
+                $entity->update(['status' => false]);
+            }
+            return null;
         }
     }
 
@@ -256,14 +290,16 @@ class BranchController extends Controller
     }
 
 
-    public function categoryUpdate(Request $request)
+    public function categoryUpdate(Request $request,EntityManagerInterface $em)
     {
         try {
             // Validate the input
             $request->validate([
-                'value' => ['required', 'string', 'regex:/^\d+#\d+$/']
+                'value' => ['required', 'string', 'regex:/^\d+#\d+$/'],
+                'check' => 'required|boolean'
             ], [
                 'value.regex' => 'The value must be in the format "categoryId#domainId".',
+                'check.required' => 'The check field is required.',
             ]);
 
             // Split and parse the input
@@ -288,24 +324,27 @@ class BranchController extends Controller
             $categoryGroup = $category->parent;
 
             // Fetch or create SubdomainCategory
-            $subCategory = SubdomainCategory::where('category_id', $categoryId)
-                ->where('config_id', $childAccConfig)
-                ->first();
-
-            if (!$subCategory) {
-                $subCategory = SubdomainCategory::create([
+            $subCategory = SubdomainCategory::firstOrCreate(
+                [
                     'category_id' => $categoryId,
                     'config_id' => $childAccConfig,
+                ],
+                [
                     'category_group_id' => $categoryGroup ?? null,
                     'created_by_id' => $this->domain['user_id'],
-                ]);
-            } else {
+                    'status' => true, // Default status for newly created records
+                ]
+            );
+
+            // Update status if the record already existed
+            if (!$subCategory->wasRecentlyCreated) {
                 $subCategory->update([
-                    'category_id' => $categoryId,
-                    'config_id' => $childAccConfig,
-                    'category_group_id' => $categoryGroup ?? null,
+                    'status' => $request->input('check') ? true : false,
                 ]);
             }
+
+            // handle category wise product create & update
+            $this->handleCategoryProduct($categoryId,$childAccConfig,$em,$request->input('check'),$domainId);
 
             // Success response
             return response()->json([
@@ -323,5 +362,104 @@ class BranchController extends Controller
     }
 
 
+    private function handleCategoryProduct($categoryId, $childAccConfig, $entityManager, $shouldUpdate, $domainId) {
+        // Fetch all products for the given category and config
+        $products = ProductModel::where('category_id', $categoryId)
+            ->where('config_id', $this->domain['config_id'])
+            ->where('status', true)
+            ->get();
+
+        // Fetch all child products for given config in one query
+        $productUpdates = ProductModel::where('config_id', $childAccConfig)
+            ->whereIn('parent_id', $products->pluck('id')) // Batch query
+            ->get()
+            ->keyBy('parent_id');
+
+        // Pre-fetch customer discounts to avoid redundant calls
+        $discountPercent = $this->getCustomerDiscount($domainId);
+
+        // Pre-fetch all stock items for efficiency
+        $parentStocks = StockItemModel::whereIn('product_id', $products->pluck('id'))
+            ->get()
+            ->keyBy('product_id');
+
+        // Iterate through all parent products
+        foreach ($products as $parentProduct) {
+            $productUpdate = $productUpdates[$parentProduct->id] ?? null;
+            $parentStock = $parentStocks[$parentProduct->id] ?? null;
+
+            if ($shouldUpdate && !$productUpdate) {
+                $this->createChildProduct($parentProduct, $categoryId, $childAccConfig, $entityManager, $parentStock, $discountPercent);
+            } elseif ($productUpdate) {
+                $this->updateProductAndStock($parentProduct, $productUpdate, $parentStock, $shouldUpdate, $discountPercent);
+            }
+        }
+
+        return true;
+    }
+
+    private function createChildProduct($parentProduct, $categoryId, $childAccConfig, $entityManager, $parentStock, $discountPercent) {
+        // Create a new child product
+        $childProduct = ProductModel::create([
+            'category_id' => $categoryId,
+            'name' => $parentProduct->name,
+            'slug' => $this->generateUniqueSlug($parentProduct->slug),
+            'config_id' => $childAccConfig,
+            'barcode' => $parentProduct->barcode,
+            'alternative_name' => $parentProduct->alternative_name,
+            'unit_id' => $parentProduct->unit_id,
+            'product_type_id' => $parentProduct->product_type_id,
+            'parent_id' => $parentProduct->id,
+        ]);
+
+        // Prepare stock data and insert
+        $stockData = $this->prepareStockData($parentStock, $discountPercent);
+        $entityManager->getRepository(StockItem::class)->insertStockItem($childProduct->id, $stockData);
+
+        return true;
+    }
+
+    private function updateProductAndStock($parentProduct, $productUpdate, $parentStock, $shouldUpdate, $discountPercent) {
+        $status = $shouldUpdate ? true : false;
+
+        // Update child product's status
+        $productUpdate->update(['status' => $status]);
+
+        $productStockUpdate = StockItemModel::where('product_id', $productUpdate->id)->first();
+
+        if ($productStockUpdate) {
+            // Update child stock
+            $productStockUpdate->update(
+                $this->prepareStockData($parentStock, $discountPercent, ['status' => $status])
+            );
+        }
+
+        return true;
+    }
+
+    private function getCustomerDiscount($domainId) {
+        // Fetch customer and return discount percentage
+        $customer = CustomerModel::where('domain_id', $this->domain['global_id'])
+            ->where('sub_domain_id', $domainId)
+            ->first();
+
+        return $customer->discount_percent ?? 0;
+    }
+
+    private function prepareStockData($parentStock, $discountPercent, $additionalData = []) {
+        // Centralized stock calculation logic with additional fields
+        $baseStockData = [
+            'purchase_price' => $parentStock ? $parentStock->sales_price * ((100 - $discountPercent) / 100) : 0.0,
+            'sales_price' => $parentStock->sales_price ?? 0.0,
+            'min_quantity' => $parentStock->min_quantity ?? 0.0,
+        ];
+
+        return array_merge($baseStockData, $additionalData);
+    }
+
+    private function generateUniqueSlug($slug) {
+        // Generate a unique slug by appending random characters
+        return $slug . '-' . substr(uniqid(), -6);
+    }
 
 }

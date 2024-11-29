@@ -30,7 +30,8 @@ class VendorModel extends Model
         'vendor_code',
         'customer_id',
         'sub_domain_id',
-        'domain_id'
+        'domain_id',
+        'status'
     ];
 
     public static function getRecords($request,$domain)
@@ -107,6 +108,7 @@ class VendorModel extends Model
             $model->unique_id = self::quickRandom();
             $model->created_at = $date;
             $model->updated_at = $date;
+            $model->status = true;
         });
 
         self::updating(function ($model) {

@@ -39,6 +39,7 @@ class StockItemModel extends Model
         self::creating(function ($model) {
             $date =  new \DateTime("now");
             $model->created_at = $date;
+            $model->status = true;
         });
 
         self::updating(function ($model) {

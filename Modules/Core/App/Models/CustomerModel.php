@@ -89,6 +89,7 @@ class CustomerModel extends Model
             $model->updated_at = $date;
             $model->created = $date;
             $model->updated = $date;
+            $model->status = true;
             $datetime = new \DateTime("now");
         });
 

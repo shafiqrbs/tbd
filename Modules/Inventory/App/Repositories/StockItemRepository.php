@@ -82,33 +82,53 @@ class StockItemRepository extends EntityRepository
 
     }
 
-    public function insertStockItem($id,$data){
-
+    public function insertStockItem($id, $data) {
         $em = $this->_em;
 
-        /** @var  $product Product  */
-
+        /** @var Product|null $product */
         $product = $em->getRepository(Product::class)->find($id);
-        $exist = $em->getRepository(StockItem::class)->findOneBy(['product' => $id,'isMaster' => 1]);
-        if(empty($exist)){
+
+        // Ensure product exists
+        if (!$product) {
+            throw new \InvalidArgumentException("Product with ID {$id} not found.");
+        }
+
+        /** @var StockItem|null $exist */
+        $exist = $em->getRepository(StockItem::class)->findOneBy(['product' => $id, 'isMaster' => 1]);
+
+        // Only proceed if StockItem doesn't already exist
+        if (empty($exist)) {
             $entity = new StockItem();
-            $entity->setConfig($product->getConfig());
+
+            // Handle potential null returns gracefully
+            $config = $product->getConfig();
+            $unit = $product->getUnit();
+            $unitName = $unit ? $unit->getName() : null;
+
+            $entity->setConfig($config);
             $entity->setProduct($product);
-            $entity->setName($product->getName());
-            $entity->setDisplayName($product->getName());
-            $entity->setUom($product->getUnit()->getName());
+
+            // Ensure methods like getName() won't fail
+            $entity->setName($product->getName() ?? null);
+            $entity->setDisplayName($product->getName() ?? null);
+            $entity->setUom($unitName ?? null); // Fallback if unit or unit name does not exist
             $entity->setPurchasePrice($data['purchase_price'] ?? 0.0);
             $entity->setPrice($data['sales_price'] ?? 0.0);
             $entity->setSalesPrice($data['sales_price'] ?? 0.0);
-            $min = (isset($data['min_quantity']) and $data['min_quantity'] > 1 ) ? $data['min_quantity']:0;
+
+            $min = (isset($data['min_quantity']) && $data['min_quantity'] > 1) ? $data['min_quantity'] : 0;
             $entity->setMinQuantity($min);
+
             $entity->setIsMaster(1);
             $entity->setCreatedAt(new \DateTime());
             $entity->setUpdatedAt(new \DateTime());
+
+            // Persist and flush the new StockItem entity
             $em->persist($entity);
             $em->flush();
         }
     }
+
 
     public function updateStockItem($id,$data){
 
