@@ -198,6 +198,11 @@ class Customer
     private $company;
 
     /**
+     * @ORM\OneToOne(targetEntity="Modules\Core\App\Entities\Vendor", mappedBy="customer")
+     */
+    protected $vendor;
+
+    /**
      * @var string
      *
      * @ORM\Column(name="process", type="string", length=50, nullable =true)

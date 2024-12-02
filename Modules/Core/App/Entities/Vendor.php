@@ -40,13 +40,14 @@ class Vendor
     protected $domain;
 
 
-	/**
-	 * @ORM\OneToOne(targetEntity="Modules\Core\App\Entities\Customer")
-	 * @ORM\JoinColumn(name="customer_id", referencedColumnName="id", nullable=true, onDelete="cascade")
-	 */
-	protected $customer;
+    /**
+     * @ORM\OneToOne(targetEntity="Modules\Core\App\Entities\Customer")
+     * @ORM\JoinColumn(name="customer_id", referencedColumnName="id", nullable=true, onDelete="CASCADE")
+     */
+    protected $customer; // This maps to the `customer` relationship.
 
-	/**
+
+    /**
      * @var string
      *
      * @ORM\Column(name="module", type="string", length = 50, nullable=true)

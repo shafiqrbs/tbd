@@ -33,7 +33,7 @@ class VendorRequest extends FormRequest
                     ],
                     'customer_id' => [
                         'nullable',
-                        Rule::unique('Modules\Core\App\Entities\Customer', 'id')
+//                        Rule::unique('Modules\Core\App\Entities\Vendor', 'customer_id'),
                     ],
                     'email' => 'email|nullable',
                     'address' => 'string|nullable',
@@ -54,7 +54,7 @@ class VendorRequest extends FormRequest
                     'email' => 'email|nullable',
                     'customer_id' => [
                         'nullable',
-                        Rule::unique('Modules\Core\App\Entities\Customer', 'id')->ignore($vendor)
+//                        Rule::unique('Modules\Core\App\Entities\Customer', 'id')->ignore($vendor)
                     ],
                     'address' => 'string|nullable',
                 ];

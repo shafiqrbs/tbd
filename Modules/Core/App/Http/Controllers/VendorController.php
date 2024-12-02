@@ -5,6 +5,7 @@ namespace Modules\Core\App\Http\Controllers;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Validation\ValidationException;
 use Modules\Accounting\App\Models\AccountHeadModel;
 use Modules\AppsApi\App\Services\GeneratePatternCodeService;
 use Modules\AppsApi\App\Services\JsonRequestResponse;
@@ -47,6 +48,13 @@ class VendorController extends Controller
     {
         $service = new JsonRequestResponse();
         $input = $request->validated();
+        $customerExists = VendorModel::where('customer_id', $input['customer_id'])->first();
+
+        if ($customerExists) {
+            throw ValidationException::withMessages([
+                'customer_id' => ['The customer ID is already in use.'],
+            ]);
+        }
         $input['domain_id'] = $this->domain['global_id'];
         $params = ['domain' => $this->domain['global_id'],'table' => 'cor_vendors','prefix' => ''];
         $pattern = $patternCodeService->customerCode($params);
@@ -116,6 +124,13 @@ class VendorController extends Controller
     public function update(VendorRequest $request, $id)
     {
         $data = $request->validated();
+        $customerExists = VendorModel::where('customer_id', $data['customer_id'])->first();
+
+        if ($customerExists && $customerExists->id != $id) {
+            throw ValidationException::withMessages([
+                'customer_id' => ['The customer ID is already in use.'],
+            ]);
+        }
         $entity = VendorModel::find($id);
         $entity->update($data);
 

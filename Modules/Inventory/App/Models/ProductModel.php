@@ -67,6 +67,7 @@ class ProductModel extends Model
             ->leftjoin('inv_category','inv_category.id','=','inv_product.category_id')
             ->leftjoin('inv_particular','inv_particular.id','=','inv_product.unit_id')
             ->leftjoin('inv_setting','inv_setting.id','=','inv_product.product_type_id')
+            ->leftjoin('inv_stock','inv_stock.product_id','=','inv_product.id')
             ->select([
                 'inv_product.id',
                 'inv_product.name as product_name',
@@ -76,10 +77,12 @@ class ProductModel extends Model
                 'inv_product.barcode',
                 'inv_product.alternative_name',
                 'inv_setting.name as product_type',
+                'inv_stock.quantity',
+                'inv_product.status',
             ]);
 
         if (isset($request['term']) && !empty($request['term'])){
-            $products = $products->whereAny(['inv_product.name','inv_product.slug','inv_category.name','inv_particular.name','inv_brand.name','inv_product.sales_price','inv_setting.name'],'LIKE','%'.$request['term'].'%');
+            $products = $products->whereAny(['inv_product.name','inv_product.slug','inv_category.name','inv_particular.name','inv_setting.name'],'LIKE','%'.$request['term'].'%');
         }
 
         if (isset($request['name']) && !empty($request['name'])){

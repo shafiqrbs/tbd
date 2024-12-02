@@ -103,6 +103,55 @@ class ProductController extends Controller
         return $service->returnJosnResponse($entity);
     }
 
+
+    public function productStatusInlineUpdate($id)
+    {
+        $product = ProductModel::find($id);
+
+        if (!$product) {
+            return response()->json([
+                'status' => 404,
+                'success' => false,
+                'message' => 'Product not found.'
+            ]);
+        }
+
+        $stockItem = StockItemModel::where('product_id', $id)->first();
+
+        if (!$stockItem) {
+            return response()->json([
+                'status' => 404,
+                'success' => false,
+                'message' => 'Stock not found.'
+            ]);
+        }
+
+        try {
+            // Toggle status for product and stockItem
+            $newStatus = $product->status == 1 ? 0 : 1;
+
+            $product->update(['status' => $newStatus]);
+            $stockItem->update(['status' => $newStatus]);
+
+            return response()->json([
+                'message' => 'Status updated successfully.',
+                'status' => 200,
+                'data' => [
+                    'product_id' => $product->id,
+                    'new_status' => $newStatus
+                ]
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 500,
+                'success' => false,
+                'message' => 'An error occurred while updating status.',
+                'error' => $e->getMessage()
+            ]);
+        }
+    }
+
+
     public function stockItem()
     {
         $service = new JsonRequestResponse();

@@ -61,6 +61,8 @@ class UserController extends Controller
         $data['password']= Hash::make($data['password']);
         $data['is_delete']= 0;
         $user = UserModel::create($data);
+        $data['user_id'] = $user->id;
+        UserProfileModel::create($data);
         $service = new JsonRequestResponse();
         return $service->returnJosnResponse($user);
     }
