@@ -30,6 +30,7 @@ use Modules\Core\App\Models\UserModel;
 use Modules\Domain\App\Models\CurrencyModel;
 use Modules\Domain\App\Models\DomainModel;
 use Modules\Domain\App\Models\SubdomainCategory;
+use Modules\Inventory\App\Entities\Product;
 use Modules\Inventory\App\Entities\Setting;
 use Modules\Inventory\App\Entities\StockItem;
 use Modules\Inventory\App\Models\CategoryModel;
@@ -158,6 +159,48 @@ class BranchController extends Controller
                 $this->ensureVendorLedger($vendor, $childDomain->id);
             }
 
+
+            $customer = CustomerModel::where('domain_id', $this->domain['global_id'])
+                ->where('sub_domain_id', $input['child_domain_id'])
+                ->first();
+            if ($customer){
+                // Fetch configuration by sub_domain_id
+                $childAccConfig = ConfigModel::where('domain_id', $customer->sub_domain_id)
+                    ->value('id');
+
+                if (!$childAccConfig) {
+                    return response()->json(['status' => 404, 'success' => false, 'message' => 'Config not found']);
+                }
+
+                // Fetch all subdomain category IDs for the config
+                $getSubDomainCategory = SubdomainCategory::where('config_id', $childAccConfig)
+                    ->pluck('category_id')
+                    ->toArray();
+                if ($getSubDomainCategory) {
+                    // Fetch products belonging to the fetched categories and config
+                    $getProducts = ProductModel::whereIn('category_id', $getSubDomainCategory)
+                        ->where('config_id', $childAccConfig)
+                        ->whereNotNull('parent_id')
+                        ->pluck('id')
+                        ->toArray();
+
+                    foreach ($getProducts as $productId) {
+                        ProductModel::find($productId)->update(['status' => $input['checked']]);
+                    }
+
+                    // Fetch stock items for the products
+                    $getStocks = StockItemModel::whereIn('product_id', $getProducts)->get();
+
+                    // Update stock items if any exist
+                    if ($getStocks->isNotEmpty()) {
+                        foreach ($getStocks as $stock) {
+                            $stock->update(
+                                ['status' => $input['checked']]
+                            );
+                        }
+                    }
+                }
+            }
             // Commit transaction
             DB::commit();
 
@@ -285,9 +328,57 @@ class BranchController extends Controller
     public function priceUpdate(BranchPriceUpdateRequest $request)
     {
         $input = $request->validated();
-        CustomerModel::findOrFail($input['customer_id'])->update([$input['field_name'] => $input['value']]);
-        return response()->json(['status'=>200,'success' => true,'data'=>$input]);
+
+        // Update the specific field for the customer
+        CustomerModel::findOrFail($input['customer_id'])->update([
+            $input['field_name'] => $input['value']
+        ]);
+
+        // Check if discount_percent is being updated
+        if ($input['field_name'] === 'discount_percent') {
+            $customer = CustomerModel::select('discount_percent', 'domain_id', 'sub_domain_id')
+                ->findOrFail($input['customer_id']);
+
+            if (!$customer) {
+                return response()->json(['status' => 404, 'success' => false]);
+            }
+
+            // Fetch configuration by sub_domain_id
+            $childAccConfig = ConfigModel::where('domain_id', $customer->sub_domain_id)
+                ->value('id');
+
+            if (!$childAccConfig) {
+                return response()->json(['status' => 404, 'success' => false, 'message' => 'Config not found']);
+            }
+
+            // Fetch all subdomain category IDs for the config
+            $getSubDomainCategory = SubdomainCategory::where('config_id', $childAccConfig)
+                ->pluck('category_id')
+                ->toArray();
+
+            // Fetch products belonging to the fetched categories and config
+            $getProducts = ProductModel::whereIn('category_id', $getSubDomainCategory)
+                ->where('config_id', $childAccConfig)
+                ->whereNotNull('parent_id')
+                ->pluck('id')
+                ->toArray();
+
+            // Fetch stock items for the products
+            $getStocks = StockItemModel::whereIn('product_id', $getProducts)->get();
+
+            // Update stock items if any exist
+            if ($getStocks->isNotEmpty()) {
+                foreach ($getStocks as $stock) {
+                    $stock->update(
+                        $this->prepareStockData($stock, $input['value'])
+                    );
+                }
+            }
+        }
+
+        return response()->json(['status' => 200, 'success' => true, 'data' => $input]);
     }
+
 
 
     public function categoryUpdate(Request $request,EntityManagerInterface $em)
