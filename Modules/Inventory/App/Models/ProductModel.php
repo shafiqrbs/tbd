@@ -79,6 +79,7 @@ class ProductModel extends Model
                 'inv_setting.name as product_type',
                 'inv_stock.quantity',
                 'inv_product.status',
+                'inv_product.parent_id',
             ]);
 
         if (isset($request['term']) && !empty($request['term'])){
