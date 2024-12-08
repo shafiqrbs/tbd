@@ -48,13 +48,17 @@ class VendorController extends Controller
     {
         $service = new JsonRequestResponse();
         $input = $request->validated();
-        $customerExists = VendorModel::where('customer_id', $input['customer_id'])->first();
 
-        if ($customerExists) {
-            throw ValidationException::withMessages([
-                'customer_id' => ['The customer ID is already in use.'],
-            ]);
+        if ($input['customer_id']){
+            $customerExists = VendorModel::where('customer_id', $input['customer_id'])->first();
+
+            if ($customerExists) {
+                throw ValidationException::withMessages([
+                    'customer_id' => ['The customer ID is already in use.'],
+                ]);
+            }
         }
+
         $input['domain_id'] = $this->domain['global_id'];
         $params = ['domain' => $this->domain['global_id'],'table' => 'cor_vendors','prefix' => ''];
         $pattern = $patternCodeService->customerCode($params);
