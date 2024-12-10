@@ -33,6 +33,7 @@ class ProductRequest extends FormRequest
             'min_quantity' => 'nullable|numeric|regex:/^\d+(\.\d{1,2})?$/',
             'reorder_quantity' => 'nullable|numeric|regex:/^\d+(\.\d{1,2})?$/',
             'status' => 'required|boolean',
+            'description' => 'nullable|string',
         ];
     }
 

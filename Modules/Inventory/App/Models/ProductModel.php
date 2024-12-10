@@ -25,6 +25,7 @@ class ProductModel extends Model
         'status',
         'config_id',
         'parent_id',
+        'description',
     ];
 
     /**

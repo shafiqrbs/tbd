@@ -129,6 +129,11 @@ class Product
      */
     protected $path;
 
+    /**
+     * @ORM\Column(name="description",type="string", nullable=true)
+     */
+    protected $description;
+
 
     /**
      * @var \DateTime

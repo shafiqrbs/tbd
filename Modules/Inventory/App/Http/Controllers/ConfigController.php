@@ -13,6 +13,7 @@ use Modules\Core\App\Models\UserModel;
 use Modules\Core\App\Models\VendorModel;
 use Modules\Inventory\App\Http\Requests\ConfigRequest;
 use Modules\Inventory\App\Models\ConfigModel;
+use Modules\Inventory\App\Models\SettingModel;
 
 class ConfigController extends Controller
 {
@@ -35,6 +36,32 @@ class ConfigController extends Controller
         $id = $this->domain['config_id'];
         $service = new JsonRequestResponse();
         $entity = ConfigModel::with('domain','currency','businessModel')->find($id);
+        $inv_product_type = SettingModel::where('parent_slug', 'product-type')
+            ->select('id', 'slug', 'name', 'status')
+            ->get()
+            ->toArray();
+
+        if ($inv_product_type) {
+            foreach ($inv_product_type as $value) {
+                switch ($value['slug']) {
+                    case 'raw-materials':
+                        $entity['raw_materials'] = $value['status'];
+                        break;
+                    case 'stockable':
+                        $entity['stockable'] = $value['status'];
+                        break;
+                    case 'post-production':
+                        $entity['post_production'] = $value['status'];
+                        break;
+                    case 'mid-production':
+                        $entity['mid_production'] = $value['status'];
+                        break;
+                    case 'pre-production':
+                        $entity['pre_production'] = $value['status'];
+                        break;
+                }
+            }
+        }
         if (!$entity){
             $entity = 'Data not found';
         }
@@ -76,6 +103,45 @@ class ConfigController extends Controller
             $data['path'] = $imageName;
         }
         $entity->update($data);
+
+        $productSlugs = [
+            'raw_materials' => 'raw-materials',
+            'stockable' => 'stockable',
+            'post_production' => 'post-production',
+            'mid_production' => 'mid-production',
+            'pre_production' => 'pre-production'
+        ];
+
+        foreach ($productSlugs as $requestKey => $slug) {
+            if ($request->has($requestKey)) {
+                // Fetch the latest model instance
+                $productType = SettingModel::where('parent_slug', 'product-type')
+                    ->where('config_id', $this->domain['config_id'])
+                    ->where('slug', $slug)
+                    ->first();
+
+                if (!$productType) {
+                    \Log::error("Record not found for slug: {$slug}");
+                    continue; // Skip to the next slug
+                }
+
+                $newStatus = $request->get($requestKey);
+
+                // Only update if the new status is different
+                if ($productType->status !== $newStatus) {
+                    $productType->update(['status' => $newStatus]);
+
+                    if ($productType->wasChanged('status')) {
+                        \Log::info("Slug {$slug} updated successfully.");
+                    } else {
+                        \Log::error("Failed to update slug: {$slug}");
+                    }
+                } else {
+                    \Log::info("No changes needed for slug: {$slug}. Existing status is the same.");
+                }
+            }
+        }
+
         $service = new JsonRequestResponse();
         return $service->returnJosnResponse($data);
     }
