@@ -75,6 +75,12 @@ class StockItem
 
     /**
      * @ORM\ManyToOne(targetEntity="Particular")
+     * @ORM\JoinColumn(name="model_id", referencedColumnName="id", nullable=true, onDelete="SET NULL")
+     **/
+    private  $model;
+
+    /**
+     * @ORM\ManyToOne(targetEntity="Particular")
      * @ORM\JoinColumn(name="color_id", referencedColumnName="id", nullable=true, onDelete="SET NULL")
      **/
     private  $color;

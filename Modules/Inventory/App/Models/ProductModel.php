@@ -68,10 +68,10 @@ class ProductModel extends Model
             ->leftjoin('inv_category','inv_category.id','=','inv_product.category_id')
             ->leftjoin('inv_particular','inv_particular.id','=','inv_product.unit_id')
             ->leftjoin('inv_setting','inv_setting.id','=','inv_product.product_type_id')
-            ->leftjoin('inv_stock','inv_stock.product_id','=','inv_product.id')
+            ->join('inv_stock','inv_stock.product_id','=','inv_product.id')
             ->select([
                 'inv_product.id',
-                'inv_product.name as product_name',
+                'inv_stock.name as product_name',
                 'inv_product.slug',
                 'inv_category.name as category_name',
                 'inv_particular.name as unit_name',

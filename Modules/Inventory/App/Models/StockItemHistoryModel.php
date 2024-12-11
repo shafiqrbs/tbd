@@ -10,7 +10,7 @@ class StockItemHistoryModel extends Model
 {
     use HasFactory;
 
-    protected $table = 'inv_stock_history';
+    protected $table = 'inv_stock_item_history';
     public $timestamps = true;
     protected $guarded = ['id'];
 

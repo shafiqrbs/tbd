@@ -64,6 +64,7 @@ Route::prefix('/inventory')->middleware([HeaderAuthenticationMiddleware::class])
 
         Route::post('/stock/sku', [StockItemController::class,'stockSkuAdded'])->name('product_stock_sku');
         Route::get('/stock/sku/{product}', [StockItemController::class,'stockSkuList'])->name('product_stock_list');
+        Route::delete('/stock/sku/{product}', [StockItemController::class,'stockItemDelete'])->name('product_stock_delete');
         Route::post('/stock/sku/inline-update/{stock_id}', [StockItemController::class,'stockSkuInlineUpdate'])->name('product_stock_sku_inline_update');
         Route::post('/gallery', [ProductController::class,'galleryAdded'])->name('product_gallery_added');
     });

@@ -6,14 +6,17 @@ use App\Http\Controllers\Controller;
 use Doctrine\ORM\EntityManagerInterface;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Validation\ValidationException;
 use Modules\AppsApi\App\Services\JsonRequestResponse;
 use Modules\Core\App\Models\UserModel;
 use Modules\Inventory\App\Entities\StockItem;
 use Modules\Inventory\App\Http\Requests\ProductRequest;
 use Modules\Inventory\App\Http\Requests\StockSkuRequest;
 use Modules\Inventory\App\Models\ConfigModel;
+use Modules\Inventory\App\Models\ParticularModel;
 use Modules\Inventory\App\Models\ProductModel;
 use Modules\Inventory\App\Models\SettingModel;
+use Modules\Inventory\App\Models\StockItemHistoryModel;
 use Modules\Inventory\App\Models\StockItemModel;
 use Modules\Inventory\App\Models\StockItemPriceMatrixModel;
 use Modules\Inventory\App\Repositories\StockItemRepository;
@@ -72,57 +75,80 @@ class StockItemController extends Controller
         $input['config_id'] = $this->domain['config_id'];
         $findProduct = ProductModel::getProductDetails($input['product_id'],$this->domain);
         if (!$findProduct){
-            $response = new Response();
-            $response->headers->set('Content-Type', 'application/json');
-            $response->setContent(json_encode([
-                'message' => 'Product not found',
-                'status' => Response::HTTP_NOT_FOUND,
-            ]));
-            $response->setStatusCode(Response::HTTP_OK);
-            return $response;
+            throw ValidationException::withMessages([
+                'exists' => ['Product not found'],
+            ]);
         }
 
         $input['price'] = $findProduct->price;
         $input['sales_price'] = $findProduct->sales_price;
-        $input['name'] = $findProduct->product_name;
-        $input['display_name'] = $findProduct->display_name;
+        $productName = $findProduct->product_name.' (';
         $input['purchase_price'] = $findProduct->purchase_price;
         $input['uom'] = $findProduct->unit_name;
         $input['is_master'] = 0;
         $input['status'] = 1;
 
-        $existingProduct = StockItemModel::where('is_master',0);
-        if ($request->has('brand_id')) {
+        $existingProduct = StockItemModel::where('is_master',0)->where('product_id',$input['product_id']);
+        if ($request->has('brand_id') && !empty($input['brand_id'])) {
             $existingProduct=$existingProduct->where('brand_id', $request->brand_id);
+            $findBrandName = ParticularModel::find($request->brand_id)->name;
+            $productName .=  $findBrandName.'-';
         }
 
-        if ($request->has('color_id')) {
+        if ($request->has('color_id') && !empty($input['color_id'])) {
             $existingProduct=$existingProduct->where('color_id', $request->color_id);
+            $findColorName = ParticularModel::find($request->color_id)->name;
+            $productName .=  $findColorName.'-';
         }
 
-        if ($request->has('size_id')) {
+        if ($request->has('size_id') && !empty($input['size_id'])) {
             $existingProduct=$existingProduct->where('size_id', $request->size_id);
+            $findSizeName = ParticularModel::find($request->size_id)->name;
+            $productName .= $findSizeName.'-';
         }
 
-        if ($request->has('grade_id')) {
+        if ($request->has('grade_id') && !empty($input['grade_id'])) {
             $existingProduct=$existingProduct->where('grade_id', $request->grade_id);
+            $findGradeName = ParticularModel::find($request->grade_id)->name;
+            $productName .= $findGradeName.'-';
+        }
+
+        if ($request->has('model_id') && !empty($input['model_id'])) {
+            $existingProduct=$existingProduct->where('model_id', $request->model_id);
+            $findModelName = ParticularModel::find($request->model_id)->name;
+            $productName .=  $findModelName.'-';
         }
         $existingProduct = $existingProduct->get();
 
+
         if (count($existingProduct) > 0) {
-            $response = new Response();
-            $response->headers->set('Content-Type', 'application/json');
-            $response->setContent(json_encode([
-                'message' => 'Already Exists',
-                'status' => Response::HTTP_OK,
-            ]));
-            $response->setStatusCode(Response::HTTP_OK);
-            return $response;
+            throw ValidationException::withMessages([
+                'exists' => ['Already Exists'],
+            ]);
         }
+        $productName = rtrim($productName, '-');
+        $input['name'] = $productName.' )';
+        $input['display_name'] = $productName.' )';
+
         $entity = StockItemModel::create($input);
 
         $data = $service->returnJosnResponse($entity);
         return $data;
+    }
+
+    public function stockItemDelete(Request $request,$id)
+    {
+        $findStockItem = StockItemModel::find($id);
+        $stockHistoryExists = StockItemHistoryModel::where('stock_item_id',$id)->exists();
+        if ($stockHistoryExists) {
+            $findStockItem->update(['is_delete' => 1]);
+        }else{
+            $findStockItem->delete();
+        }
+
+        $service = new JsonRequestResponse();
+        $entity = ['message' => 'delete'];
+        return $service->returnJosnResponse($entity);
     }
 
 
