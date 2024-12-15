@@ -69,6 +69,11 @@ class ProductModel extends Model
             ->leftjoin('inv_particular','inv_particular.id','=','inv_product.unit_id')
             ->leftjoin('inv_setting','inv_setting.id','=','inv_product.product_type_id')
             ->join('inv_stock','inv_stock.product_id','=','inv_product.id')
+            ->leftjoin('inv_particular as brand','brand.id','=','inv_stock.brand_id')
+            ->leftjoin('inv_particular as model','model.id','=','inv_stock.model_id')
+            ->leftjoin('inv_particular as color','color.id','=','inv_stock.color_id')
+            ->leftjoin('inv_particular as grade','grade.id','=','inv_stock.grade_id')
+            ->leftjoin('inv_particular as size','size.id','=','inv_stock.size_id')
             ->select([
                 'inv_product.id',
                 'inv_stock.name as product_name',
@@ -81,6 +86,11 @@ class ProductModel extends Model
                 'inv_stock.quantity',
                 'inv_product.status',
                 'inv_product.parent_id',
+                'brand.name as brand_name',
+                'model.name as model_name',
+                'color.name as color_name',
+                'grade.name as grade_name',
+                'size.name as size_name',
             ]);
 
         if (isset($request['term']) && !empty($request['term'])){

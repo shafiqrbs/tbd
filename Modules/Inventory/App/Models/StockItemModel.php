@@ -31,6 +31,7 @@ class StockItemModel extends Model
         'model_id',
         'price',
         'name',
+        'sku',
         'display_name',
         'uom',
     ];
@@ -214,6 +215,7 @@ class StockItemModel extends Model
                 'inv_stock.name',
                 'inv_stock.display_name',
                 'inv_stock.price',
+                'inv_stock.purchase_price',
                 'inv_stock.grade_id',
                 'grade.name as grade_name',
                 'inv_stock.color_id',

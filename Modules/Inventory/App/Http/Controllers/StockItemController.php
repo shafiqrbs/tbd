@@ -223,9 +223,12 @@ class StockItemController extends Controller
         if ($request->get('field')=='price'){
             $findStockItem->update(['price'=>$request->get('value')]);
         }
+        if ($request->get('field')=='purchase_price'){
+            $findStockItem->update(['purchase_price'=>$request->get('value')]);
+        }
 
         // for multi-price price update
-        if ($request->get('field')!='price'){
+        if ($request->get('field')!='price' && $request->get('field')!='purchase_price'){
             $wholeSaleExists = StockItemPriceMatrixModel::where('stock_item_id',$id)
                 ->where('price_unit_id',$request->get('setting_id'))
                 ->where('product_id',$findStockItem->product_id)

@@ -130,7 +130,7 @@ class Product
     protected $path;
 
     /**
-     * @ORM\Column(name="description",type="string", nullable=true)
+     * @ORM\Column(name="description",type="string",length=700, nullable=true)
      */
     protected $description;
 
