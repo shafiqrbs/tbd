@@ -110,6 +110,9 @@ class ProductModel extends Model
         if (isset($request['sales_price']) && !empty($request['sales_price'])){
             $products = $products->where('inv_product.sales_price',$request['sales_price']);
         }
+        if (isset($request['type']) && !empty($request['type']) && $request['type']=='product'){
+            $products = $products->where('inv_stock.is_master',1);
+        }
 
         $total  = $products->count();
         $entities = $products->skip($skip)

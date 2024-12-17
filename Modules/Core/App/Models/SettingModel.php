@@ -83,7 +83,7 @@ class SettingModel extends Model
 
 
         if (isset($request['term']) && !empty($request['term'])){
-            $entities = $entities->whereAny(['name'],'LIKE','%'.$request['term'].'%');
+            $entities = $entities->whereAny(['cor_setting.name','cst.name'],'LIKE','%'.$request['term'].'%');
         }
         $counts  = $entities->count();
         $entities = $entities->skip($skip)
