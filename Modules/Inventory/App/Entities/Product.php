@@ -109,9 +109,9 @@ class Product
 
 
      /**
-     * @var integer
+     * @var string
      *
-     * @ORM\Column(type="integer",  nullable=true)
+     * @ORM\Column(type="string",  nullable=true)
      */
     private $barcode;
 
