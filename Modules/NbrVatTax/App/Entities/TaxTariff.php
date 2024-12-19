@@ -36,7 +36,7 @@ class TaxTariff
     /**
      * @var float
      *
-     * @ORM\Column(name="customsDuty", type="float", nullable=true)
+     * @ORM\Column(name="customs_duty", type="float", nullable=true)
      */
     private $customsDuty = 0.00;
 
@@ -44,14 +44,14 @@ class TaxTariff
      /**
      * @var float
      *
-     * @ORM\Column(name="supplementaryDuty", type="float", nullable=true)
+     * @ORM\Column(name="supplementary_duty", type="float", nullable=true)
      */
     private $supplementaryDuty = 0.00;
 
     /**
      * @var float
      *
-     * @ORM\Column(name="valueAddedTax", type="float", nullable=true)
+     * @ORM\Column(name="value_added_tax", type="float", nullable=true)
      */
     private $valueAddedTax = 0.00;
 
@@ -59,7 +59,7 @@ class TaxTariff
     /**
      * @var float
      *
-     * @ORM\Column(name="advanceIncomeTax", type="float", nullable=true)
+     * @ORM\Column(name="advance_income_tax", type="float", nullable=true)
      */
     private $advanceIncomeTax = 0.00;
 
@@ -67,7 +67,7 @@ class TaxTariff
     /**
      * @var float
      *
-     * @ORM\Column(name="recurringDeposit", type="float", nullable=true)
+     * @ORM\Column(name="recurring_deposit", type="float", nullable=true)
      */
     private $recurringDeposit = 0.00;
 
@@ -75,7 +75,7 @@ class TaxTariff
     /**
      * @var float
      *
-     * @ORM\Column(name= "regulatoryDuty", type="float", nullable=true)
+     * @ORM\Column(name= "regulatory_duty", type="float", nullable=true)
      */
     private $regulatoryDuty = 0.00;
 
@@ -83,7 +83,7 @@ class TaxTariff
     /**
      * @var float
      *
-     * @ORM\Column(name="advanceTradeVat", type="float", nullable=true)
+     * @ORM\Column(name="advance_trade_vat", type="float", nullable=true)
      */
     private $advanceTradeVat = 0.00;
 
@@ -91,7 +91,7 @@ class TaxTariff
     /**
      * @var float
      *
-     * @ORM\Column(name="advanceTax", type="float", nullable=true)
+     * @ORM\Column(name="advance_tax", type="float", nullable=true)
      */
     private $advanceTax = 0.00;
 
@@ -100,7 +100,7 @@ class TaxTariff
     /**
      * @var float
      *
-     * @ORM\Column(name="totalTaxIncidence", type="float", nullable=true)
+     * @ORM\Column(name="total_tax_incidence", type="float", nullable=true)
      */
     private $totalTaxIncidence = 0.00;
 
@@ -116,7 +116,7 @@ class TaxTariff
     /**
      * @var integer
      *
-     * @ORM\Column(name="hsCode", type="string", length=50, nullable = true)
+     * @ORM\Column(name="hs_code", type="string", length=50, nullable = true)
      */
     private $hsCode;
 
