@@ -6,9 +6,21 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Modules\NbrVatTax\App\Models\NbrTaxTariff;
 
 class NbrVatTaxController extends Controller
 {
+    public function tariffDropdown(){
+        $dropdown = NbrTaxTariff::getNbrTaxTariffDropdown();
+        $response = new Response();
+        $response->headers->set('Content-Type', 'application/json');
+        $response->setContent(json_encode([
+            'message' => 'success',
+            'status' => Response::HTTP_OK,
+            'data' => $dropdown
+        ]));
+        $response->setStatusCode(Response::HTTP_OK);
+        return $response;    }
     /**
      * Display a listing of the resource.
      */

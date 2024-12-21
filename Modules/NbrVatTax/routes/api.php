@@ -1,7 +1,9 @@
 <?php
 
+use App\Http\Middleware\HeaderAuthenticationMiddleware;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use Modules\NbrVatTax\App\Http\Controllers\NbrVatTaxController;
 
 /*
     |--------------------------------------------------------------------------
@@ -17,3 +19,13 @@ use Illuminate\Support\Facades\Route;
 Route::middleware(['auth:sanctum'])->prefix('v1')->name('api.')->group(function () {
     Route::get('nbrvattax', fn (Request $request) => $request->user())->name('nbrvattax');
 });
+
+Route::prefix('/nbr/select')->middleware([HeaderAuthenticationMiddleware::class])->group(function() {
+    Route::get('/tariff', [NbrVatTaxController::class,'tariffDropdown'])->name('get_tariff_dropdown');
+
+});
+
+Route::prefix('/nbr')->middleware([HeaderAuthenticationMiddleware::class])->group(function() {
+//    Route::get('/config', [ConfigController::class,'getConfig'])->name('get_config');
+});
+

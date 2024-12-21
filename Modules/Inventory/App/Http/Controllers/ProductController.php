@@ -9,6 +9,7 @@ use Illuminate\Http\Response;
 use Illuminate\Support\Facades\File;
 use Modules\AppsApi\App\Services\JsonRequestResponse;
 use Modules\Core\App\Models\UserModel;
+use Modules\Inventory\App\Entities\Product;
 use Modules\Inventory\App\Entities\StockItem;
 use Modules\Inventory\App\Http\Requests\ProductGalleryRequest;
 use Modules\Inventory\App\Http\Requests\ProductMeasurementRequest;
@@ -18,6 +19,8 @@ use Modules\Inventory\App\Models\ProductMeasurementModel;
 use Modules\Inventory\App\Models\ProductModel;
 use Modules\Inventory\App\Models\StockItemModel;
 use Modules\Inventory\App\Repositories\StockItemRepository;
+use Modules\NbrVatTax\App\Models\NbrItemVat;
+use Modules\NbrVatTax\App\Models\NbrTaxTariff;
 
 class ProductController extends Controller
 {
@@ -263,6 +266,119 @@ class ProductController extends Controller
 
         return null;
     }
+
+    public function nbrTariff($id)
+    {
+        // Validate product exists
+        $product = ProductModel::find($id);
+        if (!$product) {
+            return response()->json([
+                'status' => 404,
+                'success' => false,
+                'message' => 'Product not found.'
+            ]);
+        }
+
+        // Define VAT fields and labels
+        $vatFields = [
+            'customs_duty' => 'Customs Duty',
+            'supplementary_duty' => 'Supplementary Duty',
+            'value_added_tax' => 'Value Added Tax',
+            'advance_tax' => 'Advance Tax',
+            'advance_income_tax' => 'Advance Income Tax',
+            'recurring_deposit' => 'Recurring Deposit',
+            'advance_trade_vat' => 'Advance Trade Vat',
+            'regulatory_duty' => 'Regulatory Duty',
+            'total_tax_incidence' => 'Total Tax Incidence'
+        ];
+
+        // Fetch VAT data for the product
+        $getProductVat = NbrItemVat::where('item_id', $id)->first();
+
+        // Fetch applicable tariff data (if `hscode_id` exists and is valid)
+        $getNbrVat = $getProductVat && $getProductVat->hscode_id
+            ? NbrTaxTariff::find($getProductVat->hscode_id)
+            : null;
+
+        // Build VAT items response
+        $vatItems = [];
+        foreach ($vatFields as $fieldName => $fieldLabel) {
+            $vatItems[] = [
+                'field_name' => $fieldName,
+                'field_label' => $fieldLabel,
+                'value' => $getProductVat[$fieldName] ?? null,
+                'nbr_vat' => $getNbrVat[$fieldName] ?? null,
+                'hscode_id' => $getProductVat->hscode_id ?? null
+            ];
+        }
+
+        // Return JSON response
+        return response()->json([
+            'status' => 200,
+            'success' => true,
+            'data' => $vatItems
+        ]);
+    }
+
+
+    public function nbrTariffInlineUpdate(Request $request, $id)
+    {
+        // Define the list of allowed fields
+        $allowedFields = [
+            'customs_duty',
+            'supplementary_duty',
+            'value_added_tax',
+            'advance_tax',
+            'advance_income_tax',
+            'recurring_deposit',
+            'advance_trade_vat',
+            'regulatory_duty',
+            'total_tax_incidence',
+        ];
+
+        // Validate request input
+        $validatedData = $request->validate([
+            'hscode_id' => 'required|integer',
+            'field_name' => 'required|string',
+            'value' => 'required|numeric|min:0',
+        ]);
+
+        // Validate the field name against the allowed fields
+        $fieldName = $validatedData['field_name'];
+        if (!in_array($fieldName, $allowedFields)) {
+            return response()->json(['message' => 'Invalid field name.', 'status' => 400], 400);
+        }
+
+        // Construct the conditions and update data
+        $conditions = [
+            'hscode_id' => $validatedData['hscode_id'],
+            'item_id' => $id,
+        ];
+
+        $vatData = [
+            $fieldName => $validatedData['value'],
+        ];
+
+        try {
+            // Update or create the VAT data record
+            $vat = NbrItemVat::updateOrCreate($conditions, $vatData);
+
+            return response()->json([
+                'status' => 200,
+                'success' => true,
+                'data' => $vat
+            ]);
+        } catch (\Exception $e) {
+            // Handle exceptions gracefully
+            return response()->json([
+                'status' => 500,
+                'success' => false,
+                'message' => 'An error occurred while updating the record.',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
 
 
 }
