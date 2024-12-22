@@ -99,6 +99,15 @@ class ItemVatTax
      */
     private $rebate = 0.00;
 
+
+
+    /**
+     * @var float
+     *
+     * @ORM\Column(type="float", nullable=true)
+     */
+    private $regulatoryDuty = 0.00;
+
     /**
      * @var float
      *
