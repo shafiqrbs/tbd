@@ -36,10 +36,11 @@ class ConfigController extends Controller
         $id = $this->domain['config_id'];
         $service = new JsonRequestResponse();
         $entity = ConfigModel::with('domain','currency','businessModel')->find($id);
-        $inv_product_type = SettingModel::where('parent_slug', 'product-type')
+        $inv_product_type = SettingModel::where('parent_slug', 'product-type')->where('config_id', $id)
             ->select('id', 'slug', 'name', 'status')
             ->get()
             ->toArray();
+//        dump($inv_product_type,$id);
 
         if ($inv_product_type) {
             foreach ($inv_product_type as $value) {

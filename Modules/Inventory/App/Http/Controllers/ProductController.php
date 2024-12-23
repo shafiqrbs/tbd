@@ -334,6 +334,7 @@ class ProductController extends Controller
             'advance_trade_vat',
             'regulatory_duty',
             'total_tax_incidence',
+            'hscode_id',
         ];
 
         // Validate request input
@@ -342,6 +343,32 @@ class ProductController extends Controller
             'field_name' => 'required|string',
             'value' => 'required|numeric|min:0',
         ]);
+
+        if ($validatedData['field_name']=='hscode_id'){
+            $conditions = [
+                'item_id' => $id,
+                'config_id' => $this->domain->nbr_config
+            ];
+
+            $vatData = [
+                'hscode_id' => $validatedData['value'],
+                'customs_duty' => null,
+                'supplementary_duty' => null,
+                'value_added_tax' => null,
+                'advance_tax' => null,
+                'advance_income_tax' => null,
+                'recurring_deposit' => null,
+                'advance_trade_vat' => null,
+                'regulatory_duty' => null,
+                'total_tax_incidence' => null
+            ];
+            $vat = NbrItemVat::updateOrCreate($conditions, $vatData);
+            return response()->json([
+                'status' => 200,
+                'success' => true,
+                'data' => $vat
+            ]);
+        }
 
         // Validate the field name against the allowed fields
         $fieldName = $validatedData['field_name'];
@@ -353,6 +380,7 @@ class ProductController extends Controller
         $conditions = [
             'hscode_id' => $validatedData['hscode_id'],
             'item_id' => $id,
+            'config_id' => $this->domain->nbr_config
         ];
 
         $vatData = [

@@ -123,7 +123,7 @@ class DomainController extends Controller
                         'setting_id' => $type->id,
                         'name' => $type->name,
                         'slug' => $type->slug,
-                        'parent_slug' => 'product_type',
+                        'parent_slug' => 'product-type',
                         'is_production' => in_array($type->slug,
                             ['post-production', 'mid-production', 'pre-production']) ? 1 : 0,
                     ]);
@@ -190,7 +190,7 @@ class DomainController extends Controller
 
         // Fetch relevant product types settings as setting_id array
         $getInvProductType = InventorySettingModel::where('config_id', $getInvConfigId)
-            ->where('parent_slug', 'product_type')
+            ->where('parent_slug', 'product-type')
             ->where('status', 1)
             ->get('id')
             ->toArray();
@@ -205,7 +205,7 @@ class DomainController extends Controller
 
         // fetch inventory setting product type for generate checkbox
         $getInvProductTypeForCheckbox = InventorySettingModel::where('config_id', $getInvConfigId)
-            ->where('parent_slug', 'product_type')
+            ->where('parent_slug', 'product-type')
             ->get()
             ->toArray();
         $entity['product_types_checkbox'] = $getInvProductTypeForCheckbox;
@@ -259,7 +259,7 @@ class DomainController extends Controller
             }
 
             $getInvSetting = InventorySettingModel::where('config_id', $getInvConfigId)
-                ->where('parent_slug', 'product_type')
+                ->where('parent_slug', 'product-type')
                 ->get();
 
             // Loop through each product type and either find or create inventory setting.

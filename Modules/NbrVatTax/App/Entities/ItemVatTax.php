@@ -30,6 +30,12 @@ class ItemVatTax
     protected  $item;
 
     /**
+     * @ORM\ManyToOne(targetEntity="Modules\NbrVatTax\App\Entities\config")
+     * @ORM\JoinColumn(onDelete="CASCADE")
+     **/
+    protected  $config;
+
+    /**
      * @ORM\ManyToOne(targetEntity="TaxTariff")
      * @ORM\JoinColumn(onDelete="CASCADE")
      **/
