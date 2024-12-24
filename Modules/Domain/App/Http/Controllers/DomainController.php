@@ -346,11 +346,7 @@ class DomainController extends Controller
     {
         $service = new JsonRequestResponse();
 
-        $userData = DomainModel::getDomainConfigData($id);
-        AccountingModel::find($userData['acc_config'])->delete();
-        NbrVatModel::find($userData['pro_config'])->delete();
-        ConfigModel::find($userData['config_id'])->delete();
-        ProductionConfig::find($userData['pro_config'])->delete();
+
 
         DomainModel::find($id)->delete();
         $entity = ['message'=>'delete'];
@@ -364,6 +360,19 @@ class DomainController extends Controller
     public function resetData($id)
     {
         $service = new JsonRequestResponse();
+        $userData = DomainModel::getDomainConfigData($id);
+        if($userData['acc_config']){
+            AccountingModel::find($userData['acc_config'])->delete();
+        }
+        if($userData['pro_config']) {
+            ProductionConfig::find($userData['pro_config'])->delete();
+        }
+        if($userData['nbr_config']) {
+            NbrVatModel::find($userData['nbr_config'])->delete();
+        }
+        if($userData['config_id']) {
+            ConfigModel::find($userData['config_id'])->delete();
+        }
         DomainModel::find($id)->delete();
         $entity = ['message'=>'delete'];
         $data = $service->returnJosnResponse($entity);
@@ -375,7 +384,21 @@ class DomainController extends Controller
      */
     public function deleteData($id)
     {
+
         $service = new JsonRequestResponse();
+        $userData = DomainModel::getDomainConfigData($id);
+        if($userData['acc_config']){
+            AccountingModel::find($userData['acc_config'])->delete();
+        }
+        if($userData['pro_config']) {
+            ProductionConfig::find($userData['pro_config'])->delete();
+        }
+        if($userData['nbr_config']) {
+            NbrVatModel::find($userData['nbr_config'])->delete();
+        }
+        if($userData['config_id']) {
+            ConfigModel::find($userData['config_id'])->delete();
+        }
         DomainModel::find($id)->delete();
         $entity = ['message'=>'delete'];
         $data = $service->returnJosnResponse($entity);

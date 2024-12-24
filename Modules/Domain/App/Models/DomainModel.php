@@ -127,7 +127,7 @@ class DomainModel extends Model
 
     public static function getDomainConfigData($id)
     {
-        $data = self::select(['dom_domain.id as global_id','users.id as user_id','inv_config.id as config_id','inv_config.id as inv_config','acc_config.id as acc_config','pro_config.id as pro_config','nbr_config.id as nbr_config'])
+        $data = self::select(['dom_domain.id as global_id','inv_config.id as config_id','inv_config.id as inv_config','acc_config.id as acc_config','pro_config.id as pro_config','nbr_config.id as nbr_config'])
             ->leftjoin('inv_config','inv_config.domain_id','=','dom_domain.id')
             ->leftjoin('acc_config','acc_config.domain_id','=','dom_domain.id')
             ->leftjoin('pro_config','pro_config.domain_id','=','dom_domain.id')
