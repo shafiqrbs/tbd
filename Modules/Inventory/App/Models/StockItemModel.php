@@ -158,7 +158,7 @@ class StockItemModel extends Model
                 'inv_stock.purchase_price',
                 'inv_stock.sales_price',
                 'inv_stock.barcode',
-                'inv_particular.name as uom',
+                'inv_particular.name as unit_name',
             ]);
         $products = $products->orderBy('inv_product.id','DESC')->get();
 
@@ -203,6 +203,7 @@ class StockItemModel extends Model
     public static function getStockSkuItem($product_id,$domain)
     {
         return self::where([['inv_stock.config_id',$domain['config_id']]])->where('product_id',$product_id)->where('inv_stock.is_delete',0)
+            ->leftjoin('inv_product','inv_product.id','=','inv_stock.product_id')
             ->leftjoin('inv_particular as grade','grade.id','=','inv_stock.grade_id')
             ->leftjoin('inv_particular as color','color.id','=','inv_stock.color_id')
             ->leftjoin('inv_particular as brand','brand.id','=','inv_stock.brand_id')
@@ -212,7 +213,7 @@ class StockItemModel extends Model
                 'inv_stock.id as stock_id',
                 'inv_stock.is_master',
                 'inv_stock.product_id',
-                'inv_stock.name',
+                'inv_product.name',
                 'inv_stock.display_name',
                 'inv_stock.price',
                 'inv_stock.purchase_price',

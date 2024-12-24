@@ -11,6 +11,7 @@ use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
 use Modules\Accounting\App\Entities\AccountHead;
 use Modules\Accounting\App\Models\AccountingModel;
+use Modules\Accounting\App\Models\TransactionModeModel;
 use Modules\AppsApi\App\Services\JsonRequestResponse;
 use Modules\Domain\App\Entities\DomainChild;
 use Modules\Domain\App\Entities\GlobalOption;
@@ -139,6 +140,17 @@ class DomainController extends Controller
                             ['post-production', 'mid-production', 'pre-production']) ? 1 : 0,
                     ]);
                 }
+
+                /*TransactionModeModel::create([
+                    'domain_id' => $entity->id,
+                    'account_owner' => 'Cash',
+                    'authorised' => 'bKash',
+                    'name' => 'Cash',
+                    'short_name' => 'Cash',
+                    'slug' => 'cash',
+                    'path' => null,
+                    'account_type' => 'Current',
+                ]);*/
             }
 
 

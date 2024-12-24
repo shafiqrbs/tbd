@@ -49,7 +49,7 @@ class VendorController extends Controller
         $service = new JsonRequestResponse();
         $input = $request->validated();
 
-        if ($input['customer_id']){
+        if ($request->filled('customer_id')){
             $customerExists = VendorModel::where('customer_id', $input['customer_id'])->first();
 
             if ($customerExists) {

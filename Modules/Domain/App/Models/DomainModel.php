@@ -4,6 +4,8 @@ namespace Modules\Domain\App\Models;
 use Cviebrock\EloquentSluggable\Sluggable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Modules\Utility\App\Models\SettingModel;
 
 class DomainModel extends Model
 {
@@ -24,6 +26,11 @@ class DomainModel extends Model
         'alternative_mobile',
         'company_name',
     ];
+
+    public function businessModel(): BelongsTo
+    {
+        return $this->belongsTo(SettingModel::class,'business_model_id','id');
+    }
 
     public function sluggable(): array
     {
