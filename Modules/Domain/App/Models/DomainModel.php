@@ -63,6 +63,7 @@ class DomainModel extends Model
             'created_at'
         ]);
 
+        $entities = $entities->where('id','!=',1);
         if (isset($request['term']) && !empty($request['term'])){
             $entities = $entities->whereAny(['name','email','username','mobile'],'LIKE','%'.$request['term'].'%');
         }
@@ -123,5 +124,17 @@ class DomainModel extends Model
             ->where('users.id',$id)->first();
         return $data;
     }
+
+    public static function getDomainConfigData($id)
+    {
+        $data = self::select(['dom_domain.id as global_id','users.id as user_id','inv_config.id as config_id','inv_config.id as inv_config','acc_config.id as acc_config','pro_config.id as pro_config','nbr_config.id as nbr_config'])
+            ->leftjoin('inv_config','inv_config.domain_id','=','dom_domain.id')
+            ->leftjoin('acc_config','acc_config.domain_id','=','dom_domain.id')
+            ->leftjoin('pro_config','pro_config.domain_id','=','dom_domain.id')
+            ->leftjoin('nbr_config','nbr_config.domain_id','=','dom_domain.id')
+            ->where('dom_domain.id',$id)->first();
+        return $data;
+    }
+
 
 }

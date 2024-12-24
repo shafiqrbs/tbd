@@ -19,8 +19,11 @@ use Modules\Domain\App\Http\Requests\DomainRequest;
 use Modules\Core\App\Models\UserModel;
 use Modules\Domain\App\Models\CurrencyModel;
 use Modules\Domain\App\Models\DomainModel;
+use Modules\Inventory\App\Entities\Config;
 use Modules\Inventory\App\Entities\Setting;
 use Modules\Inventory\App\Models\ConfigModel;
+use Modules\NbrVatTax\App\Models\NbrVatModel;
+use Modules\Production\App\Models\ProductionConfig;
 use Modules\Utility\App\Models\SettingModel as UtilitySettingModel;
 use Modules\Inventory\App\Models\SettingModel as InventorySettingModel;
 
@@ -100,6 +103,14 @@ class DomainController extends Controller
                 'financial_start_date' => date('Y-m-d'),
                 'financial_end_date' => date('Y-m-d'),
             ]);
+
+            // Step 4: Create the accounting data
+            $accountingConfig = NbrVatModel::create([
+                'domain_id' => $entity->id,
+                'financial_start_date' => date('Y-m-d'),
+                'financial_end_date' => date('Y-m-d'),
+            ]);
+
             $getProductType = UtilitySettingModel::getEntityDropdown('product-type');
             if (count($getProductType) > 0) {
                 // If no inventory config found, return JSON response.
@@ -334,6 +345,13 @@ class DomainController extends Controller
     public function destroy($id)
     {
         $service = new JsonRequestResponse();
+
+        $userData = DomainModel::getDomainConfigData($id);
+        AccountingModel::find($userData['acc_config'])->delete();
+        NbrVatModel::find($userData['pro_config'])->delete();
+        ConfigModel::find($userData['config_id'])->delete();
+        ProductionConfig::find($userData['pro_config'])->delete();
+
         DomainModel::find($id)->delete();
         $entity = ['message'=>'delete'];
         $data = $service->returnJosnResponse($entity);
