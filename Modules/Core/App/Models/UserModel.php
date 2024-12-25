@@ -103,17 +103,20 @@ class UserModel extends Model
     }
 
     public static function getRecordsForLocalStorage($request,$domain){
-        $users = self::where('domain_id',$domain['global_id'])->whereNull('deleted_at')
+        $users = self::where('users.domain_id',$domain['global_id'])->whereNull('users.deleted_at')
+            ->leftJoin('cor_user_role','cor_user_role.user_id','=','users.id')
             ->select([
-                'id',
-                'name',
-                'username',
-                'email',
-                'mobile',
-                DB::raw('DATE_FORMAT(created_at, "%d-%m-%Y") as created_date'),
-                'created_at'
+                'users.id',
+                'users.name',
+                'users.username',
+                'users.email',
+                'users.mobile',
+                DB::raw('DATE_FORMAT(users.created_at, "%d-%m-%Y") as created_date'),
+                'users.created_at',
+                'cor_user_role.access_control_role',
+                'cor_user_role.android_control_role',
             ])
-            ->orderBy('id','DESC')
+            ->orderByDesc('users.id')
             ->get();
 
         $data = array('entities' => $users);

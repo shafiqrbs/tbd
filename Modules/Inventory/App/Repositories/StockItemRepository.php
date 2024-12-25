@@ -143,9 +143,9 @@ class StockItemRepository extends EntityRepository
             $entity->setName($product->getName());
             $entity->setDisplayName($product->getName());
             $entity->setUom($product->getUnit()->getName());
-            $entity->setPurchasePrice($data['purchase_price'] ?? 0.0);
-            $entity->setPrice($data['sales_price'] ?? 0.0);
-            $entity->setSalesPrice($data['sales_price'] ?? 0.0);
+//            $entity->setPurchasePrice($data['purchase_price'] ?? 0.0);
+//            $entity->setPrice($data['sales_price'] ?? 0.0);
+//            $entity->setSalesPrice($data['sales_price'] ?? 0.0);
             $entity->setSku($data['sku']);
             $min = (isset($data['min_quantity']) and $data['min_quantity'] > 1 ) ? $data['min_quantity']:0;
             $entity->setMinQuantity($min);

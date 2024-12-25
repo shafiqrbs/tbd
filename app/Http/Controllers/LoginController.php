@@ -43,6 +43,8 @@ class LoginController extends Controller
             return new JsonResponse(['status'=>404, 'message'=>'Invalid credentials']);
         }
 
+        $accessRole = \DB::table('cor_user_role')->where('user_id',$userExists->id)->first();
+
         $arrayData=[
             'id'=>$userExists->id,
             'name'=>$userExists->name,
@@ -51,6 +53,8 @@ class LoginController extends Controller
             'username'=>$userExists->username,
             'user_group'=>$userExists->user_group,
             'domain_id'=>$userExists->domain_id,
+            'access_control_role' => $accessRole?$accessRole->access_control_role:[],
+            'android_control_role' => $accessRole?$accessRole->android_control_role:[],
         ];
         return new JsonResponse([
             'status'=>200,

@@ -106,7 +106,7 @@ class DomainController extends Controller
             ]);
 
             // Step 4: Create the accounting data
-            $accountingConfig = NbrVatModel::create([
+            $nbrConfig = NbrVatModel::create([
                 'domain_id' => $entity->id,
                 'financial_start_date' => date('Y-m-d'),
                 'financial_end_date' => date('Y-m-d'),
@@ -141,8 +141,8 @@ class DomainController extends Controller
                     ]);
                 }
 
-                /*TransactionModeModel::create([
-                    'domain_id' => $entity->id,
+                TransactionModeModel::create([
+                    'config_id' => $accountingConfig->id,
                     'account_owner' => 'Cash',
                     'authorised' => 'bKash',
                     'name' => 'Cash',
@@ -150,7 +150,9 @@ class DomainController extends Controller
                     'slug' => 'cash',
                     'path' => null,
                     'account_type' => 'Current',
-                ]);*/
+                    'authorised_mode_id' => 14,
+                    'status' => true
+                ]);
             }
 
 
@@ -210,6 +212,30 @@ class DomainController extends Controller
         }
 
         $getInvConfigId = $config->id;
+
+        // if product type not exists then create
+        $productTypeExists = InventorySettingModel::where('config_id', $getInvConfigId)
+            ->where('parent_slug', 'product-type')
+            ->exists();
+
+        if (!$productTypeExists) {
+            $getProductType = UtilitySettingModel::getEntityDropdown('product-type');
+            if (count($getProductType) > 0) {
+                // Loop through each product type and either find or create inventory setting.
+                foreach ($getProductType as $type) {
+                    // If the inventory setting is not found, create a new one.
+                    InventorySettingModel::create([
+                        'config_id' => $getInvConfigId,
+                        'setting_id' => $type->id,
+                        'name' => $type->name,
+                        'slug' => $type->slug,
+                        'parent_slug' => 'product-type',
+                        'is_production' => in_array($type->slug,
+                            ['post-production', 'mid-production', 'pre-production']) ? 1 : 0,
+                    ]);
+                }
+            }
+        }
 
         // Fetch relevant product types settings as setting_id array
         $getInvProductType = InventorySettingModel::where('config_id', $getInvConfigId)
