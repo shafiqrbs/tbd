@@ -379,12 +379,12 @@ class BranchController extends Controller
         return response()->json(['status' => 200, 'success' => true, 'data' => $input]);
     }
 
-
-
-    public function categoryUpdate(Request $request,EntityManagerInterface $em)
+    public function categoryUpdate(Request $request)
     {
         try {
-            // Validate the input
+            DB::beginTransaction(); // Start transaction
+
+            // Existing validation and parsing logic
             $request->validate([
                 'value' => ['required', 'string', 'regex:/^\d+#\d+$/'],
                 'check' => 'required|boolean'
@@ -393,28 +393,23 @@ class BranchController extends Controller
                 'check.required' => 'The check field is required.',
             ]);
 
-            // Split and parse the input
             [$categoryId, $domainId] = explode('#', $request->input('value'));
 
-            // Validate numeric IDs
             if (!is_numeric($categoryId) || !is_numeric($domainId)) {
                 return response()->json(['status' => 422, 'success' => false, 'message' => 'Category ID or Domain ID is invalid.']);
             }
 
-            // Fetch configuration
             $childAccConfig = ConfigModel::where('domain_id', $domainId)->value('id');
             if (!$childAccConfig) {
                 return response()->json(['status' => 404, 'success' => false, 'message' => 'Configuration not found.']);
             }
 
-            // Fetch category and category group
             $category = CategoryModel::find($categoryId);
             if (!$category) {
                 return response()->json(['status' => 404, 'success' => false, 'message' => 'Category not found.']);
             }
             $categoryGroup = $category->parent;
 
-            // Fetch or create SubdomainCategory
             $subCategory = SubdomainCategory::firstOrCreate(
                 [
                     'category_id' => $categoryId,
@@ -423,37 +418,36 @@ class BranchController extends Controller
                 [
                     'category_group_id' => $categoryGroup ?? null,
                     'created_by_id' => $this->domain['user_id'],
-                    'status' => true, // Default status for newly created records
+                    'status' => true,
                 ]
             );
 
-            // Update status if the record already existed
             if (!$subCategory->wasRecentlyCreated) {
                 $subCategory->update([
                     'status' => $request->input('check') ? true : false,
                 ]);
             }
 
-            // handle category wise product create & update
-            $this->handleCategoryProduct($categoryId,$childAccConfig,$em,$request->input('check'),$domainId);
+            $this->handleCategoryProduct($categoryId, $childAccConfig, $request->input('check'), $domainId);
 
-            // Success response
+            DB::commit(); // Commit transaction
+
             return response()->json([
                 'status' => 200,
                 'success' => true,
                 'message' => 'Category updated successfully.',
                 'data' => $subCategory,
             ]);
-
         } catch (\Exception $e) {
-            // Log and return error response
+            DB::rollBack(); // Rollback transaction on error
             \Log::error('Category update failed: ' . $e->getMessage());
             return response()->json(['status' => 500, 'success' => false, 'message' => 'An internal error occurred.']);
         }
     }
 
 
-    private function handleCategoryProduct($categoryId, $childAccConfig, $entityManager, $shouldUpdate, $domainId) {
+
+    private function handleCategoryProduct($categoryId, $childAccConfig, $shouldUpdate, $domainId) {
         // Fetch all products for the given category and config
         $products = ProductModel::where('category_id', $categoryId)
             ->where('config_id', $this->domain['config_id'])
@@ -480,7 +474,7 @@ class BranchController extends Controller
             $parentStock = $parentStocks[$parentProduct->id] ?? null;
 
             if ($shouldUpdate && !$productUpdate) {
-                $this->createChildProduct($parentProduct, $categoryId, $childAccConfig, $entityManager, $parentStock, $discountPercent);
+                $this->createChildProduct($parentProduct, $categoryId, $childAccConfig, $parentStock, $discountPercent);
             } elseif ($productUpdate) {
                 $this->updateProductAndStock($parentProduct, $productUpdate, $parentStock, $shouldUpdate, $discountPercent);
             }
@@ -489,7 +483,7 @@ class BranchController extends Controller
         return true;
     }
 
-    private function createChildProduct($parentProduct, $categoryId, $childAccConfig, $entityManager, $parentStock, $discountPercent) {
+    private function createChildProduct($parentProduct, $categoryId, $childAccConfig, $parentStock, $discountPercent) {
         // Create a new child product
         $childProduct = ProductModel::create([
             'category_id' => $categoryId,
@@ -505,10 +499,13 @@ class BranchController extends Controller
 
         // Prepare stock data and insert
         $stockData = $this->prepareStockData($parentStock, $discountPercent);
-        $entityManager->getRepository(StockItem::class)->insertStockItem($childProduct->id, $stockData);
+        $stockData['sku'] = $parentStock->sku ?? null;
+        // this static function replace to repo insertStockItem method ( convert symfont to laravel )
+        StockItemModel::insertStockItem($childProduct->id, $stockData);
 
         return true;
     }
+
 
     private function updateProductAndStock($parentProduct, $productUpdate, $parentStock, $shouldUpdate, $discountPercent) {
         $status = $shouldUpdate ? true : false;

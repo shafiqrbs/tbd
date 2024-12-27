@@ -5,6 +5,8 @@ namespace Modules\Inventory\App\Models;
 use Cviebrock\EloquentSluggable\Sluggable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Modules\Inventory\App\Entities\Product;
+use Modules\Inventory\App\Entities\StockItem;
 
 class StockItemModel extends Model
 {
@@ -33,6 +35,7 @@ class StockItemModel extends Model
         'name',
         'sku',
         'display_name',
+        'is_master',
         'uom',
     ];
 
@@ -141,7 +144,7 @@ class StockItemModel extends Model
 
     public static function getStockItem($domain)
     {
-        $products = self::where([['inv_product.config_id',$domain['config_id']]])
+        $products = self::where([['inv_product.config_id',$domain['config_id']]])->where('inv_stock.status',1)
             ->join('inv_product','inv_product.id','=','inv_stock.product_id')
             ->leftjoin('inv_category','inv_category.id','=','inv_product.category_id')
             ->leftjoin('inv_particular','inv_particular.id','=','inv_product.unit_id')
@@ -230,4 +233,42 @@ class StockItemModel extends Model
             ])->get()->toArray();
     }
 
+    public static function insertStockItem($id, $data)
+    {
+        // Fetch the product by ID
+        $product = ProductModel::find($id);
+
+        // Ensure the product exists
+        if (!$product) {
+            throw new \InvalidArgumentException("Product with ID {$id} not found.");
+        }
+
+        // Check if a master stock item already exists for the product
+        if (self::where('product_id', $id)->where('is_master', 1)->exists()) {
+            return; // Exit early if the stock item already exists
+        }
+
+        // Retrieve related unit and SKU information
+        $findUnit = ParticularModel::find($product->unit_id);
+
+        // Prepare default values with data validation
+        $minQuantity = (isset($data['min_quantity']) && $data['min_quantity'] > 1) ? $data['min_quantity'] : 0;
+        $purchasePrice = isset($data['purchase_price']) ? (float)$data['purchase_price'] : 0.0;
+        $salesPrice = isset($data['sales_price']) ? (float)$data['sales_price'] : 0.0;
+
+        // Create the new stock item
+        self::create([
+            'product_id' => $id,
+            'config_id' => $product->config_id,
+            'name' => $product->name ?? null,
+            'display_name' => $product->name ?? null,
+            'uom' => $findUnit->name ?? null,
+            'purchase_price' => $purchasePrice,
+            'price' => $salesPrice,
+            'sales_price' => $salesPrice,
+            'sku' => $data['sku'] ?? null,
+            'min_quantity' => $minQuantity,
+            'is_master' => 1,
+        ]);
+    }
 }
