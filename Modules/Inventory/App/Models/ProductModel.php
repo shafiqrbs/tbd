@@ -64,7 +64,7 @@ class ProductModel extends Model
         $perPage = isset($request['offset']) && $request['offset']!=''? (int)($request['offset']):0;
         $skip = isset($page) && $page!=''? (int)$page * $perPage:0;
 
-        $products = self::where([['inv_product.config_id',$domain['config_id']]])->where('inv_stock.status',1)
+        $products = self::where([['inv_product.config_id',$domain['config_id']]])
             ->leftjoin('inv_category','inv_category.id','=','inv_product.category_id')
             ->leftjoin('inv_particular','inv_particular.id','=','inv_product.unit_id')
             ->leftjoin('inv_setting','inv_setting.id','=','inv_product.product_type_id')

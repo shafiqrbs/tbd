@@ -122,11 +122,11 @@ class OpeningStockController extends Controller
             if($getPurchaseItem){
                 $em->getRepository(StockItemHistory::class)->openingStockQuantity($getPurchaseItem->id);
             }
-            if($getPurchaseItem){
+            /*if($getPurchaseItem){
                 $item = $em->getRepository(PurchaseItem::class)->find($getPurchaseItem->id);
                 $config = $this->domain['acc_config'];
                 $em->getRepository(AccountJournal::class)->insertOpeningPurchase($config,$item);
-            }
+            }*/
         }
         if ($request->field_name === 'opening_quantity' ){
             $getPurchaseItem->update(['opening_quantity' => $request->opening_quantity,'quantity' => $request->opening_quantity,'sub_total'=>$request->subTotal]);
