@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Doctrine\ORM\EntityManager;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\DB;
 use Modules\Accounting\App\Entities\AccountJournal;
 use Modules\AppsApi\App\Services\JsonRequestResponse;
 use Modules\Core\App\Models\UserModel;
@@ -16,6 +17,7 @@ use Modules\Inventory\App\Http\Requests\OpeningStockRequest;
 use Modules\Inventory\App\Http\Requests\ProductRequest;
 use Modules\Inventory\App\Models\PurchaseItemModel;
 use Modules\Inventory\App\Models\PurchaseModel;
+use Modules\Inventory\App\Models\StockItemHistoryModel;
 
 
 class OpeningStockController extends Controller
@@ -101,48 +103,73 @@ class OpeningStockController extends Controller
         return $service->returnJosnResponse($entity);
     }
 
-    public function inlineUpdate(Request $request, EntityManager $em)
+    public function inlineUpdate(Request $request)
     {
-
-        $getPurchaseItem = PurchaseItemModel::find($request->id);
-        if (!$getPurchaseItem){
-            $response = new Response();
-            $response->headers->set('Content-Type', 'application/json');
-            $response->setContent(json_encode([
-                'status' => Response::HTTP_NOT_FOUND,
-                'message' => 'Data not found',
-            ]));
-            $response->setStatusCode(Response::HTTP_OK);
-            return $response;
-        }
-      //  dd($getPurchaseItem);
-
-        if ($request->field_name === 'approve' ){
-          //  $getPurchaseItem->update(['approved_by_id' => $this->domain['user_id']]);
-            if($getPurchaseItem){
-                $em->getRepository(StockItemHistory::class)->openingStockQuantity($getPurchaseItem->id);
-            }
-            /*if($getPurchaseItem){
-                $item = $em->getRepository(PurchaseItem::class)->find($getPurchaseItem->id);
-                $config = $this->domain['acc_config'];
-                $em->getRepository(AccountJournal::class)->insertOpeningPurchase($config,$item);
-            }*/
-        }
-        if ($request->field_name === 'opening_quantity' ){
-            $getPurchaseItem->update(['opening_quantity' => $request->opening_quantity,'quantity' => $request->opening_quantity,'sub_total'=>$request->subTotal]);
-        }
-        if ($request->field_name === 'purchase_price' ){
-            $getPurchaseItem->update(['purchase_price' => $request->purchase_price,'sub_total' => $request->subTotal]);
-        }
         $response = new Response();
         $response->headers->set('Content-Type', 'application/json');
-        $response->setContent(json_encode([
-            'status' => Response::HTTP_OK,
-            'message' => 'update',
-        ]));
-        $response->setStatusCode(Response::HTTP_OK);
+
+        // Start the database transaction
+        DB::beginTransaction();
+
+        try {
+            $getPurchaseItem = PurchaseItemModel::find($request->id);
+
+            // Validate purchase item existence
+            if (!$getPurchaseItem) {
+                $response->setContent(json_encode([
+                    'status' => Response::HTTP_NOT_FOUND,
+                    'message' => 'Data not found',
+                ]));
+                $response->setStatusCode(Response::HTTP_OK);
+                return $response;
+            }
+
+            // Perform updates based on field_name
+            if ($request->field_name === 'approve') {
+                // Approve the purchase item
+                $getPurchaseItem->update(['approved_by_id' => $this->domain['user_id']]);
+
+                // Call the opening stock quantity method
+                StockItemHistoryModel::openingStockQuantity($getPurchaseItem, 'opening');
+            }
+
+            if ($request->field_name === 'opening_quantity') {
+                $getPurchaseItem->update([
+                    'opening_quantity' => $request->opening_quantity,
+                    'quantity' => $request->opening_quantity,
+                    'sub_total' => $request->subTotal,
+                ]);
+            }
+
+            if ($request->field_name === 'purchase_price') {
+                $getPurchaseItem->update([
+                    'purchase_price' => $request->purchase_price,
+                    'sub_total' => $request->subTotal,
+                ]);
+            }
+
+            // Commit the transaction after all updates are successful
+            DB::commit();
+
+            $response->setContent(json_encode([
+                'status' => Response::HTTP_OK,
+                'message' => 'Updated successfully',
+            ]));
+            $response->setStatusCode(Response::HTTP_OK);
+        } catch (\Exception $e) {
+            // Rollback the transaction in case of an error
+            DB::rollBack();
+
+            $response->setContent(json_encode([
+                'status' => Response::HTTP_INTERNAL_SERVER_ERROR,
+                'message' => 'An error occurred: ' . $e->getMessage(),
+            ]));
+            $response->setStatusCode(Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+
         return $response;
     }
+
 
 
     public function openingApprove(Request $request, EntityManager $em)

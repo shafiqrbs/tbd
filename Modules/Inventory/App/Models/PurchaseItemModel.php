@@ -79,7 +79,7 @@ class PurchaseItemModel extends Model
 
         if (!empty($request['term'])) {
             $purchaseItems = $purchaseItems->whereAny(
-                ['inv_product.name', 'inv_product.slug', 'inv_category.name', 'uti_product_unit.name', 'inv_brand.name', 'inv_product.sales_price', 'uti_settings.name'],
+                ['inv_product.name', 'inv_product.slug', 'inv_category.name', 'inv_stock.sales_price', 'inv_setting.name'],
                 'LIKE',
                 '%' . $request['term'] . '%'
             );

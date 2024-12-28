@@ -53,6 +53,17 @@ class StockItemModel extends Model
         });
     }
 
+    public function brand()
+    {
+        return $this->belongsTo(ParticularModel::class, 'brand_id');
+    }
+
+    public function product()
+    {
+        return $this->belongsTo(ProductModel::class, 'product_id');
+    }
+
+
 
     public static function getRecords($request,$domain)
     {

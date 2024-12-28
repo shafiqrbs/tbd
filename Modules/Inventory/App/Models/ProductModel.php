@@ -57,6 +57,12 @@ class ProductModel extends Model
         });
     }
 
+    public function category()
+    {
+        return $this->belongsTo(CategoryModel::class, 'category_id');
+    }
+
+
 
     public static function getRecords($request,$domain)
     {
