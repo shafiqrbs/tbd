@@ -16,6 +16,7 @@ use Modules\Inventory\App\Models\PurchaseItemModel;
 use Modules\Inventory\App\Models\PurchaseModel;
 use Modules\Inventory\App\Models\SalesItemModel;
 use Modules\Inventory\App\Models\SalesModel;
+use Modules\Inventory\App\Models\StockItemHistoryModel;
 use function Symfony\Component\HttpFoundation\Session\Storage\Handler\getInsertStatement;
 
 class PurchaseController extends Controller
@@ -163,6 +164,48 @@ class PurchaseController extends Controller
         PurchaseModel::find($id)->delete();
         $entity = ['message' => 'delete'];
         return $service->returnJosnResponse($entity);
+    }
+
+    /**
+     * Approve the specified resource from storage.
+     */
+    public function approve($id)
+    {
+        $response = new Response();
+        $response->headers->set('Content-Type', 'application/json');
+
+        // Start the database transaction
+        DB::beginTransaction();
+
+        try {
+            $purchase = PurchaseModel::find($id);
+            $purchase->update(['approved_by_id' => $this->domain['user_id']]);
+            if (sizeof($purchase->purchaseItems)>0){
+                foreach ($purchase->purchaseItems as $item){
+                    $item->update(['approved_by_id' => $this->domain['user_id']]);
+                    StockItemHistoryModel::openingStockQuantity($item,'purchase');
+                }
+            }
+            // Commit the transaction after all updates are successful
+            DB::commit();
+
+            $response->setContent(json_encode([
+                'status' => Response::HTTP_OK,
+                'message' => 'Approved successfully',
+            ]));
+            $response->setStatusCode(Response::HTTP_OK);
+        } catch (\Exception $e) {
+            // Rollback the transaction in case of an error
+            DB::rollBack();
+
+            $response->setContent(json_encode([
+                'status' => Response::HTTP_INTERNAL_SERVER_ERROR,
+                'message' => 'An error occurred: ' . $e->getMessage(),
+            ]));
+            $response->setStatusCode(Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+
+        return $response;
     }
 
 }

@@ -83,6 +83,7 @@ Route::prefix('/inventory')->middleware([HeaderAuthenticationMiddleware::class])
 
     Route::apiResource('/purchase', PurchaseController::class)->middleware([HeaderAuthenticationMiddleware::class]);
     Route::get('/purchase/edit/{id}', [PurchaseController::class,'edit'])->name('get_edit_purchase');
+    Route::get('/purchase/approve/{id}', [PurchaseController::class,'approve'])->name('approve_purchase');
 
     Route::apiResource('/purchase-item', PurchaseItemController::class)->middleware([HeaderAuthenticationMiddleware::class]);
 
