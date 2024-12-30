@@ -18,6 +18,7 @@ class StockItemModel extends Model
 
     protected $fillable = [
         'product_id',
+        'quantity',
         'barcode',
         'sales_price',
         'purchase_price',
@@ -282,4 +283,14 @@ class StockItemModel extends Model
             'is_master' => 1,
         ]);
     }
+
+    public static function calculateTotalStockQuantity($productId, $configId) {
+        $query = self::where('product_id', $productId)
+            ->where('config_id', $configId)
+            ->where('is_delete', 0)
+            ->where('status', 1);
+
+        return $query->sum('quantity');
+    }
+
 }

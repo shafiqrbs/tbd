@@ -82,6 +82,7 @@ class PurchaseModel extends Model
                 'inv_purchase.discount as discount',
                 'inv_purchase.discount_calculation as discount_calculation',
                 'inv_purchase.discount_type as discount_type',
+                'inv_purchase.approved_by_id',
                 'cor_vendors.id as customerId',
                 'cor_vendors.name as customerName',
                 'cor_vendors.mobile as customerMobile',

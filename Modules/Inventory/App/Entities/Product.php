@@ -115,6 +115,13 @@ class Product
      */
     private $barcode;
 
+    /**
+     * @var float
+     *
+     * @ORM\Column(name="quantity", type="float", options={"default"="0"},nullable=true)
+     */
+    private $quantity=0;
+
 
 
     /**

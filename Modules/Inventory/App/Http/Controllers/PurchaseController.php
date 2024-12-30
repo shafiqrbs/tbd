@@ -122,8 +122,6 @@ class PurchaseController extends Controller
             }
             DB::commit();
 
-//            $purchaseData = PurchaseModel::getShow($id, $this->domain);
-
             $response = new Response();
             $response->headers->set('Content-Type', 'application/json');
             $response->setContent(json_encode([
@@ -146,13 +144,6 @@ class PurchaseController extends Controller
         }
 
         return $response;
-//        dump($request->all(),$id);
-        /*$data = $request->validated();
-        $entity = PurchaseModel::find($id);
-        $entity->update($data);
-
-        $service = new JsonRequestResponse();
-        return $service->returnJosnResponse($entity);*/
     }
 
     /**

@@ -26,6 +26,7 @@ class ProductModel extends Model
         'config_id',
         'parent_id',
         'description',
+        'quantity',
     ];
 
     /**

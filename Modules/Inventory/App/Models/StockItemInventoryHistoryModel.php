@@ -19,6 +19,7 @@ class StockItemInventoryHistoryModel extends Model
         'brand',
         'category',
         'purchase_item_id',
+        'purchase_id',
         'price',
         'purchase_price',
         'sales_price',
@@ -38,13 +39,13 @@ class StockItemInventoryHistoryModel extends Model
         });
     }
 
-    public static function openingInventoryHistory($purchaseItem, $stockItemHistory)
+    public static function openingInventoryHistory($item, $stockItemHistory,$process)
     {
         // Check for existing record
         $exist = self::where('stock_item_history_id', $stockItemHistory->id)->first();
 
         // Fetch related stock item details with eager loading
-        $findStockItem = StockItemModel::with(['brand', 'product.category'])->find($purchaseItem->stock_item_id);
+        $findStockItem = StockItemModel::with(['brand', 'product.category'])->find($item->stock_item_id);
 
         if (!$findStockItem) {
             return; // Exit if stock item doesn't exist
@@ -57,17 +58,17 @@ class StockItemInventoryHistoryModel extends Model
         if (!$exist) {
             self::create([
                 'stock_item_history_id' => $stockItemHistory->id,
-                'quantity' => $purchaseItem->quantity,
+                'quantity' => $item->quantity,
                 'brand' => $brandName,
                 'category' => $categoryName,
-                'purchase_item_id' => $purchaseItem->id,
-                'purchase_id' => $purchaseItem->purchase_id ?? null,
-                'price' => $purchaseItem->purchase_price,
-                'purchase_price' => $purchaseItem->purchase_price,
-                'sales_price' => $purchaseItem->sales_price,
-                'sub_total' => $purchaseItem->sub_total,
-                'total' => $purchaseItem->sub_total,
-                'config_id' => $purchaseItem->config_id,
+                'purchase_item_id' => $item->id ?? null,
+                'purchase_id' => $item->purchase_id ?? null,
+                'price' => $item->purchase_price,
+                'purchase_price' => $item->purchase_price,
+                'sales_price' => $item->sales_price,
+                'sub_total' => $item->sub_total,
+                'total' => $item->sub_total,
+                'config_id' => $item->config_id,
             ]);
         }
     }
