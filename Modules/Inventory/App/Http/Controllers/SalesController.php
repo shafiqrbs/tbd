@@ -16,6 +16,7 @@ use Modules\Inventory\App\Http\Requests\ProductRequest;
 use Modules\Inventory\App\Http\Requests\SalesRequest;
 use Modules\Inventory\App\Models\SalesItemModel;
 use Modules\Inventory\App\Models\SalesModel;
+use Modules\Inventory\App\Models\StockItemHistoryModel;
 use function Symfony\Component\HttpFoundation\Session\Storage\Handler\getInsertStatement;
 
 class SalesController extends Controller
@@ -55,10 +56,20 @@ class SalesController extends Controller
         $input = $request->validated();
         $input['config_id'] = $this->domain['config_id'];
         $entity = SalesModel::create($input);
-        $process = new SalesModel();
-        $em->getRepository(SalesItem::class)->salesInsert($entity->id,$input);
-       // $process->insertSalesItems($entity,$input['items']);
+
+        $entity->refresh();
+
+        $em->getRepository(SalesItem::class)->salesInsert($entity->id,$input,$this->domain);
         $salesData = SalesModel::getShow($entity->id, $this->domain);
+
+        // for stock maintain
+        $entity->update(['approved_by_id' => $this->domain['user_id']]);
+        if (sizeof($entity->salesItems)>0){
+            foreach ($entity->salesItems as $item){
+                StockItemHistoryModel::openingStockQuantity($item,'sales',$this->domain);
+            }
+        }
+
         $data = $service->returnJosnResponse($salesData);
         return $data;
 

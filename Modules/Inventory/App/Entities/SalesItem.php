@@ -30,6 +30,12 @@ class SalesItem
      **/
     private  $sale;
 
+    /**
+     * @ORM\ManyToOne(targetEntity="Modules\Inventory\App\Entities\Config" , cascade={"detach","merge"} )
+     * @ORM\JoinColumn(onDelete="CASCADE")
+     **/
+    private  $config;
+
      /**
      * @ORM\ManyToOne(targetEntity="StockItem")
      * @ORM\JoinColumn(onDelete="CASCADE")
@@ -840,6 +846,22 @@ class SalesItem
     public function setName($name)
     {
         $this->name = $name;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getConfig()
+    {
+        return $this->config;
+    }
+
+    /**
+     * @param mixed $config
+     */
+    public function setConfig($config): void
+    {
+        $this->config = $config;
     }
 
 

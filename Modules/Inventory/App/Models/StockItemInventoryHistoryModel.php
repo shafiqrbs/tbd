@@ -20,6 +20,8 @@ class StockItemInventoryHistoryModel extends Model
         'category',
         'purchase_item_id',
         'purchase_id',
+        'sales_item_id',
+        'sale_id',
         'price',
         'purchase_price',
         'sales_price',
@@ -39,7 +41,7 @@ class StockItemInventoryHistoryModel extends Model
         });
     }
 
-    public static function openingInventoryHistory($item, $stockItemHistory,$process)
+    public static function openingInventoryHistory($item, $stockItemHistory,$process,$domain)
     {
         // Check for existing record
         $exist = self::where('stock_item_history_id', $stockItemHistory->id)->first();
@@ -56,21 +58,35 @@ class StockItemInventoryHistoryModel extends Model
         $categoryName = $findStockItem->product->category->name ?? null;
 
         if (!$exist) {
-            self::create([
+            $data = [
                 'stock_item_history_id' => $stockItemHistory->id,
                 'quantity' => $item->quantity,
                 'brand' => $brandName,
                 'category' => $categoryName,
-                'purchase_item_id' => $item->id ?? null,
-                'purchase_id' => $item->purchase_id ?? null,
-                'price' => $item->purchase_price,
+                'price' => $item->purchase_price, // Assuming purchase price as default
                 'purchase_price' => $item->purchase_price,
                 'sales_price' => $item->sales_price,
                 'sub_total' => $item->sub_total,
                 'total' => $item->sub_total,
                 'config_id' => $item->config_id,
-            ]);
+            ];
+
+            // Check if this is a purchase operation
+            if ($process==='purchase' && isset($item->purchase_id)) {
+                $data['purchase_id'] = $item->purchase_id;
+                $data['purchase_item_id'] = $item->id;
+            }
+
+            // Check if this is a sales operation
+            if ($process==='sales' && isset($item->sale_id)) {
+                $data['sale_id'] = $item->sale_id;
+                $data['sales_item_id'] = $item->id;
+            }
+
+            // Create the database record
+            self::create($data);
         }
+
     }
 
 

@@ -23,7 +23,8 @@ class StockItemHistoryModel extends Model
         'wearhouse_id',
         'mode',
         'process',
-        'price',
+        'sales_price',
+        'purchase_price',
         'opening_balance',
         'created_by'
     ];
@@ -37,7 +38,7 @@ class StockItemHistoryModel extends Model
         });
     }
 
-    public static function openingStockQuantity($item, $process = 'opening')
+    public static function openingStockQuantity($item, $process = 'opening',$domain)
     {
         try {
             // Fetch the latest stock history
@@ -70,7 +71,8 @@ class StockItemHistoryModel extends Model
                 $closing_quantity,
                 $closing_balance,
                 $quantity,
-                $process
+                $process,
+                $domain
             );
 
             // Create stock history record
@@ -94,7 +96,7 @@ class StockItemHistoryModel extends Model
             }
 
             // Log inventory history
-            StockItemInventoryHistoryModel::openingInventoryHistory($item, $stockHistory,$process);
+            StockItemInventoryHistoryModel::openingInventoryHistory($item, $stockHistory,$process,$domain);
 
             return true;
 
@@ -125,13 +127,14 @@ class StockItemHistoryModel extends Model
         return [$closing_quantity, $closing_balance, $quantity];
     }
 
-    private static function prepareStockHistoryData($existingStockHistory, $item, $closing_quantity, $closing_balance, $quantity, $process)
+    private static function prepareStockHistoryData($existingStockHistory, $item, $closing_quantity, $closing_balance, $quantity, $process,$domain)
     {
         return [
             'stock_item_id' => $item->stock_item_id,
             'config_id' => $item->config_id,
             'quantity' => $quantity,
-            'price' => $item->purchase_price ?? 0,
+            'purchase_price' => $item->purchase_price ?? 0,
+            'sales_price' => $item->sales_price ?? 0,
             'opening_quantity' => $existingStockHistory->closing_quantity ?? 0,
             'opening_balance' => $existingStockHistory->closing_balance ?? 0,
             'closing_quantity' => $closing_quantity,
@@ -139,71 +142,7 @@ class StockItemHistoryModel extends Model
             'wearhouse_id' => $item->wearhouse_id ?? null,
             'mode' => $process,
             'process' => 'approved',
-            'created_by' => $item->approved_by_id
+            'created_by' => $domain['user_id']
         ];
     }
-
-
-
-
-    /*public static function openingStockQuantity($item, $process = 'opening')
-    {
-        // Check if record exists
-        $existingStockHistory = self::where('stock_item_id', $item->stock_item_id)
-            ->where('config_id', $item->config_id)
-            ->latest()
-            ->first();
-
-        // select operator
-        $operatorData = [
-            'opening' => '+',
-            'purchase' => '+',
-            'sales' => '-'
-        ];
-
-            // Get the operator based on the process
-            $operator = $operatorData[$process] ?? '+';
-
-            // Perform the dynamic calculation for `closing_quantity`
-            if ($operator === '+') {
-                $closing_quantity = $existingStockHistory ? $existingStockHistory->closing_quantity + $item->quantity : $item->quantity;
-                $closing_balance = $existingStockHistory ? $existingStockHistory->closing_balance + $item->sub_total: $item->sub_total;
-                $quantity = $item->quantity ?? 0;
-            } elseif ($operator === '-') {
-                $closing_quantity = $existingStockHistory ? $existingStockHistory->closing_quantity - $item->quantity : $item->quantity;
-                $closing_balance = $existingStockHistory ? $existingStockHistory->closing_balance - $item->sub_total : $item->sub_total;
-                $quantity = -$item->quantity ?? 0;
-            }
-
-        // Prepare common data variables
-            $data = [
-                'stock_item_id' => $item->stock_item_id,
-                'config_id' => $item->config_id,
-                'quantity' => $quantity,
-                'price' => $item->purchase_price ?? 0,
-                'opening_quantity' => $existingStockHistory ? $existingStockHistory->closing_quantity : 0 ,
-                'opening_balance' => $existingStockHistory ? $existingStockHistory->closing_balance : 0,
-                'closing_quantity' => $closing_quantity,
-                'closing_balance' => $closing_balance,
-                'wearhouse_id' => $item->wearhouse_id ?? null,
-                'mode' => $process,
-                'process' => 'approved',
-                'created_by' => $item->approved_by_id
-            ];
-
-            $stockHistory = self::create($data);
-            $findStockItem = StockItemModel::find($item->stock_item_id);
-            $findStockItem->update(['quantity' => $stockHistory->closing_quantity]);
-
-            $totalProductQty = StockItemModel::calculateTotalStockQuantity($findStockItem->product_id, $findStockItem->config_id);
-
-            $findProduct = ProductModel::find($findStockItem->product_id);
-            $findProduct->update(['quantity' => $totalProductQty]);
-
-            // create opening inventory-history if needed
-            StockItemInventoryHistoryModel::openingInventoryHistory($item,$stockHistory);
-
-        return true;
-    }*/
-
 }

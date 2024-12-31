@@ -174,7 +174,7 @@ class PurchaseController extends Controller
             if (sizeof($purchase->purchaseItems)>0){
                 foreach ($purchase->purchaseItems as $item){
                     $item->update(['approved_by_id' => $this->domain['user_id']]);
-                    StockItemHistoryModel::openingStockQuantity($item,'purchase');
+                    StockItemHistoryModel::openingStockQuantity($item,'purchase',$this->domain);
                 }
             }
             // Commit the transaction after all updates are successful

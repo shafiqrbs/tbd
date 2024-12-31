@@ -57,10 +57,15 @@ class StockItemHistory
 
     /**
      * @var float
-     *
-     * @ORM\Column(name="price", type="float", nullable = true)
+     * @ORM\Column(name="sales_price", type="float", nullable = true)
      */
-    private $price = 0;
+    private $salesPrice = 0;
+
+    /**
+     * @var float
+     * @ORM\Column(name="purchase_price", type="float", nullable = true)
+     */
+    private $purchasePrice = 0;
 
 
     /**

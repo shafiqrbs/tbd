@@ -2,6 +2,7 @@
 
 namespace Modules\Inventory\App\Repositories;
 use Doctrine\ORM\EntityRepository;
+use Modules\Inventory\App\Entities\Config;
 use Modules\Inventory\App\Entities\Sales;
 use Modules\Inventory\App\Entities\SalesItem;
 use Modules\Inventory\App\Entities\StockItem;
@@ -15,7 +16,7 @@ use Modules\Inventory\App\Entities\StockItem;
  */
 class SalesItemRepository extends EntityRepository
 {
-    public function salesInsert($salesId, $datas)
+    public function salesInsert($salesId, $datas,$domain)
     {
 
         $em = $this->_em;
@@ -31,6 +32,7 @@ class SalesItemRepository extends EntityRepository
             /* @var $item StockItem */
 
             $item = $em->getRepository(StockItem::class)->find($stockId);
+            $config = $em->getRepository(Config::class)->find($domain['config_id']);
             $entity = new SalesItem();
             $entity->setSale($sales);
             $entity->setStockItem($item);
@@ -42,6 +44,7 @@ class SalesItemRepository extends EntityRepository
             $entity->setPrice($item->getPrice());
             $entity->setSalesPrice($sales_price);
             $entity->setPurchasePrice($purchase_price);
+            $entity->setConfig($config);
             $entity->setSubTotal($entity->getQuantity() * $entity->getSalesPrice());
             $entity->setPurchasePrice( $item->getPurchasePrice() );
             $entity->setCreatedAt(new \DateTime());
