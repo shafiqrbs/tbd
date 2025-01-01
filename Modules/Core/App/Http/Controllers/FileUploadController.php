@@ -9,6 +9,7 @@ use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Str;
 use Modules\Accounting\App\Models\AccountHeadModel;
 use Modules\AppsApi\App\Services\GeneratePatternCodeService;
 use Modules\AppsApi\App\Services\JsonRequestResponse;
@@ -164,9 +165,8 @@ class FileUploadController extends Controller
 
         // Remove headers
         $keys = array_map('trim', array_shift($allData));
-
         // Only proceed if it's 'Product' and structure is correct
-        if ($getFile->file_type === 'Product' && count($keys) === 5) {
+        if ($getFile->file_type === 'Product' && count($keys) === 13) {
             $isInsert = $this->insertProductsInBatches($allData, $em);
         } else {
             return response()->json([
@@ -196,21 +196,77 @@ class FileUploadController extends Controller
             $values = array_map('trim', $data);
 
             // Fetch related IDs
-            $productType = InventorySettingModel::where('name', 'like', '%' . $values[0] . '%')->first('id');
-            $productCategory = CategoryModel::where('name', 'like', '%' . $values[1] . '%')->first('id');
-            $productUnit = ParticularModel::where('name', 'like', '%' . $values[2] . '%')->first('id');
+            $productType = InventorySettingModel::where('slug', 'like', '%' . Str::slug(trim($values[2])) . '%')->first('id');
+
+            // Trim and Slug Values Once
+            $parentCategory = trim($values[3] ?? null); // Avoid undefined index issues
+            $productCategory = trim($values[4] ?? null);
+
+            $parentSlug = $parentCategory ? Str::slug($parentCategory) : null;
+            $productSlug = $productCategory ? Str::slug($productCategory) : null;
+
+            // Handle Parent Category
+            if ($parentSlug && !empty($parentCategory)) {
+                $parentCategory = CategoryModel::where('slug', $parentSlug)->where('config_id',$this->domain['config_id'])->first('id');
+                if (!$parentCategory) {
+                    $parentCategory = CategoryModel::create([
+                        'config_id' => $this->domain['config_id'], // Assuming $this->domain['config_id'] exists
+                        'name' => $parentCategory,
+                        'slug' => $parentSlug,
+                        'status' => 1,
+                        'parent' => null // Parent category has no parent
+                    ]);
+
+                    // Check for Ledger Existence and Insert if Necessary
+                    $ledgerExist = AccountHeadModel::where('category_id', $parentCategory->id)
+                        ->where('config_id', $this->domain['acc_config'])->first();
+
+                    if (empty($ledgerExist)) {
+                        AccountHeadModel::insertCategoryLedger($this->domain['acc_config'], $parentCategory);
+                    }
+                }
+            }
+
+            // Handle Product Category
+            if ($productSlug && !empty($productCategory)) {
+                $productCategory = CategoryModel::where('slug', $productSlug)->where('config_id',$this->domain['config_id'])->first('id');
+                if (!$productCategory) {
+                    $productCategory = CategoryModel::create([
+                        'config_id' => $this->domain['config_id'],
+                        'name' => $productCategory,
+                        'slug' => $productSlug,
+                        'status' => 1,
+                        'parent' => ($parentSlug && isset($parentCategory->id)) ? $parentCategory->id : null
+                    ]);
+
+                    // Check for Ledger Existence and Insert if Necessary
+                    $ledgerExist = AccountHeadModel::where('category_id', $productCategory->id)
+                        ->where('config_id', $this->domain['acc_config'])->first();
+
+                    if (empty($ledgerExist)) {
+                        AccountHeadModel::insertCategoryLedger($this->domain['acc_config'], $productCategory);
+                    }
+                }
+            }
+
+            $productUnit = ParticularModel::where('name', 'like', '%' . Str::slug(trim($values[8])) . '%')->first('id');
 
             // Ensure valid data
-            if ($productType && $productCategory && $productUnit && $values[3] && $values[4]) {
+            if ($productType && $productUnit && $values[5]) {
                 $productData = [
-                    'product_type_id' => $productType->id,
-                    'category_id' => $productCategory->id,
-                    'unit_id' => $productUnit->id,
-                    'name' => $values[3],
-                    'alternative_name' => $values[3],
-                    'config_id' => $this->domain['config_id'],
-                    'status' => 1
+                    'code' => !empty($values[0]) ? str_replace("#", "", trim($values[0])) : null,
+                    'barcode' => trim($values[1] ?? null),
+                    'product_type_id' => $productType->id ?? null,
+                    'category_id' => $productCategory->id ?? null,
+                    'unit_id' => $productUnit->id ?? null,
+                    'name' => trim($values[5] ?? ''),
+                    'alternative_name' => !empty(trim($values[6] ?? '')) ? trim($values[6]) : null,
+                    'purchase_price' => is_numeric(trim($values[10] ?? '')) ? (float) trim($values[10]) : null,
+                    'sales_price' => is_numeric(trim($values[11] ?? '')) ? (float) trim($values[11]) : null,
+                    'config_id' => $this->domain['config_id'] ?? null,
+                    'status' => 1,
                 ];
+
 
                 $batch[] = $productData;
 

@@ -20,6 +20,7 @@ class ProductModel extends Model
         'category_id',
         'unit_id',
         'name',
+        'code',
         'alternative_name',
         'barcode',
         'status',

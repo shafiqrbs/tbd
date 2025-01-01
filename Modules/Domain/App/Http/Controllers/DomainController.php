@@ -9,6 +9,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 use Modules\Accounting\App\Entities\AccountHead;
 use Modules\Accounting\App\Models\AccountingModel;
 use Modules\Accounting\App\Models\TransactionModeModel;
@@ -83,7 +84,7 @@ class DomainController extends Controller
             UserModel::create([
                 'username' => $data['username'],
                 'email' => $email,
-                'password' => bcrypt($password),
+                'password' => Hash::make($password),
                 'domain_id' => $entity->id,
             ]);
 
