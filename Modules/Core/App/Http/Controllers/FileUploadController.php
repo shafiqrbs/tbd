@@ -199,19 +199,19 @@ class FileUploadController extends Controller
             $productType = InventorySettingModel::where('slug', 'like', '%' . Str::slug(trim($values[2])) . '%')->first('id');
 
             // Trim and Slug Values Once
-            $parentCategory = trim($values[3] ?? null); // Avoid undefined index issues
-            $productCategory = trim($values[4] ?? null);
+            $parentCategoryName = trim($values[3] ?? null); // Avoid undefined index issues
+            $productCategoryName = trim($values[4] ?? null);
 
-            $parentSlug = $parentCategory ? Str::slug($parentCategory) : null;
-            $productSlug = $productCategory ? Str::slug($productCategory) : null;
+            $parentSlug = $parentCategoryName ? Str::slug($parentCategoryName) : null;
+            $productSlug = $productCategoryName ? Str::slug($productCategoryName) : null;
 
             // Handle Parent Category
-            if ($parentSlug && !empty($parentCategory)) {
+            if ($parentSlug && !empty($parentCategoryName)) {
                 $parentCategory = CategoryModel::where('slug', $parentSlug)->where('config_id',$this->domain['config_id'])->first('id');
                 if (!$parentCategory) {
                     $parentCategory = CategoryModel::create([
                         'config_id' => $this->domain['config_id'], // Assuming $this->domain['config_id'] exists
-                        'name' => $parentCategory,
+                        'name' => $parentCategoryName,
                         'slug' => $parentSlug,
                         'status' => 1,
                         'parent' => null // Parent category has no parent
@@ -228,12 +228,12 @@ class FileUploadController extends Controller
             }
 
             // Handle Product Category
-            if ($productSlug && !empty($productCategory)) {
+            if ($productSlug && !empty($productCategoryName)) {
                 $productCategory = CategoryModel::where('slug', $productSlug)->where('config_id',$this->domain['config_id'])->first('id');
                 if (!$productCategory) {
                     $productCategory = CategoryModel::create([
                         'config_id' => $this->domain['config_id'],
-                        'name' => $productCategory,
+                        'name' => $productCategoryName,
                         'slug' => $productSlug,
                         'status' => 1,
                         'parent' => ($parentSlug && isset($parentCategory->id)) ? $parentCategory->id : null
