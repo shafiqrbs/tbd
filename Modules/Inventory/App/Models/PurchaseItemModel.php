@@ -4,7 +4,12 @@ namespace Modules\Inventory\App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Support\Facades\DB;
+use Modules\Inventory\App\Entities\StockItem;
+use Modules\Inventory\App\Entities\StockItemInventoryHistory;
 use Modules\Utility\App\Models\ProductUnitModel;
 use Ramsey\Collection\Collection;
 
@@ -43,7 +48,15 @@ class PurchaseItemModel extends Model
     {
         return $this->hasMany(StockItemHistoryModel::class,'purchase_item_id');
     }
+    public function inventoryItemHistory() : HasMany
+    {
+        return $this->hasMany(StockItemInventoryHistoryModel::class,'purchase_item_id');
+    }
 
+    public function stock() : BelongsTo
+    {
+        return $this->belongsTo(StockItemModel::class , 'stock_item_id');
+    }
 
     public static function getRecords($request,$domain)
     {

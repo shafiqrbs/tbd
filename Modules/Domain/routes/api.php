@@ -42,7 +42,7 @@ Route::prefix('/domain')->middleware(array(HeaderAuthenticationMiddleware::class
         Route::post('/inventory/{id}', [DomainController::class,'inventorySetting'])->name('domain_inventory_setting');
     });
     Route::prefix('restore')->middleware([HeaderAuthenticationMiddleware::class])->group(function() {
-        Route::get('/reset', [DomainController::class,'resetData'])->name('domain_reset');
-        Route::get('/delete/{id}', [DomainController::class,'deleteData'])->name('domain_delete');
+        Route::get('reset/{domain}', [DomainController::class,'resetData'])->name('domain_reset');
+        Route::get('delete/{id}', [DomainController::class,'deleteData'])->name('domain_delete');
     });
 });

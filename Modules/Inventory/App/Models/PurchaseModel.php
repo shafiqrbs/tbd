@@ -5,6 +5,7 @@ namespace Modules\Inventory\App\Models;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\DB;
 use Ramsey\Collection\Collection;
 
@@ -42,6 +43,11 @@ class PurchaseModel extends Model
     public function purchaseItems()
     {
         return $this->hasMany(PurchaseItemModel::class, 'purchase_id');
+    }
+
+    public function inventoryItems() : HasMany
+    {
+        return $this->hasMany(StockItemInventoryHistoryModel::class, 'purchase_id');
     }
 
     public function insertPurchaseItems($sales,$items)

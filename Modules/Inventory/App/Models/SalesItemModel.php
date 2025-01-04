@@ -4,6 +4,7 @@ namespace Modules\Inventory\App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Modules\Inventory\App\Entities\Product;
 use Modules\Utility\App\Models\ProductUnitModel;
 use Ramsey\Collection\Collection;
@@ -43,7 +44,10 @@ class SalesItemModel extends Model
     {
         return $this->belongsTo(ProductModel::class,'stock_item_id');
     }
-
+    public function stock() : BelongsTo
+    {
+        return $this->belongsTo(StockItemModel::class , 'stock_item_id');
+    }
 
     public static function getRecords($request,$domain)
     {

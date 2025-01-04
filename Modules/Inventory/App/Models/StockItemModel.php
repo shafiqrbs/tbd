@@ -5,6 +5,7 @@ namespace Modules\Inventory\App\Models;
 use Cviebrock\EloquentSluggable\Sluggable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Modules\Inventory\App\Entities\Product;
 use Modules\Inventory\App\Entities\StockItem;
 
@@ -63,6 +64,12 @@ class StockItemModel extends Model
     {
         return $this->belongsTo(ProductModel::class, 'product_id');
     }
+
+    public function stockItemHistory() :HasMany
+    {
+        return $this->hasMany(StockItemHistoryModel::class, 'stock_item_id');
+    }
+
 
 
 

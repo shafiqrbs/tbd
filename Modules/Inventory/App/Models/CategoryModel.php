@@ -57,11 +57,17 @@ class CategoryModel extends Model
         return $query->get();
     }
 
-    public static function getCategoryDropdown($domain)
+    public static function getCategoryDropdown($domain,$type)
     {
         $query = self::select(['name', 'slug', 'id'])
             ->where([['status', 1],['config_id', $domain['config_id']]]);
-        $query->whereNotNull('parent');
+        if ($type == 'parent'){
+            $query->whereNotNull('parent');
+        }
+        if ($type == 'child'){
+            $query->whereNull('parent');
+        }
+
         return $query->get();
     }
 

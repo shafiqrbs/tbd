@@ -14,6 +14,8 @@ use Modules\Accounting\App\Entities\AccountHead;
 use Modules\Accounting\App\Models\AccountingModel;
 use Modules\Accounting\App\Models\TransactionModeModel;
 use Modules\AppsApi\App\Services\JsonRequestResponse;
+use Modules\Core\App\Models\CustomerModel;
+use Modules\Core\App\Models\VendorModel;
 use Modules\Domain\App\Entities\DomainChild;
 use Modules\Domain\App\Entities\GlobalOption;
 use Modules\Domain\App\Entities\SubDomain;
@@ -24,6 +26,10 @@ use Modules\Domain\App\Models\DomainModel;
 use Modules\Inventory\App\Entities\Config;
 use Modules\Inventory\App\Entities\Setting;
 use Modules\Inventory\App\Models\ConfigModel;
+use Modules\Inventory\App\Models\PurchaseItemModel;
+use Modules\Inventory\App\Models\PurchaseModel;
+use Modules\Inventory\App\Models\SalesModel;
+use Modules\Inventory\App\Models\StockItemModel;
 use Modules\NbrVatTax\App\Models\NbrVatModel;
 use Modules\Production\App\Models\ProductionConfig;
 use Modules\Utility\App\Models\SettingModel as UtilitySettingModel;
@@ -394,28 +400,61 @@ class DomainController extends Controller
     }
 
     /**
-     * Remove the specified resource from storage.
+     * Reset the specified resource from storage.
      */
+
     public function resetData($id)
     {
-        $service = new JsonRequestResponse();
-        $userData = DomainModel::getDomainConfigData($id);
-        if($userData['acc_config']){
-            AccountingModel::find($userData['acc_config'])->delete();
+        // Ensure the domain exists
+        $findDomain = DomainModel::findOrFail($id);
+
+        // Fetch domain config
+        $allConfigId = DomainModel::getDomainConfigData($id)->toArray();
+
+        if (empty($allConfigId['inv_config'])) {
+            return response()->json(['message' => 'Inventory config not found', 'status' => Response::HTTP_NOT_FOUND], Response::HTTP_NOT_FOUND);
         }
-        if($userData['pro_config']) {
-            ProductionConfig::find($userData['pro_config'])->delete();
-        }
-        if($userData['nbr_config']) {
-            NbrVatModel::find($userData['nbr_config'])->delete();
-        }
-        if($userData['config_id']) {
-            ConfigModel::find($userData['config_id'])->delete();
-        }
-        DomainModel::find($id)->delete();
-        $entity = ['message'=>'delete'];
-        $data = $service->returnJosnResponse($entity);
-        return $data;
+
+        // Delete purchases and related data using chunking
+        PurchaseModel::with('purchaseItems.stock.stockItemHistory')
+            ->where('config_id', $allConfigId['inv_config'])
+            ->chunk(100, function ($purchases) {
+                $purchases->each(function ($purchase) {
+                    $purchase->purchaseItems->each(function ($purchaseItem) {
+                        if ($purchaseItem->stock && $purchaseItem->stock->stockItemHistory->isNotEmpty()) {
+                            $purchaseItem->stock->stockItemHistory->each(function ($history) {
+                                $history->delete();
+                            });
+                        }
+                    });
+                    $purchase->delete();
+                });
+            });
+
+        // Bulk delete vendors and customers
+        VendorModel::where('domain_id', $id)->delete();
+        CustomerModel::where('domain_id', $id)->delete();
+
+        // Delete sales and related data using chunking
+        SalesModel::with('salesItems.stock.stockItemHistory')
+            ->where('config_id', $allConfigId['inv_config'])
+            ->chunk(100, function ($sales) {
+                $sales->each(function ($sale) {
+                    $sale->salesItems->each(function ($salesItem) {
+                        if ($salesItem->stock && $salesItem->stock->stockItemHistory->isNotEmpty()) {
+                            $salesItem->stock->stockItemHistory->each(function ($history) {
+                                $history->delete();
+                            });
+                        }
+                    });
+                    $sale->delete();
+                });
+            });
+
+        // Bulk update stock item quantities
+        StockItemModel::where('config_id', $allConfigId['inv_config'])->update(['quantity' => 0]);
+
+        return response()->json(['message' => 'Domain reset successfully', 'status' => Response::HTTP_OK], Response::HTTP_OK);
     }
 
     /**

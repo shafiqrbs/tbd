@@ -25,6 +25,7 @@ use Modules\Inventory\App\Models\ConfigModel;
 use Modules\Inventory\App\Models\ParticularModel;
 use Modules\Inventory\App\Models\ProductModel;
 use Modules\Inventory\App\Models\SettingModel as InventorySettingModel;
+use Modules\Utility\App\Models\ProductUnitModel;
 use PhpOffice\PhpSpreadsheet\Exception;
 use PhpOffice\PhpSpreadsheet\Reader\Xlsx;
 
@@ -196,7 +197,7 @@ class FileUploadController extends Controller
             $values = array_map('trim', $data);
 
             // Fetch related IDs
-            $productType = InventorySettingModel::where('slug', 'like', '%' . Str::slug(trim($values[2])) . '%')->first('id');
+            $productType = InventorySettingModel::where('slug', 'like', '%' . Str::slug(trim($values[2])) . '%')->where('config_id',$this->domain['config_id'])->first('id');
 
             // Trim and Slug Values Once
             $parentCategoryName = trim($values[3] ?? null); // Avoid undefined index issues
@@ -210,7 +211,7 @@ class FileUploadController extends Controller
                 $parentCategory = CategoryModel::where('slug', $parentSlug)->where('config_id',$this->domain['config_id'])->first('id');
                 if (!$parentCategory) {
                     $parentCategory = CategoryModel::create([
-                        'config_id' => $this->domain['config_id'], // Assuming $this->domain['config_id'] exists
+                        'config_id' => $this->domain['config_id'],
                         'name' => $parentCategoryName,
                         'slug' => $parentSlug,
                         'status' => 1,
@@ -249,10 +250,18 @@ class FileUploadController extends Controller
                 }
             }
 
-            $productUnit = ParticularModel::where('name', 'like', '%' . Str::slug(trim($values[8])) . '%')->first('id');
-
+            $productUnit = ParticularModel::where('name', 'like', '%' . Str::slug(trim($values[8])) . '%')->where('config_id',$this->domain['config_id'])->first('id');
+            if (!$productUnit) {
+                $productUnit = ParticularModel::create([
+                    'config_id' => $this->domain['config_id'],
+                    'particular_type_id' => 1,
+                    'name' => trim($values[8]),
+                    'slug' => Str::slug(trim($values[8])),
+                    'status' => true
+                ]);
+            }
             // Ensure valid data
-            if ($productType && $productUnit && $values[5]) {
+            if ($productType && $values[5]) {
                 $productData = [
                     'code' => !empty($values[0]) ? str_replace("#", "", trim($values[0])) : null,
                     'barcode' => trim($values[1] ?? null),

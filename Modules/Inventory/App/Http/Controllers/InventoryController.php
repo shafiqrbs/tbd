@@ -75,7 +75,8 @@ class InventoryController extends Controller
      */
     public function categoryDropdown(Request $request)
     {
-        $dropdown = CategoryModel::getCategoryDropdown($this->domain);
+        $type = $request->get('type');
+        $dropdown = CategoryModel::getCategoryDropdown($this->domain,$type);
         $service = new JsonRequestResponse();
         return $service->returnJosnResponse($dropdown);
     }
