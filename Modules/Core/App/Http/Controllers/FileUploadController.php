@@ -25,6 +25,7 @@ use Modules\Inventory\App\Models\ConfigModel;
 use Modules\Inventory\App\Models\ParticularModel;
 use Modules\Inventory\App\Models\ProductModel;
 use Modules\Inventory\App\Models\SettingModel as InventorySettingModel;
+use Modules\Inventory\App\Models\StockItemModel;
 use Modules\Utility\App\Models\ProductUnitModel;
 use PhpOffice\PhpSpreadsheet\Exception;
 use PhpOffice\PhpSpreadsheet\Reader\Xlsx;
@@ -268,10 +269,11 @@ class FileUploadController extends Controller
                     'product_type_id' => $productType->id ?? null,
                     'category_id' => $productCategory->id ?? null,
                     'unit_id' => $productUnit->id ?? null,
-                    'name' => trim($values[5] ?? ''),
-                    'alternative_name' => !empty(trim($values[6] ?? '')) ? trim($values[6]) : null,
-                    'purchase_price' => is_numeric(trim($values[10] ?? '')) ? (float) trim($values[10]) : null,
-                    'sales_price' => is_numeric(trim($values[11] ?? '')) ? (float) trim($values[11]) : null,
+                    'name' => trim($values[5]),
+                    'item_size' => trim($values[7] ?? null),
+                    'alternative_name' => !empty(trim($values[6])) ? trim($values[6]) : null,
+                    'purchase_price' => is_numeric(trim($values[10])) ? (float) trim($values[10]) : 0,
+                    'sales_price' => is_numeric(trim($values[11])) ? (float) trim($values[11]) : 0,
                     'config_id' => $this->domain['config_id'] ?? null,
                     'status' => 1,
                 ];
@@ -300,8 +302,23 @@ class FileUploadController extends Controller
         $rowCount = 0;
 
         foreach ($batch as $productData) {
-            $product = ProductModel::create($productData);
-            $em->getRepository(StockItem::class)->insertStockItem($product->id, $productData);
+            $product = ProductModel::where('name', $productData['name'])
+                ->where('config_id', $productData['config_id'])
+                ->first();
+
+            if (!$product) {
+                // Create the product if it doesn't exist
+                $product = ProductModel::create($productData);
+
+                // Insert stock item for newly created product (new record)
+                $em->getRepository(StockItem::class)->insertStockItem($product->id, $productData);
+            } else {
+                // Insert stock item for newly created product (new record)
+                $productData['product_id'] = $product->id;
+                $productData['display_name'] = $product->name;
+                StockItemModel::create($productData);
+            }
+
             $rowCount++;
         }
 

@@ -120,6 +120,10 @@ class StockItemRepository extends EntityRepository
             $min = (isset($data['min_quantity']) && $data['min_quantity'] > 1) ? $data['min_quantity'] : 0;
             $entity->setMinQuantity($min);
 
+            if ($data['item_size']){
+                $entity->setItemSize($data['item_size']);
+            }
+
             $entity->setIsMaster(1);
             $entity->setCreatedAt(new \DateTime());
             $entity->setUpdatedAt(new \DateTime());

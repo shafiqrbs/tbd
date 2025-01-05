@@ -390,6 +390,12 @@ class StockItem
      */
     private $issueDate;
 
+    /**
+     * @var string
+     * @ORM\Column( type="text", length=255, nullable = true)
+     */
+    private $itemSize;
+
 
     /**
      * @var \DateTime
@@ -415,6 +421,16 @@ class StockItem
     public function getId()
     {
         return $this->id;
+    }
+
+    public function getItemSize(): string
+    {
+        return $this->itemSize;
+    }
+
+    public function setItemSize(string $itemSize): void
+    {
+        $this->itemSize = $itemSize;
     }
 
 

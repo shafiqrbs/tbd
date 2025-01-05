@@ -39,6 +39,7 @@ class StockItemModel extends Model
         'display_name',
         'is_master',
         'uom',
+        'item_size',
     ];
 
     public static function boot() {
@@ -170,7 +171,7 @@ class StockItemModel extends Model
             ->leftjoin('inv_setting','inv_setting.id','=','inv_product.product_type_id')
             ->select([
                 'inv_stock.id',
-                \DB::raw("CONCAT(inv_stock.name, '[',IFNULL(inv_stock.remaining_quantity, 0),'] ', IFNULL(inv_particular.name,'')) AS product_name"),
+                \DB::raw("CONCAT(inv_stock.name,' ',IFNULL(inv_stock.item_size,''),' ' ,'[',IFNULL(inv_stock.remaining_quantity, 0),'] ', IFNULL(inv_particular.name,'')) AS product_name"),
                 'inv_stock.name as name',
                 'inv_stock.display_name as display_name',
                 'inv_product.slug',
