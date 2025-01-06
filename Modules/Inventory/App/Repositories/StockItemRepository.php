@@ -3,8 +3,10 @@
 namespace Modules\Inventory\App\Repositories;
 use Doctrine\DBAL\DriverManager;
 use Doctrine\ORM\EntityRepository;
+use Modules\Inventory\App\Entities\Particular;
 use Modules\Inventory\App\Entities\Product;
 use Modules\Inventory\App\Entities\StockItem;
+use Modules\Inventory\App\Models\ParticularModel;
 use function Doctrine\Common\Collections\exists;
 
 /**
@@ -108,20 +110,44 @@ class StockItemRepository extends EntityRepository
             $entity->setConfig($config);
             $entity->setProduct($product);
 
-            // Ensure methods like getName() won't fail
             $entity->setName($product->getName() ?? null);
             $entity->setDisplayName($product->getName() ?? null);
-            $entity->setUom($unitName ?? null); // Fallback if unit or unit name does not exist
+            $entity->setUom($unitName ?? null);
             $entity->setPurchasePrice($data['purchase_price'] ?? 0.0);
             $entity->setPrice($data['sales_price'] ?? 0.0);
             $entity->setSalesPrice($data['sales_price'] ?? 0.0);
             $entity->setSku($data['sku'] ?? null);
+
+            if (isset($data['bangla_name']) && !empty($data['bangla_name'])) {
+                $entity->setBanglaName($data['bangla_name']);
+            }
 
             $min = (isset($data['min_quantity']) && $data['min_quantity'] > 1) ? $data['min_quantity'] : 0;
             $entity->setMinQuantity($min);
 
             if (isset($data['item_size']) && !empty($data['item_size'])) {
                 $entity->setItemSize($data['item_size']);
+            }
+
+            if (isset($data['color_id']) && !empty($data['color_id'])) {
+                $color = $em->getRepository(Particular::class)->find($data['color_id']);
+                $entity->setColor($color);
+            }
+            if (isset($data['brand_id']) && !empty($data['brand_id'])) {
+                $brand = $em->getRepository(Particular::class)->find($data['brand_id']);
+                $entity->setBrand($brand);
+            }
+            if (isset($data['size_id']) && !empty($data['size_id'])) {
+                $size = $em->getRepository(Particular::class)->find($data['size_id']);
+                $entity->setSize($size);
+            }
+            if (isset($data['grade_id']) && !empty($data['grade_id'])) {
+                $grade = $em->getRepository(Particular::class)->find($data['grade_id']);
+                $entity->setGrade($grade);
+            }
+            if (isset($data['model_id']) && !empty($data['model_id'])) {
+                $model = $em->getRepository(Particular::class)->find($data['model_id']);
+                $entity->setModel($model);
             }
 
             $entity->setIsMaster(1);
@@ -144,8 +170,9 @@ class StockItemRepository extends EntityRepository
         $product = $em->getRepository(Product::class)->find($id);
         $entity = $em->getRepository(StockItem::class)->findOneBy(['product' => $id,'isMaster' => 1]);
         if($entity){
-            $entity->setName($product->getName());
-            $entity->setDisplayName($product->getName());
+            $entity->setName(isset($data['name']) && !empty($data['name']) ? $data['name'] : $product->getName());
+            $entity->setDisplayName(isset($data['alternative_name']) && !empty($data['alternative_name']) ? $data['alternative_name'] : $product->getName());
+            $entity->setBanglaName(isset($data['bangla_name']) && !empty($data['bangla_name']) ? $data['bangla_name'] : $product->getName());
             $entity->setUom($product->getUnit()->getName());
 //            $entity->setPurchasePrice($data['purchase_price'] ?? 0.0);
 //            $entity->setPrice($data['sales_price'] ?? 0.0);

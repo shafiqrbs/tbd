@@ -25,15 +25,21 @@ class ProductRequest extends FormRequest
                     'product_type_id' => 'required|integer',
                     'category_id' => 'required|integer',
                     'unit_id' => 'required|integer',
-                    'brand_id' => 'nullable|integer',
+//                    'brand_id' => 'nullable|integer',
                     'name' => 'required|string',
                     'alternative_name' => 'nullable|string',
+                    'bangla_name' => 'nullable|string',
                     'sku' => 'nullable|string',
                     'barcode' => 'nullable',
                     'opening_quantity' => 'nullable|numeric|regex:/^\d+(\.\d{1,2})?$/',
                     'min_quantity' => 'nullable|numeric|regex:/^\d+(\.\d{1,2})?$/',
                     'reorder_quantity' => 'nullable|numeric|regex:/^\d+(\.\d{1,2})?$/',
                     'description' => 'nullable|string',
+                    'brand_id' => 'nullable|integer',
+                    'color_id' => 'nullable|integer',
+                    'size_id' => 'nullable|integer',
+                    'grade_id' => 'nullable|integer',
+                    'model_id' => 'nullable|integer',
                 ];
             }
             case 'PUT':
@@ -43,9 +49,10 @@ class ProductRequest extends FormRequest
                     'product_type_id' => 'required|integer',
                     'category_id' => 'required|integer',
                     'unit_id' => 'required|integer',
-                    'brand_id' => 'nullable|integer',
+//                    'brand_id' => 'nullable|integer',
                     'name' => 'required|string',
                     'alternative_name' => 'nullable|string',
+                    'bangla_name' => 'nullable|string',
                     'sku' => 'nullable|string',
                     'barcode' => 'nullable',
                     'opening_quantity' => 'nullable|numeric|regex:/^\d+(\.\d{1,2})?$/',
@@ -55,6 +62,11 @@ class ProductRequest extends FormRequest
                     'reorder_quantity' => 'nullable|numeric|regex:/^\d+(\.\d{1,2})?$/',
                     'status' => 'required|boolean',
                     'description' => 'nullable|string',
+                    'brand_id' => 'nullable|integer',
+                    'color_id' => 'nullable|integer',
+                    'size_id' => 'nullable|integer',
+                    'grade_id' => 'nullable|integer',
+                    'model_id' => 'nullable|integer',
                 ];
             }
 

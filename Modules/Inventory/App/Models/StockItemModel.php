@@ -40,6 +40,7 @@ class StockItemModel extends Model
         'is_master',
         'uom',
         'item_size',
+        'bangla_name',
     ];
 
     public static function boot() {

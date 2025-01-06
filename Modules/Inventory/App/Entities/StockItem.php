@@ -102,6 +102,14 @@ class StockItem
     private $displayName;
 
 
+
+    /**
+     * @var string
+     * @ORM\Column( name="bangla_name",type="text", nullable = true)
+     */
+    private $banglaName;
+
+
       /**
      * @var string
      *
@@ -1348,6 +1356,32 @@ class StockItem
     public function setUom($uom)
     {
         $this->uom = $uom;
+    }
+
+    public function getBanglaName(): string
+    {
+        return $this->banglaName;
+    }
+
+    public function setBanglaName(string $banglaName): void
+    {
+        $this->banglaName = $banglaName;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getModel()
+    {
+        return $this->model;
+    }
+
+    /**
+     * @param mixed $model
+     */
+    public function setModel($model): void
+    {
+        $this->model = $model;
     }
 
 
