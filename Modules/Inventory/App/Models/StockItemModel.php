@@ -239,7 +239,7 @@ class StockItemModel extends Model
                 'inv_stock.product_id',
                 'inv_product.name',
                 'inv_stock.display_name',
-                'inv_stock.price',
+                'inv_stock.sales_price as price',
                 'inv_stock.purchase_price',
                 'inv_stock.grade_id',
                 'grade.name as grade_name',
