@@ -130,7 +130,7 @@ class OpeningStockController extends Controller
                 $getPurchaseItem->update(['approved_by_id' => $this->domain['user_id']]);
 
                 // Call the opening stock quantity method
-                StockItemHistoryModel::openingStockQuantity($getPurchaseItem, 'opening');
+                StockItemHistoryModel::openingStockQuantity($getPurchaseItem, 'opening',$this->domain);
             }
 
             if ($request->field_name === 'opening_quantity') {
