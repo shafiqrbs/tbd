@@ -57,7 +57,7 @@ class CategoryModel extends Model
         return $query->get();
     }
 
-    public static function getCategoryDropdown($domain,$type)
+    public static function getCategoryDropdown($domain,$type='all')
     {
         $query = self::select(['name', 'slug', 'id'])
             ->where([['status', 1],['config_id', $domain['config_id']]]);
