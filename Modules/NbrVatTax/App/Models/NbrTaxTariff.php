@@ -16,7 +16,7 @@ class NbrTaxTariff extends Model
 
     public static function getNbrTaxTariffDropdown()
     {
-        $query = self::select(['hs_code as name', 'slug', 'id'])->where([['status', 1]]);
+        $query = self::select(['hs_code as name','name as label', 'slug', 'id'])->where([['status', 1]]);
         return $query->get()->toArray();
     }
 }

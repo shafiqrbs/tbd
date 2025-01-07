@@ -17,6 +17,7 @@ use Modules\Inventory\App\Models\PurchaseModel;
 use Modules\Inventory\App\Models\SalesItemModel;
 use Modules\Inventory\App\Models\SalesModel;
 use Modules\Inventory\App\Models\StockItemHistoryModel;
+use Modules\Inventory\App\Models\StockItemModel;
 use function Symfony\Component\HttpFoundation\Session\Storage\Handler\getInsertStatement;
 
 class PurchaseController extends Controller
@@ -173,6 +174,11 @@ class PurchaseController extends Controller
             $purchase->update(['approved_by_id' => $this->domain['user_id']]);
             if (sizeof($purchase->purchaseItems)>0){
                 foreach ($purchase->purchaseItems as $item){
+                    // get average price
+                    $itemAveragePrice = StockItemModel::calculateStockItemAveragePrice($item->stock_item_id,$item->config_id,$item);
+                    //set average price
+                    StockItemModel::where('id', $item->stock_item_id)->where('config_id',$item->config_id)->update(['average_price' => $itemAveragePrice]);
+
                     $item->update(['approved_by_id' => $this->domain['user_id']]);
                     StockItemHistoryModel::openingStockQuantity($item,'purchase',$this->domain);
                 }

@@ -419,6 +419,12 @@ class StockItem
      */
     private $updatedAt ;
 
+    /**
+     * @var float
+     * @ORM\Column(name="average_price", type="float", options={"default":0})
+     */
+    private $averagePrice=0;
+
 
 
     /**
@@ -1382,6 +1388,16 @@ class StockItem
     public function setModel($model): void
     {
         $this->model = $model;
+    }
+
+    public function getAveragePrice(): float|int
+    {
+        return $this->averagePrice;
+    }
+
+    public function setAveragePrice(float|int $averagePrice): void
+    {
+        $this->averagePrice = $averagePrice;
     }
 
 

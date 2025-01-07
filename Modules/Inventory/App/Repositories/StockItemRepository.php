@@ -125,6 +125,10 @@ class StockItemRepository extends EntityRepository
             $min = (isset($data['min_quantity']) && $data['min_quantity'] > 1) ? $data['min_quantity'] : 0;
             $entity->setMinQuantity($min);
 
+            if (isset($data['barcode']) && !empty($data['barcode'])) {
+                $entity->setBarcode($data['barcode']);
+            }
+
             if (isset($data['item_size']) && !empty($data['item_size'])) {
                 $entity->setItemSize($data['item_size']);
             }

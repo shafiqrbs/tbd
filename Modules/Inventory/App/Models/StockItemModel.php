@@ -41,6 +41,7 @@ class StockItemModel extends Model
         'uom',
         'item_size',
         'bangla_name',
+        'average_price',
     ];
 
     public static function boot() {
@@ -302,5 +303,32 @@ class StockItemModel extends Model
 
         return $query->sum('quantity');
     }
+
+    public static function calculateStockItemAveragePrice($itemId, $configId, $currentItem)
+    {
+        // Fetch the existing stock item
+        $query = self::where('id', $itemId)->where('config_id', $configId)->first();
+
+        // Handle missing stock item (set defaults)
+        $existingQuantity = $query->quantity ?? 0;
+        $existingPrice = $query->purchase_price ?? 0;
+
+        // Ensure current item has valid values
+        $currentQuantity = $currentItem->quantity ?? 0;
+        $currentPrice = $currentItem->purchase_price ?? 0;
+
+        // Calculate total prices
+        $existingTotalPrice = $existingQuantity * $existingPrice;
+        $currentTotalPrice = $currentQuantity * $currentPrice;
+        $totalPrice = $existingTotalPrice + $currentTotalPrice;
+
+        // Calculate total quantity
+        $totalQuantity = $existingQuantity + $currentQuantity;
+
+        // Calculate and return the average price
+        $averagePrice = $totalPrice / $totalQuantity;
+        return $averagePrice;
+    }
+
 
 }

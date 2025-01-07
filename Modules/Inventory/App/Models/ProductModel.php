@@ -100,6 +100,9 @@ class ProductModel extends Model
                 'color.name as color_name',
                 'grade.name as grade_name',
                 'size.name as size_name',
+                'inv_stock.purchase_price',
+                'inv_stock.sales_price',
+                'inv_stock.average_price',
             ]);
 
         if (isset($request['term']) && !empty($request['term'])){

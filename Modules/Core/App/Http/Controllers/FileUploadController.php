@@ -168,11 +168,11 @@ class FileUploadController extends Controller
         // Remove headers
         $keys = array_map('trim', array_shift($allData));
         // Only proceed if it's 'Product' and structure is correct
-        if ($getFile->file_type === 'Product' && count($keys) === 13) {
+        if ($getFile->file_type === 'Product' && count($keys) === 12) {
             $isInsert = $this->insertProductsInBatches($allData, $em);
         } else {
             return response()->json([
-                'message' => 'Invalid file type or structure',
+                'message' => 'Invalid file type or structure or column expect 12 , its '.count($keys).' given.',
                 'status' => Response::HTTP_INTERNAL_SERVER_ERROR
             ], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
@@ -251,13 +251,13 @@ class FileUploadController extends Controller
                 }
             }
 
-            $productUnit = ParticularModel::where('name', 'like', '%' . Str::slug(trim($values[8])) . '%')->where('config_id',$this->domain['config_id'])->first('id');
+            $productUnit = ParticularModel::where('name', 'like', '%' . Str::slug(trim($values[9])) . '%')->where('config_id',$this->domain['config_id'])->first('id');
             if (!$productUnit) {
                 $productUnit = ParticularModel::create([
                     'config_id' => $this->domain['config_id'],
                     'particular_type_id' => 1,
-                    'name' => trim($values[8]),
-                    'slug' => Str::slug(trim($values[8])),
+                    'name' => trim($values[9]),
+                    'slug' => Str::slug(trim($values[9])),
                     'status' => true
                 ]);
             }
@@ -265,13 +265,14 @@ class FileUploadController extends Controller
             if ($productType && $values[5]) {
                 $productData = [
                     'code' => !empty($values[0]) ? str_replace("#", "", trim($values[0])) : null,
-                    'barcode' => trim($values[1] ?? null),
+                    'barcode' => !empty($values[1]) ? str_replace("#", "", trim($values[1])) : null,
                     'product_type_id' => $productType->id ?? null,
                     'category_id' => $productCategory->id ?? null,
                     'unit_id' => $productUnit->id ?? null,
                     'name' => trim($values[5]),
-                    'item_size' => trim($values[7] ?? null),
+                    'item_size' => trim($values[8] ?? null),
                     'alternative_name' => !empty(trim($values[6])) ? trim($values[6]) : null,
+                    'bangla_name' => !empty(trim($values[7])) ? trim($values[7]) : null,
                     'purchase_price' => is_numeric(trim($values[10])) ? (float) trim($values[10]) : 0,
                     'sales_price' => is_numeric(trim($values[11])) ? (float) trim($values[11]) : 0,
                     'config_id' => $this->domain['config_id'] ?? null,
@@ -315,7 +316,7 @@ class FileUploadController extends Controller
             } else {
                 // Insert stock item for newly created product (new record)
                 $productData['product_id'] = $product->id;
-                $productData['display_name'] = $product->name;
+                $productData['display_name'] = $productData['alternative_name'];
                 StockItemModel::create($productData);
             }
 
