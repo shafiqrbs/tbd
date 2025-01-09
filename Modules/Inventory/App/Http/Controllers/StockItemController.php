@@ -130,6 +130,24 @@ class StockItemController extends Controller
         $input['name'] = $productName.' )';
         $input['display_name'] = $productName.' )';
 
+        if (empty($input['barcode'])) {
+            // Generate a random 8-digit barcode
+            $input['barcode'] = random_int(10000000, 99999999);
+
+            // Check if the product has an existing barcode
+            if ($findProduct->barcode) {
+                // Check if the barcode already exists in StockItemModel with the same config_id
+                $barcodeExists = StockItemModel::where('barcode', $findProduct->barcode)
+                    ->where('config_id', $input['config_id'])
+                    ->exists();
+
+                // If the barcode is not found, use the existing product's barcode
+                if (!$barcodeExists) {
+                    $input['barcode'] = $findProduct->barcode;
+                }
+            }
+        }
+
         $entity = StockItemModel::create($input);
 
         $data = $service->returnJosnResponse($entity);
@@ -227,8 +245,22 @@ class StockItemController extends Controller
             $findStockItem->update(['purchase_price'=>$request->get('value')]);
         }
 
+        // Update barcode logic
+        if ($request->get('field') == 'barcode') {
+            // Check if the barcode already exists in StockItemModel with the same config_id,
+            $barcodeExists = StockItemModel::where('barcode', $request->get('value'))
+                ->where('config_id', $this->domain['config_id'])
+                ->where('id', '!=', $id)
+                ->exists();
+
+            if (!$barcodeExists) {
+                // Update the stock item's barcode
+                $findStockItem->update(['barcode' => $request->get('value')]);
+            }
+        }
+
         // for multi-price price update
-        if ($request->get('field')!='sales_price' && $request->get('field')!='purchase_price'){
+        if ($request->get('field')!='sales_price' && $request->get('field')!='purchase_price' && $request->get('field')!='barcode'){
             $wholeSaleExists = StockItemPriceMatrixModel::where('stock_item_id',$id)
                 ->where('price_unit_id',$request->get('setting_id'))
                 ->where('product_id',$findStockItem->product_id)

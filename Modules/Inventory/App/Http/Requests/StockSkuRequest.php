@@ -25,6 +25,7 @@ class StockSkuRequest extends FormRequest
             'grade_id' => 'nullable',
             'product_id' => 'nullable',
             'model_id' => 'nullable',
+            'barcode' => 'nullable',
         ];
     }
 

@@ -11,6 +11,7 @@ use Modules\Core\App\Http\Controllers\SettingController;
 use Modules\Core\App\Http\Controllers\SiteMapController;
 use Modules\Core\App\Http\Controllers\UserController;
 use Modules\Core\App\Http\Controllers\VendorController;
+use Modules\Core\App\Http\Controllers\WarehouseController;
 use Modules\Inventory\App\Http\Controllers\InventoryController;
 
 /*
@@ -53,6 +54,7 @@ Route::prefix('/core')->middleware([HeaderAuthenticationMiddleware::class])->gro
     Route::apiResource('location', LocationController::class)->middleware([HeaderAuthenticationMiddleware::class]);
     Route::apiResource('customer', CustomerController::class)->middleware([HeaderAuthenticationMiddleware::class]);
     Route::apiResource('vendor', VendorController::class)->middleware([HeaderAuthenticationMiddleware::class]);
+    Route::apiResource('warehouse', WarehouseController::class)->middleware([HeaderAuthenticationMiddleware::class]);
 
     Route::apiResource('setting', SettingController::class)
         ->middleware([HeaderAuthenticationMiddleware::class])

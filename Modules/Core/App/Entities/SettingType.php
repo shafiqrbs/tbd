@@ -44,6 +44,12 @@ class SettingType
     private $status= true;
 
     /**
+     * @var boolean
+     * @ORM\Column(type="boolean" )
+     */
+    private $isShowSettingDropdown= true;
+
+    /**
      * @var \DateTime
      * @Gedmo\Timestampable(on="create")
      * @ORM\Column(name="created_at", type="datetime")

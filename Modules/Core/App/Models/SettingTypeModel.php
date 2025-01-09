@@ -21,7 +21,7 @@ class SettingTypeModel extends Model
 
     public static function getSettingTypeDropdown()
     {
-        return self::where('status', 1)->select('id','name','slug')->orderBy('name')->get();
+        return self::where('status', 1)->where('is_show_setting_dropdown',1)->select('id','name','slug')->orderBy('name')->get();
     }
 
 }

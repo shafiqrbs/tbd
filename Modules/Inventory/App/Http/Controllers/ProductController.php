@@ -350,17 +350,19 @@ class ProductController extends Controller
                 'config_id' => $this->domain->nbr_config
             ];
 
+            $findNbrTariff = NbrTaxTariff::find($validatedData['value']);
+
             $vatData = [
                 'hscode_id' => $validatedData['value'],
-                'customs_duty' => null,
-                'supplementary_duty' => null,
-                'value_added_tax' => null,
-                'advance_tax' => null,
-                'advance_income_tax' => null,
-                'recurring_deposit' => null,
-                'advance_trade_vat' => null,
-                'regulatory_duty' => null,
-                'total_tax_incidence' => null
+                'customs_duty' => $findNbrTariff->customs_duty ?? null,
+                'supplementary_duty' => $findNbrTariff->supplementary_duty ?? null,
+                'value_added_tax' => $findNbrTariff->value_added_tax ?? null,
+                'advance_tax' => $findNbrTariff->advance_tax ?? null,
+                'advance_income_tax' => $findNbrTariff->advance_income_tax ?? null,
+                'recurring_deposit' => $findNbrTariff->recurring_deposit ?? null,
+                'advance_trade_vat' => $findNbrTariff->advance_trade_vat ?? null,
+                'regulatory_duty' => $findNbrTariff->regulatory_duty ?? null,
+                'total_tax_incidence' => $findNbrTariff->total_tax_incidence ?? null
             ];
             $vat = NbrItemVat::updateOrCreate($conditions, $vatData);
             return response()->json([

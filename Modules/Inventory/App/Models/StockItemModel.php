@@ -238,6 +238,7 @@ class StockItemModel extends Model
             ->select([
                 'inv_stock.id as stock_id',
                 'inv_stock.is_master',
+                'inv_stock.barcode',
                 'inv_stock.product_id',
                 'inv_product.name',
                 'inv_stock.display_name',
