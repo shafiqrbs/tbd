@@ -46,8 +46,6 @@ class WarehouseRequest extends FormRequest
                     'contract_person' => 'required|string',
                     'mobile' => [
                         'nullable',
-                        'numeric',
-                        Rule::unique('Modules\Core\App\Entities\Warehouse', 'mobile')->ignore($warehouse)
                     ],
                     'email' => 'email|nullable',
                     'address' => 'string|nullable',

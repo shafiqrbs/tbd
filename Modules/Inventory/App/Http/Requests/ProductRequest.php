@@ -56,7 +56,7 @@ class ProductRequest extends FormRequest
                     'sku' => 'nullable|string',
                     'barcode' => 'nullable',
                     'opening_quantity' => 'nullable|numeric|regex:/^\d+(\.\d{1,2})?$/',
-                    'sales_price' => 'required|numeric|regex:/^\d+(\.\d{1,2})?$/',
+                    'sales_price' => 'nullable|numeric|regex:/^\d+(\.\d{1,2})?$/',
                     'purchase_price' => 'nullable|numeric|regex:/^\d+(\.\d{1,2})?$/',
                     'min_quantity' => 'nullable|numeric|regex:/^\d+(\.\d{1,2})?$/',
                     'reorder_quantity' => 'nullable|numeric|regex:/^\d+(\.\d{1,2})?$/',
@@ -72,29 +72,6 @@ class ProductRequest extends FormRequest
 
             default:break;
         }
-        /*// Rules for 'GET' and 'DELETE' methods return an empty array, as they typically don't require validation
-        if (in_array($this->method(), ['GET', 'DELETE'])) {
-            return [];
-        }
-
-        // Common validation rules for 'POST', 'PUT', and 'PATCH' methods
-        return [
-            'product_type_id' => 'required|integer',
-            'category_id' => 'required|integer',
-            'unit_id' => 'required|integer',
-            'brand_id' => 'nullable|integer',
-            'name' => 'required|string',
-            'alternative_name' => 'nullable|string',
-            'sku' => 'nullable|string',
-            'barcode' => 'nullable',
-            'opening_quantity' => 'nullable|numeric|regex:/^\d+(\.\d{1,2})?$/',
-            'sales_price' => 'required|numeric|regex:/^\d+(\.\d{1,2})?$/',
-            'purchase_price' => 'nullable|numeric|regex:/^\d+(\.\d{1,2})?$/',
-            'min_quantity' => 'nullable|numeric|regex:/^\d+(\.\d{1,2})?$/',
-            'reorder_quantity' => 'nullable|numeric|regex:/^\d+(\.\d{1,2})?$/',
-            'status' => 'required|boolean',
-            'description' => 'nullable|string',
-        ];*/
     }
 
     public function failedValidation(Validator $validator)

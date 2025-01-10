@@ -92,7 +92,7 @@ class WarehouseController extends Controller
     public function show($id)
     {
         $service = new JsonRequestResponse();
-        $entity = VendorModel::find($id);
+        $entity = WarehouseModel::find($id);
 
         if (!$entity){
             $entity = 'Data not found';
@@ -125,7 +125,7 @@ class WarehouseController extends Controller
     public function edit($id)
     {
         $service = new JsonRequestResponse();
-        $entity = VendorModel::find($id);
+        $entity = WarehouseModel::find($id);
 
         if (!$entity){
             $entity = 'Data not found';
@@ -138,21 +138,24 @@ class WarehouseController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(VendorRequest $request, $id)
+    public function update(WarehouseRequest $request, $id)
     {
         $data = $request->validated();
 
-        if ($data['customer_id']){
-            $customerExists = VendorModel::where('customer_id', $data['customer_id'])->first();
+        if ($data['mobile']){
+            $warehouseExists = WarehouseModel::where('mobile', $data['mobile'])->first();
 
-            if ($customerExists && $customerExists->id != $id) {
-                throw ValidationException::withMessages([
-                    'customer_id' => ['The customer ID is already in use.'],
-                ]);
+            if ($warehouseExists && $warehouseExists->id != $id) {
+                return response()->json([
+                    'message' => 'Validation failed.',
+                    'errors' => [
+                        'mobile' => ['Mobile is already in use.'],
+                    ]
+                ], 422); // HTTP 422 Unprocessable Entity
             }
         }
 
-        $entity = VendorModel::find($id);
+        $entity = WarehouseModel::find($id);
         $entity->update($data);
 
         $service = new JsonRequestResponse();
