@@ -19,7 +19,37 @@ class ProductionItems extends Model
     public $timestamps = true;
     protected $guarded = ['id'];
     protected $fillable = [
-
+        'config_id',
+        'item_id',
+        'created_by_id',
+        'checked_by_id',
+        'approved_by_id',
+        'opening_date',
+        'name',
+        'mode',
+        'quantity',
+        'price',
+        'sub_total',
+        'license_date',
+        'initiate_date',
+        'uom',
+        'remark',
+        'issue_by',
+        'designation',
+        'waste_percent',
+        'waste_amount',
+        'material_amount',
+        'material_quantity',
+        'waste_material_quantity',
+        'value_added_amount',
+        'issue_quantity',
+        'return_quantity',
+        'damage_quantity',
+        'reminig_quantity',
+        'status',
+        'is_delete',
+        'is_revised',
+        'process'
     ];
 
     /**

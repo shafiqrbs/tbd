@@ -26,6 +26,11 @@ use Modules\Inventory\App\Models\ParticularModel;
 use Modules\Inventory\App\Models\ProductModel;
 use Modules\Inventory\App\Models\SettingModel as InventorySettingModel;
 use Modules\Inventory\App\Models\StockItemModel;
+use Modules\Production\App\Models\ProductionBatchItemnModel;
+use Modules\Production\App\Models\ProductionElements;
+use Modules\Production\App\Models\ProductionItems;
+use Modules\Production\App\Models\ProductionValueAdded;
+use Modules\Production\App\Models\SettingModel;
 use Modules\Utility\App\Models\ProductUnitModel;
 use PhpOffice\PhpSpreadsheet\Exception;
 use PhpOffice\PhpSpreadsheet\Reader\Xlsx;
@@ -147,7 +152,6 @@ class FileUploadController extends Controller
      * process file data to DB.
      */
 
-
     public function fileProcessToDB(Request $request, EntityManagerInterface $em)
     {
         set_time_limit(0);
@@ -170,13 +174,13 @@ class FileUploadController extends Controller
         // Only proceed if it's 'Product' and structure is correct
         if ($getFile->file_type === 'Product' && count($keys) === 12) {
             $isInsert = $this->insertProductsInBatches($allData, $em);
-        }elseif ($getFile->file_type === 'Production' && count($keys) === 8 ){
+        }elseif ($getFile->file_type === 'Production' && count($keys) === 7 ){
             $isInsert = $this->insertProductionInBatches($allData, $em);
         } else {
             if ($getFile->file_type === 'Product'){
                 $message = 'Invalid file type or structure or column expect 12 , its '.count($keys).' given.';
             }elseif ($getFile->file_type === 'Production'){
-                $message = 'Invalid file type or structure or column expect 8 , its '.count($keys).' given.';
+                $message = 'Invalid file type or structure or column expect 7 , its '.count($keys).' given.';
             }else{
                 $message = 'Invalid file type or structure.';
             }
@@ -186,7 +190,7 @@ class FileUploadController extends Controller
             ], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
 
-        /*if ($isInsert['is_insert']) {
+        if ($isInsert['is_insert']) {
             $getFile->update(['is_process' => true, 'process_row' => $isInsert['row_count']]);
 
             return response()->json([
@@ -194,8 +198,9 @@ class FileUploadController extends Controller
                 'status' => Response::HTTP_OK,
                 'row' => $isInsert['row_count']
             ], Response::HTTP_OK);
-        }*/
+        }
     }
+
 
     // for production batch process for upload
     private function insertProductionInBatches($allData, EntityManagerInterface $em)
@@ -204,159 +209,58 @@ class FileUploadController extends Controller
         $batch = [];
         $rowsProcessed = 0;
 
-//        dump($allData);
 
         foreach ($allData as $index => $data) {
             $values = array_map('trim', $data);
-//            dump($values);
 
             // Fetch related IDs
             $stockItemBarcode = str_replace("#", "", trim($values[0]));
             $stockItem = StockItemModel::where('barcode',$stockItemBarcode)->where('config_id',$this->domain['config_id'])->first('id');
 
             $materialItemBarcode = str_replace("#", "", trim($values[2]));
-            $materialItem = StockItemModel::where('barcode',$materialItemBarcode)->where('config_id',$this->domain['config_id'])->first('id');
-//            dump($this->domain);
-            if ($stockItem && $materialItem) {
+            $materialItem = StockItemModel::where('barcode',$materialItemBarcode)->where('config_id',$this->domain['config_id'])->first(['id','purchase_price']);
+
+            if ($stockItem && $materialItem && $values[4]) {
                 // handle material item unit
-                $materialItemUnit = ParticularModel::where('slug', 'like', '%' . Str::slug(trim($values[5])) . '%')->where('config_id',$this->domain['config_id'])->first('id');
-                /*if (!$materialItemUnit) {
-                    $materialItemUnit = ParticularModel::create([
-                        'config_id' => $this->domain['config_id'],
-                        'particular_type_id' => 1,
-                        'name' => trim($values[9]),
-                        'slug' => Str::slug(trim($values[9])),
-                        'status' => true
-                    ]);
-                }*/
+                $materialItemUnit = ParticularModel::where('slug', 'like', '%' . Str::slug(trim($values[5])) . '%')->where('config_id',$this->domain['config_id'])->first(['id','name']);
 
                 $productionData = [
                     'item_id' => $stockItem->id,
                     'material_id' => $materialItem->id,
+                    'quantity' => trim($values[4]),
+                    'price' => $materialItem->purchase_price ?? 0,
+                    'purchase_price' => $materialItem->purchase_price ?? 0,
+                    'sub_total' => $materialItem->purchase_price*trim($values[4]),
                     'config_id' => $this->domain['pro_config'],
                     'unit_id' => $materialItemUnit->id,
-//                    'code' => !empty($values[0]) ? str_replace("#", "", trim($values[0])) : null,
-//                    'barcode' => !empty($values[1]) ? str_replace("#", "", trim($values[1])) : null,
-//                    'product_type_id' => $productType->id ?? null,
-//                    'category_id' => $productCategory->id ?? null,
-//                    'unit_id' => $productUnit->id ?? null,
-//                    'name' => trim($values[5]),
-//                    'item_size' => trim($values[8] ?? null),
-//                    'alternative_name' => !empty(trim($values[6])) ? trim($values[6]) : null,
-//                    'bangla_name' => !empty(trim($values[7])) ? trim($values[7]) : null,
-//                    'purchase_price' => is_numeric(trim($values[10])) ? (float) trim($values[10]) : 0,
-//                    'sales_price' => is_numeric(trim($values[11])) ? (float) trim($values[11]) : 0,
-//                    'config_id' => $this->domain['config_id'] ?? null,
-//                    'status' => 1,
+                    'uom' => $materialItemUnit->name,
+                    'status' => true,
                 ];
 
-                dump($productionData);
-//                $batch[] = $productData;
-
-                // Batch insert when batch size reached
-//                if (count($batch) === $batchSize) {
-//                    $rowsProcessed += $this->processProductionBatch($batch, $em);
-//                    $batch = [];  // Reset batch after processing
-//                }
-            }
-//            dump($stockItem,$materialItem);
-
-            // Trim and Slug Values Once
-//            $parentCategoryName = trim($values[3] ?? null); // Avoid undefined index issues
-//            $productCategoryName = trim($values[4] ?? null);
-
-//            $parentSlug = $parentCategoryName ? Str::slug($parentCategoryName) : null;
-//            $productSlug = $productCategoryName ? Str::slug($productCategoryName) : null;
-
-            // Handle Parent Category
-            /*if ($parentSlug && !empty($parentCategoryName)) {
-                $parentCategory = CategoryModel::where('slug', $parentSlug)->where('config_id',$this->domain['config_id'])->first('id');
-                if (!$parentCategory) {
-                    $parentCategory = CategoryModel::create([
-                        'config_id' => $this->domain['config_id'],
-                        'name' => $parentCategoryName,
-                        'slug' => $parentSlug,
-                        'status' => 1,
-                        'parent' => null // Parent category has no parent
-                    ]);
-
-                    // Check for Ledger Existence and Insert if Necessary
-                    $ledgerExist = AccountHeadModel::where('category_id', $parentCategory->id)
-                        ->where('config_id', $this->domain['acc_config'])->first();
-
-                    if (empty($ledgerExist)) {
-                        AccountHeadModel::insertCategoryLedger($this->domain['acc_config'], $parentCategory);
-                    }
+                if (trim($values[6]) && !empty(trim($values[6]))){
+                    $wastagePercent = trim($values[6]) ?? null;
+                    $wastageQuantity = ((trim($values[4])*trim($values[6]))/100) ?? null;
+                    $productionData['wastage_percent'] = $wastagePercent;
+                    $productionData['wastage_quantity'] = $wastageQuantity;
+                    $productionData['wastage_amount'] = $wastageQuantity*$productionData['price'];
                 }
-            }*/
 
-            // Handle Product Category
-            /*if ($productSlug && !empty($productCategoryName)) {
-                $productCategory = CategoryModel::where('slug', $productSlug)->where('config_id',$this->domain['config_id'])->first('id');
-                if (!$productCategory) {
-                    $productCategory = CategoryModel::create([
-                        'config_id' => $this->domain['config_id'],
-                        'name' => $productCategoryName,
-                        'slug' => $productSlug,
-                        'status' => 1,
-                        'parent' => ($parentSlug && isset($parentCategory->id)) ? $parentCategory->id : null
-                    ]);
-
-                    // Check for Ledger Existence and Insert if Necessary
-                    $ledgerExist = AccountHeadModel::where('category_id', $productCategory->id)
-                        ->where('config_id', $this->domain['acc_config'])->first();
-
-                    if (empty($ledgerExist)) {
-                        AccountHeadModel::insertCategoryLedger($this->domain['acc_config'], $productCategory);
-                    }
-                }
-            }*/
-
-            /*$productUnit = ParticularModel::where('name', 'like', '%' . Str::slug(trim($values[9])) . '%')->where('config_id',$this->domain['config_id'])->first('id');
-            if (!$productUnit) {
-                $productUnit = ParticularModel::create([
-                    'config_id' => $this->domain['config_id'],
-                    'particular_type_id' => 1,
-                    'name' => trim($values[9]),
-                    'slug' => Str::slug(trim($values[9])),
-                    'status' => true
-                ]);
-            }*/
-            // Ensure valid data
-            /*if ($productType && $values[5]) {
-                $productData = [
-                    'code' => !empty($values[0]) ? str_replace("#", "", trim($values[0])) : null,
-                    'barcode' => !empty($values[1]) ? str_replace("#", "", trim($values[1])) : null,
-                    'product_type_id' => $productType->id ?? null,
-                    'category_id' => $productCategory->id ?? null,
-                    'unit_id' => $productUnit->id ?? null,
-                    'name' => trim($values[5]),
-                    'item_size' => trim($values[8] ?? null),
-                    'alternative_name' => !empty(trim($values[6])) ? trim($values[6]) : null,
-                    'bangla_name' => !empty(trim($values[7])) ? trim($values[7]) : null,
-                    'purchase_price' => is_numeric(trim($values[10])) ? (float) trim($values[10]) : 0,
-                    'sales_price' => is_numeric(trim($values[11])) ? (float) trim($values[11]) : 0,
-                    'config_id' => $this->domain['config_id'] ?? null,
-                    'status' => 1,
-                ];
-
-
-                $batch[] = $productData;
+                $batch[] = $productionData;
 
                 // Batch insert when batch size reached
                 if (count($batch) === $batchSize) {
                     $rowsProcessed += $this->processProductionBatch($batch, $em);
                     $batch = [];  // Reset batch after processing
                 }
-            }*/
+            }
         }
 
-        /*// Process any remaining items
+        // Process any remaining items
         if (count($batch) > 0) {
             $rowsProcessed += $this->processProductionBatch($batch, $em);
-        }*/
+        }
 
-//        return ['is_insert' => true, 'row_count' => $rowsProcessed];
+        return ['is_insert' => true, 'row_count' => $rowsProcessed];
     }
 
     // product batch upload
@@ -364,23 +268,84 @@ class FileUploadController extends Controller
     {
         $rowCount = 0;
 
-        foreach ($batch as $productData) {
-            $product = ProductModel::where('name', $productData['name'])
-                ->where('config_id', $productData['config_id'])
+        foreach ($batch as $item) {
+            // production item exists
+            $productionItem = ProductionItems::where('item_id', $item['item_id'])
+                ->where('config_id', $item['config_id'])
+                ->first();
+            // production item not exists then create production item
+            if (!$productionItem) {
+                $item['is_delete'] = 0;
+                $productionItem = ProductionItems::create($item);
+            }
+
+            // check material item exists
+            $materialItemExists = ProductionElements::where('production_item_id', $productionItem->id)
+                ->where('config_id', $item['config_id'])
+                ->where('material_id',$item['material_id'])
                 ->first();
 
-            if (!$product) {
-                // Create the product if it doesn't exist
-                $product = ProductModel::create($productData);
-
-                // Insert stock item for newly created product (new record)
-                $em->getRepository(StockItem::class)->insertStockItem($product->id, $productData);
-            } else {
-                // Insert stock item for newly created product (new record)
-                $productData['product_id'] = $product->id;
-                $productData['display_name'] = $productData['alternative_name'];
-                StockItemModel::create($productData);
+            if ($materialItemExists) {
+                // update material item
+                $materialItemExists->update($item);
+            }else {
+                // create material item
+                $item['production_item_id'] = $productionItem->id;
+                ProductionElements::create($item);
             }
+
+            // value added create or update
+            $getMeasurementInputGenerate = SettingModel::getMeasurementInput($this->domain['pro_config']);
+            if (!empty($getMeasurementInputGenerate)) {
+                foreach ($getMeasurementInputGenerate as $value) {
+                    if (isset($value['id'])) {
+                        ProductionValueAdded::firstOrCreate([
+                            'production_item_id' => $productionItem->id,
+                            'value_added_id' => $value['id'],
+                        ]);
+                    }
+                }
+            }
+
+            // production item update total all
+            /*$materialItemTotal = ProductionElements::where('production_item_id', $productionItem->id)
+                ->where('config_id', $item['config_id']);
+            $materialItemTotalQuantity = $materialItemTotal->sum('quantity');
+            $materialItemTotalSubtotal = $materialItemTotal->sum('sub_total');
+            $materialItemTotalWastageQuantity = $materialItemTotal->sum('wastage_quantity');
+            $materialItemTotalWastageAmount = $materialItemTotal->sum('wastage_amount');
+            $materialItemTotalWastagePercentage = $materialItemTotal->sum('wastage_percent');
+            $productionItem->update([
+                'material_quantity' => $materialItemTotalQuantity,
+                'material_amount' => $materialItemTotalSubtotal,
+                'waste_material_quantity' => $materialItemTotalWastageQuantity,
+                'waste_amount' => $materialItemTotalWastageAmount,
+                'waste_percent' => $materialItemTotalWastagePercentage,
+            ]);*/
+
+            // Calculate totals for the production item and update
+            $totals = ProductionElements::where('production_item_id', $productionItem->id)
+                ->where('config_id', $item['config_id'])
+                ->selectRaw('
+                SUM(quantity) as material_quantity,
+                SUM(sub_total) as material_amount,
+                SUM(wastage_quantity) as total_wastage_quantity,
+                SUM(wastage_amount) as total_wastage_amount,
+                SUM(wastage_percent) as total_wastage_percent
+            ')
+                ->first();
+
+            $productionItem->update([
+                'quantity' => $totals->material_quantity+$totals->total_wastage_quantity,
+                'price' => null,
+                'process' => 'created',
+                'sub_total' => $totals->material_amount,
+                'material_quantity' => $totals->material_quantity,
+                'material_amount' => $totals->material_amount,
+                'waste_material_quantity' => $totals->total_wastage_quantity,
+                'waste_amount' => $totals->total_wastage_amount,
+                'waste_percent' => $totals->total_wastage_percent,
+            ]);
 
             $rowCount++;
         }
