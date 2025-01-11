@@ -170,14 +170,23 @@ class FileUploadController extends Controller
         // Only proceed if it's 'Product' and structure is correct
         if ($getFile->file_type === 'Product' && count($keys) === 12) {
             $isInsert = $this->insertProductsInBatches($allData, $em);
+        }elseif ($getFile->file_type === 'Production' && count($keys) === 8 ){
+            $isInsert = $this->insertProductionInBatches($allData, $em);
         } else {
+            if ($getFile->file_type === 'Product'){
+                $message = 'Invalid file type or structure or column expect 12 , its '.count($keys).' given.';
+            }elseif ($getFile->file_type === 'Production'){
+                $message = 'Invalid file type or structure or column expect 8 , its '.count($keys).' given.';
+            }else{
+                $message = 'Invalid file type or structure.';
+            }
             return response()->json([
-                'message' => 'Invalid file type or structure or column expect 12 , its '.count($keys).' given.',
+                'message' => $message,
                 'status' => Response::HTTP_INTERNAL_SERVER_ERROR
             ], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
 
-        if ($isInsert['is_insert']) {
+        /*if ($isInsert['is_insert']) {
             $getFile->update(['is_process' => true, 'process_row' => $isInsert['row_count']]);
 
             return response()->json([
@@ -185,9 +194,201 @@ class FileUploadController extends Controller
                 'status' => Response::HTTP_OK,
                 'row' => $isInsert['row_count']
             ], Response::HTTP_OK);
-        }
+        }*/
     }
 
+    // for production batch process for upload
+    private function insertProductionInBatches($allData, EntityManagerInterface $em)
+    {
+        $batchSize = 1000;
+        $batch = [];
+        $rowsProcessed = 0;
+
+//        dump($allData);
+
+        foreach ($allData as $index => $data) {
+            $values = array_map('trim', $data);
+//            dump($values);
+
+            // Fetch related IDs
+            $stockItemBarcode = str_replace("#", "", trim($values[0]));
+            $stockItem = StockItemModel::where('barcode',$stockItemBarcode)->where('config_id',$this->domain['config_id'])->first('id');
+
+            $materialItemBarcode = str_replace("#", "", trim($values[2]));
+            $materialItem = StockItemModel::where('barcode',$materialItemBarcode)->where('config_id',$this->domain['config_id'])->first('id');
+//            dump($this->domain);
+            if ($stockItem && $materialItem) {
+                // handle material item unit
+                $materialItemUnit = ParticularModel::where('slug', 'like', '%' . Str::slug(trim($values[5])) . '%')->where('config_id',$this->domain['config_id'])->first('id');
+                /*if (!$materialItemUnit) {
+                    $materialItemUnit = ParticularModel::create([
+                        'config_id' => $this->domain['config_id'],
+                        'particular_type_id' => 1,
+                        'name' => trim($values[9]),
+                        'slug' => Str::slug(trim($values[9])),
+                        'status' => true
+                    ]);
+                }*/
+
+                $productionData = [
+                    'item_id' => $stockItem->id,
+                    'material_id' => $materialItem->id,
+                    'config_id' => $this->domain['pro_config'],
+                    'unit_id' => $materialItemUnit->id,
+//                    'code' => !empty($values[0]) ? str_replace("#", "", trim($values[0])) : null,
+//                    'barcode' => !empty($values[1]) ? str_replace("#", "", trim($values[1])) : null,
+//                    'product_type_id' => $productType->id ?? null,
+//                    'category_id' => $productCategory->id ?? null,
+//                    'unit_id' => $productUnit->id ?? null,
+//                    'name' => trim($values[5]),
+//                    'item_size' => trim($values[8] ?? null),
+//                    'alternative_name' => !empty(trim($values[6])) ? trim($values[6]) : null,
+//                    'bangla_name' => !empty(trim($values[7])) ? trim($values[7]) : null,
+//                    'purchase_price' => is_numeric(trim($values[10])) ? (float) trim($values[10]) : 0,
+//                    'sales_price' => is_numeric(trim($values[11])) ? (float) trim($values[11]) : 0,
+//                    'config_id' => $this->domain['config_id'] ?? null,
+//                    'status' => 1,
+                ];
+
+                dump($productionData);
+//                $batch[] = $productData;
+
+                // Batch insert when batch size reached
+//                if (count($batch) === $batchSize) {
+//                    $rowsProcessed += $this->processProductionBatch($batch, $em);
+//                    $batch = [];  // Reset batch after processing
+//                }
+            }
+//            dump($stockItem,$materialItem);
+
+            // Trim and Slug Values Once
+//            $parentCategoryName = trim($values[3] ?? null); // Avoid undefined index issues
+//            $productCategoryName = trim($values[4] ?? null);
+
+//            $parentSlug = $parentCategoryName ? Str::slug($parentCategoryName) : null;
+//            $productSlug = $productCategoryName ? Str::slug($productCategoryName) : null;
+
+            // Handle Parent Category
+            /*if ($parentSlug && !empty($parentCategoryName)) {
+                $parentCategory = CategoryModel::where('slug', $parentSlug)->where('config_id',$this->domain['config_id'])->first('id');
+                if (!$parentCategory) {
+                    $parentCategory = CategoryModel::create([
+                        'config_id' => $this->domain['config_id'],
+                        'name' => $parentCategoryName,
+                        'slug' => $parentSlug,
+                        'status' => 1,
+                        'parent' => null // Parent category has no parent
+                    ]);
+
+                    // Check for Ledger Existence and Insert if Necessary
+                    $ledgerExist = AccountHeadModel::where('category_id', $parentCategory->id)
+                        ->where('config_id', $this->domain['acc_config'])->first();
+
+                    if (empty($ledgerExist)) {
+                        AccountHeadModel::insertCategoryLedger($this->domain['acc_config'], $parentCategory);
+                    }
+                }
+            }*/
+
+            // Handle Product Category
+            /*if ($productSlug && !empty($productCategoryName)) {
+                $productCategory = CategoryModel::where('slug', $productSlug)->where('config_id',$this->domain['config_id'])->first('id');
+                if (!$productCategory) {
+                    $productCategory = CategoryModel::create([
+                        'config_id' => $this->domain['config_id'],
+                        'name' => $productCategoryName,
+                        'slug' => $productSlug,
+                        'status' => 1,
+                        'parent' => ($parentSlug && isset($parentCategory->id)) ? $parentCategory->id : null
+                    ]);
+
+                    // Check for Ledger Existence and Insert if Necessary
+                    $ledgerExist = AccountHeadModel::where('category_id', $productCategory->id)
+                        ->where('config_id', $this->domain['acc_config'])->first();
+
+                    if (empty($ledgerExist)) {
+                        AccountHeadModel::insertCategoryLedger($this->domain['acc_config'], $productCategory);
+                    }
+                }
+            }*/
+
+            /*$productUnit = ParticularModel::where('name', 'like', '%' . Str::slug(trim($values[9])) . '%')->where('config_id',$this->domain['config_id'])->first('id');
+            if (!$productUnit) {
+                $productUnit = ParticularModel::create([
+                    'config_id' => $this->domain['config_id'],
+                    'particular_type_id' => 1,
+                    'name' => trim($values[9]),
+                    'slug' => Str::slug(trim($values[9])),
+                    'status' => true
+                ]);
+            }*/
+            // Ensure valid data
+            /*if ($productType && $values[5]) {
+                $productData = [
+                    'code' => !empty($values[0]) ? str_replace("#", "", trim($values[0])) : null,
+                    'barcode' => !empty($values[1]) ? str_replace("#", "", trim($values[1])) : null,
+                    'product_type_id' => $productType->id ?? null,
+                    'category_id' => $productCategory->id ?? null,
+                    'unit_id' => $productUnit->id ?? null,
+                    'name' => trim($values[5]),
+                    'item_size' => trim($values[8] ?? null),
+                    'alternative_name' => !empty(trim($values[6])) ? trim($values[6]) : null,
+                    'bangla_name' => !empty(trim($values[7])) ? trim($values[7]) : null,
+                    'purchase_price' => is_numeric(trim($values[10])) ? (float) trim($values[10]) : 0,
+                    'sales_price' => is_numeric(trim($values[11])) ? (float) trim($values[11]) : 0,
+                    'config_id' => $this->domain['config_id'] ?? null,
+                    'status' => 1,
+                ];
+
+
+                $batch[] = $productData;
+
+                // Batch insert when batch size reached
+                if (count($batch) === $batchSize) {
+                    $rowsProcessed += $this->processProductionBatch($batch, $em);
+                    $batch = [];  // Reset batch after processing
+                }
+            }*/
+        }
+
+        /*// Process any remaining items
+        if (count($batch) > 0) {
+            $rowsProcessed += $this->processProductionBatch($batch, $em);
+        }*/
+
+//        return ['is_insert' => true, 'row_count' => $rowsProcessed];
+    }
+
+    // product batch upload
+    private function processProductionBatch(array $batch, EntityManagerInterface $em)
+    {
+        $rowCount = 0;
+
+        foreach ($batch as $productData) {
+            $product = ProductModel::where('name', $productData['name'])
+                ->where('config_id', $productData['config_id'])
+                ->first();
+
+            if (!$product) {
+                // Create the product if it doesn't exist
+                $product = ProductModel::create($productData);
+
+                // Insert stock item for newly created product (new record)
+                $em->getRepository(StockItem::class)->insertStockItem($product->id, $productData);
+            } else {
+                // Insert stock item for newly created product (new record)
+                $productData['product_id'] = $product->id;
+                $productData['display_name'] = $productData['alternative_name'];
+                StockItemModel::create($productData);
+            }
+
+            $rowCount++;
+        }
+
+        return $rowCount;
+    }
+
+    // for product batch process for upload
     private function insertProductsInBatches($allData, EntityManagerInterface $em)
     {
         $batchSize = 1000;
@@ -284,7 +485,7 @@ class FileUploadController extends Controller
 
                 // Batch insert when batch size reached
                 if (count($batch) === $batchSize) {
-                    $rowsProcessed += $this->processBatch($batch, $em);
+                    $rowsProcessed += $this->processProductBatch($batch, $em);
                     $batch = [];  // Reset batch after processing
                 }
             }
@@ -292,13 +493,14 @@ class FileUploadController extends Controller
 
         // Process any remaining items
         if (count($batch) > 0) {
-            $rowsProcessed += $this->processBatch($batch, $em);
+            $rowsProcessed += $this->processProductBatch($batch, $em);
         }
 
         return ['is_insert' => true, 'row_count' => $rowsProcessed];
     }
 
-    private function processBatch(array $batch, EntityManagerInterface $em)
+    // product batch upload
+    private function processProductBatch(array $batch, EntityManagerInterface $em)
     {
         $rowCount = 0;
 

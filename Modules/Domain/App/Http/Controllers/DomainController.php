@@ -134,6 +134,11 @@ class DomainController extends Controller
                     return $response;
                 }
 
+                //create production config
+                ProductionConfig::create([
+                    'domain_id' => $entity->id,
+                ]);
+
                 // Loop through each product type and either find or create inventory setting.
                 foreach ($getProductType as $type) {
                     // If the inventory setting is not found, create a new one.
