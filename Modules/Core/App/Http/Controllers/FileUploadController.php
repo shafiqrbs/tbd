@@ -174,7 +174,7 @@ class FileUploadController extends Controller
         // Only proceed if it's 'Product' and structure is correct
         if ($getFile->file_type === 'Product' && count($keys) === 12) {
             $isInsert = $this->insertProductsInBatches($allData, $em);
-        }elseif ($getFile->file_type === 'Production' && count($keys) === 7 ){
+        }elseif ($getFile->file_type === 'Production' && count($keys) === 8 ){
             $isInsert = $this->insertProductionInBatches($allData, $em);
         } else {
             if ($getFile->file_type === 'Product'){
@@ -234,6 +234,7 @@ class FileUploadController extends Controller
                     'config_id' => $this->domain['pro_config'],
                     'unit_id' => $materialItemUnit->id,
                     'uom' => $materialItemUnit->name,
+                    'value_added' => trim($values[7]),
                     'status' => true,
                 ];
 
@@ -294,34 +295,8 @@ class FileUploadController extends Controller
                 ProductionElements::create($item);
             }
 
-            // value added create or update
-            $getMeasurementInputGenerate = SettingModel::getMeasurementInput($this->domain['pro_config']);
-            if (!empty($getMeasurementInputGenerate)) {
-                foreach ($getMeasurementInputGenerate as $value) {
-                    if (isset($value['id'])) {
-                        ProductionValueAdded::firstOrCreate([
-                            'production_item_id' => $productionItem->id,
-                            'value_added_id' => $value['id'],
-                        ]);
-                    }
-                }
-            }
-
-            // production item update total all
-            /*$materialItemTotal = ProductionElements::where('production_item_id', $productionItem->id)
-                ->where('config_id', $item['config_id']);
-            $materialItemTotalQuantity = $materialItemTotal->sum('quantity');
-            $materialItemTotalSubtotal = $materialItemTotal->sum('sub_total');
-            $materialItemTotalWastageQuantity = $materialItemTotal->sum('wastage_quantity');
-            $materialItemTotalWastageAmount = $materialItemTotal->sum('wastage_amount');
-            $materialItemTotalWastagePercentage = $materialItemTotal->sum('wastage_percent');
-            $productionItem->update([
-                'material_quantity' => $materialItemTotalQuantity,
-                'material_amount' => $materialItemTotalSubtotal,
-                'waste_material_quantity' => $materialItemTotalWastageQuantity,
-                'waste_amount' => $materialItemTotalWastageAmount,
-                'waste_percent' => $materialItemTotalWastagePercentage,
-            ]);*/
+            // manage value added
+            $this->valueAddedInsetAndUpdate($item['value_added'],$productionItem);
 
             // Calculate totals for the production item and update
             $totals = ProductionElements::where('production_item_id', $productionItem->id)
@@ -351,6 +326,56 @@ class FileUploadController extends Controller
         }
 
         return $rowCount;
+    }
+
+    private function valueAddedInsetAndUpdate($valueAdded, $productionItem)
+    {
+        //  Remove the curly braces
+        $valueAdded = trim($valueAdded, '{}');
+
+        // Split the string into key-value pairs
+        $pairs = explode(',', $valueAdded);
+
+        $valueAddedArray = [];
+        // Iterate over the key-value pairs and populate the array
+        foreach ($pairs as $pair) {
+            list($key, $value) = explode('=>', $pair);
+            $valueAddedArray[trim($key)] = trim($value);
+        }
+
+        $getMeasurementInputGenerate = SettingModel::getMeasurementInput($this->domain['pro_config']);
+        if (!empty($getMeasurementInputGenerate)) {
+            foreach ($getMeasurementInputGenerate as $value) {
+                if (isset($value['id'])) {
+                    DB::transaction(function () use ($productionItem, $value) {
+                        ProductionValueAdded::lockForUpdate()->firstOrCreate([
+                            'production_item_id' => $productionItem->id,
+                            'value_added_id' => $value['id'],
+                        ]);
+                    });
+                }
+            }
+        }
+
+        // Update value added
+        if (!empty($valueAddedArray)) {
+            foreach ($valueAddedArray as $key => $amount) {
+                DB::transaction(function () use ($productionItem, $key, $amount) {
+                    $findCoreSetting = SettingModel::where('config_id', $this->domain['pro_config'])
+                        ->where('slug', $key)
+                        ->first(['id']);
+
+                    if ($findCoreSetting && $amount) {
+                        ProductionValueAdded::lockForUpdate()->firstOrCreate([
+                            'production_item_id' => $productionItem->id,
+                            'value_added_id' => $findCoreSetting->id,
+                        ])->update([
+                            'amount' => $amount,
+                        ]);
+                    }
+                });
+            }
+        }
     }
 
     // for product batch process for upload

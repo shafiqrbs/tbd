@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Modules\Core\App\Models\UserModel;
 use Modules\Inventory\App\Entities\StockItem;
+use Modules\Inventory\App\Models\StockItemModel;
 use Modules\Production\App\Entities\ProductionItem;
 use Modules\Production\App\Http\Requests\RecipeItemsRequest;
 use Modules\Production\App\Models\ProductionElements;
@@ -104,6 +105,7 @@ class ProductionRecipeItemsController extends Controller
 
         $getValueAdded = ProductionValueAdded::getValueAddedWithInputGenerate($pro_item_id);
         $getProductionItem = ProductionItems::find($pro_item_id);
+        $getStockItem = StockItemModel::find($getProductionItem->item_id);
 
         $response->headers->set('Content-Type', 'application/json');
         $response->setContent(json_encode([
@@ -111,7 +113,8 @@ class ProductionRecipeItemsController extends Controller
             'message' => 'success',
             'data' => [
                 'field' => $getValueAdded,
-                'item' => $getProductionItem
+                'item' => $getProductionItem,
+                'stock_item' => $getStockItem
             ],
         ]));
         $response->setStatusCode(Response::HTTP_OK);
