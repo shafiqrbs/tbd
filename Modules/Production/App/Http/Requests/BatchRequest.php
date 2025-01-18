@@ -27,6 +27,14 @@ class BatchRequest extends FormRequest
         {
 
             case 'PATCH':
+            {
+                return [
+                    'remark' => 'nullable|string',
+                    'issue_date' => 'nullable|date',
+                    'receive_date' => 'nullable|date',
+                    'process' => 'nullable|string',
+                ];
+            }
             case 'PUT':
             case 'POST':
             {

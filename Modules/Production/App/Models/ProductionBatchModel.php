@@ -20,9 +20,11 @@ class ProductionBatchModel extends Model
         'issue_date',
         'receive_date',
         'process',
+        'remark',
         'mode',
         'invoice',
         'created_by_id',
+        'approved_by_id',
         'status',
         'code'
     ];

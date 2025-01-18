@@ -11,11 +11,14 @@ use Modules\AppsApi\App\Services\GeneratePatternCodeService;
 use Modules\AppsApi\App\Services\JsonRequestResponse;
 use Modules\Core\App\Models\UserModel;
 use Modules\Inventory\App\Models\InvoiceBatchTransactionModel;
+use Modules\Inventory\App\Models\StockItemHistoryModel;
+use Modules\Inventory\App\Models\StockItemModel;
 use Modules\Production\App\Entities\ProductionBatch;
 use Modules\Production\App\Http\Requests\BatchItemRequest;
 use Modules\Production\App\Http\Requests\BatchRequest;
 use Modules\Production\App\Models\ProductionBatchItemnModel;
 use Modules\Production\App\Models\ProductionBatchModel;
+use Symfony\Component\HttpFoundation\Response as ResponseAlias;
 
 class ProductionBatchController extends Controller
 {
@@ -104,9 +107,37 @@ class ProductionBatchController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, $id): RedirectResponse
+    public function update(BatchRequest $request, $id)
     {
-        //
+        $input = $request->validated();
+
+        $batch = ProductionBatchModel::find($id);
+        if (!$batch) {
+            return response()->json([
+                'message' => 'Data not found',
+                'status' => ResponseAlias::HTTP_NOT_FOUND
+            ], ResponseAlias::HTTP_NOT_FOUND);
+        }
+
+        if ($input['process'] == 'approved') {
+            $input['approved_by_id'] = $this->domain['user_id'];
+
+            foreach($batch->batchItems as $batchItem) {
+                foreach($batchItem->productionItems as $productionItem) {
+                    $stockItem = StockItemModel::find($productionItem->material_id);
+                    $productionItem->needed_quantity = $batchItem->issue_quantity * $productionItem->quantity;
+                    StockItemHistoryModel::openingStockQuantity($stockItem,'production',$this->domain);
+                }
+            }
+        }
+
+        $batch->update($input);
+
+
+        return response()->json([
+            'message' => 'success',
+            'status' => ResponseAlias::HTTP_OK
+        ],ResponseAlias::HTTP_OK);
     }
 
     /**

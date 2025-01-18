@@ -51,6 +51,7 @@ class StockItemHistoryModel extends Model
             $operatorData = [
                 'opening' => '+',
                 'purchase' => '+',
+                'production' => '-',
                 'sales' => '-',
             ];
 
