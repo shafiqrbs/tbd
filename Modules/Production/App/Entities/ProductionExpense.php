@@ -83,7 +83,7 @@ class ProductionExpense
     /**
      * @var float
      *
-     * @ORM\Column(name="purchasePrice", type="float", nullable = true)
+     * @ORM\Column(name="purchase_price", type="float", nullable = true)
      */
     private $purchasePrice;
 
@@ -91,24 +91,31 @@ class ProductionExpense
     /**
      * @var float
      *
-     * @ORM\Column(name="salesPrice", type="float", nullable = true)
+     * @ORM\Column(name="sales_price", type="float", nullable = true)
      */
     private $salesPrice;
 
     /**
      * @var \DateTime
      * @Gedmo\Timestampable(on="create")
-     * @ORM\Column(name="issueDate", type="datetime",nullable=true)
+     * @ORM\Column(name="issue_date", type="datetime",nullable=true)
      */
     private $issueDate;
-
 
     /**
      * @var \DateTime
      * @Gedmo\Timestampable(on="create")
-     * @ORM\Column(name="created", type="datetime")
+     * @ORM\Column(name="created_at", type="datetime")
      */
-    private $created;
+    private $createdAt;
+
+    /**
+     * @var \DateTime
+     * @ORM\Column(name="updated_at", type="datetime", nullable = true)
+     */
+    private $updatedAt;
+
+
 
 
     /**
@@ -287,21 +294,6 @@ class ProductionExpense
         $this->returnReceiveBatchItem = $returnReceiveBatchItem;
     }
 
-    /**
-     * @return \DateTime
-     */
-    public function getCreated()
-    {
-        return $this->created;
-    }
-
-    /**
-     * @param \DateTime $created
-     */
-    public function setCreated($created)
-    {
-        $this->created = $created;
-    }
 
     /**
      * @return \DateTime
@@ -349,6 +341,26 @@ class ProductionExpense
     public function setIssueItem($issueItem)
     {
         $this->issueItem = $issueItem;
+    }
+
+    public function getCreatedAt(): \DateTime
+    {
+        return $this->createdAt;
+    }
+
+    public function setCreatedAt(\DateTime $createdAt): void
+    {
+        $this->createdAt = $createdAt;
+    }
+
+    public function getUpdatedAt(): \DateTime
+    {
+        return $this->updatedAt;
+    }
+
+    public function setUpdatedAt(\DateTime $updatedAt): void
+    {
+        $this->updatedAt = $updatedAt;
     }
 
 

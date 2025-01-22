@@ -26,7 +26,7 @@ use Modules\Inventory\App\Models\ParticularModel;
 use Modules\Inventory\App\Models\ProductModel;
 use Modules\Inventory\App\Models\SettingModel as InventorySettingModel;
 use Modules\Inventory\App\Models\StockItemModel;
-use Modules\Production\App\Models\ProductionBatchItemnModel;
+use Modules\Production\App\Models\ProductionBatchItemModel;
 use Modules\Production\App\Models\ProductionElements;
 use Modules\Production\App\Models\ProductionItems;
 use Modules\Production\App\Models\ProductionValueAdded;

@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Support\Facades\DB;
 
 
-class ProductionBatchItemnModel extends Model
+class ProductionBatchItemModel extends Model
 {
     use HasFactory;
 
@@ -15,6 +15,7 @@ class ProductionBatchItemnModel extends Model
     public $timestamps = true;
     protected $guarded = ['id'];
     protected $fillable = [
+        'config_id',
         'batch_id',
         'production_item_id',
         'receive_quantity',
@@ -39,6 +40,11 @@ class ProductionBatchItemnModel extends Model
     public function productionItems()
     {
         return $this->hasMany(ProductionElements::class, 'production_item_id','production_item_id');
+    }
+
+    public function productionExpenses()
+    {
+        return $this->hasMany(ProductionExpense::class, 'production_batch_item_id','id');
     }
 
 

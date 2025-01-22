@@ -7,6 +7,7 @@ use Doctrine\ORM\EntityManager;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\DB;
 use Modules\AppsApi\App\Services\GeneratePatternCodeService;
 use Modules\AppsApi\App\Services\JsonRequestResponse;
 use Modules\Core\App\Models\UserModel;
@@ -16,8 +17,11 @@ use Modules\Inventory\App\Models\StockItemModel;
 use Modules\Production\App\Entities\ProductionBatch;
 use Modules\Production\App\Http\Requests\BatchItemRequest;
 use Modules\Production\App\Http\Requests\BatchRequest;
-use Modules\Production\App\Models\ProductionBatchItemnModel;
+use Modules\Production\App\Models\ProductionBatchItemModel;
 use Modules\Production\App\Models\ProductionBatchModel;
+use Modules\Production\App\Models\ProductionElements;
+use Modules\Production\App\Models\ProductionExpense;
+use Modules\Production\App\Models\ProductionItems;
 use Symfony\Component\HttpFoundation\Response as ResponseAlias;
 
 class ProductionBatchController extends Controller
@@ -73,14 +77,71 @@ class ProductionBatchController extends Controller
     /**
      * Show the form for creating a new resource.
      */
+
     public function insertBatchItem(BatchItemRequest $request)
     {
-        $service = new JsonRequestResponse();
-        $input = $request->validated();
-        $entity = ProductionBatchItemnModel::create($input);
-        $data = $service->returnJosnResponse($entity);
-        return $data;
+        try {
+            // Validate input
+            $input = $request->validated();
+            $input['config_id'] = $this->domain['pro_config'];
+
+            // Check if production item exists
+            $productionItem = ProductionItems::find($input['production_item_id']);
+            if (!$productionItem) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Production item not found.',
+                ], 404);
+            }
+
+            // Start database transaction
+            DB::beginTransaction();
+
+            // Create production batch item
+            $productionBatchItem = ProductionBatchItemModel::create($input);
+
+            // Process production elements and calculate related expenses
+            $recipeItems = ProductionElements::join('inv_stock', 'inv_stock.id', '=', 'pro_element.material_id')
+                ->select('pro_element.*', 'inv_stock.name', 'inv_stock.purchase_price as item_purchase_price', 'inv_stock.sales_price as item_sale_price')
+                ->where('pro_element.production_item_id', $input['production_item_id'])
+                ->get();
+
+            if ($recipeItems->isNotEmpty()) {
+                $productionExpenses = [];
+                foreach ($recipeItems as $item) {
+                    $productionExpenses[] = [
+                        'config_id' => $this->domain['pro_config'],
+                        'production_item_id' => $input['production_item_id'],
+                        'production_batch_item_id' => $productionBatchItem->id,
+                        'production_element_id' => $item->id,
+                        'purchase_price' => $item->item_purchase_price,
+                        'sales_price' => $item->item_sale_price,
+                        'quantity' => $input['issue_quantity'] * $item->quantity,
+                        'created_at' => now()
+                    ];
+                }
+                ProductionExpense::insert($productionExpenses); // Batch insert
+            }
+
+            DB::commit(); // Commit transaction
+
+            // Return success response
+            return response()->json([
+                'success' => true,
+                'message' => 'Production batch item successfully created.',
+                'data' => $productionBatchItem,
+            ], 201);
+
+        } catch (\Exception $e) {
+            // Rollback on error
+            DB::rollBack();
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage()
+            ], 500);
+        }
     }
+
 
     /**
      * Show the specified resource.

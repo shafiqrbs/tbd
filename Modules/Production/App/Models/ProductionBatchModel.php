@@ -46,7 +46,7 @@ class ProductionBatchModel extends Model
 
     public function batchItems()
     {
-        return $this->hasMany(ProductionBatchItemnModel::class, 'batch_id');
+        return $this->hasMany(ProductionBatchItemModel::class, 'batch_id');
     }
     public static function getRecords($request,$domain){
         $page =  isset($request['page']) && $request['page'] > 0?($request['page'] - 1 ) : 0;
@@ -115,15 +115,17 @@ class ProductionBatchModel extends Model
                 ])
                     ->join('pro_item','pro_item.id','=','pro_batch_item.production_item_id')
                     ->join('inv_stock','inv_stock.id','=','pro_item.item_id')
-                    ->with(['productionItems' => function ($query) {
+                    ->with(['productionExpenses' => function ($query) {
                         $query->select([
-                            'pro_element.id',
-                            'pro_element.production_item_id',
-                            'pro_element.quantity',
+                            'pro_expense.id',
+                            'pro_expense.production_batch_item_id',
+                            'pro_expense.production_item_id',
+                            'pro_expense.quantity',
                             'pro_element.material_id',
                             'inv_stock.quantity as stock_quantity',
                             'inv_stock.name as name',
                         ])
+                            ->join('pro_element','pro_element.id','=','pro_expense.production_element_id')
                             ->join('inv_stock','inv_stock.id','=','pro_element.material_id')
                         ;
                     }]);
@@ -131,14 +133,14 @@ class ProductionBatchModel extends Model
             ->first();
 
         foreach($entity->batchItems as $batchItem) {
-            foreach($batchItem->productionItems as $productionItem) {
-                $productionItem->needed_quantity = $batchItem->issue_quantity * $productionItem->quantity;
-                if ($productionItem->needed_quantity>$productionItem->stock_quantity){
-                    $productionItem->less_quantity = $productionItem->needed_quantity - $productionItem->stock_quantity;
-                    $productionItem->more_quantity = null;
+            foreach($batchItem->productionExpenses as $expense) {
+                $expense->needed_quantity = $expense->quantity;
+                if ($expense->needed_quantity>$expense->stock_quantity){
+                    $expense->less_quantity = $expense->needed_quantity - $expense->stock_quantity;
+                    $expense->more_quantity = null;
                 }else{
-                    $productionItem->more_quantity = $productionItem->stock_quantity-$productionItem->needed_quantity;
-                    $productionItem->less_quantity = null;
+                    $expense->more_quantity = $expense->stock_quantity-$expense->needed_quantity;
+                    $expense->less_quantity = null;
                 }
             }
         }

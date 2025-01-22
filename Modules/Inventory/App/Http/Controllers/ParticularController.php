@@ -63,6 +63,7 @@ class ParticularController extends Controller
     {
         $service = new JsonRequestResponse();
         $entity = ParticularModel::find($id);
+        $entity['setting_type_id'] = $entity->particular_type_id;
         if (!$entity) {
             $entity = 'Data not found';
         }
@@ -76,6 +77,7 @@ class ParticularController extends Controller
     public function edit($id)
     {
         $entity = ParticularModel::find($id);
+        $entity['setting_type_id'] = $entity->particular_type_id;
         $status = $entity ? Response::HTTP_OK : Response::HTTP_NOT_FOUND;
         return response()->json([
             'message' => 'success',
