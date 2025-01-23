@@ -22,7 +22,7 @@ class OpeningStockRequest extends FormRequest
             'product_id' => 'required|integer',
             'opening_quantity' => 'required|numeric|min:0.01',
             'purchase_price' => 'required|numeric|min:0.01',
-            'sales_price' => 'required|numeric|min:0.01',
+            'sales_price' => 'nullable|numeric',
             'sub_total' => 'required|numeric|min:0.01',
             'mode' => 'required|string',
         ];
