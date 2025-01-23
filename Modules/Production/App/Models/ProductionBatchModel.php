@@ -120,8 +120,9 @@ class ProductionBatchModel extends Model
                             'pro_expense.id',
                             'pro_expense.production_batch_item_id',
                             'pro_expense.production_item_id',
-                            'pro_expense.quantity',
+                            'pro_expense.quantity as needed_quantity',
                             'pro_element.material_id',
+                            'pro_element.quantity',
                             'inv_stock.quantity as stock_quantity',
                             'inv_stock.name as name',
                         ])
@@ -134,7 +135,7 @@ class ProductionBatchModel extends Model
 
         foreach($entity->batchItems as $batchItem) {
             foreach($batchItem->productionExpenses as $expense) {
-                $expense->needed_quantity = $expense->quantity;
+                $expense->needed_quantity = $expense->needed_quantity;
                 if ($expense->needed_quantity>$expense->stock_quantity){
                     $expense->less_quantity = $expense->needed_quantity - $expense->stock_quantity;
                     $expense->more_quantity = null;

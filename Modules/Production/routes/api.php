@@ -82,6 +82,7 @@ Route::prefix('/production')->middleware([HeaderAuthenticationMiddleware::class]
         ]);
     ;
     Route::post('/batch/create-batch-item', [ProductionBatchController::class,'insertBatchItem'])->name('production_insert_batch_item');
+    Route::post('/batch/item/inline-quantity-update', [ProductionBatchController::class,'batchItemQuantityInlineUpdate'])->name('production_batch_item_quantity_update');
 
 
     Route::prefix('restore')->middleware([HeaderAuthenticationMiddleware::class])->group(function() {

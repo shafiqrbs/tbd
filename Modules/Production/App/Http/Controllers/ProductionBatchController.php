@@ -15,6 +15,7 @@ use Modules\Inventory\App\Models\InvoiceBatchTransactionModel;
 use Modules\Inventory\App\Models\StockItemHistoryModel;
 use Modules\Inventory\App\Models\StockItemModel;
 use Modules\Production\App\Entities\ProductionBatch;
+use Modules\Production\App\Http\Requests\BatchItemQuantityInlineUpdateRequest;
 use Modules\Production\App\Http\Requests\BatchItemRequest;
 use Modules\Production\App\Http\Requests\BatchRequest;
 use Modules\Production\App\Models\ProductionBatchItemModel;
@@ -142,6 +143,82 @@ class ProductionBatchController extends Controller
         }
     }
 
+    /**
+     * batch item quantity inline update.
+     */
+
+    public function batchItemQuantityInlineUpdate(BatchItemQuantityInlineUpdateRequest $request)
+    {
+        try {
+            // Validate input
+            $input = $request->validated();
+
+            // Check if production item exists
+            $productionBatchItem = ProductionBatchItemModel::where('batch_id', $input['batch_id'])
+                ->where('id', $input['batch_item_id'])
+                ->where('config_id',$this->domain['pro_config'])
+                ->first();
+            if (!$productionBatchItem) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Production batch item not found.',
+                ], 404);
+            }
+
+            // Start database transaction
+            DB::beginTransaction();
+
+            if ($input['type'] === 'issue_quantity') {
+                // Process production elements and calculate related expenses
+                $recipeItems = ProductionElements::join('inv_stock', 'inv_stock.id', '=', 'pro_element.material_id')
+                    ->select('pro_element.*', 'inv_stock.name', 'inv_stock.purchase_price as item_purchase_price', 'inv_stock.sales_price as item_sale_price')
+                    ->where('pro_element.production_item_id', $productionBatchItem->production_item_id)
+                    ->get();
+
+                if ($recipeItems->isNotEmpty()) {
+                    foreach ($recipeItems as $item) {
+                        $filter = [
+                            'config_id' => $this->domain['pro_config'],
+                            'production_item_id' => $item['production_item_id'],
+                            'production_batch_item_id' => $input['batch_item_id'],
+                            'production_element_id' => $item->id,
+                        ];
+
+                        $data = [
+                            'purchase_price' => $item->item_purchase_price,
+                            'sales_price' => $item->item_sale_price,
+                            'quantity' => $input['quantity'] * $item->quantity,
+                            'created_at' => now(),
+                        ];
+
+                        ProductionExpense::updateOrCreate($filter, $data); // create or update
+                    }
+                }
+            }
+
+            // Dynamically update the specified field using the `type` key.
+            $fieldToUpdate = $input['type'];
+            $productionBatchItem->$fieldToUpdate = $input['quantity'];
+            $productionBatchItem->save();
+
+            DB::commit(); // Commit transaction
+
+            // Return success response
+            return response()->json([
+                'success' => true,
+                'message' => 'Production batch item successfully updated.',
+                'data' => $productionBatchItem,
+            ], 200);
+
+        } catch (\Exception $e) {
+            // Rollback on error
+            DB::rollBack();
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
 
     /**
      * Show the specified resource.
