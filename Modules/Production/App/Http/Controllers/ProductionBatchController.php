@@ -3,18 +3,15 @@
 namespace Modules\Production\App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
-use Doctrine\ORM\EntityManager;
-use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
 use Modules\AppsApi\App\Services\GeneratePatternCodeService;
 use Modules\AppsApi\App\Services\JsonRequestResponse;
 use Modules\Core\App\Models\UserModel;
-use Modules\Inventory\App\Models\InvoiceBatchTransactionModel;
+use Modules\Inventory\App\Models\ProductModel;
 use Modules\Inventory\App\Models\StockItemHistoryModel;
 use Modules\Inventory\App\Models\StockItemModel;
-use Modules\Production\App\Entities\ProductionBatch;
 use Modules\Production\App\Http\Requests\BatchItemQuantityInlineUpdateRequest;
 use Modules\Production\App\Http\Requests\BatchItemRequest;
 use Modules\Production\App\Http\Requests\BatchRequest;
@@ -23,12 +20,11 @@ use Modules\Production\App\Models\ProductionBatchModel;
 use Modules\Production\App\Models\ProductionElements;
 use Modules\Production\App\Models\ProductionExpense;
 use Modules\Production\App\Models\ProductionItems;
+use Modules\Production\App\Models\ProductionStockHistory;
 use Symfony\Component\HttpFoundation\Response as ResponseAlias;
 
 class ProductionBatchController extends Controller
 {
-
-
     protected $domain;
 
     public function __construct(Request $request)
@@ -259,12 +255,13 @@ class ProductionBatchController extends Controller
 
         if ($input['process'] == 'approved') {
             $input['approved_by_id'] = $this->domain['user_id'];
+            $input['process'] = 'approved';
 
-            foreach($batch->batchItems as $batchItem) {
-                foreach($batchItem->productionItems as $productionItem) {
-                    $stockItem = StockItemModel::find($productionItem->material_id);
-                    $productionItem->needed_quantity = $batchItem->issue_quantity * $productionItem->quantity;
-                    StockItemHistoryModel::openingStockQuantity($stockItem,'production',$this->domain);
+            foreach ($batch->batchItems as $batchItem) {
+                // get batch expense data
+                foreach ($batchItem->productionExpenses as $expenseItem) {
+                    // recipe item quantity process into stock
+                    $this->processProductionExpense($expenseItem, $batchItem, $batch);
                 }
             }
         }
@@ -285,4 +282,132 @@ class ProductionBatchController extends Controller
     {
         //
     }
+
+
+    public function batchApproved(Request $request,$id)
+    {
+        DB::beginTransaction();
+
+        try {
+            // find batch
+            $batch = ProductionBatchModel::find($id);
+            if (!$batch) {
+                return response()->json([
+                    'message' => 'Production batch not found',
+                    'status' => ResponseAlias::HTTP_NOT_FOUND
+                ], ResponseAlias::HTTP_NOT_FOUND);
+            }
+
+            // get batch item
+            foreach ($batch->batchItems as $batchItem) {
+                // get batch expense data
+                foreach ($batchItem->productionExpenses as $expenseItem) {
+                    // recipe item quantity process into stock
+                    $this->processProductionExpense($expenseItem, $batchItem, $batch);
+                }
+            }
+
+            // approve batch
+            $batch->update([
+                'approved_by_id' => $this->domain['user_id'],
+                'process' => 'approved'
+            ]);
+
+            DB::commit();
+
+            return response()->json([
+                'message' => 'success',
+                'status' => ResponseAlias::HTTP_OK
+            ], ResponseAlias::HTTP_OK);
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            return response()->json([
+                'message' => 'An error occurred: ' . $e->getMessage(),
+                'status' => ResponseAlias::HTTP_INTERNAL_SERVER_ERROR
+            ], ResponseAlias::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    /**
+     * Process production expense and update stock/inventory information.
+     *
+     * @param $expenseItem
+     * @param $batchItem
+     * @param $batch
+     */
+    private function processProductionExpense($expenseItem, $batchItem, $batch)
+    {
+        // find recipe element
+        $findElement = ProductionElements::find($expenseItem->production_element_id);
+        // find recipe element stock
+        $findStockItem = StockItemModel::find($findElement->material_id);
+
+        // find existing stock
+        $existingStockHistory = StockItemHistoryModel::where('stock_item_id', $findElement->material_id)
+            ->where('config_id', $findStockItem->config_id)
+            ->latest()
+            ->first();
+
+        // calculate closing quantity & stock
+        $quantity = $expenseItem->quantity ?? 0;
+        $subTotal = $quantity * $expenseItem->sales_price ?? 0;
+
+        $closing_quantity = ($existingStockHistory->closing_quantity ?? 0) - $quantity;
+        $closing_balance = ($existingStockHistory->closing_balance ?? 0) - $subTotal;
+        $quantity = -$quantity;
+
+        // prepare data for stock item history
+        $data = [
+            'stock_item_id' => $findElement->material_id,
+            'config_id' => $findStockItem->config_id,
+            'quantity' => $quantity,
+            'purchase_price' => $expenseItem->purchase_price ?? 0,
+            'sales_price' => $expenseItem->sales_price ?? 0,
+            'opening_quantity' => $existingStockHistory->closing_quantity ?? 0,
+            'opening_balance' => $existingStockHistory->closing_balance ?? 0,
+            'closing_quantity' => $closing_quantity,
+            'closing_balance' => $closing_balance,
+            'wearhouse_id' => $batchItem->wearhouse_id ?? null,
+            'mode' => 'production',
+            'process' => 'approved',
+            'created_by' => $this->domain['user_id']
+        ];
+
+        // create stock item history
+        $stockHistory = StockItemHistoryModel::create($data);
+
+        // update stock item
+        $stockItem = StockItemModel::find($findElement->material_id);
+        if ($stockItem) {
+            $stockItem->update(['quantity' => $stockHistory->closing_quantity]);
+        }
+
+        // find total stock item
+        $totalProductQty = StockItemModel::calculateTotalStockQuantity(
+            $stockItem->product_id,
+            $stockItem->config_id
+        );
+
+        // update product quantity
+        $product = ProductModel::find($stockItem->product_id);
+        if ($product) {
+            $product->update(['quantity' => $totalProductQty]);
+        }
+
+        // prepare data for production history
+        $inventoryData = [
+            'config_id' => $this->domain['pro_config'],
+            'stock_item_history_id' => $stockHistory->id,
+            'production_batch_item_id' => $batchItem->id,
+            'production_batch_id' => $batch->id,
+            'production_expense_id' => $expenseItem->id,
+            'production_batch_item_quantity' => $batchItem->quantity,
+            'production_expense_quantity' => $expenseItem->quantity,
+        ];
+         // create production history
+        ProductionStockHistory::create($inventoryData);
+    }
+
+
 }

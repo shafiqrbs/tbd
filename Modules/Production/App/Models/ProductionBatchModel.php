@@ -62,6 +62,7 @@ class ProductionBatchModel extends Model
                 'pro_batch.status',
                 'pro_batch.process',
                 'pro_batch.created_by_id',
+                'pro_batch.approved_by_id',
                 'users.name as created_by_name',
                 DB::raw('DATE_FORMAT(pro_batch.created_at, "%d-%M-%Y") as created_date'),
                 DB::raw('DATE_FORMAT(pro_batch.issue_date, "%d-%M-%Y") as issue_date'),
