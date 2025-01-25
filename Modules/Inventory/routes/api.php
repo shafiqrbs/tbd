@@ -58,9 +58,12 @@ Route::prefix('/inventory')->middleware([HeaderAuthenticationMiddleware::class])
     Route::prefix('/product')->middleware([HeaderAuthenticationMiddleware::class])->group(function() {
         Route::get('/status/inline-update/{id}', [ProductController::class,'productStatusInlineUpdate'])->name('product_status_inline_update');
 
-        Route::post('/measurement', [ProductController::class,'measurementAdded'])->name('product_measurement_added');
-        Route::get('/measurement/{product}', [ProductController::class,'measurementList'])->name('product_measurement_list');
-        Route::delete('/measurement/{product}', [ProductController::class,'measurementDelete'])->name('product_measurement_delete');
+        Route::prefix('/measurement')->group(function() {
+            Route::post('', [ProductController::class,'measurementAdded'])->name('product_measurement_added');
+            Route::post('/sales-purchase/{product}', [ProductController::class,'measurementSalesPurchaseUpdate'])->name('product_measurement_sales_purchase_update');
+            Route::get('/{product}', [ProductController::class,'measurementList'])->name('product_measurement_list');
+            Route::delete('/{product}', [ProductController::class,'measurementDelete'])->name('product_measurement_delete');
+        });
 
         Route::get('/nbr-tariff/{product}', [ProductController::class,'nbrTariff'])->name('product_measurement_list');
         Route::post('/nbr-tariff/inline-update/{product}', [ProductController::class,'nbrTariffInlineUpdate'])->name('nbr_tariff_inline_update');

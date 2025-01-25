@@ -13,6 +13,7 @@ use Modules\Inventory\App\Entities\Product;
 use Modules\Inventory\App\Entities\StockItem;
 use Modules\Inventory\App\Http\Requests\ProductGalleryRequest;
 use Modules\Inventory\App\Http\Requests\ProductMeasurementRequest;
+use Modules\Inventory\App\Http\Requests\ProductMeasurementSalesPurchaseRequest;
 use Modules\Inventory\App\Http\Requests\ProductRequest;
 use Modules\Inventory\App\Models\ProductGalleryModel;
 use Modules\Inventory\App\Models\ProductMeasurementModel;
@@ -57,9 +58,26 @@ class ProductController extends Controller
     {
         $service = new JsonRequestResponse();
         $input = $request->validated();
+
         $input['config_id'] = $this->domain['config_id'];
         $entity = ProductModel::create($input);
         $productId = $entity['id'];
+
+        // base unit added measurement table
+        $unitDataConditions = [
+            'product_id' => $productId,
+            'config_id' => $this->domain['config_id'],
+            'is_base_unit' => 1
+        ];
+
+        $unitData = [
+            'unit_id' => $input['unit_id'],
+            'quantity' => 1
+        ];
+
+        ProductMeasurementModel::updateOrCreate($unitDataConditions, $unitData);
+
+
         $em->getRepository(StockItem::class)->insertStockItem($productId,$input);
         $data = $service->returnJosnResponse($entity);
         return $data;
@@ -173,7 +191,7 @@ class ProductController extends Controller
     {
         $service = new JsonRequestResponse();
         $input = $request->validated();
-        $existsByUnit = ProductMeasurementModel::where('product_id', $input['product_id'])->where('unit_id',$input['unit_id'])->first();
+        $existsByUnit = ProductMeasurementModel::where('product_id', $input['product_id'])->where('unit_id',$input['unit_id'])->where('config_id',$this->domain['config_id'])->first();
         if ($existsByUnit){
             $response = new Response();
             $response->headers->set('Content-Type', 'application/json');
@@ -184,13 +202,62 @@ class ProductController extends Controller
             $response->setStatusCode(Response::HTTP_OK);
             return $response;
         }
+        $input['is_base_unit'] = 0;
+        $input['config_id'] = $this->domain['config_id'];
+        $input['is_sales'] = false;
+        $input['is_purchase'] = false;
+
         $entity = ProductMeasurementModel::create($input);
         return $service->returnJosnResponse($entity);
     }
 
+    public function measurementSalesPurchaseUpdate(ProductMeasurementSalesPurchaseRequest $request, $productId)
+    {
+        $input = $request->validated();
+
+        // Validate 'type' to ensure it matches an allowed column
+        $allowedTypes = ['is_sales', 'is_purchase']; // Define allowed columns
+        if (!isset($input['type']) || !in_array($input['type'], $allowedTypes)) {
+            return response()->json([
+                'status' => 400,
+                'success' => false,
+                'message' => 'Invalid type provided.',
+            ], 400);
+        }
+
+        // Retrieve only required columns from the database
+        $measurements = ProductMeasurementModel::where('product_id', $productId)
+            ->where('config_id', $this->domain['config_id'])
+            ->select(['id', $input['type']])
+            ->get();
+
+        // If no measurement units found, return error response
+        if ($measurements->isEmpty()) {
+            return response()->json([
+                'status' => 404,
+                'success' => false,
+                'message' => 'No measurement units found.',
+            ], 404);
+        }
+
+        // Perform updates in a single query if possible (batch update)
+        foreach ($measurements as $measurementUnit) {
+            $condition = isset($input['check']) && $input['check'] === true && $measurementUnit['id'] == $input['unit_id'];
+            $measurementUnit->update([$input['type'] => $condition ? 1 : 0]);
+        }
+
+        // Return appropriate response
+        return response()->json([
+            'status' => 200,
+            'success' => true,
+            'message' => 'updated',
+        ]);
+    }
+
+
     public function measurementList(Request $request,$id)
     {
-        $data = ProductMeasurementModel::getRecords($id);
+        $data = ProductMeasurementModel::getRecords($id,$this->domain['config_id']);
         $response = new Response();
         $response->headers->set('Content-Type', 'application/json');
         $response->setContent(json_encode([

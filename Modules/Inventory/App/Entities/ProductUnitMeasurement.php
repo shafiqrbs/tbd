@@ -11,7 +11,7 @@ use Gedmo\Mapping\Annotation as Gedmo;
  * @ORM\Table( name = "inv_product_unit_measurment")
  * @ORM\Entity()
  */
-class  ProductUnitMeasurment
+class  ProductUnitMeasurement
 {
     /**
      * @var integer
@@ -63,6 +63,31 @@ class  ProductUnitMeasurment
      * @ORM\Column(name="updated_at", type="datetime")
      */
     private $updatedAt;
+
+    /**
+     * @var boolean
+     *
+     * @ORM\Column(name="is_base_unit", type="boolean" )
+     */
+    private $isBaseUnit = false;
+
+    /**
+     * @ORM\ManyToOne(targetEntity="Modules\Inventory\App\Entities\Config")
+     * @ORM\JoinColumn(onDelete="CASCADE")
+     **/
+    private $config;
+
+    /**
+     * @var boolean
+     * @ORM\Column(name="is_sales", type="boolean" )
+     */
+    private $isSales = false;
+
+    /**
+     * @var boolean
+     * @ORM\Column(name="is_purchase", type="boolean" )
+     */
+    private $isPurchase = false;
 
     /**
      * @return int

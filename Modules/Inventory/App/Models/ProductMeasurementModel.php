@@ -18,6 +18,10 @@ class ProductMeasurementModel extends Model
     protected $fillable = [
         'product_id',
         'unit_id',
+        'is_base_unit',
+        'config_id',
+        'is_sales',
+        'is_purchase',
         'quantity'
     ];
 
@@ -37,15 +41,18 @@ class ProductMeasurementModel extends Model
     }
 
 
-    public static function getRecords($id)
+    public static function getRecords($id,$configId)
     {
-        return self::where([['inv_product_unit_measurment.status',1],['inv_product_unit_measurment.product_id',$id]])
+        return self::where([['inv_product_unit_measurment.status',1],['inv_product_unit_measurment.product_id',$id],['inv_product_unit_measurment.config_id',$configId]])
             ->leftjoin('inv_particular','inv_particular.id','=','inv_product_unit_measurment.unit_id')
             ->select([
                 'inv_product_unit_measurment.id',
                 'inv_product_unit_measurment.product_id',
                 'inv_product_unit_measurment.unit_id',
                 'inv_product_unit_measurment.quantity',
+                'inv_product_unit_measurment.is_sales',
+                'inv_product_unit_measurment.is_purchase',
+                'inv_product_unit_measurment.is_base_unit',
                 'inv_particular.name as unit_name',
             ])->orderBy('inv_product_unit_measurment.id','DESC')->get();
     }
