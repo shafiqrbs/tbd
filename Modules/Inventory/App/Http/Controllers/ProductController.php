@@ -72,7 +72,9 @@ class ProductController extends Controller
 
         $unitData = [
             'unit_id' => $input['unit_id'],
-            'quantity' => 1
+            'quantity' => 1,
+            'is_sales' => 1,
+            'is_purchase' => 1
         ];
 
         ProductMeasurementModel::updateOrCreate($unitDataConditions, $unitData);
