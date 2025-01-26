@@ -296,7 +296,9 @@ class FileUploadController extends Controller
             }
 
             // manage value added
-            $this->valueAddedInsetAndUpdate($item['value_added'],$productionItem);
+            if (isset($item['value_added']) && !empty($item['value_added'])) {
+                $this->valueAddedInsetAndUpdate($item['value_added'], $productionItem);
+            }
 
             // Calculate totals for the production item and update
             $totals = ProductionElements::where('production_item_id', $productionItem->id)
