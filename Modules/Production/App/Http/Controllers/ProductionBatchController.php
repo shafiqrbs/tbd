@@ -64,7 +64,7 @@ class ProductionBatchController extends Controller
         $input['config_id'] = $config;
         $input['code'] = $pattern['code'];
         $input['invoice'] = $pattern['generateId'];
-        $input['process'] = 'created';
+        $input['process'] = 'Created';
         $input['created_by_id'] = $this->domain['user_id'];
         $entity = ProductionBatchModel::create($input);
         $data = $service->returnJosnResponse($entity);
@@ -253,9 +253,9 @@ class ProductionBatchController extends Controller
             ], ResponseAlias::HTTP_NOT_FOUND);
         }
 
-        if ($input['process'] == 'approved') {
+        if ($input['process'] == 'Approved') {
             $input['approved_by_id'] = $this->domain['user_id'];
-            $input['process'] = 'approved';
+            $input['process'] = 'Approved';
 
             foreach ($batch->batchItems as $batchItem) {
                 // get batch expense data
@@ -310,7 +310,7 @@ class ProductionBatchController extends Controller
             // approve batch
             $batch->update([
                 'approved_by_id' => $this->domain['user_id'],
-                'process' => 'approved'
+                'process' => 'Approved'
             ]);
 
             DB::commit();
@@ -327,6 +327,122 @@ class ProductionBatchController extends Controller
                 'status' => ResponseAlias::HTTP_INTERNAL_SERVER_ERROR
             ], ResponseAlias::HTTP_INTERNAL_SERVER_ERROR);
         }
+    }
+
+    public function batchConfirmReceive(Request $request,$id)
+    {
+        DB::beginTransaction();
+        try {
+            // find batch
+            $batch = ProductionBatchModel::find($id);
+            if (!$batch) {
+                return response()->json([
+                    'message' => 'Production batch not found',
+                    'status' => ResponseAlias::HTTP_NOT_FOUND
+                ], ResponseAlias::HTTP_NOT_FOUND);
+            }
+
+            // get batch item
+            foreach ($batch->batchItems as $batchItem) {
+                    // batch item quantity process into stock
+                    $this->processProductionReceiveConfirm($batchItem, $batch);
+            }
+
+            // approve batch
+            $batch->update([
+                'process' => 'Received'
+            ]);
+
+            DB::commit();
+
+            return response()->json([
+                'message' => 'success',
+                'status' => ResponseAlias::HTTP_OK
+            ], ResponseAlias::HTTP_OK);
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            return response()->json([
+                'message' => 'An error occurred: ' . $e->getMessage(),
+                'status' => ResponseAlias::HTTP_INTERNAL_SERVER_ERROR
+            ], ResponseAlias::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    /**
+     * Process production expense and update stock/inventory information.
+     * @param $batchItem
+     * @param $batch
+     */
+    private function processProductionReceiveConfirm($batchItem, $batch)
+    {
+        $getStockItemId = ProductionItems::find($batchItem['production_item_id'])->item_id;
+
+        // find stock item
+        $stockItem = StockItemModel::find($getStockItemId);
+
+        // find existing stock
+        $existingStockHistory = StockItemHistoryModel::where('stock_item_id', $getStockItemId)
+            ->where('config_id', $stockItem->config_id)
+            ->latest()
+            ->first();
+
+        // calculate closing quantity & stock
+        $quantity = $batchItem['issue_quantity'] ?? 0;
+        $subTotal = $quantity * $stockItem->sales_price ?? 0;
+
+        $closing_quantity = ($existingStockHistory->closing_quantity ?? 0) + $quantity;
+        $closing_balance = ($existingStockHistory->closing_balance ?? 0) + $subTotal;
+
+        // prepare data for stock item history
+        $data = [
+            'stock_item_id' => $getStockItemId,
+            'config_id' => $stockItem->config_id,
+            'quantity' => $quantity,
+            'purchase_price' => $stockItem->purchase_price ?? 0,
+            'sales_price' => $stockItem->sales_price ?? 0,
+            'opening_quantity' => $existingStockHistory->closing_quantity ?? 0,
+            'opening_balance' => $existingStockHistory->closing_balance ?? 0,
+            'closing_quantity' => $closing_quantity,
+            'closing_balance' => $closing_balance,
+            'wearhouse_id' => $batchItem->wearhouse_id ?? null,
+            'mode' => 'production',
+            'process' => 'approved',
+            'created_by' => $this->domain['user_id']
+        ];
+
+        // create stock item history
+        $stockHistory = StockItemHistoryModel::create($data);
+
+        // update stock item
+        if ($stockItem) {
+            $stockItem->update(['quantity' => $stockHistory->closing_quantity]);
+        }
+
+        // find total stock item
+        $totalProductQty = StockItemModel::calculateTotalStockQuantity(
+            $stockItem->product_id,
+            $stockItem->config_id
+        );
+
+        // update product quantity
+        $product = ProductModel::find($stockItem->product_id);
+        if ($product) {
+            $product->update(['quantity' => $totalProductQty]);
+        }
+
+        // prepare data for production history
+        /*$inventoryData = [
+            'config_id' => $this->domain['pro_config'],
+            'stock_item_history_id' => $stockHistory->id,
+            'production_batch_item_id' => $batchItem->id,
+            'production_batch_id' => $batch->id,
+            'production_expense_id' => $expenseItem->id,
+            'production_batch_item_quantity' => $batchItem->quantity,
+            'production_expense_quantity' => $expenseItem->quantity,
+        ];*/
+         // create production history
+//        ProductionStockHistory::create($inventoryData);
     }
 
     /**

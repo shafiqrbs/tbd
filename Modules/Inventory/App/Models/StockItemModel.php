@@ -210,7 +210,7 @@ class StockItemModel extends Model
                 'inv_particular.id as unit_id',
                 'inv_particular.name as unit_name',
                 \DB::raw("CONCAT(inv_stock.name, ' [',IFNULL(inv_stock.remaining_quantity, 0),'] ', inv_particular.name) AS product_name"),
-                'inv_stock.display_name as display_name',
+                \DB::raw("IFNULL(inv_stock.display_name, inv_stock.name) AS display_name"),
                 'inv_stock.slug',
                 'inv_stock.opening_quantity',
                 'inv_stock.min_quantity',
