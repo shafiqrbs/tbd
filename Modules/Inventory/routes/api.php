@@ -65,9 +65,8 @@ Route::prefix('/inventory')->middleware([HeaderAuthenticationMiddleware::class])
             Route::delete('/{product}', [ProductController::class,'measurementDelete'])->name('product_measurement_delete');
         });
 
-        Route::get('/nbr-tariff/{product}', [ProductController::class,'nbrTariff'])->name('product_measurement_list');
+        Route::get('/nbr-tariff/{product}', [ProductController::class,'nbrTariff'])->name('nbr_tariff_list');
         Route::post('/nbr-tariff/inline-update/{product}', [ProductController::class,'nbrTariffInlineUpdate'])->name('nbr_tariff_inline_update');
-
         Route::post('/stock/sku', [StockItemController::class,'stockSkuAdded'])->name('product_stock_sku');
         Route::get('/stock/sku/{product}', [StockItemController::class,'stockSkuList'])->name('product_stock_list');
         Route::delete('/stock/sku/{product}', [StockItemController::class,'stockItemDelete'])->name('product_stock_delete');
