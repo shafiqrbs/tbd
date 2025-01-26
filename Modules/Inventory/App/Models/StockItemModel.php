@@ -167,6 +167,7 @@ class StockItemModel extends Model
     public static function getStockItem($domain)
     {
         $products = self::where([['inv_product.config_id',$domain['config_id']]])->where('inv_stock.status',1)
+            ->whereIN('inv_setting.slug',['pre-production','stockable','mid-production','post-production'])
             ->join('inv_product','inv_product.id','=','inv_stock.product_id')
             ->leftjoin('inv_category','inv_category.id','=','inv_product.category_id')
             ->leftjoin('inv_particular','inv_particular.id','=','inv_product.unit_id')
