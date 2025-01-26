@@ -180,7 +180,7 @@ class FileUploadController extends Controller
             if ($getFile->file_type === 'Product'){
                 $message = 'Invalid file type or structure or column expect 12 , its '.count($keys).' given.';
             }elseif ($getFile->file_type === 'Production'){
-                $message = 'Invalid file type or structure or column expect 7 , its '.count($keys).' given.';
+                $message = 'Invalid file type or structure or column expect 8 , its '.count($keys).' given.';
             }else{
                 $message = 'Invalid file type or structure.';
             }
