@@ -72,7 +72,7 @@ class DomainModel extends Model
 
         $entities = $entities->where('id','!=',1);
         if (isset($request['term']) && !empty($request['term'])){
-            $entities = $entities->whereAny(['name','email','username','mobile'],'LIKE','%'.$request['term'].'%');
+            $entities = $entities->whereAny(['name','email','mobile'],'LIKE','%'.$request['term'].'%');
         }
 
         if (isset($request['name']) && !empty($request['name'])){
