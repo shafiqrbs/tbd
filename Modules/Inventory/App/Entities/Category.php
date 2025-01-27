@@ -25,14 +25,14 @@ class Category
 
 
     /**
-     * @ORM\ManyToOne(targetEntity="Config" , cascade={"detach","merge"} )
+     * @ORM\ManyToOne(targetEntity="Config" , cascade={"persist", "remove"} )
      * @ORM\JoinColumn(onDelete="CASCADE")
      **/
     private  $config;
 
     /**
      * @Gedmo\TreeParent
-     * @ORM\ManyToOne(targetEntity="Category", inversedBy="children")
+     * @ORM\ManyToOne(targetEntity="Category", inversedBy="children" , cascade={"persist", "remove"}  )
      * @ORM\JoinColumns({
      *   @ORM\JoinColumn(name="parent", referencedColumnName="id", onDelete="SET NULL", nullable=true)
      * })

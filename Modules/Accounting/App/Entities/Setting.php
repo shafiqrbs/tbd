@@ -23,12 +23,6 @@ class Setting
     private $id;
 
     /**
-     * @ORM\ManyToOne(targetEntity="Config", cascade={"persist", "remove"})
-     * @ORM\JoinColumn(onDelete="CASCADE")
-     **/
-    private $config;
-
-    /**
      * @ORM\ManyToOne(targetEntity="SettingType")
      **/
     private $settingType;

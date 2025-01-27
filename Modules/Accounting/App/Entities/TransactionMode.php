@@ -31,8 +31,8 @@ class TransactionMode
     private $config;
 
     /**
-     * @var Setting
-     * @ORM\ManyToOne(targetEntity="Setting")
+     * @ORM\ManyToOne(targetEntity="Modules\Accounting\App\Entities\Setting", cascade={"persist", "remove"})
+     * @ORM\JoinColumn(onDelete="SET NULL", nullable=true)
      **/
     private $method;
 

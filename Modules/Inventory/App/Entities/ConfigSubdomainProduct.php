@@ -38,15 +38,19 @@ class ConfigSubdomainProduct
 
     /**
      * @ORM\ManyToOne(targetEntity="Modules\Inventory\App\Entities\Category")
+     * @ORM\JoinColumn(onDelete="CASCADE")
+     * @ORM\OrderBy({"sorting" = "ASC"})
+     **/
+    private $category;
+
+    /**
+     * @ORM\ManyToOne(targetEntity="Modules\Inventory\App\Entities\Category")
+     * @ORM\JoinColumn(onDelete="CASCADE")
      * @ORM\OrderBy({"sorting" = "ASC"})
      **/
     private $categoryGroup;
 
-    /**
-     * @ORM\ManyToOne(targetEntity="Modules\Inventory\App\Entities\Category")
-     * @ORM\OrderBy({"sorting" = "ASC"})
-     **/
-    private $category;
+
 
     /**
      * @var boolean
