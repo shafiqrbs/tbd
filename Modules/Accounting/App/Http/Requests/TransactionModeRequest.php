@@ -33,8 +33,8 @@ class TransactionModeRequest extends FormRequest
                 return [
                     'name' => 'required|string',
                     'is_selected' => 'nullable',
-                    'authorised_mode_id' => 'required|integer',
-                    'account_mode_id' => 'required|integer',
+                    'authorised_mode_id' => 'nullable|integer',
+                    'account_mode_id' => 'nullable|integer',
                     'service_charge' => 'nullable|string',
                     'short_name' => 'required|string',
                     'account_owner' => 'nullable|string',

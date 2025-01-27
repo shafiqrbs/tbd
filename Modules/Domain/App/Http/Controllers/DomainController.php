@@ -111,10 +111,13 @@ class DomainController extends Controller
             ]);
 
             // Step 4: Create the accounting data
-            $nbrConfig = NbrVatModel::create([
+            NbrVatModel::create([
                 'domain_id' => $entity->id,
-                'financial_start_date' => date('Y-m-d'),
-                'financial_end_date' => date('Y-m-d'),
+            ]);
+
+             // Step 5: Create the Production data
+            ProductionConfig::create([
+                'domain_id' => $entity->id,
             ]);
 
             $getProductType = UtilitySettingModel::getEntityDropdown('product-type');
@@ -131,11 +134,6 @@ class DomainController extends Controller
                     $response->setStatusCode(Response::HTTP_OK);
                     return $response;
                 }
-
-                //create production config
-                ProductionConfig::create([
-                    'domain_id' => $entity->id,
-                ]);
 
                 // Loop through each product type and either find or create inventory setting.
                 foreach ($getProductType as $type) {
@@ -154,13 +152,13 @@ class DomainController extends Controller
                 TransactionModeModel::create([
                     'config_id' => $accountingConfig->id,
                     'account_owner' => 'Cash',
-                    'authorised' => 'bKash',
+                    'authorised' => 'Cash',
                     'name' => 'Cash',
                     'short_name' => 'Cash',
                     'slug' => 'cash',
                     'path' => null,
                     'account_type' => 'Current',
-                    'authorised_mode_id' => 14,
+                    'method_id' => 20,
                     'status' => true
                 ]);
             }
