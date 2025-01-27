@@ -26,7 +26,7 @@ class TransactionMode
 
     /**
      * @ORM\ManyToOne(targetEntity="Config", cascade={"persist", "remove"})
-     * @ORM\JoinColumn(onDelete="CASCADE")
+     * @ORM\JoinColumn(onDelete="SET NULL", nullable=true)
      **/
     private $config;
 
@@ -120,20 +120,23 @@ class TransactionMode
     private $status = true;
 
     /**
-     * @ORM\ManyToOne(targetEntity="Modules\Accounting\App\Entities\Setting")
+     * @ORM\ManyToOne(targetEntity="Modules\Accounting\App\Entities\Setting", cascade={"persist", "remove"})
+     * @ORM\JoinColumn(onDelete="SET NULL", nullable=true)
      **/
     private $authorisedMode;
 
 
     /**
-     * @ORM\ManyToOne(targetEntity="Modules\Accounting\App\Entities\Setting")
+     * @ORM\ManyToOne(targetEntity="Modules\Accounting\App\Entities\Setting", cascade={"persist", "remove"})
+     * @ORM\JoinColumn(onDelete="SET NULL", nullable=true)
      **/
     private $accountMode;
 
 
 
     /**
-     * @ORM\ManyToOne(targetEntity="Modules\Accounting\App\Entities\Setting")
+     * @ORM\ManyToOne(targetEntity="Modules\Accounting\App\Entities\Setting", cascade={"persist", "remove"})
+     * @ORM\JoinColumn(onDelete="SET NULL", nullable=true)
      **/
     private $accountTypeMode;
 

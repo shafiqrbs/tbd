@@ -67,7 +67,8 @@ class Sales
     private  $approvedBy;
 
     /**
-     * @ORM\ManyToOne(targetEntity="Modules\Accounting\App\Entities\TransactionMode")
+     * @ORM\ManyToOne(targetEntity="Modules\Accounting\App\Entities\TransactionMode" ,cascade={"persist", "remove"})
+     * @ORM\JoinColumn(onDelete="SET NULL", nullable=true)
      **/
     private $transactionMode;
 

@@ -10,6 +10,7 @@ use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Modules\Accounting\App\Entities\AccountHead;
+use Modules\Accounting\App\Entities\TransactionMode;
 use Modules\Accounting\App\Models\AccountingModel;
 use Modules\Accounting\App\Models\TransactionModeModel;
 use Modules\AppsApi\App\Services\JsonRequestResponse;
@@ -479,6 +480,7 @@ class DomainController extends Controller
         if($userData['config_id']) {
             ConfigModel::find($userData['config_id'])->delete();
         }
+        TransactionModeModel::whereNull('config_id')->delete();
         DomainModel::find($id)->delete();
         $entity = ['message'=>'delete'];
         $data = $service->returnJosnResponse($entity);

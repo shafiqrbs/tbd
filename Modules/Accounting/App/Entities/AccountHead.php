@@ -91,6 +91,7 @@ class AccountHead
 
     /**
      * @ORM\ManyToOne(targetEntity="Setting")
+     * @ORM\JoinColumn(onDelete="CASCADE")
      **/
     private $motherAccount;
 
