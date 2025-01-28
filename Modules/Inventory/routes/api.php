@@ -76,6 +76,7 @@ Route::prefix('/inventory')->middleware([HeaderAuthenticationMiddleware::class])
 
     Route::apiResource('/stock', StockItemController::class)->middleware([HeaderAuthenticationMiddleware::class]);
     Route::get('/stock-item', [StockItemController::class,'stockItem'])->name('get_stock_item');
+    Route::get('generate/stock-item/xlsx', [StockItemController::class,'stockItemXlsxGenerate'])->name('get_stock_item_xlsx_generate');
 
     Route::apiResource('/sales', SalesController::class)->middleware([HeaderAuthenticationMiddleware::class]);
     Route::get('/sales/edit/{id}', [SalesController::class,'edit'])->name('get_edit_sales');
@@ -92,8 +93,7 @@ Route::prefix('/inventory')->middleware([HeaderAuthenticationMiddleware::class])
     Route::apiResource('/opening-stock', OpeningStockController::class)->middleware([HeaderAuthenticationMiddleware::class]);
     Route::post('/opening-stock/inline-update', [OpeningStockController::class,'inlineUpdate'])->name('opening_stock_inline_update');
   //  Route::post('/inventory/branch-management', [BranchManagementController::class,'branchManagement'])->name('branch_management_update');
-
-
 });
 
 
+Route::get('stock-item/download', [StockItemController::class,'stockItemDownload'])->name('stock_item_download');

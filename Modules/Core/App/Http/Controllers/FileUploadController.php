@@ -24,7 +24,9 @@ use Modules\Inventory\App\Models\CategoryModel;
 use Modules\Inventory\App\Models\ConfigModel;
 use Modules\Inventory\App\Models\ParticularModel;
 use Modules\Inventory\App\Models\ProductModel;
+use Modules\Inventory\App\Models\PurchaseItemModel;
 use Modules\Inventory\App\Models\SettingModel as InventorySettingModel;
+use Modules\Inventory\App\Models\StockItemHistoryModel;
 use Modules\Inventory\App\Models\StockItemModel;
 use Modules\Production\App\Models\ProductionBatchItemModel;
 use Modules\Production\App\Models\ProductionElements;
@@ -176,6 +178,24 @@ class FileUploadController extends Controller
             $isInsert = $this->insertProductsInBatches($allData, $em);
         }elseif ($getFile->file_type === 'Production'){
             $isInsert = $this->insertProductionInBatches($allData, $em);
+        }elseif ($getFile->file_type === 'Opening-Stock'){
+            $spreadsheet = $reader->load($filePath);
+            $data = $spreadsheet->getActiveSheet()->toArray(null, true, true, true);
+
+            // Use the first row as headers
+            $headers = array_shift($data);
+
+            // Map rows to headers
+            $dataWithHeaders = [];
+            foreach ($data as $row) {
+                $mappedRow = [];
+                foreach ($headers as $column => $headerName) {
+                    $mappedRow[$headerName] = $row[$column] ?? null; // Use header name as key
+                }
+                $dataWithHeaders[] = $mappedRow;
+            }
+
+            $isInsert = $this->insertOpeningStock($dataWithHeaders);
         } else {
             /*if ($getFile->file_type === 'Product'){
                 $message = 'Invalid file type or structure or column expect 12 , its '.count($keys).' given.';
@@ -200,6 +220,134 @@ class FileUploadController extends Controller
             ], Response::HTTP_OK);
         }
     }
+
+    // for opening stock process for upload
+
+    private function insertOpeningStock($allData)
+    {
+        $batchSize = 1000;
+        $batch = [];
+        $rowsProcessed = 0;
+
+        // Get all stock items in one query
+        $productIds = array_column($allData, 'ProductID');
+        $stockItems = StockItemModel::whereIn('product_id', $productIds)->get()->keyBy('product_id');
+
+        foreach ($allData as $index => $data) {
+            $values = array_map(fn($item) => is_string($item) ? trim($item) : $item, $data);
+            $productID = $values['ProductID'] ?? null;
+            $openingStock = $values['OpeningStock'] ?? 0;
+
+            if (!$productID || !isset($stockItems[$productID])) {
+                continue;
+            }
+
+            $findStockItem = $stockItems[$productID];
+
+            $batch[] = [
+                'config_id' => $this->domain['config_id'],
+                'created_by_id' => $this->domain['user_id'],
+                'approved_by_id' => $this->domain['user_id'],
+                'stock_item_id' => $findStockItem->id,
+                'quantity' => $openingStock,
+                'mode' => 'opening',
+                'sales_price' => $findStockItem->sales_price,
+                'purchase_price' => $findStockItem->purchase_price,
+                'sub_total' => $openingStock * $findStockItem->purchase_price,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ];
+
+            // Batch insert when batch size is reached
+            if (count($batch) >= $batchSize) {
+                $rowsProcessed += $this->processOpeningStockBatch($batch);
+                $batch = [];
+            }
+        }
+
+        // Process remaining items
+        if (count($batch) > 0) {
+            $rowsProcessed += $this->processOpeningStockBatch($batch);
+        }
+
+        return ['is_insert' => true, 'row_count' => $rowsProcessed];
+    }
+
+    private function processOpeningStockBatch(array $batch)
+    {
+        if (empty($batch)) {
+            return 0;
+        }
+        // Bulk insert
+        PurchaseItemModel::insert($batch);
+
+        // Get inserted records for further processing
+        $insertedRecords = PurchaseItemModel::latest('id')->take(count($batch))->get();
+        foreach ($insertedRecords as $purchase) {
+            StockItemHistoryModel::openingStockQuantity($purchase, 'opening', $this->domain);
+        }
+        return count($batch);
+    }
+
+    /*private function insertOpeningStock($allData)
+    {
+        $batchSize = 1000;
+        $batch = [];
+        $rowsProcessed = 0;
+
+        foreach ($allData as $index => $data) {
+            $values = array_map('trim', $data);
+
+            $findStockItem = StockItemModel::where('product_id', $values['ProductID'])->first();
+            if ($findStockItem) {
+                $input['config_id'] = $this->domain['config_id'];
+                $input['created_by_id'] = $this->domain['user_id'];
+                $input['approved_by_id'] = $this->domain['user_id'];
+                $input['stock_item_id'] = $findStockItem->id;
+                $input['quantity'] = $values['OpeningStock'];
+                $input['mode'] = 'opening';
+                $input['sales_price'] = $findStockItem->sales_price;
+                $input['purchase_price'] = $findStockItem->purchase_price;
+                $input['sub_total'] = $values['OpeningStock']*$findStockItem->purchase_price;
+
+                $batch[] = $input;
+            }
+
+
+
+            // Batch insert when batch size reached
+                if (count($batch) === $batchSize) {
+                    $rowsProcessed += $this->processOpeningStockBatch($batch);
+                    $batch = [];
+                }
+//            }
+        }
+
+        // Process any remaining items
+        if (count($batch) > 0) {
+            $rowsProcessed += $this->processOpeningStockBatch($batch);
+        }
+
+        return ['is_insert' => true, 'row_count' => $rowsProcessed];
+    }
+
+    private function processOpeningStockBatch(array $batch)
+    {
+        $rowCount = 0;
+
+        foreach ($batch as $item) {
+
+                $purchase = PurchaseItemModel::create($item);
+
+            // Call the opening stock quantity method
+                StockItemHistoryModel::openingStockQuantity($purchase, 'opening',$this->domain);
+
+            $rowCount++;
+        }
+
+        return $rowCount;
+    }*/
+
 
 
     // for production batch process for upload

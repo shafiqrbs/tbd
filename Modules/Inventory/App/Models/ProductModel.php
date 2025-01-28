@@ -135,6 +135,44 @@ class ProductModel extends Model
         $data = array('count'=>$total,'entities'=>$entities);
         return $data;
     }
+    public static function getStockDataFormDownload($domain)
+    {
+        $products = self::where([['inv_product.config_id',$domain['config_id']]])
+            ->leftjoin('inv_category','inv_category.id','=','inv_product.category_id')
+            ->leftjoin('inv_particular','inv_particular.id','=','inv_product.unit_id')
+            ->leftjoin('inv_setting','inv_setting.id','=','inv_product.product_type_id')
+            ->join('inv_stock','inv_stock.product_id','=','inv_product.id')
+            ->leftjoin('inv_particular as brand','brand.id','=','inv_stock.brand_id')
+            ->leftjoin('inv_particular as model','model.id','=','inv_stock.model_id')
+            ->leftjoin('inv_particular as color','color.id','=','inv_stock.color_id')
+            ->leftjoin('inv_particular as grade','grade.id','=','inv_stock.grade_id')
+            ->leftjoin('inv_particular as size','size.id','=','inv_stock.size_id')
+            ->select([
+                'inv_product.id',
+                'inv_stock.name as product_name',
+                'inv_product.slug',
+                'inv_category.name as category_name',
+                'inv_particular.name as unit_name',
+                'inv_product.barcode',
+                'inv_product.alternative_name',
+                'inv_setting.name as product_type',
+                'inv_stock.quantity',
+                'inv_stock.bangla_name',
+                'inv_product.status',
+                'inv_product.parent_id',
+                'brand.name as brand_name',
+                'model.name as model_name',
+                'color.name as color_name',
+                'grade.name as grade_name',
+                'size.name as size_name',
+                'inv_stock.purchase_price',
+                'inv_stock.sales_price',
+                'inv_stock.average_price',
+            ]);
+
+        $entities = $products->orderBy('inv_product.id','DESC')->get()->toArray();
+        return $entities;
+    }
 
 
     public static function getProductDetails($id,$domain)

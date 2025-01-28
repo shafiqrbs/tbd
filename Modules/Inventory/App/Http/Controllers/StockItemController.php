@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use Doctrine\ORM\EntityManagerInterface;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\File;
 use Illuminate\Validation\ValidationException;
 use Modules\AppsApi\App\Services\JsonRequestResponse;
 use Modules\Core\App\Models\UserModel;
@@ -20,6 +22,8 @@ use Modules\Inventory\App\Models\StockItemHistoryModel;
 use Modules\Inventory\App\Models\StockItemModel;
 use Modules\Inventory\App\Models\StockItemPriceMatrixModel;
 use Modules\Inventory\App\Repositories\StockItemRepository;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
 class StockItemController extends Controller
 {
@@ -340,6 +344,160 @@ class StockItemController extends Controller
         $service = new JsonRequestResponse();
         $data = StockItemModel::getProductForRecipe($this->domain);
         return $service->returnJosnResponse($data);
+    }
+
+    /*public function stockItemXlsxGenerate()
+    {
+        try {
+            $spreadsheet = new Spreadsheet();
+            $sheet = $spreadsheet->getActiveSheet();
+
+            // Fetch data from the database
+            $stockData = ProductModel::getStockDataFormDownload($this->domain);
+            // Define headers and the corresponding fields manually
+            $headers = ['ProductID', 'ProductName', 'CategoryName', 'UnitName','StockQuantity'];
+            $fields = ['id', 'product_name', 'category_name', 'unit_name','quantity'];
+
+            // Write headers to the first row
+            $sheet->fromArray($headers, null, 'A1');
+
+            // Make headers bold
+            $headerStyleArray = [
+                'font' => ['bold' => true],
+            ];
+            $sheet->getStyle('A1:' . chr(64 + count($headers)) . '1')->applyFromArray($headerStyleArray);
+
+            // Set the data rows
+            $rowIndex = 2;
+            foreach ($stockData as $row) {
+                $colIndex = 'A'; // Start from column A
+                foreach ($fields as $field) {
+                    if (property_exists($row, $field)) {
+                        $sheet->setCellValue($colIndex . $rowIndex, $row->{$field});
+                    } else {
+                        $sheet->setCellValue($colIndex . $rowIndex, '');
+                    }
+                    $colIndex++;
+                }
+                $rowIndex++;
+            }
+
+            // Auto-size columns
+            $colCount = count($headers);
+            for ($col = 1; $col <= $colCount; $col++) {
+                $sheet->getColumnDimension(chr(64 + $col))->setAutoSize(true);
+            }
+
+            // Generate the file
+            $fileName = 'stock-item-data.xlsx';
+            $tempFilePath = storage_path($fileName);
+            $writer = new Xlsx($spreadsheet);
+            $writer->save($tempFilePath);
+
+            return response([
+                'filename' => $fileName,
+                'result' => true,
+                'status' => 200
+            ]);
+        } catch (\Exception $e) {
+            // Catch any exceptions and handle errors
+            return response([
+                'error' => $e->getMessage(),
+                'result' => false,
+                'status' => 500,
+            ]);
+        }
+    }*/
+
+    public function stockItemXlsxGenerate()
+    {
+        try {
+            $spreadsheet = new Spreadsheet();
+            $sheet = $spreadsheet->getActiveSheet();
+
+            // Fetch data from the database
+            $stockData = ProductModel::getStockDataFormDownload($this->domain);
+
+            // Handle empty data case
+            if (empty($stockData)) {
+                return response([
+                    'error' => 'No stock data available for download.',
+                    'result' => false,
+                    'status' => 404,
+                ]);
+            }
+
+            // Define headers and fields
+            $headers = ['ProductID', 'ProductName', 'CategoryName', 'UnitName', 'StockQuantity','OpeningStock'];
+            $fields = ['id', 'product_name', 'category_name', 'unit_name', 'quantity'];
+
+            // Write headers to the first row
+            $sheet->fromArray($headers, null, 'A1');
+
+            // Make headers bold
+            $headerStyleArray = [
+                'font' => ['bold' => true],
+            ];
+            // Dynamically set style for all header cells
+            $columnRange = 'A1:' . chr(64 + count($headers)) . '1'; // e.g., A1:E1
+            $sheet->getStyle($columnRange)->applyFromArray($headerStyleArray);
+
+            // Set the data rows
+            $rowIndex = 2;
+            foreach ($stockData as $row) {
+                $colIndex = 'A'; // Start from column A
+                foreach ($fields as $field) {
+                    if (is_array($row) && array_key_exists($field, $row)) {
+                        $sheet->setCellValue($colIndex . $rowIndex, $row[$field]);
+                    } elseif (is_object($row) && property_exists($row, $field)) {
+                        $sheet->setCellValue($colIndex . $rowIndex, $row->{$field});
+                    } else {
+                        $sheet->setCellValue($colIndex . $rowIndex, '');
+                    }
+                    $colIndex++;
+                }
+                $rowIndex++;
+            }
+
+            // Auto-size columns
+            foreach (range('A', chr(64 + count($headers))) as $columnID) {
+                $sheet->getColumnDimension($columnID)->setAutoSize(true);
+            }
+
+            // Save the file
+            $directory = storage_path('exports');
+            if (!file_exists($directory)) {
+                mkdir($directory, 0755, true); // Create directory if it doesn't exist
+            }
+            $fileName = 'stock-item-data.xlsx';
+            $tempFilePath = $directory . '/' . $fileName;
+            $writer = new Xlsx($spreadsheet);
+            $writer->save($tempFilePath);
+
+            // Return file path as response
+            return response([
+                'filename' => $fileName,
+                'file_url' => url("storage/exports/{$fileName}"),
+                'result' => true,
+                'status' => 200,
+            ]);
+        } catch (\Exception $e) {
+            // Handle errors gracefully
+            return response([
+                'error' => $e->getMessage(),
+                'result' => false,
+                'status' => 500,
+            ]);
+        }
+    }
+
+
+
+    public function stockItemDownload()
+    {
+        $fileName = 'stock-item-data' . '.xlsx';
+        $filePath = storage_path('exports/'.$fileName);
+        return response()->download($filePath, $fileName)->deleteFileAfterSend(true);
     }
 
 }
