@@ -172,18 +172,18 @@ class FileUploadController extends Controller
         // Remove headers
         $keys = array_map('trim', array_shift($allData));
         // Only proceed if it's 'Product' and structure is correct
-        if ($getFile->file_type === 'Product' && count($keys) === 12) {
+        if ($getFile->file_type === 'Product') {
             $isInsert = $this->insertProductsInBatches($allData, $em);
-        }elseif ($getFile->file_type === 'Production' && count($keys) === 8 ){
+        }elseif ($getFile->file_type === 'Production'){
             $isInsert = $this->insertProductionInBatches($allData, $em);
         } else {
-            if ($getFile->file_type === 'Product'){
+            /*if ($getFile->file_type === 'Product'){
                 $message = 'Invalid file type or structure or column expect 12 , its '.count($keys).' given.';
             }elseif ($getFile->file_type === 'Production'){
                 $message = 'Invalid file type or structure or column expect 8 , its '.count($keys).' given.';
-            }else{
+            }else{*/
                 $message = 'Invalid file type or structure.';
-            }
+//            }
             return response()->json([
                 'message' => $message,
                 'status' => Response::HTTP_INTERNAL_SERVER_ERROR
@@ -239,8 +239,9 @@ class FileUploadController extends Controller
                 ];
 
                 if (trim($values[6]) && !empty(trim($values[6]))){
-                    $wastagePercent = trim($values[6]) ?? null;
-                    $wastageQuantity = ((trim($values[4])*trim($values[6]))/100) ?? null;
+                    $wastagePercent = str_replace("%", "", trim($values[6])) ?? null;
+//                    $wastagePercent = trim($values[6]) ?? null;
+                    $wastageQuantity = ((trim($values[4])*trim($wastagePercent))/100) ?? null;
                     $productionData['wastage_percent'] = $wastagePercent;
                     $productionData['wastage_quantity'] = $wastageQuantity;
                     $productionData['wastage_amount'] = $wastageQuantity*$productionData['price'];

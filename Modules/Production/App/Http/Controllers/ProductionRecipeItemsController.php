@@ -93,13 +93,10 @@ class ProductionRecipeItemsController extends Controller
 
         if (sizeof($getMeasurementInputGenerate) > 0) {
             foreach ($getMeasurementInputGenerate as $value) {
-                $valueAddedExists = ProductionValueAdded::where([['production_item_id', '=', $pro_item_id],['value_added_id', '=', $value['id']]])->first();
-                if (!$valueAddedExists){
-                    ProductionValueAdded::firstOrCreate([
-                        'production_item_id' => $pro_item_id,
-                        'value_added_id' => $value['id'],
-                    ]);
-                }
+                ProductionValueAdded::firstOrCreate([
+                    'production_item_id' => $pro_item_id,
+                    'value_added_id' => $value['id'],
+                ]);
             }
         }
 
