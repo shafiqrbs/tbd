@@ -227,7 +227,7 @@ class FileUploadController extends Controller
                 $productionData = [
                     'item_id' => $stockItem->id,
                     'material_id' => $materialItem->id,
-                    'quantity' => trim($values[4]),
+                    'quantity' => sprintf('%f', (float) trim($values[4])),
                     'price' => $materialItem->purchase_price ?? 0,
                     'purchase_price' => $materialItem->purchase_price ?? 0,
                     'sub_total' => $materialItem->purchase_price*trim($values[4]),
@@ -239,7 +239,7 @@ class FileUploadController extends Controller
                 ];
 
                 if (trim($values[6]) && !empty(trim($values[6]))){
-                    $wastagePercent = str_replace("%", "", trim($values[6])) ?? null;
+                    $wastagePercent = str_replace("%", "", sprintf('%f', (float) trim($values[6]))) ?? null;
 //                    $wastagePercent = trim($values[6]) ?? null;
                     $wastageQuantity = ((trim($values[4])*trim($wastagePercent))/100) ?? null;
                     $productionData['wastage_percent'] = $wastagePercent;
