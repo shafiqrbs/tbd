@@ -376,7 +376,7 @@ class FileUploadController extends Controller
                 'created_by_id' => $this->domain['user_id'],
                 'approved_by_id' => $this->domain['user_id'],
                 'stock_item_id' => $findStockItem->id,
-                'quantity' => $openingStock,
+                'opening_quantity' => $openingStock,
                 'mode' => 'opening',
                 'sales_price' => $findStockItem->sales_price,
                 'purchase_price' => $findStockItem->purchase_price,
@@ -408,7 +408,7 @@ class FileUploadController extends Controller
         // Bulk insert
         PurchaseItemModel::insert($batch);
 
-        // Get inserted records for further processing
+        // Get inserted records for furthequantityr processing
         $insertedRecords = PurchaseItemModel::latest('id')->take(count($batch))->get();
         foreach ($insertedRecords as $purchase) {
             StockItemHistoryModel::openingStockQuantity($purchase, 'opening', $this->domain);
