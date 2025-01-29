@@ -59,6 +59,9 @@ Route::prefix('/production')->middleware([HeaderAuthenticationMiddleware::class]
         ]);
     ;
 
+    Route::get('generate/finish-goods/xlsx', [ProductionRecipeItemsController::class,'finishGoodsXlsxGenerate'])->name('get_finish_goods_xlsx_generate');
+
+
     Route::apiResource('recipe', ProductionRecipeController::class)
         ->middleware([HeaderAuthenticationMiddleware::class])
         ->names([
@@ -92,3 +95,5 @@ Route::prefix('/production')->middleware([HeaderAuthenticationMiddleware::class]
     });
 
 });
+
+Route::get('finish-goods/download', [ProductionRecipeItemsController::class,'finishGoodsDownload'])->name('finish_goods_download');

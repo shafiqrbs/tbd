@@ -491,8 +491,6 @@ class StockItemController extends Controller
         }
     }
 
-
-
     public function stockItemDownload()
     {
         $fileName = 'stock-item-data' . '.xlsx';

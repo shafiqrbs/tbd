@@ -85,6 +85,46 @@ class ProductionItems extends Model
         return $this->belongsTo(SettingTypeModel::class);
     }
 
+
+    public static function getFinishGoodsDownload($domain)
+    {
+        $data = self::where([
+            ['pro_item.status', '=', 1],
+            ['pro_item.is_delete', '=', 0],
+            ['pro_config.domain_id', '=', $domain['global_id']],
+        ])
+            ->where('inv_setting.is_production', '=', 1)
+            ->join('inv_stock','inv_stock.id','=','pro_item.item_id')
+            ->join('pro_config','pro_config.id','=','pro_item.config_id')
+            ->join('inv_product','inv_product.id','=','inv_stock.product_id')
+            ->join('inv_category','inv_category.id','=','inv_product.category_id')
+            ->join('inv_setting','inv_setting.id','=','inv_product.product_type_id')
+            ->select([
+                'pro_item.id',
+                'inv_stock.name as product_name',
+                'inv_stock.uom as unit_name',
+                'pro_item.waste_amount',
+                DB::raw('DATE_FORMAT(pro_item.license_date, "%d-%M-%Y") as license_date'),
+                DB::raw('DATE_FORMAT(pro_item.initiate_date, "%d-%M-%Y") as initiate_date'),
+                'pro_item.quantity',
+                'pro_item.waste_percent',
+                'pro_item.waste_amount',
+                'pro_item.material_amount',
+                'pro_item.material_quantity',
+                'pro_item.value_added_amount',
+                'pro_item.sub_total',
+                'pro_item.reminig_quantity',
+                'inv_setting.slug as product_type_slug',
+                'inv_category.name as category_name',
+                'pro_item.status',
+                'pro_item.process',
+            ])
+            ->orderBy('pro_item.id','DESC')
+            ->get()->toArray();
+
+        return $data;
+    }
+
     public static function getRecords($request,$domain){
 
         $page =  isset($request['page']) && $request['page'] > 0?($request['page'] - 1 ) : 0;

@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Str;
 use Modules\Accounting\App\Models\AccountHeadModel;
@@ -29,7 +30,9 @@ use Modules\Inventory\App\Models\SettingModel as InventorySettingModel;
 use Modules\Inventory\App\Models\StockItemHistoryModel;
 use Modules\Inventory\App\Models\StockItemModel;
 use Modules\Production\App\Models\ProductionBatchItemModel;
+use Modules\Production\App\Models\ProductionBatchModel;
 use Modules\Production\App\Models\ProductionElements;
+use Modules\Production\App\Models\ProductionExpense;
 use Modules\Production\App\Models\ProductionItems;
 use Modules\Production\App\Models\ProductionValueAdded;
 use Modules\Production\App\Models\SettingModel;
@@ -40,14 +43,16 @@ use PhpOffice\PhpSpreadsheet\Reader\Xlsx;
 class FileUploadController extends Controller
 {
     protected $domain;
+    protected $pattarnCodeService;
 
-    public function __construct(Request $request)
+    public function __construct(Request $request,GeneratePatternCodeService $patternCodeService)
     {
         $userId = $request->header('X-Api-User');
         if ($userId && !empty($userId)){
             $userData = UserModel::getUserData($userId);
             $this->domain = $userData;
         }
+        $this->pattarnCodeService = $patternCodeService;
     }
     public function index(Request $request){
 
@@ -171,6 +176,23 @@ class FileUploadController extends Controller
 
         $allData = $reader->load($filePath)->getActiveSheet()->toArray();
 
+        // for process data with header
+        $spreadsheet = $reader->load($filePath);
+        $data = $spreadsheet->getActiveSheet()->toArray(null, true, true, true);
+
+        // Use the first row as headers
+        $headers = array_shift($data);
+
+        // Map rows to headers
+        $dataWithHeaders = [];
+        foreach ($data as $row) {
+            $mappedRow = [];
+            foreach ($headers as $column => $headerName) {
+                $mappedRow[$headerName] = $row[$column] ?? null; // Use header name as key
+            }
+            $dataWithHeaders[] = $mappedRow;
+        }
+
         // Remove headers
         $keys = array_map('trim', array_shift($allData));
         // Only proceed if it's 'Product' and structure is correct
@@ -179,23 +201,9 @@ class FileUploadController extends Controller
         }elseif ($getFile->file_type === 'Production'){
             $isInsert = $this->insertProductionInBatches($allData, $em);
         }elseif ($getFile->file_type === 'Opening-Stock'){
-            $spreadsheet = $reader->load($filePath);
-            $data = $spreadsheet->getActiveSheet()->toArray(null, true, true, true);
-
-            // Use the first row as headers
-            $headers = array_shift($data);
-
-            // Map rows to headers
-            $dataWithHeaders = [];
-            foreach ($data as $row) {
-                $mappedRow = [];
-                foreach ($headers as $column => $headerName) {
-                    $mappedRow[$headerName] = $row[$column] ?? null; // Use header name as key
-                }
-                $dataWithHeaders[] = $mappedRow;
-            }
-
             $isInsert = $this->insertOpeningStock($dataWithHeaders);
+        }elseif ($getFile->file_type === 'Finish-Goods'){
+            $isInsert = $this->insertFinishGoodsBatchStock($dataWithHeaders);
         } else {
             /*if ($getFile->file_type === 'Product'){
                 $message = 'Invalid file type or structure or column expect 12 , its '.count($keys).' given.';
@@ -221,8 +229,127 @@ class FileUploadController extends Controller
         }
     }
 
-    // for opening stock process for upload
+    // process finish goods product
+    private function insertFinishGoodsBatchStock($inputData)
+    {
+        $batchSize = 1000;
+        $batch = [];
+        $rowsProcessed = 0;
 
+        // Fetch all production items in one query
+        $productionItemIds = array_column($inputData, 'ProductionItemId');
+        $productionsItems = ProductionItems::whereIn('id', $productionItemIds)->get()->keyBy('id');
+
+        foreach ($inputData as $data) {
+            $trimmedData = array_map(fn($item) => is_string($item) ? trim($item) : $item, $data);
+            $productionItemId = $trimmedData['ProductionItemId'] ?? null;
+            $issueQuantity = $trimmedData['IssueQuantity'] ?? 0;
+
+            // Skip invalid entries
+            if (!$productionItemId || !isset($productionsItems[$productionItemId])) {
+                continue;
+            }
+
+            // Add to batch
+            $batch[] = [
+                'config_id' => $this->domain['pro_config'],
+                'process' => 'Created',
+                'mode' => 'in-house',
+                'created_by_id' => $this->domain['user_id'],
+                'issue_quantity' => $issueQuantity,
+                'production_item_id' => $productionItemId,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ];
+
+            // Batch insert when batch size is reached
+            if (count($batch) >= $batchSize) {
+                $rowsProcessed += $this->processFinishGoodsBatch($batch);
+                $batch = [];
+            }
+        }
+
+        // Process remaining items
+        if (count($batch) > 0) {
+            $rowsProcessed += $this->processFinishGoodsBatch($batch);
+        }
+
+        return ['is_insert' => true, 'row_count' => $rowsProcessed];
+    }
+
+    private function processFinishGoodsBatch(array $batch)
+    {
+        if (empty($batch)) {
+            return 0;
+        }
+
+        DB::beginTransaction();
+        try {
+            // Generate batch code and invoice
+            $pattern = $this->pattarnCodeService->productBatch([
+                'config' => $this->domain['pro_config'],
+                'table' => 'pro_batch',
+                'prefix' => 'PB-',
+            ]);
+
+            $batchData = [
+                'code' => $pattern['code'],
+                'invoice' => $pattern['generateId'],
+                'config_id' => $this->domain['pro_config'],
+                'process' => 'Created',
+                'mode' => 'in-house',
+                'created_by_id' => $this->domain['user_id'],
+            ];
+
+            $newBatch = ProductionBatchModel::create($batchData);
+
+            // Fetch all production elements in one query
+            $productionItemIds = array_column($batch, 'production_item_id');
+            $recipeItems = ProductionElements::join('inv_stock', 'inv_stock.id', '=', 'pro_element.material_id')
+                ->select('pro_element.*', 'inv_stock.name', 'inv_stock.purchase_price as item_purchase_price', 'inv_stock.sales_price as item_sale_price')
+                ->whereIn('pro_element.production_item_id', $productionItemIds)
+                ->get()
+                ->groupBy('production_item_id');
+
+            foreach ($batch as $item) {
+                $input = [
+                    'batch_id' => $newBatch->id,
+                    'config_id' => $this->domain['pro_config'],
+                    'issue_quantity' => $item['issue_quantity'],
+                    'production_item_id' => $item['production_item_id'],
+                ];
+
+                $productionBatchItem = ProductionBatchItemModel::create($input);
+
+                // Process production elements
+                if (isset($recipeItems[$item['production_item_id']])) {
+                    $productionExpenses = [];
+                    foreach ($recipeItems[$item['production_item_id']] as $element) {
+                        $productionExpenses[] = [
+                            'config_id' => $this->domain['pro_config'],
+                            'production_item_id' => $item['production_item_id'],
+                            'production_batch_item_id' => $productionBatchItem->id,
+                            'production_element_id' => $element->id,
+                            'purchase_price' => $element->item_purchase_price,
+                            'sales_price' => $element->item_sale_price,
+                            'quantity' => $item['issue_quantity'] * $element->quantity,
+                            'created_at' => now(),
+                        ];
+                    }
+                    ProductionExpense::insert($productionExpenses); // Batch insert
+                }
+            }
+
+            DB::commit();
+            return count($batch);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Error processing batch: ' . $e->getMessage());
+            return 0;
+        }
+    }
+
+    // for opening stock process for upload
     private function insertOpeningStock($allData)
     {
         $batchSize = 1000;
