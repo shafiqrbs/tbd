@@ -289,66 +289,6 @@ class FileUploadController extends Controller
         return count($batch);
     }
 
-    /*private function insertOpeningStock($allData)
-    {
-        $batchSize = 1000;
-        $batch = [];
-        $rowsProcessed = 0;
-
-        foreach ($allData as $index => $data) {
-            $values = array_map('trim', $data);
-
-            $findStockItem = StockItemModel::where('product_id', $values['ProductID'])->first();
-            if ($findStockItem) {
-                $input['config_id'] = $this->domain['config_id'];
-                $input['created_by_id'] = $this->domain['user_id'];
-                $input['approved_by_id'] = $this->domain['user_id'];
-                $input['stock_item_id'] = $findStockItem->id;
-                $input['quantity'] = $values['OpeningStock'];
-                $input['mode'] = 'opening';
-                $input['sales_price'] = $findStockItem->sales_price;
-                $input['purchase_price'] = $findStockItem->purchase_price;
-                $input['sub_total'] = $values['OpeningStock']*$findStockItem->purchase_price;
-
-                $batch[] = $input;
-            }
-
-
-
-            // Batch insert when batch size reached
-                if (count($batch) === $batchSize) {
-                    $rowsProcessed += $this->processOpeningStockBatch($batch);
-                    $batch = [];
-                }
-//            }
-        }
-
-        // Process any remaining items
-        if (count($batch) > 0) {
-            $rowsProcessed += $this->processOpeningStockBatch($batch);
-        }
-
-        return ['is_insert' => true, 'row_count' => $rowsProcessed];
-    }
-
-    private function processOpeningStockBatch(array $batch)
-    {
-        $rowCount = 0;
-
-        foreach ($batch as $item) {
-
-                $purchase = PurchaseItemModel::create($item);
-
-            // Call the opening stock quantity method
-                StockItemHistoryModel::openingStockQuantity($purchase, 'opening',$this->domain);
-
-            $rowCount++;
-        }
-
-        return $rowCount;
-    }*/
-
-
 
     // for production batch process for upload
     private function insertProductionInBatches($allData, EntityManagerInterface $em)
