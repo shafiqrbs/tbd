@@ -19,6 +19,8 @@ use Modules\AppsApi\App\Services\GeneratePatternCodeService;
 use Modules\AppsApi\App\Services\JsonRequestResponse;
 use Modules\Core\App\Entities\Customer;
 use Modules\Core\App\Models\CustomerModel;
+use Modules\Core\App\Models\SettingModel;
+use Modules\Core\App\Models\SettingTypeModel;
 use Modules\Core\App\Models\VendorModel;
 use Modules\Domain\App\Entities\DomainChild;
 use Modules\Domain\App\Entities\GlobalOption;
@@ -140,6 +142,8 @@ class BranchController extends Controller
                 fn() => $this->prepareCustomerData($childDomain, $patternCodeService)
             );
 
+//            dump($customer);
+
             if ($customer) {
                 $this->ensureCustomerLedger($customer);
             }
@@ -163,6 +167,7 @@ class BranchController extends Controller
             $customer = CustomerModel::where('domain_id', $this->domain['global_id'])
                 ->where('sub_domain_id', $input['child_domain_id'])
                 ->first();
+
             if ($customer){
                 // Fetch configuration by sub_domain_id
                 $childAccConfig = ConfigModel::where('domain_id', $customer->sub_domain_id)
@@ -243,6 +248,8 @@ class BranchController extends Controller
     private function prepareCustomerData($childDomain, $patternCodeService): array
     {
         $code = $this->generateCustomerCode($patternCodeService);
+        $getCoreSettingTypeId = SettingTypeModel::where('slug','customer-group')->first();
+        $getCustomerGroupId = SettingModel::where('setting_type_id',$getCoreSettingTypeId->id)->first();
 
         return [
             'domain_id' => $this->domain['global_id'],
@@ -253,7 +260,7 @@ class BranchController extends Controller
             'email' => $childDomain->email,
             'status' => true,
             'address' => $childDomain->address,
-            'customer_group_id' => 1, // Default group
+            'customer_group_id' => $getCustomerGroupId ?? null, // Default group
             'slug' => Str::slug($childDomain->name),
             'sub_domain_id' => $childDomain->id,
             'customerId' => $code['generateId'], // Generated ID from the pattern code
