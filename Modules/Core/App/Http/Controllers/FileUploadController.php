@@ -377,6 +377,7 @@ class FileUploadController extends Controller
                 'approved_by_id' => $this->domain['user_id'],
                 'stock_item_id' => $findStockItem->id,
                 'opening_quantity' => $openingStock,
+                'quantity' => $openingStock,
                 'mode' => 'opening',
                 'sales_price' => $findStockItem->sales_price,
                 'purchase_price' => $findStockItem->purchase_price,
