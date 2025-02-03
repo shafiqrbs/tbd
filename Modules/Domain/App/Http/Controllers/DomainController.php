@@ -93,14 +93,13 @@ class DomainController extends Controller
             ]);
 
             // Step 3: Create the inventory configuration (config)
-            $business = UtilitySettingModel::whereSlug('general')->first();
             $currency = CurrencyModel::find(1);
 
             $config =  ConfigModel::create([
                 'domain_id' => $entity->id,
                 'currency_id' => $currency->id,
                 'zero_stock' => true,
-                'business_model_id' => $business->id,
+                'business_model_id' => $entity->business_model_id,
             ]);
 
             // Step 4: Create the accounting data

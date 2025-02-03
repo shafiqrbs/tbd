@@ -29,20 +29,21 @@ class ProductionBatchItem
      **/
     private  $config;
 
-
     /**
-     * @ORM\ManyToOne(targetEntity="ProductionItem", inversedBy="productionBatchItems" )
+     * @ORM\ManyToOne(targetEntity="ProductionItem")
+     * @ORM\JoinColumn(onDelete="CASCADE")
      **/
     private  $productionItem;
 
-
     /**
      * @ORM\ManyToOne(targetEntity="ProductionWorkOrderItem", inversedBy="productionWorkOrderItems" )
+     * @ORM\JoinColumn(onDelete="CASCADE")
      **/
     private  $workorderItem;
 
     /**
      * @ORM\OneToMany(targetEntity="ProductionReceiveBatchItem", mappedBy="batchItem" )
+     * @ORM\JoinColumn(onDelete="CASCADE")
      **/
     private  $receiveItems;
 
@@ -51,14 +52,9 @@ class ProductionBatchItem
      **/
     private  $salesItems;
 
-    /**
-     * @ORM\OneToMany(targetEntity="ProductionExpense", mappedBy="productionBatchItem" )
-     **/
-    private  $productionExpenses;
-
 
     /**
-     * @ORM\ManyToOne(targetEntity="ProductionBatch", inversedBy="batchItems")
+     * @ORM\ManyToOne(targetEntity="ProductionBatch")
      * @ORM\JoinColumn(onDelete="CASCADE")
      **/
     private  $batch;
