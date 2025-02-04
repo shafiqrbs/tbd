@@ -374,7 +374,7 @@ class FileUploadController extends Controller
             $batch[] = [
                 'config_id' => $this->domain['config_id'],
                 'created_by_id' => $this->domain['user_id'],
-                'approved_by_id' => $this->domain['user_id'],
+                'approved_by_id' => $findStockItem->purchase_price?$this->domain['user_id']:null,
                 'stock_item_id' => $findStockItem->id,
                 'opening_quantity' => $openingStock,
                 'quantity' => $openingStock,
