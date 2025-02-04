@@ -244,18 +244,14 @@ class BranchController extends Controller
 
     private function prepareCustomerData($childDomain, $patternCodeService): array
     {
-
-
         $code = $this->generateCustomerCode($patternCodeService);
         $getCoreSettingTypeId = SettingTypeModel::where('slug','customer-group')->first();
 
-
-
         $getCustomerGroupId = SettingModel::where('setting_type_id', $getCoreSettingTypeId->id)
-            ->where('Name', 'domain')->where('domain_id', $this->domain['global_id'])->first();
-        dd($getCustomerGroupId);
+            ->where('name', 'Domain')->where('domain_id', $this->domain['global_id'])->first();
+
         if(empty($getCustomerGroupId)){
-            $id = DB::table('cor_setting')->insert([
+            $getCustomerGroupId = SettingModel::create([
                 'domain_id' => $this->domain['global_id'],
                 'name' => 'Domain',
                 'setting_type_id' => $getCoreSettingTypeId->id, // Ensure this variable has a value
@@ -266,7 +262,6 @@ class BranchController extends Controller
             ]);
         }
 
-        exit;
         return [
             'domain_id' => $this->domain['global_id'],
             'customer_unique_id' => "{$this->domain['global_id']}@{$childDomain->mobile}-{$childDomain->name}",
@@ -276,7 +271,7 @@ class BranchController extends Controller
             'email' => $childDomain->email,
             'status' => true,
             'address' => $childDomain->address,
-            'customer_group_id' => $getCustomerGroupId ?? null, // Default group
+            'customer_group_id' => $getCustomerGroupId->id ?? null, // Default group
             'slug' => Str::slug($childDomain->name),
             'sub_domain_id' => $childDomain->id,
             'customerId' => $code['generateId'], // Generated ID from the pattern code
