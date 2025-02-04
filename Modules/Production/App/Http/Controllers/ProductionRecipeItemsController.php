@@ -56,7 +56,9 @@ class ProductionRecipeItemsController extends Controller
         $entities = $em->getRepository(StockItem::class)->getProductionItems($inv_config);
         $response = new Response();
         foreach ($entities as $entity) {
+            if ($pro_config && $entity['id']){
             $em->getRepository(ProductionItem::class)->insertUpdate($pro_config, $entity['id']);
+            }
         }
         $response->setContent(json_encode([
             'message' => 'success',
