@@ -121,9 +121,8 @@ class BranchController extends Controller
      */
 
     public function store(BranchRequest $request, GeneratePatternCodeService $patternCodeService, JsonRequestResponse $service) {
-        // Validate input
-        $input = $request->validated();
 
+        $input = $request->validated();
         DB::beginTransaction();
 
         try {
@@ -141,8 +140,6 @@ class BranchController extends Controller
                 $input['checked'],
                 fn() => $this->prepareCustomerData($childDomain, $patternCodeService)
             );
-
-//            dump($customer);
 
             if ($customer) {
                 $this->ensureCustomerLedger($customer);
@@ -247,10 +244,29 @@ class BranchController extends Controller
 
     private function prepareCustomerData($childDomain, $patternCodeService): array
     {
+
+
         $code = $this->generateCustomerCode($patternCodeService);
         $getCoreSettingTypeId = SettingTypeModel::where('slug','customer-group')->first();
-        $getCustomerGroupId = SettingModel::where('setting_type_id',$getCoreSettingTypeId->id)->first();
 
+
+
+        $getCustomerGroupId = SettingModel::where('setting_type_id', $getCoreSettingTypeId->id)
+            ->where('Name', 'domain')->where('domain_id', $this->domain['global_id'])->first();
+        dd($getCustomerGroupId);
+        if(empty($getCustomerGroupId)){
+            $id = DB::table('cor_setting')->insert([
+                'domain_id' => $this->domain['global_id'],
+                'name' => 'Domain',
+                'setting_type_id' => $getCoreSettingTypeId->id, // Ensure this variable has a value
+                'slug' => 'domain',
+                'status' => 1,
+                'created_at' => now(),  // Add the current timestamp
+                'updated_at' => now()   // If you also have `updated_at`
+            ]);
+        }
+
+        exit;
         return [
             'domain_id' => $this->domain['global_id'],
             'customer_unique_id' => "{$this->domain['global_id']}@{$childDomain->mobile}-{$childDomain->name}",
