@@ -36,9 +36,9 @@ class CustomerRequest extends FormRequest
                     'location_id' => 'integer|nullable',
                     'marketing_id' => 'integer|nullable',
                     'customer_group_id' => 'integer|nullable',
-                    'credit_limit' => 'string|nullable',
+                    'credit_limit' => 'nullable',
                     'reference_id' => 'integer|nullable',
-                    'alternative_mobile' => 'string|nullable',
+                    'alternative_mobile' => 'nullable',
                     'address' => 'string|nullable',
                     'email' => 'email|nullable',
                 ];
@@ -56,9 +56,9 @@ class CustomerRequest extends FormRequest
                     'location_id' => 'integer|nullable',
                     'marketing_id' => 'integer|nullable',
                     'customer_group_id' => 'integer|nullable',
-                    'credit_limit' => 'string|nullable',
+                    'credit_limit' => 'nullable',
                     'reference_id' => 'integer|nullable',
-                    'alternative_mobile' => 'string|nullable',
+                    'alternative_mobile' => 'nullable',
                     'address' => 'string|nullable',
                     'email' => 'email|nullable'
                 ];
