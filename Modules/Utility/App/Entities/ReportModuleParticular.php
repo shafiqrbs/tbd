@@ -8,10 +8,10 @@ use Doctrine\ORM\Mapping as ORM;
 /**
  * Theme
  *
- * @ORM\Table(name="uti_report_module")
+ * @ORM\Table(name="uti_report_module_particular")
  * @ORM\Entity()
  */
-class ReportModule
+class ReportModuleParticular
 {
     /**
      * @var integer
@@ -24,16 +24,48 @@ class ReportModule
 
 
     /**
-     * @ORM\ManyToOne(targetEntity="Modules\Utility\App\Entities\Setting")
+     * @ORM\ManyToOne(targetEntity="ReportModule")
      **/
-    private $module;
+    private $report;
+
 
     /**
      * @var string
      *
-     * @ORM\Column(name="report_name",type="string", length=255)
+     * @ORM\Column(name="label_name",type="string", length=255)
      */
-    private $report_name;
+    private $labelName;
+
+
+     /**
+     * @var string
+     *
+     * @ORM\Column(name="field_name",type="string", length=255)
+     */
+    private $fieldName;
+
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="field_type",type="string", length=255)
+     */
+    private $fieldType;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="data_source_name",type="string", length=255)
+     */
+    private $dataSourceName;
+
+
+    /**
+     * @var boolean
+     *
+     * @ORM\Column(name="is_required",type="boolean")
+     */
+    private $isRequired = false;
 
 
     /**
