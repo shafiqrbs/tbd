@@ -172,6 +172,7 @@ class StockItemModel extends Model
             ->leftjoin('inv_category','inv_category.id','=','inv_product.category_id')
             ->leftjoin('inv_particular','inv_particular.id','=','inv_product.unit_id')
             ->leftjoin('inv_setting','inv_setting.id','=','inv_product.product_type_id')
+            ->leftjoin('inv_product_gallery','inv_product_gallery.product_id','=','inv_product.id')
             ->select([
                 'inv_stock.id',
                 \DB::raw("CONCAT(inv_stock.name,'[',IFNULL(inv_stock.remaining_quantity, 0),'] ', IFNULL(inv_particular.name,'')) AS product_name"),
@@ -186,6 +187,7 @@ class StockItemModel extends Model
                 'inv_stock.sales_price',
                 'inv_stock.barcode',
                 'inv_particular.name as unit_name',
+                'inv_product_gallery.feature_image',
             ]);
         $products = $products->orderBy('inv_product.id','DESC')->get();
 

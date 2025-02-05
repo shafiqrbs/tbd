@@ -90,6 +90,4 @@ class ReportModuleParticular
      */
     private $updatedAt;
 
-
-
 }
