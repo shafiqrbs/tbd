@@ -80,6 +80,7 @@ Route::prefix('/inventory')->middleware([HeaderAuthenticationMiddleware::class])
 
     Route::apiResource('/sales', SalesController::class)->middleware([HeaderAuthenticationMiddleware::class]);
     Route::get('/sales/edit/{id}', [SalesController::class,'edit'])->name('get_edit_sales');
+    Route::get('/sales/domain-customer/{id}', [SalesController::class,'domainCustomerSales'])->name('get_domain_customer_sales');
     Route::apiResource('/invoice-batch', InvoiceBatchController::class)->middleware([HeaderAuthenticationMiddleware::class]);
     Route::apiResource('/invoice-batch-transaction', InvoiceBatchTransactionControllerAlias::class)->middleware([HeaderAuthenticationMiddleware::class]);
 

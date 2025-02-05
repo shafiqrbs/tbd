@@ -9,14 +9,21 @@ use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Session;
+use Modules\Accounting\App\Entities\Config;
+use Modules\Accounting\App\Models\TransactionModeModel;
 use Modules\AppsApi\App\Services\JsonRequestResponse;
 use Modules\Core\App\Models\UserModel;
+use Modules\Core\App\Models\VendorModel;
 use Modules\Inventory\App\Entities\SalesItem;
 use Modules\Inventory\App\Http\Requests\ProductRequest;
 use Modules\Inventory\App\Http\Requests\SalesRequest;
+use Modules\Inventory\App\Models\ProductModel;
+use Modules\Inventory\App\Models\PurchaseItemModel;
+use Modules\Inventory\App\Models\PurchaseModel;
 use Modules\Inventory\App\Models\SalesItemModel;
 use Modules\Inventory\App\Models\SalesModel;
 use Modules\Inventory\App\Models\StockItemHistoryModel;
+use Modules\Inventory\App\Models\StockItemModel;
 use function Symfony\Component\HttpFoundation\Session\Storage\Handler\getInsertStatement;
 
 class SalesController extends Controller
@@ -153,6 +160,75 @@ class SalesController extends Controller
         }
 
         return $response;
+    }
+
+    /**
+     * Update the specified resource in storage.
+     */
+    public function domainCustomerSales($id)
+    {
+        DB::beginTransaction();
+        try {
+            $getSales = SalesModel::findOrFail($id);
+            $getSalesItems = $getSales->salesItems;
+
+            // get customer domain
+            $customerDomain = $getSales->customerDomain;
+            if ($customerDomain){
+                // parent domain data
+                $getVendor = VendorModel::where('customer_id', $customerDomain->id)->first();
+                $getTransactionModeSlug = TransactionModeModel::find($getSales->transaction_mode_id)->slug;
+
+                // child domain data
+                $getAccountConfigId = DB::table('acc_config')->where('domain_id', $customerDomain->sub_domain_id)->first()->id;
+                $getInventoryConfigId = DB::table('inv_config')->where('domain_id', $customerDomain->sub_domain_id)->first()->id;
+                $getTransactionMode = TransactionModeModel::where('slug', $getTransactionModeSlug)->where('config_id',$getAccountConfigId)->first()->id;
+
+                $purchase = PurchaseModel::create([
+                    'config_id' => $getInventoryConfigId,
+                    'created_by_id' => $this->domain['user_id'],
+                    'vendor_id' => $getVendor->id ?? null,
+                    'transaction_mode_id' => $getTransactionMode ?? null,
+                ]);
+
+                if ($purchase){
+                    if (sizeof($getSalesItems)>0){
+                        $totalPrice = 0;
+                        foreach ($getSalesItems as $item) {
+                            $getStockItemId = StockItemModel::where('name', $item['name'])->where('config_id',$getInventoryConfigId)->first()->id;
+                            $purchasePrice = $item['sales_price']-($item['sales_price']*$customerDomain->discount_percent)/100;
+                            $subtotal = $item['quantity']*$purchasePrice;
+                            $totalPrice += $subtotal;
+                            $record['purchase_id'] = $purchase->id;
+                            $record['created_by_id'] = $this->domain['user_id'];
+                            $record['config_id'] = $getInventoryConfigId;
+                            $record['created_at'] = now();
+                            $record['quantity'] = $item['quantity'];
+                            $record['purchase_price'] = $purchasePrice;
+                            $record['sub_total'] = $subtotal;
+                            $record['mode'] = 'purchase';
+                            $record['updated_at'] = now();
+                            $record['stock_item_id'] = $getStockItemId;
+                        }
+                        PurchaseItemModel::insert($record);
+
+                        $purchase->update([
+                            'sub_total' => $totalPrice,
+                            'total'=>$totalPrice,
+                            'payment'=>$getSales->payment,
+                            'due'=>$totalPrice-$getSales->payment,
+                            'discount_type' => $getSales->discount_type,
+                        ]);
+                    }
+                }
+            }
+            DB::commit();
+            return response()->json(['status' => 200, 'success' => true]);
+
+            } catch (\Exception $e) {
+                DB::rollback();
+                return response()->json(['status' => 500, 'success' => false, 'error' => $e->getMessage()]);
+            }
     }
 
     /**

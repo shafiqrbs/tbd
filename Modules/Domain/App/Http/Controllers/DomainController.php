@@ -99,6 +99,10 @@ class DomainController extends Controller
                 'domain_id' => $entity->id,
                 'currency_id' => $currency->id,
                 'zero_stock' => true,
+                'is_sku' => true,
+                'is_measurement' => true,
+                'is_product_gallery' => true,
+                'is_multi_price' => true,
                 'business_model_id' => $entity->business_model_id,
             ]);
 
@@ -155,6 +159,7 @@ class DomainController extends Controller
                     'name' => 'Cash',
                     'short_name' => 'Cash',
                     'slug' => 'cash',
+                    'is_selected' => true,
                     'path' => null,
                     'account_type' => 'Current',
                     'method_id' => 20,

@@ -153,7 +153,7 @@ class BranchController extends Controller
                     'domain_id' => $input['child_domain_id']
                 ],
                 $input['checked'],
-                fn() => $this->prepareVendorData($childDomain, $parentDomain, $patternCodeService)
+                fn() => $this->prepareVendorData($childDomain, $parentDomain, $patternCodeService,$customer)
             );
 
             if ($vendor) {
@@ -292,7 +292,7 @@ class BranchController extends Controller
     }
 
 
-    private function prepareVendorData($childDomain, $parentDomain, $patternCodeService): array
+    private function prepareVendorData($childDomain, $parentDomain, $patternCodeService,$customer): array
     {
         $params = [
             'domain' => $this->domain['global_id'],
@@ -313,6 +313,7 @@ class BranchController extends Controller
             'slug' => Str::slug($childDomain->name),
             'code' => $pattern['code'],
             'vendor_code' => $pattern['generateId'],
+            'customer_id' => $customer->id,
         ];
     }
 

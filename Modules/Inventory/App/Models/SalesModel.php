@@ -6,6 +6,7 @@ use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Support\Facades\DB;
+use Modules\Core\App\Models\CustomerModel;
 use Ramsey\Collection\Collection;
 
 class SalesModel extends Model
@@ -44,6 +45,10 @@ class SalesModel extends Model
         return $this->hasMany(SalesItemModel::class, 'sale_id');
     }
 
+    public function customerDomain(){
+        return $this->belongsTo(CustomerModel::class , 'customer_id');
+    }
+
     public function insertSalesItems($sales,$items)
     {
         $timestamp = Carbon::now();
@@ -66,6 +71,7 @@ class SalesModel extends Model
             ->leftjoin('users as salesBy','salesBy.id','=','inv_sales.sales_by_id')
             ->leftjoin('acc_transaction_mode','acc_transaction_mode.id','=','inv_sales.transaction_mode_id')
             ->leftjoin('cor_customers','cor_customers.id','=','inv_sales.customer_id')
+            ->leftjoin('cor_setting','cor_setting.id','=','cor_customers.customer_group_id')
             ->select([
                 'inv_sales.id',
                 DB::raw('DATE_FORMAT(inv_sales.created_at, "%d-%m-%Y") as created'),
@@ -89,6 +95,7 @@ class SalesModel extends Model
                 'inv_sales.process as process',
                 'acc_transaction_mode.name as mode_name',
                 'cor_customers.address as customer_address',
+                'cor_setting.slug as customer_group',
                 'cor_customers.balance as balance',
             ])->with('salesItems');
 
