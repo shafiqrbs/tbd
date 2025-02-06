@@ -412,7 +412,7 @@ class FileUploadController extends Controller
         // Get inserted records for furthequantityr processing
         $insertedRecords = PurchaseItemModel::latest('id')->take(count($batch))->get();
         foreach ($insertedRecords as $purchase) {
-            if ($purchase->purchase_price) {
+            if ($purchase->purchase_price && $purchase->quantity) {
                 StockItemHistoryModel::openingStockQuantity($purchase, 'opening', $this->domain);
             }
         }
