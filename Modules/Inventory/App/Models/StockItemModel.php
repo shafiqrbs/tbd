@@ -42,6 +42,7 @@ class StockItemModel extends Model
         'item_size',
         'bangla_name',
         'average_price',
+        'parent_stock_item',
     ];
 
     public static function boot() {

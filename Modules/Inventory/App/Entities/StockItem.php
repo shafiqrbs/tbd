@@ -425,6 +425,11 @@ class StockItem
      */
     private $averagePrice=0;
 
+    /**
+     * @ORM\ManyToOne(targetEntity="Modules\Inventory\App\Entities\StockItem")
+     * @ORM\Column( nullable=true)
+     **/
+    private  $parentStockItem;
 
 
     /**
@@ -1398,6 +1403,22 @@ class StockItem
     public function setAveragePrice(float|int $averagePrice): void
     {
         $this->averagePrice = $averagePrice;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getParentStockItem()
+    {
+        return $this->parentStockItem;
+    }
+
+    /**
+     * @param mixed $parentStockItem
+     */
+    public function setParentStockItem($parentStockItem): void
+    {
+        $this->parentStockItem = $parentStockItem;
     }
 
 

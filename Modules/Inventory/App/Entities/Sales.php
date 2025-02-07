@@ -312,6 +312,13 @@ class Sales
      */
     private $updatedAt;
 
+    /**
+     * @var boolean
+     *
+     * @ORM\Column(type="boolean", nullable=true)
+     */
+    private $isDomainSalesCompleted = false;
+
 
 }
 

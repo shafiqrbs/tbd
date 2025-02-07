@@ -37,6 +37,7 @@ use Modules\Inventory\App\Entities\Setting;
 use Modules\Inventory\App\Entities\StockItem;
 use Modules\Inventory\App\Models\CategoryModel;
 use Modules\Inventory\App\Models\ConfigModel;
+use Modules\Inventory\App\Models\ParticularModel;
 use Modules\Inventory\App\Models\ProductModel;
 use Modules\Inventory\App\Models\StockItemModel;
 use Modules\Utility\App\Models\SettingModel as UtilitySettingModel;
@@ -514,15 +515,68 @@ class BranchController extends Controller
             'unit_id' => $parentProduct->unit_id,
             'product_type_id' => $parentProduct->product_type_id,
             'parent_id' => $parentProduct->id,
+            'description' => $parentProduct->description,
         ]);
 
-        // Prepare stock data and insert
-        $stockData = $this->prepareStockData($parentStock, $discountPercent);
-        $stockData['sku'] = $parentStock->sku ?? null;
-        // this static function replace to repo insertStockItem method ( convert symfont to laravel )
-        StockItemModel::insertStockItem($childProduct->id, $stockData);
+        // Fetch parent product stock
+        $getStocks = StockItemModel::where([
+            ['product_id', $parentProduct->id],
+            ['config_id', $parentProduct->config_id],
+            ['status', 1],
+            ['is_delete', 0]
+        ])->get();
 
+        if (count($getStocks) > 0) {
+            foreach ($getStocks as $stock) {
+                // Prepare stock data and insert
+                $stockData = $this->prepareStockData($stock, $discountPercent,[
+                    'product_id'         => $childProduct->id,
+                    'config_id'          => $childAccConfig,
+                    'barcode'            => random_int(10000000, 99999999),
+                    'sku'                => random_int(10000000, 99999999),
+                    'status'             => $stock->status ?? null,
+                    'is_delete'          => $stock->is_delete ?? null,
+                    'is_master'          => $stock->is_master ?? null,
+                    'name'               => $stock->name ?? null,
+                    'display_name'       => $stock->display_name ?? null,
+                    'uom'                => $stock->uom ?? null,
+                    'bangla_name'        => $stock->bangla_name ?? null,
+                    'parent_stock_item'  => $stock->id ?? null,
+                ]);
+
+                // Attributes processing
+                $attributes = ['color_id', 'grade_id', 'brand_id', 'size_id', 'model_id'];
+                foreach ($attributes as $attribute) {
+                    if (!empty($stock->$attribute)) {
+                        $stockData[$attribute] = $this->createParticularForBranch($stock->$attribute, $childAccConfig);
+                    }
+                }
+                $stockData['barcode'] = random_int(10000000, 99999999);
+                $stockData['sku'] = $stockData['barcode'];
+                // Save stock data
+                StockItemModel::create($stockData);
+            }
+        }
         return true;
+    }
+
+    private function createParticularForBranch($parentParticularId, $childAccConfig) {
+        $parentParticular = ParticularModel::find($parentParticularId);
+
+        if ($parentParticular) {
+            $childParticular = ParticularModel::firstOrCreate(
+                [
+                    'particular_type_id' => $parentParticular->particular_type_id,
+                    'config_id' => $childAccConfig,
+                ],
+                [
+                    'name' => $parentParticular->name,
+                    'slug' => $parentParticular->slug,
+                    'status' => 1,
+                ]
+            );
+            return $childParticular->id;
+        }
     }
 
 
@@ -532,13 +586,15 @@ class BranchController extends Controller
         // Update child product's status
         $productUpdate->update(['status' => $status]);
 
-        $productStockUpdate = StockItemModel::where('product_id', $productUpdate->id)->first();
+        $productStockUpdate = StockItemModel::where('product_id', $productUpdate->id)->get();
 
         if ($productStockUpdate) {
             // Update child stock
-            $productStockUpdate->update(
-                $this->prepareStockData($parentStock, $discountPercent, ['status' => $status])
-            );
+            foreach ($productStockUpdate as $productStock) {
+                $productStock->update(
+                    $this->prepareStockData($parentStock, $discountPercent, ['status' => $status])
+                );
+            }
         }
 
         return true;

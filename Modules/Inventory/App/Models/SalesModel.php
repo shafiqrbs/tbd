@@ -80,6 +80,7 @@ class SalesModel extends Model
                 'inv_sales.total as total',
                 'inv_sales.payment as payment',
                 'inv_sales.discount as discount',
+                'inv_sales.is_domain_sales_completed',
                 'inv_sales.discount_calculation as discount_calculation',
                 'inv_sales.discount_type as discount_type',
                 'inv_sales.invoice_batch_id',

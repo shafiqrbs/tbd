@@ -88,7 +88,7 @@ class ProductModel extends Model
                 'inv_product.slug',
                 'inv_category.name as category_name',
                 'inv_particular.name as unit_name',
-                'inv_product.barcode',
+                'inv_stock.barcode',
                 'inv_product.alternative_name',
                 'inv_setting.name as product_type',
                 'inv_stock.quantity',

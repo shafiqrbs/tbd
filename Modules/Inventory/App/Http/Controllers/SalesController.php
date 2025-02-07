@@ -189,13 +189,14 @@ class SalesController extends Controller
                     'created_by_id' => $this->domain['user_id'],
                     'vendor_id' => $getVendor->id ?? null,
                     'transaction_mode_id' => $getTransactionMode ?? null,
+                    'process' => 'created'
                 ]);
 
                 if ($purchase){
                     if (sizeof($getSalesItems)>0){
                         $totalPrice = 0;
                         foreach ($getSalesItems as $item) {
-                            $getStockItemId = StockItemModel::where('name', $item['name'])->where('config_id',$getInventoryConfigId)->first()->id;
+                            $getStockItemId = StockItemModel::where('parent_stock_item', $item['stock_item_id'])->where('config_id',$getInventoryConfigId)->first()->id;
                             $purchasePrice = $item['sales_price']-($item['sales_price']*$customerDomain->discount_percent)/100;
                             $subtotal = $item['quantity']*$purchasePrice;
                             $totalPrice += $subtotal;
@@ -221,6 +222,8 @@ class SalesController extends Controller
                         ]);
                     }
                 }
+
+                $getSales->update(['is_domain_sales_completed'=>1]);
             }
             DB::commit();
             return response()->json(['status' => 200, 'success' => true]);
