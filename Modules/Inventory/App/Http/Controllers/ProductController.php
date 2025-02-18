@@ -119,11 +119,13 @@ class ProductController extends Controller
      */
     public function destroy($id)
     {
-        $service = new JsonRequestResponse();
         ProductModel::find($id)->delete();
 
-        $entity = ['message' => 'delete'];
-        return $service->returnJosnResponse($entity);
+        return response()->json([
+            'status' => 200,
+            'success' => true,
+            'message' => 'delete'
+        ]);
     }
 
 

@@ -36,6 +36,7 @@ class FileUploadModel extends Model
             'file',
             'domain_id',
             'is_process',
+            'process_row',
             DB::raw('DATE_FORMAT(created_at, "%d-%m-%Y %h:%i:%s %p") as created')
         ]);
 

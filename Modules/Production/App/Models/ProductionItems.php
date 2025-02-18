@@ -140,12 +140,14 @@ class ProductionItems extends Model
             ->join('inv_stock','inv_stock.id','=','pro_item.item_id')
             ->join('pro_config','pro_config.id','=','pro_item.config_id')
             ->join('inv_product','inv_product.id','=','inv_stock.product_id')
+            ->leftjoin('inv_particular','inv_particular.id','=','inv_product.unit_id')
             ->join('inv_category','inv_category.id','=','inv_product.category_id')
             ->join('inv_setting','inv_setting.id','=','inv_product.product_type_id')
             ->select([
                 'pro_item.id',
                 'inv_stock.name as product_name',
-                'inv_stock.uom as unit_name',
+                /*'inv_stock.uom as unit_name',*/
+                'inv_particular.name as unit_name',
                 'pro_item.waste_amount',
                 DB::raw('DATE_FORMAT(pro_item.license_date, "%d-%M-%Y") as license_date'),
                 DB::raw('DATE_FORMAT(pro_item.initiate_date, "%d-%M-%Y") as initiate_date'),

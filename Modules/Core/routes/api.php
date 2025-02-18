@@ -69,6 +69,7 @@ Route::prefix('/core')->middleware([HeaderAuthenticationMiddleware::class])->gro
     Route::get('/setting/inline-status/{id}', [SettingController::class,'inlineStatus'])->name('core_setting_inline_status');
 
     Route::get('/file-upload', [FileUploadController::class,'index'])->name('index_file_upload');
+    Route::delete('/file-upload/{id}', [FileUploadController::class,'destroy'])->name('index_file_delete');
     Route::get('/file-upload/process', [FileUploadController::class,'fileProcessToDB'])->name('upload_file_process');
     Route::post('/file-upload/store', [FileUploadController::class,'store'])->name('store_file_upload');
 }

@@ -57,7 +57,7 @@ class ProductionRecipeItemsController extends Controller
         $response = new Response();
         foreach ($entities as $entity) {
             if ($pro_config && $entity['id']){
-            $em->getRepository(ProductionItem::class)->insertUpdate($pro_config, $entity['id']);
+                $em->getRepository(ProductionItem::class)->insertUpdate($pro_config, $entity['id']);
             }
         }
         $response->setContent(json_encode([

@@ -147,12 +147,12 @@ class FileUploadController extends Controller
      */
     public function destroy($id)
     {
-        $service = new JsonRequestResponse();
-        VendorModel::find($id)->delete();
-
-        $entity = ['message'=>'delete'];
-        return $service->returnJosnResponse($entity);
-
+        FileUploadModel::find($id)->delete();
+        return response()->json([
+            'status' => 200,
+            'success' => true,
+            'message' => 'delete'
+        ]);
     }
 
     /**
