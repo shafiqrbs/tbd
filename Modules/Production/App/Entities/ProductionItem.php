@@ -32,7 +32,8 @@ class ProductionItem
     private  $config;
 
     /**
-     * @ORM\ManyToOne(targetEntity="Modules\Inventory\App\Entities\StockItem")
+     * @ORM\OneToOne(targetEntity="Modules\Inventory\App\Entities\StockItem")
+     * @ORM\JoinColumn(onDelete="CASCADE")
      **/
     private  $item;
 

@@ -33,9 +33,9 @@ class ProductionItemAmendment
 
     /**
      * @ORM\ManyToOne(targetEntity="Modules\Inventory\App\Entities\StockItem")
+     * @ORM\JoinColumn(onDelete="CASCADE")
      **/
     private  $item;
-
 
     /**
      * @ORM\ManyToOne(targetEntity="ProductionItem")
