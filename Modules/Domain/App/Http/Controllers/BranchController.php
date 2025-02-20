@@ -407,13 +407,17 @@ class BranchController extends Controller
             // Existing validation and parsing logic
             $request->validate([
                 'value' => ['required', 'string', 'regex:/^\d+#\d+$/'],
-                'check' => 'required|boolean'
+                'check' => 'required|boolean',
+                'customer_id' => 'required'
             ], [
                 'value.regex' => 'The value must be in the format "categoryId#domainId".',
                 'check.required' => 'The check field is required.',
+                'customer_id.required' => 'The customer id field is required.',
             ]);
 
             [$categoryId, $domainId] = explode('#', $request->input('value'));
+            $customerId = $request->input('customer_id');
+            $findVendor = VendorModel::where('customer_id',$customerId)->first();
 
             if (!is_numeric($categoryId) || !is_numeric($domainId)) {
                 return response()->json(['status' => 422, 'success' => false, 'message' => 'Category ID or Domain ID is invalid.']);
@@ -448,7 +452,7 @@ class BranchController extends Controller
                 ]);
             }
 
-            $this->handleCategoryProduct($categoryId, $childAccConfig, $request->input('check'), $domainId);
+            $this->handleCategoryProduct($categoryId, $childAccConfig, $request->input('check'), $domainId,$findVendor);
 
             DB::commit(); // Commit transaction
 
@@ -467,7 +471,7 @@ class BranchController extends Controller
 
 
 
-    private function handleCategoryProduct($categoryId, $childAccConfig, $shouldUpdate, $domainId) {
+    private function handleCategoryProduct($categoryId, $childAccConfig, $shouldUpdate, $domainId,$findVendor) {
         // Fetch all products for the given category and config
         $products = ProductModel::where('category_id', $categoryId)
             ->where('config_id', $this->domain['config_id'])
@@ -494,16 +498,16 @@ class BranchController extends Controller
             $parentStock = $parentStocks[$parentProduct->id] ?? null;
 
             if ($shouldUpdate && !$productUpdate) {
-                $this->createChildProduct($parentProduct, $categoryId, $childAccConfig, $parentStock, $discountPercent);
+                $this->createChildProduct($parentProduct, $categoryId, $childAccConfig, $parentStock, $discountPercent,$findVendor);
             } elseif ($productUpdate) {
-                $this->updateProductAndStock($parentProduct, $productUpdate, $parentStock, $shouldUpdate, $discountPercent);
+                $this->updateProductAndStock($parentProduct, $productUpdate, $parentStock, $shouldUpdate, $discountPercent,$findVendor);
             }
         }
 
         return true;
     }
 
-    private function createChildProduct($parentProduct, $categoryId, $childAccConfig, $parentStock, $discountPercent) {
+    private function createChildProduct($parentProduct, $categoryId, $childAccConfig, $parentStock, $discountPercent,$findVendor) {
         // Create a new child product
         $childProduct = ProductModel::create([
             'category_id' => $categoryId,
@@ -516,6 +520,7 @@ class BranchController extends Controller
             'product_type_id' => $parentProduct->product_type_id,
             'parent_id' => $parentProduct->id,
             'description' => $parentProduct->description,
+            'vendor_id' => $findVendor->id,
         ]);
 
         // Fetch parent product stock
@@ -580,11 +585,14 @@ class BranchController extends Controller
     }
 
 
-    private function updateProductAndStock($parentProduct, $productUpdate, $parentStock, $shouldUpdate, $discountPercent) {
+    private function updateProductAndStock($parentProduct, $productUpdate, $parentStock, $shouldUpdate, $discountPercent,$findVendor) {
         $status = $shouldUpdate ? true : false;
 
         // Update child product's status
-        $productUpdate->update(['status' => $status]);
+        $productUpdate->update([
+            'status' => $status,
+            'vendor_id' => $findVendor->id
+        ]);
 
         $productStockUpdate = StockItemModel::where('product_id', $productUpdate->id)->get();
 

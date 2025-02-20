@@ -157,6 +157,12 @@ class Product
     private $updatedAt;
 
     /**
+     * @ORM\ManyToOne(targetEntity="Modules\Core\App\Entities\Vendor")
+     * @ORM\JoinColumn(name="vendor_id", onDelete="CASCADE")
+     **/
+    private  $vendor;
+
+    /**
      * @return int
      */
     public function getId()

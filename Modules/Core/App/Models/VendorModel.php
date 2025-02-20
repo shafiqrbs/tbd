@@ -90,6 +90,8 @@ class VendorModel extends Model
                 'cor_vendors.email',
                 'cor_vendors.mobile',
                 'cor_vendors.unique_id',
+                'cor_vendors.sub_domain_id',
+                'cor_vendors.customer_id',
                 DB::raw('DATE_FORMAT(cor_vendors.created_at, "%d-%m-%Y") as created_date'),
                 'cor_vendors.created_at'
             ])

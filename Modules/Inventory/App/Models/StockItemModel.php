@@ -181,6 +181,7 @@ class StockItemModel extends Model
                 'inv_setting.slug as product_nature',
                 'inv_stock.display_name as display_name',
                 'inv_product.slug',
+                'inv_product.vendor_id',
                 'inv_product.category_id',
                 'inv_product.unit_id',
                 'inv_stock.remaining_quantity as quantity',
