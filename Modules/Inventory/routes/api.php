@@ -14,6 +14,7 @@ use Modules\Inventory\App\Http\Controllers\ParticularController;
 use Modules\Inventory\App\Http\Controllers\ProductController;
 use Modules\Inventory\App\Http\Controllers\PurchaseController;
 use Modules\Inventory\App\Http\Controllers\PurchaseItemController;
+use Modules\Inventory\App\Http\Controllers\RequisitionController;
 use Modules\Inventory\App\Http\Controllers\SalesController;
 use Modules\Inventory\App\Http\Controllers\SettingController;
 use Modules\Inventory\App\Http\Controllers\StockItemController;
@@ -94,6 +95,9 @@ Route::prefix('/inventory')->middleware([HeaderAuthenticationMiddleware::class])
     Route::apiResource('/opening-stock', OpeningStockController::class)->middleware([HeaderAuthenticationMiddleware::class]);
     Route::post('/opening-stock/inline-update', [OpeningStockController::class,'inlineUpdate'])->name('opening_stock_inline_update');
   //  Route::post('/inventory/branch-management', [BranchManagementController::class,'branchManagement'])->name('branch_management_update');
+
+    Route::apiResource('/requisition', RequisitionController::class)->middleware([HeaderAuthenticationMiddleware::class]);
+
 });
 
 
