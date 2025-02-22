@@ -58,7 +58,6 @@ class Purchase
 
     /**
      * @var string
-     *
      * @ORM\Column(name="invoice", type="string", length=255, nullable=true)
      */
     private $invoice;

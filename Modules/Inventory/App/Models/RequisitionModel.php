@@ -22,6 +22,7 @@ class RequisitionModel extends Model
     public static function boot() {
         parent::boot();
         self::creating(function ($model) {
+            $model->invoice = self::quickRandom();
             $date =  new \DateTime("now");
             $model->created_at = $date;
         });
@@ -30,6 +31,12 @@ class RequisitionModel extends Model
             $date =  new \DateTime("now");
             $model->updated_at = $date;
         });
+    }
+
+    public static function quickRandom($length = 12)
+    {
+        $pool = '0123456789';
+        return substr(str_shuffle(str_repeat($pool, $length)), 0, $length);
     }
 
     public function requisitionItems()
@@ -48,6 +55,7 @@ class RequisitionModel extends Model
             ->leftjoin('cor_vendors','cor_vendors.id','=','inv_requisition.vendor_id')
             ->select([
                 'inv_requisition.id',
+                'inv_requisition.invoice',
                 DB::raw('DATE_FORMAT(inv_requisition.created_at, "%d-%m-%Y") as created'),
                 DB::raw('DATE_FORMAT(inv_requisition.expected_date, "%d-%m-%Y") as expected_date'),
                 'inv_requisition.sub_total as sub_total',
@@ -82,22 +90,22 @@ class RequisitionModel extends Model
                 }]);
 
         if (isset($request['term']) && !empty($request['term'])){
-            $entities = $entities->whereAny(['inv_requisition.sub_total','inv_requisition.name','inv_requisition.mobile','createdBy.username'],'LIKE','%'.$request['term'].'%');
+            $entities = $entities->whereAny(['inv_requisition.sub_total','inv_requisition.invoice','cor_vendors.mobile','createdBy.username','cor_vendors.name','createdBy.name'],'LIKE','%'.$request['term'].'%');
         }
 
-        /*if (isset($request['vendor_id']) && !empty($request['vendor_id'])){
-            $entities = $entities->where('inv_purchase.vendor_id',$request['vendor_id']);
+        if (isset($request['vendor_id']) && !empty($request['vendor_id'])){
+            $entities = $entities->where('inv_requisition.vendor_id',$request['vendor_id']);
         }
         if (isset($request['start_date']) && !empty($request['start_date']) && empty($request['end_date'])){
             $start_date = $request['start_date'].' 00:00:00';
             $end_date = $request['start_date'].' 23:59:59';
-            $entities = $entities->whereBetween('inv_purchase.created_at',[$start_date, $end_date]);
+            $entities = $entities->whereBetween('inv_requisition.created_at',[$start_date, $end_date]);
         }
         if (isset($request['start_date']) && !empty($request['start_date']) && isset($request['end_date']) && !empty($request['end_date'])){
             $start_date = $request['start_date'].' 00:00:00';
             $end_date = $request['end_date'].' 23:59:59';
-            $entities = $entities->whereBetween('inv_purchase.created_at',[$start_date, $end_date]);
-        }*/
+            $entities = $entities->whereBetween('inv_requisition.created_at',[$start_date, $end_date]);
+        }
 
         $total  = $entities->count();
         $entities = $entities->skip($skip)

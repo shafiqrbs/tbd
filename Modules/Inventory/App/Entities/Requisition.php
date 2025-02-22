@@ -44,6 +44,12 @@ class Requisition
     private  $vendor;
 
     /**
+     * @var string
+     * @ORM\Column(name="invoice", type="string", length=255, nullable=true)
+     */
+    private $invoice;
+
+    /**
      * @ORM\ManyToOne(targetEntity="Modules\Core\App\Entities\Customer")
      * @ORM\JoinColumn(onDelete="CASCADE")
      **/
