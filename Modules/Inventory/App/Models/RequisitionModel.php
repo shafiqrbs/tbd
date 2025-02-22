@@ -65,21 +65,21 @@ class RequisitionModel extends Model
                 'createdBy.id as createdById',
                 'inv_requisition.process as process',
                 'cor_vendors.address as vendor_address',
-            ])/*->with(['requisitionItems' => function ($query){
+            ])->with(['requisitionItems' => function ($query){
                     $query->select([
-                        'inv_purchase_item.id',
-                        'inv_purchase_item.purchase_id',
+                        'inv_requisition_item.id',
+                        'inv_requisition_item.requisition_id',
                         'inv_stock.name as item_name',
-                        'inv_purchase_item.quantity',
-                        'inv_purchase_item.purchase_price',
-                        'inv_purchase_item.sales_price',
-                        'inv_purchase_item.sub_total',
-                        'inv_particular.name as unit_name',
+                        'inv_requisition_item.quantity',
+                        'inv_requisition_item.purchase_price',
+                        'inv_requisition_item.sales_price',
+                        'inv_requisition_item.sub_total',
+                        'inv_requisition_item.unit_name as unit_name',
                     ])
-                        ->join('inv_stock','inv_stock.id','=','inv_purchase_item.stock_item_id')
-                        ->join('inv_product','inv_product.id','=','inv_stock.product_id')
-                        ->leftjoin('inv_particular','inv_particular.id','=','inv_product.unit_id');
-                }])*/;
+                        ->join('inv_stock','inv_stock.id','=','inv_requisition_item.customer_stock_item_id')
+                        ->join('inv_product','inv_product.id','=','inv_stock.product_id');
+//                        ->leftjoin('inv_particular','inv_particular.id','=','inv_product.unit_id');
+                }]);
 
         if (isset($request['term']) && !empty($request['term'])){
             $entities = $entities->whereAny(['inv_requisition.sub_total','inv_requisition.name','inv_requisition.mobile','createdBy.username'],'LIKE','%'.$request['term'].'%');
