@@ -5,6 +5,7 @@ namespace Modules\Inventory\App\Http\Controllers;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Modules\AppsApi\App\Services\JsonRequestResponse;
 use Modules\Core\App\Models\UserModel;
@@ -16,6 +17,7 @@ use Modules\Inventory\App\Models\ProductModel;
 use Modules\Inventory\App\Models\PurchaseItemModel;
 use Modules\Inventory\App\Models\PurchaseModel;
 use Modules\Inventory\App\Models\RequisitionItemModel;
+use Modules\Inventory\App\Models\RequisitionMatrixBoardModel;
 use Modules\Inventory\App\Models\RequisitionModel;
 use Modules\Inventory\App\Models\StockItemHistoryModel;
 use Modules\Inventory\App\Models\StockItemModel;
@@ -272,5 +274,171 @@ class RequisitionController extends Controller
 
         return $response;
     }
+
+
+    public function matrixBoard(Request $request)
+    {
+        $expectedDate = $request->query('expected_date');
+        $vendorConfigId = $this->domain['config_id'];
+
+        $getItems = RequisitionItemModel::where([
+            ['inv_requisition_item.vendor_config_id', $vendorConfigId],
+            ['inv_requisition.expected_date', $expectedDate]
+        ])
+            ->select([
+                'inv_requisition_item.id',
+                'inv_requisition_item.vendor_config_id',
+                'inv_requisition_item.customer_config_id',
+                'inv_requisition_item.vendor_stock_item_id',
+                'inv_requisition_item.customer_stock_item_id',
+                'inv_requisition_item.quantity',
+                'inv_requisition_item.barcode',
+                'inv_requisition_item.purchase_price',
+                'inv_requisition_item.sales_price',
+                'inv_requisition_item.sub_total',
+                'inv_requisition_item.display_name',
+                'inv_requisition_item.unit_name',
+                'inv_requisition_item.unit_id',
+                'inv_requisition.customer_id',
+                'cor_customers.name as customer_name',
+                'cor_customers.mobile as customer_mobile',
+                'inv_requisition.expected_date',
+                'vendor_stock_item.remaining_quantity',
+                'vendor_stock_item.quantity as vendor_stock_quantity',
+            ])
+            ->join('inv_requisition', 'inv_requisition.id', '=', 'inv_requisition_item.requisition_id')
+            ->join('inv_stock as vendor_stock_item', 'vendor_stock_item.id', '=', 'inv_requisition_item.vendor_stock_item_id')
+            ->join('cor_customers', 'cor_customers.id', '=', 'inv_requisition.customer_id')
+            ->get()
+            ->toArray();
+
+        $groupedItems = $this->groupByCustomerStockItemIdAndConfigId($getItems);
+
+
+        if (!empty($groupedItems)) {
+            $itemsToInsert = [];
+
+            foreach ($groupedItems as $val) {
+                // Check if a record already exists
+                $exists = RequisitionMatrixBoardModel::where('vendor_config_id', $val['vendor_config_id'])
+                    ->where('expected_date', $val['expected_date'])
+                    ->exists();
+
+                if (!$exists) {
+                    $itemsToInsert[] = [
+                        'customer_stock_item_id' => $val['customer_stock_item_id'],
+                        'vendor_stock_item_id' => $val['vendor_stock_item_id'],
+                        'customer_config_id' => $val['customer_config_id'],
+                        'vendor_config_id' => $val['vendor_config_id'],
+                        'unit_id' => $val['unit_id'],
+                        'barcode' => $val['barcode'],
+                        'purchase_price' => $val['purchase_price'],
+                        'sales_price' => $val['sales_price'],
+                        'quantity' => $val['quantity'],
+                        'requested_quantity' => $val['quantity'],
+                        'sub_total' => $val['sub_total'],
+                        'display_name' => $val['display_name'],
+                        'unit_name' => $val['unit_name'],
+                        'customer_id' => $val['customer_id'],
+                        'customer_name' => $val['customer_name'],
+                        'expected_date' => $val['expected_date'],
+                        'vendor_stock_quantity' => $val['vendor_stock_quantity'],
+                        'status' => true,
+                        'process' => 'Generated',
+                        'created_at' => now(),
+                    ];
+                }
+            }
+
+            if (!empty($itemsToInsert)) {
+                RequisitionMatrixBoardModel::insert($itemsToInsert);
+            }
+        }
+
+        // Fetch the latest data after insertion
+        $getItemWiseProduct = RequisitionMatrixBoardModel::where([
+            ['vendor_config_id', $vendorConfigId],
+            ['expected_date', $expectedDate]
+        ])->get()->toArray();
+
+        $shops = $this->getCustomerNames($getItemWiseProduct);
+
+        $transformedData = $this->formatMatrixBoardData($getItemWiseProduct, $shops);
+
+        return response()->json([
+            'status' => ResponseAlias::HTTP_OK,
+            'message' => 'Insert successfully',
+            'data' => $transformedData,
+            'customers' => $shops,
+        ], ResponseAlias::HTTP_OK);
+    }
+
+    private function getCustomerNames(array $data): array
+    {
+        return collect($data)
+            ->pluck('customer_name')
+            ->unique()
+            ->values()
+            ->toArray();
+    }
+
+    private function formatMatrixBoardData(array $data, array $shops): array
+    {
+        return collect($data)
+            ->groupBy('display_name')
+            ->map(function ($group) use ($shops) {
+                $base = [
+                    'product' => $group->first()['display_name'],
+                    'vendor_stock_quantity' => $group->first()['vendor_stock_quantity'],
+                ];
+
+                foreach ($shops as $shop) {
+                    $base[strtolower(str_replace(' ', '_', $shop))] = 0;
+                }
+
+                $totalRequestQuantity = 0;
+                foreach ($group as $item) {
+                    $customerName = strtolower(str_replace(' ', '_', $item['customer_name']));
+                    $base[$customerName] = $item['quantity'];
+                    $totalRequestQuantity+=$item['quantity'];
+                }
+
+                $base['total_request_quantity'] = $totalRequestQuantity;
+                $base['remaining_quantity'] = $group->first()['vendor_stock_quantity']-$totalRequestQuantity;
+
+                return $base;
+            })
+            ->values()
+            ->toArray();
+    }
+
+    private function groupByCustomerStockItemIdAndConfigId(array $data): Collection
+    {
+        return collect($data)->groupBy(fn($item) => $item['customer_stock_item_id'] . '-' . $item['customer_config_id'])
+            ->map(function ($group) {
+                return [
+                    'id' => $group->first()['id'],
+                    'customer_stock_item_id' => $group->first()['customer_stock_item_id'],
+                    'vendor_stock_item_id' => $group->first()['vendor_stock_item_id'],
+                    'customer_config_id' => $group->first()['customer_config_id'],
+                    'vendor_config_id' => $group->first()['vendor_config_id'],
+                    'quantity' => $group->sum('quantity'),
+                    'sub_total' => $group->sum('sub_total'),
+                    'purchase_price' => $group->first()['purchase_price'],
+                    'sales_price' => $group->first()['sales_price'],
+                    'display_name' => $group->first()['display_name'],
+                    'barcode' => $group->first()['barcode'],
+                    'unit_name' => $group->first()['unit_name'],
+                    'unit_id' => $group->first()['unit_id'],
+                    'customer_id' => $group->first()['customer_id'],
+                    'customer_name' => $group->first()['customer_name'],
+                    'customer_mobile' => $group->first()['customer_mobile'],
+                    'expected_date' => $group->first()['expected_date'],
+                    'remaining_quantity' => $group->first()['remaining_quantity'],
+                    'vendor_stock_quantity' => $group->first()['vendor_stock_quantity'],
+                ];
+            });
+    }
+
 
 }

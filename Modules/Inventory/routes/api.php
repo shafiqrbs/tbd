@@ -97,7 +97,9 @@ Route::prefix('/inventory')->middleware([HeaderAuthenticationMiddleware::class])
   //  Route::post('/inventory/branch-management', [BranchManagementController::class,'branchManagement'])->name('branch_management_update');
 
     Route::apiResource('/requisition', RequisitionController::class)->middleware([HeaderAuthenticationMiddleware::class]);
-
+    Route::prefix('/requisition')->middleware([HeaderAuthenticationMiddleware::class])->group(function() {
+        Route::get('matrix/board', [RequisitionController::class,'matrixBoard'])->name('requisition_matrix_board');
+    });
 });
 
 
