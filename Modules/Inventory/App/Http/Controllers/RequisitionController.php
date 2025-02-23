@@ -336,6 +336,7 @@ class RequisitionController extends Controller
                         'sales_price' => $val['sales_price'],
                         'quantity' => $val['quantity'],
                         'requested_quantity' => $val['quantity'],
+                        'approved_quantity' => $val['quantity'],
                         'sub_total' => $val['sub_total'],
                         'display_name' => $val['display_name'],
                         'unit_name' => $val['unit_name'],
@@ -388,8 +389,11 @@ class RequisitionController extends Controller
             ->groupBy('display_name')
             ->map(function ($group) use ($shops) {
                 $base = [
+                    'vendor_stock_item_id' => $group->first()['vendor_stock_item_id'],
+                    'customer_stock_item_id' => $group->first()['customer_stock_item_id'],
                     'product' => $group->first()['display_name'],
                     'vendor_stock_quantity' => $group->first()['vendor_stock_quantity'],
+                    'total_approved_quantity' => $group->sum('approved_quantity'),
                 ];
 
                 foreach ($shops as $shop) {
@@ -399,12 +403,15 @@ class RequisitionController extends Controller
                 $totalRequestQuantity = 0;
                 foreach ($group as $item) {
                     $customerName = strtolower(str_replace(' ', '_', $item['customer_name']));
+                    $base[$customerName.'_id'] = $item['id'];
+                    $base[$customerName.'_approved_quantity'] = $item['approved_quantity'];
+                    $base[$customerName.'_requested_quantity'] = $item['requested_quantity'];
                     $base[$customerName] = $item['quantity'];
-                    $totalRequestQuantity+=$item['quantity'];
+                    $totalRequestQuantity+=$item['requested_quantity'];
                 }
 
                 $base['total_request_quantity'] = $totalRequestQuantity;
-                $base['remaining_quantity'] = $group->first()['vendor_stock_quantity']-$totalRequestQuantity;
+                $base['remaining_quantity'] = $group->first()['vendor_stock_quantity']-$base['total_approved_quantity'];
 
                 return $base;
             })
@@ -438,6 +445,36 @@ class RequisitionController extends Controller
                     'vendor_stock_quantity' => $group->first()['vendor_stock_quantity'],
                 ];
             });
+    }
+
+    /**
+     * @throws \Exception
+     */
+    public function matrixBoardQuantityUpdate(Request $request)
+    {
+        if (!$request->has('quantity') || empty($request->quantity)) {
+            throw new \Exception("Quantity not found");
+        }
+
+        if (!$request->has('id') || empty($request->id)) {
+            throw new \Exception("Update id not found");
+        }
+
+        $findBoardMatrix = RequisitionMatrixBoardModel::find($request->id);
+        if (!$findBoardMatrix) {
+            throw new \Exception("Board matrix not found");
+        }
+
+        $findBoardMatrix->update([
+            'quantity' => $request->quantity,
+            'approved_quantity' => $request->quantity,
+            'sub_total' => $request->quantity*$findBoardMatrix->purchase_price,
+        ]);
+
+        return response()->json([
+            'status' => ResponseAlias::HTTP_OK,
+            'message' => 'Update successfully',
+        ], ResponseAlias::HTTP_OK);
     }
 
 
