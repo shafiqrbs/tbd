@@ -13,12 +13,16 @@ use Modules\Core\App\Models\VendorModel;
 use Modules\Inventory\App\Http\Requests\PurchaseRequest;
 use Modules\Inventory\App\Http\Requests\RequisitionRequest;
 use Modules\Inventory\App\Models\ConfigModel;
+use Modules\Inventory\App\Models\InvoiceBatchItemModel;
+use Modules\Inventory\App\Models\InvoiceBatchModel;
 use Modules\Inventory\App\Models\ProductModel;
 use Modules\Inventory\App\Models\PurchaseItemModel;
 use Modules\Inventory\App\Models\PurchaseModel;
 use Modules\Inventory\App\Models\RequisitionItemModel;
 use Modules\Inventory\App\Models\RequisitionMatrixBoardModel;
 use Modules\Inventory\App\Models\RequisitionModel;
+use Modules\Inventory\App\Models\SalesItemModel;
+use Modules\Inventory\App\Models\SalesModel;
 use Modules\Inventory\App\Models\StockItemHistoryModel;
 use Modules\Inventory\App\Models\StockItemModel;
 use Symfony\Component\HttpFoundation\Response as ResponseAlias;
@@ -389,6 +393,7 @@ class RequisitionController extends Controller
             ->groupBy('display_name')
             ->map(function ($group) use ($shops) {
                 $base = [
+                    'process' => $group->first()['process'],
                     'vendor_stock_item_id' => $group->first()['vendor_stock_item_id'],
                     'customer_stock_item_id' => $group->first()['customer_stock_item_id'],
                     'product' => $group->first()['display_name'],
@@ -476,6 +481,141 @@ class RequisitionController extends Controller
             'message' => 'Update successfully',
         ], ResponseAlias::HTTP_OK);
     }
+    
+
+    /**
+     * @throws \Exception
+     */
+    public function matrixBoardBatchGenerate(Request $request)
+    {
+        if (!$request->has('expected_date') || empty($request->expected_date)) {
+            throw new \Exception("Expected date not found");
+        }
+
+        $vendorConfigId = $request->config_id;
+        if (!$request->has('config_id') || empty($request->config_id)) {
+            $vendorConfigId = $this->domain['config_id'];
+        }
+
+        // Fetch the latest data
+        $getMatrixs = RequisitionMatrixBoardModel::where([
+            ['vendor_config_id', $vendorConfigId],
+            ['expected_date', $request->expected_date],
+            ['process', 'Generated']
+        ])->get()->toArray();
+
+        $inputs =  collect($getMatrixs)
+        ->groupBy('vendor_config_id')
+        ->map(function ($group) {
+            $base = [
+                'process' => 'New',
+                'config_id' => $group->first()['vendor_config_id'],
+                'created_by_id' => $this->domain['user_id'],
+                'sales_by_id' => $this->domain['user_id'],
+                'approved_by_id' => $this->domain['user_id'],
+                'quantity' => $group->sum('quantity'),
+                'sub_total' => $group->sum('sub_total'),
+                'total' => $group->sum('sub_total'),
+                'invoice_date' => now(),
+            ];
+
+            return $base;
+        })
+        ->values()->toArray()[0];
+
+        $batch = InvoiceBatchModel::create($inputs);
+
+        $items =  collect($getMatrixs)
+            ->groupBy('id')
+            ->map(function ($group) use ($batch) {
+                $base = [
+                    'invoice_batch_id' => $batch->id,
+                    'quantity' => $group->first()['quantity'],
+                    'sales_price' => $group->first()['sales_price'],
+                    'purchase_price' => $group->first()['purchase_price'],
+                    'price' => $group->first()['purchase_price'],
+                    'sub_total' => $group->first()['sub_total'],
+                    'stock_item_id' => $group->first()['vendor_stock_item_id'],
+                    'uom' => $group->first()['unit_name'],
+                    'name' => $group->first()['display_name'],
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ];
+
+                return $base;
+            })
+            ->values()->toArray();
+
+        InvoiceBatchItemModel::insert($items);
+
+        // Example usage
+        $groupedSales = $this->groupSalesByCustomer($getMatrixs,$batch);
+
+        foreach ($groupedSales as $sale) {
+            $sales = SalesModel::create($sale);
+
+            $salesItems = [];
+            foreach ($sale['items'] as $item) {
+                $salesItems[] = array_merge($item, ['sale_id' => $sales->id]);
+            }
+
+            // Insert sales items in bulk
+            SalesItemModel::insert($salesItems);
+        }
+
+        foreach ($getMatrixs as $matrix) {
+            RequisitionMatrixBoardModel::find($matrix['id'])->update([
+                'process' => 'Confirmed',
+            ]);
+        }
 
 
+
+        return response()->json([
+            'status' => ResponseAlias::HTTP_OK,
+            'message' => 'success',
+        ], ResponseAlias::HTTP_OK);
+    }
+
+    public function groupSalesByCustomer(array $salesData,$batch)
+    {
+        $groupedSales = [];
+
+        foreach ($salesData as $item) {
+            $customerId = $item['customer_id'];
+
+            if (!isset($groupedSales[$customerId])) {
+                $groupedSales[$customerId] = [
+                    'customer_id' => $customerId,
+                    'config_id' => $item['vendor_config_id'],
+                    'invoice_batch_id' => $batch->id,
+                    'created_by_id' => $this->domain['user_id'],
+                    'sales_by_id' => $this->domain['user_id'],
+                    'sub_total' => 0,
+                    'total' => 0,
+                    'items' => []
+                ];
+            }
+
+            $groupedSales[$customerId]['items'][] = [
+                'sale_id' => '',
+                'uom' => $item['unit_name'],
+                'name' => $item['display_name'],
+                'quantity' => $item['quantity'],
+                'sales_price' => $item['sales_price'],
+                'purchase_price' => $item['purchase_price'],
+                'price' => $item['purchase_price'],
+                'sub_total' => $item['sub_total'],
+                'stock_item_id' => $item['vendor_stock_item_id'],
+                'config_id' => $this->domain['config_id'],
+                'created_at' => now(),
+                'updated_at' => now(),
+            ];
+
+            $groupedSales[$customerId]['sub_total'] += $item['sub_total'];
+            $groupedSales[$customerId]['total'] += $item['sub_total'];
+        }
+
+        return array_values($groupedSales);
+    }
 }

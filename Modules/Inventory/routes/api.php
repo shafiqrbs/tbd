@@ -100,6 +100,7 @@ Route::prefix('/inventory')->middleware([HeaderAuthenticationMiddleware::class])
     Route::prefix('/requisition')->middleware([HeaderAuthenticationMiddleware::class])->group(function() {
         Route::get('matrix/board', [RequisitionController::class,'matrixBoard'])->name('requisition_matrix_board');
         Route::post('matrix/board/quantity-update', [RequisitionController::class,'matrixBoardQuantityUpdate'])->name('requisition_matrix_board_quantity_update');
+        Route::post('matrix/board/batch-generate', [RequisitionController::class,'matrixBoardBatchGenerate'])->name('requisition_matrix_board_batch_generate');
     });
 });
 

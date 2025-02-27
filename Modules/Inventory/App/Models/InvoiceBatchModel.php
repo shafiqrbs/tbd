@@ -19,6 +19,24 @@ class InvoiceBatchModel extends Model
     protected $fillable = [
         'config_id',
         'customer_id',
+        'config_id',
+        'created_by_id',
+        'transaction_mode_id',
+        'sales_by_id',
+        'approved_by_id',
+        'process',
+        'sub_total',
+        'vat',
+        'discount',
+        'total',
+        'received',
+        'amount',
+        'commission',
+        'discount_type',
+        'discount_calculation',
+        'due',
+        'is_reversed',
+        'invoice_date'
     ];
 
     public static function boot() {
@@ -62,8 +80,6 @@ class InvoiceBatchModel extends Model
 
     public static function insertBatch($config,$customer,$items)
     {
-
-
         $entity = self::create(
             [
                 'config_id' => $config,

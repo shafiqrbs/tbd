@@ -17,7 +17,9 @@ class SalesModel extends Model
     public $timestamps = true;
     protected $guarded = ['id'];
 
-    protected $fillable = [];
+    protected $fillable = [
+        'customer_id','config_id','invoice_batch_id','created_by_id','sales_by_id','sub_total','total'
+    ];
 
     public static function boot() {
         parent::boot();
