@@ -535,24 +535,26 @@ class RequisitionController extends Controller
             // Insert invoice batch
             $batch = InvoiceBatchModel::create($inputs);
 
-            // Prepare invoice batch items
-            $items = $getMatrixs->map(function ($matrix) use ($batch) {
+            // Grouping items by customer_stock_item_id
+            $groupedItems = $getMatrixs->groupBy('vendor_stock_item_id')->map(function ($items) use ($batch) {
                 return [
                     'invoice_batch_id' => $batch->id,
-                    'quantity' => $matrix->quantity,
-                    'sales_price' => $matrix->sales_price,
-                    'purchase_price' => $matrix->purchase_price,
-                    'price' => $matrix->purchase_price,
-                    'sub_total' => $matrix->sub_total,
-                    'stock_item_id' => $matrix->vendor_stock_item_id,
-                    'uom' => $matrix->unit_name,
-                    'name' => $matrix->display_name,
+                    'quantity' => $items->sum('quantity'),
+                    'sales_price' => $items->first()['sales_price'],
+                    'purchase_price' => $items->first()['purchase_price'],
+                    'price' => $items->first()['purchase_price'],
+                    'sub_total' => $items->sum('sub_total'),
+                    'stock_item_id' => $items->first()['vendor_stock_item_id'],
+                    'uom' => $items->first()['unit_name'],
+                    'name' => $items->first()['display_name'],
                     'created_at' => now(),
                     'updated_at' => now(),
                 ];
-            })->toArray();
+            })->values()->toArray();
 
-            InvoiceBatchItemModel::insert($items); // Bulk insert
+            // Bulk insert grouped data
+            InvoiceBatchItemModel::insert($groupedItems);
+
 
             // Group sales data by customer
             $groupedSales = $this->groupSalesByCustomer($getMatrixs->toArray(), $batch);
