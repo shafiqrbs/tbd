@@ -107,7 +107,16 @@ class ProductModel extends Model
             ]);
 
         if (isset($request['term']) && !empty($request['term'])){
-            $products = $products->whereAny(['inv_product.name','inv_product.slug','inv_category.name','inv_particular.name','inv_setting.name'],'LIKE','%'.$request['term'].'%');
+            $products = $products->whereAny([
+                'inv_product.name',
+                'inv_product.alternative_name',
+                'inv_stock.display_name',
+                'inv_stock.bangla_name',
+//                'inv_product.slug',
+//                'inv_category.name',
+//                'inv_particular.name',
+//                'inv_setting.name'
+            ],'LIKE','%'.$request['term'].'%');
         }
 
         if (isset($request['name']) && !empty($request['name'])){

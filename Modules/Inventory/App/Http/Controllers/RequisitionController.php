@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Modules\AppsApi\App\Services\JsonRequestResponse;
 use Modules\Core\App\Models\UserModel;
 use Modules\Core\App\Models\VendorModel;
@@ -481,100 +482,110 @@ class RequisitionController extends Controller
             'message' => 'Update successfully',
         ], ResponseAlias::HTTP_OK);
     }
-    
+
 
     /**
      * @throws \Exception
      */
     public function matrixBoardBatchGenerate(Request $request)
     {
+        // Validate input
         if (!$request->has('expected_date') || empty($request->expected_date)) {
             throw new \Exception("Expected date not found");
         }
 
-        $vendorConfigId = $request->config_id;
-        if (!$request->has('config_id') || empty($request->config_id)) {
-            $vendorConfigId = $this->domain['config_id'];
-        }
+        $vendorConfigId = $request->config_id ?? $this->domain['config_id'];
 
-        // Fetch the latest data
-        $getMatrixs = RequisitionMatrixBoardModel::where([
-            ['vendor_config_id', $vendorConfigId],
-            ['expected_date', $request->expected_date],
-            ['process', 'Generated']
-        ])->get()->toArray();
+        DB::beginTransaction(); // Start transaction
 
-        $inputs =  collect($getMatrixs)
-        ->groupBy('vendor_config_id')
-        ->map(function ($group) {
-            $base = [
-                'process' => 'New',
-                'config_id' => $group->first()['vendor_config_id'],
-                'created_by_id' => $this->domain['user_id'],
-                'sales_by_id' => $this->domain['user_id'],
-                'approved_by_id' => $this->domain['user_id'],
-                'quantity' => $group->sum('quantity'),
-                'sub_total' => $group->sum('sub_total'),
-                'total' => $group->sum('sub_total'),
-                'invoice_date' => now(),
-            ];
+        try {
+            // Fetch the latest data
+            $getMatrixs = RequisitionMatrixBoardModel::where([
+                ['vendor_config_id', $vendorConfigId],
+                ['expected_date', $request->expected_date],
+                ['process', 'Generated']
+            ])->get();
 
-            return $base;
-        })
-        ->values()->toArray()[0];
+            if ($getMatrixs->isEmpty()) {
+                DB::rollBack();
+                return response()->json([
+                    'status' => ResponseAlias::HTTP_BAD_REQUEST,
+                    'message' => 'No data found for the given criteria',
+                ], ResponseAlias::HTTP_BAD_REQUEST);
+            }
 
-        $batch = InvoiceBatchModel::create($inputs);
+            // Prepare batch data
+            $inputs =  $getMatrixs->groupBy('vendor_config_id')
+                ->map(function ($group) {
+                    return [
+                        'process' => 'New',
+                        'config_id' => $group->first()->vendor_config_id,
+                        'created_by_id' => $this->domain['user_id'],
+                        'sales_by_id' => $this->domain['user_id'],
+                        'approved_by_id' => $this->domain['user_id'],
+                        'quantity' => $group->sum('quantity'),
+                        'sub_total' => $group->sum('sub_total'),
+                        'total' => $group->sum('sub_total'),
+                        'invoice_date' => now(),
+                    ];
+                })
+                ->values()
+                ->first(); // Fetch first batch
 
-        $items =  collect($getMatrixs)
-            ->groupBy('id')
-            ->map(function ($group) use ($batch) {
-                $base = [
+            // Insert invoice batch
+            $batch = InvoiceBatchModel::create($inputs);
+
+            // Prepare invoice batch items
+            $items = $getMatrixs->map(function ($matrix) use ($batch) {
+                return [
                     'invoice_batch_id' => $batch->id,
-                    'quantity' => $group->first()['quantity'],
-                    'sales_price' => $group->first()['sales_price'],
-                    'purchase_price' => $group->first()['purchase_price'],
-                    'price' => $group->first()['purchase_price'],
-                    'sub_total' => $group->first()['sub_total'],
-                    'stock_item_id' => $group->first()['vendor_stock_item_id'],
-                    'uom' => $group->first()['unit_name'],
-                    'name' => $group->first()['display_name'],
+                    'quantity' => $matrix->quantity,
+                    'sales_price' => $matrix->sales_price,
+                    'purchase_price' => $matrix->purchase_price,
+                    'price' => $matrix->purchase_price,
+                    'sub_total' => $matrix->sub_total,
+                    'stock_item_id' => $matrix->vendor_stock_item_id,
+                    'uom' => $matrix->unit_name,
+                    'name' => $matrix->display_name,
                     'created_at' => now(),
                     'updated_at' => now(),
                 ];
+            })->toArray();
 
-                return $base;
-            })
-            ->values()->toArray();
+            InvoiceBatchItemModel::insert($items); // Bulk insert
 
-        InvoiceBatchItemModel::insert($items);
+            // Group sales data by customer
+            $groupedSales = $this->groupSalesByCustomer($getMatrixs->toArray(), $batch);
 
-        // Example usage
-        $groupedSales = $this->groupSalesByCustomer($getMatrixs,$batch);
+            foreach ($groupedSales as $sale) {
+                $sales = SalesModel::create($sale);
 
-        foreach ($groupedSales as $sale) {
-            $sales = SalesModel::create($sale);
+                $salesItems = array_map(fn ($item) => array_merge($item, ['sale_id' => $sales->id]), $sale['items']);
 
-            $salesItems = [];
-            foreach ($sale['items'] as $item) {
-                $salesItems[] = array_merge($item, ['sale_id' => $sales->id]);
+                SalesItemModel::insert($salesItems); // Bulk insert sales items
             }
 
-            // Insert sales items in bulk
-            SalesItemModel::insert($salesItems);
+            // Update process status of requisition matrix records
+            RequisitionMatrixBoardModel::whereIn('id', $getMatrixs->pluck('id'))
+                ->update(['process' => 'Confirmed']);
+
+            DB::commit(); // Commit transaction
+
+            return response()->json([
+                'status' => ResponseAlias::HTTP_OK,
+                'message' => 'Matrix data process successfully',
+            ], ResponseAlias::HTTP_OK);
+
+        } catch (\Exception $e) {
+            DB::rollBack(); // Rollback if any error
+            Log::error("Matrix Batch Generation Error: " . $e->getMessage());
+
+            return response()->json([
+                'status' => ResponseAlias::HTTP_INTERNAL_SERVER_ERROR,
+                'message' => 'An error occurred while generating the batch',
+                'error' => $e->getMessage(),
+            ], ResponseAlias::HTTP_INTERNAL_SERVER_ERROR);
         }
-
-        foreach ($getMatrixs as $matrix) {
-            RequisitionMatrixBoardModel::find($matrix['id'])->update([
-                'process' => 'Confirmed',
-            ]);
-        }
-
-
-
-        return response()->json([
-            'status' => ResponseAlias::HTTP_OK,
-            'message' => 'success',
-        ], ResponseAlias::HTTP_OK);
     }
 
     public function groupSalesByCustomer(array $salesData,$batch)

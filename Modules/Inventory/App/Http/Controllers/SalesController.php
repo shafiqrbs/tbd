@@ -177,12 +177,14 @@ class SalesController extends Controller
             if ($customerDomain){
                 // parent domain data
                 $getVendor = VendorModel::where('customer_id', $customerDomain->id)->first();
-                $getTransactionModeSlug = TransactionModeModel::find($getSales->transaction_mode_id)->slug;
 
                 // child domain data
                 $getAccountConfigId = DB::table('acc_config')->where('domain_id', $customerDomain->sub_domain_id)->first()->id;
                 $getInventoryConfigId = DB::table('inv_config')->where('domain_id', $customerDomain->sub_domain_id)->first()->id;
-                $getTransactionMode = TransactionModeModel::where('slug', $getTransactionModeSlug)->where('config_id',$getAccountConfigId)->first()->id;
+                if ($getSales->transaction_mode_id){
+                    $getTransactionModeSlug = TransactionModeModel::find($getSales->transaction_mode_id)->slug;
+                    $getTransactionMode = TransactionModeModel::where('slug', $getTransactionModeSlug)->where('config_id',$getAccountConfigId)->first()->id;
+                }
 
                 $purchase = PurchaseModel::create([
                     'config_id' => $getInventoryConfigId,
@@ -195,23 +197,36 @@ class SalesController extends Controller
                 if ($purchase){
                     if (sizeof($getSalesItems)>0){
                         $totalPrice = 0;
+
+                        $records = []; // Initialize an empty array to store records
+
                         foreach ($getSalesItems as $item) {
-                            $getStockItemId = StockItemModel::where('parent_stock_item', $item['stock_item_id'])->where('config_id',$getInventoryConfigId)->first()->id;
-                            $purchasePrice = $item['sales_price']-($item['sales_price']*$customerDomain->discount_percent)/100;
-                            $subtotal = $item['quantity']*$purchasePrice;
+                            $getStockItemId = StockItemModel::where('parent_stock_item', $item['stock_item_id'])
+                                ->where('config_id', $getInventoryConfigId)
+                                ->first()
+                                ->id;
+
+                            $purchasePrice = $item['sales_price'] - ($item['sales_price'] * $customerDomain->discount_percent) / 100;
+                            $subtotal = $item['quantity'] * $purchasePrice;
                             $totalPrice += $subtotal;
-                            $record['purchase_id'] = $purchase->id;
-                            $record['created_by_id'] = $this->domain['user_id'];
-                            $record['config_id'] = $getInventoryConfigId;
-                            $record['created_at'] = now();
-                            $record['quantity'] = $item['quantity'];
-                            $record['purchase_price'] = $purchasePrice;
-                            $record['sub_total'] = $subtotal;
-                            $record['mode'] = 'purchase';
-                            $record['updated_at'] = now();
-                            $record['stock_item_id'] = $getStockItemId;
+
+                            $records[] = [  // Add each record to the $records array
+                                'purchase_id'   => $purchase->id,
+                                'created_by_id' => $this->domain['user_id'],
+                                'config_id'     => $getInventoryConfigId,
+                                'created_at'    => now(),
+                                'quantity'      => $item['quantity'],
+                                'purchase_price' => $purchasePrice,
+                                'sub_total'     => $subtotal,
+                                'mode'          => 'purchase',
+                                'updated_at'    => now(),
+                                'stock_item_id' => $getStockItemId,
+                            ];
                         }
-                        PurchaseItemModel::insert($record);
+
+                        // Insert multiple records at once
+                        PurchaseItemModel::insert($records);
+
 
                         $purchase->update([
                             'sub_total' => $totalPrice,
@@ -223,7 +238,13 @@ class SalesController extends Controller
                     }
                 }
 
-                $getSales->update(['is_domain_sales_completed'=>1]);
+                $getSales->update(['is_domain_sales_completed'=>1,'approved_by_id'=>$this->domain['user_id']]);
+                // Manege stock
+                if (sizeof($getSales->salesItems)>0){
+                    foreach ($getSales->salesItems as $item){
+                        StockItemHistoryModel::openingStockQuantity($item,'sales',$this->domain);
+                    }
+                }
             }
             DB::commit();
             return response()->json(['status' => 200, 'success' => true]);
