@@ -12,6 +12,7 @@ use Modules\Core\App\Models\UserModel;
 use Modules\Inventory\App\Entities\PurchaseItem;
 use Modules\Inventory\App\Http\Requests\ProductRequest;
 use Modules\Inventory\App\Http\Requests\PurchaseRequest;
+use Modules\Inventory\App\Models\ConfigModel;
 use Modules\Inventory\App\Models\PurchaseItemModel;
 use Modules\Inventory\App\Models\PurchaseModel;
 use Modules\Inventory\App\Models\SalesItemModel;
@@ -55,11 +56,31 @@ class PurchaseController extends Controller
     {
         $service = new JsonRequestResponse();
         $input = $request->validated();
+
         $input['config_id'] = $this->domain['config_id'];
         $entity = PurchaseModel::create($input);
         $process = new PurchaseModel();
         $process->insertPurchaseItems($entity,$input['items']);
-       // $em->getRepository(PurchaseItem::class)->insert($entity,$input['items']);
+
+        $findConfig = ConfigModel::find($this->domain['config_id']);
+        if ($findConfig->is_purchase_auto_approved){
+            $entity->update([
+                'approved_by_id' => $this->domain['user_id'],
+                'process' => 'Approved'
+            ]);
+            if (sizeof($entity->purchaseItems)>0){
+                foreach ($entity->purchaseItems as $item){
+                    // get average price
+                    $itemAveragePrice = StockItemModel::calculateStockItemAveragePrice($item->stock_item_id,$item->config_id,$item);
+                    //set average price
+                    StockItemModel::where('id', $item->stock_item_id)->where('config_id',$item->config_id)->update(['average_price' => $itemAveragePrice]);
+
+                    $item->update(['approved_by_id' => $this->domain['user_id']]);
+                    StockItemHistoryModel::openingStockQuantity($item,'purchase',$this->domain);
+                }
+            }
+        }
+
         $data = $service->returnJosnResponse($entity);
         return $data;
 
@@ -171,7 +192,10 @@ class PurchaseController extends Controller
 
         try {
             $purchase = PurchaseModel::find($id);
-            $purchase->update(['approved_by_id' => $this->domain['user_id']]);
+            $purchase->update([
+                'approved_by_id' => $this->domain['user_id'],
+                'process' => 'Approved'
+            ]);
             if (sizeof($purchase->purchaseItems)>0){
                 foreach ($purchase->purchaseItems as $item){
                     // get average price

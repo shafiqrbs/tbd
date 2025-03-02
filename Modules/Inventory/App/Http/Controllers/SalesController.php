@@ -12,16 +12,19 @@ use Illuminate\Support\Facades\Session;
 use Modules\Accounting\App\Entities\Config;
 use Modules\Accounting\App\Models\TransactionModeModel;
 use Modules\AppsApi\App\Services\JsonRequestResponse;
+use Modules\Core\App\Models\CustomerModel;
 use Modules\Core\App\Models\UserModel;
 use Modules\Core\App\Models\VendorModel;
 use Modules\Inventory\App\Entities\SalesItem;
 use Modules\Inventory\App\Http\Requests\ProductRequest;
 use Modules\Inventory\App\Http\Requests\SalesRequest;
+use Modules\Inventory\App\Models\ConfigModel;
 use Modules\Inventory\App\Models\ProductModel;
 use Modules\Inventory\App\Models\PurchaseItemModel;
 use Modules\Inventory\App\Models\PurchaseModel;
 use Modules\Inventory\App\Models\SalesItemModel;
 use Modules\Inventory\App\Models\SalesModel;
+use Modules\Inventory\App\Models\SettingModel;
 use Modules\Inventory\App\Models\StockItemHistoryModel;
 use Modules\Inventory\App\Models\StockItemModel;
 use function Symfony\Component\HttpFoundation\Session\Storage\Handler\getInsertStatement;
@@ -70,12 +73,21 @@ class SalesController extends Controller
         $salesData = SalesModel::getShow($entity->id, $this->domain);
 
         // for stock maintain
-        $entity->update(['approved_by_id' => $this->domain['user_id']]);
-        if (sizeof($entity->salesItems)>0){
-            foreach ($entity->salesItems as $item){
-                StockItemHistoryModel::openingStockQuantity($item,'sales',$this->domain);
+
+        $findCustomer = CustomerModel::find($input['customer_id']);
+        $findUserType = \Modules\Core\App\Models\SettingModel::find($findCustomer->customer_group_id);
+        $findConfig = ConfigModel::find($this->domain['config_id']);
+
+        if ($findConfig->is_sales_auto_approved && (!$findUserType || $findUserType->name != 'Domain')) {
+            $entity->update(['approved_by_id' => $this->domain['user_id']]);
+
+            if (count($entity->salesItems) > 0) {
+                foreach ($entity->salesItems as $item) {
+                    StockItemHistoryModel::openingStockQuantity($item, 'sales', $this->domain);
+                }
             }
         }
+
 
         $data = $service->returnJosnResponse($salesData);
         return $data;
@@ -181,6 +193,7 @@ class SalesController extends Controller
                 // child domain data
                 $getAccountConfigId = DB::table('acc_config')->where('domain_id', $customerDomain->sub_domain_id)->first()->id;
                 $getInventoryConfigId = DB::table('inv_config')->where('domain_id', $customerDomain->sub_domain_id)->first()->id;
+
                 if ($getSales->transaction_mode_id){
                     $getTransactionModeSlug = TransactionModeModel::find($getSales->transaction_mode_id)->slug;
                     $getTransactionMode = TransactionModeModel::where('slug', $getTransactionModeSlug)->where('config_id',$getAccountConfigId)->first()->id;
@@ -203,8 +216,11 @@ class SalesController extends Controller
                         foreach ($getSalesItems as $item) {
                             $getStockItemId = StockItemModel::where('parent_stock_item', $item['stock_item_id'])
                                 ->where('config_id', $getInventoryConfigId)
-                                ->first()
-                                ->id;
+                                ->first();
+                            if (!$getStockItemId){
+                                return response()->json(['status' => 404, 'success' => false, 'message' => 'Stock item not found in child domain']);
+                            }
+                            $getStockItemId =$getStockItemId->id;
 
                             $purchasePrice = $item['sales_price'] - ($item['sales_price'] * $customerDomain->discount_percent) / 100;
                             $subtotal = $item['quantity'] * $purchasePrice;
@@ -246,6 +262,29 @@ class SalesController extends Controller
                     }
                 }
             }
+            DB::commit();
+            return response()->json(['status' => 200, 'success' => true]);
+
+            } catch (\Exception $e) {
+                DB::rollback();
+                return response()->json(['status' => 500, 'success' => false, 'error' => $e->getMessage()]);
+            }
+    }
+    public function notDomainCustomerSales($id)
+    {
+        DB::beginTransaction();
+        try {
+            $getSales = SalesModel::findOrFail($id);
+            $getSalesItems = $getSales->salesItems;
+
+            $getSales->update(['approved_by_id'=>$this->domain['user_id']]);
+            // Manege stock
+            if (sizeof($getSales->salesItems)>0){
+                foreach ($getSales->salesItems as $item){
+                    StockItemHistoryModel::openingStockQuantity($item,'sales',$this->domain);
+                }
+            }
+
             DB::commit();
             return response()->json(['status' => 200, 'success' => true]);
 

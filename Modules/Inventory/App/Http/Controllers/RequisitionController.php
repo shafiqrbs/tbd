@@ -308,7 +308,7 @@ class RequisitionController extends Controller
                 'cor_customers.name as customer_name',
                 'cor_customers.mobile as customer_mobile',
                 'inv_requisition.expected_date',
-                'vendor_stock_item.remaining_quantity',
+                'vendor_stock_item.quantity as remaining_quantity',
                 'vendor_stock_item.quantity as vendor_stock_quantity',
             ])
             ->join('inv_requisition', 'inv_requisition.id', '=', 'inv_requisition_item.requisition_id')

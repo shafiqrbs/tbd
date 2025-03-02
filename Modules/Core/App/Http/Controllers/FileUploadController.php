@@ -205,13 +205,7 @@ class FileUploadController extends Controller
         }elseif ($getFile->file_type === 'Finish-Goods'){
             $isInsert = $this->insertFinishGoodsBatchStock($dataWithHeaders);
         } else {
-            /*if ($getFile->file_type === 'Product'){
-                $message = 'Invalid file type or structure or column expect 12 , its '.count($keys).' given.';
-            }elseif ($getFile->file_type === 'Production'){
-                $message = 'Invalid file type or structure or column expect 8 , its '.count($keys).' given.';
-            }else{*/
-                $message = 'Invalid file type or structure.';
-//            }
+            $message = 'Invalid file type or structure.';
             return response()->json([
                 'message' => $message,
                 'status' => Response::HTTP_INTERNAL_SERVER_ERROR

@@ -726,6 +726,18 @@ class Config
      */
     private $updatedAt;
 
+    /**
+     * @var boolean
+     * @ORM\Column(type="boolean",options={"default"="true"})
+     */
+    private $isSalesAutoApproved;
+
+    /**
+     * @var boolean
+     * @ORM\Column(type="boolean",options={"default"="true"})
+     */
+    private $isPurchaseAutoApproved;
+
     public function __construct()
     {
         $this->createdAt = new \DateTime();

@@ -104,6 +104,8 @@ class ConfigModel extends Model
         'is_batch_invoice',
         'is_provision',
         'country_id',
+        'is_sales_auto_approved',
+        'is_purchase_auto_approved',
         'is_sku'
 
     ];

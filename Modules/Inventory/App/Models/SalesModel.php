@@ -80,6 +80,7 @@ class SalesModel extends Model
                 'inv_sales.invoice as invoice',
                 'inv_sales.sub_total as sub_total',
                 'inv_sales.total as total',
+                'inv_sales.approved_by_id',
                 'inv_sales.payment as payment',
                 'inv_sales.discount as discount',
                 'inv_sales.is_domain_sales_completed',
@@ -98,7 +99,7 @@ class SalesModel extends Model
                 'inv_sales.process as process',
                 'acc_transaction_mode.name as mode_name',
                 'cor_customers.address as customer_address',
-                'cor_setting.slug as customer_group',
+                'cor_setting.name as customer_group',
                 'cor_customers.balance as balance',
             ])->with('salesItems');
 
