@@ -220,6 +220,24 @@ class Config
 
     /**
      * @var bool
+     * @ORM\Column(type="boolean",options={"default"="0"})
+     */
+    private $isPos;
+
+    /**
+     * @var bool
+     * @ORM\Column(type="boolean",options={"default"="0"})
+     */
+    private $isTablePos;
+
+    /**
+     * @var bool
+     * @ORM\Column(type="boolean",options={"default"="0"})
+     */
+    private $isPayFirst;
+
+    /**
+     * @var bool
      *
      * @ORM\Column(type="boolean", options={"default"="0"})
      */
@@ -2319,6 +2337,88 @@ class Config
     {
         $this->isSku = $isSku;
     }
+
+    /**
+     * @return bool
+     */
+    public function isPos()
+    {
+        return $this->isPos;
+    }
+
+    /**
+     * @param bool $isPos
+     */
+    public function setIsPos($isPos)
+    {
+        $this->isPos = $isPos;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isTablePos()
+    {
+        return $this->isTablePos;
+    }
+
+    /**
+     * @param bool $isTablePos
+     */
+    public function setIsTablePos($isTablePos)
+    {
+        $this->isTablePos = $isTablePos;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isPayFirst()
+    {
+        return $this->isPayFirst;
+    }
+
+    /**
+     * @param bool $isPayFirst
+     */
+    public function setIsPayFirst($isPayFirst)
+    {
+        $this->isPayFirst = $isPayFirst;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isSalesAutoApproved()
+    {
+        return $this->isSalesAutoApproved;
+    }
+
+    /**
+     * @param bool $isSalesAutoApproved
+     */
+    public function setIsSalesAutoApproved($isSalesAutoApproved)
+    {
+        $this->isSalesAutoApproved = $isSalesAutoApproved;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isPurchaseAutoApproved()
+    {
+        return $this->isPurchaseAutoApproved;
+    }
+
+    /**
+     * @param bool $isPurchaseAutoApproved
+     */
+    public function setIsPurchaseAutoApproved($isPurchaseAutoApproved)
+    {
+        $this->isPurchaseAutoApproved = $isPurchaseAutoApproved;
+    }
+
+
 
 }
 

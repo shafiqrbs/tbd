@@ -106,6 +106,9 @@ class ConfigModel extends Model
         'country_id',
         'is_sales_auto_approved',
         'is_purchase_auto_approved',
+        'is_pos',
+        'is_table_pos',
+        'is_pay_first',
         'is_sku'
 
     ];
