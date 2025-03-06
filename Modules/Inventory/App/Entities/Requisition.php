@@ -154,5 +154,11 @@ class Requisition
      */
     private $updatedAt;
 
+    /**
+     * @var \Date
+     * @ORM\Column(type="date",nullable=true)
+     */
+    private $matrixGenerateDate;
+
 }
 

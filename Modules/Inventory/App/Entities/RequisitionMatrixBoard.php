@@ -165,5 +165,11 @@ class RequisitionMatrixBoard
      * @ORM\Column(type="date", nullable=true)
      */
     private $expectedDate;
+
+    /**
+     * @var \Date
+     * @ORM\Column(type="date", nullable=true)
+     */
+    private $generateDate;
 }
 

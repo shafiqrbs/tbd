@@ -116,4 +116,47 @@ class RequisitionModel extends Model
         return $data;
     }
 
+    public static function getShow($id,$domain)
+    {
+        $data = self::where('inv_requisition.id',$id)
+            ->leftjoin('users as createdBy','createdBy.id','=','inv_requisition.created_by_id')
+            ->leftjoin('cor_vendors','cor_vendors.id','=','inv_requisition.vendor_id')
+            ->select([
+                'inv_requisition.id',
+                'inv_requisition.invoice',
+                DB::raw('DATE_FORMAT(inv_requisition.created_at, "%d-%m-%Y") as created'),
+                DB::raw('DATE_FORMAT(inv_requisition.expected_date, "%d-%m-%Y") as expected_date'),
+                'inv_requisition.sub_total as sub_total',
+                'inv_requisition.total as total',
+                'inv_requisition.payment as payment',
+                'inv_requisition.discount as discount',
+                'inv_requisition.discount_calculation as discount_calculation',
+                'inv_requisition.discount_type as discount_type',
+                'inv_requisition.approved_by_id',
+                'cor_vendors.id as vendor_id',
+                'cor_vendors.name as vendor_name',
+                'cor_vendors.mobile as vendor_mobile',
+                'createdBy.username as createdByUser',
+                'createdBy.name as createdByName',
+                'createdBy.id as createdById',
+                'inv_requisition.process as process',
+                'cor_vendors.address as vendor_address',
+            ])->with(['requisitionItems' => function ($query){
+                $query->select([
+                    'inv_requisition_item.id',
+                    'inv_requisition_item.requisition_id',
+                    'inv_stock.display_name as display_name',
+                    'inv_requisition_item.quantity',
+                    'inv_requisition_item.purchase_price',
+                    'inv_requisition_item.sales_price',
+                    'inv_requisition_item.sub_total',
+                    'inv_requisition_item.unit_name as unit_name',
+                ])
+                    ->join('inv_stock','inv_stock.id','=','inv_requisition_item.customer_stock_item_id')
+                    ->join('inv_product','inv_product.id','=','inv_stock.product_id');
+//                        ->leftjoin('inv_particular','inv_particular.id','=','inv_product.unit_id');
+            }])->first();
+        return $data;
+    }
+
 }
