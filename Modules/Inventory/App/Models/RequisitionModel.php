@@ -126,7 +126,9 @@ class RequisitionModel extends Model
                 'inv_requisition.invoice',
                 DB::raw('DATE_FORMAT(inv_requisition.created_at, "%d-%m-%Y") as created'),
                 DB::raw('DATE_FORMAT(inv_requisition.expected_date, "%d-%m-%Y") as expected_date'),
+                DB::raw('DATE_FORMAT(inv_requisition.invoice_date, "%d-%m-%Y") as invoice_date'),
                 'inv_requisition.sub_total as sub_total',
+                'inv_requisition.remark',
                 'inv_requisition.total as total',
                 'inv_requisition.payment as payment',
                 'inv_requisition.discount as discount',
@@ -145,6 +147,7 @@ class RequisitionModel extends Model
                 $query->select([
                     'inv_requisition_item.id',
                     'inv_requisition_item.requisition_id',
+                    'inv_stock.id as product_id',
                     'inv_stock.display_name as display_name',
                     'inv_requisition_item.quantity',
                     'inv_requisition_item.purchase_price',

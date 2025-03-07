@@ -170,59 +170,98 @@ class RequisitionController extends Controller
         return $data;
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(PurchaseRequest $request, $id)
+    public function update(RequisitionRequest $request, $id)
     {
-        $data = $request->validated();
-
         DB::beginTransaction();
-        try {
-            $getPurchase = PurchaseModel::findOrFail($id);
-            $data['remark']=$request->narration;
-            $data['due'] = ($data['total'] ?? 0) - ($data['payment'] ?? 0);
-            $getPurchase->fill($data);
-            $getPurchase->save();
 
-            PurchaseItemModel::class::where('purchase_id', $id)->delete();
-            if (sizeof($data['items'])>0){
-                foreach ($data['items'] as $item){
-                    $item['stock_item_id'] = $item['product_id'];
-                    $item['config_id'] = $getPurchase->config_id;
-                    $item['purchase_id'] = $id;
-                    $item['quantity'] = $item['quantity'] ?? 0;
-                    $item['purchase_price'] = $item['purchase_price'] ?? 0;
-                    $item['sub_total'] = $item['sub_total'] ?? 0;
-                    $item['mode'] = 'purchase';
-                    PurchaseItemModel::create($item);
+        try {
+            $input = $request->validated();
+            $input['config_id'] = $this->domain['config_id'];
+            $input['status'] = true;
+
+            // Find requisition
+            $findRequisition = RequisitionModel::findOrFail($id);
+
+            // Validate vendor
+            $findVendor = VendorModel::find($input['vendor_id']);
+            if (!$findVendor) {
+                throw new \Exception("Vendor not found");
+            }
+
+            // Update requisition
+            $findRequisition->update($input);
+
+            if (!empty($input['items'])) {
+                $itemsToInsert = [];
+                $total = 0;
+
+                // Bulk delete old items
+                $findRequisition->requisitionItems()->delete();
+
+                // Collect stock items in bulk instead of multiple queries inside loop
+                $stockItemIds = collect($input['items'])->pluck('product_id')->toArray();
+                $customerStockItems = StockItemModel::whereIn('id', $stockItemIds)->get()->keyBy('id');
+
+                $productIds = $customerStockItems->pluck('product_id')->toArray();
+                $products = ProductModel::whereIn('id', $productIds)->get()->keyBy('id');
+
+                foreach ($input['items'] as $val) {
+                    $customerStockItem = $customerStockItems[$val['product_id']] ?? null;
+                    if (!$customerStockItem) {
+                        throw new \Exception("Stock item not found");
+                    }
+
+                    $findProduct = $products[$customerStockItem->product_id] ?? null;
+                    if (!$findProduct) {
+                        throw new \Exception("Product not found");
+                    }
+
+                    $total += $val['sub_total'];
+
+                    $itemsToInsert[] = [
+                        'requisition_id' => $id,
+                        'customer_stock_item_id' => $val['product_id'],
+                        'vendor_stock_item_id' => $customerStockItem->parent_stock_item,
+                        'vendor_config_id' => $findRequisition->vendor_config_id,
+                        'customer_config_id' => $findRequisition->customer_config_id,
+                        'barcode' => $customerStockItem->barcode,
+                        'quantity' => $val['quantity'],
+                        'display_name' => $val['display_name'],
+                        'purchase_price' => $val['purchase_price'],
+                        'sales_price' => $val['sales_price'],
+                        'sub_total' => $val['sub_total'],
+                        'unit_id' => $findProduct->unit_id,
+                        'unit_name' => $customerStockItem->uom,
+                        'created_at' => now(),
+                    ];
+                }
+
+                // Insert new items in bulk
+                if (!empty($itemsToInsert)) {
+                    RequisitionItemModel::insert($itemsToInsert);
                 }
             }
+
+            // Update requisition totals
+            $findRequisition->update(['sub_total' => $total, 'total' => $total]);
+
             DB::commit();
 
-            $response = new Response();
-            $response->headers->set('Content-Type', 'application/json');
-            $response->setContent(json_encode([
-                'message' => 'success',
-                'status' => Response::HTTP_OK,
-//                'data' => $purchaseData ?? []
-            ]));
-            $response->setStatusCode(Response::HTTP_OK);
-
+            return response()->json([
+                'status' => ResponseAlias::HTTP_OK,
+                'message' => 'Update successfully',
+                'data' => $findRequisition,
+            ], ResponseAlias::HTTP_OK);
         } catch (\Exception $e) {
-            DB::rollback();
-            $response = new Response();
-            $response->headers->set('Content-Type', 'application/json');
-            $response->setContent(json_encode([
-                'message' => 'error',
-                'status' => Response::HTTP_INTERNAL_SERVER_ERROR,
-                'error' => $e->getMessage(),
-            ]));
-            $response->setStatusCode(Response::HTTP_OK);
-        }
+            DB::rollBack();
 
-        return $response;
+            return response()->json([
+                'status' => ResponseAlias::HTTP_INTERNAL_SERVER_ERROR,
+                'message' => 'Transaction failed: ' . $e->getMessage(),
+            ], ResponseAlias::HTTP_INTERNAL_SERVER_ERROR);
+        }
     }
+
 
     /**
      * Remove the specified resource from storage.
@@ -230,7 +269,7 @@ class RequisitionController extends Controller
     public function destroy($id)
     {
         $service = new JsonRequestResponse();
-        PurchaseModel::find($id)->delete();
+        RequisitionModel::find($id)->delete();
         $entity = ['message' => 'delete'];
         return $service->returnJosnResponse($entity);
     }
