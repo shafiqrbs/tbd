@@ -168,7 +168,7 @@ class Config
      *
      * @ORM\Column(type="boolean",options={"default"="false"})
      */
-    private $skuWearhouse;
+    private $skuWarehouse;
 
      /**
      * @var boolean

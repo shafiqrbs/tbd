@@ -1,11 +1,7 @@
 <?php
 
 namespace Modules\Core\App\Models;
-
-
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\DB;
-
 class WarehouseModel extends Model
 {
     protected $table = 'cor_warehouses';
@@ -20,56 +16,44 @@ class WarehouseModel extends Model
         'contract_person',
         'domain_id',
         'setting_id',
+        'is_delete',
         'status'
     ];
 
-    public static function getRecords($request,$domain)
+    public static function getRecords($request, $domain)
     {
-        $page =  isset($request['page']) && $request['page'] > 0?($request['page'] - 1 ) : 0;
-        $perPage = isset($request['offset']) && $request['offset']!=''? (int)($request['offset']):0;
-        $skip = isset($page) && $page!=''? (int)$page * $perPage:0;
+        $page = (!empty($request['page']) && is_numeric($request['page'])) ? max(0, $request['page'] - 1) : 0;
+        $perPage = (int) ($request['offset'] ?? 10);
+        $skip = $page * $perPage;
 
-        $warehouses = self::where('domain_id',$domain['global_id'])
-        ->select([
-            'id',
-            'name',
-            'location',
-            'contract_person',
-            'email',
-            'mobile',
-            'address',
-            'created_at'
-        ]);
+        // Default domain ID if missing
+        $domainId = $domain['global_id'] ?? 0;
 
-        if (isset($request['term']) && !empty($request['term'])){
-            $warehouses = $warehouses->whereAny(['name','email','contract_person','mobile','location','address'],'LIKE','%'.$request['term'].'%');
-        }
+        $warehouses = self::where([['domain_id', $domainId],['is_delete',0],['status',1]])
+            ->select(['id', 'name', 'location', 'contract_person', 'email', 'mobile', 'address', 'created_at'])
+            ->when(!empty($request['term']), function ($query) use ($request) {
+                $query->whereAny(['name', 'email', 'contract_person', 'mobile', 'location', 'address'], 'LIKE', "%{$request['term']}%");
+            })
+            ->when(!empty($request['name']), fn($q) => $q->where('name', $request['name']))
+            ->when(!empty($request['mobile']), fn($q) => $q->where('mobile', $request['mobile']))
+            ->when(!empty($request['contract_person']), fn($q) => $q->where('contract_person', $request['contract_person']))
+            ->when(!empty($request['location']), fn($q) => $q->where('location', $request['location']));
 
-        if (isset($request['name']) && !empty($request['name'])){
-            $warehouses = $warehouses->where('name',$request['name']);
-        }
+        $total = $warehouses->clone()->count();
 
-        if (isset($request['mobile']) && !empty($request['mobile'])){
-            $warehouses = $warehouses->where('mobile',$request['mobile']);
-        }
+        $entities = $warehouses->orderBy('id', 'DESC')->skip($skip)->take($perPage)->get();
 
-        if (isset($request['contract_person']) && !empty($request['contract_person'])){
-            $warehouses = $warehouses->where('contract_person',$request['contract_person']);
-        }
-
-        if (isset($request['location']) && !empty($request['location'])){
-            $warehouses = $warehouses->where('location',$request['location']);
-        }
-
-        $total  = $warehouses->count();
-        $entities = $warehouses->skip($skip)
-                        ->take($perPage)
-                        ->orderBy('id','DESC')
-                        ->get();
-
-        $data = array('count'=>$total,'entities'=>$entities);
-        return $data;
+        return [
+            'success' => true,
+            'message' => 'Warehouses fetched successfully',
+            'data' => [
+                'count' => $total,
+                'entities' => $entities
+            ]
+        ];
     }
+
+
 
     public static function boot() {
         parent::boot();
@@ -78,6 +62,7 @@ class WarehouseModel extends Model
             $model->created_at = $date;
             $model->updated_at = $date;
             $model->status = true;
+            $model->is_delete = false;
         });
 
         self::updating(function ($model) {
@@ -99,12 +84,6 @@ class WarehouseModel extends Model
                 'source' => 'name'
             ]
         ];
-    }
-
-    public static function quickRandom($length = 32)
-    {
-        $pool = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
-        return substr(str_shuffle(str_repeat($pool, $length)), 0, $length);
     }
 
 }

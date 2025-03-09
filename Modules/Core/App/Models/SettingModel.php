@@ -5,16 +5,13 @@ namespace Modules\Core\App\Models;
 
 use Cviebrock\EloquentSluggable\Sluggable;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Support\Facades\DB;
 
 
 class SettingModel extends Model
 {
 
     protected $table = 'cor_setting';
-    use HasFactory;
     use Sluggable;
 
     public $timestamps = true;

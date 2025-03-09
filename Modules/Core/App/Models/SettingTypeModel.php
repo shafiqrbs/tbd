@@ -16,6 +16,7 @@ class SettingTypeModel extends Model
     protected $fillable = [
         'name',
         'slug',
+        'is_show_setting_dropdown',
         'status'
     ];
 

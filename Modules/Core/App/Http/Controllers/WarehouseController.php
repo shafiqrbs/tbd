@@ -3,18 +3,14 @@
 namespace Modules\Core\App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Validation\ValidationException;
-use Modules\Accounting\App\Models\AccountHeadModel;
-use Modules\AppsApi\App\Services\GeneratePatternCodeService;
-use Modules\AppsApi\App\Services\JsonRequestResponse;
-use Modules\Core\App\Http\Requests\VendorRequest;
+use Illuminate\Support\Facades\Log;
 use Modules\Core\App\Http\Requests\WarehouseRequest;
 use Modules\Core\App\Models\SettingModel;
+use Modules\Core\App\Models\SettingTypeModel;
 use Modules\Core\App\Models\UserModel;
-use Modules\Core\App\Models\VendorModel;
 use Modules\Core\App\Models\WarehouseModel;
 
 class WarehouseController extends Controller
@@ -32,16 +28,14 @@ class WarehouseController extends Controller
     public function index(Request $request){
 
         $data = WarehouseModel::getRecords($request,$this->domain);
-        $response = new Response();
-        $response->headers->set('Content-Type','application/json');
-        $response->setContent(json_encode([
-            'message' => 'success',
-            'status' => Response::HTTP_OK,
-            'total' => $data['count'],
-            'data' => $data['entities']
-        ]));
-        $response->setStatusCode(Response::HTTP_OK);
-        return $response;
+
+        return response()->json([
+            'status' => 200,
+            'success' => true,
+            'message' => 'Warehouse created successfully.',
+            'total' => $data['data']['count'],
+            'data' => $data['data']['entities'],
+        ], 200);
     }
 
 
@@ -50,40 +44,55 @@ class WarehouseController extends Controller
      */
     public function store(WarehouseRequest $request)
     {
-        $service = new JsonRequestResponse();
         $input = $request->validated();
-
-        // Include necessary fields
         $input['domain_id'] = $this->domain['global_id'];
         $input['status'] = true;
-        $input['setting_type_id'] = 9;
 
-        DB::beginTransaction(); // Begin a database transaction
+        // Ensure the setting type exists using firstOrCreate to avoid race conditions
+        $wareHouseSettingType = SettingTypeModel::firstOrCreate(
+            ['slug' => 'warehouse'],
+            ['name' => 'Warehouse', 'status' => true, 'is_show_setting_dropdown' => false]
+        );
+
+        DB::beginTransaction();
         try {
-            // Create setting record
-            $setting = SettingModel::create($input);
-            $input['setting_id'] = $setting->id;
+            $input['setting_type_id'] = $wareHouseSettingType->id;
 
-            // Create warehouse record
+            // Create setting entry
+            $wareHouseSetting = SettingModel::create($input);
+
+            $input['setting_id'] = $wareHouseSetting->id;
+
+            // Create warehouse entry
             $warehouse = WarehouseModel::create($input);
 
-            // Commit the transaction since everything is successful
+            // Commit transaction
             DB::commit();
 
-            // Return the warehouse record as a JSON response
-            return $service->returnJosnResponse($warehouse);
-
+            return response()->json([
+                'status' => 200,
+                'success' => true,
+                'message' => 'Warehouse created successfully.',
+                'data' => $warehouse,
+            ], 200);
         } catch (\Exception $e) {
-            // Rollback the transaction if any exception occurs
+            // Rollback transaction
             DB::rollBack();
 
-            // Log the error for debugging purposes
+            // Log the detailed error
             Log::error('Warehouse creation failed: ' . $e->getMessage(), ['trace' => $e->getTrace()]);
 
-            // Return an appropriate error response to the client
-            return response()->json(['error' => 'Failed to create warehouse'], 500);
+            // Show detailed error in non-production environments
+            $errorMessage = app()->environment('production') ? 'Failed to create warehouse' : $e->getMessage();
+
+            return response()->json([
+                'status' => 500,
+                'success' => false,
+                'message' => $errorMessage,
+            ], 500);
         }
     }
+
 
 
     /**
@@ -91,104 +100,112 @@ class WarehouseController extends Controller
      */
     public function show($id)
     {
-        $service = new JsonRequestResponse();
-        $entity = WarehouseModel::find($id);
+        try {
+            $entity = WarehouseModel::findOrFail($id);
 
-        if (!$entity){
-            $entity = 'Data not found';
+            return response()->json([
+                'success' => true,
+                'message' => 'Warehouse fetched successfully.',
+                'data' => $entity
+            ], 200);
+
+        } catch (ModelNotFoundException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Warehouse not found.'
+            ], 404);
         }
-
-        $data = $service->returnJosnResponse($entity);
-        return $data;
-    }
-
-
-    /**
-     * Show the specified resource.
-     */
-    public function details($id)
-    {
-        $service = new JsonRequestResponse();
-        $entity = VendorModel::find($id);
-
-        if (!$entity){
-            $entity = 'Data not found';
-        }
-
-        $data = $service->returnJosnResponse($entity);
-        return $data;
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit($id)
-    {
-        $service = new JsonRequestResponse();
-        $entity = WarehouseModel::find($id);
-
-        if (!$entity){
-            $entity = 'Data not found';
-        }
-
-        $data = $service->returnJosnResponse($entity);
-        return $data;
     }
 
     /**
      * Update the specified resource in storage.
      */
+
     public function update(WarehouseRequest $request, $id)
     {
         $data = $request->validated();
 
-        if ($data['mobile']){
-            $warehouseExists = WarehouseModel::where('mobile', $data['mobile'])->first();
+        try {
+            DB::beginTransaction();
 
-            if ($warehouseExists && $warehouseExists->id != $id) {
+            $entity = WarehouseModel::find($id);
+
+            if (!$entity) {
                 return response()->json([
-                    'message' => 'Validation failed.',
-                    'errors' => [
-                        'mobile' => ['Mobile is already in use.'],
-                    ]
-                ], 422); // HTTP 422 Unprocessable Entity
+                    'message' => 'Warehouse not found.',
+                    'errors' => ['id' => ['Invalid warehouse ID.']]
+                ], 404);
             }
+
+            if (!empty($data['mobile'])) {
+                $warehouseExists = WarehouseModel::where('mobile', $data['mobile'])
+                    ->where('id', '!=', $id)
+                    ->first();
+
+                if ($warehouseExists) {
+                    DB::rollBack();
+                    return response()->json([
+                        'message' => 'Validation failed.',
+                        'errors' => ['mobile' => ['Mobile is already in use.']]
+                    ], 422);
+                }
+            }
+
+            $entity->update($data);
+
+            DB::commit(); // Commit Transaction
+
+            return response()->json([
+                'status' => 200,
+                'success' => true,
+                'message' => 'Warehouse updated successfully.',
+                'data' => $entity,
+            ], 200);
+
+        } catch (\Exception $e) {
+            DB::rollBack(); // Rollback on error
+            return response()->json([
+                'message' => 'Something went wrong.',
+                'error' => $e->getMessage()
+            ], 500);
         }
-
-        $entity = WarehouseModel::find($id);
-        $entity->update($data);
-
-        $service = new JsonRequestResponse();
-        return $service->returnJosnResponse($entity);
     }
+
 
     /**
      * Remove the specified resource from storage.
      */
     public function destroy($id)
     {
-        $service = new JsonRequestResponse();
-        VendorModel::find($id)->delete();
+        try {
+            // Find the warehouse
+            $warehouse = WarehouseModel::find($id);
 
-        $entity = ['message'=>'delete'];
-        return $service->returnJosnResponse($entity);
+            // If no warehouse found, return 404 response
+            if (!$warehouse) {
+                return response()->json([
+                    'status' => 404,
+                    'success' => false,
+                    'message' => 'Warehouse not found.',
+                ], 404);
+            }
 
+            // Delete the warehouse (supports soft deletes if enabled)
+            $warehouse->update(['is_delete' => true]);
+
+            return response()->json([
+                'status' => 200,
+                'success' => true,
+                'message' => 'Warehouse deleted successfully.',
+            ], 200);
+        } catch (\Exception $e) {
+            // Catch unexpected errors
+            return response()->json([
+                'status' => 500,
+                'success' => false,
+                'message' => 'An error occurred while deleting the warehouse.',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
     }
-
-
-    public function localStorage(Request $request){
-
-        $data = VendorModel::getRecordsForLocalStorage($request,$this->domain);
-        $response = new Response();
-        $response->headers->set('Content-Type','application/json');
-        $response->setContent(json_encode([
-            'message' => 'success',
-            'status' => Response::HTTP_OK,
-            'data' => $data['entities']
-        ]));
-        $response->setStatusCode(Response::HTTP_OK);
-        return $response;
-    }
-
-
 }

@@ -28,7 +28,7 @@ class ConfigRequest extends FormRequest
                     'currency_id' => 'required|integer',
                     'country_id' => 'required|integer',
                     'address' => 'nullable|string',
-                    'sku_wearhouse' => 'boolean',
+                    'sku_warehouse' => 'boolean',
                     'sku_category' => 'boolean',
                     'vat_enable' => 'boolean',
                     'vat_percent' => 'nullable|numeric|regex:/^\d+(\.\d{1,2})?$/',
