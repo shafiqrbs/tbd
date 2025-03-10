@@ -32,9 +32,20 @@ class WarehouseController extends Controller
         return response()->json([
             'status' => 200,
             'success' => true,
-            'message' => 'Warehouse created successfully.',
+            'message' => 'Warehouse fetched successfully.',
             'total' => $data['data']['count'],
             'data' => $data['data']['entities'],
+        ], 200);
+    }
+    public function warehouseDropdown(Request $request){
+
+        $data = WarehouseModel::getDropdown($request,$this->domain);
+
+        return response()->json([
+            'status' => 200,
+            'success' => true,
+            'message' => 'Warehouse fetched successfully.',
+            'data' => $data,
         ], 200);
     }
 

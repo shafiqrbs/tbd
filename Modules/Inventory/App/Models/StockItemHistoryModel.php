@@ -20,7 +20,7 @@ class StockItemHistoryModel extends Model
         'opening_quantity',
         'closing_quantity',
         'closing_balance',
-        'wearhouse_id',
+        'warehouse_id',
         'mode',
         'process',
         'sales_price',
@@ -140,7 +140,7 @@ class StockItemHistoryModel extends Model
             'opening_balance' => $existingStockHistory->closing_balance ?? 0,
             'closing_quantity' => $closing_quantity,
             'closing_balance' => $closing_balance,
-            'wearhouse_id' => $item->wearhouse_id ?? null,
+            'warehouse_id' => $item->warehouse_id ?? null,
             'mode' => $process,
             'process' => 'approved',
             'created_by' => $domain['user_id']

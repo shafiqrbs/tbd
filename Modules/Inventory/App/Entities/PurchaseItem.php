@@ -60,9 +60,9 @@ class PurchaseItem
     private  $unit;
 
     /**
-     * @ORM\ManyToOne(targetEntity="WearHouse")
+     * @ORM\ManyToOne(targetEntity="Modules\Core\App\Entities\Warehouse")
      **/
-    private  $wearhouse;
+    private  $warehouse;
 
     /**
      * @var float

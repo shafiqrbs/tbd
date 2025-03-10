@@ -30,10 +30,10 @@ class StockItemHistory
 
     /**
      *
-     * @ORM\ManyToOne(targetEntity="Modules\Core\App\Entities\Setting")
+     * @ORM\ManyToOne(targetEntity="Modules\Core\App\Entities\Warehouse")
      * @ORM\JoinColumn(onDelete="CASCADE")
      **/
-    private  $wearhouse;
+    private  $warehouse;
 
     /**
      * @ORM\ManyToOne(targetEntity="StockItem")

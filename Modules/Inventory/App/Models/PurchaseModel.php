@@ -109,9 +109,13 @@ class PurchaseModel extends Model
                         'inv_purchase_item.sales_price',
                         'inv_purchase_item.sub_total',
                         'inv_particular.name as unit_name',
+                        'cor_warehouses.name as warehouse_name',
+                        'cor_warehouses.location as warehouse_location',
+                        'cor_warehouses.id as warehouse_id',
                     ])
                         ->join('inv_stock','inv_stock.id','=','inv_purchase_item.stock_item_id')
                         ->join('inv_product','inv_product.id','=','inv_stock.product_id')
+                        ->leftjoin('cor_warehouses','cor_warehouses.id','=','inv_purchase_item.warehouse_id')
                         ->leftjoin('inv_particular','inv_particular.id','=','inv_product.unit_id');
                 }]);
 
@@ -200,6 +204,7 @@ class PurchaseModel extends Model
                 $query->leftjoin('inv_stock','inv_stock.id','=','inv_purchase_item.stock_item_id');
                 $query->leftjoin('inv_product','inv_product.id','=','inv_stock.product_id');
                 $query->leftjoin('inv_particular as unit','unit.id','=','inv_product.unit_id');
+                $query->leftjoin('cor_warehouses','cor_warehouses.id','=','inv_purchase_item.warehouse_id');
                 $query->select([
                     'inv_purchase_item.id',
                     'inv_purchase_item.stock_item_id as product_id',
@@ -209,7 +214,11 @@ class PurchaseModel extends Model
                     'inv_purchase_item.quantity',
                     'inv_purchase_item.purchase_price',
                     'inv_purchase_item.sub_total',
-                    'inv_product.unit_id as unit_id'
+                    'inv_product.unit_id as unit_id',
+                    DB::raw("CONCAT(cor_warehouses.name, ' (', cor_warehouses.location, ')') as warehouse_name"),
+                    'cor_warehouses.name as warehouse',
+                    'cor_warehouses.location as warehouse_location',
+                    'cor_warehouses.id as warehouse_id'
                 ]);
             }])->first();
 

@@ -139,6 +139,7 @@ class PurchaseController extends Controller
                     $item['purchase_price'] = $item['purchase_price'] ?? 0;
                     $item['sub_total'] = $item['sub_total'] ?? 0;
                     $item['mode'] = 'purchase';
+                    $item['warehouse_id'] = $item['warehouse_id'];
                     PurchaseItemModel::create($item);
                 }
             }

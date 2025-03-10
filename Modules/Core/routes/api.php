@@ -35,6 +35,7 @@ Route::prefix('/core/select')->middleware([HeaderAuthenticationMiddleware::class
     Route::get('/setting', [CoreController::class,'settingDropdown'])->name('core_setting_dropdown');
     Route::get('/setting-type', [CoreController::class,'settingTypeDropdown'])->name('core_setting_type_dropdown');
     Route::get('/countries', [CoreController::class,'countriesDropdown'])->name('core_countries_dropdown');
+    Route::get('/warehouse', [WarehouseController::class,'warehouseDropdown'])->name('core_warehouse_dropdown');
 });
 
 Route::prefix('/core')->middleware([HeaderAuthenticationMiddleware::class])->group(function() {
