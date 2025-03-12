@@ -721,6 +721,48 @@ class Config
     /**
      * @var boolean
      *
+     * @ORM\Column(type="boolean",options={"default"="false"})
+     */
+    private $posInvoicePosition;
+
+    /**
+     * @var boolean
+     *
+     * @ORM\Column(type="boolean",options={"default"="false"})
+     */
+    private $multiKitchen;
+
+    /**
+     * @var boolean
+     *
+     * @ORM\Column(type="boolean",options={"default"="false"})
+     */
+    private $paymentSplit;
+
+    /**
+     * @var boolean
+     *
+     * @ORM\Column(type="boolean",options={"default"="false"})
+     */
+    private $itemAddons;
+
+    /**
+     * @var boolean
+     *
+     * @ORM\Column(type="boolean",options={"default"="false"})
+     */
+    private $cashOnDelivery;
+
+    /**
+     * @var boolean
+     *
+     * @ORM\Column(type="boolean",options={"default"="false"})
+     */
+    private $isOnline;
+
+    /**
+     * @var boolean
+     *
      * @ORM\Column(type="boolean" ,options={"default"="false"})
      */
     private $removeImage;
@@ -2417,6 +2459,121 @@ class Config
     {
         $this->isPurchaseAutoApproved = $isPurchaseAutoApproved;
     }
+
+    /**
+     * @return bool
+     */
+    public function isSkuWarehouse()
+    {
+        return $this->skuWarehouse;
+    }
+
+    /**
+     * @param bool $skuWarehouse
+     */
+    public function setSkuWarehouse($skuWarehouse)
+    {
+        $this->skuWarehouse = $skuWarehouse;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isPosInvoicePosition()
+    {
+        return $this->posInvoicePosition;
+    }
+
+    /**
+     * @param bool $posInvoicePosition
+     */
+    public function setPosInvoicePosition($posInvoicePosition)
+    {
+        $this->posInvoicePosition = $posInvoicePosition;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isMultiKitchen()
+    {
+        return $this->multiKitchen;
+    }
+
+    /**
+     * @param bool $multiKitchen
+     */
+    public function setMultiKitchen($multiKitchen)
+    {
+        $this->multiKitchen = $multiKitchen;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isPaymentSplit()
+    {
+        return $this->paymentSplit;
+    }
+
+    /**
+     * @param bool $paymentSplit
+     */
+    public function setPaymentSplit($paymentSplit)
+    {
+        $this->paymentSplit = $paymentSplit;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isItemAddons()
+    {
+        return $this->itemAddons;
+    }
+
+    /**
+     * @param bool $itemAddons
+     */
+    public function setItemAddons($itemAddons)
+    {
+        $this->itemAddons = $itemAddons;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isCashOnDelivery()
+    {
+        return $this->cashOnDelivery;
+    }
+
+    /**
+     * @param bool $cashOnDelivery
+     */
+    public function setCashOnDelivery($cashOnDelivery)
+    {
+        $this->cashOnDelivery = $cashOnDelivery;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isOnline()
+    {
+        return $this->isOnline;
+    }
+
+    /**
+     * @param bool $isOnline
+     */
+    public function setIsOnline($isOnline)
+    {
+        $this->isOnline = $isOnline;
+    }
+
+
+
 
 
 
