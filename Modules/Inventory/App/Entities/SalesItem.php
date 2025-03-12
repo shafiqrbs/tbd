@@ -81,28 +81,28 @@ class SalesItem
      *
      * @ORM\Column(type="float", nullable=true)
      */
-    private $returnQnt = 0;
+    private $returnQuantity = 0;
 
     /**
      * @var float
      *
      * @ORM\Column(type="float", nullable=true)
      */
-    private $damageQnt = 0;
+    private $damageQuantity = 0;
 
     /**
      * @var float
      *
      * @ORM\Column(type="float", nullable=true)
      */
-    private $spoilQnt= 0;
+    private $spoilQuantity= 0;
 
     /**
      * @var float
      *
      * @ORM\Column(type="float", nullable=true)
      */
-    private $bonusQnt = 0;
+    private $bonusQuantity = 0;
 
 
     /**
@@ -272,6 +272,11 @@ class SalesItem
     private $updatedAt;
 
     /**
+     * @ORM\ManyToOne(targetEntity="Modules\Core\App\Entities\Warehouse")
+     **/
+    private  $warehouse;
+
+    /**
      * @return int
      */
     public function getId()
@@ -398,70 +403,6 @@ class SalesItem
     public function setQuantity($quantity)
     {
         $this->quantity = $quantity;
-    }
-
-    /**
-     * @return float
-     */
-    public function getReturnQnt()
-    {
-        return $this->returnQnt;
-    }
-
-    /**
-     * @param float $returnQnt
-     */
-    public function setReturnQnt($returnQnt)
-    {
-        $this->returnQnt = $returnQnt;
-    }
-
-    /**
-     * @return float
-     */
-    public function getDamageQnt()
-    {
-        return $this->damageQnt;
-    }
-
-    /**
-     * @param float $damageQnt
-     */
-    public function setDamageQnt($damageQnt)
-    {
-        $this->damageQnt = $damageQnt;
-    }
-
-    /**
-     * @return float
-     */
-    public function getSpoilQnt()
-    {
-        return $this->spoilQnt;
-    }
-
-    /**
-     * @param float $spoilQnt
-     */
-    public function setSpoilQnt($spoilQnt)
-    {
-        $this->spoilQnt = $spoilQnt;
-    }
-
-    /**
-     * @return float
-     */
-    public function getBonusQnt()
-    {
-        return $this->bonusQnt;
-    }
-
-    /**
-     * @param float $bonusQnt
-     */
-    public function setBonusQnt($bonusQnt)
-    {
-        $this->bonusQnt = $bonusQnt;
     }
 
     /**
@@ -862,6 +803,62 @@ class SalesItem
     public function setConfig($config): void
     {
         $this->config = $config;
+    }
+
+    public function getReturnQuantity(): float|int
+    {
+        return $this->returnQuantity;
+    }
+
+    public function setReturnQuantity(float|int $returnQuantity): void
+    {
+        $this->returnQuantity = $returnQuantity;
+    }
+
+    public function getDamageQuantity(): float|int
+    {
+        return $this->damageQuantity;
+    }
+
+    public function setDamageQuantity(float|int $damageQuantity): void
+    {
+        $this->damageQuantity = $damageQuantity;
+    }
+
+    public function getSpoilQuantity(): float|int
+    {
+        return $this->spoilQuantity;
+    }
+
+    public function setSpoilQuantity(float|int $spoilQuantity): void
+    {
+        $this->spoilQuantity = $spoilQuantity;
+    }
+
+    public function getBonusQuantity(): float|int
+    {
+        return $this->bonusQuantity;
+    }
+
+    public function setBonusQuantity(float|int $bonusQuantity): void
+    {
+        $this->bonusQuantity = $bonusQuantity;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getWarehouse()
+    {
+        return $this->warehouse;
+    }
+
+    /**
+     * @param mixed $warehouse
+     */
+    public function setWarehouse($warehouse): void
+    {
+        $this->warehouse = $warehouse;
     }
 
 

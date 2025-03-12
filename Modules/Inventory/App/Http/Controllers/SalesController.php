@@ -4,6 +4,7 @@ namespace Modules\Inventory\App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use Doctrine\ORM\EntityManager;
+use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
@@ -27,6 +28,7 @@ use Modules\Inventory\App\Models\SalesModel;
 use Modules\Inventory\App\Models\SettingModel;
 use Modules\Inventory\App\Models\StockItemHistoryModel;
 use Modules\Inventory\App\Models\StockItemModel;
+use Symfony\Component\HttpFoundation\Response as ResponseAlias;
 use function Symfony\Component\HttpFoundation\Session\Storage\Handler\getInsertStatement;
 
 class SalesController extends Controller
@@ -60,38 +62,67 @@ class SalesController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(SalesRequest $request, EntityManager $em)
+
+    public function store(SalesRequest $request)
     {
-        $service = new JsonRequestResponse();
         $input = $request->validated();
         $input['config_id'] = $this->domain['config_id'];
-        $entity = SalesModel::create($input);
 
-        $entity->refresh();
+        // Start Database Transaction to Ensure Data Consistency
+        DB::beginTransaction();
 
-        $em->getRepository(SalesItem::class)->salesInsert($entity->id,$input,$this->domain);
-        $salesData = SalesModel::getShow($entity->id, $this->domain);
+        try {
+            // Create Sales Record
+            $sales = SalesModel::create($input);
+            $sales->refresh();
 
-        // for stock maintain
+            // Insert Sales Items
+            SalesItemModel::insertSalesItems($sales, $input['items']);
 
-        $findCustomer = CustomerModel::find($input['customer_id']);
-        $findUserType = \Modules\Core\App\Models\SettingModel::find($findCustomer->customer_group_id);
-        $findConfig = ConfigModel::find($this->domain['config_id']);
+            // Fetch Sales Data for Response
+            $salesData = SalesModel::getShow($sales->id, $this->domain);
 
-        if ($findConfig->is_sales_auto_approved && (!$findUserType || $findUserType->name != 'Domain')) {
-            $entity->update(['approved_by_id' => $this->domain['user_id']]);
+            // Stock Maintenance Logic (Auto Approval)
+            $findCustomer = CustomerModel::find($input['customer_id']);
+            $findUserType = SettingModel::find($findCustomer->customer_group_id);
+            $findConfig = ConfigModel::find($this->domain['config_id']);
 
-            if (count($entity->salesItems) > 0) {
-                foreach ($entity->salesItems as $item) {
-                    StockItemHistoryModel::openingStockQuantity($item, 'sales', $this->domain);
+            if (
+                $findConfig->is_sales_auto_approved &&
+                (!$findUserType || $findUserType->name !== 'Domain')
+            ) {
+                $sales->update(['approved_by_id' => $this->domain['user_id']]);
+
+                if ($sales->salesItems->count() > 0) {
+                    foreach ($sales->salesItems as $item) {
+                        StockItemHistoryModel::openingStockQuantity($item, 'sales', $this->domain);
+                    }
                 }
             }
+
+            // Commit Transaction
+            DB::commit();
+
+            // Send Success Response
+            return response()->json([
+                'status' => 200,
+                'success' => true,
+                'message' => 'Sales updated successfully.',
+                'data' => $salesData,
+            ]);
+        } catch (Exception $e) {
+            // Rollback Transaction on Failure
+            DB::rollBack();
+
+            // Log the Error (For Debugging Purposes)
+            \Log::error('Sales transaction failed: ' . $e->getMessage());
+
+            // Send Error Response
+            return response()->json([
+                'message' => 'An error occurred while processing the sale.',
+                'error' => $e->getMessage()
+            ], 500);
         }
-
-
-        $data = $service->returnJosnResponse($salesData);
-        return $data;
-
     }
 
     /**
@@ -113,13 +144,13 @@ class SalesController extends Controller
     public function edit($id)
     {
         $entity = SalesModel::getEditData($id, $this->domain);
-        $status = $entity ? Response::HTTP_OK : Response::HTTP_NOT_FOUND;
+        $status = $entity ? ResponseAlias::HTTP_OK : ResponseAlias::HTTP_NOT_FOUND;
 
         return response()->json([
             'message' => 'success',
             'status' => $status,
             'data' => $entity ?? []
-        ], Response::HTTP_OK);
+        ], ResponseAlias::HTTP_OK);
 
     }
 
@@ -138,12 +169,7 @@ class SalesController extends Controller
 
             SalesItemModel::where('sale_id', $id)->delete();
             if (sizeof($data['items'])>0){
-                foreach ($data['items'] as $item){
-                    $item['stock_item_id'] = $item['product_id'];
-                    $item['name'] = $item['item_name'];
-                    $item['uom'] = $item['uom'];
-                    SalesItemModel::create($item);
-                }
+                SalesItemModel::insertSalesItems($getSales, $data['items']);
             }
             DB::commit();
 
@@ -154,10 +180,10 @@ class SalesController extends Controller
             $response->headers->set('Content-Type', 'application/json');
             $response->setContent(json_encode([
                 'message' => 'success',
-                'status' => Response::HTTP_OK,
+                'status' => ResponseAlias::HTTP_OK,
                 'data' => $salesData ?? []
             ]));
-            $response->setStatusCode(Response::HTTP_OK);
+            $response->setStatusCode(ResponseAlias::HTTP_OK);
 
         } catch (\Exception $e) {
             DB::rollback();
@@ -165,10 +191,10 @@ class SalesController extends Controller
             $response->headers->set('Content-Type', 'application/json');
             $response->setContent(json_encode([
                 'message' => 'error',
-                'status' => Response::HTTP_INTERNAL_SERVER_ERROR,
+                'status' => ResponseAlias::HTTP_INTERNAL_SERVER_ERROR,
                 'error' => $e->getMessage(),
             ]));
-            $response->setStatusCode(Response::HTTP_OK);
+            $response->setStatusCode(ResponseAlias::HTTP_OK);
         }
 
         return $response;

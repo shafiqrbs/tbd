@@ -5,6 +5,7 @@ namespace Modules\Inventory\App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Carbon;
 use Modules\Inventory\App\Entities\Product;
 use Modules\Utility\App\Models\ProductUnitModel;
 use Ramsey\Collection\Collection;
@@ -18,7 +19,25 @@ class SalesItemModel extends Model
     protected $guarded = ['id'];
 
     protected $fillable = [
-
+        'sale_id',
+        'config_id',
+        'name',
+        'uom',
+        'unit_id',
+        'stock_item_id',
+        'warehouse_id',
+        'bonus_quantity',
+        'quantity',
+        'percent',
+        'price',
+        'sales_price',
+        'purchase_price',
+        'sub_total',
+        'discount_price',
+        'height',
+        'width',
+        'total_quantity',
+        'sub_quantity',
     ];
 
     public static function boot() {
@@ -47,6 +66,62 @@ class SalesItemModel extends Model
     public function stock() : BelongsTo
     {
         return $this->belongsTo(StockItemModel::class , 'stock_item_id');
+    }
+
+    /**
+     * Insert multiple sales items.
+     *
+     * @param SalesModel $sales Sales instance.
+     * @param array $items Incoming items to insert.
+     * @return bool
+     */
+    public static function insertSalesItems($sales, array $items): bool
+    {
+        $timestamp = Carbon::now();
+
+
+        $formattedItems = array_map(function ($item) use ($sales, $timestamp) {
+            return [
+                'sale_id'       => $sales->id,
+                'config_id'      => $sales->config_id,
+                'stock_item_id'  => $item['product_id'] ?? null,
+                'unit_id'  => $item['unit_id'] ?? null,
+                'name'  => $item['item_name'] ?? null,
+                'price'  => $item['price'] ?? null,
+                'uom'  => $item['uom'] ?? null,
+                'warehouse_id'   => $item['warehouse_id'] ?? null,
+                'bonus_quantity' => $item['bonus_quantity'] ?? 0,
+                'return_quantity' => $item['return_quantity'] ?? 0,
+                'damage_quantity' => $item['damage_quantity'] ?? 0,
+                'spoil_quantity' => $item['spoil_quantity'] ?? 0,
+                'height' => $item['height'] ?? 0,
+                'width' => $item['width'] ?? 0,
+                'total_quantity' => $item['total_quantity'] ?? 0,
+                'sub_quantity' => $item['sub_quantity'] ?? 0,
+                'quantity'       => $item['quantity'] ?? 0,
+                'percent'        => $item['percent'] ?? 0,
+                'sales_price'    => $item['sales_price'] ?? 0,
+                'purchase_price' => $item['purchase_price'] ?? 0,
+                'sub_total'      => ($item['quantity'] ?? 0) * ($item['sales_price'] ?? 0),
+                'discount_price' => self::calculateDiscountPrice($item['percent'] ?? 0, $item['sales_price'] ?? 0),
+                'created_at'     => $timestamp,
+                'updated_at'     => $timestamp,
+            ];
+        }, $items);
+
+        return self::insert($formattedItems);
+    }
+
+    /**
+     * Calculate the discounted price based on percentage.
+     *
+     * @param float $percent Discount percentage.
+     * @param float $salesPrice Original price.
+     * @return float
+     */
+    private static function calculateDiscountPrice($percent, $salesPrice)
+    {
+        return $salesPrice - ($salesPrice * ($percent / 100));
     }
 
     public static function getRecords($request,$domain)

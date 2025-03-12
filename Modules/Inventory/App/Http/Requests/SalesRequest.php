@@ -33,6 +33,8 @@ class SalesRequest extends FormRequest
             'created_by_id' => 'nullable|integer',
             'process' => 'nullable|string',
             'narration' => 'nullable|string',
+            'warehouse_id' => 'nullable',
+            'bonus_quantity' => 'nullable',
             'invoice_date' => 'nullable|date',
 
         ];

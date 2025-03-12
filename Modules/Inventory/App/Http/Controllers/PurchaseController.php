@@ -140,6 +140,7 @@ class PurchaseController extends Controller
                     $item['sub_total'] = $item['sub_total'] ?? 0;
                     $item['mode'] = 'purchase';
                     $item['warehouse_id'] = $item['warehouse_id'];
+                    $item['bonus_quantity'] = $item['bonus_quantity'];
                     PurchaseItemModel::create($item);
                 }
             }
@@ -194,7 +195,7 @@ class PurchaseController extends Controller
         try {
             $purchase = PurchaseModel::find($id);
             $purchase->update([
-//                'approved_by_id' => $this->domain['user_id'],
+                'approved_by_id' => $this->domain['user_id'],
                 'process' => 'Approved'
             ]);
             if (sizeof($purchase->purchaseItems)>0){

@@ -33,6 +33,7 @@ class PurchaseRequest extends FormRequest
             'process' => 'nullable|string',
             'narration' => 'nullable|string',
             'invoice_date' => 'nullable|date',
+            'bonus_quantity' => 'nullable',
         ];
     }
 

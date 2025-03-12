@@ -101,7 +101,27 @@ class SalesModel extends Model
                 'cor_customers.address as customer_address',
                 'cor_setting.name as customer_group',
                 'cor_customers.balance as balance',
-            ])->with('salesItems');
+            ])->with(['salesItems' => function ($query) {
+                $query->select([
+                    'inv_sales_item.id',
+                    'inv_sales_item.sale_id',
+                    'inv_sales_item.stock_item_id as product_id',
+                    'inv_sales_item.unit_id',
+                    'inv_sales_item.name as item_name',
+                    'inv_sales_item.name as name',
+                    'inv_sales_item.uom as uom',
+                    'inv_sales_item.quantity',
+                    'inv_sales_item.sales_price',
+                    'inv_sales_item.purchase_price',
+                    'inv_sales_item.price',
+                    'inv_sales_item.sub_total',
+                    'inv_sales_item.bonus_quantity',
+                    DB::raw("CONCAT(cor_warehouses.name, ' (', cor_warehouses.location, ')') as warehouse_name"),
+                    'cor_warehouses.name as warehouse',
+                    'cor_warehouses.location as warehouse_location',
+                    'cor_warehouses.id as warehouse_id'
+                ])->leftjoin('cor_warehouses','cor_warehouses.id','=','inv_sales_item.warehouse_id');
+            }]);
 
         if (isset($request['term']) && !empty($request['term'])){
             $entities = $entities->whereAny(['inv_sales.invoice','cor_customers.name','cor_customers.mobile','salesBy.username','createdBy.username','acc_transaction_mode.name','inv_sales.total'],'LIKE','%'.$request['term'].'%');
@@ -237,7 +257,12 @@ class SalesModel extends Model
                     'inv_sales_item.purchase_price',
                     'inv_sales_item.price',
                     'inv_sales_item.sub_total',
-                ]);
+                    'inv_sales_item.bonus_quantity',
+                    DB::raw("CONCAT(cor_warehouses.name, ' (', cor_warehouses.location, ')') as warehouse_name"),
+                    'cor_warehouses.name as warehouse',
+                    'cor_warehouses.location as warehouse_location',
+                    'cor_warehouses.id as warehouse_id'
+                ])->leftjoin('cor_warehouses','cor_warehouses.id','=','inv_sales_item.warehouse_id');
             }])
             ->first();
 
