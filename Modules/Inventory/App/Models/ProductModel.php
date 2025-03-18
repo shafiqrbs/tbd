@@ -65,6 +65,11 @@ class ProductModel extends Model
         return $this->belongsTo(CategoryModel::class, 'category_id');
     }
 
+    public function images()
+    {
+        return $this->hasOne(ProductGalleryModel::class, 'product_id');
+    }
+
 
 
     public static function getRecords($request,$domain)
@@ -104,7 +109,17 @@ class ProductModel extends Model
                 'inv_stock.purchase_price',
                 'inv_stock.sales_price',
                 'inv_stock.average_price',
-            ]);
+            ])->with(['images' => function ($query) {
+                $query->select([
+                    'inv_product_gallery.id',
+                    'inv_product_gallery.product_id',
+                    DB::raw("CONCAT('uploads/inventory/product/feature_image/', inv_product_gallery.feature_image) AS feature_image"),
+                    DB::raw("CONCAT('uploads/inventory/product/path_one/', inv_product_gallery.path_one) AS path_one"),
+                    DB::raw("CONCAT('uploads/inventory/product/path_two/', inv_product_gallery.path_two) AS path_two"),
+                    DB::raw("CONCAT('uploads/inventory/product/path_three/', inv_product_gallery.path_three) AS path_three"),
+                    DB::raw("CONCAT('uploads/inventory/product/path_four/', inv_product_gallery.path_four) AS path_four")
+                ])->where('inv_product_gallery.status', 1);
+            }]);
 
         if (isset($request['term']) && !empty($request['term'])){
             $products = $products->whereAny([

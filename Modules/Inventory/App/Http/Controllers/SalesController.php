@@ -84,7 +84,7 @@ class SalesController extends Controller
 
             // Stock Maintenance Logic (Auto Approval)
             $findCustomer = CustomerModel::find($input['customer_id']);
-            $findUserType = SettingModel::find($findCustomer->customer_group_id);
+            $findUserType = \Modules\Core\App\Models\SettingModel::find($findCustomer->customer_group_id);
             $findConfig = ConfigModel::find($this->domain['config_id']);
 
             if (

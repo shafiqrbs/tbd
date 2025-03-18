@@ -42,6 +42,8 @@ class ConfigController extends Controller
             ->get()
             ->toArray();
 
+        $entity['child_domain_exists'] = VendorModel::where('sub_domain_id', $this->domain['global_id'])->exists();
+
         if ($inv_product_type) {
             foreach ($inv_product_type as $value) {
                 switch ($value['slug']) {
@@ -78,6 +80,7 @@ class ConfigController extends Controller
         $service = new JsonRequestResponse();
         $dataModel = ConfigModel::with('domain','currency','businessModel')->where('domain_id',$id)->first();
         $entity = ConfigModel::with('domain','currency','businessModel')->find($dataModel->id);
+        $entity['child_domain_exists'] = VendorModel::where('sub_domain_id', $id)->exists();
         if (!$entity){
             $entity = 'Data not found';
         }
