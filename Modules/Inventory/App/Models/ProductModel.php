@@ -228,6 +228,7 @@ class ProductModel extends Model
                 'inv_stock.bangla_name',
                 'inv_stock.sales_price as sales_price',
                 'inv_stock.min_quantity as min_quantity',
+                'inv_stock.quantity as stock_quantity',
                 'inv_stock.sku as sku',
                 DB::raw("CONCAT('".url('')."/uploads/inventory/product/feature_image/', inv_product_gallery.feature_image) AS feature_image"),
                 DB::raw("CONCAT('".url('')."/uploads/inventory/product/path_one/', inv_product_gallery.path_one) AS path_one"),
