@@ -8,10 +8,10 @@ use Gedmo\Mapping\Annotation as Gedmo;
 /**
  * MedicineDamage
  *
- * @ORM\Table("inv_stock_adjustment")
+ * @ORM\Table("inv_stock_transfer")
  * @ORM\Entity()
  */
-class ItemStockAdjustment
+class StockItemTransfer
 {
     /**
      * @var integer
@@ -28,12 +28,21 @@ class ItemStockAdjustment
      **/
     private $config;
 
+    /**
+     * @ORM\ManyToOne(targetEntity="Modules\Core\App\Entities\Warehouse")
+     **/
+    private  $fromWarehouse;
 
     /**
-     * @ORM\ManyToOne(targetEntity="Product")
+     * @ORM\ManyToOne(targetEntity="Modules\Core\App\Entities\Warehouse")
+     **/
+    private  $toWarehouse;
+
+    /**
+     * @ORM\ManyToOne(targetEntity="StockItem")
      * @ORM\JoinColumn(onDelete="CASCADE")
      **/
-    private $item;
+    private $stock_item;
 
     /**
      * @Gedmo\Blameable(on="create")
@@ -91,19 +100,6 @@ class ItemStockAdjustment
      */
     private $updatedAt;
 
-    /**
-     * @var \DateTime
-     * @Gedmo\Timestampable(on="create")
-     * @ORM\Column(name="created", type="datetime",nullable=true)
-     */
-    private $created;
-
-    /**
-     * @var \DateTime
-     * @Gedmo\Timestampable(on="update")
-     * @ORM\Column(name="updated", type="datetime",nullable=true)
-     */
-    private $updated;
 
 
 

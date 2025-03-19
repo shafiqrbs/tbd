@@ -2,17 +2,16 @@
 
 namespace Modules\Inventory\App\Entities;
 
-
 use Doctrine\ORM\Mapping as ORM;
 use Gedmo\Mapping\Annotation as Gedmo;
 
 /**
- * RestaurantTableInvoiceItem
+ * InvoiceTable
  *
- * @ORM\Table( name = "inv_invoice_table_item")
+ * @ORM\Table( name = "inv_location_printer_setup")
  * @ORM\Entity()
  */
-class InvoiceTableItem
+class LocationPrinterSetup
 {
     /**
      * @var integer
@@ -25,61 +24,55 @@ class InvoiceTableItem
 
 
     /**
-     * @ORM\ManyToOne(targetEntity="StockItem")
+     * @ORM\ManyToOne(targetEntity="Config", cascade={"detach","merge"} )
      * @ORM\JoinColumn(onDelete="CASCADE")
      **/
-    private  $stockItem;
-
+    private  $config;
 
     /**
-     * @ORM\ManyToOne(targetEntity="InvoiceTable")
-     * @ORM\JoinColumn(onDelete="CASCADE")
+     * @Gedmo\Blameable(on="create")
+     * @ORM\ManyToOne(targetEntity="Modules\Core\App\Entities\User")
      **/
-    private $invoice;
+    private  $createdBy;
 
 
     /**
-     * @var float
+     * @ORM\ManyToOne(targetEntity="Particular")
+     **/
+    private $itemLocation;
+
+
+    /**
+     * @var string
      *
-     * @ORM\Column(name="quantity", type="float")
+     * @ORM\Column(name="interface", type="string", nullable=true)
      */
-    private $quantity = 1;
+    private $interface;
 
-    /**
-     * @var float
+
+     /**
+     * @var string
      *
-     * @ORM\Column(name="salesPrice", type="float")
+     * @ORM\Column(name="printer_type", type="string", nullable=true)
      */
-    private $salesPrice;
+    private $printerType;
+
 
     /**
-     * @var float
+     * @var string
      *
-     * @ORM\Column(name="purchasePrice", type="float", nullable=true)
+     * @ORM\Column(name="type_tont", type="string", nullable=true)
+     * TypeFontA|TypeFontB
      */
-    private $purchasePrice;
+    private $typeFont;
 
 
-    /**
+     /**
      * @var boolean
      *
-     * @ORM\Column(name="customPrice", type="boolean")
+     * @ORM\Column(name="isActive", type="boolean", nullable=true)
      */
-    private $customPrice = false;
-
-    /**
-     * @var boolean
-     *
-     * @ORM\Column(name="isPrint", type="boolean")
-     */
-    private $isPrint = true;
-
-    /**
-     * @var float
-     *
-     * @ORM\Column(name="subTotal", type="float")
-     */
-    private $subTotal;
+    private $isActive = false;
 
     /**
      * @var \DateTime
@@ -105,6 +98,8 @@ class InvoiceTableItem
     {
         return $this->id;
     }
+
+
 
 }
 

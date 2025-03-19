@@ -92,10 +92,10 @@ class AccountJournalItem
     private  $purchaseReturn;
 
     /**
-     * @ORM\ManyToOne(targetEntity="Modules\Inventory\App\Entities\ItemStockAdjustment")
+     * @ORM\ManyToOne(targetEntity="Modules\Inventory\App\Entities\StockItemReconciliation")
      * @ORM\JoinColumn(name="stock_adjustment_id", referencedColumnName="id", nullable=true, onDelete="CASCADE")
      **/
-    private  $stockAdjustment;
+    private  $stockItemReconciliation;
 
 
     /**

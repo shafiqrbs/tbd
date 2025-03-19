@@ -2,18 +2,17 @@
 
 namespace Modules\Inventory\App\Entities;
 
-use Core\UserBundle\Entity\User;
 use Doctrine\ORM\Mapping as ORM;
 use Gedmo\Mapping\Annotation as Gedmo;
 
 /**
- * RestaurantTemporarySales
+ * InvoiceTable
  *
  * @ORM\Table( name = "inv_invoice_table")
- * @ORM\Entity(repositoryClass="Appstore\Bundle\RestaurantBundle\Repository\RestaurantTableInvoiceRepository")
+ * @ORM\Entity()
  */
 class InvoiceTable
-{s
+{
     /**
      * @var integer
      *
@@ -25,35 +24,30 @@ class InvoiceTable
 
 
     /**
-     * @ORM\ManyToOne(targetEntity="Appstore\Bundle\RestaurantBundle\Entity\RestaurantConfig", inversedBy="restaurantTemp" , cascade={"detach","merge"} )
+     * @ORM\ManyToOne(targetEntity="Config", cascade={"detach","merge"} )
      * @ORM\JoinColumn(onDelete="CASCADE")
      **/
-    private  $restaurantConfig;
+    private  $config;
 
     /**
-     * @ORM\ManyToOne(targetEntity="Core\UserBundle\Entity\User")
-     * @ORM\JoinColumn(onDelete="CASCADE")
+     * @Gedmo\Blameable(on="create")
+     * @ORM\ManyToOne(targetEntity="Modules\Core\App\Entities\User")
      **/
-    private $user;
+    private  $createdBy;
+
 
     /**
-     * @ORM\ManyToOne(targetEntity="Appstore\Bundle\RestaurantBundle\Entity\Particular", inversedBy="restaurantTemps")
-     * @ORM\JoinColumn(onDelete="CASCADE")
+     * @ORM\ManyToOne(targetEntity="Particular")
      **/
     private $table;
 
      /**
-     * @ORM\ManyToOne(targetEntity="Appstore\Bundle\RestaurantBundle\Entity\Particular")
+     * @ORM\ManyToOne(targetEntity="Particular")
      **/
     private $invoiceMode;
 
-     /**
-     * @ORM\OneToMany(targetEntity="Appstore\Bundle\RestaurantBundle\Entity\RestaurantTableInvoiceItem", mappedBy="tableInvoice")
-     **/
-    private $invoiceItems;
-
     /**
-     * @ORM\ManyToOne(targetEntity="Core\UserBundle\Entity\User")
+     * @ORM\ManyToOne(targetEntity="Modules\Core\App\Entities\User")
      * @ORM\JoinColumn(onDelete="CASCADE")
      **/
     private  $salesBy;
@@ -74,9 +68,9 @@ class InvoiceTable
     private $isActive = false;
 
     /**
-     * @var array
+     * @var text
      *
-     * @ORM\Column(name="serveBy", type="json_array", length=50, nullable=true)
+     * @ORM\Column(name="serveBy", type="text", nullable=true)
      */
     private $serveBy;
 
@@ -118,31 +112,10 @@ class InvoiceTable
 
 
     /**
-     * @ORM\ManyToOne(targetEntity="Setting\Bundle\ToolBundle\Entity\TransactionMethod")
+     * @ORM\ManyToOne(targetEntity="Modules\Accounting\App\Entities\TransactionMode" ,cascade={"persist", "remove"})
+     * @ORM\JoinColumn(onDelete="SET NULL", nullable=true)
      **/
-    private  $transactionMethod;
-
-    /**
-     * @ORM\ManyToOne(targetEntity="Setting\Bundle\ToolBundle\Entity\Bank")
-     **/
-    private  $bank;
-
-    /**
-     * @ORM\ManyToOne(targetEntity="Appstore\Bundle\AccountingBundle\Entity\AccountBank")
-     **/
-    private  $accountBank;
-
-
-    /**
-     * @ORM\ManyToOne(targetEntity="Appstore\Bundle\AccountingBundle\Entity\AccountMobileBank")
-     **/
-    private  $accountMobileBank;
-
-
-    /**
-     * @ORM\ManyToOne(targetEntity="Setting\Bundle\ToolBundle\Entity\PaymentCard")
-     **/
-    private  $paymentCard;
+    private $transactionMode;
 
 
     /**
@@ -151,27 +124,6 @@ class InvoiceTable
      * @ORM\Column(name="tableNos", type="array", nullable=true)
      */
     private $tableNos;
-
-    /**
-     * @var string
-     *
-     * @ORM\Column(name="cardNo", type="string", length=100, nullable=true)
-     */
-    private $cardNo;
-
-    /**
-     * @var string
-     *
-     * @ORM\Column(name="paymentMobile", type="string", length=50, nullable=true)
-     */
-    private $paymentMobile;
-
-    /**
-     * @var string
-     *
-     * @ORM\Column(name="transactionId", type="string", length=50, nullable=true)
-     */
-    private $transactionId;
 
 
     /**
@@ -239,6 +191,20 @@ class InvoiceTable
      */
     private $remark;
 
+    /**
+     * @var \DateTime
+     * @Gedmo\Timestampable(on="create")
+     * @ORM\Column(name="created_at", type="datetime",nullable=true)
+     */
+    private $createdAt;
+
+    /**
+     * @var \DateTime
+     * @Gedmo\Timestampable(on="create")
+     * @ORM\Column(name="updated_at", type="datetime",nullable=true)
+     */
+    private $updatedAt;
+
 
     /**
      * Get id
@@ -250,544 +216,6 @@ class InvoiceTable
         return $this->id;
     }
 
-    /**
-     * @return float
-     */
-    public function getSubTotal()
-    {
-        return $this->subTotal;
-    }
-
-    /**
-     * @param float $subTotal
-     */
-    public function setSubTotal($subTotal)
-    {
-        $this->subTotal = $subTotal;
-    }
-
-    /**
-     * @return User
-     */
-    public function getUser()
-    {
-        return $this->user;
-    }
-
-    /**
-     * @param User $user
-     */
-    public function setUser($user)
-    {
-        $this->user = $user;
-    }
-
-    /**
-     * @return RestaurantConfig
-     */
-    public function getRestaurantConfig()
-    {
-        return $this->restaurantConfig;
-    }
-
-    /**
-     * @param RestaurantConfig $restaurantConfig
-     */
-    public function setRestaurantConfig($restaurantConfig)
-    {
-        $this->restaurantConfig = $restaurantConfig;
-    }
-
-    /**
-     * @return array
-     */
-    public function getServeBy()
-    {
-        return $this->serveBy;
-    }
-
-    /**
-     * @param array $serveBy
-     */
-    public function setServeBy($serveBy)
-    {
-        $this->serveBy = $serveBy;
-    }
-
-    /**
-     * @return User
-     */
-    public function getOrderBy()
-    {
-        return $this->orderBy;
-    }
-
-    /**
-     * @param User $orderBy
-     */
-    public function setOrderBy($orderBy)
-    {
-        $this->orderBy = $orderBy;
-    }
-
-    /**
-     * @return \DateTime
-     */
-    public function getCreated()
-    {
-        return $this->created;
-    }
-
-    /**
-     * @param \DateTime $created
-     */
-    public function setCreated($created)
-    {
-        $this->created = $created;
-    }
-
-    /**
-     * @return \DateTime
-     */
-    public function getUpdated()
-    {
-        return $this->updated;
-    }
-
-    /**
-     * @param \DateTime $updated
-     */
-    public function setUpdated($updated)
-    {
-        $this->updated = $updated;
-    }
-
-    /**
-     * @return string
-     */
-    public function getProcess()
-    {
-        return $this->process;
-    }
-
-    /**
-     * @param string $process
-     */
-    public function setProcess($process)
-    {
-        $this->process = $process;
-    }
-
-    /**
-     * @return Particular
-     */
-    public function getTable()
-    {
-        return $this->table;
-    }
-
-    /**
-     * @param Particular $table
-     */
-    public function setTable($table)
-    {
-        $this->table = $table;
-    }
-
-    /**
-     * @return array
-     */
-    public function getSubTable()
-    {
-        return $this->subTable;
-    }
-
-    /**
-     * @param array $subTable
-     */
-    public function setSubTable($subTable)
-    {
-        $this->subTable = $subTable;
-    }
-
-
-    /**
-     * @return mixed
-     */
-    public function getTransactionMethod()
-    {
-        return $this->transactionMethod;
-    }
-
-    /**
-     * @param mixed $transactionMethod
-     */
-    public function setTransactionMethod($transactionMethod)
-    {
-        $this->transactionMethod = $transactionMethod;
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getBank()
-    {
-        return $this->bank;
-    }
-
-    /**
-     * @param mixed $bank
-     */
-    public function setBank($bank)
-    {
-        $this->bank = $bank;
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getAccountBank()
-    {
-        return $this->accountBank;
-    }
-
-    /**
-     * @param mixed $accountBank
-     */
-    public function setAccountBank($accountBank)
-    {
-        $this->accountBank = $accountBank;
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getAccountMobileBank()
-    {
-        return $this->accountMobileBank;
-    }
-
-    /**
-     * @param mixed $accountMobileBank
-     */
-    public function setAccountMobileBank($accountMobileBank)
-    {
-        $this->accountMobileBank = $accountMobileBank;
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getPaymentCard()
-    {
-        return $this->paymentCard;
-    }
-
-    /**
-     * @param mixed $paymentCard
-     */
-    public function setPaymentCard($paymentCard)
-    {
-        $this->paymentCard = $paymentCard;
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getTableNos()
-    {
-        return $this->tableNos;
-    }
-
-    /**
-     * @param mixed $tableNos
-     */
-    public function setTableNos($tableNos)
-    {
-        $this->tableNos = $tableNos;
-    }
-
-    /**
-     * @return string
-     */
-    public function getCardNo()
-    {
-        return $this->cardNo;
-    }
-
-    /**
-     * @param string $cardNo
-     */
-    public function setCardNo($cardNo)
-    {
-        $this->cardNo = $cardNo;
-    }
-
-    /**
-     * @return string
-     */
-    public function getPaymentMobile()
-    {
-        return $this->paymentMobile;
-    }
-
-    /**
-     * @param string $paymentMobile
-     */
-    public function setPaymentMobile($paymentMobile)
-    {
-        $this->paymentMobile = $paymentMobile;
-    }
-
-
-    /**
-     * @return string
-     */
-    public function getRemark()
-    {
-        return $this->remark;
-    }
-
-    /**
-     * @param string $remark
-     */
-    public function setRemark($remark)
-    {
-        $this->remark = $remark;
-    }
-
-    /**
-     * @return string
-     */
-    public function getDiscountType()
-    {
-        return $this->discountType;
-    }
-
-    /**
-     * @param string $discountType
-     */
-    public function setDiscountType($discountType)
-    {
-        $this->discountType = $discountType;
-    }
-
-
-    /**
-     * @return int
-     */
-    public function getPercentage()
-    {
-        return $this->percentage;
-    }
-
-    /**
-     * @param int $percentage
-     */
-    public function setPercentage($percentage)
-    {
-        $this->percentage = $percentage;
-    }
-
-    /**
-     * @return float
-     */
-    public function getPayment()
-    {
-        return $this->payment;
-    }
-
-    /**
-     * @param float $payment
-     */
-    public function setPayment($payment)
-    {
-        $this->payment = $payment;
-    }
-
-    /**
-     * @return string
-     */
-    public function getTransactionId()
-    {
-        return $this->transactionId;
-    }
-
-    /**
-     * @param string $transactionId
-     */
-    public function setTransactionId($transactionId)
-    {
-        $this->transactionId = $transactionId;
-    }
-
-    /**
-     * @return int
-     */
-    public function getDiscountCalculation()
-    {
-        return $this->discountCalculation;
-    }
-
-    /**
-     * @param int $discountCalculation
-     */
-    public function setDiscountCalculation($discountCalculation)
-    {
-        $this->discountCalculation = $discountCalculation;
-    }
-
-    /**
-     * @return string
-     */
-    public function getDiscountCoupon()
-    {
-        return $this->discountCoupon;
-    }
-
-    /**
-     * @param string $discountCoupon
-     */
-    public function setDiscountCoupon($discountCoupon)
-    {
-        $this->discountCoupon = $discountCoupon;
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getSalesBy()
-    {
-        return $this->salesBy;
-    }
-
-    /**
-     * @param mixed $salesBy
-     */
-    public function setSalesBy($salesBy)
-    {
-        $this->salesBy = $salesBy;
-    }
-
-    /**
-     * @return RestaurantTableInvoiceItem
-     */
-    public function getInvoiceItems()
-    {
-        return $this->invoiceItems;
-    }
-
-    /**
-     * @return float
-     */
-    public function getTotal()
-    {
-        return $this->total;
-    }
-
-    /**
-     * @param float $total
-     */
-    public function setTotal($total)
-    {
-        $this->total = $total;
-    }
-
-    /**
-     * @return float
-     */
-    public function getDiscount()
-    {
-        return $this->discount;
-    }
-
-    /**
-     * @param float $discount
-     */
-    public function setDiscount($discount)
-    {
-        $this->discount = $discount;
-    }
-
-    /**
-     * @return float
-     */
-    public function getVat()
-    {
-        return $this->vat;
-    }
-
-    /**
-     * @param float $vat
-     */
-    public function setVat($vat)
-    {
-        $this->vat = $vat;
-    }
-
-    /**
-     * @return Particular
-     */
-    public function getInvoiceMode()
-    {
-        return $this->invoiceMode;
-    }
-
-    /**
-     * @param Particular $invoiceMode
-     */
-    public function setInvoiceMode($invoiceMode)
-    {
-        $this->invoiceMode = $invoiceMode;
-    }
-
-    /**
-     * @return float
-     */
-    public function getSd()
-    {
-        return $this->sd;
-    }
-
-    /**
-     * @param float $sd
-     */
-    public function setSd($sd)
-    {
-        $this->sd = $sd;
-    }
-
-    /**
-     * @return \DateTime
-     */
-    public function getOrderDate()
-    {
-        return $this->orderDate;
-    }
-
-    /**
-     * @param \DateTime $orderDate
-     */
-    public function setOrderDate($orderDate)
-    {
-        $this->orderDate = $orderDate;
-    }
-
-    /**
-     * @return bool
-     */
-    public function isActive()
-    {
-        return $this->isActive;
-    }
-
-    /**
-     * @param bool $isActive
-     */
-    public function setIsActive($isActive)
-    {
-        $this->isActive = $isActive;
-    }
 
 
 }
