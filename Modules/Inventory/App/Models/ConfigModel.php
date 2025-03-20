@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Modules\Domain\App\Models\DomainModel;
+use Modules\Utility\App\Entities\Setting;
 use Modules\Utility\App\Models\CurrencyModel;
 use Modules\Utility\App\Models\SettingModel;
 
@@ -107,7 +108,7 @@ class ConfigModel extends Model
         'is_sales_auto_approved',
         'is_purchase_auto_approved',
         'is_pos',
-        'is_table_pos',
+        'pos_invoice_mode_id',
         'is_pay_first',
         'is_sku'
 
@@ -126,6 +127,11 @@ class ConfigModel extends Model
     public function currency(): BelongsTo
     {
         return $this->BelongsTo(CurrencyModel::class,'currency_id','id');
+    }
+
+    public function pos_invoice_mode(): BelongsTo
+    {
+        return $this->BelongsTo(SettingModel::class,'pos_invoice_mode_id','id');
     }
 
 }

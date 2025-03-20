@@ -42,8 +42,8 @@ class InvoiceTable
     private $table;
 
      /**
-     * @ORM\ManyToOne(targetEntity="Particular")
-     **/
+      * @ORM\Column(name="invoice_mode", type="string", length=50, nullable=true)
+      **/
     private $invoiceMode;
 
     /**
@@ -55,57 +55,37 @@ class InvoiceTable
 
     /**
      * @var string
-     *
      * @ORM\Column(name="process", type="string", length=50, nullable=true)
      */
     private $process = "Free";
 
      /**
      * @var boolean
-     *
-     * @ORM\Column(name="isActive", type="boolean", nullable=true)
+     * @ORM\Column(name="is_active", type="boolean", nullable=true)
      */
     private $isActive = false;
 
     /**
-     * @var text
-     *
-     * @ORM\Column(name="serveBy", type="text", nullable=true)
-     */
+     * @ORM\ManyToOne(targetEntity="Modules\Core\App\Entities\User")
+     * @ORM\JoinColumn(onDelete="CASCADE")
+     **/
     private $serveBy;
 
     /**
      * @var \DateTime
-     * @ORM\Column(name="orderDate", type="datetime", nullable=true)
+     * @ORM\Column(name="order_date", type="datetime", nullable=true)
      */
     private $orderDate;
 
 
     /**
-     * @var \DateTime
-     * @Gedmo\Timestampable(on="create")
-     * @ORM\Column(name="created", type="datetime")
-     */
-    private $created;
-
-    /**
-     * @var \DateTime
-     * @Gedmo\Timestampable(on="update")
-     * @ORM\Column(name="updated", type="datetime")
-     */
-    private $updated;
-
-
-    /**
      * @var float
-     *
-     * @ORM\Column(name="subTotal", type="float", nullable=true)
+     * @ORM\Column(name="sub_total", type="float", nullable=true)
      */
     private $subTotal;
 
     /**
      * @var float
-     *
      * @ORM\Column(name="payment", type="float", nullable=true)
      */
     private $payment;
@@ -120,8 +100,7 @@ class InvoiceTable
 
     /**
      * @var array
-     *
-     * @ORM\Column(name="tableNos", type="array", nullable=true)
+     * @ORM\Column(name="table_nos", type="text", nullable=true)
      */
     private $tableNos;
 
@@ -129,7 +108,7 @@ class InvoiceTable
     /**
      * @var string
      *
-     * @ORM\Column(name="discountType", type="string", length=30, nullable=true)
+     * @ORM\Column(name="discount_type", type="string", length=30, nullable=true)
      */
     private $discountType;
 
@@ -171,7 +150,7 @@ class InvoiceTable
     /**
      * @var int
      *
-     * @ORM\Column(name="discountCalculation", type="smallint", length = 2,  nullable=true)
+     * @ORM\Column(name="discount_calculation", type="smallint", length = 2,  nullable=true)
      */
     private $discountCalculation;
 
@@ -179,7 +158,7 @@ class InvoiceTable
     /**
      * @var string
      *
-     * @ORM\Column(name="discountCoupon", type="string",  nullable=true)
+     * @ORM\Column(name="discount_coupon", type="string",  nullable=true)
      */
     private $discountCoupon;
 

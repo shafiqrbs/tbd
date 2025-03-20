@@ -225,10 +225,10 @@ class Config
     private $isPos;
 
     /**
-     * @var bool
-     * @ORM\Column(type="boolean",options={"default"="0"})
-     */
-    private $isTablePos;
+     * @ORM\OneToOne(targetEntity="Modules\Utility\App\Entities\Setting")
+     * @ORM\JoinColumn(onDelete="CASCADE", nullable=true)
+     **/
+    private ?Setting $posInvoiceMode = null;
 
     /**
      * @var bool

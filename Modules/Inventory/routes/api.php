@@ -11,6 +11,7 @@ use Modules\Inventory\App\Http\Controllers\InvoiceBatchController;
 use Modules\Inventory\App\Http\Controllers\InvoiceBatchTransactionController as InvoiceBatchTransactionControllerAlias;
 use Modules\Inventory\App\Http\Controllers\OpeningStockController;
 use Modules\Inventory\App\Http\Controllers\ParticularController;
+use Modules\Inventory\App\Http\Controllers\PosController;
 use Modules\Inventory\App\Http\Controllers\ProductController;
 use Modules\Inventory\App\Http\Controllers\PurchaseController;
 use Modules\Inventory\App\Http\Controllers\PurchaseItemController;
@@ -102,6 +103,10 @@ Route::prefix('/inventory')->middleware([HeaderAuthenticationMiddleware::class])
         Route::get('matrix/board', [RequisitionController::class,'matrixBoard'])->name('requisition_matrix_board');
         Route::post('matrix/board/quantity-update', [RequisitionController::class,'matrixBoardQuantityUpdate'])->name('requisition_matrix_board_quantity_update');
         Route::post('matrix/board/batch-generate', [RequisitionController::class,'matrixBoardBatchGenerate'])->name('requisition_matrix_board_batch_generate');
+    });
+
+    Route::prefix('/pos')->middleware([HeaderAuthenticationMiddleware::class])->group(function() {
+        Route::get('/check/invoice-mode', [PosController::class,'checkInvoiceMode'])->name('pos_check_invoice_mode');
     });
 });
 

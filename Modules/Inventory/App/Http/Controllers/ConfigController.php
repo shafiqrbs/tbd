@@ -35,7 +35,7 @@ class ConfigController extends Controller
     {
         $id = $this->domain['config_id'];
         $service = new JsonRequestResponse();
-        $entity = ConfigModel::with('domain','currency','businessModel')->find($id);
+        $entity = ConfigModel::with('domain','currency','businessModel','pos_invoice_mode')->find($id);
 //        $entity['business_model'] = $entity->domain->businessModel;
         $inv_product_type = SettingModel::where('parent_slug', 'product-type')->where('config_id', $id)
             ->select('id', 'slug', 'name', 'status')
@@ -78,7 +78,7 @@ class ConfigController extends Controller
     public function getConfigById($id)
     {
         $service = new JsonRequestResponse();
-        $dataModel = ConfigModel::with('domain','currency','businessModel')->where('domain_id',$id)->first();
+        $dataModel = ConfigModel::with('domain','currency','businessModel','pos_invoice_mode')->where('domain_id',$id)->first();
         $entity = ConfigModel::with('domain','currency','businessModel')->find($dataModel->id);
         $entity['child_domain_exists'] = VendorModel::where('sub_domain_id', $id)->exists();
         if (!$entity){
@@ -106,6 +106,8 @@ class ConfigController extends Controller
             $request->logo->move($path, $imageName);
             $data['path'] = $imageName;
         }
+        $data['pos_invoice_mode_id'] = $data['pos_invoice_mode_id'] ?? null;
+
         $entity->update($data);
 
         $productSlugs = [
