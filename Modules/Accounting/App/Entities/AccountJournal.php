@@ -73,14 +73,14 @@ class AccountJournal
 
 
     /**
-     * @ORM\ManyToOne(targetEntity="Modules\Inventory\App\Entities\SalesReturn")
+     * @ORM\ManyToOne(targetEntity="Modules\Inventory\App\Entities\PurchaseReturn")
      * @ORM\JoinColumn(name="purchase_return_id", referencedColumnName="id", nullable=true, onDelete="SET NULL")
      **/
     private  $purchaseReturn;
 
     /**
      * @ORM\ManyToOne(targetEntity="Modules\Inventory\App\Entities\StockItemReconciliation")
-     * @ORM\JoinColumn(name="stock_adjustment_id", referencedColumnName="id", nullable=true, onDelete="SET NULL")
+     * @ORM\JoinColumn(name="stock_item_reconciliation_id", referencedColumnName="id", nullable=true, onDelete="SET NULL")
      **/
     private  $stockItemReconciliation;
 
