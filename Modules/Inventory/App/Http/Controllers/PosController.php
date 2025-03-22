@@ -14,6 +14,7 @@ use Modules\Core\App\Models\CustomerModel;
 use Modules\Core\App\Models\SettingTypeModel;
 use Modules\Core\App\Models\UserModel;
 use Modules\Core\App\Models\VendorModel;
+use Modules\Domain\App\Models\DomainModel;
 use Modules\Inventory\App\Http\Requests\RequisitionRequest;
 use Modules\Inventory\App\Models\ConfigModel;
 use Modules\Inventory\App\Models\InvoiceBatchItemModel;
@@ -91,7 +92,7 @@ class PosController extends Controller
         $this->deleteUnusedTables($toDelete);
         $this->insertNewTables($toInsert, $tableDatas);
 
-        $getInvoiceTableData = InvoiceTempModel::getInvoiceTables($this->domain['config_id']);
+        $getInvoiceTableData = InvoiceTempModel::getInvoiceTables($this->domain['config_id'],'table');
 
         if (!empty($getInvoiceTableData)) {
             return response()->json([
@@ -137,6 +138,7 @@ class PosController extends Controller
 
     private function handleCustomerMode($config)
     {
+        $findDomain = DomainModel::find($config);
         // Ensure Default Customer Group Exists
         $defaultCustomerGroup = \Modules\Core\App\Models\SettingModel::firstOrCreate(
             [
@@ -159,28 +161,41 @@ class PosController extends Controller
             [
                 'customer_unique_id' => "{$this->domain['global_id']}@default-customer-{$defaultCustomerGroup->id}",
                 'name' => 'Default',
-                'mobile' => '01700000000',
+                'mobile' => $findDomain->mobile,
                 'email' => 'default@default.com',
                 'status' => true,
-                'address' => 'Default Address',
+                'address' => 'Default',
                 'slug' => Str::slug('Default'),
             ]
         );
 
-        // Return JSON Response
+        $customerExists = InvoiceTempModel::where('config_id', $this->domain['config_id'])->where('invoice_mode','customer')->first();
+        if (empty($customerExists)) {
+            InvoiceTempModel::create([
+                'config_id' => $this->domain['config_id'],
+                'created_by_id' => $this->domain['user_id'],
+                'customer_id' => $findDefaultCustomer->id,
+                'is_active' => false,
+                'invoice_mode' => 'customer',
+                'created_at' => now(),
+            ]);
+        }
+
+        $getInvoiceCustomerData = InvoiceTempModel::getInvoiceTables($this->domain['config_id'],'customer');
+
+        if (!empty($getInvoiceCustomerData)) {
+            return response()->json([
+                'status' => ResponseAlias::HTTP_OK,
+                'message' => 'success',
+                'invoice_mode' => 'customer',
+                'data' => $getInvoiceCustomerData
+            ], ResponseAlias::HTTP_OK);
+        }
+
         return response()->json([
-            'status' => ResponseAlias::HTTP_OK,
-            'message' => 'success',
-            'invoice_mode' => 'customer',
-            'data' => [
-                ['customer_id' => $findDefaultCustomer->id ?? null,
-                'domain_id' => $findDefaultCustomer->domain_id ?? null,
-                'name' => $findDefaultCustomer->name ?? null,
-                'mobile' => $findDefaultCustomer->mobile ?? null,
-                'email' => $findDefaultCustomer->email ?? null,
-                'slug' => $findDefaultCustomer->slug ?? null,]
-            ]
-        ], ResponseAlias::HTTP_OK);
+            'status' => ResponseAlias::HTTP_NOT_FOUND,
+            'message' => 'Invoice table data not found',
+        ], ResponseAlias::HTTP_NOT_FOUND);
     }
     private function handleUserMode($config)
     {
@@ -192,5 +207,73 @@ class PosController extends Controller
             'invoice_mode' => 'user',
             'data' => $data['entities']
         ], ResponseAlias::HTTP_OK);
+    }
+
+    public function invoiceUpdate(Request $request)
+    {
+        $input = $request->all();
+
+        $allowedParticularFieldNames = ['table', 'customer', 'user'];
+        if (in_array($input['field_name'], $allowedParticularFieldNames)) {
+            try {
+                // Deactivate all invoices first
+                InvoiceTempModel::where('config_id', $this->domain['config_id'])
+                    ->where('invoice_mode', $input['field_name'])
+                    ->update(['is_active' => 0]);
+
+                // Activate the specific invoice
+                InvoiceTempModel::where('id', $input['invoice_id'])
+                    ->update(['is_active' => 1]);
+
+                return response()->json([
+                    'status' => ResponseAlias::HTTP_OK,
+                    'message' => 'success',
+                ], ResponseAlias::HTTP_OK);
+
+            } catch (\Exception $e) {
+                Log::error('Error updating invoices: ' . $e->getMessage());
+                return response()->json(['error' => 'An error occurred'], 500);
+            }
+        }
+
+        $allowedParticularFieldNames = ['sales_by_id','amount','discount','customer_id'];
+        if (in_array($input['field_name'], $allowedParticularFieldNames)) {
+            try {
+                $findInvoice = InvoiceTempModel::find($input['invoice_id']);
+                if ($input['field_name'] == 'sales_by_id') {
+                    $findInvoice->update([
+                        $input['field_name'] => $input['value']
+                    ]);
+                }
+                if ($input['field_name'] == 'amount') {
+                    $findInvoice->update([
+                        'payment' => $input['value']
+                    ]);
+                }
+                if ($input['field_name'] == 'discount') {
+                    $findInvoice->update([
+                        'discount' => $input['value']
+                    ]);
+                }
+                if ($input['field_name'] == 'customer_id') {
+                    $findInvoice->update([
+                        'customer_id' => $input['value']
+                    ]);
+                }
+                return response()->json([
+                    'status' => ResponseAlias::HTTP_OK,
+                    'message' => 'success',
+                ], ResponseAlias::HTTP_OK);
+
+            } catch (\Exception $e) {
+                Log::error('Error updating invoices: ' . $e->getMessage());
+                return response()->json(['error' => 'An error occurred'], 500);
+            }
+        }
+
+        return response()->json([
+            'status' => ResponseAlias::HTTP_NOT_FOUND,
+            'message' => 'An error occurred',
+        ], ResponseAlias::HTTP_NOT_FOUND);
     }
 }

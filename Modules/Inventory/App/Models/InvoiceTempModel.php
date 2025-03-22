@@ -35,6 +35,7 @@ class InvoiceTempModel extends Model
         'discount_coupon',
         'remark',
         'invoice_mode',
+        'customer_id',
         'serve_by_id'
     ];
 
@@ -52,10 +53,11 @@ class InvoiceTempModel extends Model
         });
     }
 
-    public static function getInvoiceTables($config){
+    public static function getInvoiceTables($config,$type){
         return self::where('inv_invoice_table.config_id',$config)
-            ->where('inv_invoice_table.invoice_mode', 'table')
-            ->join('inv_particular','inv_particular.id','=','inv_invoice_table.table_id')
+            ->where('inv_invoice_table.invoice_mode', $type)
+            ->leftjoin('inv_particular','inv_particular.id','=','inv_invoice_table.table_id')
+            ->leftjoin('cor_customers','cor_customers.id','=','inv_invoice_table.customer_id')
             ->select([
                 'inv_invoice_table.id as id',
                 'inv_invoice_table.config_id',
@@ -81,7 +83,10 @@ class InvoiceTempModel extends Model
                 'inv_invoice_table.invoice_mode',
                 'inv_invoice_table.serve_by_id',
                 'inv_particular.name as particular_name',
-                'inv_particular.slug as particular_slug'
+                'inv_particular.slug as particular_slug',
+                'cor_customers.id as customer_id',
+                'cor_customers.name as customer_name',
+                'cor_customers.mobile as customer_mobile',
             ])
             ->get()
             ->toArray();

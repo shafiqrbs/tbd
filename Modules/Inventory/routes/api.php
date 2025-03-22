@@ -107,6 +107,7 @@ Route::prefix('/inventory')->middleware([HeaderAuthenticationMiddleware::class])
 
     Route::prefix('/pos')->middleware([HeaderAuthenticationMiddleware::class])->group(function() {
         Route::get('/check/invoice-mode', [PosController::class,'checkInvoiceMode'])->name('pos_check_invoice_mode');
+        Route::post('/inline-update', [PosController::class,'invoiceUpdate'])->name('pos_inline_update');
     });
 });
 

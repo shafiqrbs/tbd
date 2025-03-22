@@ -184,6 +184,12 @@ class InvoiceTable
      */
     private $updatedAt;
 
+    /**
+     * @ORM\ManyToOne(targetEntity="Modules\Core\App\Entities\Customer" ,cascade={"persist", "remove"})
+     * @ORM\JoinColumn(onDelete="SET NULL", nullable=true)
+     **/
+    private $customer;
+
 
     /**
      * Get id
