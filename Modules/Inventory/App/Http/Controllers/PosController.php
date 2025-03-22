@@ -158,12 +158,12 @@ class PosController extends Controller
             ],
             [
                 'customer_unique_id' => "{$this->domain['global_id']}@default-customer-{$defaultCustomerGroup->id}",
-                'name' => 'Default Customer',
+                'name' => 'Default',
                 'mobile' => '01700000000',
                 'email' => 'default@default.com',
                 'status' => true,
                 'address' => 'Default Address',
-                'slug' => Str::slug('Default Customer'),
+                'slug' => Str::slug('Default'),
             ]
         );
 

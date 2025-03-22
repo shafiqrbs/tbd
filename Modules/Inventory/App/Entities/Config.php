@@ -225,7 +225,7 @@ class Config
     private $isPos;
 
     /**
-     * @ORM\OneToOne(targetEntity="Modules\Utility\App\Entities\Setting")
+     * @ORM\ManyToOne(targetEntity="Modules\Utility\App\Entities\Setting")
      * @ORM\JoinColumn(onDelete="CASCADE", nullable=true)
      **/
     private ?Setting $posInvoiceMode = null;
@@ -2396,21 +2396,6 @@ class Config
         $this->isPos = $isPos;
     }
 
-    /**
-     * @return bool
-     */
-    public function isTablePos()
-    {
-        return $this->isTablePos;
-    }
-
-    /**
-     * @param bool $isTablePos
-     */
-    public function setIsTablePos($isTablePos)
-    {
-        $this->isTablePos = $isTablePos;
-    }
 
     /**
      * @return bool
