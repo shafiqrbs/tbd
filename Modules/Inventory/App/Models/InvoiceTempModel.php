@@ -39,6 +39,11 @@ class InvoiceTempModel extends Model
         'serve_by_id'
     ];
 
+    public function invoiceItems()
+    {
+        return $this->hasMany(InvoiceItemTempModel::class, 'invoice_id');
+    }
+
 
     public static function boot() {
         parent::boot();
@@ -90,5 +95,48 @@ class InvoiceTempModel extends Model
             ])
             ->get()
             ->toArray();
+    }
+
+
+    public static function getInvoiceDetails($findInvoice){
+        $data =  self::where('inv_invoice_table.id',$findInvoice->id)
+            ->leftjoin('users as created_by','created_by.id','=','inv_invoice_table.created_by_id')
+            ->leftjoin('users as sales_by','sales_by.id','=','inv_invoice_table.sales_by_id')
+            ->leftjoin('inv_particular','inv_particular.id','=','inv_invoice_table.table_id')
+            ->leftjoin('cor_customers','cor_customers.id','=','inv_invoice_table.customer_id')
+            ->select([
+                'inv_invoice_table.id as id',
+                'inv_invoice_table.config_id',
+                'inv_invoice_table.created_by_id',
+                'inv_invoice_table.table_id',
+                'inv_invoice_table.sales_by_id',
+                'inv_invoice_table.transaction_mode_id',
+                'inv_invoice_table.process',
+                'inv_invoice_table.is_active',
+                'inv_invoice_table.order_date',
+                'inv_invoice_table.sub_total',
+                'inv_invoice_table.payment',
+                'inv_invoice_table.table_nos',
+                'inv_invoice_table.discount_type',
+                'inv_invoice_table.total',
+                'inv_invoice_table.vat',
+                'inv_invoice_table.sd',
+                'inv_invoice_table.discount',
+                'inv_invoice_table.percentage',
+                'inv_invoice_table.discount_calculation',
+                'inv_invoice_table.discount_coupon',
+                'inv_invoice_table.remark',
+                'inv_invoice_table.invoice_mode',
+                'inv_invoice_table.serve_by_id',
+                'inv_particular.name as table_name',
+                'inv_particular.slug as table_slug',
+                'cor_customers.id as customer_id',
+                'cor_customers.name as customer_name',
+                'cor_customers.mobile as customer_mobile',
+                'created_by.username as created_by_name',
+                'sales_by.username as sales_by_name',
+            ])->with('invoiceItems')
+            ->first();
+        return $data;
     }
 }

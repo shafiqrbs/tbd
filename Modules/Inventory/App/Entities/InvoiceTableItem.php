@@ -48,14 +48,14 @@ class InvoiceTableItem
     /**
      * @var float
      *
-     * @ORM\Column(name="salesPrice", type="float")
+     * @ORM\Column(name="sales_price", type="float")
      */
     private $salesPrice;
 
     /**
      * @var float
      *
-     * @ORM\Column(name="purchasePrice", type="float", nullable=true)
+     * @ORM\Column(name="purchase_price", type="float", nullable=true)
      */
     private $purchasePrice;
 
@@ -63,21 +63,21 @@ class InvoiceTableItem
     /**
      * @var boolean
      *
-     * @ORM\Column(name="customPrice", type="boolean")
+     * @ORM\Column(name="custom_price", type="boolean")
      */
     private $customPrice = false;
 
     /**
      * @var boolean
      *
-     * @ORM\Column(name="isPrint", type="boolean")
+     * @ORM\Column(name="is_print", type="boolean")
      */
     private $isPrint = true;
 
     /**
      * @var float
      *
-     * @ORM\Column(name="subTotal", type="float")
+     * @ORM\Column(name="sub_total", type="float")
      */
     private $subTotal;
 

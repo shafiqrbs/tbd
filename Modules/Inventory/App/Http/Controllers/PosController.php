@@ -19,6 +19,7 @@ use Modules\Inventory\App\Http\Requests\RequisitionRequest;
 use Modules\Inventory\App\Models\ConfigModel;
 use Modules\Inventory\App\Models\InvoiceBatchItemModel;
 use Modules\Inventory\App\Models\InvoiceBatchModel;
+use Modules\Inventory\App\Models\InvoiceItemTempModel;
 use Modules\Inventory\App\Models\InvoiceTempModel;
 use Modules\Inventory\App\Models\ParticularModel;
 use Modules\Inventory\App\Models\ProductModel;
@@ -138,6 +139,26 @@ class PosController extends Controller
 
     private function handleCustomerMode($config)
     {
+        $this->createCustomerForSales($config);
+        $getInvoiceCustomerData = InvoiceTempModel::getInvoiceTables($this->domain['config_id'],'customer');
+
+        if (!empty($getInvoiceCustomerData)) {
+            return response()->json([
+                'status' => ResponseAlias::HTTP_OK,
+                'message' => 'success',
+                'invoice_mode' => 'customer',
+                'data' => $getInvoiceCustomerData
+            ], ResponseAlias::HTTP_OK);
+        }
+
+        return response()->json([
+            'status' => ResponseAlias::HTTP_NOT_FOUND,
+            'message' => 'Invoice table data not found',
+        ], ResponseAlias::HTTP_NOT_FOUND);
+    }
+
+    private function createCustomerForSales($config)
+    {
         $findDomain = DomainModel::find($config);
         // Ensure Default Customer Group Exists
         $defaultCustomerGroup = \Modules\Core\App\Models\SettingModel::firstOrCreate(
@@ -171,7 +192,7 @@ class PosController extends Controller
 
         $customerExists = InvoiceTempModel::where('config_id', $this->domain['config_id'])->where('invoice_mode','customer')->first();
         if (empty($customerExists)) {
-            InvoiceTempModel::create([
+            $customerExists = InvoiceTempModel::create([
                 'config_id' => $this->domain['config_id'],
                 'created_by_id' => $this->domain['user_id'],
                 'customer_id' => $findDefaultCustomer->id,
@@ -180,22 +201,7 @@ class PosController extends Controller
                 'created_at' => now(),
             ]);
         }
-
-        $getInvoiceCustomerData = InvoiceTempModel::getInvoiceTables($this->domain['config_id'],'customer');
-
-        if (!empty($getInvoiceCustomerData)) {
-            return response()->json([
-                'status' => ResponseAlias::HTTP_OK,
-                'message' => 'success',
-                'invoice_mode' => 'customer',
-                'data' => $getInvoiceCustomerData
-            ], ResponseAlias::HTTP_OK);
-        }
-
-        return response()->json([
-            'status' => ResponseAlias::HTTP_NOT_FOUND,
-            'message' => 'Invoice table data not found',
-        ], ResponseAlias::HTTP_NOT_FOUND);
+        return $customerExists;
     }
     private function handleUserMode($config)
     {
@@ -271,9 +277,75 @@ class PosController extends Controller
             }
         }
 
+        $allowedParticularFieldNames = ['items'];
+        if (in_array($input['field_name'], $allowedParticularFieldNames)) {
+            DB::beginTransaction();
+            try {
+                $findStock = StockItemModel::find($input['value']['id']);
+                if (!$findStock) {
+                    return response()->json(['status' => ResponseAlias::HTTP_NOT_FOUND, 'message' => 'Stock item not found'], ResponseAlias::HTTP_NOT_FOUND);
+                }
+
+                $findInvoice = InvoiceTempModel::find($input['invoice_id'])
+                    ?? InvoiceTempModel::where('config_id', $this->domain['config_id'])->where('is_active', 1)->first();
+
+                if (!$findInvoice) {
+                    $findInvoice = $this->createCustomerForSales($this->domain['global_id']);
+                    $findInvoice->update(['is_active' => 1])->refresh();
+                }
+
+                // Check for existing item
+                $findStockInTempItem = InvoiceItemTempModel::where('invoice_id', $findInvoice->id)
+                    ->where('stock_item_id', $input['value']['id'])
+                    ->first();
+
+                if (!$findStockInTempItem) {
+                    InvoiceItemTempModel::create([
+                        'stock_item_id' => $input['value']['id'],
+                        'invoice_id' => $findInvoice->id,
+                        'quantity' => $input['value']['quantity'],
+                        'purchase_price' => $findStock->purchase_price,
+                        'sales_price' => $findStock->sales_price,
+                        'custom_price' => false,
+                        'sub_total' => $findStock->sales_price,
+                        'is_print' => true,
+                    ]);
+                } else {
+                    $quantityToAdd = $input['value']['quantity'] ?? 1;
+                    $findStockInTempItem->increment('quantity', $quantityToAdd);
+                    $findStockInTempItem->update([
+                        'sub_total' => $findStockInTempItem->quantity * $findStock->sales_price,
+                    ]);
+                }
+
+                // Update invoice total
+                $findInvoice->update(['sub_total' => InvoiceItemTempModel::where('invoice_id', $findInvoice->id)->sum('sub_total')]);
+
+                DB::commit();
+                return response()->json(['status' => ResponseAlias::HTTP_OK, 'message' => 'success'], ResponseAlias::HTTP_OK);
+            } catch (\Exception $e) {
+                DB::rollBack();
+                Log::error("Error updating invoices: {$e->getMessage()} on line {$e->getLine()} in file {$e->getFile()}");
+                return response()->json(['error' => 'An error occurred'], ResponseAlias::HTTP_INTERNAL_SERVER_ERROR);
+            }
+        }
+
         return response()->json([
             'status' => ResponseAlias::HTTP_NOT_FOUND,
             'message' => 'An error occurred',
         ], ResponseAlias::HTTP_NOT_FOUND);
+    }
+
+    public function invoiceDetails(Request $request)
+    {
+        $invoiceId = $request->query('invoice_id');
+        $findInvoice = InvoiceTempModel::find($invoiceId);
+        if (!$invoiceId) {
+            $findInvoice = InvoiceTempModel::where('config_id', $this->domain['config_id'])->where('is_active',1)->first();
+        }
+
+        $invoiceDetails = InvoiceTempModel::getInvoiceDetails($findInvoice);
+
+        dump($invoiceDetails);
     }
 }
