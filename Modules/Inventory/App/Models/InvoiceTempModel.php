@@ -3,6 +3,8 @@
 namespace Modules\Inventory\App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
+use Modules\Core\App\Models\CustomerModel;
 
 class InvoiceTempModel extends Model
 {
@@ -42,6 +44,11 @@ class InvoiceTempModel extends Model
     public function invoiceItems()
     {
         return $this->hasMany(InvoiceItemTempModel::class, 'invoice_id');
+    }
+
+    public function customer()
+    {
+        return $this->belongsTo(CustomerModel::class, 'customer_id');
     }
 
 
@@ -135,7 +142,21 @@ class InvoiceTempModel extends Model
                 'cor_customers.mobile as customer_mobile',
                 'created_by.username as created_by_name',
                 'sales_by.username as sales_by_name',
-            ])->with('invoiceItems')
+            ])->with(['invoiceItems' => function ($query) {
+                $query->select([
+                    'inv_invoice_table_item.id',
+                    'inv_invoice_table_item.stock_item_id as product_id',
+                    'inv_invoice_table_item.stock_item_id',
+                    'inv_stock.display_name',
+                    'inv_invoice_table_item.invoice_id',
+                    'inv_invoice_table_item.quantity',
+                    'inv_invoice_table_item.purchase_price',
+                    'inv_invoice_table_item.sales_price',
+                    'inv_invoice_table_item.custom_price',
+                    'inv_invoice_table_item.is_print',
+                    'inv_invoice_table_item.sub_total',
+                ])->join('inv_stock','inv_stock.id','=','inv_invoice_table_item.stock_item_id');
+            },'customer'])
             ->first();
         return $data;
     }

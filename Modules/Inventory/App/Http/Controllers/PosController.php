@@ -228,8 +228,7 @@ class PosController extends Controller
                     ->update(['is_active' => 0]);
 
                 // Activate the specific invoice
-                InvoiceTempModel::where('id', $input['invoice_id'])
-                    ->update(['is_active' => 1]);
+                InvoiceTempModel::where('id', $input['invoice_id'])->update(['is_active' => 1]);
 
                 return response()->json([
                     'status' => ResponseAlias::HTTP_OK,
@@ -242,10 +241,12 @@ class PosController extends Controller
             }
         }
 
-        $allowedParticularFieldNames = ['sales_by_id','amount','discount','customer_id'];
+        $allowedParticularFieldNames = ['sales_by_id','amount','discount','customer_id','transaction_mode_id','discount_type'];
         if (in_array($input['field_name'], $allowedParticularFieldNames)) {
             try {
-                $findInvoice = InvoiceTempModel::find($input['invoice_id']);
+                $findInvoice = InvoiceTempModel::find($input['invoice_id'])
+                    ?? InvoiceTempModel::where('config_id', $this->domain['config_id'])->where('is_active', 1)->first();
+
                 if ($input['field_name'] == 'sales_by_id') {
                     $findInvoice->update([
                         $input['field_name'] => $input['value']
@@ -256,14 +257,41 @@ class PosController extends Controller
                         'payment' => $input['value']
                     ]);
                 }
-                if ($input['field_name'] == 'discount') {
+
+                if ($input['field_name'] == 'discount_type') {
+                    $discountAmount = 0;
+                    if ($input['value'] === "Flat") {
+                        $discountAmount = $input['discount_amount'];
+                    } else if ($input['value'] === "Percent") {
+                        $discountAmount = ($findInvoice->sub_total * $input['discount_amount']) / 100;
+                    }
+
                     $findInvoice->update([
-                        'discount' => $input['value']
+                        'discount' => $discountAmount,
+                        'discount_type' => $input['value'] ?? null
+                    ]);
+                }
+                if ($input['field_name'] == 'discount') {
+                    $discountAmount = 0;
+                    if ($input['discount_type'] === "Flat") {
+                        $discountAmount = $input['value'];
+                    } else if ($input['discount_type'] === "Percent") {
+                        $discountAmount = ($findInvoice->sub_total * $input['value']) / 100;
+                    }
+
+                    $findInvoice->update([
+                        'discount' => $discountAmount,
+                        'discount_type' => $input['discount_type'] ?? null
                     ]);
                 }
                 if ($input['field_name'] == 'customer_id') {
                     $findInvoice->update([
                         'customer_id' => $input['value']
+                    ]);
+                }
+                if ($input['field_name'] == 'transaction_mode_id') {
+                    $findInvoice->update([
+                        'transaction_mode_id' => $input['value']
                     ]);
                 }
                 return response()->json([
@@ -346,6 +374,10 @@ class PosController extends Controller
 
         $invoiceDetails = InvoiceTempModel::getInvoiceDetails($findInvoice);
 
-        dump($invoiceDetails);
-    }
+        // Return JSON Response
+        return response()->json([
+            'status' => ResponseAlias::HTTP_OK,
+            'message' => 'success',
+            'data' => $invoiceDetails
+        ], ResponseAlias::HTTP_OK);    }
 }
