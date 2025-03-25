@@ -18,7 +18,7 @@ class SalesModel extends Model
     protected $guarded = ['id'];
 
     protected $fillable = [
-        'customer_id','config_id','invoice_batch_id','created_by_id','sales_by_id','sub_total','total','is_domain_sales_completed','approved_by_id'
+        'customer_id','config_id','invoice_batch_id','created_by_id','sales_by_id','sub_total','total','is_domain_sales_completed','approved_by_id','discount','discount_calculation','discount_type','payment','process','transaction_mode_id','sales_form'
     ];
 
     public static function boot() {

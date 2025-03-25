@@ -113,6 +113,52 @@ class SalesItemModel extends Model
     }
 
     /**
+     * Insert multiple sales items.
+     *
+     * @param SalesModel $sales Sales instance.
+     * @param array $items Incoming items to insert.
+     * @return bool
+     */
+    public static function insertSalesItemsForPos($sales, array $items): bool
+    {
+        $timestamp = Carbon::now();
+
+
+        $formattedItems = array_map(function ($item) use ($sales, $timestamp) {
+            $findStockItem = StockItemModel::find($item['stock_item_id']);
+            $product = ProductModel::find($findStockItem->product_id);
+//            dump($findStockItem);
+            return [
+                'sale_id'       => $sales->id,
+                'config_id'      => $sales->config_id,
+                'stock_item_id'  => $item['stock_item_id'] ?? null,
+                'unit_id'  => $product->unit_id ?? null,
+                'name'  => $findStockItem->display_name ?? null,
+                'price'  => $item['sales_price'] ?? null,
+                'uom'  => $findStockItem->uom ?? null,
+                'warehouse_id'   => $findStockItem->warehouse_id ?? null,
+                'bonus_quantity' => $item['bonus_quantity'] ?? 0,
+                'return_quantity' => $item['return_quantity'] ?? 0,
+                'damage_quantity' => $item['damage_quantity'] ?? 0,
+                'spoil_quantity' => $item['spoil_quantity'] ?? 0,
+                'height' => $item['height'] ?? 0,
+                'width' => $item['width'] ?? 0,
+                'total_quantity' => $item['total_quantity'] ?? 0,
+                'sub_quantity' => $item['sub_quantity'] ?? 0,
+                'quantity'       => $item['quantity'] ?? 0,
+                'percent'        => $item['percent'] ?? 0,
+                'sales_price'    => $item['sales_price'] ?? 0,
+                'purchase_price' => $item['purchase_price'] ?? 0,
+                'sub_total'      => ($item['quantity'] ?? 0) * ($item['sales_price'] ?? 0),
+                'discount_price' => self::calculateDiscountPrice($item['percent'] ?? 0, $item['sales_price'] ?? 0),
+                'created_at'     => $timestamp,
+                'updated_at'     => $timestamp,
+            ];
+        }, $items);
+        return self::insert($formattedItems);
+    }
+
+    /**
      * Calculate the discounted price based on percentage.
      *
      * @param float $percent Discount percentage.

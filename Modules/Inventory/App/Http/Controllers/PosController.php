@@ -3,6 +3,7 @@
 namespace Modules\Inventory\App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Collection;
@@ -381,5 +382,90 @@ class PosController extends Controller
             'status' => ResponseAlias::HTTP_OK,
             'message' => 'success',
             'data' => $invoiceDetails
-        ], ResponseAlias::HTTP_OK);    }
+        ], ResponseAlias::HTTP_OK);
+    }
+
+    public function posSalesComplete(int $id)
+    {
+        $findInvoice = InvoiceTempModel::find($id);
+        if (!$findInvoice || $findInvoice->is_active==0) {
+            return response()->json([
+                'status' => ResponseAlias::HTTP_NOT_FOUND,
+                'message' => 'Invoice not found',
+            ], ResponseAlias::HTTP_NOT_FOUND);
+        }
+
+        $input['config_id'] = $this->domain['config_id'];
+        $input['customer_id'] = $findInvoice->customer_id;
+        $input['created_by_id'] = $this->domain['user_id'];
+        $input['sales_by_id'] = $findInvoice->sales_by_id;
+        $input['sub_total'] = $findInvoice->sub_total;
+        $input['total'] = $findInvoice->sub_total-$findInvoice->discount;
+        $input['discount_type'] = $findInvoice->discount_type;
+        $input['discount_calculation'] = $findInvoice->percentage;
+        $input['discount'] = $findInvoice->discount;
+        $input['payment'] = $findInvoice->payment;
+        $input['transaction_mode_id'] = $findInvoice->transaction_mode_id;
+        $input['sales_form'] = 'pos';
+
+        // Start Database Transaction to Ensure Data Consistency
+        DB::beginTransaction();
+
+        try {
+            // Create Sales Record
+            $sales = SalesModel::create($input);
+            $sales->refresh();
+
+            // Insert Sales Items
+            SalesItemModel::insertSalesItemsForPos($sales, $findInvoice->invoiceItems->toArray());
+
+            // Fetch Sales Data for Response
+            $salesData = SalesModel::getShow($sales->id, $this->domain);
+
+            // Stock Maintenance Logic (Auto Approval)
+            $findConfig = ConfigModel::find($this->domain['config_id']);
+
+            if (
+                $findConfig->is_sales_auto_approved
+            ) {
+                $sales->update(['process' => 'approved']);
+                $sales->update(['approved_by_id' => $this->domain['user_id']]);
+
+                if ($sales->salesItems->count() > 0) {
+                    foreach ($sales->salesItems as $item) {
+                        StockItemHistoryModel::openingStockQuantity($item, 'sales', $this->domain);
+                    }
+                }
+            }
+
+            // delete invoice items & clear invoice activation
+            foreach ($findInvoice->invoiceItems as $item) {
+                $item->delete();
+            }
+
+            $findInvoice->update(['is_active' => 0]);
+            // Commit Transaction
+            DB::commit();
+
+            // Send Success Response
+            return response()->json([
+                'status' => 200,
+                'success' => true,
+                'message' => 'Sales updated successfully.',
+                'data' => $salesData,
+            ]);
+        } catch (Exception $e) {
+            // Rollback Transaction on Failure
+            DB::rollBack();
+
+            // Log the Error (For Debugging Purposes)
+            \Log::error('Sales transaction failed: ' . $e->getMessage());
+
+            // Send Error Response
+            return response()->json([
+                'message' => 'An error occurred while processing the sale.',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
 }

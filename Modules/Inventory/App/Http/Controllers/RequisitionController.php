@@ -759,6 +759,7 @@ class RequisitionController extends Controller
             $groupedSales = $this->groupSalesByCustomer($getMatrixs->toArray(), $batch);
 
             foreach ($groupedSales as $sale) {
+                $sale['sales_form'] = 'requisition';
                 $sales = SalesModel::create($sale);
 
                 $salesItems = array_map(fn ($item) => array_merge($item, ['sale_id' => $sales->id]), $sale['items']);

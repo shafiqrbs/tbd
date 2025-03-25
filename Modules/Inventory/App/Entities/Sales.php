@@ -320,5 +320,12 @@ class Sales
     private $isDomainSalesCompleted = false;
 
 
+    /**
+     * @var string
+     * @ORM\Column(name="sales_form", type="text", nullable=true)
+     */
+    private $salesForm;
+
+
 }
 

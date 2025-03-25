@@ -67,6 +67,7 @@ class SalesController extends Controller
     {
         $input = $request->validated();
         $input['config_id'] = $this->domain['config_id'];
+        $input['sales_form'] = 'inventory';
 
         // Start Database Transaction to Ensure Data Consistency
         DB::beginTransaction();
