@@ -268,6 +268,7 @@ class PosController extends Controller
 
                     $findInvoice->update([
                         'discount' => $discountAmount,
+                        'percentage' => $input['value'] === "Percent"?$discountAmount:null,
                         'discount_type' => $input['value'] ?? null
                     ]);
                 }
@@ -281,6 +282,7 @@ class PosController extends Controller
 
                     $findInvoice->update([
                         'discount' => $discountAmount,
+                        'percentage' => $input['discount_type'] === "Percent"?$input['value']:null,
                         'discount_type' => $input['discount_type'] ?? null
                     ]);
                 }
