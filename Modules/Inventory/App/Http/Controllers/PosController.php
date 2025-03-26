@@ -449,6 +449,9 @@ class PosController extends Controller
                 'customer_id' => null,
                 'discount' => null,
                 'percentage' => null,
+                'transaction_mode_id' => null,
+                'sales_by_id' => null,
+                'sales_by_name' => null,
                 'is_active' => 0
             ]);
             // Commit Transaction
