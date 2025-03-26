@@ -443,7 +443,14 @@ class PosController extends Controller
                 $item->delete();
             }
 
-            $findInvoice->update(['is_active' => 0]);
+            $findInvoice->update([
+                'discount_type' => 'Percent',
+                'payment' => null,
+                'customer_id' => null,
+                'discount' => null,
+                'percentage' => null,
+                'is_active' => 0
+            ]);
             // Commit Transaction
             DB::commit();
 
