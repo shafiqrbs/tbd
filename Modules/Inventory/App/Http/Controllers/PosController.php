@@ -451,6 +451,7 @@ class PosController extends Controller
                 'percentage' => null,
                 'transaction_mode_id' => null,
                 'sales_by_id' => null,
+                'sub_total' => null,
                 'sales_by_name' => null,
                 'is_active' => 0
             ]);
