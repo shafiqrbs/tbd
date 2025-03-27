@@ -269,6 +269,35 @@ class AccountHeadModel extends Model
             ->get();
     }
 
+    public static function getAccountLedgerDropdown($domain,$head='')
+    {
+        $data = self::where('acc_head.config_id', $domain['acc_config'])
+            ->join('acc_head as l_head', 'l_head.id', '=', 'acc_head.parent_id')
+            ->whereNotNull('acc_head.parent_id')
+            ->select([
+                'acc_head.id',
+                'acc_head.parent_id',
+                'l_head.name as parent_name',
+                'l_head.slug as parent_slug',
+                'acc_head.name',
+                'acc_head.slug',
+                'acc_head.code',
+            ])
+            ->get()
+            ->groupBy('parent_id')
+            ->map(function ($group) {
+                return [
+                    'group' => $group->first()->parent_name,
+                    'items' => $group->map(fn($item) => [
+                        'id' => $item->id,
+                        'item_name' => $item->name,
+                        'slug' => $item->slug,
+                    ])->values(),
+                ];
+            })->values()->toArray();
+        return $data;
+    }
+
 
 
 }
