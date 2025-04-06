@@ -139,6 +139,7 @@ class CustomerModel extends Model
                 'cor_customers.name as name',
                 'cor_customers.mobile as mobile',
                 'cor_customers.credit_limit as credit_limit',
+                'cor_customers.discount_percent as discount_percent',
                 'cor_setting.name as customer_group',
                 'cor_setting.id as customer_group_id',
                 'users.id as marketing_id',
