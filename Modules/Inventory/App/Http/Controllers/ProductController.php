@@ -18,6 +18,7 @@ use Modules\Inventory\App\Http\Requests\ProductRequest;
 use Modules\Inventory\App\Models\ProductGalleryModel;
 use Modules\Inventory\App\Models\ProductMeasurementModel;
 use Modules\Inventory\App\Models\ProductModel;
+use Modules\Inventory\App\Models\StockItemHistoryModel;
 use Modules\Inventory\App\Models\StockItemModel;
 use Modules\Inventory\App\Repositories\StockItemRepository;
 use Modules\NbrVatTax\App\Models\NbrItemVat;
@@ -119,6 +120,7 @@ class ProductController extends Controller
      */
     public function destroy($id)
     {
+//        StockItemHistoryModel::where()
         ProductModel::find($id)->delete();
 
         return response()->json([

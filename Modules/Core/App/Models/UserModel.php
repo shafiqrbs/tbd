@@ -23,6 +23,7 @@ class UserModel extends Model
         'employee_group_id',
         'email_verified_at',
         'enabled',
+        'user_group',
     ];
 
     public static function getRecords($request,$domain){

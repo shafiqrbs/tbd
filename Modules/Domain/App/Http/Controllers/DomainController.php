@@ -9,12 +9,16 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 use Modules\Accounting\App\Entities\AccountHead;
 use Modules\Accounting\App\Entities\TransactionMode;
 use Modules\Accounting\App\Models\AccountingModel;
 use Modules\Accounting\App\Models\TransactionModeModel;
+use Modules\AppsApi\App\Services\GeneratePatternCodeService;
 use Modules\AppsApi\App\Services\JsonRequestResponse;
 use Modules\Core\App\Models\CustomerModel;
+use Modules\Core\App\Models\SettingModel;
+use Modules\Core\App\Models\SettingTypeModel;
 use Modules\Core\App\Models\VendorModel;
 use Modules\Domain\App\Entities\DomainChild;
 use Modules\Domain\App\Entities\GlobalOption;
@@ -69,7 +73,7 @@ class DomainController extends Controller
      * Store a newly created resource in storage.
      */
 
-    public function store(DomainRequest $request , EntityManager $em)
+    public function store(DomainRequest $request , EntityManager $em,GeneratePatternCodeService $patternCodeService)
     {
         $data = $request->validated();
 
@@ -90,7 +94,47 @@ class DomainController extends Controller
                 'email' => $email,
                 'password' => Hash::make($password),
                 'domain_id' => $entity->id,
+                'user_group' => 'domain',
             ]);
+
+            // create domain customer
+
+            // Fetch the customer
+            $customer = CustomerModel::where('domain_id',$entity->id)->first();
+
+            if (!$customer) {
+                $getCoreSettingTypeId = SettingTypeModel::where('slug', 'customer-group')->first();
+                $getCustomerGroupId = SettingModel::where('setting_type_id', $getCoreSettingTypeId->id)
+                    ->where('name', 'Domain')->where('domain_id', $this->domain['global_id'])->first();
+
+                if (empty($getCustomerGroupId)) {
+                    $getCustomerGroupId = SettingModel::create([
+                        'domain_id' => $this->domain['global_id'],
+                        'name' => 'Default',
+                        'setting_type_id' => $getCoreSettingTypeId->id, // Ensure this variable has a value
+                        'slug' => 'default',
+                        'status' => 1,
+                        'created_at' => now(),  // Add the current timestamp
+                        'updated_at' => now()   // If you also have `updated_at`
+                    ]);
+                }
+
+                // Handle Customer
+                $code = $this->generateCustomerCode($patternCodeService);
+
+                CustomerModel::create([
+                    'domain_id' => $entity->id,
+                    'code' => $code['code'],
+                    'name' => $data['username'],
+                    'mobile' => $data['mobile'],
+                    'email' => $entity->email,
+                    'status' => true,
+                    'address' => $entity->address,
+                    'customer_group_id' => $getCustomerGroupId->id ?? null, // Default group
+                    'slug' => Str::slug($entity->name),
+                    'customerId' => $code['generateId'], // Generated ID from the pattern code
+                ]);
+            }
 
             // Step 3: Create the inventory configuration (config)
             $currency = CurrencyModel::find(1);
@@ -193,6 +237,19 @@ class DomainController extends Controller
             $response->setStatusCode(Response::HTTP_INTERNAL_SERVER_ERROR);
             return $response;
         }
+    }
+
+    private function generateCustomerCode($patternCodeService): array
+    {
+        $params = [
+            'domain' => $this->domain['global_id'],
+            'table' => 'cor_customers',
+            'prefix' => 'CUS-',
+        ];
+
+        $pattern = $patternCodeService->customerCode($params);
+
+        return $pattern;
     }
 
 

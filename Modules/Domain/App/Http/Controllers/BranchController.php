@@ -32,6 +32,7 @@ use Modules\Core\App\Models\UserModel;
 use Modules\Domain\App\Models\CurrencyModel;
 use Modules\Domain\App\Models\DomainModel;
 use Modules\Domain\App\Models\SubdomainCategory;
+use Modules\Domain\App\Models\SubDomainModel;
 use Modules\Inventory\App\Entities\Product;
 use Modules\Inventory\App\Entities\Setting;
 use Modules\Inventory\App\Entities\StockItem;
@@ -130,6 +131,13 @@ class BranchController extends Controller
             // Fetch the child and parent domains
             $childDomain = DomainModel::findOrFail($input['child_domain_id']);
             $parentDomain = DomainModel::findOrFail($input['parent_domain_id']);
+
+            // create domain wise sub domain
+            SubDomainModel::updateOrCreate(
+                ['domain_id' => $parentDomain->id, 'sub_domain_id' => $childDomain->id],
+                ['status' => $input['checked'] ? 1 : 0]
+            );
+
 
             // Handle Customer
             $customer = $this->handleEntity(
@@ -284,7 +292,7 @@ class BranchController extends Controller
         $params = [
             'domain' => $this->domain['global_id'],
             'table' => 'cor_customers',
-            'prefix' => 'EMP-',
+            'prefix' => 'CUS-',
         ];
 
         $pattern = $patternCodeService->customerCode($params);
