@@ -167,7 +167,7 @@ class UserModel extends Model
     public static function getAccessControlRoles($userId, $type)
     {
         // Set the base group based on the provided type
-        $baseGroup = ($type == 'access_control_role') ? ['Accounting', 'HR & Payroll'] : ['Android Accounting', 'Android HR & Payroll'];
+        $baseGroup = ($type == 'access_control_role') ? ['Accounting', 'Sales & Purchase', 'Procurement','Production','Inventory & Product','Core & Master Data'] : ['Android Apps'];
 
         // Fetch user roles from the database
         $roles = DB::table('cor_user_role_group')
