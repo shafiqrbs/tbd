@@ -9,6 +9,7 @@ use Modules\Core\App\Http\Controllers\FileUploadController;
 use Modules\Core\App\Http\Controllers\LocationController;
 use Modules\Core\App\Http\Controllers\SettingController;
 use Modules\Core\App\Http\Controllers\SiteMapController;
+use Modules\Core\App\Http\Controllers\SplashController;
 use Modules\Core\App\Http\Controllers\UserController;
 use Modules\Core\App\Http\Controllers\VendorController;
 use Modules\Core\App\Http\Controllers\WarehouseController;
@@ -73,6 +74,11 @@ Route::prefix('/core')->middleware([HeaderAuthenticationMiddleware::class])->gro
     Route::delete('/file-upload/{id}', [FileUploadController::class,'destroy'])->name('index_file_delete');
     Route::get('/file-upload/process', [FileUploadController::class,'fileProcessToDB'])->name('upload_file_process');
     Route::post('/file-upload/store', [FileUploadController::class,'store'])->name('store_file_upload');
-}
-);
+});
+
+// for local application
+Route::prefix('/core')->group(function() {
+    Route::get('splash-info', [SplashController::class, 'splashInfo'])->name('splash_info');
+});
+
 

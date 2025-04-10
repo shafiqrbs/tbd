@@ -170,7 +170,7 @@ class CustomerModel extends Model
         return $data;
     }
 
-    public static function getRecordsForLocalStorage($domain){
+    public static function getRecordsForLocalStorage($domain,$request){
 
         $global = $domain['global_id'];
 
