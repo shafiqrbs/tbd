@@ -58,7 +58,7 @@ class SubDomain
 
 
     /**
-     * @ORM\ManyToOne(targetEntity="Setting")
+     * @ORM\ManyToOne(targetEntity="Modules\Utility\App\Entities\Setting")
      * @ORM\JoinColumn(name="domain_type", referencedColumnName="id", nullable=true, onDelete="SET NULL")
      */
     private $domainType;
