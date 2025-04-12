@@ -40,7 +40,14 @@ class SubDomain
      */
     private $percentMode;
 
-      /**
+    /**
+     * @var float
+     *
+     * @ORM\Column(name="sales_price_percent",type="float" , nullable=true)
+     */
+    private $salesPricePercent;
+
+    /**
      * @var float
      *
      * @ORM\Column(name="price_percent",type="float" , nullable=true)
@@ -52,9 +59,16 @@ class SubDomain
     /**
      * @var float
      *
-     * @ORM\Column(name="offer_quantity",type="float" , nullable=true)
+     * @ORM\Column(name="bonus_percent",type="float" , nullable=true)
      */
-    private $offerQuantity;
+    private $bonusPercent;
+
+    /**
+     * @var float
+     *
+     * @ORM\Column(name="sales_target_amount",type="float" , nullable=true)
+     */
+    private $salesTargetAmount;
 
 
     /**

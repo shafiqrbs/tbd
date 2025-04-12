@@ -155,6 +155,7 @@ class StockItem
      */
      private $salesPrice=0;
 
+
      /**
      * @var float
      *
