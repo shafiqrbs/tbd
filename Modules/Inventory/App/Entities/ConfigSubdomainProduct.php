@@ -29,6 +29,20 @@ class ConfigSubdomainProduct
      **/
     private $config;
 
+     /**
+     * @var float
+     *
+     * @ORM\Column(name="percent_mode",type="float" , nullable=true)
+     */
+    private $percentMode;
+
+     /**
+     * @var float
+     *
+     * @ORM\Column(name="price_percent",type="float" , nullable=true)
+     */
+    private $pricePercent;
+
 
     /**
      * @Gedmo\Blameable(on="create")
@@ -42,6 +56,7 @@ class ConfigSubdomainProduct
      * @ORM\OrderBy({"sorting" = "ASC"})
      **/
     private $category;
+    
 
     /**
      * @ORM\ManyToOne(targetEntity="Modules\Inventory\App\Entities\Category")

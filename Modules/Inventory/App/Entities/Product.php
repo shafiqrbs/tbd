@@ -34,6 +34,12 @@ class Product
      **/
     private  $stockItems;
 
+    /**
+     * @ORM\ManyToOne(targetEntity="Discount")
+     * @ORM\JoinColumn(name="unit_id", referencedColumnName="id", nullable=true, onDelete="SET NULL")
+     */
+    private  $discount;
+
 
     /**
      * @ORM\ManyToOne(targetEntity="Product", inversedBy="children", cascade={"detach","merge"})

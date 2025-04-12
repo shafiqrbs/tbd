@@ -32,7 +32,7 @@ class InvoiceTableItem
 
 
     /**
-     * @ORM\ManyToOne(targetEntity="InvoiceTable")
+     * @ORM\ManyToOne(targetEntity="InvoiceTable", cascade={"detach","merge"})
      * @ORM\JoinColumn(onDelete="CASCADE")
      **/
     private $invoice;

@@ -48,6 +48,12 @@ class StockItem
     protected  $product;
 
 
+     /**
+     * @ORM\JoinColumn(name="discount_id", referencedColumnName="id", nullable=true, onDelete="SET NULL")
+     **/
+    private  $discount;
+
+
     /**
      * @ORM\ManyToOne(targetEntity="Particular")
      * @ORM\JoinColumn(name="rack_id", referencedColumnName="id", nullable=true, onDelete="SET NULL")
@@ -116,6 +122,14 @@ class StockItem
      * @ORM\Column(type="text", nullable = true)
      */
     private $uom;
+
+
+     /**
+     * @var float
+     *
+     * @ORM\Column(name="mrp", type="float", options={"default":0})
+     */
+    private $mrp=0;
 
 
      /**

@@ -10,10 +10,10 @@ use Gedmo\Mapping\Annotation as Gedmo;
 /**
  * BusinessConfig
  *
- * @ORM\Table( name ="inv_config")
+ * @ORM\Table( name ="inv_config_history")
  * @ORM\Entity()
  */
-class Config
+class ConfigHistory
 {
     /**
      * @var integer
@@ -250,7 +250,6 @@ class Config
      * @ORM\Column(type="boolean", options={"default"="0"})
      */
     private $isPurchaseByPurchasePrice;
-    
 
      /**
      * @var string

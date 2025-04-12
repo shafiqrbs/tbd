@@ -129,12 +129,14 @@ class GlobalOption
      * @ORM\Column(length=255, unique=true)
      */
     private $slug;
+
     /**
      * @var string
      *
      * @ORM\Column(name="domain", type="string", length=255 , unique=true , nullable=true)
      */
     private $domain;
+
     /**
      * @var string
      *

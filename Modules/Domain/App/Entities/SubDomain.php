@@ -32,6 +32,37 @@ class SubDomain
      **/
     private $subDomain;
 
+
+     /**
+     * @var float
+     *
+     * @ORM\Column(name="percent_mode",type="float" , nullable=true)
+     */
+    private $percentMode;
+
+      /**
+     * @var float
+     *
+     * @ORM\Column(name="price_percent",type="float" , nullable=true)
+     */
+    private $pricePercent;
+
+
+
+    /**
+     * @var float
+     *
+     * @ORM\Column(name="offer_quantity",type="float" , nullable=true)
+     */
+    private $offerQuantity;
+
+
+    /**
+     * @ORM\ManyToOne(targetEntity="Setting")
+     * @ORM\JoinColumn(name="domain_type", referencedColumnName="id", nullable=true, onDelete="SET NULL")
+     */
+    private $domainType;
+
     /**
      * @var boolean
      *

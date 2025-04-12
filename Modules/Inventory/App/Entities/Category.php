@@ -39,6 +39,12 @@ class Category
      */
     private $parent;
 
+    /**
+     * @ORM\ManyToOne(targetEntity="Discount")
+     * @ORM\JoinColumn(name="unit_id", referencedColumnName="id", nullable=true, onDelete="SET NULL")
+     */
+    private  $discount;
+
 
     /**
      * @var string

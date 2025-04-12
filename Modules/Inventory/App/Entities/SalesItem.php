@@ -36,6 +36,23 @@ class SalesItem
      **/
     private  $config;
 
+
+    /**
+     * @ORM\ManyToOne(targetEntity="Discount")
+     * @ORM\JoinColumn(name="unit_id", referencedColumnName="id", nullable=true, onDelete="SET NULL")
+     */
+    private  $discount;
+
+
+
+    /**
+     * @ORM\ManyToOne(targetEntity="Particular")
+     * @ORM\JoinColumn(name="rack_id", referencedColumnName="id", nullable=true, onDelete="SET NULL")
+     */
+    private  $rack;
+
+
+
      /**
      * @ORM\ManyToOne(targetEntity="StockItem")
      * @ORM\JoinColumn(onDelete="CASCADE")
@@ -68,6 +85,21 @@ class SalesItem
      * @ORM\Column(name="description", type="text", nullable=true)
      */
     private $description;
+
+     /**
+     * @var float
+     *
+     * @ORM\Column(name="receivable_discount_percent", type="float",  nullable=true)
+     */
+    private $receivableDiscountPercent = 0;
+
+
+     /**
+     * @var float
+     *
+     * @ORM\Column(name="receivable_discount_amount", type="float",  nullable=true)
+     */
+    private $receivableDiscountAmount = 0;
 
     /**
      * @var float

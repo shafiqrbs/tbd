@@ -22,27 +22,18 @@ use Modules\Core\App\Models\CustomerModel;
 use Modules\Core\App\Models\SettingModel;
 use Modules\Core\App\Models\SettingTypeModel;
 use Modules\Core\App\Models\VendorModel;
-use Modules\Domain\App\Entities\DomainChild;
-use Modules\Domain\App\Entities\GlobalOption;
-use Modules\Domain\App\Entities\SubDomain;
 use Modules\Domain\App\Http\Requests\BranchPriceUpdateRequest;
 use Modules\Domain\App\Http\Requests\BranchRequest;
-use Modules\Domain\App\Http\Requests\DomainRequest;
 use Modules\Core\App\Models\UserModel;
-use Modules\Domain\App\Models\CurrencyModel;
 use Modules\Domain\App\Models\DomainModel;
 use Modules\Domain\App\Models\SubdomainCategory;
 use Modules\Domain\App\Models\SubDomainModel;
-use Modules\Inventory\App\Entities\Product;
-use Modules\Inventory\App\Entities\Setting;
-use Modules\Inventory\App\Entities\StockItem;
 use Modules\Inventory\App\Models\CategoryModel;
 use Modules\Inventory\App\Models\ConfigModel;
 use Modules\Inventory\App\Models\ParticularModel;
 use Modules\Inventory\App\Models\ProductModel;
 use Modules\Inventory\App\Models\StockItemModel;
-use Modules\Utility\App\Models\SettingModel as UtilitySettingModel;
-use Modules\Inventory\App\Models\SettingModel as InventorySettingModel;
+
 
 class BranchController extends Controller
 {

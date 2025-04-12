@@ -1,19 +1,17 @@
 <?php
 
-namespace Modules\Accounting\App\Entities;
-
+namespace Modules\Inventory\App\Entities;
 
 use Doctrine\ORM\Mapping as ORM;
-use Modules\Domain\App\Entities\GlobalOption;
 use Gedmo\Mapping\Annotation as Gedmo;
 
 /**
- * Config
+ * BusinessParticular
  *
- * @ORM\Table(name="acc_config")
- * @ORM\Entity(repositoryClass="Modules\Accounting\App\Repositories\ConfigRepository")
+ * @ORM\Table( name = "inv_discount_config")
+ * @ORM\Entity()
  */
-class Config
+class DiscountConfig
 {
     /**
      * @var integer
@@ -25,26 +23,35 @@ class Config
     private $id;
 
     /**
-     * @ORM\OneToOne(targetEntity="Modules\Domain\App\Entities\GlobalOption", cascade={"persist", "remove"})
+     * @ORM\OneToOne(targetEntity="Config", cascade={"detach","merge"} )
      * @ORM\JoinColumn(onDelete="CASCADE")
      **/
-    private $domain;
+    private  $config;
+
 
     /**
-     * @var \DateTime
-     * @Gedmo\Timestampable(on="create")
-     * @ORM\Column(name="financial_start_date", type="datetime")
+     * @var string
+     *
+     * @ORM\Column(name="name", type="string", length=255, nullable=true)
      */
-    private $financialStartDate;
-    
+    private $name;
+
+
 
      /**
-     * @var \DateTime
-     * @Gedmo\Timestampable(on="create")
-     * @ORM\Column(name="financial_end_date", type="datetime")
+     * @var float
+     *
+     * @ORM\Column(name="max_discount", type="float" , nullable=true)
      */
-    private $financialEndDate;
+    private $maxDiscount;
 
+
+    /**
+     * @Gedmo\Translatable
+     * @Gedmo\Slug(fields={"name"})
+     * @ORM\Column(length=255)
+     */
+    private $slug;
 
     /**
      * @var \DateTime
@@ -59,6 +66,14 @@ class Config
      * @ORM\Column(name="updated_at", type="datetime")
      */
     private $updatedAt;
+
+
+    /**
+     * @var boolean
+     *
+     * @ORM\Column(name="status", type="boolean" )
+     */
+    private $status= true;
 
     /**
      * @return int
@@ -77,51 +92,52 @@ class Config
     }
 
     /**
-     * @return GlobalOption
+     * @return mixed
      */
-    public function getDomain()
+    public function getConfig()
     {
-        return $this->domain;
+        return $this->config;
     }
 
     /**
-     * @param GlobalOption $domain
+     * @param mixed $config
      */
-    public function setDomain($domain)
+    public function setConfig($config)
     {
-        $this->domain = $domain;
+        $this->config = $config;
+    }
+
+
+    /**
+     * @return string
+     */
+    public function getName()
+    {
+        return $this->name;
     }
 
     /**
-     * @return \DateTime
+     * @param string $name
      */
-    public function getFinancialStartDate()
+    public function setName($name)
     {
-        return $this->financialStartDate;
+        $this->name = $name;
     }
 
     /**
-     * @param \DateTime $financialStartDate
+     * @return mixed
      */
-    public function setFinancialStartDate($financialStartDate)
+    public function getSlug()
     {
-        $this->financialStartDate = $financialStartDate;
+        return $this->slug;
     }
 
     /**
-     * @return \DateTime
+     * @param mixed $slug
      */
-    public function getFinancialEndDate()
+    public function setSlug($slug)
     {
-        return $this->financialEndDate;
-    }
-
-    /**
-     * @param \DateTime $financialEndDate
-     */
-    public function setFinancialEndDate($financialEndDate)
-    {
-        $this->financialEndDate = $financialEndDate;
+        $this->slug = $slug;
     }
 
     /**
@@ -156,7 +172,21 @@ class Config
         $this->updatedAt = $updatedAt;
     }
 
+    /**
+     * @return bool
+     */
+    public function isStatus()
+    {
+        return $this->status;
+    }
 
+    /**
+     * @param bool $status
+     */
+    public function setStatus($status)
+    {
+        $this->status = $status;
+    }
 
 
 }
