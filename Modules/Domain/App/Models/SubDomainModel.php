@@ -11,7 +11,8 @@ class SubDomainModel extends Model
     protected $fillable = [
         'domain_id',
         'sub_domain_id',
-        'status'
+        'status',
+        'domain_type'
     ];
 
     public static function boot() {

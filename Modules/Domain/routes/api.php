@@ -3,6 +3,7 @@
 use App\Http\Middleware\HeaderAuthenticationMiddleware;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use Modules\Domain\App\Http\Controllers\B2bController;
 use Modules\Domain\App\Http\Controllers\BranchController;
 use Modules\Domain\App\Http\Controllers\DomainController;
 
@@ -44,5 +45,9 @@ Route::prefix('/domain')->middleware(array(HeaderAuthenticationMiddleware::class
     Route::prefix('restore')->middleware([HeaderAuthenticationMiddleware::class])->group(function() {
         Route::get('reset/{domain}', [DomainController::class,'resetData'])->name('domain_reset');
         Route::get('delete/{id}', [DomainController::class,'deleteData'])->name('domain_delete');
+    });
+
+    Route::prefix('b2b')->middleware([HeaderAuthenticationMiddleware::class])->group(function() {
+        Route::post('inline-update/domain', [B2bController::class,'domainInlineUpdate'])->name('domain_inline_update');
     });
 });
