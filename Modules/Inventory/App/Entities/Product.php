@@ -36,7 +36,7 @@ class Product
 
     /**
      * @ORM\ManyToOne(targetEntity="Discount")
-     * @ORM\JoinColumn(name="unit_id", referencedColumnName="id", nullable=true, onDelete="SET NULL")
+     * @ORM\JoinColumn(name="discount_id", referencedColumnName="id", nullable=true, onDelete="SET NULL")
      */
     private  $discount;
 

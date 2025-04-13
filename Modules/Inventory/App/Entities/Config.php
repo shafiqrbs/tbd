@@ -83,6 +83,7 @@ class Config
      */
     private $vatPercent;
 
+
     /**
      * @var smallint
      *
@@ -250,7 +251,7 @@ class Config
      * @ORM\Column(type="boolean", options={"default"="0"})
      */
     private $isPurchaseByPurchasePrice;
-    
+
 
      /**
      * @var string
@@ -271,7 +272,28 @@ class Config
      *
      * @ORM\Column(type="boolean",options={"default"="false"})
      */
+    private $hsCodeEnable;
+
+    /**
+     * @var boolean
+     *
+     * @ORM\Column(type="boolean",options={"default"="false"})
+     */
     private $vatEnable;
+
+      /**
+     * @var boolean
+     *
+     * @ORM\Column(type="boolean",options={"default"="false"})
+     */
+    private $sdEnable;
+
+    /**
+     * @var float
+     *
+     * @ORM\Column(type="float",  nullable=true)
+     */
+    private $sdPercent;
 
      /**
      * @var boolean
@@ -2557,6 +2579,74 @@ class Config
     {
         $this->isOnline = $isOnline;
     }
+
+    /**
+     * @return bool
+     */
+    public function isHsCodeEnable()
+    {
+        return $this->hsCodeEnable;
+    }
+
+    /**
+     * @param bool $hsCodeEnable
+     */
+    public function setHsCodeEnable($hsCodeEnable)
+    {
+        $this->hsCodeEnable = $hsCodeEnable;
+    }
+
+    /**
+     * @return Setting|null
+     */
+    public function getPosInvoiceMode()
+    {
+        return $this->posInvoiceMode;
+    }
+
+    /**
+     * @param Setting|null $posInvoiceMode
+     */
+    public function setPosInvoiceMode($posInvoiceMode)
+    {
+        $this->posInvoiceMode = $posInvoiceMode;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isSdEnable()
+    {
+        return $this->sdEnable;
+    }
+
+    /**
+     * @param bool $sdEnable
+     */
+    public function setSdEnable($sdEnable)
+    {
+        $this->sdEnable = $sdEnable;
+    }
+
+    /**
+     * @return float
+     */
+    public function getSdPercent()
+    {
+        return $this->sdPercent;
+    }
+
+    /**
+     * @param float $sdPercent
+     */
+    public function setSdPercent($sdPercent)
+    {
+        $this->sdPercent = $sdPercent;
+    }
+
+
+
+
 
 
 
