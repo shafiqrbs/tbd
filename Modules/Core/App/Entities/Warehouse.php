@@ -109,6 +109,7 @@ class Warehouse
      **/
     protected $domain;
 
+
     public function getId(): int
     {
         return $this->id;

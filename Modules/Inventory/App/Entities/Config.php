@@ -1155,21 +1155,6 @@ class Config
         $this->skuSize = $skuSize;
     }
 
-    /**
-     * @return bool
-     */
-    public function isSkuWearhouse()
-    {
-        return $this->skuWearhouse;
-    }
-
-    /**
-     * @param bool $skuWearhouse
-     */
-    public function setSkuWearhouse($skuWearhouse)
-    {
-        $this->skuWearhouse = $skuWearhouse;
-    }
 
     /**
      * @return bool
