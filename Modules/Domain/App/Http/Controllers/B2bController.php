@@ -28,6 +28,7 @@ use Modules\Domain\App\Models\CurrencyModel;
 use Modules\Domain\App\Models\DomainModel;
 use Modules\Domain\App\Models\SubDomainModel;
 use Modules\Inventory\App\Entities\Setting;
+use Modules\Inventory\App\Models\B2BCategoryPriceMatrixModel;
 use Modules\Inventory\App\Models\ConfigModel;
 use Modules\Inventory\App\Models\PurchaseModel;
 use Modules\Inventory\App\Models\SalesModel;
@@ -51,77 +52,7 @@ class B2bController extends Controller
         }
     }
 
-    public function domainInlineUpdate(Request $request)
-    {
-        $validated = $request->validate([
-            'domain_id'  => 'required|integer',
-            'field_name' => 'required|string',
-            'value'      => 'required',
-        ]);
 
-        $domainId   = $validated['domain_id'];
-        $fieldName  = $validated['field_name'];
-        $value      = $validated['value'];
-        $globalDomainId = $this->domain['global_id'];
-
-        $findDomain = DomainModel::find($domainId);
-        if (!$findDomain) {
-            return response()->json(['message' => 'Domain not found', 'status' => ResponseAlias::HTTP_NOT_FOUND], ResponseAlias::HTTP_NOT_FOUND);
-        }
-
-        // Assuming $this->domain is defined globally
-        if (!isset($globalDomainId)) {
-            return response()->json(['message' => 'Global domain context missing', 'status' => ResponseAlias::HTTP_INTERNAL_SERVER_ERROR], ResponseAlias::HTTP_INTERNAL_SERVER_ERROR);
-        }
-
-        try {
-            switch ($fieldName) {
-                case 'domain_type':
-                    $subDomain = SubDomainModel::firstOrCreate(
-                        [
-                            'domain_id'     => $globalDomainId,
-                            'sub_domain_id' => $domainId,
-                        ],
-                        ['status' => 0]
-                    );
-                    $subDomain->update(['domain_type' => $value]);
-                    break;
-
-                case 'status':
-                    $subDomain = SubDomainModel::where('domain_id', $globalDomainId)
-                        ->where('sub_domain_id', $domainId)
-                        ->first();
-
-                    if (!$subDomain) {
-                        return response()->json([
-                            'message' => 'Assign domain type before updating status',
-                            'status'  => ResponseAlias::HTTP_NOT_FOUND
-                        ], ResponseAlias::HTTP_NOT_FOUND);
-                    }
-
-                    $subDomain->update(['status' => $value]);
-                    break;
-
-                default:
-                    return response()->json([
-                        'message' => 'Field not supported',
-                        'status'  => ResponseAlias::HTTP_BAD_REQUEST
-                    ], ResponseAlias::HTTP_BAD_REQUEST);
-            }
-
-            return response()->json([
-                'message' => 'Success',
-                'status'  => ResponseAlias::HTTP_OK
-            ], ResponseAlias::HTTP_OK);
-
-        } catch (\Exception $e) {
-            return response()->json([
-                'message' => 'Something went wrong',
-                'error'   => $e->getMessage(),
-                'status'  => ResponseAlias::HTTP_INTERNAL_SERVER_ERROR
-            ], ResponseAlias::HTTP_INTERNAL_SERVER_ERROR);
-        }
-    }
 
     /**
      * Display a listing of the resource.
@@ -137,6 +68,128 @@ class B2bController extends Controller
             'status' => Response::HTTP_OK,
             'total' => $data['count'],
             'data' => $data['entities']
+        ]));
+        $response->setStatusCode(Response::HTTP_OK);
+        return $response;
+    }
+
+    public function b2bSubDomain(Request $request)
+    {
+        $domains = SubDomainModel::getB2BDomain($this->domain['global_id']);
+        $response = new Response();
+        $response->headers->set('Content-Type','application/json');
+        $response->setContent(json_encode([
+            'message' => 'success',
+            'status' => Response::HTTP_OK,
+            'data' => $domains
+        ]));
+        $response->setStatusCode(Response::HTTP_OK);
+        return $response;
+    }
+
+    public function b2bSubDomainSetting(Request $request,$domain)
+    {
+        $entity = SubDomainModel::getB2BDomainSetting($domain);
+        $response = new Response();
+        $response->headers->set('Content-Type','application/json');
+        $response->setContent(json_encode([
+            'message' => 'success',
+            'status' => Response::HTTP_OK,
+            'data' => $entity
+        ]));
+        $response->setStatusCode(Response::HTTP_OK);
+        return $response;
+    }
+
+    public function b2bSubDomainCategory(Request $request,$id)
+    {
+
+        $domain = UserModel::getDomainData($id);
+        $invConfig = $domain['inv_config'];
+        $entities = B2BCategoryPriceMatrixModel::getB2BDomainCategory($invConfig);
+        $response = new Response();
+        $response->headers->set('Content-Type','application/json');
+        $response->setContent(json_encode([
+            'message' => 'success',
+            'status' => Response::HTTP_OK,
+            'data' => $entities
+        ]));
+        $response->setStatusCode(Response::HTTP_OK);
+        return $response;
+    }
+
+
+    public function b2bSubDomainProduct(Request $request,$id)
+    {
+        $domain = UserModel::getDomainData($id);
+        $invConfig = $domain['inv_config'];
+        $entities = B2BCategoryPriceMatrixModel::getB2BDomainCategory($invConfig);
+        $response = new Response();
+        $response->headers->set('Content-Type','application/json');
+        $response->setContent(json_encode([
+            'message' => 'success',
+            'status' => Response::HTTP_OK,
+            'data' => $domains
+        ]));
+        $response->setStatusCode(Response::HTTP_OK);
+        return $response;
+    }
+
+    public function domainForBranch()
+    {
+        $domains = DomainModel::getDomainsForBranch($this->domain['global_id']);
+        $data = [];
+
+        if (count($domains) > 0) {
+            foreach ($domains as $domain) {
+                // sub domain exists
+                $getCustomerPriceData = CustomerModel::where('sub_domain_id', $domain['id'])
+                    ->where('domain_id', $this->domain['global_id'])
+                    ->select('discount_percent', 'bonus_percent', 'monthly_target_amount','id','status')
+                    ->first();
+
+                if ($getCustomerPriceData) {
+                    $domain['customer_id'] = $getCustomerPriceData->id;
+                    $domain['is_sub_domain'] = $getCustomerPriceData->status==1?true:false;
+                    $domain['prices'] = [
+                        ['discount_percent' => $getCustomerPriceData->discount_percent,'label'=> 'Discount Percent'],
+                        ['bonus_percent' => $getCustomerPriceData->bonus_percent,'label'=> 'Bonus Percent'],
+                        ['monthly_target_amount' => $getCustomerPriceData->monthly_target_amount,'label'=> 'Monthly Target Amount'],
+                    ];
+                } else {
+                    $domain['customer_id'] = null;
+                    $domain['is_sub_domain'] = false;
+                    $domain['prices'] = [
+                        ['discount_percent' => null,'label'=> 'Discount Percent'],
+                        ['bonus_percent' => null,'label'=> 'Bonus Percent'],
+                        ['monthly_target_amount' => null,'label'=> 'Monthly Target Amount'],
+                    ];
+                }
+                $domain['categories'] = CategoryModel::getCategoryDropdown($this->domain);
+
+                // get assign category
+                $invConfig = ConfigModel::where('domain_id', $domain['id'])->value('id');
+
+                $categories = SubdomainCategory::where('config_id', $invConfig)->where('status',true)
+                    ->pluck('category_id')
+                    ->toArray();
+
+                // Directly map "category_id" to the required format "category_id#domain_id"
+                $checkCategory = array_map(fn($categoryId) => $categoryId . '#' . $domain['id'], $categories);
+
+                $domain['check_category'] = $checkCategory;
+
+                $data[] = $domain;
+            }
+        }
+
+        $response = new Response();
+        $response->headers->set('Content-Type','application/json');
+        $response->setContent(json_encode([
+            'message' => 'success',
+            'status' => Response::HTTP_OK,
+            'total' => count($data),
+            'data' => $data
         ]));
         $response->setStatusCode(Response::HTTP_OK);
         return $response;
@@ -312,6 +365,78 @@ class B2bController extends Controller
         }
     }
 
+    public function domainInlineUpdate(Request $request)
+    {
+        $validated = $request->validate([
+            'domain_id'  => 'required|integer',
+            'field_name' => 'required|string',
+            'value'      => 'required',
+        ]);
+
+        $domainId   = $validated['domain_id'];
+        $fieldName  = $validated['field_name'];
+        $value      = $validated['value'];
+        $globalDomainId = $this->domain['global_id'];
+
+        $findDomain = DomainModel::find($domainId);
+        if (!$findDomain) {
+            return response()->json(['message' => 'Domain not found', 'status' => ResponseAlias::HTTP_NOT_FOUND], ResponseAlias::HTTP_NOT_FOUND);
+        }
+
+        // Assuming $this->domain is defined globally
+        if (!isset($globalDomainId)) {
+            return response()->json(['message' => 'Global domain context missing', 'status' => ResponseAlias::HTTP_INTERNAL_SERVER_ERROR], ResponseAlias::HTTP_INTERNAL_SERVER_ERROR);
+        }
+
+        try {
+            switch ($fieldName) {
+                case 'domain_type':
+                    $subDomain = SubDomainModel::firstOrCreate(
+                        [
+                            'domain_id'     => $globalDomainId,
+                            'sub_domain_id' => $domainId,
+                        ],
+                        ['status' => 0]
+                    );
+                    $subDomain->update(['domain_type' => $value]);
+                    break;
+
+                case 'status':
+                    $subDomain = SubDomainModel::where('domain_id', $globalDomainId)
+                        ->where('sub_domain_id', $domainId)
+                        ->first();
+
+                    if (!$subDomain) {
+                        return response()->json([
+                            'message' => 'Assign domain type before updating status',
+                            'status'  => ResponseAlias::HTTP_NOT_FOUND
+                        ], ResponseAlias::HTTP_NOT_FOUND);
+                    }
+
+                    $subDomain->update(['status' => $value]);
+                    break;
+
+                default:
+                    return response()->json([
+                        'message' => 'Field not supported',
+                        'status'  => ResponseAlias::HTTP_BAD_REQUEST
+                    ], ResponseAlias::HTTP_BAD_REQUEST);
+            }
+
+            return response()->json([
+                'message' => 'Success',
+                'status'  => ResponseAlias::HTTP_OK
+            ], ResponseAlias::HTTP_OK);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Something went wrong',
+                'error'   => $e->getMessage(),
+                'status'  => ResponseAlias::HTTP_INTERNAL_SERVER_ERROR
+            ], ResponseAlias::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
+
     private function generateCustomerCode($patternCodeService): array
     {
         $params = [
@@ -324,7 +449,6 @@ class B2bController extends Controller
 
         return $pattern;
     }
-
 
     /**
      * Show the specified resource.
@@ -404,7 +528,6 @@ class B2bController extends Controller
         // Return a structured JSON response using your service
         return $service->returnJosnResponse($entity);
     }
-
 
     /**
      * Show the form for editing the specified resource.
@@ -525,9 +648,6 @@ class B2bController extends Controller
     public function destroy($id)
     {
         $service = new JsonRequestResponse();
-
-
-
         DomainModel::find($id)->delete();
         $entity = ['message'=>'delete'];
         $data = $service->returnJosnResponse($entity);

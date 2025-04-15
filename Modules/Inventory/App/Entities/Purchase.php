@@ -48,6 +48,12 @@ class Purchase
      **/
     private  $approvedBy;
 
+    /**
+     *
+     * @ORM\ManyToOne(targetEntity="Modules\Core\App\Entities\Warehouse")
+     * @ORM\JoinColumn(onDelete="CASCADE")
+     **/
+    private  $wearhouse;
 
     /**
      * @ORM\ManyToOne(targetEntity="Modules\Accounting\App\Entities\TransactionMode" ,cascade={"persist", "remove"})

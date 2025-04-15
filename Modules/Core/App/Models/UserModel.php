@@ -111,6 +111,26 @@ class UserModel extends Model
         return $data;
     }
 
+    public static function getDomainData($id)
+    {
+        $data = self::select([
+            'dom_domain.id as global_id',
+            'users.id as user_id',
+            'inv_config.id as config_id',
+            'inv_config.id as inv_config',
+            'acc_config.id as acc_config',
+            'pro_config.id as pro_config',
+            'nbr_config.id as nbr_config'
+        ])
+            ->join('dom_domain','dom_domain.id','=','users.domain_id')
+            ->leftjoin('inv_config','inv_config.domain_id','=','dom_domain.id')
+            ->leftjoin('acc_config','acc_config.domain_id','=','dom_domain.id')
+            ->leftjoin('pro_config','pro_config.domain_id','=','dom_domain.id')
+            ->leftjoin('nbr_config','nbr_config.domain_id','=','dom_domain.id')
+            ->where('dom_domain.id',$id)->first();
+        return $data;
+    }
+
     public static function getRecordsForLocalStorage($request,$domain){
         $users = self::where('users.domain_id',$domain['global_id'])->whereNull('users.deleted_at')
             ->leftJoin('cor_user_role','cor_user_role.user_id','=','users.id')

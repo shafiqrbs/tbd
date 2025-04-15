@@ -60,9 +60,12 @@ class PurchaseItem
     private  $unit;
 
     /**
+     *
      * @ORM\ManyToOne(targetEntity="Modules\Core\App\Entities\Warehouse")
+     * @ORM\JoinColumn(onDelete="CASCADE")
      **/
-    private  $warehouse;
+    private  $wearhouse;
+
 
     /**
      * @var float

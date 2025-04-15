@@ -37,6 +37,20 @@ class ProductionBatch
      **/
      private  $vendor;
 
+    /**
+     *
+     * @ORM\ManyToOne(targetEntity="Modules\Core\App\Entities\Setting")
+     * @ORM\JoinColumn(onDelete="CASCADE")
+     **/
+    private  $factory;
+
+    /**
+     *
+     * @ORM\ManyToOne(targetEntity="Modules\Core\App\Entities\Customer")
+     * @ORM\JoinColumn(onDelete="CASCADE")
+     **/
+    private  $customer;
+
 
     /**
      * @var integer

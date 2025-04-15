@@ -38,12 +38,46 @@ class ProductionIssue
     private  $factory;
 
 
+     /**
+     *
+     * @ORM\ManyToOne(targetEntity="Modules\Core\App\Entities\Warehouse")
+     * @ORM\JoinColumn(onDelete="CASCADE")
+     **/
+    private  $wearhouse;
+
+
+     /**
+     *
+     * @ORM\ManyToOne(targetEntity="ProductionBatch")
+     * @ORM\JoinColumn(onDelete="CASCADE")
+     **/
+    private  $productionBatch;
+
+    /**
+     * @var float
+     *
+     * @ORM\Column(type="float",  nullable=true)
+     */
+    private $amount;
+
+
     /**
      * @var string
      *
      * @ORM\Column(name="process", type="string", length=50, nullable=true)
      */
     private $process = "In-progress";
+
+    /**
+     * @Gedmo\Blameable(on="create")
+     * @ORM\ManyToOne(targetEntity="Modules\Core\App\Entities\User")
+     **/
+    private  $createdBy;
+
+    /**
+     * @ORM\ManyToOne(targetEntity="Modules\Core\App\Entities\User")
+     **/
+    private  $approvedBy;
 
 
     /**

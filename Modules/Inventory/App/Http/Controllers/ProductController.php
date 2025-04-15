@@ -39,6 +39,7 @@ class ProductController extends Controller
 
     public function index(Request $request)
     {
+
         $data = ProductModel::getRecords($request, $this->domain);
         $response = new Response();
         $response->headers->set('Content-Type', 'application/json');

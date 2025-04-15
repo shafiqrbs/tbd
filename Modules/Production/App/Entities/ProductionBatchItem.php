@@ -52,6 +52,13 @@ class ProductionBatchItem
      **/
     private  $salesItems;
 
+    /**
+     *
+     * @ORM\ManyToOne(targetEntity="Modules\Core\App\Entities\Warehouse")
+     * @ORM\JoinColumn(onDelete="CASCADE")
+     **/
+    private  $wearhouse;
+
 
     /**
      * @ORM\ManyToOne(targetEntity="ProductionBatch")
