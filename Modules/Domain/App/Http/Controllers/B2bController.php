@@ -3,40 +3,19 @@
 namespace Modules\Domain\App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
-use Doctrine\ORM\EntityManager;
-use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Str;
-use Modules\Accounting\App\Entities\AccountHead;
-use Modules\Accounting\App\Models\AccountingModel;
-use Modules\Accounting\App\Models\TransactionModeModel;
-use Modules\AppsApi\App\Services\GeneratePatternCodeService;
-use Modules\AppsApi\App\Services\JsonRequestResponse;
-use Modules\Core\App\Models\CustomerModel;
-use Modules\Core\App\Models\SettingModel;
-use Modules\Core\App\Models\SettingTypeModel;
 use Modules\Core\App\Models\UserModel;
-use Modules\Core\App\Models\VendorModel;
 use Modules\Domain\App\Entities\DomainChild;
-use Modules\Domain\App\Entities\GlobalOption;
-use Modules\Domain\App\Entities\SubDomain;
-use Modules\Domain\App\Http\Requests\DomainRequest;
-use Modules\Domain\App\Models\CurrencyModel;
+use Modules\Domain\App\Http\Requests\B2bCategoryWiseProductRequest;
+use Modules\Domain\App\Models\B2BCategoryPriceMatrixModel;
+use Modules\Domain\App\Models\B2BStockPriceMatrixModel;
 use Modules\Domain\App\Models\DomainModel;
 use Modules\Domain\App\Models\SubDomainModel;
-use Modules\Inventory\App\Entities\Setting;
-use Modules\Inventory\App\Models\B2BCategoryPriceMatrixModel;
-use Modules\Inventory\App\Models\ConfigModel;
-use Modules\Inventory\App\Models\PurchaseModel;
-use Modules\Inventory\App\Models\SalesModel;
-use Modules\Inventory\App\Models\SettingModel as InventorySettingModel;
+use Modules\Inventory\App\Models\CategoryModel;
+use Modules\Inventory\App\Models\ParticularModel;
+use Modules\Inventory\App\Models\ProductModel;
 use Modules\Inventory\App\Models\StockItemModel;
-use Modules\NbrVatTax\App\Models\NbrVatModel;
-use Modules\Production\App\Models\ProductionConfig;
-use Modules\Utility\App\Models\SettingModel as UtilitySettingModel;
 use Symfony\Component\HttpFoundation\Response as ResponseAlias;
 
 class B2bController extends Controller
@@ -52,318 +31,6 @@ class B2bController extends Controller
         }
     }
 
-
-
-    /**
-     * Display a listing of the resource.
-     */
-
-    public function index(Request $request){
-
-        $data = DomainModel::getRecords($request);
-        $response = new Response();
-        $response->headers->set('Content-Type','application/json');
-        $response->setContent(json_encode([
-            'message' => 'success',
-            'status' => Response::HTTP_OK,
-            'total' => $data['count'],
-            'data' => $data['entities']
-        ]));
-        $response->setStatusCode(Response::HTTP_OK);
-        return $response;
-    }
-
-    public function b2bSubDomain(Request $request)
-    {
-        $domains = SubDomainModel::getB2BDomain($this->domain['global_id']);
-        $response = new Response();
-        $response->headers->set('Content-Type','application/json');
-        $response->setContent(json_encode([
-            'message' => 'success',
-            'status' => Response::HTTP_OK,
-            'data' => $domains
-        ]));
-        $response->setStatusCode(Response::HTTP_OK);
-        return $response;
-    }
-
-    public function b2bSubDomainSetting(Request $request,$domain)
-    {
-        $entity = SubDomainModel::getB2BDomainSetting($domain);
-        $response = new Response();
-        $response->headers->set('Content-Type','application/json');
-        $response->setContent(json_encode([
-            'message' => 'success',
-            'status' => Response::HTTP_OK,
-            'data' => $entity
-        ]));
-        $response->setStatusCode(Response::HTTP_OK);
-        return $response;
-    }
-
-    public function b2bSubDomainCategory(Request $request,$id)
-    {
-
-        $domain = UserModel::getDomainData($id);
-        $invConfig = $domain['inv_config'];
-        $entities = B2BCategoryPriceMatrixModel::getB2BDomainCategory($invConfig);
-        $response = new Response();
-        $response->headers->set('Content-Type','application/json');
-        $response->setContent(json_encode([
-            'message' => 'success',
-            'status' => Response::HTTP_OK,
-            'data' => $entities
-        ]));
-        $response->setStatusCode(Response::HTTP_OK);
-        return $response;
-    }
-
-
-    public function b2bSubDomainProduct(Request $request,$id)
-    {
-        $domain = UserModel::getDomainData($id);
-        $invConfig = $domain['inv_config'];
-        $entities = B2BCategoryPriceMatrixModel::getB2BDomainCategory($invConfig);
-        $response = new Response();
-        $response->headers->set('Content-Type','application/json');
-        $response->setContent(json_encode([
-            'message' => 'success',
-            'status' => Response::HTTP_OK,
-            'data' => $domains
-        ]));
-        $response->setStatusCode(Response::HTTP_OK);
-        return $response;
-    }
-
-    public function domainForBranch()
-    {
-        $domains = DomainModel::getDomainsForBranch($this->domain['global_id']);
-        $data = [];
-
-        if (count($domains) > 0) {
-            foreach ($domains as $domain) {
-                // sub domain exists
-                $getCustomerPriceData = CustomerModel::where('sub_domain_id', $domain['id'])
-                    ->where('domain_id', $this->domain['global_id'])
-                    ->select('discount_percent', 'bonus_percent', 'monthly_target_amount','id','status')
-                    ->first();
-
-                if ($getCustomerPriceData) {
-                    $domain['customer_id'] = $getCustomerPriceData->id;
-                    $domain['is_sub_domain'] = $getCustomerPriceData->status==1?true:false;
-                    $domain['prices'] = [
-                        ['discount_percent' => $getCustomerPriceData->discount_percent,'label'=> 'Discount Percent'],
-                        ['bonus_percent' => $getCustomerPriceData->bonus_percent,'label'=> 'Bonus Percent'],
-                        ['monthly_target_amount' => $getCustomerPriceData->monthly_target_amount,'label'=> 'Monthly Target Amount'],
-                    ];
-                } else {
-                    $domain['customer_id'] = null;
-                    $domain['is_sub_domain'] = false;
-                    $domain['prices'] = [
-                        ['discount_percent' => null,'label'=> 'Discount Percent'],
-                        ['bonus_percent' => null,'label'=> 'Bonus Percent'],
-                        ['monthly_target_amount' => null,'label'=> 'Monthly Target Amount'],
-                    ];
-                }
-                $domain['categories'] = CategoryModel::getCategoryDropdown($this->domain);
-
-                // get assign category
-                $invConfig = ConfigModel::where('domain_id', $domain['id'])->value('id');
-
-                $categories = SubdomainCategory::where('config_id', $invConfig)->where('status',true)
-                    ->pluck('category_id')
-                    ->toArray();
-
-                // Directly map "category_id" to the required format "category_id#domain_id"
-                $checkCategory = array_map(fn($categoryId) => $categoryId . '#' . $domain['id'], $categories);
-
-                $domain['check_category'] = $checkCategory;
-
-                $data[] = $domain;
-            }
-        }
-
-        $response = new Response();
-        $response->headers->set('Content-Type','application/json');
-        $response->setContent(json_encode([
-            'message' => 'success',
-            'status' => Response::HTTP_OK,
-            'total' => count($data),
-            'data' => $data
-        ]));
-        $response->setStatusCode(Response::HTTP_OK);
-        return $response;
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     */
-
-    public function store(DomainRequest $request , EntityManager $em,GeneratePatternCodeService $patternCodeService)
-    {
-        $data = $request->validated();
-
-        // Start the transaction
-        DB::beginTransaction();
-
-        try {
-            // Step 1: Create the domain the entity
-            $data['modules'] = json_encode($data['modules'], JSON_PRETTY_PRINT);
-            $entity = DomainModel::create($data);
-
-            // Step 2: Prepare email and password, then create user
-            $password = "@123456";
-            $email = $data['email'] ?? "{$data['username']}@gmail.com"; // If email is not present, default to username@gmail.com
-
-            UserModel::create([
-                'username' => $data['username'],
-                'email' => $email,
-                'password' => Hash::make($password),
-                'domain_id' => $entity->id,
-                'user_group' => 'domain',
-            ]);
-
-            // create domain customer
-
-            // Fetch the customer
-            $customer = CustomerModel::where('domain_id',$entity->id)->first();
-
-            if (!$customer) {
-                $getCoreSettingTypeId = SettingTypeModel::where('slug', 'customer-group')->first();
-                $getCustomerGroupId = SettingModel::where('setting_type_id', $getCoreSettingTypeId->id)
-                    ->where('name', 'Domain')->where('domain_id', $this->domain['global_id'])->first();
-
-                if (empty($getCustomerGroupId)) {
-                    $getCustomerGroupId = SettingModel::create([
-                        'domain_id' => $this->domain['global_id'],
-                        'name' => 'Default',
-                        'setting_type_id' => $getCoreSettingTypeId->id, // Ensure this variable has a value
-                        'slug' => 'default',
-                        'status' => 1,
-                        'created_at' => now(),  // Add the current timestamp
-                        'updated_at' => now()   // If you also have `updated_at`
-                    ]);
-                }
-
-                // Handle Customer
-                $code = $this->generateCustomerCode($patternCodeService);
-
-                CustomerModel::create([
-                    'domain_id' => $entity->id,
-                    'code' => $code['code'],
-                    'name' => $data['username'],
-                    'mobile' => $data['mobile'],
-                    'email' => $entity->email,
-                    'status' => true,
-                    'address' => $entity->address,
-                    'customer_group_id' => $getCustomerGroupId->id ?? null, // Default group
-                    'slug' => Str::slug($entity->name),
-                    'customerId' => $code['generateId'], // Generated ID from the pattern code
-                ]);
-            }
-
-            // Step 3: Create the inventory configuration (config)
-            $currency = CurrencyModel::find(1);
-
-            $config =  ConfigModel::create([
-                'domain_id' => $entity->id,
-                'currency_id' => $currency->id,
-                'zero_stock' => true,
-                'is_sku' => true,
-                'is_measurement' => true,
-                'is_product_gallery' => true,
-                'is_multi_price' => true,
-                'business_model_id' => $entity->business_model_id,
-            ]);
-
-            // Step 4: Create the accounting data
-            $accountingConfig = AccountingModel::create([
-                'domain_id' => $entity->id,
-                'financial_start_date' => date('Y-m-d'),
-                'financial_end_date' => date('Y-m-d'),
-            ]);
-
-            // Step 4: Create the accounting data
-            NbrVatModel::create([
-                'domain_id' => $entity->id,
-            ]);
-
-             // Step 5: Create the Production data
-            ProductionConfig::create([
-                'domain_id' => $entity->id,
-            ]);
-
-            $getProductType = UtilitySettingModel::getEntityDropdown('product-type');
-            if (count($getProductType) > 0) {
-                // If no inventory config found, return JSON response.
-                if (!$config) {
-                    DB::rollBack();
-                    $response = new Response();
-                    $response->headers->set('Content-Type', 'application/json');
-                    $response->setContent(json_encode([
-                        'message' => 'Inventory config not found',
-                        'status' => Response::HTTP_NOT_FOUND,
-                    ]));
-                    $response->setStatusCode(Response::HTTP_OK);
-                    return $response;
-                }
-
-                // Loop through each product type and either find or create inventory setting.
-                foreach ($getProductType as $type) {
-                    // If the inventory setting is not found, create a new one.
-                    InventorySettingModel::create([
-                        'config_id' => $config->id,
-                        'setting_id' => $type->id,
-                        'name' => $type->name,
-                        'slug' => $type->slug,
-                        'parent_slug' => 'product-type',
-                        'is_production' => in_array($type->slug,
-                            ['post-production', 'mid-production', 'pre-production']) ? 1 : 0,
-                    ]);
-                }
-
-                TransactionModeModel::create([
-                    'config_id' => $accountingConfig->id,
-                    'account_owner' => 'Cash',
-                    'authorised' => 'Cash',
-                    'name' => 'Cash',
-                    'short_name' => 'Cash',
-                    'slug' => 'cash',
-                    'is_selected' => true,
-                    'path' => null,
-                    'account_type' => 'Current',
-                    'method_id' => 20,
-                    'status' => true
-                ]);
-            }
-
-
-            // Commit all database operations
-            DB::commit();
-            $em->getRepository(AccountHead::class)->generateAccountHead($accountingConfig->id);
-            // Return the response
-            $service = new JsonRequestResponse();
-            return $service->returnJosnResponse($entity);
-
-        } catch (Exception $e) {
-            // Something went wrong, rollback the transaction
-            DB::rollBack();
-
-            // Optionally log the exception for debugging purposes
-            \Log::error('Error storing domain and related data: ' . $e->getMessage());
-
-            // Return an error response
-            $response = new Response();
-            $response->headers->set('Content-Type', 'application/json');
-            $response->setContent(json_encode([
-                'message' => 'An error occurred while saving the domain and related data.',
-                'error' => $e->getMessage(),
-                'status' => Response::HTTP_INTERNAL_SERVER_ERROR,
-            ]));
-            $response->setStatusCode(Response::HTTP_INTERNAL_SERVER_ERROR);
-            return $response;
-        }
-    }
 
     public function domainInlineUpdate(Request $request)
     {
@@ -437,305 +104,359 @@ class B2bController extends Controller
         }
     }
 
-    private function generateCustomerCode($patternCodeService): array
+
+    public function b2bSubDomain()
     {
-        $params = [
-            'domain' => $this->domain['global_id'],
-            'table' => 'cor_customers',
-            'prefix' => 'CUS-',
+        $domains = SubDomainModel::getB2BDomain($this->domain['global_id']);
+        return response()->json([
+            'message' => 'Success',
+            'status'  => ResponseAlias::HTTP_OK,
+            'data'    => $domains
+        ], ResponseAlias::HTTP_OK);
+    }
+
+    public function categoryWiseProductManage(B2bCategoryWiseProductRequest $request)
+    {
+        $validate = $request->validated();
+
+        $findSubDomain = SubDomainModel::find($validate['id']);
+
+        if (!$findSubDomain || $findSubDomain->status==0) {
+            return response()->json([
+                'message' => 'Domain not found or domain inactive',
+                'status'  => ResponseAlias::HTTP_NOT_FOUND
+            ], ResponseAlias::HTTP_NOT_FOUND);
+        }
+
+        $findSubDomain->update($validate);
+
+        $this->handleCategory($validate['categories'],$findSubDomain,$validate);
+
+        return response()->json([
+            'message' => 'success',
+            'status'  => ResponseAlias::HTTP_OK
+        ], ResponseAlias::HTTP_OK);
+
+    }
+
+    private function handleCategory($categoryInput, $findSubDomain, $inputData)
+    {
+        // Step 1: Get child domain config
+        $findSubDomainIds = UserModel::getDomainData($findSubDomain->sub_domain_id);
+        $childAccConfig = $findSubDomainIds['config_id'];
+
+        $processedCategoryIds = [];
+
+        foreach ($categoryInput as $categoryId) {
+            // Step 2: Ensure subdomain category exists
+            $subDomainCategory = $this->manageSubDomainCategory($categoryId, $childAccConfig);
+
+            // Step 3: Create or update the price matrix row
+            B2BCategoryPriceMatrixModel::updateOrCreate(
+                [
+                    'sub_domain_id' => $findSubDomain->id,
+                    'domain_category_id' => $categoryId,
+                ],
+                [
+                    'config_id' => $childAccConfig,
+                    'sub_domain_category_id' => $subDomainCategory->id,
+                    'created_by_id' => $this->domain['user_id'],
+                    'percent_mode' => $inputData['percent_mode'],
+                    'status' => 1,
+                    'sales_target_amount' => $inputData['sales_target_amount'],
+                    'bonus_percent' => $inputData['bonus_percent'],
+                    'purchase_percent' => $inputData['purchase_percent'],
+                    'mrp_percent' => $inputData['mrp_percent'],
+                ]
+            );
+
+            $processedCategoryIds[] = $categoryId;
+        }
+
+        // Step 4: Disable status for categories that were not selected
+        $existingMappings = B2BCategoryPriceMatrixModel::where('sub_domain_id', $findSubDomain->id)->get();
+        $idsToKeepActive = $existingMappings->whereIn('domain_category_id', $processedCategoryIds)->pluck('id');
+        $idsToDisable = $existingMappings->whereNotIn('domain_category_id', $processedCategoryIds)->pluck('id');
+
+        B2BCategoryPriceMatrixModel::whereIn('id', $idsToKeepActive)->update(['status' => 1]);
+        B2BCategoryPriceMatrixModel::whereIn('id', $idsToDisable)->update(['status' => 0]);
+
+        $updatedMappings = B2BCategoryPriceMatrixModel::where('sub_domain_id', $findSubDomain->id)->get();
+
+        $findSubDomainIds = UserModel::getDomainData($findSubDomain->sub_domain_id);
+        $childAccConfig = $findSubDomainIds['config_id'];
+
+        foreach ($updatedMappings as $category){
+            $this->handleCategoryProduct($category, $findSubDomain,$childAccConfig);
+        }
+    }
+
+    private function handleCategoryProduct($categoryMatrix, $findSubDomain,$childAccConfig) {
+
+        // Fetch all products for the given category and config
+        $products = ProductModel::where('category_id', $categoryMatrix->domain_category_id)
+            ->where('config_id', $this->domain['config_id'])
+            ->where('status', true)
+            ->get();
+
+        // Fetch all child products for given config in one query
+        $productUpdates = ProductModel::where('config_id', $childAccConfig)
+            ->whereIn('parent_id', $products->pluck('id')) // Batch query
+            ->get()
+            ->keyBy('parent_id');
+
+        // Pre-fetch all stock items for efficiency
+        $parentStocks = StockItemModel::whereIn('product_id', $products->pluck('id'))
+            ->get()
+            ->keyBy('product_id');
+
+        // Iterate through all parent products
+        foreach ($products as $parentProduct) {
+            $productUpdate = $productUpdates[$parentProduct->id] ?? null;
+            $parentStock = $parentStocks[$parentProduct->id] ?? null;
+
+            if (!$productUpdate) {
+                $this->createChildProduct($parentProduct, $categoryMatrix, $childAccConfig, $parentStock,$findSubDomain);
+            } elseif ($productUpdate) {
+                $this->updateProductAndStock($parentProduct, $productUpdate, $parentStock, $findSubDomain,$categoryMatrix);
+            }
+        }
+
+        return true;
+    }
+
+    private function updateProductAndStock($parentProduct, $productUpdate, $parentStock, $findSubDomain,$categoryMatrix) {
+        $status = $categoryMatrix->status;
+
+        // Update child product's status
+        $productUpdate->update([
+            'status' => $status,
+//            'vendor_id' => $findVendor->id
+        ]);
+
+        $productStockUpdate = StockItemModel::where('product_id', $productUpdate->id)->get();
+
+        if ($productStockUpdate) {
+            // Update child stock
+            foreach ($productStockUpdate as $productStock) {
+                $productStock->update(
+                    $this->prepareStockData($parentStock, $findSubDomain, ['status' => $status])
+                );
+
+                B2BStockPriceMatrixModel::updateOrCreate(
+                    [
+                        'sub_domain_id' => $findSubDomain->id,
+                        'category_price_matrix_id' => $categoryMatrix->id,
+                        'domain_stock_item_id' => $parentStock->id,
+                        'sub_domain_stock_item_id' => $productStock->id,
+                    ],
+                    [
+                        'mrp' => $productStock->sales_price,
+                        'purchase_price' => $productStock->purchase_price,
+                        'sales_price' => $productStock->sales_price,
+                        'status' => $status,
+                    ]
+                );
+            }
+        }
+
+        return true;
+    }
+
+    private function createChildProduct($parentProduct, $category, $childAccConfig, $parentStock,$findSubDomain) {
+        // Create a new child product
+        $childProduct = ProductModel::create([
+            'category_id' => $category->sub_domain_category_id,
+            'name' => $parentProduct->name,
+            'slug' => $this->generateUniqueSlug($parentProduct->slug),
+            'config_id' => $childAccConfig,
+            'barcode' => $parentProduct->barcode,
+            'alternative_name' => $parentProduct->alternative_name,
+            'unit_id' => $parentProduct->unit_id,
+            'product_type_id' => $parentProduct->product_type_id,
+            'parent_id' => $parentProduct->id,
+            'description' => $parentProduct->description,
+//            'vendor_id' => $findVendor->id,
+        ]);
+
+        // Fetch parent product stock
+        $getStocks = StockItemModel::where([
+            ['product_id', $parentProduct->id],
+            ['config_id', $parentProduct->config_id],
+            ['status', 1],
+            ['is_delete', 0]
+        ])->get();
+
+        if (count($getStocks) > 0) {
+            foreach ($getStocks as $stock) {
+                // Prepare stock data and insert
+                $stockData = $this->prepareStockData($stock, $findSubDomain,[
+                    'product_id'         => $childProduct->id,
+                    'config_id'          => $childAccConfig,
+                    'barcode'            => random_int(10000000, 99999999),
+                    'sku'                => random_int(10000000, 99999999),
+                    'status'             => $stock->status ?? null,
+                    'is_delete'          => $stock->is_delete ?? null,
+                    'is_master'          => $stock->is_master ?? null,
+                    'name'               => $stock->name ?? null,
+                    'display_name'       => $stock->display_name ?? null,
+                    'uom'                => $stock->uom ?? null,
+                    'bangla_name'        => $stock->bangla_name ?? null,
+                    'parent_stock_item'  => $stock->id ?? null,
+                ]);
+
+                // Attributes processing
+                $attributes = ['color_id', 'grade_id', 'brand_id', 'size_id', 'model_id'];
+                foreach ($attributes as $attribute) {
+                    if (!empty($stock->$attribute)) {
+                        $stockData[$attribute] = $this->createParticularForBranch($stock->$attribute, $childAccConfig);
+                    }
+                }
+                $stockData['barcode'] = random_int(10000000, 99999999);
+                $stockData['sku'] = $stockData['barcode'];
+                // Save stock data
+                $stock = StockItemModel::create($stockData);
+
+                B2BStockPriceMatrixModel::updateOrCreate(
+                    [
+                        'sub_domain_id' => $findSubDomain->id,
+                        'category_price_matrix_id' => $category->id,
+                        'domain_stock_item_id' => $parentStock->id,
+                        'sub_domain_stock_item_id' => $stock->id,
+                    ],
+                    [
+                        'mrp' => $stock->sales_price,
+                        'purchase_price' => $stock->purchase_price,
+                        'sales_price' => $stock->sales_price,
+                        'status' => 1,
+                    ]
+                );
+            }
+        }
+        return true;
+    }
+
+    private function prepareStockData($parentStock, $findSubDomain, $additionalData = []) {
+        $modifier = ($findSubDomain->percent_mode == 'Increase')
+            ? (100 + $findSubDomain->mrp_percent)
+            : (100 - $findSubDomain->mrp_percent);
+
+        $salesPrice = $parentStock->sales_price * ($modifier / 100);
+
+        $baseStockData = [
+            'purchase_price' => $findSubDomain->purchase_percent? $salesPrice * ((100 - $findSubDomain->purchase_percent) / 100) : 0.0,
+            'sales_price' => $salesPrice ?? 0.0,
+            'min_quantity' => $parentStock->min_quantity ?? 0.0,
         ];
 
-        $pattern = $patternCodeService->customerCode($params);
-
-        return $pattern;
+        return array_merge($baseStockData, $additionalData);
     }
 
-    /**
-     * Show the specified resource.
-     */
-    public function show($id)
+    private function createParticularForBranch($parentParticularId, $childAccConfig) {
+        $parentParticular = ParticularModel::find($parentParticularId);
+
+        if ($parentParticular) {
+            $childParticular = ParticularModel::firstOrCreate(
+                [
+                    'particular_type_id' => $parentParticular->particular_type_id,
+                    'config_id' => $childAccConfig,
+                ],
+                [
+                    'name' => $parentParticular->name,
+                    'slug' => $parentParticular->slug,
+                    'status' => 1,
+                ]
+            );
+            return $childParticular->id;
+        }
+    }
+
+
+    private function generateUniqueSlug($slug) {
+        // Generate a unique slug by appending random characters
+        return $slug . '-' . substr(uniqid(), -6);
+    }
+
+    private function manageSubDomainCategory($categoryId,$childAccConfig)
     {
-        $service = new JsonRequestResponse();
+        $findParentCategory = CategoryModel::find($categoryId);
+        $parentId = null;
 
-        // Fetch the domain entity
-        $entity = DomainModel::find($id);
+        if ($findParentCategory->parent) {
+            $findCategoryParent = CategoryModel::find($findParentCategory->parent);
 
-        if (!$entity) {
-            return $service->returnJosnResponse([
-                'message' => 'Domain not found',
-                'status' => Response::HTTP_NOT_FOUND,
-            ]);
+            $parentCategory = CategoryModel::firstOrCreate(
+                [
+                    'slug' => $findCategoryParent->slug,
+                    'config_id' => $childAccConfig
+                ],
+                [
+                    'status' => 1,
+                    'name' => $findCategoryParent->name,
+                    'parent' => null
+                ]
+            );
+
+            $parentId = $parentCategory->id;
         }
 
-        // Retrieve the inventory config id based on domain_id
-        $config = ConfigModel::where('domain_id', $id)->first();
-
-        if (!$config) {
-            return $service->returnJosnResponse([
-                'message' => 'Inventory config not found for this domain',
-                'status' => Response::HTTP_NOT_FOUND,
-            ]);
-        }
-
-        $getInvConfigId = $config->id;
-
-        // if product type not exists then create
-        $productTypeExists = InventorySettingModel::where('config_id', $getInvConfigId)
-            ->where('parent_slug', 'product-type')
-            ->exists();
-
-        if (!$productTypeExists) {
-            $getProductType = UtilitySettingModel::getEntityDropdown('product-type');
-            if (count($getProductType) > 0) {
-                // Loop through each product type and either find or create inventory setting.
-                foreach ($getProductType as $type) {
-                    // If the inventory setting is not found, create a new one.
-                    InventorySettingModel::create([
-                        'config_id' => $getInvConfigId,
-                        'setting_id' => $type->id,
-                        'name' => $type->name,
-                        'slug' => $type->slug,
-                        'parent_slug' => 'product-type',
-                        'is_production' => in_array($type->slug,
-                            ['post-production', 'mid-production', 'pre-production']) ? 1 : 0,
-                    ]);
-                }
-            }
-        }
-
-        // Fetch relevant product types settings as setting_id array
-        $getInvProductType = InventorySettingModel::where('config_id', $getInvConfigId)
-            ->where('parent_slug', 'product-type')
-            ->where('status', 1)
-            ->get('id')
-            ->toArray();
-
-        // Extract ids as strings
-        $ids = array_map(function($module) {
-            return (string)$module['id'];
-        }, $getInvProductType);
-
-        // Attach the product types to the entity
-        $entity['product_types'] = $ids;
-
-        // fetch inventory setting product type for generate checkbox
-        $getInvProductTypeForCheckbox = InventorySettingModel::where('config_id', $getInvConfigId)
-            ->where('parent_slug', 'product-type')
-            ->get()
-            ->toArray();
-        $entity['product_types_checkbox'] = $getInvProductTypeForCheckbox;
-
-        // Return a structured JSON response using your service
-        return $service->returnJosnResponse($entity);
+        $currentCategory = CategoryModel::firstOrCreate(
+            [
+                'slug' => $findParentCategory->slug,
+                'config_id' => $childAccConfig,
+                'parent' => $parentId
+            ],
+            [
+                'status' => 1,
+                'name' => $findParentCategory->name
+            ]
+        );
+        return $currentCategory;
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit($id)
+
+    public function b2bSubDomainSetting($id)
     {
-        $service = new JsonRequestResponse();
-        $entity = DomainModel::find($id);
-        if (!$entity){
-            $entity = 'Data not found';
-        }
-        $data = $service->returnJosnResponse($entity);
-        return $data;
+        $entity = SubDomainModel::getB2BDomainSetting($id);
+        return response()->json([
+            'message' => 'success',
+            'status'  => ResponseAlias::HTTP_OK,
+            'data' => $entity
+        ], ResponseAlias::HTTP_OK);
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-
-    public function update(DomainRequest $request, $id)
-    {
-        $data = $request->validated();
-
-        // Start the transaction.
-        DB::beginTransaction();
-
-        try {
-            // Find inventory config id.
-            $getInvConfigId = ConfigModel::where('domain_id', $id)->first('id')->id;
-
-            // If no inventory config found, return JSON response.
-            if (!$getInvConfigId) {
-                DB::rollBack();  // Rollback if inventory config is not found.
-
-                $response = new Response();
-                $response->headers->set('Content-Type', 'application/json');
-                $response->setContent(json_encode([
-                    'message' => 'Inventory config not found',
-                    'status' => Response::HTTP_NOT_FOUND,
-                ]));
-                $response->setStatusCode(Response::HTTP_OK);
-                return $response;
-            }
-
-            $getInvSetting = InventorySettingModel::where('config_id', $getInvConfigId)
-                ->where('parent_slug', 'product-type')
-                ->get();
-
-            // Loop through each product type and either find or create inventory setting.
-            foreach ($getInvSetting as $type) {
-                if (in_array($type->id, $data['product_types'])) {
-                    $type->update(['status'=>true]);
-                }else{
-                    $type->update(['status'=>false]);
-                }
-            }
-
-            // Find and update the domain entity.
-            $entity = DomainModel::find($id);
-            $entity->update($data);
-
-            // If we got this far, everything is okay, commit the transaction.
-            DB::commit();
-
-            // Return a json response using your service.
-            $service = new JsonRequestResponse();
-            return $service->returnJosnResponse($entity);
-
-        } catch (Exception $e) {
-            // If there's an exception, rollback the transaction.
-            DB::rollBack();
-
-            // Optionally log the exception (for debugging purposes)
-            \Log::error('Error updating domain and inventory settings: '.$e->getMessage());
-
-            // Return an error response.
-            $response = new Response();
-            $response->headers->set('Content-Type', 'application/json');
-            $response->setContent(json_encode([
-                'message' => 'An error occurred while updating.',
-                'error' => $e->getMessage(),
-                'status' => Response::HTTP_INTERNAL_SERVER_ERROR,
-            ]));
-            $response->setStatusCode(Response::HTTP_INTERNAL_SERVER_ERROR);
-            return $response;
-        }
-    }
-
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function subDomain(Request $request,$id, EntityManager $em)
+    public function b2bSubDomainCategory(Request $request,$id)
     {
 
-        $subDomain = $request->sub_domain;
-        $entity = $em->getRepository(GlobalOption::class)->find($id);
-        $em->getRepository(SubDomain::class)->insertUpdate($entity,$subDomain);
-        $service = new JsonRequestResponse();
-        return $service->returnJosnResponse($entity);
+        $domain = UserModel::getDomainData($id);
+        $invConfig = $domain['inv_config'];
+        $entities = B2BCategoryPriceMatrixModel::getB2BDomainCategory($invConfig);
+        $response = new Response();
+        $response->headers->set('Content-Type','application/json');
+        $response->setContent(json_encode([
+            'message' => 'success',
+            'status' => Response::HTTP_OK,
+            'data' => $entities
+        ]));
+        $response->setStatusCode(Response::HTTP_OK);
+        return $response;
     }
 
-     /**
-     * Update the specified resource in storage.
-     */
-    public function inventorySetting(Request $request,$id, EntityManager $em)
+
+    public function b2bSubDomainProduct(Request $request,$id)
     {
-        $setting_id = $request->setting_id;
-        $entity = $em->getRepository(GlobalOption::class)->find($id);
-        $em->getRepository(Setting::class)->insertUpdate($entity,$setting_id);
-        $service = new JsonRequestResponse();
-        return $service->returnJosnResponse($entity);
+        $domain = UserModel::getDomainData($id);
+        $invConfig = $domain['inv_config'];
+        $entities = B2BCategoryPriceMatrixModel::getB2BDomainCategory($invConfig);
+        $response = new Response();
+        $response->headers->set('Content-Type','application/json');
+        $response->setContent(json_encode([
+            'message' => 'success',
+            'status' => Response::HTTP_OK,
+            'data' => $domains
+        ]));
+        $response->setStatusCode(Response::HTTP_OK);
+        return $response;
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy($id)
-    {
-        $service = new JsonRequestResponse();
-        DomainModel::find($id)->delete();
-        $entity = ['message'=>'delete'];
-        $data = $service->returnJosnResponse($entity);
-        return $data;
-    }
-
-    /**
-     * Reset the specified resource from storage.
-     */
-
-    public function resetData($id)
-    {
-        // Ensure the domain exists
-        $findDomain = DomainModel::findOrFail($id);
-
-        // Fetch domain config
-        $allConfigId = DomainModel::getDomainConfigData($id)->toArray();
-
-        if (empty($allConfigId['inv_config'])) {
-            return response()->json(['message' => 'Inventory config not found', 'status' => Response::HTTP_NOT_FOUND], Response::HTTP_NOT_FOUND);
-        }
-
-        // Delete purchases and related data using chunking
-        PurchaseModel::with('purchaseItems.stock.stockItemHistory')
-            ->where('config_id', $allConfigId['inv_config'])
-            ->chunk(100, function ($purchases) {
-                $purchases->each(function ($purchase) {
-                    $purchase->purchaseItems->each(function ($purchaseItem) {
-                        if ($purchaseItem->stock && $purchaseItem->stock->stockItemHistory->isNotEmpty()) {
-                            $purchaseItem->stock->stockItemHistory->each(function ($history) {
-                                $history->delete();
-                            });
-                        }
-                    });
-                    $purchase->delete();
-                });
-            });
-
-        // Bulk delete vendors and customers
-        VendorModel::where('domain_id', $id)->delete();
-        CustomerModel::where('domain_id', $id)->delete();
-
-        // Delete sales and related data using chunking
-        SalesModel::with('salesItems.stock.stockItemHistory')
-            ->where('config_id', $allConfigId['inv_config'])
-            ->chunk(100, function ($sales) {
-                $sales->each(function ($sale) {
-                    $sale->salesItems->each(function ($salesItem) {
-                        if ($salesItem->stock && $salesItem->stock->stockItemHistory->isNotEmpty()) {
-                            $salesItem->stock->stockItemHistory->each(function ($history) {
-                                $history->delete();
-                            });
-                        }
-                    });
-                    $sale->delete();
-                });
-            });
-
-        // Bulk update stock item quantities
-        StockItemModel::where('config_id', $allConfigId['inv_config'])->update(['quantity' => 0]);
-
-        return response()->json(['message' => 'Domain reset successfully', 'status' => Response::HTTP_OK], Response::HTTP_OK);
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function deleteData($id)
-    {
-
-        $service = new JsonRequestResponse();
-        $userData = DomainModel::getDomainConfigData($id);
-        if($userData['acc_config']){
-            AccountingModel::find($userData['acc_config'])->delete();
-        }
-        if($userData['pro_config']) {
-            ProductionConfig::find($userData['pro_config'])->delete();
-        }
-        if($userData['nbr_config']) {
-            NbrVatModel::find($userData['nbr_config'])->delete();
-        }
-        if($userData['config_id']) {
-            ConfigModel::find($userData['config_id'])->delete();
-        }
-        TransactionModeModel::whereNull('config_id')->delete();
-        DomainModel::find($id)->delete();
-        $entity = ['message'=>'delete'];
-        $data = $service->returnJosnResponse($entity);
-        return $data;
-    }
 }

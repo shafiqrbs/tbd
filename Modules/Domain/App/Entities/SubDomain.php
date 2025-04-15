@@ -35,26 +35,23 @@ class SubDomain
 
      /**
      * @var float
-     *
-     * @ORM\Column(name="percent_mode",type="float" , nullable=true)
+     * @ORM\Column(name="percent_mode",type="string" , nullable=true)
      */
     private $percentMode;
 
     /**
      * @var float
      *
-     * @ORM\Column(name="sales_price_percent",type="float" , nullable=true)
+     * @ORM\Column(name="mrp_percent",type="float" , nullable=true)
      */
-    private $salesPricePercent;
+    private $mrpPercent;
 
     /**
      * @var float
      *
-     * @ORM\Column(name="price_percent",type="float" , nullable=true)
+     * @ORM\Column(name="purchase_percent",type="float" , nullable=true)
      */
-    private $pricePercent;
-
-
+    private $purchasePercent;
 
     /**
      * @var float

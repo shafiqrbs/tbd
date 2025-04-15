@@ -1,10 +1,9 @@
 <?php
 
-namespace Modules\Inventory\App\Entities;
+namespace Modules\Domain\App\Entities;
 
 use Doctrine\ORM\Mapping as ORM;
 use Gedmo\Mapping\Annotation as Gedmo;
-use Modules\Domain\App\Entities\GlobalOption;
 
 /**
  * B2BCategoryPriceMatrix
@@ -31,8 +30,8 @@ class B2BCategoryPriceMatrix
     private $config;
 
     /**
-     * @var GlobalOption $subDomain
-     * @ORM\ManyToOne(targetEntity="Modules\Domain\App\Entities\GlobalOption")
+     * @var SubDomain $subDomain
+     * @ORM\ManyToOne(targetEntity="Modules\Domain\App\Entities\SubDomain")
      **/
     private $subDomain;
 
@@ -53,24 +52,37 @@ class B2BCategoryPriceMatrix
 
     /**
      * @var float
-     *
-     * @ORM\Column(name="percent_mode",type="float" , nullable=true)
+     * @ORM\Column(name="percent_mode",type="string" , nullable=true)
      */
     private $percentMode;
 
     /**
      * @var float
      *
-     * @ORM\Column(name="price_percent",type="float" , nullable=true)
+     * @ORM\Column(name="mrp_percent",type="float" , nullable=true)
      */
-    private $pricePercent;
+    private $mrpPercent;
 
     /**
      * @var float
      *
-     * @ORM\Column(name="sales_price_percent",type="float" , nullable=true)
+     * @ORM\Column(name="purchase_percent",type="float" , nullable=true)
      */
-    private $salesPricePercent;
+    private $purchasePercent;
+
+    /**
+     * @var float
+     *
+     * @ORM\Column(name="bonus_percent",type="float" , nullable=true)
+     */
+    private $bonusPercent;
+
+    /**
+     * @var float
+     *
+     * @ORM\Column(name="sales_target_amount",type="float" , nullable=true)
+     */
+    private $salesTargetAmount;
 
 
     /**

@@ -1,13 +1,10 @@
 <?php
 
-namespace Modules\Inventory\App\Entities;
+namespace Modules\Domain\App\Entities;
 
-use Modules\Inventory\App\Entities\Product;
 use Doctrine\ORM\Mapping as ORM;
 use Gedmo\Mapping\Annotation as Gedmo;
-use Modules\Utility\App\Entities\ProductUnit;
-use Symfony\Component\HttpFoundation\File\UploadedFile;
-use Symfony\Component\Validator\Constraints as Assert;
+
 /**
  * RequisitionItem
  *
@@ -26,10 +23,16 @@ class B2BStockPriceMatrix
     private $id;
 
     /**
-     * @ORM\ManyToOne(targetEntity="Modules\Inventory\App\Entities\Config" , cascade={"detach","merge"} )
-     * @ORM\JoinColumn(name="config_id", onDelete="CASCADE")
+     * @var SubDomain $subDomain
+     * @ORM\ManyToOne(targetEntity="Modules\Domain\App\Entities\SubDomain")
      **/
-    private  $config;
+    private $subDomain;
+
+    /**
+     * @var SubDomain $subDomain
+     * @ORM\ManyToOne(targetEntity="Modules\Domain\App\Entities\B2BCategoryPriceMatrix")
+     **/
+    private $categoryPriceMatrix;
 
     /**
      * @ORM\ManyToOne(targetEntity="Modules\Inventory\App\Entities\StockItem" , cascade={"detach","merge"} )
@@ -43,15 +46,6 @@ class B2BStockPriceMatrix
      * @ORM\JoinColumn(name="sub_domain_stock_item_id", onDelete="CASCADE")
      **/
     private  $subDomainStockItem;
-
-
-    /**
-     * @var float
-     *
-     * @ORM\Column(name="price_percent",type="float" , nullable=true)
-     */
-    private $pricePercent;
-
 
     /**
      * @var float

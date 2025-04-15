@@ -1,21 +1,27 @@
 <?php
 
-namespace Modules\Inventory\App\Models;
-
+namespace Modules\Domain\App\Models;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 
-class B2BStockPriceMatrixModel extends Model
+class B2BCategoryPriceMatrixModel extends Model
 {
-    use HasFactory;
-
-    protected $table = 'inv_b2b_stock_price_matrix';
+    protected $table = 'inv_b2b_category_price_matrix';
     public $timestamps = true;
     protected $guarded = ['id'];
     protected $fillable = [
         'config_id',
-        'category_id',
+        'sub_domain_id',
+        'domain_category_id',
+        'sub_domain_category_id',
+        'created_by_id',
+        'percent_mode',
         'status',
+        'notes',
+        'process',
+        'sales_target_amount',
+        'bonus_percent',
+        'purchase_percent',
+        'mrp_percent',
     ];
 
 
@@ -33,12 +39,12 @@ class B2BStockPriceMatrixModel extends Model
     }
 
 
-    public static function getRecords($request,$domain)
+    public static function getB2BDomainCategory($domain)
     {
 
-        $categories = self::where('inv_b2b_category_price_matrix.config_id',$domain['config_id'])
-            ->join('inv_category as c','c.id','=','inv_b2b_category_price_matrix.sub_domain_category_item_id')
-            ->join('inv_category as p','p.id','=','inv_category.parent')
+        $categories = self::where('inv_b2b_category_price_matrix.config_id',$domain)
+            ->join('inv_category as c','c.id','=','inv_b2b_category_price_matrix.sub_domain_category_id')
+            ->join('inv_category as p','p.id','=','c.parent')
             ->select([
                 'inv_b2b_category_price_matrix.id',
                 'inv_b2b_category_price_matrix.percent_mode',
@@ -50,7 +56,7 @@ class B2BStockPriceMatrixModel extends Model
                 'c.status',
                 'p.name as parent_name'
             ]);
-        $entities = $categories->orderBy('inv_category.id','DESC')->get();
+        $entities = $categories->orderBy('c.name','DESC')->get();
         return $entities;
     }
 
