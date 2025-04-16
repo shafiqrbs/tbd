@@ -32,6 +32,17 @@ class SubDomain
      **/
     private $subDomain;
 
+    /**
+     * @ORM\ManyToOne(targetEntity="Modules\Core\App\Entities\Customer")
+     * @ORM\JoinColumn(onDelete="CASCADE")
+     **/
+    private  $customer;
+
+    /**
+     * @ORM\ManyToOne(targetEntity="Modules\Core\App\Entities\Vendor")
+     * @ORM\JoinColumn(onDelete="CASCADE")
+     **/
+    private  $vendor;
 
      /**
      * @var float
@@ -185,6 +196,135 @@ class SubDomain
     {
         $this->subDomain = $subDomain;
     }
+
+    /**
+     * @return mixed
+     */
+    public function getCustomer()
+    {
+        return $this->customer;
+    }
+
+    /**
+     * @param mixed $customer
+     */
+    public function setCustomer($customer)
+    {
+        $this->customer = $customer;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getVendor()
+    {
+        return $this->vendor;
+    }
+
+    /**
+     * @param mixed $vendor
+     */
+    public function setVendor($vendor)
+    {
+        $this->vendor = $vendor;
+    }
+
+    /**
+     * @return float
+     */
+    public function getPercentMode()
+    {
+        return $this->percentMode;
+    }
+
+    /**
+     * @param float $percentMode
+     */
+    public function setPercentMode($percentMode)
+    {
+        $this->percentMode = $percentMode;
+    }
+
+    /**
+     * @return float
+     */
+    public function getMrpPercent()
+    {
+        return $this->mrpPercent;
+    }
+
+    /**
+     * @param float $mrpPercent
+     */
+    public function setMrpPercent($mrpPercent)
+    {
+        $this->mrpPercent = $mrpPercent;
+    }
+
+    /**
+     * @return float
+     */
+    public function getPurchasePercent()
+    {
+        return $this->purchasePercent;
+    }
+
+    /**
+     * @param float $purchasePercent
+     */
+    public function setPurchasePercent($purchasePercent)
+    {
+        $this->purchasePercent = $purchasePercent;
+    }
+
+    /**
+     * @return float
+     */
+    public function getBonusPercent()
+    {
+        return $this->bonusPercent;
+    }
+
+    /**
+     * @param float $bonusPercent
+     */
+    public function setBonusPercent($bonusPercent)
+    {
+        $this->bonusPercent = $bonusPercent;
+    }
+
+    /**
+     * @return float
+     */
+    public function getSalesTargetAmount()
+    {
+        return $this->salesTargetAmount;
+    }
+
+    /**
+     * @param float $salesTargetAmount
+     */
+    public function setSalesTargetAmount($salesTargetAmount)
+    {
+        $this->salesTargetAmount = $salesTargetAmount;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getDomainType()
+    {
+        return $this->domainType;
+    }
+
+    /**
+     * @param mixed $domainType
+     */
+    public function setDomainType($domainType)
+    {
+        $this->domainType = $domainType;
+    }
+
 
 
 

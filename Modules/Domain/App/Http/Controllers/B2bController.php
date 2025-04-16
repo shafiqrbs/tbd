@@ -227,7 +227,6 @@ class B2bController extends Controller
 
     private function updateProductAndStock($parentProduct, $productUpdate, $parentStock, $findSubDomain,$categoryMatrix) {
         $status = $categoryMatrix->status;
-
         // Update child product's status
         $productUpdate->update([
             'status' => $status,

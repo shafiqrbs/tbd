@@ -52,7 +52,6 @@ Route::prefix('/domain')->middleware(array(HeaderAuthenticationMiddleware::class
         Route::get('sub-domain', [B2bController::class,'b2bSubDomain'])->name('b2b_sub_domain');
         Route::post('sub-domain/category', [B2bController::class,'categoryWiseProductManage'])->name('category_wise_product_insert');
         Route::get('sub-domain/setting/{id}', [B2bController::class,'b2bSubDomainSetting'])->name('b2b_sub_domain_setting');
-
         Route::get('sub-domain/category/{id}', [B2bController::class,'b2bSubDomainCategory'])->name('b2b_sub_domain_category');
         Route::get('sub-domain/product/{id}', [B2bController::class,'b2bSubDomainProduct'])->name('b2b_sub_domain_product');
     });

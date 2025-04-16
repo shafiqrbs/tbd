@@ -116,7 +116,7 @@ class CategoryModel extends Model
         $total  = $categories->count();
         $entities = $categories->skip($skip)
             ->take($perPage)
-            ->orderBy('inv_category.id','DESC')
+            ->orderBy('inv_category.name','DESC')
             ->get();
 
         $data = array('count'=>$total,'entities'=>$entities);
