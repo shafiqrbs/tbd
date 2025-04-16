@@ -143,5 +143,56 @@ class DomainModel extends Model
         return $data;
     }
 
+    public static function getSubDomain($request){
+
+        $page =  isset($request['page']) && $request['page'] > 0?($request['page'] - 1 ) : 0;
+        $perPage = isset($request['offset']) && $request['offset']!=''? (int)($request['offset']):50;
+        $skip = isset($page) && $page!=''? (int)$page * $perPage:0;
+        $entities = self::select([
+            'dom_domain.id',
+            'dom_domain.company_name',
+            'dom_domain.name',
+            'dom_domain.email',
+            'dom_domain.mobile',
+            'dom_domain.unique_code',
+            'dom_domain.created_at',
+            'dom_sub_domain.domain_type',
+            'dom_sub_domain.percent_mode',
+            'dom_sub_domain.bonus_percent',
+            'dom_sub_domain.sales_target_amount',
+            'dom_sub_domain.mrp_percent',
+            'dom_sub_domain.purchase_percent',
+            'dom_sub_domain.status',
+        ])->leftjoin('dom_sub_domain','dom_sub_domain.sub_domain_id','=','dom_domain.id');
+
+        $entities = $entities->where('dom_domain.id','!=',1);
+        if (isset($request['term']) && !empty($request['term'])){
+            $entities = $entities->whereAny(['dom_domain.name','dom_domain.email','dom_domain.mobile'],'LIKE','%'.$request['term'].'%');
+        }
+
+        if (isset($request['name']) && !empty($request['name'])){
+            $entities = $entities->where('dom_domain.name',$request['name']);
+        }
+
+        if (isset($request['mobile']) && !empty($request['mobile'])){
+            $entities = $entities->where('dom_domain.mobile',$request['mobile']);
+        }
+
+        if (isset($request['email']) && !empty($request['email'])){
+            $entities = $entities->where('dom_domain.email',$request['email']);
+        }
+
+        $total  = $entities->count();
+        $entities = $entities->skip($skip)
+            ->take($perPage)
+            ->orderBy('dom_sub_domain.id','DESC')
+            ->get();
+
+        $data = array('count'=>$total,'entities' => $entities);
+        return $data;
+
+    }
+
+
 
 }

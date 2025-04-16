@@ -6,6 +6,7 @@ use Cviebrock\EloquentSluggable\Sluggable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Modules\Domain\App\Models\B2BCategoryPriceMatrixModel;
 use Modules\Inventory\App\Entities\Product;
 use Modules\Inventory\App\Entities\StockItem;
 
@@ -72,6 +73,12 @@ class StockItemModel extends Model
     public function stockItemHistory() :HasMany
     {
         return $this->hasMany(StockItemHistoryModel::class, 'stock_item_id');
+    }
+
+    // In StockItemModel.php
+    public function parentStock()
+    {
+        return $this->belongsTo(StockItemModel::class, 'parent_stock_item');
     }
 
 

@@ -3,9 +3,18 @@
 namespace Modules\Domain\App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
+use Modules\Accounting\App\Models\AccountHeadModel;
+use Modules\AppsApi\App\Services\GeneratePatternCodeService;
+use Modules\Core\App\Models\CustomerModel;
+use Modules\Core\App\Models\SettingModel;
+use Modules\Core\App\Models\SettingTypeModel;
 use Modules\Core\App\Models\UserModel;
+use Modules\Core\App\Models\VendorModel;
 use Modules\Domain\App\Entities\DomainChild;
 use Modules\Domain\App\Http\Requests\B2bCategoryWiseProductRequest;
 use Modules\Domain\App\Models\B2BCategoryPriceMatrixModel;
@@ -31,8 +40,21 @@ class B2bController extends Controller
         }
     }
 
+    public function index(Request $request){
+        $data = DomainModel::getSubDomain($request);
+        $response = new Response();
+        $response->headers->set('Content-Type','application/json');
+        $response->setContent(json_encode([
+            'message' => 'success',
+            'status' => Response::HTTP_OK,
+            'total' => $data['count'],
+            'data' => $data['entities']
+        ]));
+        $response->setStatusCode(Response::HTTP_OK);
+        return $response;
+    }
 
-    public function domainInlineUpdate(Request $request)
+    public function domainInlineUpdate(Request $request, GeneratePatternCodeService $patternCodeService)
     {
         $validated = $request->validate([
             'domain_id'  => 'required|integer',
@@ -40,70 +62,335 @@ class B2bController extends Controller
             'value'      => 'required',
         ]);
 
-        $domainId   = $validated['domain_id'];
-        $fieldName  = $validated['field_name'];
-        $value      = $validated['value'];
-        $globalDomainId = $this->domain['global_id'];
-
-        $findDomain = DomainModel::find($domainId);
-        if (!$findDomain) {
-            return response()->json(['message' => 'Domain not found', 'status' => ResponseAlias::HTTP_NOT_FOUND], ResponseAlias::HTTP_NOT_FOUND);
-        }
-
-        // Assuming $this->domain is defined globally
-        if (!isset($globalDomainId)) {
-            return response()->json(['message' => 'Global domain context missing', 'status' => ResponseAlias::HTTP_INTERNAL_SERVER_ERROR], ResponseAlias::HTTP_INTERNAL_SERVER_ERROR);
-        }
-
+        DB::beginTransaction();
         try {
+            $domainId = $validated['domain_id'];
+            $fieldName = $validated['field_name'];
+            $value = $validated['value'];
+            $globalDomainId = $this->domain['global_id'] ?? null;
+
+            if (!$globalDomainId) {
+                throw new \RuntimeException('Global domain context missing');
+            }
+
+            $findDomain = DomainModel::findOrFail($domainId);
+            $updateData = [];
+
             switch ($fieldName) {
                 case 'domain_type':
                     $subDomain = SubDomainModel::firstOrCreate(
-                        [
-                            'domain_id'     => $globalDomainId,
-                            'sub_domain_id' => $domainId,
-                        ],
+                        ['domain_id' => $globalDomainId, 'sub_domain_id' => $domainId],
                         ['status' => 0]
                     );
                     $subDomain->update(['domain_type' => $value]);
                     break;
 
                 case 'status':
-                    $subDomain = SubDomainModel::where('domain_id', $globalDomainId)
-                        ->where('sub_domain_id', $domainId)
-                        ->first();
+                    $subDomain = SubDomainModel::where([
+                        'domain_id' => $globalDomainId,
+                        'sub_domain_id' => $domainId
+                    ])->firstOrFail();
 
-                    if (!$subDomain) {
-                        return response()->json([
-                            'message' => 'Assign domain type before updating status',
-                            'status'  => ResponseAlias::HTTP_NOT_FOUND
-                        ], ResponseAlias::HTTP_NOT_FOUND);
+                    $childDomain = DomainModel::findOrFail($subDomain->sub_domain_id);
+                    $parentDomain = DomainModel::findOrFail($subDomain->domain_id);
+
+                    if (!$subDomain->customer_id) {
+                        $customer = $this->handleEntity(
+                            CustomerModel::class,
+                            [
+                                'sub_domain_id' => $subDomain->sub_domain_id,
+                                'domain_id' => $subDomain->domain_id
+                            ],
+                            true,
+                            fn() => $this->prepareCustomerData($childDomain, $patternCodeService)
+                        );
+                        $this->ensureCustomerLedger($customer);
+                        $updateData['customer_id'] = $customer->id;
                     }
 
-                    $subDomain->update(['status' => $value]);
+                    if (!$subDomain->vendor_id) {
+                        $customer = $customer ?? CustomerModel::find($subDomain->customer_id);
+                        $vendor = $this->handleEntity(
+                            VendorModel::class,
+                            [
+                                'sub_domain_id' => $subDomain->sub_domain_id,
+                                'domain_id' => $subDomain->domain_id
+                            ],
+                            true,
+                            fn() => $this->prepareVendorData($childDomain, $parentDomain, $patternCodeService, $customer)
+                        );
+                        $this->ensureVendorLedger($vendor, $childDomain->id);
+                        $updateData['vendor_id'] = $vendor->id;
+                    }
+
+                    $updateData['status'] = $value;
+                    $subDomain->update($updateData);
                     break;
 
                 default:
-                    return response()->json([
-                        'message' => 'Field not supported',
-                        'status'  => ResponseAlias::HTTP_BAD_REQUEST
-                    ], ResponseAlias::HTTP_BAD_REQUEST);
+                    throw new \InvalidArgumentException('Field not supported');
             }
 
+            DB::commit();
             return response()->json([
                 'message' => 'Success',
                 'status'  => ResponseAlias::HTTP_OK
-            ], ResponseAlias::HTTP_OK);
+            ]);
 
-        } catch (\Exception $e) {
+        } catch (ModelNotFoundException $e) {
+            DB::rollBack();
             return response()->json([
-                'message' => 'Something went wrong',
+                'message' => 'Resource not found',
+                'status'  => ResponseAlias::HTTP_NOT_FOUND
+            ], ResponseAlias::HTTP_NOT_FOUND);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'message' => 'Operation failed: ' . $e->getMessage(),
+                'error'   => $e->getMessage(),
+                'status'  => ResponseAlias::HTTP_INTERNAL_SERVER_ERROR
+            ], ResponseAlias::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
+    public function domainInlineUpdateCategory(Request $request)
+    {
+        $validated = $request->validate([
+            'id'  => 'required|integer',
+            'field_name' => 'required|string',
+            'value'      => 'required',
+        ]);
+
+        DB::beginTransaction();
+        try {
+            $id = $validated['id'];
+            $fieldName = $validated['field_name'];
+            $value = $validated['value'];
+            $globalDomainId = $this->domain['global_id'] ?? null;
+
+            if (!$globalDomainId) {
+                throw new \RuntimeException('Global domain context missing');
+            }
+
+            $finaCategoryMatrix = B2BCategoryPriceMatrixModel::findOrFail($id);
+            switch ($fieldName) {
+                case 'mrp_percent':
+                    $finaCategoryMatrix->update(['mrp_percent' => $value,'not_process'=>1]);
+                    break;
+
+                case 'percent_mode':
+                    $finaCategoryMatrix->update(['percent_mode' => $value,'not_process'=>1]);
+                    break;
+
+                case 'purchase_percent':
+                    $finaCategoryMatrix->update(['purchase_percent' => $value,'not_process'=>1]);
+                    break;
+
+                case 'bonus_percent':
+                    $finaCategoryMatrix->update(['bonus_percent' => $value,'not_process'=>1]);
+                    break;
+
+                default:
+                    throw new \InvalidArgumentException('Field not supported');
+            }
+
+            DB::commit();
+            return response()->json([
+                'message' => 'Success',
+                'status'  => ResponseAlias::HTTP_OK
+            ]);
+
+        } catch (ModelNotFoundException $e) {
+            DB::rollBack();
+            return response()->json([
+                'message' => 'Resource not found',
+                'status'  => ResponseAlias::HTTP_NOT_FOUND
+            ], ResponseAlias::HTTP_NOT_FOUND);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'message' => 'Operation failed: ' . $e->getMessage(),
+                'error'   => $e->getMessage(),
+                'status'  => ResponseAlias::HTTP_INTERNAL_SERVER_ERROR
+            ], ResponseAlias::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
+    public function domainInlineUpdateProduct(Request $request)
+    {
+        $validated = $request->validate([
+            'stock_id'  => 'required|integer',
+            'b2b_id'  => 'required|integer',
+            'field_name' => 'required|string',
+            'value'      => 'required',
+        ]);
+
+        DB::beginTransaction();
+        try {
+            $stockId = $validated['stock_id'];
+            $b2bid = $validated['b2b_id'];
+            $fieldName = $validated['field_name'];
+            $value = $validated['value'];
+            $globalDomainId = $this->domain['global_id'] ?? null;
+
+            if (!$globalDomainId) {
+                throw new \RuntimeException('Global domain context missing');
+            }
+
+            $findStock = StockItemModel::findOrFail($stockId);
+            $findProductPriceMatrix = B2BStockPriceMatrixModel::where('sub_domain_stock_item_id',$stockId)->where('sub_domain_id',$b2bid)->first();
+            switch ($fieldName) {
+                case 'sales_price':
+                    $findStock->update(['sales_price' => $value]);
+                    $findProductPriceMatrix->update(['sales_price' => $value]);
+                    break;
+
+                case 'purchase_price':
+                    $findStock->update(['purchase_price' => $value]);
+                    $findProductPriceMatrix->update(['purchase_price' => $value]);
+                    break;
+
+                default:
+                    throw new \InvalidArgumentException('Field not supported');
+            }
+
+            DB::commit();
+            return response()->json([
+                'message' => 'Success',
+                'status'  => ResponseAlias::HTTP_OK
+            ]);
+
+        } catch (ModelNotFoundException $e) {
+            DB::rollBack();
+            return response()->json([
+                'message' => 'Resource not found',
+                'status'  => ResponseAlias::HTTP_NOT_FOUND
+            ], ResponseAlias::HTTP_NOT_FOUND);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'message' => 'Operation failed: ' . $e->getMessage(),
                 'error'   => $e->getMessage(),
                 'status'  => ResponseAlias::HTTP_INTERNAL_SERVER_ERROR
             ], ResponseAlias::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
 
+    protected function handleEntity($modelClass, $whereConditions, $isChecked, $createCallback)
+    {
+        $entity = $modelClass::where($whereConditions)->first();
+
+        if ($isChecked) {
+            // Create or Update the entity
+            if (!$entity) {
+                $entityData = $createCallback();
+                return $modelClass::create($entityData);
+            }
+            $entity->update(['status' => true]);
+            return $entity->fresh();
+        } else {
+            if ($entity) {
+                $entity->update(['status' => false]);
+            }
+            return null;
+        }
+    }
+    private function prepareCustomerData($childDomain, $patternCodeService): array
+    {
+        $code = $this->generateCustomerCode($patternCodeService);
+        $getCoreSettingTypeId = SettingTypeModel::where('slug','customer-group')->first();
+
+        $getCustomerGroupId = SettingModel::where('setting_type_id', $getCoreSettingTypeId->id)
+            ->where('name', 'Domain')->where('domain_id', $this->domain['global_id'])->first();
+
+        if(empty($getCustomerGroupId)){
+            $getCustomerGroupId = SettingModel::create([
+                'domain_id' => $this->domain['global_id'],
+                'name' => 'Domain',
+                'setting_type_id' => $getCoreSettingTypeId->id, // Ensure this variable has a value
+                'slug' => 'domain',
+                'status' => 1,
+                'created_at' => now(),  // Add the current timestamp
+                'updated_at' => now()   // If you also have `updated_at`
+            ]);
+        }
+
+        return [
+            'domain_id' => $this->domain['global_id'],
+            'customer_unique_id' => "{$this->domain['global_id']}@{$childDomain->mobile}-{$childDomain->name}",
+            'code' => $code['code'],
+            'name' => $childDomain->name,
+            'mobile' => $childDomain->mobile,
+            'email' => $childDomain->email,
+            'status' => true,
+            'address' => $childDomain->address,
+            'customer_group_id' => $getCustomerGroupId->id ?? null, // Default group
+            'slug' => Str::slug($childDomain->name),
+            'sub_domain_id' => $childDomain->id,
+            'customerId' => $code['generateId'], // Generated ID from the pattern code
+        ];
+    }
+    private function ensureCustomerLedger(CustomerModel $customer)
+    {
+        $ledgerExist = AccountHeadModel::where('customer_id', $customer->id)
+            ->where('config_id', $this->domain['acc_config'])
+            ->exists();
+
+        if (!$ledgerExist) {
+            AccountHeadModel::insertCustomerLedger($this->domain['acc_config'], $customer);
+        }
+    }
+
+    private function generateCustomerCode($patternCodeService): array
+    {
+        $params = [
+            'domain' => $this->domain['global_id'],
+            'table' => 'cor_customers',
+            'prefix' => 'CUS-',
+        ];
+
+        $pattern = $patternCodeService->customerCode($params);
+
+        return $pattern;
+    }
+
+    private function prepareVendorData($childDomain, $parentDomain, $patternCodeService,$customer): array
+    {
+        $params = [
+            'domain' => $this->domain['global_id'],
+            'table' => 'cor_vendors',
+            'prefix' => '',
+        ];
+
+        $pattern = $patternCodeService->customerCode($params);
+
+        return [
+            'name' => $parentDomain->name,
+            'company_name' => $parentDomain->company_name,
+            'mobile' => $parentDomain->mobile,
+            'email' => $parentDomain->email,
+            'status' => true,
+            'domain_id' => $childDomain->id,
+            'sub_domain_id' => $this->domain['global_id'],
+            'slug' => Str::slug($childDomain->name),
+            'code' => $pattern['code'],
+            'vendor_code' => $pattern['generateId'],
+            'customer_id' => $customer->id,
+        ];
+    }
+
+    private function ensureVendorLedger(VendorModel $vendor, $childDomainId)
+    {
+        $childAccConfig = DB::table('acc_config')
+            ->where('domain_id', $childDomainId)
+            ->value('id');
+
+        $ledgerExist = AccountHeadModel::where('vendor_id', $vendor->id)
+            ->where('config_id', $childAccConfig)
+            ->exists();
+
+        if (!$ledgerExist) {
+            AccountHeadModel::insertVendorLedger($childAccConfig, $vendor);
+        }
+    }
 
     public function b2bSubDomain()
     {
@@ -230,7 +517,7 @@ class B2bController extends Controller
         // Update child product's status
         $productUpdate->update([
             'status' => $status,
-//            'vendor_id' => $findVendor->id
+            'vendor_id' => $findSubDomain->vendor_id,
         ]);
 
         $productStockUpdate = StockItemModel::where('product_id', $productUpdate->id)->get();
@@ -275,7 +562,7 @@ class B2bController extends Controller
             'product_type_id' => $parentProduct->product_type_id,
             'parent_id' => $parentProduct->id,
             'description' => $parentProduct->description,
-//            'vendor_id' => $findVendor->id,
+            'vendor_id' => $findSubDomain->vendor_id,
         ]);
 
         // Fetch parent product stock
@@ -424,9 +711,98 @@ class B2bController extends Controller
         ], ResponseAlias::HTTP_OK);
     }
 
+    public function b2bCategoryWisePriceUpdate($id)
+    {
+        DB::beginTransaction();
+
+        try {
+            $findCategoryMatrix = B2BCategoryPriceMatrixModel::findOrFail($id);
+            $findSubDomain = SubDomainModel::findOrFail($findCategoryMatrix->sub_domain_id);
+
+            // Validate percentages
+            if ($findCategoryMatrix->mrp_percent < 0 || $findCategoryMatrix->mrp_percent > 100) {
+                throw new \InvalidArgumentException('Invalid MRP percentage value');
+            }
+
+            if ($findCategoryMatrix->purchase_percent &&
+                ($findCategoryMatrix->purchase_percent < 0 || $findCategoryMatrix->purchase_percent > 100)) {
+                throw new \InvalidArgumentException('Invalid purchase percentage value');
+            }
+
+            // Get products with their parent stock
+            $products = StockItemModel::with(['parentStock' => function($query) {
+                $query->select('id', 'sales_price');
+            }])
+                ->where('inv_stock.config_id', $findCategoryMatrix->config_id)
+                ->join('inv_product', 'inv_product.id', '=', 'inv_stock.product_id')
+                ->where('inv_product.category_id', $findCategoryMatrix->sub_domain_category_id)
+                ->where('inv_product.vendor_id', $findSubDomain->vendor_id)
+                ->whereNotNull('inv_stock.parent_stock_item')
+                ->select('inv_stock.id', 'inv_stock.parent_stock_item')
+                ->get();
+
+            // Prepare updates
+            $updates = [];
+            foreach ($products as $product) {
+                if (!$product->parentStock) {
+                    continue; // or log this case
+                }
+
+                $modifier = ($findCategoryMatrix->percent_mode == 'Increase')
+                    ? (100 + $findCategoryMatrix->mrp_percent)
+                    : (100 - $findCategoryMatrix->mrp_percent);
+
+                $salesPrice = $product->parentStock->sales_price * ($modifier / 100);
+
+                $updates[] = [
+                    'id' => $product->id,
+                    'purchase_price' => $findCategoryMatrix->purchase_percent
+                        ? $salesPrice * ((100 - $findCategoryMatrix->purchase_percent) / 100)
+                        : 0.0,
+                    'sales_price' => $salesPrice
+                ];
+            }
+
+            // Batch update
+            StockItemModel::upsert($updates, ['id'], ['purchase_price', 'sales_price']);
+            $findCategoryMatrix->update(['not_process'=>0]);
+            DB::commit();
+
+            return response()->json([
+                'message' => 'Successfully process ' . count($updates) . ' products',
+                'status' => ResponseAlias::HTTP_OK
+            ]);
+
+        } catch (ModelNotFoundException $e) {
+            DB::rollBack();
+            return response()->json([
+                'message' => 'Required records not found',
+                'status' => ResponseAlias::HTTP_NOT_FOUND
+            ], ResponseAlias::HTTP_NOT_FOUND);
+
+        } catch (\InvalidArgumentException $e) {
+            DB::rollBack();
+            return response()->json([
+                'message' => $e->getMessage(),
+                'status' => ResponseAlias::HTTP_BAD_REQUEST
+            ], ResponseAlias::HTTP_BAD_REQUEST);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            \Log::error('Price update failed: ' . $e->getMessage(), [
+                'exception' => $e,
+                'categoryMatrixId' => $id
+            ]);
+
+            return response()->json([
+                'message' => 'Failed to update prices',
+                'status' => ResponseAlias::HTTP_INTERNAL_SERVER_ERROR
+            ], ResponseAlias::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
+
     public function b2bSubDomainCategory(Request $request,$id)
     {
-
         $domain = UserModel::getDomainData($id);
         $invConfig = $domain['inv_config'];
         $entities = B2BCategoryPriceMatrixModel::getB2BDomainCategory($invConfig);
@@ -441,21 +817,130 @@ class B2bController extends Controller
         return $response;
     }
 
-
-    public function b2bSubDomainProduct(Request $request,$id)
+    public function b2bSubDomainProduct(Request $request, $id)
     {
-        $domain = UserModel::getDomainData($id);
-        $invConfig = $domain['inv_config'];
-        $entities = B2BCategoryPriceMatrixModel::getB2BDomainCategory($invConfig);
-        $response = new Response();
-        $response->headers->set('Content-Type','application/json');
-        $response->setContent(json_encode([
-            'message' => 'success',
-            'status' => Response::HTTP_OK,
-            'data' => $domains
-        ]));
-        $response->setStatusCode(Response::HTTP_OK);
-        return $response;
+        $page =  isset($request['page']) && $request['page'] > 0?($request['page'] - 1 ) : 0;
+        $perPage = isset($request['offset']) && $request['offset']!=''? (int)($request['offset']):0;
+        $skip = isset($page) && $page!=''? (int)$page * $perPage:0;
+
+        try {
+            // Validate inputs and find required models
+            $findSubDomain = SubDomainModel::findOrFail($id);
+            $findCategoryMatrix = B2BCategoryPriceMatrixModel::where('sub_domain_id', $id)->firstOrFail();
+
+            // Get base products query
+            $products = StockItemModel::join('inv_product', 'inv_product.id', '=', 'inv_stock.product_id')
+                ->join('inv_category', 'inv_category.id', '=', 'inv_product.category_id')
+                ->leftJoin('inv_stock as parent_stock', 'parent_stock.id', '=', 'inv_stock.parent_stock_item')
+                ->leftJoin('inv_b2b_category_price_matrix as matrix', function($join) use ($id) {
+                    $join->on('matrix.sub_domain_category_id', '=', 'inv_category.id')
+                        ->where('matrix.sub_domain_id', $id);
+                })
+                ->where('inv_stock.config_id', $findCategoryMatrix->config_id)
+                ->where('inv_product.vendor_id', $findSubDomain->vendor_id)
+                ->whereNotNull('inv_stock.parent_stock_item')
+                ->select([
+                    'inv_stock.id',
+                    'inv_stock.name',
+                    'inv_stock.sales_price as sub_domain_sales_price',
+                    'inv_stock.purchase_price as sub_domain_purchase_price',
+                    'inv_category.name as category_name',
+                    'inv_category.id as category_id',
+                    'parent_stock.quantity as center_stock',
+                    'parent_stock.sales_price as center_sales_price',
+                    'parent_stock.purchase_price as center_purchase_price',
+                    'matrix.mrp_percent',
+                    'matrix.purchase_percent',
+                    'matrix.percent_mode',
+                    'matrix.sub_domain_id as b2b_id',
+                ]);
+
+            $total  = $products->count();
+            $entities = $products->skip($skip)
+                ->take($perPage)
+                ->orderBy('inv_stock.id','DESC')
+                ->get();
+
+            return response()->json([
+                'status' => ResponseAlias::HTTP_OK,
+                'message' => 'Success',
+                'total' => $total,
+                'data' => $entities,
+            ]);
+
+        } catch (ModelNotFoundException $e) {
+            return response()->json([
+                'status' => ResponseAlias::HTTP_NOT_FOUND,
+                'message' => 'Subdomain or category matrix not found'
+            ], ResponseAlias::HTTP_NOT_FOUND);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => ResponseAlias::HTTP_INTERNAL_SERVER_ERROR,
+                'message' => 'Failed to retrieve products',
+                'error' => $e->getMessage()
+            ], ResponseAlias::HTTP_INTERNAL_SERVER_ERROR);
+        }
     }
+
+    /*public function b2bSubDomainProduct(Request $request, $id)
+    {
+        try {
+            // Validate inputs and find required models
+            $findSubDomain = SubDomainModel::findOrFail($id);
+            $findCategoryMatrix = B2BCategoryPriceMatrixModel::where('sub_domain_id', $id)->firstOrFail();
+
+            // Get all products with their relationships in a single query
+            $products = StockItemModel::with([
+                'product.category',
+                'parentStock',
+                'b2bCategoryMatrix' => function($query) use ($id) {
+                    $query->where('sub_domain_id', $id);
+                }
+            ])
+                ->where('config_id', $findCategoryMatrix->config_id)
+                ->whereHas('product', function($query) use ($findSubDomain) {
+                    $query->where('vendor_id', $findSubDomain->vendor_id);
+                })
+                ->whereNotNull('parent_stock_item')
+                ->get();
+
+            // Prepare response data
+            $responseData = $products->map(function ($product) {
+                return [
+                    'id' => $product->id,
+                    'name' => $product->name,
+                    'category_name' => $product->product->category->name ?? null,
+                    'sub_domain_sales_price' => $product->sales_price,
+                    'sub_domain_purchase_price' => $product->purchase_price,
+                    'mrp_percent' => $product->b2bCategoryMatrix->mrp_percent ?? null,
+                    'purchase_percent' => $product->b2bCategoryMatrix->purchase_percent ?? null,
+                    'percent_mode' => $product->b2bCategoryMatrix->percent_mode ?? null,
+                    'center_stock' => $product->parentStock->quantity ?? null,
+                    'center_sales_price' => $product->parentStock->sales_price ?? null,
+                    'center_purchase_price' => $product->parentStock->purchase_price ?? null,
+                ];
+            });
+
+            return response()->json([
+                'status' => ResponseAlias::HTTP_OK,
+                'message' => 'Success',
+                'data' => $responseData
+            ]);
+
+        } catch (ModelNotFoundException $e) {
+            return response()->json([
+                'status' => ResponseAlias::HTTP_NOT_FOUND,
+                'message' => 'Subdomain or category matrix not found'
+            ], ResponseAlias::HTTP_NOT_FOUND);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => ResponseAlias::HTTP_INTERNAL_SERVER_ERROR,
+                'message' => 'Failed to retrieve products',
+                'error' => $e->getMessage()
+            ], ResponseAlias::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }*/
 
 }

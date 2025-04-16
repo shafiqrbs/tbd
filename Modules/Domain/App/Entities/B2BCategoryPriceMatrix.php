@@ -100,6 +100,13 @@ class B2BCategoryPriceMatrix
 
 
     /**
+     * @var boolean
+     * @ORM\Column(type="boolean" )
+     */
+    private $notProcess;
+
+
+    /**
      * @var \DateTime
      * @Gedmo\Timestampable(on="create")
      * @ORM\Column(type="datetime")

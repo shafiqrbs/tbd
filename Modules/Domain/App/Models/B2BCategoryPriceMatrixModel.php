@@ -22,6 +22,7 @@ class B2BCategoryPriceMatrixModel extends Model
         'bonus_percent',
         'purchase_percent',
         'mrp_percent',
+        'not_process',
     ];
 
 
@@ -50,6 +51,7 @@ class B2BCategoryPriceMatrixModel extends Model
                 'inv_b2b_category_price_matrix.percent_mode',
                 'inv_b2b_category_price_matrix.price_percent',
                 'inv_b2b_category_price_matrix.sales_price_percent',
+                'inv_b2b_category_price_matrix.not_process',
                 'c.id',
                 'c.name',
                 'c.slug',
