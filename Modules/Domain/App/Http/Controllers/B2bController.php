@@ -454,6 +454,7 @@ class B2bController extends Controller
                     'bonus_percent' => $inputData['bonus_percent'],
                     'purchase_percent' => $inputData['purchase_percent'],
                     'mrp_percent' => $inputData['mrp_percent'],
+                    'not_process' => 0
                 ]
             );
 
@@ -837,10 +838,12 @@ class B2bController extends Controller
                         ->where('matrix.sub_domain_id', $id);
                 })
                 ->where('inv_stock.config_id', $findCategoryMatrix->config_id)
+                ->where('inv_stock.status', 1)
                 ->where('inv_product.vendor_id', $findSubDomain->vendor_id)
                 ->whereNotNull('inv_stock.parent_stock_item')
                 ->select([
                     'inv_stock.id',
+                    'inv_stock.status',
                     'inv_stock.name',
                     'inv_stock.sales_price as sub_domain_sales_price',
                     'inv_stock.purchase_price as sub_domain_purchase_price',

@@ -95,7 +95,8 @@ class SubDomainModel extends Model
                     'inv_b2b_category_price_matrix.sales_target_amount',
                     'inv_category.name as category_name',
                     'inv_b2b_category_price_matrix.not_process',
-                ])->leftjoin('inv_category','inv_category.id','=','inv_b2b_category_price_matrix.domain_category_id');
+                ])->leftjoin('inv_category','inv_category.id','=','inv_b2b_category_price_matrix.domain_category_id')
+                    ->where('inv_b2b_category_price_matrix.status',1);
             }])
             ->where('dom_sub_domain.id', $domain) // Exclude multiple IDs
             ->first();
