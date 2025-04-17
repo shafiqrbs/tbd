@@ -67,6 +67,12 @@ class ConfigPurchase
      */
     private $showProduct;
 
+    /**
+     * @ORM\ManyToOne(targetEntity="Setting")
+     * @ORM\JoinColumn(onDelete="CASCADE")
+     **/
+    private $defaultVendorGroup;
+
 
     /**
      * @var boolean

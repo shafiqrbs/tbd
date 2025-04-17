@@ -30,6 +30,11 @@ class ConfigSales
      **/
     private $config;
 
+    /**
+     * @ORM\ManyToOne(targetEntity="Setting")
+     * @ORM\JoinColumn(onDelete="CASCADE")
+     **/
+     private $defaultCustomerGroup;
 
     /**
      * @var boolean
@@ -86,6 +91,13 @@ class ConfigSales
      * @ORM\Column(type="boolean",options={"default"="false"})
      */
     private $dueSalesWithoutCustomer;
+
+    /**
+     * @var boolean
+     *
+     * @ORM\Column(type="boolean",options={"default"="false"})
+     */
+    private $itemSalesPercent;
 
     /**
      * @var boolean
@@ -394,6 +406,56 @@ class ConfigSales
     {
         $this->updatedAt = $updatedAt;
     }
+
+    /**
+     * @return bool
+     */
+    public function isMeasurementEnable()
+    {
+        return $this->isMeasurementEnable;
+    }
+
+    /**
+     * @param bool $isMeasurementEnable
+     */
+    public function setIsMeasurementEnable($isMeasurementEnable)
+    {
+        $this->isMeasurementEnable = $isMeasurementEnable;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isItemSalesPercent()
+    {
+        return $this->itemSalesPercent;
+    }
+
+    /**
+     * @param bool $itemSalesPercent
+     */
+    public function setItemSalesPercent($itemSalesPercent)
+    {
+        $this->itemSalesPercent = $itemSalesPercent;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isMultiPrice()
+    {
+        return $this->isMultiPrice;
+    }
+
+    /**
+     * @param bool $isMultiPrice
+     */
+    public function setIsMultiPrice($isMultiPrice)
+    {
+        $this->isMultiPrice = $isMultiPrice;
+    }
+
+
 
 
 }
