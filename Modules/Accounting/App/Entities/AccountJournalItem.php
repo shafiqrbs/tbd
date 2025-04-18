@@ -105,6 +105,13 @@ class AccountJournalItem
     private  $damage;
 
 
+     /**
+     * @ORM\ManyToOne(targetEntity="Setting")
+     * @ORM\JoinColumn(name="account_mode_id", referencedColumnName="id", nullable=true, onDelete="CASCADE")
+     **/
+    private  $accountMode;
+
+
     /**
      * @var float
      *
@@ -169,14 +176,6 @@ class AccountJournalItem
     /**
      * @var string
      *
-     * @ORM\Column(name="bankName", type="text",  nullable = true)
-     */
-    private $bankName;
-
-
-    /**
-     * @var string
-     *
      * @ORM\Column(type="text",  nullable = true)
      */
     private $branchName;
@@ -188,14 +187,6 @@ class AccountJournalItem
      * @ORM\Column(type="string", nullable = true)
      */
     private $receivedFrom;
-
-
-     /**
-     * @var string
-     *
-     * @ORM\Column(type="string", nullable = true)
-     */
-    private $accountMode;
 
 
      /**

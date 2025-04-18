@@ -163,7 +163,7 @@ class AccountJournal
     /**
      * @var string
      *
-     * @ORM\Column(name="paymentMethod", type="string", length=50, nullable=true)
+     * @ORM\Column(name="payment_method", type="string", length=50, nullable=true)
      */
     private $paymentMethod;
 
@@ -171,9 +171,9 @@ class AccountJournal
     /**
      * @var string
      *
-     * @ORM\Column(name="accountRefNo", type="string", length=50, nullable=true)
+     * @ORM\Column(name="account_refno", type="string", length=150, nullable=true)
      */
-    private $accountRefNo;
+    private $accountRefno;
 
     /**
      * @var integer

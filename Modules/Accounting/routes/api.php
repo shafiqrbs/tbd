@@ -53,7 +53,17 @@ Route::prefix('/accounting')->middleware([HeaderAuthenticationMiddleware::class]
             'update' => 'accounting.setting.update',
             'destroy' => 'accounting.setting.destroy'
         ]);
-    ;
+
+    Route::apiResource('/voucher-entry', AccountSettingController::class)
+        ->middleware([HeaderAuthenticationMiddleware::class])
+        ->parameters(['setting' => 'accounting.setting'])
+        ->names([
+            'index' => 'accounting.setting.index',
+            'store' => 'accounting.setting.store',
+            'show' => 'accounting.setting.show',
+            'update' => 'accounting.setting.update',
+            'destroy' => 'accounting.setting.destroy'
+        ]);
 
 });
 
