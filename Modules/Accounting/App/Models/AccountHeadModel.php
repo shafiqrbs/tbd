@@ -297,6 +297,26 @@ class AccountHeadModel extends Model
             })->values()->toArray();
         return $data;
     }
+    public static function getAccountAllDropdownBySlug($domain,$head='account-head')
+    {
+        $data = self::where('acc_head.config_id', $domain['acc_config'])
+            ->leftjoin('acc_head as l_head', 'l_head.id', '=', 'acc_head.parent_id')
+            ->where('acc_head.head_group',$head)
+            #->where('acc_head.status',1)
+            ->select([
+                'acc_head.id',
+                'acc_head.parent_id',
+                'l_head.name as parent_name',
+                'l_head.slug as parent_slug',
+                'acc_head.name',
+                'acc_head.slug',
+                'acc_head.code',
+                'acc_head.head_group',
+                'acc_head.level',
+            ])
+            ->get()->toArray();
+        return $data;
+    }
 
 
 

@@ -89,6 +89,20 @@ class AccountingController extends Controller
         return $service->returnJosnResponse($dropdown);
     }
 
+    /**
+     * Show the form for editing the specified resource.
+     */
+    public function accountAllDropdownBySlug(Request $request)
+    {
+        $mode = $request->get('dropdown-type');
+        $dropdown = AccountHeadModel::getAccountAllDropdownBySlug($this->domain,$mode);
+        return response()->json([
+            'status' => 200,
+            'success' => true,
+            'data' => $dropdown,
+        ]);
+    }
+
 
 
 }

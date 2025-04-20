@@ -27,6 +27,7 @@ Route::prefix('/accounting/select')->middleware([HeaderAuthenticationMiddleware:
     Route::get('/setting-type', [AccountingController::class,'settingTypeDropdown'])->name('setting_accounting_dropdown_type');
     Route::get('/head', [AccountingController::class,'accountHeadDropdown'])->name('accounting_head_dropdown');
     Route::get('/ledger', [AccountingController::class,'accountLedgerDropdown'])->name('accounting_ledger_dropdown');
+    Route::get('/head-dropdown', [AccountingController::class,'accountAllDropdownBySlug'])->name('account_all_dropdown_by_slug');
 });
 
 Route::prefix('/accounting')->middleware([HeaderAuthenticationMiddleware::class])->group(function() {
