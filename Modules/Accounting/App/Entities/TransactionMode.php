@@ -4,7 +4,6 @@ namespace Modules\Accounting\App\Entities;
 
 
 use Doctrine\ORM\Mapping as ORM;
-use Modules\Domain\App\Entities\GlobalOption;
 use Gedmo\Mapping\Annotation as Gedmo;
 
 /**
@@ -31,6 +30,12 @@ class TransactionMode
     private $config;
 
     /**
+     * @ORM\ManyToOne(targetEntity="Modules\Utility\App\Entities\Country", cascade={"persist", "remove"})
+     * @ORM\JoinColumn(onDelete="SET NULL", nullable=true)
+     **/
+    private $country;
+
+    /**
      * @ORM\ManyToOne(targetEntity="Modules\Accounting\App\Entities\Setting", cascade={"persist", "remove"})
      * @ORM\JoinColumn(onDelete="SET NULL", nullable=true)
      **/
@@ -42,6 +47,7 @@ class TransactionMode
      * @ORM\Column(type="string", length=255, nullable=true)
      */
     private $accountOwner;
+
 
 
     /**
@@ -86,6 +92,14 @@ class TransactionMode
      * @ORM\Column(name="mobile", type="string", length=255, nullable=true)
      */
     private $mobile;
+
+
+     /**
+     * @var string
+     *
+     * @ORM\Column(type="string", length=255, nullable=true)
+     */
+    private $pinCode;
 
 
      /**

@@ -41,7 +41,6 @@ class StockItemHistory
      **/
     protected  $stockItem;
 
-
     /**
      * @var string
      * @ORM\Column(type="string", nullable = true)

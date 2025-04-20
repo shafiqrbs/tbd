@@ -232,6 +232,13 @@ class Config
     private ?Setting $posInvoiceMode = null;
 
     /**
+     * @var boolean
+     *
+     * @ORM\Column(type="boolean",options={"default"="false"})
+     */
+    private $isCategoryItemQuantity;
+
+    /**
      * @var bool
      * @ORM\Column(type="boolean",options={"default"="0"})
      */

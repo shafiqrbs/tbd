@@ -8,13 +8,13 @@ use Terminalbd\GenericBundle\Entity\Particular;
 
 
 /**
- * AccountHead
+ * AccountLedgerDetails
  *
- * @ORM\Table(name="acc_head")
- * @ORM\Entity(repositoryClass="Modules\Accounting\App\Repositories\AccountHeadRepository")
+ * @ORM\Table(name="acc_ledger_details")
+ * @ORM\Entity()
  *
  */
-class AccountHead
+class AccountLedgerDetails
 {
     /**
      * @var integer
@@ -32,77 +32,56 @@ class AccountHead
      */
     protected $config;
 
+    /**
+     * @ORM\OneToOne(targetEntity="AccountHead")
+     **/
+    private $ledger;
 
-      /**
-     * @ORM\ManyToOne(targetEntity="AccountMasterHead", inversedBy="children", cascade={"detach","merge"})
-     * @ORM\JoinColumn(name="account_master_head_id", referencedColumnName="id", onDelete="CASCADE")
+    /**
+     * @var string
+     *
+     * @ORM\Column(type="string", length=100, nullable=true)
      */
-    protected $accountMasterHead;
+    private $bankMethod;
 
+    /**
+     * @var string
+     *
+     * @ORM\Column(type="string", length=100, nullable=true)
+     */
+    private $panItNo;
 
      /**
-     * @ORM\ManyToOne(targetEntity="AccountHead", inversedBy="children", cascade={"detach","merge"})
-     * @ORM\JoinColumn(name="parent_id", referencedColumnName="id", onDelete="SET NULL")
+     * @var string
+     *
+     * @ORM\Column(type="string", length=100, nullable=true)
      */
-    protected $parent;
+    private $ifcCode;
 
     /**
-     * @ORM\ManyToOne(targetEntity="AccountChequeBook", inversedBy="ledger", cascade={"detach","merge"})
-     * @ORM\JoinColumn(name="parent_id", referencedColumnName="id", onDelete="SET NULL")
+     * @var string
+     *
+     * @ORM\Column(type="string", length=100, nullable=true)
      */
-    protected $chequeBooks;
+    private $swiftCode;
+
+    /**
+     * @var boolean
+     *
+     * @ORM\Column(type="boolean",options={"default"="0"})
+     */
+    private $isChequeBook;
 
 
     /**
-     * @ORM\OneToMany(targetEntity="AccountHead" , mappedBy="parent")
-     * @ORM\OrderBy({"name" = "ASC"})
-     **/
-    private $children;
+     * @var boolean
+     *
+     * @ORM\Column(type="boolean",options={"default"="0"})
+     */
+    private $isChequePrint;
+
 
     /**
-     * @ORM\OneToOne(targetEntity="TransactionMode")
-     * @ORM\JoinColumn(name="account_id", referencedColumnName="id", nullable=true, onDelete="cascade")
-     **/
-    private $transaction;
-
-    /**
-     * @ORM\OneToOne(targetEntity="Modules\Core\App\Entities\User")
-     * @ORM\JoinColumn(name="user_id", referencedColumnName="id", nullable=true, onDelete="cascade")
-     **/
-    private  $user;
-
-    /**
-     * @ORM\OneToOne(targetEntity="Modules\Core\App\Entities\Vendor")
-     * @ORM\JoinColumn(name="vendor_id", referencedColumnName="id", nullable=true, onDelete="cascade")
-     **/
-    private  $vendor;
-
-     /**
-     * @ORM\OneToOne(targetEntity="Modules\Core\App\Entities\Customer")
-     * @ORM\JoinColumn(name="customer_id", referencedColumnName="id", nullable=true, onDelete="cascade")
-     **/
-    private  $customer;
-
-    /**
-     * @ORM\OneToOne(targetEntity="Modules\Inventory\App\Entities\Category")
-     * @ORM\JoinColumn(name="product_group_id", referencedColumnName="id", nullable=true, onDelete="cascade")
-     **/
-    private  $productGroup;
-
-    /**
-     * @ORM\OneToOne(targetEntity="Modules\Inventory\App\Entities\Category")
-     * @ORM\JoinColumn(name="category_id", referencedColumnName="id", nullable=true, onDelete="cascade")
-     **/
-    private  $category;
-
-    /**
-     * @ORM\ManyToOne(targetEntity="Setting")
-     * @ORM\JoinColumn(onDelete="CASCADE")
-     **/
-    private $motherAccount;
-
-
-	/**
      * @var string
      *
      * @ORM\Column(name="code", type="string", length=20, nullable= true)
@@ -115,13 +94,6 @@ class AccountHead
      * @ORM\Column(name="name", type="string", length=255)
      */
     private $name;
-
-     /**
-     * @var float
-     *
-     * @ORM\Column(type="float", nullable=true)
-     */
-    private $openingBalance = 0;
 
      /**
      * @var float
@@ -144,92 +116,15 @@ class AccountHead
      */
     private $debit = 0;
 
-    /**
-     * @var float
-     *
-     * @ORM\Column(type="float", nullable=true)
-     */
-    private $creditLimit = 0;
-
-    /**
-     * @var integer
-     * @ORM\Column(type="integer", options={"default":0})
-     */
-    private $creditPeriod=0;
-
-    /**
-     * @var boolean
-     *
-     * @ORM\Column(type="boolean",options={"default"="false"})
-     */
-    private $balanceBillByBill;
 
 
     /**
-     * @var boolean
-     *
-     * @ORM\Column(type="boolean",options={"default"="false"})
-     */
-    private $isCreditDateCheckVoucherEntry;
-
-     /**
-     * @var integer
-     *
-     * @ORM\Column(name="level", type="integer", nullable=true)
-     */
-    private $level = 3;
-
-    /**
-     * @var string
-     *
-     * @ORM\Column(type="string", length=30, nullable=true)
-     */
-    private $headGroup;
-
-
-    /**
-     * @Gedmo\Slug(fields={"name"})
-     * @Doctrine\ORM\Mapping\Column(length=255,nullable=true)
-     */
-    private $slug;
-
-
-
-    /**
-     * @var string
-     *
-     * @ORM\Column(name="toIncrease", type="string", length=20, nullable=true)
-     */
-    private $toIncrease;
-
-
-	/**
 	 * @var integer
 	 *
 	 * @ORM\Column(name="sorting", type="integer", length=10, nullable=true)
 	 */
 	private $sorting;
 
-    /**
-     * @var boolean
-     *
-     * @ORM\Column(name="isParent", type="boolean" , nullable=true)
-     */
-    private $isParent = false;
-
-    /**
-     * @var boolean
-     *
-     * @ORM\Column(name="status", type="boolean", nullable=true)
-     */
-    private $status = true;
-
-    /**
-     * @var boolean
-     *
-     * @ORM\Column(name="showAmount", type="boolean" ,nullable=true)
-     */
-    private $showAmount = false;
 
     /**
      * @var \DateTime
