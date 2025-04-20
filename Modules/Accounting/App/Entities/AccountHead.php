@@ -160,9 +160,9 @@ class AccountHead
     /**
      * @var boolean
      *
-     * @ORM\Column(type="boolean",options={"default"="false"})
+     * @ORM\Column(type="boolean", options={"default"="false"})
      */
-    private $balanceBillByBill;
+    private $balanceBillByBill= false;
 
 
     /**
@@ -170,7 +170,7 @@ class AccountHead
      *
      * @ORM\Column(type="boolean",options={"default"="false"})
      */
-    private $isCreditDateCheckVoucherEntry;
+    private $isCreditDateCheckVoucherEntry= false;
 
      /**
      * @var integer
