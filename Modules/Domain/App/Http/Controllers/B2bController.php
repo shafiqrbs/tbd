@@ -134,7 +134,8 @@ class B2bController extends Controller
             DB::commit();
             return response()->json([
                 'message' => 'Success',
-                'status'  => ResponseAlias::HTTP_OK
+                'status'  => ResponseAlias::HTTP_OK,
+                'data'    => $subDomain
             ]);
 
         } catch (ModelNotFoundException $e) {
