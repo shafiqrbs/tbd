@@ -16,9 +16,11 @@ use Modules\Accounting\App\Models\AccountingModel;
 use Modules\Accounting\App\Models\TransactionModeModel;
 use Modules\AppsApi\App\Services\GeneratePatternCodeService;
 use Modules\AppsApi\App\Services\JsonRequestResponse;
+use Modules\Core\App\Entities\UserRole;
 use Modules\Core\App\Models\CustomerModel;
 use Modules\Core\App\Models\SettingModel;
 use Modules\Core\App\Models\SettingTypeModel;
+use Modules\Core\App\Models\UserRoleModel;
 use Modules\Core\App\Models\VendorModel;
 use Modules\Domain\App\Entities\DomainChild;
 use Modules\Domain\App\Entities\GlobalOption;
@@ -89,12 +91,20 @@ class DomainController extends Controller
             $password = "@123456";
             $email = $data['email'] ?? "{$data['username']}@gmail.com"; // If email is not present, default to username@gmail.com
 
-            UserModel::create([
+            $user = UserModel::create([
                 'username' => $data['username'],
                 'email' => $email,
                 'password' => Hash::make($password),
                 'domain_id' => $entity->id,
-                'user_group' => 'domain',
+                'user_group' => 'domain'
+            ]);
+            $accessControlRoles = array('role_domain');
+            $accessControlRolesJson = json_encode($accessControlRoles, JSON_PRETTY_PRINT);
+
+            UserRoleModel::create([
+                'user_id' => $user->id,
+                'access_control_role' => $accessControlRolesJson,
+                'android_control_role'=> $accessControlRolesJson,
             ]);
 
             // create domain customer
