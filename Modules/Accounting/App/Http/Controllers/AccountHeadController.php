@@ -38,16 +38,77 @@ class AccountHeadController extends Controller
     public function index(Request $request){
 
         $data = AccountHeadModel::getRecords($request,$this->domain);
-        $response = new Response();
-        $response->headers->set('Content-Type','application/json');
-        $response->setContent(json_encode([
+
+        return response()->json([
+            'status' => 200,
             'message' => 'success',
-            'status' => Response::HTTP_OK,
             'total' => $data['count'],
             'data' => $data['entities']
-        ]));
-        $response->setStatusCode(Response::HTTP_OK);
-        return $response;
+        ]);
+    }
+
+    /**
+     * Store a newly created resource in storage.
+     */
+    public function store(AccountHeadRequest $request)
+    {
+        $data = $request->validated();
+        $data['config_id'] = $this->domain['acc_config'];
+
+        $entity = AccountHeadModel::create($data);
+
+        return response()->json([
+            'status' => 200,
+            'success' => true,
+            'message' => 'Account head created successfully.',
+            'data' => $entity,
+        ]);
+    }
+
+    /**
+     * Update the specified resource in storage.
+     */
+    public function update(AccountHeadRequest $request, $id)
+    {
+        try {
+            // Validate and get the validated data
+            $validatedData = $request->validated();
+
+            // Find the entity or fail
+            $entity = AccountHeadModel::findOrFail($id);
+
+            // Update the entity
+            $updated = $entity->update($validatedData);
+
+            if (!$updated) {
+                throw new \RuntimeException('Failed to update account head');
+            }
+
+            // Reload the model to get any database-default values
+            $entity->refresh();
+
+            return response()->json([
+                'status' => 200,
+                'success' => true,
+                'message' => 'Account head updated successfully.',
+                'data' => $entity,
+            ]);
+
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return response()->json([
+                'status' => 404,
+                'success' => false,
+                'message' => 'Account head not found.',
+            ], 404);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 500,
+                'success' => false,
+                'message' => 'Failed to update account head.',
+                'error' => config('app.debug') ? $e->getMessage() : null,
+            ], 500);
+        }
     }
 
 
@@ -69,19 +130,6 @@ class AccountHeadController extends Controller
     {
         $config_id = $this->domain['acc_config'];
         $entity = $em->getRepository(AccountHead::class)->resetAccountHead($config_id);
-        $service = new JsonRequestResponse();
-        return $service->returnJosnResponse($entity);
-    }
-
-     /**
-     * Store a newly created resource in storage.
-     */
-    public function store(AccountHeadRequest $request)
-    {
-        $data = $request->validated();
-        $data['status'] = true;
-        $data['config_id'] = $this->domain['acc_config'];
-        $entity = AccountHeadModel::create($data);
         $service = new JsonRequestResponse();
         return $service->returnJosnResponse($entity);
     }
@@ -114,18 +162,7 @@ class AccountHeadController extends Controller
         return $data;
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(AccountHeadRequest $request, $id)
-    {
 
-        $data = $request->validated();
-        $entity = AccountHeadModel::find($id);
-        $entity->update($data);
-        $service = new JsonRequestResponse();
-        return $service->returnJosnResponse($entity);
-    }
 
     /**
      * Remove the specified resource from storage.

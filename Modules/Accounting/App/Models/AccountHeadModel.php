@@ -4,12 +4,11 @@ namespace Modules\Accounting\App\Models;
 
 use Cviebrock\EloquentSluggable\Sluggable;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Support\Facades\DB;
 
 class AccountHeadModel extends Model
 {
-    use HasFactory, Sluggable;
+    use Sluggable;
 
     protected $table = 'acc_head';
     public $timestamps = true;
@@ -29,7 +28,35 @@ class AccountHeadModel extends Model
         'level',
         'slug',
         'status',
+        'amount',
+        'credit',
+        'debit',
+        'isParent',
+        'showAmount',
+        'opening_balance',
+        'credit_limit',
+        'credit_period',
+        'balance_bill_by_bill',
+        'is_credit_date_check_voucher_entry',
+        'provide_bank_details'
     ];
+
+    protected $attributes = [
+        'status' => true,
+        'level' => 1,
+        'amount' => 0,
+        'credit' => 0,
+        'debit' => 0,
+        'isParent' => 0,
+        'showAmount' => 0,
+        'opening_balance' => 0,
+        'credit_limit' => 0,
+        'credit_period' => 0,
+        'balance_bill_by_bill' => 0,
+        'is_credit_date_check_voucher_entry' => 0,
+        'provide_bank_details' => 0,
+    ];
+
 
     /**
      * Return the sluggable configuration array for this model.
@@ -182,41 +209,70 @@ class AccountHeadModel extends Model
 
     public static function getRecords($request, $domain)
     {
+        try {
+            // Pagination setup
+            $perPage = max(1, (int)($request['offset'] ?? 50));  // Ensure at least 1 item per page
+            $currentPage = max(1, (int)($request['page'] ?? 1)); // Ensure page is at least 1
+            $skip = ($currentPage - 1) * $perPage;
 
-        $page = isset($request['page']) && $request['page'] > 0 ? ($request['page'] - 1) : 1;
-        $perPage = isset($request['offset']) && $request['offset'] != '' ? (int)($request['offset']) : 50;
-        $skip = isset($page) && $page != '' ? (int)$page * $perPage : 0;
-        $entity = self:: where('acc_head.config_id', $domain['acc_config'])
-        ->leftjoin('acc_head as parent','parent.id','=','acc_head.parent_id')
-        ->leftjoin('acc_setting as mother','acc_head.mother_account_id','=','mother.id')
-            ->select([
-                'acc_head.id',
-                'acc_head.level',
-                'acc_head.name',
-                'acc_head.slug',
-                'acc_head.code',
-                'acc_head.amount',
-                'parent.name as parent_name',
-                'mother.name as mother_name'
-            ])
-            ->orderBy('acc_head.id','DESC');
+            // Base query
+            $query = self::where('acc_head.config_id', $domain['acc_config'])
+                ->leftJoin('acc_head as parent', 'parent.id', '=', 'acc_head.parent_id')
+                ->leftJoin('acc_setting as mother', 'acc_head.mother_account_id', '=', 'mother.id')
+                ->select([
+                    'acc_head.id',
+                    'acc_head.level',
+                    'acc_head.name',
+                    'acc_head.slug',
+                    'acc_head.code',
+                    'acc_head.amount',
+                    'parent.name as parent_name',
+                    'mother.name as mother_name'
+                ]);
 
-        if (isset($request['term']) && !empty($request['term'])) {
-            $entity = $entity->whereAny(
-                ['acc_head.name', 'acc_head.slug'], 'LIKE', '%' . $request['term'] . '%');
+            // Search term filter
+            if (!empty($request['term'])) {
+                $searchTerm = '%' . $request['term'] . '%';
+                $query->where(function($q) use ($searchTerm) {
+                    $q->where('acc_head.name', 'LIKE', $searchTerm)
+                        ->orWhere('acc_head.slug', 'LIKE', $searchTerm);
+                });
+            }
+
+            // Group filter
+            if (!empty($request['group'])) {
+                $query->where('acc_head.head_group', $request['group']);
+            }
+
+            // Status filter
+            $query->where('acc_head.status', 1);
+
+            // Get total count before pagination
+            $total = $query->count();
+
+            // Apply pagination and ordering
+            $entities = $query->skip($skip)
+                ->take($perPage)
+                ->orderBy('acc_head.id', 'DESC')
+                ->get();
+
+            return [
+                'count' => $total,
+                'entities' => $entities,
+                'per_page' => $perPage,
+                'current_page' => $currentPage
+            ];
+
+        } catch (\Exception $e) {
+            // Log the error if needed
+            // Log::error('Error fetching records: ' . $e->getMessage());
+
+            return [
+                'count' => 0,
+                'entities' => [],
+                'error' => 'An error occurred while fetching records'
+            ];
         }
-        if (isset($request['group']) && !empty($request['group'])) {
-            $entity = $entity->where(
-                ['acc_head.head_group'=>$request['group']]);
-        }
-        $total = $entity->count();
-        $entities = $entity->skip($skip)
-            ->take($perPage)
-            ->orderBy('acc_head.id', 'DESC')
-            ->get();
-
-        $data = array('count' => $total, 'entities' => $entities);
-        return $data;
     }
 
 

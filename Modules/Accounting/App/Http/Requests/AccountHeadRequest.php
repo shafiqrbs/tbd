@@ -26,29 +26,18 @@ class AccountHeadRequest extends FormRequest
         switch($this->method())
         {
 
+            case 'PATCH':
+            case 'PUT':
             case 'POST':
             {
                 return [
-                    'name' => 'required|string|nullable',
-                    'mother_account_id' => 'integer|nullable',
-                    'parent_id' => 'integer|nullable',
-                    'slug' => 'string|nullable',
-                    'code' => 'string|nullable',
-                    'head_group' => 'string|nullable',
-                    'status' => 'boolean|nullable',
+                    'name' => 'required|string',
+                    'mother_account_id' => 'required',
+                    'code' => 'required',
+                    'head_group' => 'required|string',
                 ];
             }
 
-            case 'PUT':
-            case 'PATCH':
-            {
-                return [
-                    'name' => 'required|string',
-                    'account_mother_id' => 'string|nullable',
-                    'code' => 'string|nullable',
-                    'status' => 'boolean|nullable',
-                ];
-            }
             default:break;
         }
     }
