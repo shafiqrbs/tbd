@@ -31,12 +31,60 @@ class Config
     private $domain;
 
     /**
+     * @ORM\OneToOne(targetEntity="AccountHead")
+     * @ORM\JoinColumn(name="account_cash_id", referencedColumnName="id", nullable=true, onDelete="cascade")
+     **/
+    private $accountCash;
+
+    /**
+     * @ORM\OneToOne(targetEntity="AccountHead")
+     * @ORM\JoinColumn(name="account_bank_id", referencedColumnName="id", nullable=true, onDelete="cascade")
+     **/
+    private $accountBank;
+
+    /**
+     * @ORM\OneToOne(targetEntity="AccountHead")
+     * @ORM\JoinColumn(name="account_mobile_id", referencedColumnName="id", nullable=true, onDelete="cascade")
+     **/
+    private $accountMobile;
+
+    /**
+     * @ORM\OneToOne(targetEntity="AccountHead")
+     * @ORM\JoinColumn(name="account_user_id", referencedColumnName="id", nullable=true, onDelete="cascade")
+     **/
+    private  $accountUser;
+
+    /**
+     * @ORM\OneToOne(targetEntity="AccountHead")
+     * @ORM\JoinColumn(name="account_vendor_id", referencedColumnName="id", nullable=true, onDelete="cascade")
+     **/
+    private  $accountVendor;
+
+    /**
+     * @ORM\OneToOne(targetEntity="AccountHead")
+     * @ORM\JoinColumn(name="account_customer_id", referencedColumnName="id", nullable=true, onDelete="cascade")
+     **/
+    private  $accountCustomer;
+
+    /**
+     * @ORM\OneToOne(targetEntity="AccountHead")
+     * @ORM\JoinColumn(name="account_product_group_id", referencedColumnName="id", nullable=true, onDelete="cascade")
+     **/
+    private  $accountProductGroup;
+
+    /**
+     * @ORM\OneToOne(targetEntity="AccountHead")
+     * @ORM\JoinColumn(name="account_category_id", referencedColumnName="id", nullable=true, onDelete="cascade")
+     **/
+    private  $accountCategory;
+
+    /**
      * @var \DateTime
      * @Gedmo\Timestampable(on="create")
      * @ORM\Column(name="financial_start_date", type="datetime")
      */
     private $financialStartDate;
-    
+
 
      /**
      * @var \DateTime
