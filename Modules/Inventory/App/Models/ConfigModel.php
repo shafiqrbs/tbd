@@ -120,9 +120,9 @@ class ConfigModel extends Model
 
     ];
 
-    public function configProduct(): BelongsTo
+    public function configProduct(): HasOne
     {
-        return $this->belongsTo(ConfigProductModel::class,'config_id','id');
+        return $this->hasOne(ConfigProductModel::class, 'config_id', 'id');
     }
 
     public function domain(): BelongsTo

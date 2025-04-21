@@ -17,10 +17,11 @@ class ConfigProductModel extends Model
 {
     use HasFactory;
 
-    protected $table = 'inv_config';
+    protected $table = 'inv_config_product';
     public $timestamps = true;
     protected $guarded = ['id'];
     protected $fillable = [
+        'config_id',
         'business_model_id',
         'stock_format',
         'sku_warehouse',
@@ -118,6 +119,12 @@ class ConfigProductModel extends Model
         'is_sku'
 
     ];
+
+
+    public function config()
+    {
+        return $this->belongsTo(ConfigModel::class, 'config_id', 'id');
+    }
 
 
 
