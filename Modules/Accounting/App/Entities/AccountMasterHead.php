@@ -43,6 +43,13 @@ class AccountMasterHead
      **/
     private $children;
 
+    /**
+     * @var integer
+     *
+     * @ORM\Column(name="level", type="integer", nullable=true)
+     */
+    private $level;
+
 
 	/**
      * @var string
@@ -294,6 +301,24 @@ class AccountMasterHead
     {
         $this->updatedAt = $updatedAt;
     }
+
+    /**
+     * @return int
+     */
+    public function getLevel()
+    {
+        return $this->level;
+    }
+
+    /**
+     * @param int $level
+     */
+    public function setLevel($level)
+    {
+        $this->level = $level;
+    }
+
+
 
 
 }

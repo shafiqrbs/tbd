@@ -101,7 +101,6 @@ class AccountHead
      **/
     private $motherAccount;
 
-
 	/**
      * @var string
      *
@@ -164,7 +163,6 @@ class AccountHead
      */
     private $balanceBillByBill= false;
 
-
     /**
      * @var boolean
      *
@@ -186,14 +184,11 @@ class AccountHead
      */
     private $headGroup;
 
-
     /**
      * @Gedmo\Slug(fields={"name"})
      * @Doctrine\ORM\Mapping\Column(length=255,nullable=true)
      */
     private $slug;
-
-
 
     /**
      * @var string
@@ -230,6 +225,13 @@ class AccountHead
      * @ORM\Column(name="showAmount", type="boolean" ,nullable=true)
      */
     private $showAmount = false;
+
+    /**
+     * @var boolean
+     *
+     * @ORM\Column(type="boolean" ,nullable=true)
+     */
+    private $provideBankDetails = false;
 
     /**
      * @var \DateTime
@@ -676,6 +678,121 @@ class AccountHead
     {
         $this->accountMasterHead = $accountMasterHead;
     }
+
+    /**
+     * @return mixed
+     */
+    public function getChequeBooks()
+    {
+        return $this->chequeBooks;
+    }
+
+    /**
+     * @param mixed $chequeBooks
+     */
+    public function setChequeBooks($chequeBooks)
+    {
+        $this->chequeBooks = $chequeBooks;
+    }
+
+    /**
+     * @return float
+     */
+    public function getOpeningBalance()
+    {
+        return $this->openingBalance;
+    }
+
+    /**
+     * @param float $openingBalance
+     */
+    public function setOpeningBalance($openingBalance)
+    {
+        $this->openingBalance = $openingBalance;
+    }
+
+    /**
+     * @return float
+     */
+    public function getCreditLimit()
+    {
+        return $this->creditLimit;
+    }
+
+    /**
+     * @param float $creditLimit
+     */
+    public function setCreditLimit($creditLimit)
+    {
+        $this->creditLimit = $creditLimit;
+    }
+
+    /**
+     * @return int
+     */
+    public function getCreditPeriod()
+    {
+        return $this->creditPeriod;
+    }
+
+    /**
+     * @param int $creditPeriod
+     */
+    public function setCreditPeriod($creditPeriod)
+    {
+        $this->creditPeriod = $creditPeriod;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isBalanceBillByBill()
+    {
+        return $this->balanceBillByBill;
+    }
+
+    /**
+     * @param bool $balanceBillByBill
+     */
+    public function setBalanceBillByBill($balanceBillByBill)
+    {
+        $this->balanceBillByBill = $balanceBillByBill;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isCreditDateCheckVoucherEntry()
+    {
+        return $this->isCreditDateCheckVoucherEntry;
+    }
+
+    /**
+     * @param bool $isCreditDateCheckVoucherEntry
+     */
+    public function setIsCreditDateCheckVoucherEntry($isCreditDateCheckVoucherEntry)
+    {
+        $this->isCreditDateCheckVoucherEntry = $isCreditDateCheckVoucherEntry;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isProvideBankDetails()
+    {
+        return $this->provideBankDetails;
+    }
+
+    /**
+     * @param bool $provideBankDetails
+     */
+    public function setProvideBankDetails($provideBankDetails)
+    {
+        $this->provideBankDetails = $provideBankDetails;
+    }
+
+
+
 
 }
 

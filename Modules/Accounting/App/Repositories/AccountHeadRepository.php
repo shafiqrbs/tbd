@@ -280,7 +280,7 @@ class AccountHeadRepository extends EntityRepository
             $entity->setName($head->getName());
             $entity->setSlug($head->getSlug());
             $entity->setHeadGroup($head->getHeadGroup());
-            $entity->setLevel(1);
+            $entity->setLevel($head->getLevel());
             $em->persist($entity);
             $em->flush();
             if($head->getChildren()){
@@ -293,7 +293,7 @@ class AccountHeadRepository extends EntityRepository
                     $subHead->setName($child->getName());
                     $subHead->setSlug($child->getSlug());
                     $subHead->setHeadGroup($child->getHeadGroup());
-                    $subHead->setLevel(2);
+                    $subHead->setLevel($child->getLevel());
                     $em->persist($subHead);
                     $em->flush();
                 }
@@ -350,7 +350,7 @@ class AccountHeadRepository extends EntityRepository
             $entity->setName($head->getName());
             $entity->setSlug($head->getSlug());
             $entity->setHeadGroup($head->getHeadGroup());
-            $entity->setLevel(1);
+            $entity->setLevel($head->getLevel());
             $em->persist($entity);
             $em->flush();
             if($head->getChildren()){
@@ -363,7 +363,7 @@ class AccountHeadRepository extends EntityRepository
                     $subHead->setName($child->getName());
                     $subHead->setSlug($child->getSlug());
                     $subHead->setHeadGroup($child->getHeadGroup());
-                    $subHead->setLevel(2);
+                    $subHead->setLevel($child->getLevel());
                     $em->persist($subHead);
                     $em->flush();
                 }

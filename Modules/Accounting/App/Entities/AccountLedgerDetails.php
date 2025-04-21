@@ -102,21 +102,6 @@ class AccountLedgerDetails
      */
     private $amount = 0;
 
-    /**
-     * @var float
-     *
-     * @ORM\Column(name="credit",type="float", nullable=true)
-     */
-    private $credit = 0;
-
-    /**
-     * @var float
-     *
-     * @ORM\Column(name="debit",type="float", nullable=true)
-     */
-    private $debit = 0;
-
-
 
     /**
 	 * @var integer
@@ -172,149 +157,6 @@ class AccountLedgerDetails
         $this->config = $config;
     }
 
-    /**
-     * @return mixed
-     */
-    public function getParent()
-    {
-        return $this->parent;
-    }
-
-    /**
-     * @param mixed $parent
-     */
-    public function setParent($parent)
-    {
-        $this->parent = $parent;
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getChildren()
-    {
-        return $this->children;
-    }
-
-    /**
-     * @param mixed $children
-     */
-    public function setChildren($children)
-    {
-        $this->children = $children;
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getTransaction()
-    {
-        return $this->transaction;
-    }
-
-    /**
-     * @param mixed $transaction
-     */
-    public function setTransaction($transaction)
-    {
-        $this->transaction = $transaction;
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getUser()
-    {
-        return $this->user;
-    }
-
-    /**
-     * @param mixed $user
-     */
-    public function setUser($user)
-    {
-        $this->user = $user;
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getVendor()
-    {
-        return $this->vendor;
-    }
-
-    /**
-     * @param mixed $vendor
-     */
-    public function setVendor($vendor)
-    {
-        $this->vendor = $vendor;
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getCustomer()
-    {
-        return $this->customer;
-    }
-
-    /**
-     * @param mixed $customer
-     */
-    public function setCustomer($customer)
-    {
-        $this->customer = $customer;
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getProductGroup()
-    {
-        return $this->productGroup;
-    }
-
-    /**
-     * @param mixed $productGroup
-     */
-    public function setProductGroup($productGroup)
-    {
-        $this->productGroup = $productGroup;
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getCategory()
-    {
-        return $this->category;
-    }
-
-    /**
-     * @param mixed $category
-     */
-    public function setCategory($category)
-    {
-        $this->category = $category;
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getMotherAccount()
-    {
-        return $this->motherAccount;
-    }
-
-    /**
-     * @param mixed $motherAccount
-     */
-    public function setMotherAccount($motherAccount)
-    {
-        $this->motherAccount = $motherAccount;
-    }
 
     /**
      * @return string
@@ -365,102 +207,6 @@ class AccountLedgerDetails
     }
 
     /**
-     * @return float
-     */
-    public function getCredit()
-    {
-        return $this->credit;
-    }
-
-    /**
-     * @param float $credit
-     */
-    public function setCredit($credit)
-    {
-        $this->credit = $credit;
-    }
-
-    /**
-     * @return float
-     */
-    public function getDebit()
-    {
-        return $this->debit;
-    }
-
-    /**
-     * @param float $debit
-     */
-    public function setDebit($debit)
-    {
-        $this->debit = $debit;
-    }
-
-    /**
-     * @return int
-     */
-    public function getLevel()
-    {
-        return $this->level;
-    }
-
-    /**
-     * @param int $level
-     */
-    public function setLevel($level)
-    {
-        $this->level = $level;
-    }
-
-    /**
-     * @return string
-     */
-    public function getHeadGroup()
-    {
-        return $this->headGroup;
-    }
-
-    /**
-     * @param string $headGroup
-     */
-    public function setHeadGroup($headGroup)
-    {
-        $this->headGroup = $headGroup;
-    }
-
-    /**
-     * @return string
-     */
-    public function getSlug()
-    {
-        return $this->slug;
-    }
-
-    /**
-     * @param string $slug
-     */
-    public function setSlug($slug)
-    {
-        $this->slug = $slug;
-    }
-
-    /**
-     * @return string
-     */
-    public function getToIncrease()
-    {
-        return $this->toIncrease;
-    }
-
-    /**
-     * @param string $toIncrease
-     */
-    public function setToIncrease($toIncrease)
-    {
-        $this->toIncrease = $toIncrease;
-    }
-
-    /**
      * @return int
      */
     public function getSorting()
@@ -476,53 +222,6 @@ class AccountLedgerDetails
         $this->sorting = $sorting;
     }
 
-    /**
-     * @return bool
-     */
-    public function isParent()
-    {
-        return $this->isParent;
-    }
-
-    /**
-     * @param bool $isParent
-     */
-    public function setIsParent($isParent)
-    {
-        $this->isParent = $isParent;
-    }
-
-    /**
-     * @return bool
-     */
-    public function isStatus()
-    {
-        return $this->status;
-    }
-
-    /**
-     * @param bool $status
-     */
-    public function setStatus($status)
-    {
-        $this->status = $status;
-    }
-
-    /**
-     * @return bool
-     */
-    public function isShowAmount()
-    {
-        return $this->showAmount;
-    }
-
-    /**
-     * @param bool $showAmount
-     */
-    public function setShowAmount($showAmount)
-    {
-        $this->showAmount = $showAmount;
-    }
 
     /**
      * @return \DateTime
@@ -559,17 +258,113 @@ class AccountLedgerDetails
     /**
      * @return mixed
      */
-    public function getAccountMasterHead()
+    public function getLedger()
     {
-        return $this->accountMasterHead;
+        return $this->ledger;
     }
 
     /**
-     * @param mixed $accountMasterHead
+     * @param mixed $ledger
      */
-    public function setAccountMasterHead($accountMasterHead)
+    public function setLedger($ledger)
     {
-        $this->accountMasterHead = $accountMasterHead;
+        $this->ledger = $ledger;
+    }
+
+    /**
+     * @return string
+     */
+    public function getBankMethod()
+    {
+        return $this->bankMethod;
+    }
+
+    /**
+     * @param string $bankMethod
+     */
+    public function setBankMethod($bankMethod)
+    {
+        $this->bankMethod = $bankMethod;
+    }
+
+    /**
+     * @return string
+     */
+    public function getPanItNo()
+    {
+        return $this->panItNo;
+    }
+
+    /**
+     * @param string $panItNo
+     */
+    public function setPanItNo($panItNo)
+    {
+        $this->panItNo = $panItNo;
+    }
+
+    /**
+     * @return string
+     */
+    public function getIfcCode()
+    {
+        return $this->ifcCode;
+    }
+
+    /**
+     * @param string $ifcCode
+     */
+    public function setIfcCode($ifcCode)
+    {
+        $this->ifcCode = $ifcCode;
+    }
+
+    /**
+     * @return string
+     */
+    public function getSwiftCode()
+    {
+        return $this->swiftCode;
+    }
+
+    /**
+     * @param string $swiftCode
+     */
+    public function setSwiftCode($swiftCode)
+    {
+        $this->swiftCode = $swiftCode;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isChequeBook()
+    {
+        return $this->isChequeBook;
+    }
+
+    /**
+     * @param bool $isChequeBook
+     */
+    public function setIsChequeBook($isChequeBook)
+    {
+        $this->isChequeBook = $isChequeBook;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isChequePrint()
+    {
+        return $this->isChequePrint;
+    }
+
+    /**
+     * @param bool $isChequePrint
+     */
+    public function setIsChequePrint($isChequePrint)
+    {
+        $this->isChequePrint = $isChequePrint;
     }
 
 }

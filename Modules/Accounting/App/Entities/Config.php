@@ -79,6 +79,44 @@ class Config
     private  $accountCategory;
 
     /**
+     * @ORM\OneToOne(targetEntity="Setting")
+     * @ORM\JoinColumn(name="voucher_stock_opening_id", referencedColumnName="id", nullable=true, onDelete="cascade")
+     **/
+    private $voucherStockOpening;
+
+    /**
+     * @ORM\OneToOne(targetEntity="Setting")
+     * @ORM\JoinColumn(name="voucher_purchase_id", referencedColumnName="id", nullable=true, onDelete="cascade")
+     **/
+    private $voucherPurchase;
+
+    /**
+     * @ORM\OneToOne(targetEntity="Setting")
+     * @ORM\JoinColumn(name="voucher_sales_id", referencedColumnName="id", nullable=true, onDelete="cascade")
+     **/
+    private $voucherSales;
+
+    /**
+     * @ORM\OneToOne(targetEntity="Setting")
+     * @ORM\JoinColumn(name="voucher_sales_return_id", referencedColumnName="id", nullable=true, onDelete="cascade")
+     **/
+    private $voucherSalesReturn;
+
+    /**
+     * @ORM\OneToOne(targetEntity="Setting")
+     * @ORM\JoinColumn(name="voucher_purchase_return_id", referencedColumnName="id", nullable=true, onDelete="cascade")
+     **/
+    private  $voucherPurchaseReturn;
+
+
+    /**
+     * @ORM\OneToOne(targetEntity="Setting")
+     * @ORM\JoinColumn(name="voucher_stock_reconciliation_id", referencedColumnName="id", nullable=true, onDelete="cascade")
+     **/
+    private  $voucherStockReconciliation;
+
+
+    /**
      * @var \DateTime
      * @Gedmo\Timestampable(on="create")
      * @ORM\Column(name="financial_start_date", type="datetime")
@@ -203,6 +241,232 @@ class Config
     {
         $this->updatedAt = $updatedAt;
     }
+
+    /**
+     * @return mixed
+     */
+    public function getAccountCash()
+    {
+        return $this->accountCash;
+    }
+
+    /**
+     * @param mixed $accountCash
+     */
+    public function setAccountCash($accountCash)
+    {
+        $this->accountCash = $accountCash;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getAccountBank()
+    {
+        return $this->accountBank;
+    }
+
+    /**
+     * @param mixed $accountBank
+     */
+    public function setAccountBank($accountBank)
+    {
+        $this->accountBank = $accountBank;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getAccountMobile()
+    {
+        return $this->accountMobile;
+    }
+
+    /**
+     * @param mixed $accountMobile
+     */
+    public function setAccountMobile($accountMobile)
+    {
+        $this->accountMobile = $accountMobile;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getAccountUser()
+    {
+        return $this->accountUser;
+    }
+
+    /**
+     * @param mixed $accountUser
+     */
+    public function setAccountUser($accountUser)
+    {
+        $this->accountUser = $accountUser;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getAccountVendor()
+    {
+        return $this->accountVendor;
+    }
+
+    /**
+     * @param mixed $accountVendor
+     */
+    public function setAccountVendor($accountVendor)
+    {
+        $this->accountVendor = $accountVendor;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getAccountCustomer()
+    {
+        return $this->accountCustomer;
+    }
+
+    /**
+     * @param mixed $accountCustomer
+     */
+    public function setAccountCustomer($accountCustomer)
+    {
+        $this->accountCustomer = $accountCustomer;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getAccountProductGroup()
+    {
+        return $this->accountProductGroup;
+    }
+
+    /**
+     * @param mixed $accountProductGroup
+     */
+    public function setAccountProductGroup($accountProductGroup)
+    {
+        $this->accountProductGroup = $accountProductGroup;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getAccountCategory()
+    {
+        return $this->accountCategory;
+    }
+
+    /**
+     * @param mixed $accountCategory
+     */
+    public function setAccountCategory($accountCategory)
+    {
+        $this->accountCategory = $accountCategory;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getVoucherStockOpening()
+    {
+        return $this->voucherStockOpening;
+    }
+
+    /**
+     * @param mixed $voucherStockOpening
+     */
+    public function setVoucherStockOpening($voucherStockOpening)
+    {
+        $this->voucherStockOpening = $voucherStockOpening;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getVoucherPurchase()
+    {
+        return $this->voucherPurchase;
+    }
+
+    /**
+     * @param mixed $voucherPurchase
+     */
+    public function setVoucherPurchase($voucherPurchase)
+    {
+        $this->voucherPurchase = $voucherPurchase;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getVoucherSales()
+    {
+        return $this->voucherSales;
+    }
+
+    /**
+     * @param mixed $voucherSales
+     */
+    public function setVoucherSales($voucherSales)
+    {
+        $this->voucherSales = $voucherSales;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getVoucherSalesReturn()
+    {
+        return $this->voucherSalesReturn;
+    }
+
+    /**
+     * @param mixed $voucherSalesReturn
+     */
+    public function setVoucherSalesReturn($voucherSalesReturn)
+    {
+        $this->voucherSalesReturn = $voucherSalesReturn;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getVoucherPurchaseReturn()
+    {
+        return $this->voucherPurchaseReturn;
+    }
+
+    /**
+     * @param mixed $voucherPurchaseReturn
+     */
+    public function setVoucherPurchaseReturn($voucherPurchaseReturn)
+    {
+        $this->voucherPurchaseReturn = $voucherPurchaseReturn;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getVoucherStockReconciliation()
+    {
+        return $this->voucherStockReconciliation;
+    }
+
+    /**
+     * @param mixed $voucherStockReconciliation
+     */
+    public function setVoucherStockReconciliation($voucherStockReconciliation)
+    {
+        $this->voucherStockReconciliation = $voucherStockReconciliation;
+    }
+
+
 
 
 
