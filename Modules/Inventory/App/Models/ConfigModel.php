@@ -125,6 +125,16 @@ class ConfigModel extends Model
         return $this->hasOne(ConfigProductModel::class, 'config_id', 'id');
     }
 
+    public function configPurchase(): HasOne
+    {
+        return $this->hasOne(ConfigPurchaseModel::class, 'config_id', 'id');
+    }
+
+    public function configSales(): HasOne
+    {
+        return $this->hasOne(ConfigSalesModel::class, 'config_id', 'id');
+    }
+
     public function domain(): BelongsTo
     {
         return $this->belongsTo(DomainModel::class,'domain_id','id');
@@ -144,5 +154,6 @@ class ConfigModel extends Model
     {
         return $this->BelongsTo(SettingModel::class,'pos_invoice_mode_id','id');
     }
+
 
 }

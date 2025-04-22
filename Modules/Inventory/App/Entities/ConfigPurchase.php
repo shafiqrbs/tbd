@@ -44,7 +44,7 @@ class ConfigPurchase
      *
      * @ORM\Column(type="boolean",options={"default"="false"})
      */
-    private $searchByWearhouse;
+    private $searchByWarehouse;
 
     /**
      * @var boolean
@@ -154,18 +154,68 @@ class ConfigPurchase
     /**
      * @return bool
      */
-    public function isSearchByWearhouse()
+    public function isSearchByWarehouse()
     {
-        return $this->searchByWearhouse;
+        return $this->searchByWarehouse;
     }
 
     /**
-     * @param bool $searchByWearhouse
+     * @param bool $searchByWarehouse
      */
-    public function setSearchByWearhouse($searchByWearhouse)
+    public function setSearchByWarehouse($searchByWarehouse)
     {
-        $this->searchByWearhouse = $searchByWearhouse;
+        $this->searchByWarehouse = $searchByWarehouse;
     }
+
+    /**
+     * @return mixed
+     */
+    public function getDefaultVendorGroup()
+    {
+        return $this->defaultVendorGroup;
+    }
+
+    /**
+     * @param mixed $defaultVendorGroup
+     */
+    public function setDefaultVendorGroup($defaultVendorGroup)
+    {
+        $this->defaultVendorGroup = $defaultVendorGroup;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isMeasurementEnable()
+    {
+        return $this->isMeasurementEnable;
+    }
+
+    /**
+     * @param bool $isMeasurementEnable
+     */
+    public function setIsMeasurementEnable($isMeasurementEnable)
+    {
+        $this->isMeasurementEnable = $isMeasurementEnable;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isPurchaseAutoApproved()
+    {
+        return $this->isPurchaseAutoApproved;
+    }
+
+    /**
+     * @param bool $isPurchaseAutoApproved
+     */
+    public function setIsPurchaseAutoApproved($isPurchaseAutoApproved)
+    {
+        $this->isPurchaseAutoApproved = $isPurchaseAutoApproved;
+    }
+
+
 
     /**
      * @return bool
@@ -374,6 +424,8 @@ class ConfigPurchase
     {
         $this->updatedAt = $updatedAt;
     }
+
+
 
 
 }

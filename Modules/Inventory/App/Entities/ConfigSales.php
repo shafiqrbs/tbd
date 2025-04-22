@@ -36,6 +36,7 @@ class ConfigSales
      **/
      private $defaultCustomerGroup;
 
+
     /**
      * @var boolean
      *
@@ -48,7 +49,7 @@ class ConfigSales
      *
      * @ORM\Column(type="boolean",options={"default"="false"})
      */
-    private $searchByWearhouse;
+    private $searchByWarehouse;
 
     /**
      * @var boolean
@@ -121,6 +122,13 @@ class ConfigSales
     private $isSalesAutoApproved;
 
 
+     /**
+     * @var boolean
+     * @ORM\Column(type="boolean",options={"default"="false"})
+     */
+    private $discountWithCustomer = false;
+
+
     /**
      * @var \DateTime
      * @Gedmo\Timestampable(on="create")
@@ -184,20 +192,38 @@ class ConfigSales
     }
 
     /**
-     * @return bool
+     * @return mixed
      */
-    public function isSearchByWearhouse()
+    public function getDefaultCustomerGroup()
     {
-        return $this->searchByWearhouse;
+        return $this->defaultCustomerGroup;
     }
 
     /**
-     * @param bool $searchByWearhouse
+     * @param mixed $defaultCustomerGroup
      */
-    public function setSearchByWearhouse($searchByWearhouse)
+    public function setDefaultCustomerGroup($defaultCustomerGroup)
     {
-        $this->searchByWearhouse = $searchByWearhouse;
+        $this->defaultCustomerGroup = $defaultCustomerGroup;
     }
+
+    /**
+     * @return bool
+     */
+    public function isSearchByWarehouse()
+    {
+        return $this->searchByWarehouse;
+    }
+
+    /**
+     * @param bool $searchByWarehouse
+     */
+    public function setSearchByWarehouse($searchByWarehouse)
+    {
+        $this->searchByWarehouse = $searchByWarehouse;
+    }
+
+
 
     /**
      * @return bool
@@ -343,37 +369,6 @@ class ConfigSales
         $this->isSalesAutoApproved = $isSalesAutoApproved;
     }
 
-    /**
-     * @return bool
-     */
-    public function isRemoveImage()
-    {
-        return $this->removeImage;
-    }
-
-    /**
-     * @param bool $removeImage
-     */
-    public function setRemoveImage($removeImage)
-    {
-        $this->removeImage = $removeImage;
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getPath()
-    {
-        return $this->path;
-    }
-
-    /**
-     * @param mixed $path
-     */
-    public function setPath($path)
-    {
-        $this->path = $path;
-    }
 
     /**
      * @return \DateTime
@@ -455,6 +450,21 @@ class ConfigSales
         $this->isMultiPrice = $isMultiPrice;
     }
 
+    /**
+     * @return bool
+     */
+    public function isDiscountWithCustomer()
+    {
+        return $this->discountWithCustomer;
+    }
+
+    /**
+     * @param bool $discountWithCustomer
+     */
+    public function setDiscountWithCustomer($discountWithCustomer)
+    {
+        $this->discountWithCustomer = $discountWithCustomer;
+    }
 
 
 

@@ -13,35 +13,23 @@ use Modules\Utility\App\Models\CurrencyModel;
 use Modules\Utility\App\Models\SettingModel;
 
 
-class ConfigProductModel extends Model
+class ConfigPurchaseModel extends Model
 {
     use HasFactory;
 
-    protected $table = 'inv_config_product';
+    protected $table = 'inv_config_purchase';
     public $timestamps = true;
     protected $guarded = ['id'];
     protected $fillable = [
         'config_id',
-        'sku_category',
-        'sku_brand',
-        'sku_model',
-        'sku_color',
-        'sku_size',
-        'sku_warehouse',
-        'barcode_print',
-        'barcode_price_hide',
-        'barcode_color',
-        'barcode_size',
-        'barcode_brand',
-        'is_brand',
-        'is_color',
-        'is_size',
-        'is_grade',
-        'is_sku',
-        'is_model',
-        'is_multi_price',
-        'is_measurement',
-        'is_product_gallery'
+        'default_vendor_group_id',
+        'search_by_vendor',
+        'search_by_warehouse',
+        'search_by_product_nature',
+        'search_by_category',
+        'show_product',
+        'is_measurement_enable',
+        'is_purchase_auto_approved'
     ];
 
 
