@@ -25,6 +25,11 @@ class ProductMeasurementModel extends Model
         'quantity'
     ];
 
+    public function unit()
+    {
+        return $this->belongsTo(ParticularModel::class, 'unit_id','id');
+    }
+
 
     public static function boot() {
         parent::boot();

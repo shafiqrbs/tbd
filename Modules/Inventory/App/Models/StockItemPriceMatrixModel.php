@@ -22,6 +22,11 @@ class StockItemPriceMatrixModel extends Model
         'product_id',
     ];
 
+    public function priceUnitName()
+    {
+        return $this->belongsTo(SettingModel::class, 'price_unit_id','id');
+    }
+
     public static function boot() {
         parent::boot();
         self::creating(function ($model) {

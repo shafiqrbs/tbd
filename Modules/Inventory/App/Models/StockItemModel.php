@@ -70,9 +70,14 @@ class StockItemModel extends Model
         return $this->belongsTo(ProductModel::class, 'product_id');
     }
 
+
     public function stockItemHistory() :HasMany
     {
         return $this->hasMany(StockItemHistoryModel::class, 'stock_item_id');
+    }
+    public function multiplePrice() :HasMany
+    {
+        return $this->hasMany(StockItemPriceMatrixModel::class, 'stock_item_id');
     }
 
     // In StockItemModel.php
@@ -171,10 +176,64 @@ class StockItemModel extends Model
         return $product;
     }
 
-
     public static function getStockItem($domain)
     {
-        $products = self::where([['inv_product.config_id',$domain['config_id']]])->where('inv_stock.status',1)
+        return self::with(['product.measurement.unit', 'product.unit', 'product.category', 'product.setting', 'product.images','multiplePrice.priceUnitName'])
+            ->where('config_id', $domain['config_id'])
+            ->where('status', 1)
+            ->orderByDesc('id')
+            ->get()
+            ->map(function($stock) {
+                $product = $stock->product;
+                return [
+                    'id'                => $stock->id,
+                    'stock_id'          => $stock->id,
+                    'name'              => $stock->display_name ?? $stock->name,
+                    'display_name'      => $stock->display_name ?? $stock->name,
+                    'product_name'      => $stock->name . '[' . ($stock->quantity ?? 0) . '] ' . ($product->unit->name ?? ''),
+                    'slug'              => $product->slug ?? null,
+                    'vendor_id'         => $product->vendor_id ?? null,
+                    'category_id'       => $product->category_id,
+                    'unit_id'           => $product->unit_id,
+                    'quantity'          => $stock->quantity,
+                    'sales_price'       => $stock->sales_price,
+                    'purchase_price'    => $stock->purchase_price,
+                    'barcode'           => $stock->barcode,
+                    'unit_name'         => $product->unit->name ?? null,
+                    'product_nature'    => $product->setting->slug,
+                    'feature_image'     => optional($product->images)->feature_image,
+                    'multi_price'       => $stock->multiplePrice->map(function($m) {
+                        return [
+                            'id'                => $m->id,
+                            'price_unit_id'     => $m->price_unit_id,
+                            'price'             => $m->price,
+                            'field_name'        => $m->priceUnitName->name ?? null,
+                            'field_slug'        => $m->priceUnitName->slug ?? null,
+                            'parent_slug'       => $m->priceUnitName->parent_slug ?? null,
+                        ];
+                    }),
+                    'measurements' => $product->measurement->map(function($m) {
+                        return [
+                            'id'            => $m->id,
+                            'unit_id'       => $m->unit_id,
+                            'unit_name'     => $m->unit->name ?? null,
+                            'slug'          => $m->unit->slug ?? null,
+                            'is_base_unit'  => $m->is_base_unit,
+                            'is_sales'      => $m->is_sales,
+                            'is_purchase'   => $m->is_purchase,
+                            'quantity'      => $m->quantity,
+                        ];
+                    }),
+
+                ];
+            });
+    }
+
+
+    public static function getStockItemBK($domain)
+    {
+        $products = self::with(['product.measurement'])
+            ->where([['inv_product.config_id',$domain['config_id']]])->where('inv_stock.status',1)
 //            ->whereIN('inv_setting.slug',['pre-production','stockable','mid-production','post-production'])
             ->join('inv_product','inv_product.id','=','inv_stock.product_id')
             ->leftjoin('inv_category','inv_category.id','=','inv_product.category_id')

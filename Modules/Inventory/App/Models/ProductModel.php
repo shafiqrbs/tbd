@@ -65,9 +65,24 @@ class ProductModel extends Model
         return $this->belongsTo(CategoryModel::class, 'category_id');
     }
 
+    public function measurement()
+    {
+        return $this->hasMany(ProductMeasurementModel::class, 'product_id');
+    }
+
+    public function unit()
+    {
+        return $this->belongsTo(ParticularModel::class, 'unit_id');
+    }
+
+    public function setting()
+    {
+        return $this->belongsTo(SettingModel::class, 'product_type_id');
+    }
+
     public function images()
     {
-        return $this->hasOne(ProductGalleryModel::class, 'product_id');
+        return $this->hasOne(ProductGalleryModel::class, 'product_id')->where('status', 1);
     }
 
 
