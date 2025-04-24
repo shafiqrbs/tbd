@@ -59,6 +59,8 @@ class SplashController extends Controller
         $allVendors = VendorModel::getRecordsForLocalStorage($request,$domainData)['entities'];
         $allTransactionMode = TransactionModeModel::getRecordsForLocalStorage($request,$domainData)['entities'];
         $inventoryConfig = $this->getInventoryConfig($domainData['config_id'],$domainData['global_id']);
+
+        $domainConfig = $this->getDomainConfig($domainData['config_id'],$domainData['global_id']);
         $stockItem = StockItemModel::getStockItem($domainData);
 
 
@@ -66,15 +68,55 @@ class SplashController extends Controller
             'status' => 200,
             'message' => 'success',
             'data' => [
-                'users' => $allUsers,
-                'customers' => $allCustomers,
-                'vendors' => $allVendors,
-                'transaction_modes' => $allTransactionMode,
-                'inventory_config' => $inventoryConfig,
-                'stock_item' => $stockItem,
+//                'users' => $allUsers,
+//                'customers' => $allCustomers,
+//                'vendors' => $allVendors,
+//                'transaction_modes' => $allTransactionMode,
+//                'inventory_config' => $inventoryConfig,
+                'domain_config' => $domainConfig,
+//                'stock_item' => $stockItem,
             ]
         ], 200);
     }
+
+    private function getDomainConfig($id,$globalId)
+    {
+//        $entity = ConfigModel::with('domain.productionConfig','currency','businessModel','pos_invoice_mode','configProduct','configPurchase','configSales','configDiscount')->find($id);
+        $entity = DomainModel::with('inventoryConfig','inventoryConfig.configPurchase','inventoryConfig.configSales','inventoryConfig.configProduct','inventoryConfig.configDiscount')->find($globalId);
+        /*$inv_product_type = SettingModel::where('parent_slug', 'product-type')->where('config_id', $id)
+            ->select('id', 'slug', 'name', 'status')
+            ->get()
+            ->toArray();
+
+        $entity['child_domain_exists'] = VendorModel::where('sub_domain_id', $globalId)->exists();
+        if ($inv_product_type) {
+            foreach ($inv_product_type as $value) {
+                switch ($value['slug']) {
+                    case 'raw-materials':
+                        $entity['raw_materials'] = $value['status'];
+                        break;
+                    case 'stockable':
+                        $entity['stockable'] = $value['status'];
+                        break;
+                    case 'post-production':
+                        $entity['post_production'] = $value['status'];
+                        break;
+                    case 'mid-production':
+                        $entity['mid_production'] = $value['status'];
+                        break;
+                    case 'pre-production':
+                        $entity['pre_production'] = $value['status'];
+                        break;
+                }
+            }
+        }
+        if (!$entity){
+            $entity = 'Data not found';
+        }*/
+        return $entity;
+    }
+
+
 
     private function getInventoryConfig($id,$globalId)
     {

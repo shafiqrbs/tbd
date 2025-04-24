@@ -142,15 +142,15 @@ class UserModel extends Model
     public static function getRecordsForLocalStorage($request,$domain){
         $users = self::where('users.domain_id',$domain['global_id'])->whereNull('users.deleted_at')
             ->leftJoin('cor_user_role','cor_user_role.user_id','=','users.id')
-            ->leftJoin('core_user_transaction','core_user_transaction.user_id','=','users.id')
+            ->leftJoin('cor_user_transaction','cor_user_transaction.user_id','=','users.id')
             ->select([
                 'users.id',
                 'users.name',
                 'users.username',
                 'users.email',
                 'users.mobile',
-                'core_user_transaction.max_discount',
-                'core_user_transaction.sales_target',
+                'cor_user_transaction.max_discount',
+                'cor_user_transaction.sales_target',
                 DB::raw('DATE_FORMAT(users.created_at, "%d-%m-%Y") as created_date'),
                 'users.created_at',
                 'cor_user_role.access_control_role',
@@ -204,20 +204,20 @@ class UserModel extends Model
             DB::raw('COALESCE(DATE_FORMAT(users.updated_at, "%d-%m-%Y"), "") as updated'),
             'users.mobile',
             'users.enabled',
-            'core_user_profiles.alternative_email',
-            'core_user_profiles.location_id',
-            'core_user_profiles.designation_id',
-            'core_user_profiles.about_me',
-            'core_user_profiles.employee_group_id',
-            'core_user_profiles.department_id',
-            'core_user_profiles.address',
-            'core_user_transaction.max_discount',
-            'core_user_transaction.sales_target',
-            DB::raw("CONCAT('".url('')."/uploads/core/user/profile/', core_user_profiles.path) AS path"),
-            DB::raw("CONCAT('".url('')."/uploads/core/user/signature/', core_user_profiles.signature_path) AS signature_path")
+            'cor_user_profiles.alternative_email',
+            'cor_user_profiles.location_id',
+            'cor_user_profiles.designation_id',
+            'cor_user_profiles.about_me',
+            'cor_user_profiles.employee_group_id',
+            'cor_user_profiles.department_id',
+            'cor_user_profiles.address',
+            'cor_user_transaction.max_discount',
+            'cor_user_transaction.sales_target',
+            DB::raw("CONCAT('".url('')."/uploads/core/user/profile/', cor_user_profiles.path) AS path"),
+            DB::raw("CONCAT('".url('')."/uploads/core/user/signature/', cor_user_profiles.signature_path) AS signature_path")
         ])
-            ->leftJoin('core_user_profiles', 'core_user_profiles.user_id', '=', 'users.id')
-            ->leftJoin('core_user_transaction', 'core_user_transaction.user_id', '=', 'users.id')
+            ->leftJoin('cor_user_profiles', 'cor_user_profiles.user_id', '=', 'users.id')
+            ->leftJoin('cor_user_transaction', 'cor_user_transaction.user_id', '=', 'users.id')
             ->where('users.id', $id)
             ->first();
         return $data;

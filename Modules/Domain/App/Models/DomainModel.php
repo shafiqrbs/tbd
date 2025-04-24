@@ -5,6 +5,8 @@ use Cviebrock\EloquentSluggable\Sluggable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Modules\Inventory\App\Models\ConfigModel;
+use Modules\Production\App\Models\ProductionConfig;
 use Modules\Utility\App\Models\SettingModel;
 
 class DomainModel extends Model
@@ -30,6 +32,19 @@ class DomainModel extends Model
     public function businessModel(): BelongsTo
     {
         return $this->belongsTo(SettingModel::class,'business_model_id','id');
+    }
+
+
+
+    public function inventoryConfig()
+    {
+        return $this->hasOne(ConfigModel::class,'domain_id','id');
+    }
+
+
+    public function productionConfig(): BelongsTo
+    {
+        return $this->belongsTo(ProductionConfig::class,'domain_id','id');
     }
 
     public function sluggable(): array

@@ -70,10 +70,13 @@ class StockItemModel extends Model
         return $this->belongsTo(ProductModel::class, 'product_id');
     }
 
+
     public function measurments():HasMany
     {
         return $this->hasMany(ProductMeasurementModel::class, 'product_id');
     }
+
+
     public function stockItemHistory() :HasMany
     {
         return $this->hasMany(StockItemHistoryModel::class, 'stock_item_id');
@@ -192,16 +195,16 @@ class StockItemModel extends Model
                     'product_name'      => $stock->name . '[' . ($stock->quantity ?? 0) . '] ' . ($product->unit->name ?? ''),
                     'slug'              => $product->slug ?? null,
                     'vendor_id'         => $product->vendor_id ?? null,
-                    'category_id'       => $product->category_id,
-                    'unit_id'           => $product->unit_id,
+                    'category_id'       => $product->category_id ?? null,
+                    'unit_id'           => $product->unit_id ?? null,
+                    'unit_name'         => $product->unit->name ?? null,
                     'quantity'          => $stock->quantity,
                     'sales_price'       => $stock->sales_price,
                     'purchase_price'    => $stock->purchase_price,
                     'barcode'           => $stock->barcode,
-                    'unit_name'         => $product->unit->name ?? null,
-                    'product_nature'    => $product->setting->slug,
-                    'feature_image'     => optional($product->images)->feature_image,
-                    'multi_price'       => $stock->multiplePrice->map(function($m) {
+                    'product_nature'    => $product->setting->slug ?? null,
+                    'feature_image'     => optional(optional($product)->images)->feature_image ?? null,
+                    'multi_price' => optional(optional($stock)->multiplePrice)->map(function ($m) {
                         return [
                             'id'                => $m->id,
                             'price_unit_id'     => $m->price_unit_id,
@@ -211,7 +214,7 @@ class StockItemModel extends Model
                             'parent_slug'       => $m->priceUnitName->parent_slug ?? null,
                         ];
                     }),
-                    'measurements' => $product->measurement->map(function($m) {
+                    'measurements' => optional(optional($product)->measurement)->map(function ($m) {
                         return [
                             'id'            => $m->id,
                             'unit_id'       => $m->unit_id,

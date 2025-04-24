@@ -34,7 +34,7 @@ class ConfigDiscountModel extends Model
 
     public static function resetConfig($id){
 
-        $table = 'inv_config_sales';
+        $table = 'inv_config_discount';
         $columnsToExclude = [
             'id',
             'config_id',

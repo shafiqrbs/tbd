@@ -559,7 +559,7 @@ class DomainController extends Controller
         }
 
         if($domain->inv_config_discount){
-            ConfigDiscountModel::resetConfig($domain->inv_config_discount);
+          //  ConfigDiscountModel::resetConfig($domain->inv_config_discount);
         }
 
         if($domain->inv_config_purchase){
@@ -641,5 +641,12 @@ class DomainController extends Controller
         $entity = ['message'=>'delete'];
         $data = $service->returnJosnResponse($entity);
         return $data;
+    }
+
+    public function domainConfig()
+    {
+        $entity = DomainModel::with('inventoryConfig','inventoryConfig.configPurchase','inventoryConfig.configSales','inventoryConfig.configProduct','inventoryConfig.configDiscount')->find($this
+        ->domain['global_id']);
+        return $entity;
     }
 }

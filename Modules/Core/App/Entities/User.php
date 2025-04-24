@@ -26,9 +26,7 @@ class User
     /**
      * @ORM\OneToOne(targetEntity="Profile", mappedBy="user")
      */
-
     protected $profile;
-
 
 
     /**
