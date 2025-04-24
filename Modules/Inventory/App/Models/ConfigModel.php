@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Support\Facades\DB;
 use Modules\Domain\App\Models\DomainModel;
 use Modules\Utility\App\Entities\Setting;
 use Modules\Utility\App\Models\CurrencyModel;
@@ -120,9 +121,15 @@ class ConfigModel extends Model
 
     ];
 
+
     public function configProduct(): HasOne
     {
         return $this->hasOne(ConfigProductModel::class, 'config_id', 'id');
+    }
+
+    public function configDiscount(): HasOne
+    {
+        return $this->hasOne(ConfigDiscountModel::class, 'config_id', 'id');
     }
 
     public function configPurchase(): HasOne
@@ -153,6 +160,119 @@ class ConfigModel extends Model
     public function pos_invoice_mode(): BelongsTo
     {
         return $this->BelongsTo(SettingModel::class,'pos_invoice_mode_id','id');
+    }
+
+    public static function resetConfig($id){
+
+        $table = 'inv_config';
+
+        $columnsToExclude = [
+            'id',
+            'domain_id',
+            'business_model_id',
+            'stock_format',
+            'vat_reg_no',
+            'address',
+            'path',
+            'created_at',
+            'updated_at'
+        ];
+
+        $booleanFields = [
+            'is_stock_history' => true,
+            'multi_company' => false,
+            'bonus_from_stock' => false,
+            'vat_enable' => false,
+            'is_marketing_executive' => false,
+            'pos_print' => false,
+            'fuel_station' => false,
+            'zero_stock' => false,
+            'system_reset' => false,
+            'tlo_commission' => false,
+            'sr_commission' => false,
+            'sales_return' => false,
+            'store_ledger' => false,
+            'is_print_header' => false,
+            'is_invoice_title' => false,
+            'print_outstanding' => false,
+            'is_print_footer' => false,
+            'invoice_print_logo' => false,
+            'is_unit_price' => false,
+            'barcode_print' => false,
+            'custom_invoice' => false,
+            'custom_invoice_print' => false,
+            'show_stock' => false,
+            'is_powered' => false,
+            'remove_image' => false,
+            'sku_category' => false,
+            'sku_color' => false,
+            'sku_size' => false,
+            'sku_brand' => false,
+            'sku_model' => false,
+            'barcode_price_hide' => false,
+            'barcode_color' => false,
+            'barcode_size' => false,
+            'barcode_brand' => false,
+            'vat_mode' => false,
+            'is_active_sms' => false,
+            'is_zero_receive_allow' => false,
+            'is_purchase_by_purchase_price' => false,
+            'ait_enable' => false,
+            'zakat_enable' => false,
+            'stock_item' => false,
+            'is_description' => false,
+            'due_sales_without_customer' => false,
+            'vat_integration' => false,
+            'is_brand' => false,
+            'is_color' => false,
+            'is_size' => false,
+            'is_model' => false,
+            'is_multi_price' => false,
+            'is_grade' => false,
+            'is_measurement' => false,
+            'is_product_gallery' => false,
+            'is_batch_invoice' => false,
+            'is_provision' => false,
+            'is_sku' => false,
+            'is_sales_auto_approved' => false,
+            'is_purchase_auto_approved' => false,
+            'is_pos' => false,
+            'is_pay_first' => false,
+            'sku_warehouse' => false,
+            'pos_invoice_position' => false,
+            'multi_kitchen' => false,
+            'payment_split' => false,
+            'item_addons' => false,
+            'cash_on_delivery' => false,
+            'is_online' => false,
+            'hs_code_enable' => false,
+            'sd_enable' => false,
+            'is_category_item_quantity' => false,
+        ];
+
+        $columns = \Illuminate\Support\Facades\Schema::getColumnListing($table);
+        $columnsToReset = array_diff($columns, $columnsToExclude);
+
+
+        // Create SQL SET expressions
+        $setStatements = [];
+        foreach ($columnsToReset as $column) {
+            if (array_key_exists($column, $booleanFields)) {
+                // Handle boolean fields
+                $value = $booleanFields[$column] ? 1 : 0;
+                $setStatements[] = "`$column` = $value";
+            } else {
+                // Set other fields to NULL
+                $setStatements[] = "`$column` = NULL";
+            }
+        }
+
+        // Execute raw query with properly formatted SET statements
+        DB::statement("UPDATE `$table` SET " . implode(', ', $setStatements) . " WHERE id = ?", [$id]);
+
+
+
+
     }
 
 

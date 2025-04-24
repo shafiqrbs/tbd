@@ -118,6 +118,10 @@ class UserModel extends Model
             'users.id as user_id',
             'inv_config.id as config_id',
             'inv_config.id as inv_config',
+            'inv_config_product.id as inv_config_product',
+            'inv_config_discount.id as inv_config_discount',
+            'inv_config_sales.id as inv_config_sales',
+            'inv_config_purchase.id as inv_config_purchase',
             'acc_config.id as acc_config',
             'pro_config.id as pro_config',
             'nbr_config.id as nbr_config'
@@ -127,12 +131,43 @@ class UserModel extends Model
             ->leftjoin('acc_config','acc_config.domain_id','=','dom_domain.id')
             ->leftjoin('pro_config','pro_config.domain_id','=','dom_domain.id')
             ->leftjoin('nbr_config','nbr_config.domain_id','=','dom_domain.id')
+            ->leftjoin('inv_config_product','inv_config_product.config_id','=','inv_config.id')
+            ->leftjoin('inv_config_discount','inv_config_discount.config_id','=','inv_config.id')
+            ->leftjoin('inv_config_sales','inv_config_sales.config_id','=','inv_config.id')
+            ->leftjoin('inv_config_purchase','inv_config_purchase.config_id','=','inv_config.id')
             ->where('dom_domain.id',$id)->first();
         return $data;
     }
 
     public static function getRecordsForLocalStorage($request,$domain){
         $users = self::where('users.domain_id',$domain['global_id'])->whereNull('users.deleted_at')
+            ->leftJoin('cor_user_role','cor_user_role.user_id','=','users.id')
+            ->leftJoin('core_user_transaction','core_user_transaction.user_id','=','users.id')
+            ->select([
+                'users.id',
+                'users.name',
+                'users.username',
+                'users.email',
+                'users.mobile',
+                'core_user_transaction.max_discount',
+                'core_user_transaction.sales_target',
+                DB::raw('DATE_FORMAT(users.created_at, "%d-%m-%Y") as created_date'),
+                'users.created_at',
+                'cor_user_role.access_control_role',
+                'cor_user_role.android_control_role',
+            ])
+            ->orderByDesc('users.id')
+            ->get();
+
+        $data = array('entities' => $users);
+        return $data;
+
+
+    }
+
+    public static function getRecordsForDomain(){
+        $users = self::where('users.user_group','domain')->whereNull('users.deleted_at')
+            ->join('dom_domain','dom_domain.id','=','users.domain_id')
             ->leftJoin('cor_user_role','cor_user_role.user_id','=','users.id')
             ->select([
                 'users.id',
@@ -141,9 +176,11 @@ class UserModel extends Model
                 'users.email',
                 'users.mobile',
                 DB::raw('DATE_FORMAT(users.created_at, "%d-%m-%Y") as created_date'),
-                'users.created_at',
-                'cor_user_role.access_control_role',
-                'cor_user_role.android_control_role',
+                'dom_domain.id as domain_id',
+                'dom_domain.company_name as company_name',
+                'dom_domain.mobile as company_mobile',
+                'dom_domain.status as company_status',
+                'users.created_at'
             ])
             ->orderByDesc('users.id')
             ->get();
@@ -174,10 +211,13 @@ class UserModel extends Model
             'core_user_profiles.employee_group_id',
             'core_user_profiles.department_id',
             'core_user_profiles.address',
+            'core_user_transaction.max_discount',
+            'core_user_transaction.sales_target',
             DB::raw("CONCAT('".url('')."/uploads/core/user/profile/', core_user_profiles.path) AS path"),
             DB::raw("CONCAT('".url('')."/uploads/core/user/signature/', core_user_profiles.signature_path) AS signature_path")
         ])
             ->leftJoin('core_user_profiles', 'core_user_profiles.user_id', '=', 'users.id')
+            ->leftJoin('core_user_transaction', 'core_user_transaction.user_id', '=', 'users.id')
             ->where('users.id', $id)
             ->first();
         return $data;

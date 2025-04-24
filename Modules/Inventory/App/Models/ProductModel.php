@@ -5,6 +5,7 @@ namespace Modules\Inventory\App\Models;
 use Cviebrock\EloquentSluggable\Sluggable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\DB;
 
 class ProductModel extends Model
@@ -85,7 +86,10 @@ class ProductModel extends Model
         return $this->hasOne(ProductGalleryModel::class, 'product_id')->where('status', 1);
     }
 
-
+    public function measurments():HasMany
+    {
+        return $this->hasMany(ProductMeasurementModel::class, 'product_id');
+    }
 
     public static function getRecords($request,$domain)
     {
@@ -134,6 +138,9 @@ class ProductModel extends Model
                     DB::raw("CONCAT('uploads/inventory/product/path_three/', inv_product_gallery.path_three) AS path_three"),
                     DB::raw("CONCAT('uploads/inventory/product/path_four/', inv_product_gallery.path_four) AS path_four")
                 ])->where('inv_product_gallery.status', 1);
+            }])->with(['measurments' => function ($query) {
+                $query->select([
+                    'inv_product_unit_measurment.id']);
             }]);
 
         if (isset($request['term']) && !empty($request['term'])){
@@ -142,10 +149,6 @@ class ProductModel extends Model
                 'inv_product.alternative_name',
                 'inv_stock.display_name',
                 'inv_stock.bangla_name',
-//                'inv_product.slug',
-//                'inv_category.name',
-//                'inv_particular.name',
-//                'inv_setting.name'
             ],'LIKE','%'.$request['term'].'%');
         }
 
@@ -252,8 +255,8 @@ class ProductModel extends Model
                 DB::raw("CONCAT('".url('')."/uploads/inventory/product/path_four/', inv_product_gallery.path_four) AS path_four"),
                 'inv_product.status'
             ])->first();
-
         return $product;
+
     }
 
 

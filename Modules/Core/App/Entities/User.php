@@ -30,6 +30,13 @@ class User
     protected $profile;
 
 
+
+    /**
+     * @ORM\ManyToMany(targetEntity="Warehouse", inversedBy="users")
+     */
+    protected $warehouses;
+
+
     /**
      * @var boolean
      *

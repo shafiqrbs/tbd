@@ -8,10 +8,10 @@ use Gedmo\Mapping\Annotation as Gedmo;
 /**
  * BusinessParticular
  *
- * @ORM\Table( name = "inv_discount_config")
+ * @ORM\Table( name = "inv_config_discount")
  * @ORM\Entity()
  */
-class DiscountConfig
+class ConfigDiscount
 {
     /**
      * @var integer
@@ -36,8 +36,6 @@ class DiscountConfig
      */
     private $name;
 
-
-
      /**
      * @var float
      *
@@ -45,13 +43,6 @@ class DiscountConfig
      */
     private $maxDiscount;
 
-
-    /**
-     * @Gedmo\Translatable
-     * @Gedmo\Slug(fields={"name"})
-     * @ORM\Column(length=255)
-     */
-    private $slug;
 
     /**
      * @var \DateTime
@@ -71,7 +62,7 @@ class DiscountConfig
     /**
      * @var boolean
      *
-     * @ORM\Column(name="status", type="boolean" )
+     * @ORM\Column(type="boolean" ,options={"default"="false"})
      */
     private $status= true;
 

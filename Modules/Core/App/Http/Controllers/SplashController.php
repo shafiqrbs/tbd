@@ -78,14 +78,13 @@ class SplashController extends Controller
 
     private function getInventoryConfig($id,$globalId)
     {
-        $entity = ConfigModel::with('domain','currency','businessModel','pos_invoice_mode','configProduct','configPurchase','configSales')->find($id);
+        $entity = ConfigModel::with('domain','currency','businessModel','pos_invoice_mode','configProduct','configPurchase','configSales','configDiscount')->find($id);
         $inv_product_type = SettingModel::where('parent_slug', 'product-type')->where('config_id', $id)
             ->select('id', 'slug', 'name', 'status')
             ->get()
             ->toArray();
 
         $entity['child_domain_exists'] = VendorModel::where('sub_domain_id', $globalId)->exists();
-
         if ($inv_product_type) {
             foreach ($inv_product_type as $value) {
                 switch ($value['slug']) {

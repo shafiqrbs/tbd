@@ -21,6 +21,8 @@ use Modules\Domain\App\Http\Controllers\DomainController;
 
 Route::prefix('/domain')->middleware(array(HeaderAuthenticationMiddleware::class))->group(function() {
     Route::apiResource('/global', DomainController::class)->middleware([HeaderAuthenticationMiddleware::class]);
+    Route::get('users', [DomainController::class,'users'])->name('domain_users');
+    Route::get('users', [DomainController::class,'users'])->name('domain_users');
     Route::apiResource('/setting', DomainController::class)
         ->middleware([HeaderAuthenticationMiddleware::class])
         ->names([
@@ -38,12 +40,12 @@ Route::prefix('/domain')->middleware(array(HeaderAuthenticationMiddleware::class
             Route::post('price/update', [BranchController::class,'priceUpdate'])->name('branch_price_update');
             Route::post('category/update', [BranchController::class,'categoryUpdate'])->name('branch_category_update');
         });
-
         Route::post('/sub-domain/{id}', [DomainController::class,'subDomain'])->name('sub_domain');
         Route::post('/inventory/{id}', [DomainController::class,'inventorySetting'])->name('domain_inventory_setting');
     });
     Route::prefix('restore')->middleware([HeaderAuthenticationMiddleware::class])->group(function() {
         Route::get('reset/{domain}', [DomainController::class,'resetData'])->name('domain_reset');
+        Route::get('config/{id}', [DomainController::class,'resetConfig'])->name('domain_config');
         Route::get('delete/{id}', [DomainController::class,'deleteData'])->name('domain_delete');
     });
 

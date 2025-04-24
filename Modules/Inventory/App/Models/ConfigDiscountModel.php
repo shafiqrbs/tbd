@@ -1,53 +1,49 @@
 <?php
 
-namespace Modules\Production\App\Models;
+namespace Modules\Inventory\App\Models;
 
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\DB;
+use Modules\Domain\App\Models\DomainModel;
+use Modules\Utility\App\Entities\Setting;
+use Modules\Utility\App\Models\CurrencyModel;
+use Modules\Utility\App\Models\SettingModel;
 
 
-class ProductionConfig extends Model
+class ConfigDiscountModel extends Model
 {
     use HasFactory;
 
-    protected $table = 'pro_config';
-    public $timestamps = false;
+    protected $table = 'inv_config_discount';
+    public $timestamps = true;
     protected $guarded = ['id'];
-
     protected $fillable = [
-        'domain_id',
-        'production_procedure_id',
-        'consumption_method_id',
+        'config_id',
+        'max_discount',
     ];
 
-    public static function boot() {
-        parent::boot();
-        self::creating(function ($model) {
-            $date =  new \DateTime("now");
-            $model->created_at = $date;
-        });
 
-        self::updating(function ($model) {
-            $date =  new \DateTime("now");
-            $model->updated_at = $date;
-        });
+    public function config()
+    {
+        return $this->belongsTo(ConfigModel::class, 'config_id', 'id');
     }
 
     public static function resetConfig($id){
 
-        $table = 'pro_config';
+        $table = 'inv_config_sales';
         $columnsToExclude = [
             'id',
-            'domain_id',
+            'config_id',
             'created_at',
             'updated_at'
         ];
 
         $booleanFields = [
-            'is_measurement' => false,
-            'is_warehouse' => false,
+            'status' => false,
         ];
 
         $columns = \Illuminate\Support\Facades\Schema::getColumnListing($table);
@@ -60,16 +56,18 @@ class ProductionConfig extends Model
             if (array_key_exists($column, $booleanFields)) {
                 // Handle boolean fields
                 $value = $booleanFields[$column] ? 1 : 0;
-                $setStatements[] = "`$column` = $value";
+                $setStatements[] = "'$column' = $value";
             } else {
                 // Set other fields to NULL
-                $setStatements[] = "`$column` = NULL";
+                $setStatements[] = "'$column' = NULL";
             }
         }
 
         // Execute raw query with properly formatted SET statements
-        DB::statement("UPDATE `$table` SET " . implode(', ', $setStatements) . " WHERE id = ?", [$id]);
+        DB::statement("UPDATE '$table' SET " . implode(', ', $setStatements) . " WHERE id = ?", [$id]);
 
     }
+
+
 
 }

@@ -3,6 +3,7 @@
 namespace Modules\Domain\App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use Doctrine\DBAL\Schema\Schema;
 use Doctrine\ORM\EntityManager;
 use Exception;
 use Illuminate\Http\Request;
@@ -30,7 +31,11 @@ use Modules\Core\App\Models\UserModel;
 use Modules\Domain\App\Models\CurrencyModel;
 use Modules\Domain\App\Models\DomainModel;
 use Modules\Inventory\App\Entities\Setting;
+use Modules\Inventory\App\Models\ConfigDiscountModel;
 use Modules\Inventory\App\Models\ConfigModel;
+use Modules\Inventory\App\Models\ConfigProductModel;
+use Modules\Inventory\App\Models\ConfigPurchaseModel;
+use Modules\Inventory\App\Models\ConfigSalesModel;
 use Modules\Inventory\App\Models\PurchaseModel;
 use Modules\Inventory\App\Models\SalesModel;
 use Modules\Inventory\App\Models\StockItemModel;
@@ -149,7 +154,7 @@ class DomainController extends Controller
             // Step 3: Create the inventory configuration (config)
             $currency = CurrencyModel::find(1);
 
-            $config =  ConfigModel::create([
+            $config = $config =  ConfigModel::create([
                 'domain_id' => $entity->id,
                 'currency_id' => $currency->id,
                 'zero_stock' => true,
@@ -159,6 +164,23 @@ class DomainController extends Controller
                 'is_multi_price' => true,
                 'business_model_id' => $entity->business_model_id,
             ]);
+
+            // Step 4: Create the accounting data
+            ConfigProductModel::create([
+                'config_id' => $config->id,
+            ]);
+
+            // Step 4: Create the accounting data
+            ConfigSalesModel::create([
+                'config_id' => $config->id,
+            ]);
+
+            // Step 4: Create the accounting data
+            ConfigPurchaseModel::create([
+                'config_id' => $config->id,
+            ]);
+
+
 
             // Step 4: Create the accounting data
             $accountingConfig = AccountingModel::create([
@@ -462,9 +484,6 @@ class DomainController extends Controller
     public function destroy($id)
     {
         $service = new JsonRequestResponse();
-
-
-
         DomainModel::find($id)->delete();
         $entity = ['message'=>'delete'];
         $data = $service->returnJosnResponse($entity);
@@ -505,7 +524,6 @@ class DomainController extends Controller
 
         // Bulk delete vendors and customers
         VendorModel::where('domain_id', $id)->delete();
-        CustomerModel::where('domain_id', $id)->delete();
 
         // Delete sales and related data using chunking
         SalesModel::with('salesItems.stock.stockItemHistory')
@@ -527,6 +545,75 @@ class DomainController extends Controller
         StockItemModel::where('config_id', $allConfigId['inv_config'])->update(['quantity' => 0]);
 
         return response()->json(['message' => 'Domain reset successfully', 'status' => Response::HTTP_OK], Response::HTTP_OK);
+    }
+
+
+    public function resetConfig($id)
+    {
+        $domain = UserModel::getDomainData($id);
+
+        ConfigModel::resetConfig($domain->config_id);
+
+        if($domain->inv_config_product){
+            ConfigProductModel::resetConfig($domain->inv_config_product);
+        }
+
+        if($domain->inv_config_discount){
+            ConfigDiscountModel::resetConfig($domain->inv_config_discount);
+        }
+
+        if($domain->inv_config_purchase){
+            ConfigPurchaseModel::resetConfig($domain->inv_config_purchase);
+        }
+
+        if($domain->inv_config_sales){
+            ConfigSalesModel::resetConfig($domain->inv_config_sales);
+        }
+
+        if($domain->acc_config){
+            AccountingModel::resetConfig($domain->acc_config);
+        }
+
+        if($domain->pro_config){
+            ProductionConfig::resetConfig($domain->pro_config);
+        }
+        if($domain->nbr_config){
+           // NbrVatModel::resetConfig($domain->nbr_config);
+        }
+
+        // Step 4: Create the accounting data
+        ConfigProductModel::updateOrCreate([
+            'config_id' => $domain->config_id,
+        ]);
+
+         // Step 4: Create the accounting data
+        ConfigDiscountModel::updateOrCreate([
+            'config_id' => $domain->config_id,
+        ]);
+
+        // Step 4: Create the accounting data
+        ConfigSalesModel::updateOrCreate([
+            'config_id' => $domain->config_id,
+        ]);
+
+        // Step 4: Create the accounting data
+        ConfigPurchaseModel::updateOrCreate([
+            'config_id' => $domain->config_id,
+        ]);
+
+    }
+
+
+    /**
+     * Reset the specified resource from storage.
+     */
+    public function users()
+    {
+        // Ensure the domain exists
+        $service = new JsonRequestResponse();
+        $allUsers = UserModel::getRecordsForDomain();
+        $data = $service->returnJosnResponse($allUsers);
+        return $data;
     }
 
     /**

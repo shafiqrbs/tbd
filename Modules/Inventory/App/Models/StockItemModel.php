@@ -70,7 +70,10 @@ class StockItemModel extends Model
         return $this->belongsTo(ProductModel::class, 'product_id');
     }
 
-
+    public function measurments():HasMany
+    {
+        return $this->hasMany(ProductMeasurementModel::class, 'product_id');
+    }
     public function stockItemHistory() :HasMany
     {
         return $this->hasMany(StockItemHistoryModel::class, 'stock_item_id');
@@ -86,9 +89,6 @@ class StockItemModel extends Model
         return $this->belongsTo(StockItemModel::class, 'parent_stock_item');
     }
 
-
-
-
     public static function getRecords($request,$domain)
     {
         $page =  isset($request['page']) && $request['page'] > 0?($request['page'] - 1 ) : 0;
@@ -101,7 +101,7 @@ class StockItemModel extends Model
             ->leftjoin('inv_particular','inv_particular.id','=','inv_product.unit_id')
             ->leftjoin('inv_setting','inv_setting.id','=','inv_product.product_type_id')
             ->select([
-                'inv_product.id',
+                'inv_product.id as id',
                 'inv_product.name as product_name',
                 'inv_stock.slug',
                 'inv_category.name as category_name',
@@ -143,7 +143,6 @@ class StockItemModel extends Model
         $data = array('count'=>$total,'entities'=>$entities);
         return $data;
     }
-
 
     public static function getProductDetails($id,$domain)
     {
@@ -240,8 +239,10 @@ class StockItemModel extends Model
             ->leftjoin('inv_particular','inv_particular.id','=','inv_product.unit_id')
             ->leftjoin('inv_setting','inv_setting.id','=','inv_product.product_type_id')
             ->leftjoin('inv_product_gallery','inv_product_gallery.product_id','=','inv_product.id')
+            ->leftjoin('inv_product_unit_measurment','inv_product_unit_measurment.product_id','=','inv_product.id')
             ->select([
                 'inv_stock.id',
+                'inv_product.id as product_id',
                 \DB::raw("CONCAT(inv_stock.name,'[',IFNULL(inv_stock.quantity, 0),'] ', IFNULL(inv_particular.name,'')) AS product_name"),
                 'inv_stock.name as name',
                 'inv_setting.slug as product_nature',
@@ -256,7 +257,10 @@ class StockItemModel extends Model
                 'inv_stock.barcode',
                 'inv_particular.name as unit_name',
                 'inv_product_gallery.feature_image',
-            ]);
+            ])->with(['measurments' => function ($query) {
+                $query->select([
+                    'inv_product_unit_measurment.id']);
+            }]);
         $products = $products->orderBy('inv_product.id','DESC')->get();
 
         return $products;

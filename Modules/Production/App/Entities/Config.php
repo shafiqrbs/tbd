@@ -32,6 +32,19 @@ class Config
      **/
     private $domain;
 
+    /**
+     * @var boolean
+     *
+     * @ORM\Column(type="boolean",options={"default"="false"})
+     */
+    private $isWarehouse;
+
+    /**
+     * @var boolean
+     *
+     * @ORM\Column(type="boolean",options={"default"="false"})
+     */
+    private $isMeasurement;
 
     /**
      * @var \DateTime
@@ -155,6 +168,40 @@ class Config
     {
         $this->consumptionMethod = $consumptionMethod;
     }
+
+    /**
+     * @return bool
+     */
+    public function isWarehouse()
+    {
+        return $this->isWarehouse;
+    }
+
+    /**
+     * @param bool $isWarehouse
+     */
+    public function setIsWarehouse($isWarehouse)
+    {
+        $this->isWarehouse = $isWarehouse;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isMeasurement()
+    {
+        return $this->isMeasurement;
+    }
+
+    /**
+     * @param bool $isMeasurement
+     */
+    public function setIsMeasurement($isMeasurement)
+    {
+        $this->isMeasurement = $isMeasurement;
+    }
+
+
 
 
 }
