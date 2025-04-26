@@ -7,6 +7,7 @@ use Modules\Accounting\App\Http\Controllers\AccountGroupHeadController;
 use Modules\Accounting\App\Http\Controllers\AccountingController;
 use Modules\Accounting\App\Http\Controllers\AccountHeadController;
 use Modules\Accounting\App\Http\Controllers\AccountSettingController;
+use Modules\Accounting\App\Http\Controllers\AccountVoucherController;
 use Modules\Accounting\App\Http\Controllers\TransactionModeController;
 
 /*
@@ -43,6 +44,18 @@ Route::prefix('/accounting')->middleware([HeaderAuthenticationMiddleware::class]
     Route::get('/account-head-reset', [AccountHeadController::class,'resetAccountHead'])->name('account_head_reset');
     Route::get('/account-sub-head', [AccountHeadController::class,'accountSubHead'])->name('account_sub_head');
     Route::get('/account-ledger', [AccountHeadController::class,'accountLedger'])->name('account_ledger');
+
+    Route::apiResource('/voucher',
+        AccountVoucherController::class)
+        ->middleware([HeaderAuthenticationMiddleware::class])
+        ->parameters(['setting' => 'accounting.voucher'])
+        ->names([
+            'index' => 'accounting.voucher.index',
+            'store' => 'accounting.voucher.store',
+            'show' => 'accounting.voucher.show',
+            'update' => 'accounting.voucher.update',
+            'destroy' => 'accounting.voucher.destroy'
+        ]);
 
     Route::apiResource('/setting', AccountSettingController::class)
         ->middleware([HeaderAuthenticationMiddleware::class])

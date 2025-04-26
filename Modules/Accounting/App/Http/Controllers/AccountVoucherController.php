@@ -7,6 +7,8 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Modules\Accounting\App\Http\Requests\AccountHeadRequest;
+use Modules\Accounting\App\Http\Requests\AccountVoucherRequest;
+use Modules\Accounting\App\Models\AccountVoucherModel;
 use Modules\Accounting\App\Models\SettingModel;
 use Modules\Accounting\App\Models\TransactionModeModel;
 use Modules\AppsApi\App\Services\JsonRequestResponse;
@@ -15,7 +17,7 @@ use Modules\Core\App\Models\UserModel;
 use Modules\Domain\App\Models\DomainModel;
 
 
-class AccountSettingController extends Controller
+class AccountVoucherController extends Controller
 {
     protected $domain;
 
@@ -51,12 +53,13 @@ class AccountSettingController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(AccountHeadRequest $request)
+    public function store(AccountVoucherRequest $request)
     {
         $data = $request->validated();
+
         $data['status'] = true;
         $data['config_id'] = $this->domain['acc_config'];
-        $entity = SettingModel::create($data);
+        $entity = AccountVoucherModel::create($data);
         $service = new JsonRequestResponse();
         return $service->returnJosnResponse($entity);
     }

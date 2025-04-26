@@ -44,7 +44,22 @@ class Config
      *
      * @ORM\Column(type="boolean",options={"default"="false"})
      */
+    private $issueWithWarehouse;
+
+    /**
+     * @var boolean
+     *
+     * @ORM\Column(type="boolean",options={"default"="false"})
+     */
+    private $issueByProductionBatch;
+
+    /**
+     * @var boolean
+     *
+     * @ORM\Column(type="boolean",options={"default"="false"})
+     */
     private $isMeasurement;
+
 
     /**
      * @var \DateTime

@@ -1,0 +1,463 @@
+<?php
+
+namespace Modules\Domain\App\Http\Controllers;
+
+use App\Http\Controllers\Controller;
+use Doctrine\DBAL\Schema\Schema;
+use Doctrine\ORM\EntityManager;
+use Exception;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Modules\Accounting\App\Models\AccountingModel;
+use Modules\AppsApi\App\Services\JsonRequestResponse;
+use Modules\Core\App\Models\UserModel;
+use Modules\Domain\App\Models\DomainModel;
+use Modules\Inventory\App\Models\ConfigDiscountModel;
+use Modules\Inventory\App\Models\ConfigModel;
+use Modules\Inventory\App\Models\ConfigProductModel;
+use Modules\Inventory\App\Models\ConfigPurchaseModel;
+use Modules\Inventory\App\Models\ConfigRequsitionModel;
+use Modules\Inventory\App\Models\ConfigSalesModel;
+use Modules\NbrVatTax\App\Models\NbrVatConfigModel;
+use Modules\Production\App\Models\ProductionConfig;
+use Symfony\Component\HttpFoundation\Response as ResponseAlias;
+
+class DomainConfigController extends Controller
+{
+    protected $domain;
+
+    public function __construct(Request $request)
+    {
+        $entityId = $request->header('X-Api-User');
+        if ($entityId && !empty($entityId)){
+            $entityData = UserModel::getUserData($entityId);
+            $this->domain = $entityData;
+        }
+    }
+
+    public function domainConfig()
+    {
+        $entity = DomainModel::with('accountConfig','productionConfig','gstConfig','inventoryConfig','inventoryConfig.configPurchase','inventoryConfig.configSales','inventoryConfig.configProduct','inventoryConfig.configDiscount')->find($this
+            ->domain['global_id']);
+        return $entity;
+    }
+
+    public function domainConfigById($id)
+    {
+        $entity = DomainModel::with('accountConfig','productionConfig','gstConfig','inventoryConfig','inventoryConfig.configPurchase','inventoryConfig.configSales','inventoryConfig.configProduct','inventoryConfig.configDiscount')->find($id);
+        return $entity;
+    }
+
+    public function inventoryConfig(Request $request)
+    {
+        $validated = $request->validate([
+            'id'  => 'required|integer',
+            'field_name' => 'required|string',
+            'value'      => 'required',
+        ]);
+
+        DB::beginTransaction();
+        try {
+            $id = $validated['id'];
+            $fieldName = $validated['field_name'];
+            $value = $validated['value'];
+            $globalDomainId = $this->domain['global_id'] ?? null;
+            if (!$globalDomainId) {
+                throw new \RuntimeException('Global domain context missing');
+            }
+            DB::commit();
+            return response()->json([
+                'message' => 'Success',
+                'status'  => ResponseAlias::HTTP_OK
+            ]);
+
+        } catch (ModelNotFoundException $e) {
+            DB::rollBack();
+            return response()->json([
+                'message' => 'Resource not found',
+                'status'  => ResponseAlias::HTTP_NOT_FOUND
+            ], ResponseAlias::HTTP_NOT_FOUND);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'message' => 'Operation failed: ' . $e->getMessage(),
+                'error'   => $e->getMessage(),
+                'status'  => ResponseAlias::HTTP_INTERNAL_SERVER_ERROR
+            ], ResponseAlias::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    public function inventoryProductConfig(Request $request,$id)
+    {
+
+        $domain = UserModel::getDomainData($id);
+        $config = $domain['config_id'];
+        $entity = ConfigProductModel::updateOrCreate([
+            'config_id' => $config,
+        ]);
+        DB::beginTransaction();
+        try {
+            $entity->update($request->all());
+            DB::commit();
+            $service = new JsonRequestResponse();
+            $return = $service->returnJosnResponse($this->domainConfigById($id));
+            return $return;
+
+        } catch (ModelNotFoundException $e) {
+            DB::rollBack();
+            return response()->json([
+                'message' => 'Resource not found',
+                'status'  => ResponseAlias::HTTP_NOT_FOUND
+            ], ResponseAlias::HTTP_NOT_FOUND);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'message' => 'Operation failed: ' . $e->getMessage(),
+                'error'   => $e->getMessage(),
+                'status'  => ResponseAlias::HTTP_INTERNAL_SERVER_ERROR
+            ], ResponseAlias::HTTP_INTERNAL_SERVER_ERROR);
+        }
+
+
+    }
+
+    public function inventoryPurchaseConfig(Request $request,$id)
+    {
+
+        $domain = UserModel::getDomainData($id);
+        $config = $domain['config_id'];
+        $entity = ConfigPurchaseModel::updateOrCreate([
+            'config_id' => $config,
+        ]);
+        DB::beginTransaction();
+        try {
+            $entity->update($request->all());
+            DB::commit();
+            $service = new JsonRequestResponse();
+            $return = $service->returnJosnResponse($this->domainConfigById($id));
+            return $return;
+
+        } catch (ModelNotFoundException $e) {
+            DB::rollBack();
+            return response()->json([
+                'message' => 'Resource not found',
+                'status'  => ResponseAlias::HTTP_NOT_FOUND
+            ], ResponseAlias::HTTP_NOT_FOUND);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'message' => 'Operation failed: ' . $e->getMessage(),
+                'error'   => $e->getMessage(),
+                'status'  => ResponseAlias::HTTP_INTERNAL_SERVER_ERROR
+            ], ResponseAlias::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    public function inventorySalesConfig(Request $request,$id)
+    {
+
+        $domain = UserModel::getDomainData($id);
+        $config = $domain['config_id'];
+        $entity = ConfigSalesModel::updateOrCreate([
+            'config_id' => $config,
+        ]);
+        DB::beginTransaction();
+        try {
+            $entity->update($request->all());
+            DB::commit();
+            $service = new JsonRequestResponse();
+            $return = $service->returnJosnResponse($this->domainConfigById($id));
+            return $return;
+
+        } catch (ModelNotFoundException $e) {
+            DB::rollBack();
+            return response()->json([
+                'message' => 'Resource not found',
+                'status'  => ResponseAlias::HTTP_NOT_FOUND
+            ], ResponseAlias::HTTP_NOT_FOUND);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'message' => 'Operation failed: ' . $e->getMessage(),
+                'error'   => $e->getMessage(),
+                'status'  => ResponseAlias::HTTP_INTERNAL_SERVER_ERROR
+            ], ResponseAlias::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    public function inventoryDiscountConfig(Request $request,$id)
+    {
+
+        $domain = UserModel::getDomainData($id);
+        $config = $domain['config_id'];
+        $entity = ConfigDiscountModel::updateOrCreate([
+            'config_id' => $config,
+        ]);
+        DB::beginTransaction();
+        try {
+            $entity->update($request->all());
+            DB::commit();
+            $service = new JsonRequestResponse();
+            $return = $service->returnJosnResponse($this->domainConfigById($id));
+            return $return;
+
+        } catch (ModelNotFoundException $e) {
+            DB::rollBack();
+            return response()->json([
+                'message' => 'Resource not found',
+                'status'  => ResponseAlias::HTTP_NOT_FOUND
+            ], ResponseAlias::HTTP_NOT_FOUND);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'message' => 'Operation failed: ' . $e->getMessage(),
+                'error'   => $e->getMessage(),
+                'status'  => ResponseAlias::HTTP_INTERNAL_SERVER_ERROR
+            ], ResponseAlias::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    public function inventoryRequisitionConfig(Request $request,$id)
+    {
+
+        $domain = UserModel::getDomainData($id);
+        $config = $domain['config_id'];
+        $entity = ConfigRequsitionModel::updateOrCreate([
+            'config_id' => $config,
+        ]);
+        DB::beginTransaction();
+        try {
+            $entity->update($request->all());
+            DB::commit();
+            $service = new JsonRequestResponse();
+            $return = $service->returnJosnResponse($this->domainConfigById($id));
+            return $return;
+
+        } catch (ModelNotFoundException $e) {
+            DB::rollBack();
+            return response()->json([
+                'message' => 'Resource not found',
+                'status'  => ResponseAlias::HTTP_NOT_FOUND
+            ], ResponseAlias::HTTP_NOT_FOUND);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'message' => 'Operation failed: ' . $e->getMessage(),
+                'error'   => $e->getMessage(),
+                'status'  => ResponseAlias::HTTP_INTERNAL_SERVER_ERROR
+            ], ResponseAlias::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    public function inventoryPosConfig(Request $request,$id)
+    {
+
+        $entity = ConfigModel::updateOrCreate([
+            'domain_id' =>$id,
+        ]);
+        DB::beginTransaction();
+        try {
+            $entity->update($request->all());
+            DB::commit();
+            $service = new JsonRequestResponse();
+            $return = $service->returnJosnResponse($this->domainConfigById($id));
+            return $return;
+
+        } catch (ModelNotFoundException $e) {
+            DB::rollBack();
+            return response()->json([
+                'message' => 'Resource not found',
+                'status'  => ResponseAlias::HTTP_NOT_FOUND
+            ], ResponseAlias::HTTP_NOT_FOUND);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'message' => 'Operation failed: ' . $e->getMessage(),
+                'error'   => $e->getMessage(),
+                'status'  => ResponseAlias::HTTP_INTERNAL_SERVER_ERROR
+            ], ResponseAlias::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    public function inventoryVatConfig(Request $request,$id)
+    {
+
+        $entity = ConfigModel::updateOrCreate([
+            'domain_id' =>$id,
+        ]);
+        DB::beginTransaction();
+        try {
+            $entity->update($request->all());
+            DB::commit();
+            $service = new JsonRequestResponse();
+            $return = $service->returnJosnResponse($this->domainConfigById($id));
+            return $return;
+
+        } catch (ModelNotFoundException $e) {
+            DB::rollBack();
+            return response()->json([
+                'message' => 'Resource not found',
+                'status'  => ResponseAlias::HTTP_NOT_FOUND
+            ], ResponseAlias::HTTP_NOT_FOUND);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'message' => 'Operation failed: ' . $e->getMessage(),
+                'error'   => $e->getMessage(),
+                'status'  => ResponseAlias::HTTP_INTERNAL_SERVER_ERROR
+            ], ResponseAlias::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    public function accountingConfig(Request $request,$id)
+    {
+
+        $entity = AccountingModel::updateOrCreate([
+            'domain_id' => $id,
+        ]);
+        DB::beginTransaction();
+        try {
+            $entity->update($request->all());
+            DB::commit();
+            $service = new JsonRequestResponse();
+            $return = $service->returnJosnResponse($this->domainConfigById($id));
+            return $return;
+
+        } catch (ModelNotFoundException $e) {
+            DB::rollBack();
+            return response()->json([
+                'message' => 'Resource not found',
+                'status'  => ResponseAlias::HTTP_NOT_FOUND
+            ], ResponseAlias::HTTP_NOT_FOUND);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'message' => 'Operation failed: ' . $e->getMessage(),
+                'error'   => $e->getMessage(),
+                'status'  => ResponseAlias::HTTP_INTERNAL_SERVER_ERROR
+            ], ResponseAlias::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    public function productionConfig(Request $request,$id)
+    {
+
+        $entity = ProductionConfig::updateOrCreate([
+            'domain_id' => $id,
+        ]);
+        DB::beginTransaction();
+        try {
+            $entity->update($request->all());
+            DB::commit();
+            $service = new JsonRequestResponse();
+            $return = $service->returnJosnResponse($this->domainConfigById($id));
+            return $return;
+
+        } catch (ModelNotFoundException $e) {
+            DB::rollBack();
+            return response()->json([
+                'message' => 'Resource not found',
+                'status'  => ResponseAlias::HTTP_NOT_FOUND
+            ], ResponseAlias::HTTP_NOT_FOUND);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'message' => 'Operation failed: ' . $e->getMessage(),
+                'error'   => $e->getMessage(),
+                'status'  => ResponseAlias::HTTP_INTERNAL_SERVER_ERROR
+            ], ResponseAlias::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    public function vatConfig(Request $request,$id)
+    {
+
+        $entity = NbrVatConfigModel::updateOrCreate([
+            'domain_id' => $id,
+        ]);
+        DB::beginTransaction();
+        try {
+            $entity->update($request->all());
+            DB::commit();
+            $service = new JsonRequestResponse();
+            $return = $service->returnJosnResponse($this->domainConfigById($id));
+            return $return;
+
+        } catch (ModelNotFoundException $e) {
+            DB::rollBack();
+            return response()->json([
+                'message' => 'Resource not found',
+                'status'  => ResponseAlias::HTTP_NOT_FOUND
+            ], ResponseAlias::HTTP_NOT_FOUND);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'message' => 'Operation failed: ' . $e->getMessage(),
+                'error'   => $e->getMessage(),
+                'status'  => ResponseAlias::HTTP_INTERNAL_SERVER_ERROR
+            ], ResponseAlias::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    public function resetConfig($id)
+    {
+        $domain = UserModel::getDomainData($id);
+
+        ConfigModel::resetConfig($domain->config_id);
+
+        if($domain->inv_config_product){
+            ConfigProductModel::resetConfig($domain->inv_config_product);
+        }
+
+        if($domain->inv_config_discount){
+            //  ConfigDiscountModel::resetConfig($domain->inv_config_discount);
+        }
+
+        if($domain->inv_config_purchase){
+            ConfigPurchaseModel::resetConfig($domain->inv_config_purchase);
+        }
+
+        if($domain->inv_config_sales){
+            ConfigSalesModel::resetConfig($domain->inv_config_sales);
+        }
+
+        if($domain->acc_config){
+            AccountingModel::resetConfig($domain->acc_config);
+        }
+
+        if($domain->pro_config){
+            ProductionConfig::resetConfig($domain->pro_config);
+        }
+        if($domain->nbr_config){
+             NbrVatConfigModel::resetConfig($domain->nbr_config);
+        }
+
+        // Step 4: Create the accounting data
+        ConfigProductModel::updateOrCreate([
+            'config_id' => $domain->config_id,
+        ]);
+
+        // Step 4: Create the accounting data
+        ConfigDiscountModel::updateOrCreate([
+            'config_id' => $domain->config_id,
+        ]);
+
+        // Step 4: Create the accounting data
+        ConfigSalesModel::updateOrCreate([
+            'config_id' => $domain->config_id,
+        ]);
+
+        // Step 4: Create the accounting data
+        ConfigPurchaseModel::updateOrCreate([
+            'config_id' => $domain->config_id,
+        ]);
+
+        $service = new JsonRequestResponse();
+        $return = $service->returnJosnResponse($this->domainConfigById($id));
+        return $return;
+
+    }
+
+
+}

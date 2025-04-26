@@ -1,56 +1,58 @@
 <?php
 
-namespace Modules\Production\App\Models;
+namespace Modules\Inventory\App\Models;
 
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\DB;
 
 
-class ProductionConfig extends Model
+class ConfigRequsitionModel extends Model
 {
     use HasFactory;
 
-    protected $table = 'pro_config';
-    public $timestamps = false;
+    protected $table = 'inv_config_requisition';
+    public $timestamps = true;
     protected $guarded = ['id'];
-
     protected $fillable = [
-        'domain_id',
-        'production_procedure_id',
-        'consumption_method_id',
-        'is_warehouse',
-        'issue_with_warehouse',
-        'issue_by_production_batch',
+        'config_id',
+        'default_vendor_group_id',
+        'search_by_vendor',
+        'search_by_warehouse',
+        'search_by_product_nature',
+        'search_by_category',
+        'show_product',
+        'is_measurement_enable',
+        'is_purchase_auto_approved'
     ];
 
-    public static function boot() {
-        parent::boot();
-        self::creating(function ($model) {
-            $date =  new \DateTime("now");
-            $model->created_at = $date;
-        });
 
-        self::updating(function ($model) {
-            $date =  new \DateTime("now");
-            $model->updated_at = $date;
-        });
+    public function config()
+    {
+        return $this->belongsTo(ConfigModel::class, 'config_id', 'id');
     }
 
     public static function resetConfig($id){
 
-        $table = 'pro_config';
+        $table = 'inv_config_requisition';
         $columnsToExclude = [
             'id',
-            'domain_id',
+            'config_id',
             'created_at',
             'updated_at'
         ];
 
         $booleanFields = [
-            'is_measurement' => false,
-            'is_warehouse' => false,
+            'search_by_vendor' => false,
+            'search_by_warehouse' => false,
+            'search_by_product_nature' => false,
+            'search_by_category' => false,
+            'show_product' => false,
+            'is_measurement_enable' => false,
+            'is_purchase_auto_approved' => false
         ];
 
         $columns = \Illuminate\Support\Facades\Schema::getColumnListing($table);
@@ -74,5 +76,7 @@ class ProductionConfig extends Model
         DB::statement("UPDATE `$table` SET " . implode(', ', $setStatements) . " WHERE id = ?", [$id]);
 
     }
+
+
 
 }

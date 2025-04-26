@@ -68,7 +68,6 @@ class TransactionModeController extends Controller
         if ($data['is_selected']) {
             $this->updateIsSelected($entity->id);
         }
-
         return (new JsonRequestResponse())->returnJosnResponse($entity);
     }
 

@@ -5,7 +5,9 @@ use Cviebrock\EloquentSluggable\Sluggable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Modules\Accounting\App\Models\AccountingModel;
 use Modules\Inventory\App\Models\ConfigModel;
+use Modules\NbrVatTax\App\Models\NbrVatConfigModel;
 use Modules\Production\App\Models\ProductionConfig;
 use Modules\Utility\App\Models\SettingModel;
 
@@ -34,17 +36,24 @@ class DomainModel extends Model
         return $this->belongsTo(SettingModel::class,'business_model_id','id');
     }
 
-
-
     public function inventoryConfig()
     {
         return $this->hasOne(ConfigModel::class,'domain_id','id');
     }
 
-
-    public function productionConfig(): BelongsTo
+    public function productionConfig()
     {
-        return $this->belongsTo(ProductionConfig::class,'domain_id','id');
+        return $this->hasOne(ProductionConfig::class,'domain_id','id');
+    }
+
+    public function accountConfig()
+    {
+        return $this->hasOne(AccountingModel::class,'domain_id','id');
+    }
+
+    public function gstConfig()
+    {
+        return $this->hasOne(NbrVatConfigModel::class,'domain_id','id');
     }
 
     public function sluggable(): array

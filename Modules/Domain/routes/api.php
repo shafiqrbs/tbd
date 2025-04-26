@@ -5,6 +5,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Modules\Domain\App\Http\Controllers\B2bController;
 use Modules\Domain\App\Http\Controllers\BranchController;
+use Modules\Domain\App\Http\Controllers\DomainConfigController;
 use Modules\Domain\App\Http\Controllers\DomainController;
 
 /*
@@ -21,7 +22,6 @@ use Modules\Domain\App\Http\Controllers\DomainController;
 
 Route::prefix('/domain')->middleware(array(HeaderAuthenticationMiddleware::class))->group(function() {
     Route::apiResource('/global', DomainController::class)->middleware([HeaderAuthenticationMiddleware::class]);
-    Route::get('config', [DomainController::class,'domainConfig'])->name('domainConfig');
     Route::get('users', [DomainController::class,'users'])->name('domain_users');
     Route::apiResource('/setting', DomainController::class)
         ->middleware([HeaderAuthenticationMiddleware::class])
@@ -33,7 +33,6 @@ Route::prefix('/domain')->middleware(array(HeaderAuthenticationMiddleware::class
             'destroy' => 'domain.setting.destroy',
         ]);
     Route::prefix('/manage')->middleware([HeaderAuthenticationMiddleware::class])->group(function() {
-
         Route::prefix('/branch')->middleware([HeaderAuthenticationMiddleware::class])->group(function() {
             Route::get('/', [BranchController::class,'domainForBranch'])->name('get_domain_for_branch');
             Route::post('create', [BranchController::class,'store'])->name('store_branch');
@@ -43,9 +42,25 @@ Route::prefix('/domain')->middleware(array(HeaderAuthenticationMiddleware::class
         Route::post('/sub-domain/{id}', [DomainController::class,'subDomain'])->name('sub_domain');
         Route::post('/inventory/{id}', [DomainController::class,'inventorySetting'])->name('domain_inventory_setting');
     });
+
+    Route::prefix('config')->middleware([HeaderAuthenticationMiddleware::class])->group(function() {
+        Route::get('/', [DomainConfigController::class,'domainConfig'])->name('domain_reset');
+        Route::post('inventory/{id}', [DomainConfigController::class,'inventoryConfig'])->name('domain_config');
+        Route::post('inventory-product/{id}', [DomainConfigController::class,'inventoryProductConfig'])->name('domain_config');
+        Route::post('inventory-sales/{id}', [DomainConfigController::class,'inventorySalesConfig'])->name('domain_config');
+        Route::post('inventory-purchase/{id}', [DomainConfigController::class,'inventoryPurchaseConfig'])->name('domain_config');
+        Route::post('inventory-discount/{id}', [DomainConfigController::class,'inventoryDiscountConfig'])->name('domain_config');
+        Route::post('inventory-pos/{id}', [DomainConfigController::class,'inventoryPosConfig'])->name('domain_config');
+        Route::post('inventory-vat/{id}', [DomainConfigController::class,'inventoryVatConfig'])->name('domain_config');
+        Route::post('inventory-requisition/{id}', [DomainConfigController::class,'inventoryRequisitionConfig'])->name('domain_config');
+        Route::post('accounting/{id}', [DomainConfigController::class,'accountingConfig'])->name('domain_config');
+        Route::post('production/{id}', [DomainConfigController::class,'productionConfig'])->name('domain_config');
+        Route::post('gst-vat/{id}', [DomainConfigController::class,'vatConfig'])->name('domain_config');
+        Route::get('reset/{id}', [DomainConfigController::class,'resetConfig'])->name('domain_config');
+    });
+
     Route::prefix('restore')->middleware([HeaderAuthenticationMiddleware::class])->group(function() {
         Route::get('reset/{domain}', [DomainController::class,'resetData'])->name('domain_reset');
-        Route::get('config/{id}', [DomainController::class,'resetConfig'])->name('domain_config');
         Route::get('delete/{id}', [DomainController::class,'deleteData'])->name('domain_delete');
     });
 

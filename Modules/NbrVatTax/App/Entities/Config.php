@@ -30,6 +30,13 @@ class Config
      **/
     private $domain;
 
+    /**
+     * @var boolean
+     *
+     * @ORM\Column(type="boolean",options={"default"="false"})
+     */
+    private $gstEnable;
+
 
     /**
      * @var \DateTime

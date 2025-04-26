@@ -23,7 +23,6 @@ use Modules\Core\App\Models\SettingModel;
 use Modules\Core\App\Models\SettingTypeModel;
 use Modules\Core\App\Models\UserRoleModel;
 use Modules\Core\App\Models\VendorModel;
-use Modules\Domain\App\Entities\DomainChild;
 use Modules\Domain\App\Entities\GlobalOption;
 use Modules\Domain\App\Entities\SubDomain;
 use Modules\Domain\App\Http\Requests\DomainRequest;
@@ -39,7 +38,7 @@ use Modules\Inventory\App\Models\ConfigSalesModel;
 use Modules\Inventory\App\Models\PurchaseModel;
 use Modules\Inventory\App\Models\SalesModel;
 use Modules\Inventory\App\Models\StockItemModel;
-use Modules\NbrVatTax\App\Models\NbrVatModel;
+use Modules\NbrVatTax\App\Models\NbrVatConfigModel;
 use Modules\Production\App\Models\ProductionConfig;
 use Modules\Utility\App\Models\SettingModel as UtilitySettingModel;
 use Modules\Inventory\App\Models\SettingModel as InventorySettingModel;
@@ -190,7 +189,7 @@ class DomainController extends Controller
             ]);
 
             // Step 4: Create the accounting data
-            NbrVatModel::create([
+            NbrVatConfigModel::create([
                 'domain_id' => $entity->id,
             ]);
 
@@ -548,62 +547,6 @@ class DomainController extends Controller
     }
 
 
-    public function resetConfig($id)
-    {
-        $domain = UserModel::getDomainData($id);
-
-        ConfigModel::resetConfig($domain->config_id);
-
-        if($domain->inv_config_product){
-            ConfigProductModel::resetConfig($domain->inv_config_product);
-        }
-
-        if($domain->inv_config_discount){
-          //  ConfigDiscountModel::resetConfig($domain->inv_config_discount);
-        }
-
-        if($domain->inv_config_purchase){
-            ConfigPurchaseModel::resetConfig($domain->inv_config_purchase);
-        }
-
-        if($domain->inv_config_sales){
-            ConfigSalesModel::resetConfig($domain->inv_config_sales);
-        }
-
-        if($domain->acc_config){
-            AccountingModel::resetConfig($domain->acc_config);
-        }
-
-        if($domain->pro_config){
-            ProductionConfig::resetConfig($domain->pro_config);
-        }
-        if($domain->nbr_config){
-           // NbrVatModel::resetConfig($domain->nbr_config);
-        }
-
-        // Step 4: Create the accounting data
-        ConfigProductModel::updateOrCreate([
-            'config_id' => $domain->config_id,
-        ]);
-
-         // Step 4: Create the accounting data
-        ConfigDiscountModel::updateOrCreate([
-            'config_id' => $domain->config_id,
-        ]);
-
-        // Step 4: Create the accounting data
-        ConfigSalesModel::updateOrCreate([
-            'config_id' => $domain->config_id,
-        ]);
-
-        // Step 4: Create the accounting data
-        ConfigPurchaseModel::updateOrCreate([
-            'config_id' => $domain->config_id,
-        ]);
-
-    }
-
-
     /**
      * Reset the specified resource from storage.
      */
@@ -631,7 +574,7 @@ class DomainController extends Controller
             ProductionConfig::find($userData['pro_config'])->delete();
         }
         if($userData['nbr_config']) {
-            NbrVatModel::find($userData['nbr_config'])->delete();
+            NbrVatConfigModel::find($userData['nbr_config'])->delete();
         }
         if($userData['config_id']) {
             ConfigModel::find($userData['config_id'])->delete();

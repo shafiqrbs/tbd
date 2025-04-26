@@ -115,6 +115,7 @@ class UserModel extends Model
     {
         $data = self::select([
             'dom_domain.id as global_id',
+            'dom_domain.id as domain_id',
             'users.id as user_id',
             'inv_config.id as config_id',
             'inv_config.id as inv_config',

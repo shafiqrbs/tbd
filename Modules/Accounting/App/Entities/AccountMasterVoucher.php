@@ -7,11 +7,11 @@ use Gedmo\Mapping\Annotation as Gedmo;
 /**
  * AccountBank
  *
- * @ORM\Table(name="acc_voucher")
+ * @ORM\Table(name="acc_master_voucher")
  * @ORM\Entity()
  *
  */
-class AccountVoucher
+class AccountMasterVoucher
 {
     /**
      * @var integer
@@ -22,11 +22,6 @@ class AccountVoucher
      */
     private $id;
 
-    /**
-     * @ORM\ManyToOne(targetEntity="Config", cascade={"persist", "remove"})
-     * @ORM\JoinColumn(onDelete="CASCADE")
-     **/
-    private $config;
 
     /**
      * @ORM\ManyToOne(targetEntity="Setting")

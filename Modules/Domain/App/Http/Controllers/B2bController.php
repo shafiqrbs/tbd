@@ -15,7 +15,6 @@ use Modules\Core\App\Models\SettingModel;
 use Modules\Core\App\Models\SettingTypeModel;
 use Modules\Core\App\Models\UserModel;
 use Modules\Core\App\Models\VendorModel;
-use Modules\Domain\App\Entities\DomainChild;
 use Modules\Domain\App\Http\Requests\B2bCategoryWiseProductRequest;
 use Modules\Domain\App\Models\B2BCategoryPriceMatrixModel;
 use Modules\Domain\App\Models\B2BStockPriceMatrixModel;

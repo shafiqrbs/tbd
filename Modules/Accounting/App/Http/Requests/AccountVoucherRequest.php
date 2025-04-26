@@ -5,7 +5,7 @@ namespace Modules\Accounting\App\Http\Requests;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
-class AccountJournalRequest extends FormRequest
+class AccountVoucherRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -26,24 +26,19 @@ class AccountJournalRequest extends FormRequest
         switch($this->method())
         {
 
+            case 'PATCH':
+            case 'PUT':
             case 'POST':
             {
                 return [
-                    'voucher_type_id' => 'required|integer|nullable',
-                    'account_refno' => 'string|nullable',
-                    'description' => 'string|nullable'
+                    'name' => 'required|string',
+                    'voucher_type_id' => 'required|integer',
+                    'short_name' => 'required|string',
+                    'short_code' => 'required|string',
+                    'mode' => 'required|string',
                 ];
             }
 
-            case 'PUT':
-            case 'PATCH':
-            {
-                return [
-                    'voucher_type_id' => 'required|string|nullable',
-                    'account_refno' => 'string|nullable',
-                    'description' => 'string|nullable'
-                ];
-            }
             default:break;
         }
     }

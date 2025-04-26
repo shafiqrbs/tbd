@@ -5,7 +5,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Support\Facades\DB;
 
-class NbrVatModel extends Model
+class NbrVatConfigModel extends Model
 {
     use HasFactory;
 
@@ -13,6 +13,8 @@ class NbrVatModel extends Model
     public $timestamps = true;
     protected $guarded = ['id'];
     protected $fillable = [
+        'config_id',
+        'gst_enable',
     ];
 
 
