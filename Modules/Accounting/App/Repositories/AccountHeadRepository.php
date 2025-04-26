@@ -14,6 +14,7 @@ namespace Modules\Accounting\App\Repositories;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\Query;
 use Modules\Accounting\App\Entities\AccountHead;
+use Modules\Accounting\App\Entities\AccountHeadDetails;
 use Modules\Accounting\App\Entities\AccountMasterHead;
 use Modules\Accounting\App\Entities\Config;
 use Modules\Accounting\App\Entities\TransactionMode;
@@ -264,7 +265,6 @@ class AccountHeadRepository extends EntityRepository
             ->setParameter('config_id', $configId);
         $qb->execute();
 
-
         /** @var  Config $config */
         $config = $em->getRepository(Config::class)->find($configId);
         $parentHeads = $em->getRepository(AccountMasterHead::class)->findBy(['parent'=> NULL]);
@@ -296,9 +296,13 @@ class AccountHeadRepository extends EntityRepository
                     $subHead->setLevel($child->getLevel());
                     $em->persist($subHead);
                     $em->flush();
+                    if(empty($subHead->getHeadDetail())){
+                        $this->insertUpdateHeadDetails($subHead);
+                    }
                 }
             }
         }
+
         $currentAssets = $em->getRepository(TransactionMode::class)->findBy(['config' => $configId,'status'=>1]);
         foreach ($currentAssets as $asset){
             $this->insertTransactionAccount($asset);
@@ -323,6 +327,8 @@ class AccountHeadRepository extends EntityRepository
         foreach ($investors as $investor){
              $this->insertCapitalInvestmentAccount($config,$investor);
         }
+        $config = $this->find($configId);
+        return $config;
     }
 
     public function resetAccountHead($configId)
@@ -366,8 +372,25 @@ class AccountHeadRepository extends EntityRepository
                     $subHead->setLevel($child->getLevel());
                     $em->persist($subHead);
                     $em->flush();
+                    if(empty($subHead->getHeadDetail())){
+                        $this->insertUpdateHeadDetails($subHead);
+                    }
                 }
             }
+        }
+        $config = $this->find($configId);
+        return $config;
+    }
+
+    private function insertUpdateHeadDetails(AccountHead $head){
+
+        $em = $this->_em;
+        if(empty($em->getRepository(AccountHeadDetails::class)->find($head))){
+            $entity = new AccountHeadDetails();
+            $entity->setConfig($head->getConfig());
+            $entity->setAccount($head);
+            $em->persist($entity);
+            $em->flush();
         }
     }
 
@@ -377,6 +400,7 @@ class AccountHeadRepository extends EntityRepository
         $em = $this->_em;
         $exist = $this->findOneBy(array('transaction' => $entity));
         if (empty($exist)) {
+            $parent = '';
             $head = new AccountHead();
             if($entity->getMethod()->getSlug() == 'cash'){
                 $parent = $this->findOneBy(array('config' => $entity->getConfig(),'accountMasterHead' => 2));
@@ -385,16 +409,20 @@ class AccountHeadRepository extends EntityRepository
             }elseif($entity->getMethod()->getSlug() == 'mobile'){
                 $parent = $this->findOneBy(array('config' => $entity->getConfig(),'accountMasterHead' => 10));
             }
-            if($parent){
+            if(!empty($parent)){
                 $head->setConfig($entity->getConfig());
                 $head->setName($entity->getName());
                 $head->setSlug($entity->getSlug());
                 $head->setParent($parent);
                 $head->setHeadGroup('ledger');
-                $head->setLevel(3);
                 $head->setTransaction($entity);
+                $head->setLevel(3);
+                $head->setMode('debit');
                 $em->persist($head);
                 $em->flush();
+                if(empty($head->getHeadDetail())){
+                    $this->insertUpdateHeadDetails($head);
+                }
             }
 
         }
@@ -417,8 +445,13 @@ class AccountHeadRepository extends EntityRepository
             $head->setHeadGroup('ledger');
             $head->setParent($parent);
             $head->setCustomer($entity);
+            $head->setLevel(3);
+            $head->setMode('debit');
             $em->persist($head);
             $em->flush();
+            if(empty($head->getHeadDetail())){
+                $this->insertUpdateHeadDetails($head);
+            }
         }
     }
 
@@ -438,8 +471,13 @@ class AccountHeadRepository extends EntityRepository
             $head->setHeadGroup('ledger');
             $head->setParent($parent);
             $head->setVendor($entity);
+            $head->setLevel(3);
+            $head->setMode('credit');
             $em->persist($head);
             $em->flush();
+            if(empty($head->getHeadDetail())){
+                $this->insertUpdateHeadDetails($head);
+            }
         }
     }
 
@@ -459,8 +497,13 @@ class AccountHeadRepository extends EntityRepository
             $head->setSlug($user->getName());
             $head->setHeadGroup('ledger');
             $head->setUser($user);
+            $head->setLevel(3);
+            $head->setMode('credit');
             $em->persist($head);
             $em->flush();
+            if(empty($head->getHeadDetail())){
+                $this->insertUpdateHeadDetails($head);
+            }
         }
     }
 
@@ -480,8 +523,13 @@ class AccountHeadRepository extends EntityRepository
             $head->setSlug($user->getName());
             $head->setHeadGroup('ledger');
             $head->setUser($user);
+            $head->setLevel(3);
+            $head->setMode('credit');
             $em->persist($head);
             $em->flush();
+            if(empty($head->getHeadDetail())){
+                $this->insertUpdateHeadDetails($head);
+            }
         }
     }
 
@@ -499,8 +547,12 @@ class AccountHeadRepository extends EntityRepository
         $head->setProductGroup($entity);
         $head->setHeadGroup('account-head');
         $head->setLevel(2);
+        $head->setMode('debit');
         $em->persist($head);
         $em->flush();
+        if(empty($head->getHeadDetail())){
+            $this->insertUpdateHeadDetails($head);
+        }
         return $head;
 
     }
@@ -517,9 +569,13 @@ class AccountHeadRepository extends EntityRepository
         $head->setParent($parent);
         $head->setCategory($entity);
         $head->setLevel(3);
+        $head->setMode('debit');
         $head->setHeadGroup('ledger');
         $em->persist($head);
         $em->flush();
+        if(empty($head->getHeadDetail())){
+            $this->insertUpdateHeadDetails($head);
+        }
         return $head;
 
     }

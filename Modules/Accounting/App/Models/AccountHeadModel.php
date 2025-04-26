@@ -72,6 +72,11 @@ class AccountHeadModel extends Model
         ];
     }
 
+    public function accountHeadDetails()
+    {
+        return $this->hasOne(AccountHeadDetailsModel::class,'account_id','id');
+    }
+
     public static function boot()
     {
         parent::boot();
@@ -314,12 +319,15 @@ class AccountHeadModel extends Model
         return DB::table('acc_head')
             ->select([
                 'acc_head.id',
+                'acc_head.parent_id',
                 'acc_head.name',
                 'acc_head.slug',
                 'acc_head.code',
+                'acc_head.head_group',
+                'acc_head.mode',
             ])
             ->where([
-                ['acc_head.config_id',$domain['acc_config_id']],
+                ['acc_head.config_id',$domain['acc_config']],
                 ['acc_head.head_group',$head]
             ])
             ->get();

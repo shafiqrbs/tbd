@@ -10,7 +10,9 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Modules\Accounting\App\Entities\AccountHead;
 use Modules\Accounting\App\Http\Requests\AccountHeadRequest;
+use Modules\Accounting\App\Models\AccountHeadDetailsModel;
 use Modules\Accounting\App\Models\AccountHeadModel;
+use Modules\Accounting\App\Models\LedgerDetailsModel;
 use Modules\Accounting\App\Models\TransactionModeModel;
 use Modules\AppsApi\App\Services\JsonRequestResponse;
 use Modules\Domain\App\Http\Requests\DomainRequest;
@@ -54,9 +56,11 @@ class AccountHeadController extends Controller
     {
         $data = $request->validated();
         $data['config_id'] = $this->domain['acc_config'];
-
         $entity = AccountHeadModel::create($data);
-
+        AccountHeadDetailsModel::updateOrCreate([
+            'account_id' => $entity->id,
+            'config_id' => $this->domain['acc_config'],
+        ]);
         return response()->json([
             'status' => 200,
             'success' => true,
@@ -83,6 +87,10 @@ class AccountHeadController extends Controller
             if (!$updated) {
                 throw new \RuntimeException('Failed to update account head');
             }
+            AccountHeadDetailsModel::updateOrCreate([
+                'account_id' => $entity->id,
+                'config_id' => $this->domain['acc_config'],
+            ]);
 
             // Reload the model to get any database-default values
             $entity->refresh();
@@ -140,7 +148,7 @@ class AccountHeadController extends Controller
     public function show($id)
     {
         $service = new JsonRequestResponse();
-        $entity = AccountHeadModel::find($id);
+        $entity = AccountHeadModel::with('accountHeadDetails')->find($id);
         if (!$entity){
             $entity = 'Data not found';
         }

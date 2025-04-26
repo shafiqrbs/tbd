@@ -46,12 +46,6 @@ class AccountHead
      */
     protected $parent;
 
-    /**
-     * @ORM\ManyToOne(targetEntity="AccountChequeBook", inversedBy="ledger", cascade={"detach","merge"})
-     * @ORM\JoinColumn(name="parent_id", referencedColumnName="id", onDelete="SET NULL")
-     */
-    protected $chequeBooks;
-
 
     /**
      * @ORM\OneToMany(targetEntity="AccountHead" , mappedBy="parent")
@@ -64,6 +58,11 @@ class AccountHead
      * @ORM\JoinColumn(name="account_id", referencedColumnName="id", nullable=true, onDelete="cascade")
      **/
     private $transaction;
+
+     /**
+     * @ORM\OneToOne(targetEntity="AccountHeadDetails", mappedBy="account", cascade={"remove"})
+     **/
+    private $headDetail;
 
     /**
      * @ORM\OneToOne(targetEntity="Modules\Core\App\Entities\User")
@@ -185,17 +184,19 @@ class AccountHead
     private $headGroup;
 
     /**
+     * @var string
+     * debit|credit
+     * @ORM\Column(type="string", length=30, nullable=true)
+     */
+    private $mode;
+
+    /**
      * @Gedmo\Slug(fields={"name"})
      * @Doctrine\ORM\Mapping\Column(length=255,nullable=true)
      */
     private $slug;
 
-    /**
-     * @var string
-     *
-     * @ORM\Column(name="toIncrease", type="string", length=20, nullable=true)
-     */
-    private $toIncrease;
+
 
 
 	/**
@@ -208,7 +209,7 @@ class AccountHead
     /**
      * @var boolean
      *
-     * @ORM\Column(name="isParent", type="boolean" , nullable=true)
+     * @ORM\Column(type="boolean" , nullable=true)
      */
     private $isParent = false;
 
@@ -222,7 +223,7 @@ class AccountHead
     /**
      * @var boolean
      *
-     * @ORM\Column(name="showAmount", type="boolean" ,nullable=true)
+     * @ORM\Column(type="boolean" ,nullable=true)
      */
     private $showAmount = false;
 
@@ -246,6 +247,12 @@ class AccountHead
      * @ORM\Column(type="datetime",nullable=true)
      */
     private $updatedAt;
+
+    public function __construct()
+    {
+        $this->createdAt = new \DateTime();
+        $this->updatedAt = new \DateTime();
+    }
 
     /**
      * @return int
@@ -791,8 +798,29 @@ class AccountHead
         $this->provideBankDetails = $provideBankDetails;
     }
 
+    /**
+     * @return mixed
+     */
+    public function getHeadDetail()
+    {
+        return $this->headDetail;
+    }
 
+    /**
+     * @return string
+     */
+    public function getMode()
+    {
+        return $this->mode;
+    }
 
+    /**
+     * @param string $mode
+     */
+    public function setMode($mode)
+    {
+        $this->mode = $mode;
+    }
 
 }
 

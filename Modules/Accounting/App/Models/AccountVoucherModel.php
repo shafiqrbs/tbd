@@ -31,58 +31,44 @@ class AccountVoucherModel extends Model
     }
 
 
-    public static function getSettingDropdown($dropdownType)
+    public static function getEntityDropdown($request, $domain)
     {
-        return DB::table('acc_setting')
-            ->join('acc_setting_type','acc_setting_type.id','=','acc_setting.setting_type_id')
+        return DB::table('acc_voucher')
+            ->leftJoin('acc_setting','acc_setting.id','=','acc_voucher.voucher_type_id')
             ->select([
                 'acc_setting.id',
-                'acc_setting.name',
-                'acc_setting.slug',
-                'acc_setting_type.name as type_name',
+                'acc_setting.id as voucher_type_id',
+                'acc_setting.name as voucher_type_name',
+                'acc_voucher.name as name',
+                'acc_voucher.short_name as short_name',
+                'acc_voucher.short_code as short_code',
+                'acc_voucher.mode as mode',
             ])
             ->where([
-                ['acc_setting_type.slug',$dropdownType],
-                ['acc_setting_type.status','1'],
-                ['acc_setting.status','1'],
-            ])
-            ->get();
-    }
-
-    public static function getEntityDropdown($dropdownType)
-    {
-        return DB::table('acc_setting')
-            ->join('acc_setting_type','acc_setting_type.id','=','acc_setting.setting_type_id')
-            ->select([
-                'acc_setting.id',
-                'acc_setting.name',
-                'acc_setting.slug',
-                'acc_setting_type.name as type_name',
-                'acc_setting_type.slug as type_slug',
-            ])
-            ->where([
-                ['acc_setting_type.slug',$dropdownType],
-                ['acc_setting_type.status','1'],
-                ['acc_setting.status','1'],
+                ['acc_voucher.id',$domain['acc_config']],
+                ['acc_voucher.status','1']
             ])
             ->get();
     }
 
     public static function getRecords($request, $domain)
     {
+
         $page = isset($request['page']) && $request['page'] > 0 ? ($request['page'] - 1) : 1;
         $perPage = isset($request['offset']) && $request['offset'] != '' ? (int)($request['offset']) : 50;
         $skip = isset($page) && $page != '' ? (int)$page * $perPage : 0;
-        $entity = self:: where('acc_setting.config_id', $domain['acc_config_id'])
-            ->join('acc_setting_type','acc_setting_type.id','=','acc_setting.setting_type_id')
+        $entity = self:: where('acc_voucher.config_id', $domain['acc_config'])
+            ->leftJoin('acc_setting','acc_setting.id','=','acc_voucher.voucher_type_id')
             ->select([
                 'acc_setting.id',
-                'acc_setting.name',
-                'acc_setting.slug',
-                'acc_setting_type.name as type_name',
-                'acc_setting_type.slug as type_slug',
+                'acc_setting.id as voucher_type_id',
+                'acc_setting.name as voucher_type_name',
+                'acc_voucher.name as name',
+                'acc_voucher.short_name as short_name',
+                'acc_voucher.short_code as short_code',
+                'acc_voucher.mode as mode',
             ])
-            ->orderBy('acc_setting.name','ASC');
+            ->orderBy('acc_voucher.name','ASC');
 
         if (isset($request['term']) && !empty($request['term'])) {
             $entity = $entity->whereAny(

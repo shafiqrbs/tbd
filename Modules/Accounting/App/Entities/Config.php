@@ -26,92 +26,92 @@ class Config
 
     /**
      * @ORM\OneToOne(targetEntity="Modules\Domain\App\Entities\GlobalOption", cascade={"persist", "remove"})
-     * @ORM\JoinColumn(onDelete="CASCADE")
+     * @ORM\JoinColumn(onDelete="SET NULL")
      **/
     private $domain;
 
     /**
      * @ORM\OneToOne(targetEntity="AccountHead")
-     * @ORM\JoinColumn(name="account_cash_id", referencedColumnName="id", nullable=true, onDelete="cascade")
+     * @ORM\JoinColumn(name="account_cash_id", referencedColumnName="id", nullable=true, onDelete="SET NULL")
      **/
     private $accountCash;
 
     /**
      * @ORM\OneToOne(targetEntity="AccountHead")
-     * @ORM\JoinColumn(name="account_bank_id", referencedColumnName="id", nullable=true, onDelete="cascade")
+     * @ORM\JoinColumn(name="account_bank_id", referencedColumnName="id", nullable=true, onDelete="SET NULL")
      **/
     private $accountBank;
 
     /**
      * @ORM\OneToOne(targetEntity="AccountHead")
-     * @ORM\JoinColumn(name="account_mobile_id", referencedColumnName="id", nullable=true, onDelete="cascade")
+     * @ORM\JoinColumn(name="account_mobile_id", referencedColumnName="id", nullable=true, onDelete="SET NULL")
      **/
     private $accountMobile;
 
     /**
      * @ORM\OneToOne(targetEntity="AccountHead")
-     * @ORM\JoinColumn(name="account_user_id", referencedColumnName="id", nullable=true, onDelete="cascade")
+     * @ORM\JoinColumn(name="account_user_id", referencedColumnName="id", nullable=true, onDelete="SET NULL")
      **/
     private  $accountUser;
 
     /**
      * @ORM\OneToOne(targetEntity="AccountHead")
-     * @ORM\JoinColumn(name="account_vendor_id", referencedColumnName="id", nullable=true, onDelete="cascade")
+     * @ORM\JoinColumn(name="account_vendor_id", referencedColumnName="id", nullable=true, onDelete="SET NULL")
      **/
     private  $accountVendor;
 
     /**
      * @ORM\OneToOne(targetEntity="AccountHead")
-     * @ORM\JoinColumn(name="account_customer_id", referencedColumnName="id", nullable=true, onDelete="cascade")
+     * @ORM\JoinColumn(name="account_customer_id", referencedColumnName="id", nullable=true, onDelete="SET NULL")
      **/
     private  $accountCustomer;
 
     /**
      * @ORM\OneToOne(targetEntity="AccountHead")
-     * @ORM\JoinColumn(name="account_product_group_id", referencedColumnName="id", nullable=true, onDelete="cascade")
+     * @ORM\JoinColumn(name="account_product_group_id", referencedColumnName="id", nullable=true, onDelete="SET NULL")
      **/
     private  $accountProductGroup;
 
     /**
      * @ORM\OneToOne(targetEntity="AccountHead")
-     * @ORM\JoinColumn(name="account_category_id", referencedColumnName="id", nullable=true, onDelete="cascade")
+     * @ORM\JoinColumn(name="account_category_id", referencedColumnName="id", nullable=true, onDelete="SET NULL")
      **/
     private  $accountCategory;
 
     /**
      * @ORM\OneToOne(targetEntity="Setting")
-     * @ORM\JoinColumn(name="voucher_stock_opening_id", referencedColumnName="id", nullable=true, onDelete="cascade")
+     * @ORM\JoinColumn(name="voucher_stock_opening_id", referencedColumnName="id", nullable=true, onDelete="SET NULL")
      **/
     private $voucherStockOpening;
 
     /**
      * @ORM\OneToOne(targetEntity="Setting")
-     * @ORM\JoinColumn(name="voucher_purchase_id", referencedColumnName="id", nullable=true, onDelete="cascade")
+     * @ORM\JoinColumn(name="voucher_purchase_id", referencedColumnName="id", nullable=true, onDelete="SET NULL")
      **/
     private $voucherPurchase;
 
     /**
      * @ORM\OneToOne(targetEntity="Setting")
-     * @ORM\JoinColumn(name="voucher_sales_id", referencedColumnName="id", nullable=true, onDelete="cascade")
+     * @ORM\JoinColumn(name="voucher_sales_id", referencedColumnName="id", nullable=true, onDelete="SET NULL")
      **/
     private $voucherSales;
 
     /**
      * @ORM\OneToOne(targetEntity="Setting")
-     * @ORM\JoinColumn(name="voucher_sales_return_id", referencedColumnName="id", nullable=true, onDelete="cascade")
+     * @ORM\JoinColumn(name="voucher_sales_return_id", referencedColumnName="id", nullable=true, onDelete="SET NULL")
      **/
     private $voucherSalesReturn;
 
     /**
      * @ORM\OneToOne(targetEntity="Setting")
-     * @ORM\JoinColumn(name="voucher_purchase_return_id", referencedColumnName="id", nullable=true, onDelete="cascade")
+     * @ORM\JoinColumn(name="voucher_purchase_return_id", referencedColumnName="id", nullable=true, onDelete="SET NULL")
      **/
     private  $voucherPurchaseReturn;
 
 
     /**
      * @ORM\OneToOne(targetEntity="Setting")
-     * @ORM\JoinColumn(name="voucher_stock_reconciliation_id", referencedColumnName="id", nullable=true, onDelete="cascade")
+     * @ORM\JoinColumn(name="voucher_stock_reconciliation_id", referencedColumnName="id", nullable=true, onDelete="SET NULL")
      **/
     private  $voucherStockReconciliation;
 

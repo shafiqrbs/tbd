@@ -35,19 +35,20 @@ class AccountDailyCashFlow
     private $config;
 
     /**
-     * @ORM\ManyToOne(targetEntity="AccountHead")
+     * @ORM\ManyToOne(targetEntity="AccountHead", cascade={"persist", "remove"})
      * @ORM\JoinColumn(onDelete="CASCADE")
      **/
     protected $accountLedger;
 
     /**
-     * @ORM\ManyToOne(targetEntity="AccountHead")
+     * @ORM\ManyToOne(targetEntity="AccountHead", cascade={"persist", "remove"})
      * @ORM\JoinColumn(name="account_head_id", referencedColumnName="id", nullable=true, onDelete="cascade")
      **/
     private  $accountHead;
 
     /**
-     * @ORM\ManyToOne(targetEntity="AccountVoucher")
+     * @ORM\ManyToOne(targetEntity="AccountVoucher", cascade={"persist", "remove"})
+     * @ORM\JoinColumn(onDelete="CASCADE")
      **/
     protected $voucher;
 

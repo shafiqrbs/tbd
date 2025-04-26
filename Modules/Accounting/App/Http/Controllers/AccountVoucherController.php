@@ -36,7 +36,7 @@ class AccountVoucherController extends Controller
 
     public function index(Request $request){
 
-        $data = SettingModel::getRecords($request,$this->domain);
+        $data = AccountVoucherModel::getRecords($request,$this->domain);
         $response = new Response();
         $response->headers->set('Content-Type','application/json');
         $response->setContent(json_encode([

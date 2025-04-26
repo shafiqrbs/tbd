@@ -29,9 +29,10 @@ class AccountChequeBook
     private $config;
 
     /**
-     * @ORM\OneToOne(targetEntity="AccountHead", mappedBy="chequeBooks")
+     * @ORM\ManyToOne(targetEntity="AccountHead", cascade={"persist", "remove"})
+     * @ORM\JoinColumn(onDelete="CASCADE")
      **/
-     protected $ledger;
+     protected $accountHead;
 
 
     /**

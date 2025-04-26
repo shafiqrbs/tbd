@@ -8,13 +8,13 @@ use Terminalbd\GenericBundle\Entity\Particular;
 
 
 /**
- * AccountLedgerDetails
+ * AccountHeadDetails
  *
- * @ORM\Table(name="acc_ledger_details")
- * @ORM\Entity()
+ * @ORM\Table(name="acc_head_details")
+ * @ORM\Entity(repositoryClass="Modules\Accounting\App\Repositories\AccountHeadDetailsRepository")
  *
  */
-class AccountLedgerDetails
+class AccountHeadDetails
 {
     /**
      * @var integer
@@ -33,9 +33,10 @@ class AccountLedgerDetails
     protected $config;
 
     /**
-     * @ORM\OneToOne(targetEntity="AccountHead")
+     * @ORM\OneToOne(targetEntity="AccountHead" , inversedBy="headDetail", cascade={"detach","merge"})
+     * @ORM\JoinColumn(name="account_id", referencedColumnName="id", nullable=true, onDelete="CASCADE")
      **/
-    private $ledger;
+    private $account;
 
     /**
      * @var string
@@ -70,7 +71,7 @@ class AccountLedgerDetails
      *
      * @ORM\Column(type="boolean",options={"default"="0"})
      */
-    private $isChequeBook;
+    private $isChequeBook = false;
 
 
     /**
@@ -78,7 +79,7 @@ class AccountLedgerDetails
      *
      * @ORM\Column(type="boolean",options={"default"="0"})
      */
-    private $isChequePrint;
+    private $isChequePrint = false;
 
 
     /**
@@ -91,7 +92,7 @@ class AccountLedgerDetails
     /**
      * @var string
      *
-     * @ORM\Column(name="name", type="string", length=255)
+     * @ORM\Column(name="name", type="string", length=255, nullable=true)
      */
     private $name;
 
@@ -124,6 +125,12 @@ class AccountLedgerDetails
      * @ORM\Column(type="datetime",nullable=true)
      */
     private $updatedAt;
+
+    public function __construct()
+    {
+        $this->createdAt = new \DateTime();
+        $this->updatedAt = new \DateTime();
+    }
 
     /**
      * @return int
@@ -366,6 +373,24 @@ class AccountLedgerDetails
     {
         $this->isChequePrint = $isChequePrint;
     }
+
+    /**
+     * @return mixed
+     */
+    public function getAccount()
+    {
+        return $this->account;
+    }
+
+    /**
+     * @param mixed $account
+     */
+    public function setAccount($account)
+    {
+        $this->account = $account;
+    }
+
+
 
 }
 

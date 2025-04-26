@@ -39,7 +39,7 @@ class AccountJournalItem
 
 
     /**
-     * @ORM\ManyToOne(targetEntity="AccountHead")
+     * @ORM\ManyToOne(targetEntity="AccountHead",cascade={"detach","merge"})
      * @ORM\JoinColumn(name="account_head_id", referencedColumnName="id", nullable=true, onDelete="cascade")
      **/
     private  $accountHead;
@@ -47,6 +47,7 @@ class AccountJournalItem
 
     /**
      * @ORM\ManyToOne(targetEntity="AccountHead")
+     * @ORM\JoinColumn(name="account_sub_head_id", referencedColumnName="id", nullable=true, onDelete="cascade")
      **/
     protected $accountSubHead;
 
