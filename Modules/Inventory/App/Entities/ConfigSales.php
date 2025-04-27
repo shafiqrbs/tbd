@@ -31,7 +31,7 @@ class ConfigSales
     private $config;
 
     /**
-     * @ORM\ManyToOne(targetEntity="Setting")
+     * @ORM\ManyToOne(targetEntity="Modules\Core\App\Entities\Setting")
      * @ORM\JoinColumn(onDelete="CASCADE")
      **/
      private $defaultCustomerGroup;
