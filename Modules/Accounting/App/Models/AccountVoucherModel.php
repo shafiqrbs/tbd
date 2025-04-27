@@ -17,7 +17,7 @@ class AccountVoucherModel extends Model
     protected $guarded = ['id'];
     protected $fillable = [
         'config_id',
-        'voucher_type',
+        'voucher_type_id',
         'name',
         'short_name',
         'short_code',

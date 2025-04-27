@@ -29,9 +29,8 @@ class UserModel extends Model
     public static function getRecords($request,$domain){
 
         $page =  isset($request['page']) && $request['page'] > 0?($request['page'] - 1 ) : 0;
-        $perPage = isset($request['offset']) && $request['offset']!=''? (int)($request['offset']):0;
+        $perPage = isset($request['offset']) && $request['offset']!=''? (int)($request['offset']):50;
         $skip = isset($page) && $page!=''? (int)$page*$perPage:0;
-
         $users = self::where('domain_id',$domain['global_id'])
         ->select([
             'id',

@@ -8,6 +8,7 @@ use Doctrine\ORM\EntityManager;
 use Exception;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
 use Modules\Accounting\App\Models\AccountingModel;
 use Modules\AppsApi\App\Services\JsonRequestResponse;
@@ -40,7 +41,9 @@ class DomainConfigController extends Controller
     {
         $entity = DomainModel::with('accountConfig','productionConfig','gstConfig','inventoryConfig','inventoryConfig.configPurchase','inventoryConfig.configSales','inventoryConfig.configProduct','inventoryConfig.configDiscount')->find($this
             ->domain['global_id']);
-        return $entity;
+        $service = new JsonRequestResponse();
+        return $service->returnJosnResponse($entity);
+
     }
 
     public function domainConfigById($id)
@@ -60,17 +63,14 @@ class DomainConfigController extends Controller
         DB::beginTransaction();
         try {
             $id = $validated['id'];
-            $fieldName = $validated['field_name'];
-            $value = $validated['value'];
             $globalDomainId = $this->domain['global_id'] ?? null;
             if (!$globalDomainId) {
                 throw new \RuntimeException('Global domain context missing');
             }
             DB::commit();
-            return response()->json([
-                'message' => 'Success',
-                'status'  => ResponseAlias::HTTP_OK
-            ]);
+            $service = new JsonRequestResponse();
+            $return = $service->returnJosnResponse($this->domainConfigById($id));
+            return $return;
 
         } catch (ModelNotFoundException $e) {
             DB::rollBack();

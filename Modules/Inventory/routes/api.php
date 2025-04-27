@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Route;
 use Modules\Inventory\App\Http\Controllers\BusinessModelController;
 use Modules\Inventory\App\Http\Controllers\CategoryGroupController;
 use Modules\Inventory\App\Http\Controllers\ConfigController;
+use Modules\Inventory\App\Http\Controllers\DiscountConfigController;
 use Modules\Inventory\App\Http\Controllers\InventoryController;
 use Modules\Inventory\App\Http\Controllers\InvoiceBatchController;
 use Modules\Inventory\App\Http\Controllers\InvoiceBatchTransactionController as InvoiceBatchTransactionControllerAlias;
@@ -76,6 +77,20 @@ Route::prefix('/inventory')->middleware([HeaderAuthenticationMiddleware::class])
         Route::post('/gallery', [ProductController::class,'galleryAdded'])->name('product_gallery_added');
     });
 
+    Route::prefix('/discount')->middleware([HeaderAuthenticationMiddleware::class])->group(function() {
+        Route::get('config', [DiscountConfigController::class,'index'])->name('discount_config');
+        Route::get('users', [DiscountConfigController::class,'userDiscount'])->name('discount_config');
+    });
+
+    Route::apiResource('/discount', DiscountConfigController::class)
+        ->middleware([HeaderAuthenticationMiddleware::class])
+        ->names([
+            'index' => 'discount.config.index',
+            'store' => 'discount.config.store',
+            'show' => 'discount.config.show',
+            'update' => 'domain.setting.update',
+            'destroy' => 'domain.setting.destroy',
+        ]);
     Route::apiResource('/stock', StockItemController::class)->middleware([HeaderAuthenticationMiddleware::class]);
     Route::get('/stock-item', [StockItemController::class,'stockItem'])->name('get_stock_item');
     Route::get('generate/stock-item/xlsx', [StockItemController::class,'stockItemXlsxGenerate'])->name('get_stock_item_xlsx_generate');
