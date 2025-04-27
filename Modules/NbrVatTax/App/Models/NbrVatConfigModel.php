@@ -43,7 +43,10 @@ class NbrVatConfigModel extends Model
         ];
 
 
-        $booleanFields = [];
+        $booleanFields = [
+            'gst_enable' => false
+        ];
+
 
         $columns = \Illuminate\Support\Facades\Schema::getColumnListing($table);
         $columnsToReset = array_diff($columns, $columnsToExclude);

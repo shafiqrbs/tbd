@@ -51,6 +51,8 @@ class ProductionConfig extends Model
         $booleanFields = [
             'is_measurement' => false,
             'is_warehouse' => false,
+            'issue_with_warehouse' => false,
+            'issue_by_production_batch' => false,
         ];
 
         $columns = \Illuminate\Support\Facades\Schema::getColumnListing($table);
