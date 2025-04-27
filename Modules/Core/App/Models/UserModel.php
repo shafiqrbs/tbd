@@ -26,6 +26,11 @@ class UserModel extends Model
         'user_group',
     ];
 
+    public function transactions()
+    {
+        return $this->hasOne(UserTransactionModel::class,'user_id','id');
+    }
+
     public static function getRecords($request,$domain){
 
         $page =  isset($request['page']) && $request['page'] > 0?($request['page'] - 1 ) : 0;
@@ -70,13 +75,7 @@ class UserModel extends Model
     }
 
 
-    public static function getAllUsers($request,$domain){
-
-        /*$users = self::where('domain_id',$domain['global_id'])->whereDoesntHave('transactions')
-            ->get()->map(function($created){
-               return ['id'=>$created->id,'created_at' =>now(),'updated_at' =>now()];
-            })->toArray();
-        return $users;*/
+    public static function getAllUsers($domain){
 
         DB::transaction(function () use ($domain) {
             $users = self::where('domain_id', $domain['global_id'])
@@ -97,11 +96,6 @@ class UserModel extends Model
             })->toArray();
             UserTransactionModel::insertOrIgnore($insertData);
         });
-    }
-
-    public function transactions()
-    {
-        return $this->hasOne(UserTransactionModel::class,'user_id','id');
     }
 
 
@@ -318,6 +312,23 @@ class UserModel extends Model
             }
         }
         return $formattedRoles;
+    }
+
+    public static function getAllUserTransaction($domain)
+    {
+        $data = self::where('users.domain_id',$domain['global_id'])
+                ->join('cor_user_transaction','cor_user_transaction.user_id','=','users.id')
+                ->select([
+                    'users.id',
+                    'users.name',
+                    'users.username',
+                    'users.email',
+                    'users.mobile',
+                    'cor_user_transaction.max_discount',
+                    'cor_user_transaction.sales_target'
+                ])
+                ->get()->toArray();
+        return $data;
     }
 
 }

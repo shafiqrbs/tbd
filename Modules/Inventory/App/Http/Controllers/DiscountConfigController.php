@@ -42,18 +42,17 @@ class DiscountConfigController extends Controller
 
     public function userDiscount(Request $request)
     {
+        UserModel::getAllUsers($request,$this->domain);
 
-        // Start database transaction
-        DB::beginTransaction();
+        $data = UserModel::getAllUserTransaction($this->domain);
 
-
-        $data = UserModel::getAllUsers($request,$this->domain);
-        dd($data);
-       // UserTransactionModel::insert($data); // Batch insert
-
-      //  $data = UserTransactionModel::getRecords($request,$this->domain);
-        DB::commit();
-        exit;
+        return response()->json([
+           'status' => 200,
+           'message' => 'success',
+           'data' => $data
+        ]);
+//        dump($data);
+        /*exit;
 
         $response = new Response();
         $response->headers->set('Content-Type','application/json');
@@ -64,7 +63,7 @@ class DiscountConfigController extends Controller
             'data' => $data['entities']
         ]));
         $response->setStatusCode(Response::HTTP_OK);
-        return $response;
+        return $response;*/
     }
 
 }
