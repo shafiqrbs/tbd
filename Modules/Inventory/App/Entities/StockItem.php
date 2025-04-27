@@ -164,7 +164,6 @@ class StockItem
      private $actualPrice = 0;
 
 
-
      /**
      * @var float
      *
@@ -201,7 +200,6 @@ class StockItem
      * @ORM\Column(type="float", options={"default"="0"})
      */
     private $closingQuantity=0;
-
 
 
     /**
@@ -404,6 +402,14 @@ class StockItem
      * @ORM\Column(type="boolean", options={"default":0})
      */
     private $isDelete = false;
+
+
+     /**
+     * @var boolean
+     *
+     * @ORM\Column(type="boolean", options={"default":0})
+     */
+    private $withoutDiscount = false;
 
 
     /**

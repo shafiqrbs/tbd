@@ -45,6 +45,14 @@ class ConfigDiscount
 
 
     /**
+     * @var boolean
+     *
+     * @ORM\Column(type="boolean" ,options={"default"="false"})
+     */
+    private $discountWithCustomer = false;
+
+
+    /**
      * @var \DateTime
      * @Gedmo\Timestampable(on="create")
      * @ORM\Column(name="created_at", type="datetime")
@@ -59,12 +67,7 @@ class ConfigDiscount
     private $updatedAt;
 
 
-    /**
-     * @var boolean
-     *
-     * @ORM\Column(type="boolean" ,options={"default"="false"})
-     */
-    private $status= true;
+
 
     /**
      * @return int

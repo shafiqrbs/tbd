@@ -33,6 +33,7 @@ class AccountVoucherModel extends Model
 
     public static function getEntityDropdown($request, $domain)
     {
+
         return DB::table('acc_voucher')
             ->leftJoin('acc_setting','acc_setting.id','=','acc_voucher.voucher_type_id')
             ->select([
@@ -45,7 +46,7 @@ class AccountVoucherModel extends Model
                 'acc_voucher.mode as mode',
             ])
             ->where([
-                ['acc_voucher.id',$domain['acc_config']],
+                ['acc_voucher.config_id',$domain['acc_config']],
                 ['acc_voucher.status','1']
             ])
             ->get();
@@ -72,11 +73,11 @@ class AccountVoucherModel extends Model
 
         if (isset($request['term']) && !empty($request['term'])) {
             $entity = $entity->whereAny(
-                ['acc_setting.name', 'acc_setting.slug'], 'LIKE', '%' . $request['term'] . '%');
+                ['acc_voucher.name', 'acc_voucher.slug'], 'LIKE', '%' . $request['term'] . '%');
         }
         if (isset($request['type']) && !empty($request['type'])) {
             $entity = $entity->where(
-                ['acc_setting.setting_type_id'=>$request['type']]);
+                ['acc_setting.voucher_type_id'=>$request['type']]);
         }
         $total = $entity->count();
         $entities = $entity->skip($skip)

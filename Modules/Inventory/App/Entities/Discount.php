@@ -67,6 +67,20 @@ class Discount
     private $discountQuantity;
 
     /**
+     * @var float
+     *
+     * @ORM\Column(name="minimum_quantity",type="float" , nullable=true)
+     */
+    private $minimumQuantity;
+
+    /**
+     * @var float
+     *
+     * @ORM\Column(type="float" , nullable=true)
+     */
+    private $offerOrderLimit;
+
+    /**
      * @var boolean
      *
      * @ORM\Column(type="boolean",options={"default"="false"})
@@ -88,6 +102,7 @@ class Discount
      * @ORM\Column(name="discount_mode", type="string", length=50, nullable=true)
      */
     private $discountMode;
+
 
     /**
      * @var string|null The discount required (e.g., Customer, Without Customer).
