@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Modules\AppsApi\App\Services\JsonRequestResponse;
 use Modules\Core\App\Models\UserModel;
+use Modules\Core\App\Models\UserTransactionModel;
 use Modules\Inventory\App\Models\ConfigDiscountModel;
 
 
@@ -37,7 +38,7 @@ class DiscountConfigController extends Controller
 
     public function userDiscount(Request $request)
     {
-        $data = UserModel::getRecords($request,$this->domain);
+        $data = UserTransactionModel::getRecords($request,$this->domain);
         $response = new Response();
         $response->headers->set('Content-Type','application/json');
         $response->setContent(json_encode([
