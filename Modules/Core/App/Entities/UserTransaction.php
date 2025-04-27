@@ -10,12 +10,13 @@ use Modules\Domain\App\Entities\GlobalOption;
 
 
 /**
- * Category
+ * UserTransaction
  *
  * @Gedmo\Tree(type="materializedPath")
  * @ORM\Table(name="cor_user_transaction")
  * @ORM\Entity()
  */
+
 class UserTransaction
 {
     /**
@@ -58,11 +59,136 @@ class UserTransaction
      */
     private $maxDiscount = 0;
 
+     /**
+     * @var float
+     *
+     * @ORM\Column(type="float", nullable=true)
+     */
+    private $discountPercent = 0;
+
     /**
      * @var float
      *
      * @ORM\Column(type="float", nullable=true)
      */
     private $salesTarget = 0;
+
+    public function __construct()
+    {
+        $this->createdAt = new \DateTime();
+        $this->updatedAt = new \DateTime();
+    }
+
+    /**
+     * @return int
+     */
+    public function getId()
+    {
+        return $this->id;
+    }
+
+    /**
+     * @param int $id
+     */
+    public function setId($id)
+    {
+        $this->id = $id;
+    }
+
+    /**
+     * @return User
+     */
+    public function getUser()
+    {
+        return $this->user;
+    }
+
+    /**
+     * @param User $user
+     */
+    public function setUser($user)
+    {
+        $this->user = $user;
+    }
+
+    /**
+     * @return \DateTime
+     */
+    public function getCreatedAt()
+    {
+        return $this->createdAt;
+    }
+
+    /**
+     * @param \DateTime $createdAt
+     */
+    public function setCreatedAt($createdAt)
+    {
+        $this->createdAt = $createdAt;
+    }
+
+    /**
+     * @return \DateTime
+     */
+    public function getUpdatedAt()
+    {
+        return $this->updatedAt;
+    }
+
+    /**
+     * @param \DateTime $updatedAt
+     */
+    public function setUpdatedAt($updatedAt)
+    {
+        $this->updatedAt = $updatedAt;
+    }
+
+    /**
+     * @return float
+     */
+    public function getMaxDiscount()
+    {
+        return $this->maxDiscount;
+    }
+
+    /**
+     * @param float $maxDiscount
+     */
+    public function setMaxDiscount($maxDiscount)
+    {
+        $this->maxDiscount = $maxDiscount;
+    }
+
+    /**
+     * @return float
+     */
+    public function getDiscountPercent()
+    {
+        return $this->discountPercent;
+    }
+
+    /**
+     * @param float $discountPercent
+     */
+    public function setDiscountPercent($discountPercent)
+    {
+        $this->discountPercent = $discountPercent;
+    }
+
+    /**
+     * @return float
+     */
+    public function getSalesTarget()
+    {
+        return $this->salesTarget;
+    }
+
+    /**
+     * @param float $salesTarget
+     */
+    public function setSalesTarget($salesTarget)
+    {
+        $this->salesTarget = $salesTarget;
+    }
 
 }

@@ -9,6 +9,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Modules\Accounting\App\Entities\AccountHead;
+use Modules\Accounting\App\Entities\AccountVoucher;
 use Modules\Accounting\App\Http\Requests\AccountHeadRequest;
 use Modules\Accounting\App\Models\AccountHeadDetailsModel;
 use Modules\Accounting\App\Models\AccountHeadModel;
@@ -126,7 +127,9 @@ class AccountHeadController extends Controller
     public function generateAccountHead(EntityManager $em)
     {
         $config_id = $this->domain['acc_config'];
+        $em->getRepository(AccountVoucher::class)->resetVoucher($config_id);
         $entity = $em->getRepository(AccountHead::class)->generateAccountHead($config_id);
+
         $service = new JsonRequestResponse();
         return $service->returnJosnResponse($entity);
     }

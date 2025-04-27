@@ -550,13 +550,20 @@ class DomainController extends Controller
     /**
      * Reset the specified resource from storage.
      */
-    public function users()
+    public function users(Request $request)
     {
-        // Ensure the domain exists
-        $service = new JsonRequestResponse();
-        $allUsers = UserModel::getRecordsForDomain();
-        $data = $service->returnJosnResponse($allUsers);
-        return $data;
+
+        $data = UserModel::getRecordsForDomain($request);
+        $response = new Response();
+        $response->headers->set('Content-Type','application/json');
+        $response->setContent(json_encode([
+            'message' => 'success',
+            'status' => Response::HTTP_OK,
+            'total' => $data['count'],
+            'data' => $data['entities']
+        ]));
+        return $response->setStatusCode(Response::HTTP_OK);
+
     }
 
     /**

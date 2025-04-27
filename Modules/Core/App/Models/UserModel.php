@@ -166,7 +166,12 @@ class UserModel extends Model
 
     }
 
-    public static function getRecordsForDomain(){
+    public static function getRecordsForDomain($request){
+
+        $page =  isset($request['page']) && $request['page'] > 0?($request['page'] - 1 ) : 0;
+        $perPage = isset($request['offset']) && $request['offset']!=''? (int)($request['offset']):50;
+        $skip = isset($page) && $page!=''? (int)$page * $perPage:0;
+
         $users = self::where('users.user_group','domain')->whereNull('users.deleted_at')
             ->join('dom_domain','dom_domain.id','=','users.domain_id')
             ->leftJoin('cor_user_role','cor_user_role.user_id','=','users.id')
@@ -182,12 +187,15 @@ class UserModel extends Model
                 'dom_domain.mobile as company_mobile',
                 'dom_domain.status as company_status',
                 'users.created_at'
-            ])
-            ->orderByDesc('users.id')
+            ]);
+             $total  = $users->count();
+             $entities = $users->skip($skip)
+            ->take($perPage)
+            ->orderBy('id','DESC')
             ->get();
 
-        $data = array('entities' => $users);
-        return $data;
+            $data = array('count'=>$total,'entities' => $entities);
+            return $data;
 
 
     }

@@ -158,6 +158,7 @@ class DomainConfigController extends Controller
     {
 
         $domain = UserModel::getDomainData($id);
+
         $config = $domain['config_id'];
         $entity = ConfigSalesModel::updateOrCreate([
             'config_id' => $config,

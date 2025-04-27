@@ -8,11 +8,12 @@ use Gedmo\Mapping\Annotation as Gedmo;
  * AccountBank
  *
  * @ORM\Table(name="acc_master_voucher")
- * @ORM\Entity()
+ * @ORM\Entity(repositoryClass="Modules\Accounting\App\Repositories\AccountMasterVoucherRepository")
  *
  */
 class AccountMasterVoucher
 {
+
     /**
      * @var integer
      *
@@ -87,6 +88,13 @@ class AccountMasterVoucher
      */
     private $updatedAt;
 
+    public function __construct()
+    {
+        $this->createdAt = new \DateTime();
+        $this->updatedAt = new \DateTime();
+    }
+
+
     /**
      * @return int
      */
@@ -95,21 +103,6 @@ class AccountMasterVoucher
         return $this->id;
     }
 
-    /**
-     * @return mixed
-     */
-    public function getConfig()
-    {
-        return $this->config;
-    }
-
-    /**
-     * @param mixed $config
-     */
-    public function setConfig($config)
-    {
-        $this->config = $config;
-    }
 
     /**
      * @return mixed

@@ -8,7 +8,7 @@ use Gedmo\Mapping\Annotation as Gedmo;
  * AccountBank
  *
  * @ORM\Table(name="acc_voucher")
- * @ORM\Entity()
+ * @ORM\Entity(repositoryClass="Modules\Accounting\App\Repositories\AccountVoucherRepository")
  *
  */
 class AccountVoucher
@@ -91,6 +91,13 @@ class AccountVoucher
      * @ORM\Column(type="datetime",nullable=true)
      */
     private $updatedAt;
+
+
+    public function __construct()
+    {
+        $this->createdAt = new \DateTime();
+        $this->updatedAt = new \DateTime();
+    }
 
     /**
      * @return int

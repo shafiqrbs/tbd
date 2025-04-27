@@ -22,7 +22,6 @@ use Modules\Domain\App\Http\Controllers\DomainController;
 
 Route::prefix('/domain')->middleware(array(HeaderAuthenticationMiddleware::class))->group(function() {
     Route::apiResource('/global', DomainController::class)->middleware([HeaderAuthenticationMiddleware::class]);
-    Route::get('users', [DomainController::class,'users'])->name('domain_users');
     Route::apiResource('/setting', DomainController::class)
         ->middleware([HeaderAuthenticationMiddleware::class])
         ->names([
@@ -66,6 +65,7 @@ Route::prefix('/domain')->middleware(array(HeaderAuthenticationMiddleware::class
 
     Route::prefix('b2b')->middleware([HeaderAuthenticationMiddleware::class])->group(function() {
         Route::get('domain', [B2bController::class,'index'])->name('b2b_domain');
+        Route::get('users', [DomainController::class,'users'])->name('domain_users');
         Route::post('inline-update/domain', [B2bController::class,'domainInlineUpdate'])->name('domain_inline_update');
         Route::post('inline-update/category', [B2bController::class,'domainInlineUpdateCategory'])->name('domain_inline_update_category');
         Route::post('inline-update/product', [B2bController::class,'domainInlineUpdateProduct'])->name('domain_inline_update_product');
