@@ -34,29 +34,22 @@ class UserWarehouse
      *   @ORM\JoinColumn(name="user_id", referencedColumnName="id", onDelete="CASCADE")
      * })
      */
-
     protected $user;
 
     /**
-     * @ORM\Column(type="string", name="group_name" ,length=50, nullable=true)
+     * @ORM\ManyToOne(targetEntity="Warehouse")
+     * @ORM\JoinColumns({
+     *   @ORM\JoinColumn(name="warehouse_id", referencedColumnName="id", onDelete="CASCADE")
+     * })
      */
-    protected $groupName;
-
-
-    /**
-     * @ORM\Column(type="string", name="role_name" ,length=50, nullable=true)
-     */
-    protected $roleName;
+    protected $warehouse;
 
     /**
-     * @ORM\Column(type="string", name="role_label" ,length=50, nullable=true)
+     * @var boolean
+     *
+     * @ORM\Column(type="boolean" ,options={"default"="false"})
      */
-    protected $roleLabel;
-
-    /**
-     * @ORM\Column(type="string", name="role_type" ,length=50, nullable=true)
-     */
-    protected $roleType;
+    private $isStatus = false;
 
 
     /**
@@ -79,6 +72,54 @@ class UserWarehouse
     public function getId()
     {
         return $this->id;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getUser()
+    {
+        return $this->user;
+    }
+
+    /**
+     * @param mixed $user
+     */
+    public function setUser($user)
+    {
+        $this->user = $user;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getWarehouse()
+    {
+        return $this->warehouse;
+    }
+
+    /**
+     * @param mixed $warehouse
+     */
+    public function setWarehouse($warehouse)
+    {
+        $this->warehouse = $warehouse;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isStatus()
+    {
+        return $this->isStatus;
+    }
+
+    /**
+     * @param bool $isStatus
+     */
+    public function setIsStatus($isStatus)
+    {
+        $this->isStatus = $isStatus;
     }
 
     /**
@@ -113,37 +154,6 @@ class UserWarehouse
         $this->updatedAt = $updatedAt;
     }
 
-    /**
-     * @return mixed
-     */
-    public function getGroupName()
-    {
-        return $this->groupName;
-    }
-
-    /**
-     * @param mixed $groupName
-     */
-    public function setGroupName($groupName): void
-    {
-        $this->groupName = $groupName;
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getRoleName()
-    {
-        return $this->roleName;
-    }
-
-    /**
-     * @param mixed $roleName
-     */
-    public function setRoleName($roleName): void
-    {
-        $this->roleName = $roleName;
-    }
 
 
 }
