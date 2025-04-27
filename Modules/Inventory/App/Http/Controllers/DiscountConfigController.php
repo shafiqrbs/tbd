@@ -5,10 +5,14 @@ namespace Modules\Inventory\App\Http\Controllers;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\DB;
 use Modules\AppsApi\App\Services\JsonRequestResponse;
 use Modules\Core\App\Models\UserModel;
 use Modules\Core\App\Models\UserTransactionModel;
 use Modules\Inventory\App\Models\ConfigDiscountModel;
+use Modules\Production\App\Models\ProductionBatchItemModel;
+use Modules\Production\App\Models\ProductionElements;
+use Modules\Production\App\Models\ProductionExpense;
 
 
 class DiscountConfigController extends Controller
@@ -38,7 +42,19 @@ class DiscountConfigController extends Controller
 
     public function userDiscount(Request $request)
     {
-        $data = UserTransactionModel::getRecords($request,$this->domain);
+
+        // Start database transaction
+        DB::beginTransaction();
+
+
+        $data = UserModel::getAllUsers($request,$this->domain);
+        dd($data);
+       // UserTransactionModel::insert($data); // Batch insert
+
+      //  $data = UserTransactionModel::getRecords($request,$this->domain);
+        DB::commit();
+        exit;
+
         $response = new Response();
         $response->headers->set('Content-Type','application/json');
         $response->setContent(json_encode([
@@ -50,8 +66,5 @@ class DiscountConfigController extends Controller
         $response->setStatusCode(Response::HTTP_OK);
         return $response;
     }
-
-
-
 
 }

@@ -20,7 +20,7 @@ use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 
 /**
 
- * @ORM\Table(name="core_user_profiles")
+ * @ORM\Table(name="cor_user_profiles")
  * @ORM\Entity(repositoryClass="Modules\Core\App\Repositories\ProfileRepository")
  * @ORM\HasLifecycleCallbacks
  */

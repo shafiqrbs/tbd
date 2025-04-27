@@ -176,6 +176,11 @@ class User
      */
     private $updatedAt;
 
+    public function __construct()
+    {
+        $this->userGroup = 'admin';
+    }
+
     /**
      * @return mixed
      */

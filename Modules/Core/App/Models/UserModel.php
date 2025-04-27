@@ -70,6 +70,41 @@ class UserModel extends Model
     }
 
 
+    public static function getAllUsers($request,$domain){
+
+        /*$users = self::where('domain_id',$domain['global_id'])->whereDoesntHave('transactions')
+            ->get()->map(function($created){
+               return ['id'=>$created->id,'created_at' =>now(),'updated_at' =>now()];
+            })->toArray();
+        return $users;*/
+
+        DB::transaction(function () use ($domain) {
+            $users = self::where('domain_id', $domain['global_id'])
+                ->whereDoesntHave('transactions')
+                ->select('id')
+                ->get();
+
+            if ($users->isEmpty()) {
+                return;
+            }
+
+            $insertData = $users->map(function($user) {
+                return [
+                    'user_id'    => $user->id,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ];
+            })->toArray();
+            UserTransactionModel::insertOrIgnore($insertData);
+        });
+    }
+
+    public function transactions()
+    {
+        return $this->hasOne(UserTransactionModel::class,'user_id','id');
+    }
+
+
     public static function boot() {
         parent::boot();
         self::creating(function ($model) {
@@ -81,6 +116,7 @@ class UserModel extends Model
             $date =  new \DateTime("now");
             $model->created_at = $date;
             $model->enabled = 1;
+            $model->user_group = 'user';
         });
 
         self::updating(function ($model) {

@@ -9,7 +9,7 @@ class UserProfileModel extends Model
 {
     use HasFactory;
 
-    protected $table = 'core_user_profiles';
+    protected $table = 'cor_user_profiles';
     public $timestamps = true;
     protected $guarded = ['id'];
     protected $fillable = [
