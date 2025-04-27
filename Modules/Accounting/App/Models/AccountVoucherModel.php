@@ -44,6 +44,7 @@ class AccountVoucherModel extends Model
                 'acc_voucher.short_name as short_name',
                 'acc_voucher.short_code as short_code',
                 'acc_voucher.mode as mode',
+                'acc_voucher.status as status',
             ])
             ->where([
                 ['acc_voucher.config_id',$domain['acc_config']],
@@ -68,6 +69,7 @@ class AccountVoucherModel extends Model
                 'acc_voucher.short_name as short_name',
                 'acc_voucher.short_code as short_code',
                 'acc_voucher.mode as mode',
+                'acc_voucher.status as status',
             ])
             ->orderBy('acc_voucher.name','ASC');
 

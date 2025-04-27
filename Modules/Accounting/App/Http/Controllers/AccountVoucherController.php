@@ -55,8 +55,6 @@ class AccountVoucherController extends Controller
      */
     public function store(AccountVoucherRequest $request)
     {
-
-
         $data = $request->validated();
         $data['status'] = true;
         $data['config_id'] = $this->domain['acc_config'];
