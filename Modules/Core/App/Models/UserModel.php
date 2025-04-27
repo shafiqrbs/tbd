@@ -75,7 +75,7 @@ class UserModel extends Model
     }
 
 
-    public static function getAllUsers($domain){
+    public static function insertAllUsersTransactions($domain){
 
         DB::transaction(function () use ($domain) {
             $users = self::where('domain_id', $domain['global_id'])
@@ -97,7 +97,6 @@ class UserModel extends Model
             UserTransactionModel::insertOrIgnore($insertData);
         });
     }
-
 
     public static function boot() {
         parent::boot();
@@ -330,5 +329,6 @@ class UserModel extends Model
                 ->get()->toArray();
         return $data;
     }
+
 
 }

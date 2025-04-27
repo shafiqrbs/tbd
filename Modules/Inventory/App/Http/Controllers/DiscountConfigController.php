@@ -9,6 +9,8 @@ use Illuminate\Support\Facades\DB;
 use Modules\AppsApi\App\Services\JsonRequestResponse;
 use Modules\Core\App\Models\UserModel;
 use Modules\Core\App\Models\UserTransactionModel;
+use Modules\Core\App\Models\UserWarehouseModel;
+use Modules\Core\App\Models\WarehouseModel;
 use Modules\Inventory\App\Models\ConfigDiscountModel;
 use Modules\Production\App\Models\ProductionBatchItemModel;
 use Modules\Production\App\Models\ProductionElements;
@@ -42,28 +44,20 @@ class DiscountConfigController extends Controller
 
     public function userDiscount(Request $request)
     {
-        UserModel::getAllUsers($this->domain);
+        UserModel::insertAllUsersTransactions($this->domain);
+        WarehouseModel::insertAllUserWarehouses($this->domain);
 
-        $data = UserModel::getAllUserTransaction($this->domain);
+        $userTransactions = UserModel::getAllUserTransaction($this->domain);
+        $userWarehouses = UserWarehouseModel::getUserAllWarehouse($this->domain);
 
         return response()->json([
            'status' => 200,
            'message' => 'success',
-           'data' => $data
+           'data' => [
+               'user_transactions' => $userTransactions,
+               'user_warehouses' => $userWarehouses
+           ]
         ]);
-//        dump($data);
-        /*exit;
-
-        $response = new Response();
-        $response->headers->set('Content-Type','application/json');
-        $response->setContent(json_encode([
-            'message' => 'success',
-            'status' => Response::HTTP_OK,
-            'total' => $data['count'],
-            'data' => $data['entities']
-        ]));
-        $response->setStatusCode(Response::HTTP_OK);
-        return $response;*/
     }
 
 }

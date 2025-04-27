@@ -16,6 +16,7 @@ class UserWarehouseModel extends Model
     protected $guarded = ['id'];
     protected $fillable = [
         'user_id',
+        'warehouse_id',
         'max_discount'
     ];
     protected $dates = ['created_at'];
@@ -73,10 +74,25 @@ class UserWarehouseModel extends Model
 
         $data = array('count'=>$total,'entities' => $entities);
         return $data;
-
-
     }
 
-
-
+    public static function getUserAllWarehouse($domain)
+    {
+        $data = self::where('users.domain_id',$domain['global_id'])
+            ->join('users','users.id','=','cor_user_warehouse.user_id')
+            ->join('cor_warehouses','cor_warehouses.id','=','cor_user_warehouse.warehouse_id')
+            ->select([
+                'cor_user_warehouse.id',
+                'cor_user_warehouse.is_status as status',
+                'cor_user_warehouse.user_id',
+                'cor_warehouses.name as warehouse_name',
+                'cor_warehouses.location as warehouse_location',
+                'cor_warehouses.contract_person',
+                'cor_warehouses.mobile as warehouse_mobile',
+                'users.name',
+                'users.username',
+            ])
+            ->get()->toArray();
+        return $data;
+    }
 }

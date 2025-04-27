@@ -2,6 +2,8 @@
 
 namespace Modules\Core\App\Models;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
+
 class WarehouseModel extends Model
 {
     protected $table = 'cor_warehouses';
@@ -19,6 +21,98 @@ class WarehouseModel extends Model
         'is_delete',
         'status'
     ];
+
+    public function userWarehouses()
+    {
+        return $this->belongsTo(UserWarehouseModel::class,'warehouse_id','id');
+    }
+
+    /*public static function insertAlluserWarehouse($domain){
+
+        DB::transaction(function () use ($domain) {
+            $warehouses = self::where('domain_id', $domain['global_id'])
+//                ->whereDoesntHave('userWarehouses')
+                ->select('id')
+                ->get();
+//            dump($warehouses);
+
+            if ($warehouses->isEmpty()) {
+                return;
+            }
+
+            $insertData = $warehouses->map(function($warehouse) use ($domain) {
+                return [
+                    'user_id'    => $domain['user_id'],
+                    'warehouse_id'    => $warehouse->id,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ];
+            })->toArray();
+
+            UserWarehouseModel::insertOrIgnore($insertData);
+        });
+    }*/
+
+    /*public static function insertAlluserWarehouse($domain)
+    {
+        DB::transaction(function () use ($domain) {
+            $warehouses = self::where('domain_id', $domain['global_id'])
+                ->select('id')
+                ->get();
+
+            if ($warehouses->isEmpty()) {
+                return;
+            }
+
+            $insertData = $warehouses->map(function($warehouse) use ($domain) {
+                return [
+                    'user_id'       => $domain['user_id'],
+                    'warehouse_id'  => $warehouse->id,
+                    'created_at'    => now(),
+                    'updated_at'    => now(),
+                ];
+            })->toArray();
+
+            UserWarehouseModel::insertOrIgnore($insertData);
+        });
+    }*/
+
+    public static function insertAllUserWarehouses($domain)
+    {
+        DB::transaction(function () use ($domain) {
+            $warehouseIds = self::where('domain_id', $domain['global_id'])
+                ->pluck('id') // Get only IDs
+                ->toArray();
+
+            if (empty($warehouseIds)) {
+                return;
+            }
+
+            // Fetch existing warehouse_ids for this user
+            $existingWarehouseIds = UserWarehouseModel::where('user_id', $domain['user_id'])
+                ->whereIn('warehouse_id', $warehouseIds)
+                ->pluck('warehouse_id')
+                ->toArray();
+
+            $newWarehouseIds = array_diff($warehouseIds, $existingWarehouseIds);
+
+            $insertData = [];
+            foreach ($newWarehouseIds as $warehouseId) {
+                $insertData[] = [
+                    'user_id'      => $domain['user_id'],
+                    'warehouse_id' => $warehouseId,
+                    'created_at'   => now(),
+                    'updated_at'   => now(),
+                ];
+            }
+
+            if (!empty($insertData)) {
+                UserWarehouseModel::insert($insertData);
+            }
+        });
+    }
+
+
 
     public static function getRecords($request, $domain)
     {
