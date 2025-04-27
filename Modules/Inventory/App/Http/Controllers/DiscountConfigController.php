@@ -42,7 +42,7 @@ class DiscountConfigController extends Controller
 
     public function userDiscount(Request $request)
     {
-        UserModel::getAllUsers($request,$this->domain);
+        UserModel::getAllUsers($this->domain);
 
         $data = UserModel::getAllUserTransaction($this->domain);
 
