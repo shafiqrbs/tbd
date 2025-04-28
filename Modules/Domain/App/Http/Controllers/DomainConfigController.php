@@ -40,7 +40,7 @@ class DomainConfigController extends Controller
 
     public function domainConfig()
     {
-        $entity = DomainModel::with('accountConfig','productionConfig','gstConfig','inventoryConfig','inventoryConfig.configPurchase','inventoryConfig.configSales','inventoryConfig.configProduct','inventoryConfig.configDiscount')->find($this
+        $entity = DomainModel::with('accountConfig','productionConfig','gstConfig','inventoryConfig','inventoryConfig.configPurchase','inventoryConfig.configSales','inventoryConfig.configProduct','inventoryConfig.configDiscount','inventoryConfig.businessModel','inventoryConfig.currency')->find($this
             ->domain['global_id']);
         $service = new JsonRequestResponse();
         return $service->returnJosnResponse($entity);
