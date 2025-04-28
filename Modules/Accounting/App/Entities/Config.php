@@ -79,38 +79,38 @@ class Config
     private  $accountCategory;
 
     /**
-     * @ORM\OneToOne(targetEntity="Setting")
+     * @ORM\OneToOne(targetEntity="AccountVoucher")
      * @ORM\JoinColumn(name="voucher_stock_opening_id", referencedColumnName="id", nullable=true, onDelete="SET NULL")
      **/
     private $voucherStockOpening;
 
     /**
-     * @ORM\OneToOne(targetEntity="Setting")
+     * @ORM\OneToOne(targetEntity="AccountVoucher")
      * @ORM\JoinColumn(name="voucher_purchase_id", referencedColumnName="id", nullable=true, onDelete="SET NULL")
      **/
     private $voucherPurchase;
 
     /**
-     * @ORM\OneToOne(targetEntity="Setting")
+     * @ORM\OneToOne(targetEntity="AccountVoucher")
      * @ORM\JoinColumn(name="voucher_sales_id", referencedColumnName="id", nullable=true, onDelete="SET NULL")
      **/
     private $voucherSales;
 
     /**
-     * @ORM\OneToOne(targetEntity="Setting")
+     * @ORM\OneToOne(targetEntity="AccountVoucher")
      * @ORM\JoinColumn(name="voucher_sales_return_id", referencedColumnName="id", nullable=true, onDelete="SET NULL")
      **/
     private $voucherSalesReturn;
 
     /**
-     * @ORM\OneToOne(targetEntity="Setting")
+     * @ORM\OneToOne(targetEntity="AccountVoucher")
      * @ORM\JoinColumn(name="voucher_purchase_return_id", referencedColumnName="id", nullable=true, onDelete="SET NULL")
      **/
     private  $voucherPurchaseReturn;
 
 
     /**
-     * @ORM\OneToOne(targetEntity="Setting")
+     * @ORM\OneToOne(targetEntity="AccountVoucher")
      * @ORM\JoinColumn(name="voucher_stock_reconciliation_id", referencedColumnName="id", nullable=true, onDelete="SET NULL")
      **/
     private  $voucherStockReconciliation;

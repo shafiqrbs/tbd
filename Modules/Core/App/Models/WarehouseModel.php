@@ -27,56 +27,6 @@ class WarehouseModel extends Model
         return $this->belongsTo(UserWarehouseModel::class,'warehouse_id','id');
     }
 
-    /*public static function insertAlluserWarehouse($domain){
-
-        DB::transaction(function () use ($domain) {
-            $warehouses = self::where('domain_id', $domain['global_id'])
-//                ->whereDoesntHave('userWarehouses')
-                ->select('id')
-                ->get();
-//            dump($warehouses);
-
-            if ($warehouses->isEmpty()) {
-                return;
-            }
-
-            $insertData = $warehouses->map(function($warehouse) use ($domain) {
-                return [
-                    'user_id'    => $domain['user_id'],
-                    'warehouse_id'    => $warehouse->id,
-                    'created_at' => now(),
-                    'updated_at' => now(),
-                ];
-            })->toArray();
-
-            UserWarehouseModel::insertOrIgnore($insertData);
-        });
-    }*/
-
-    /*public static function insertAlluserWarehouse($domain)
-    {
-        DB::transaction(function () use ($domain) {
-            $warehouses = self::where('domain_id', $domain['global_id'])
-                ->select('id')
-                ->get();
-
-            if ($warehouses->isEmpty()) {
-                return;
-            }
-
-            $insertData = $warehouses->map(function($warehouse) use ($domain) {
-                return [
-                    'user_id'       => $domain['user_id'],
-                    'warehouse_id'  => $warehouse->id,
-                    'created_at'    => now(),
-                    'updated_at'    => now(),
-                ];
-            })->toArray();
-
-            UserWarehouseModel::insertOrIgnore($insertData);
-        });
-    }*/
-
     public static function insertAllUserWarehouses($domain)
     {
         DB::transaction(function () use ($domain) {
