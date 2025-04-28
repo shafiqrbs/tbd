@@ -43,6 +43,7 @@ Route::prefix('/production')->middleware([HeaderAuthenticationMiddleware::class]
 
     Route::get('/config', [ConfigController::class,'show'])->name('pro_config_show');
     Route::patch('/config-update', [ConfigController::class,'update'])->name('pro_config_update');
+    Route::get('/user-warehouse', [ConfigController::class,'userWarehouse'])->name('pro_user_warehouse');
 
     Route::post('/inline-update-value-added', [ProductionRecipeItemsController::class,'inlineUpdateValueAdded'])->name('pro_inline_update_value_added');
     Route::post('/inline-update-element-status', [ProductionRecipeItemsController::class,'inlineUpdateElementStatus'])->name('pro_inline_update_element_status');

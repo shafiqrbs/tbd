@@ -123,6 +123,7 @@ class UserModel extends Model
     {
         $data = self::select([
             'dom_domain.id as global_id',
+            'dom_domain.id as domain_id',
             'users.id as user_id',
             'inv_config.id as config_id',
             'inv_config.id as inv_config',
@@ -324,6 +325,7 @@ class UserModel extends Model
                     'users.email',
                     'users.mobile',
                     'cor_user_transaction.max_discount',
+                    'cor_user_transaction.discount_percent',
                     'cor_user_transaction.sales_target'
                 ])
                 ->get()->toArray();

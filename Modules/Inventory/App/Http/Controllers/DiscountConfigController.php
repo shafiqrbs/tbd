@@ -45,19 +45,9 @@ class DiscountConfigController extends Controller
     public function userDiscount(Request $request)
     {
         UserModel::insertAllUsersTransactions($this->domain);
-        WarehouseModel::insertAllUserWarehouses($this->domain);
-
         $userTransactions = UserModel::getAllUserTransaction($this->domain);
-        $userWarehouses = UserWarehouseModel::getUserAllWarehouse($this->domain);
-
-        return response()->json([
-           'status' => 200,
-           'message' => 'success',
-           'data' => [
-               'user_transactions' => $userTransactions,
-               'user_warehouses' => $userWarehouses
-           ]
-        ]);
+        $service = new JsonRequestResponse();
+        return $service->returnJosnResponse($userTransactions);
     }
 
 }

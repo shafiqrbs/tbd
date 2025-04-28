@@ -78,6 +78,7 @@ class UserWarehouseModel extends Model
 
     public static function getUserAllWarehouse($domain)
     {
+
         $data = self::where('users.domain_id',$domain['global_id'])
             ->join('users','users.id','=','cor_user_warehouse.user_id')
             ->join('cor_warehouses','cor_warehouses.id','=','cor_user_warehouse.warehouse_id')

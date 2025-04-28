@@ -8,6 +8,8 @@ use Illuminate\Http\Response;
 use Modules\AppsApi\App\Services\JsonRequestResponse;
 
 use Modules\Core\App\Models\UserModel;
+use Modules\Core\App\Models\UserWarehouseModel;
+use Modules\Core\App\Models\WarehouseModel;
 use Modules\Production\App\Entities\Config;
 use Modules\Production\App\Http\Requests\ConfigRequest;
 use Modules\Production\App\Http\Requests\SettingRequest;
@@ -59,20 +61,20 @@ class ConfigController extends Controller
     }
 
 
-
+    public function userWarehouse(Request $request)
+    {
+        WarehouseModel::insertAllUserWarehouses($this->domain);
+        $userWarehouses = UserWarehouseModel::getUserAllWarehouse($this->domain);
+        $service = new JsonRequestResponse();
+        return $service->returnJosnResponse($userWarehouses);
+    }
 
     public function configDropdown()
     {
         $data = SettingModel::getConfigDropdown($this->domain);
-        $response = new Response();
-        $response->headers->set('Content-Type', 'application/json');
-        $response->setContent(json_encode([
-            'message' => 'success',
-            'status' => Response::HTTP_OK,
-            'data' => sizeof($data)>0 ? $data : []
-        ]));
-        $response->setStatusCode(Response::HTTP_OK);
-        return $response;
+        $entity = sizeof($data)>0 ? $data : [];
+        $service = new JsonRequestResponse();
+        return $service->returnJosnResponse($entity);
     }
 
 }
