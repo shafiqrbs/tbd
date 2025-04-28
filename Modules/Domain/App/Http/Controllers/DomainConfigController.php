@@ -14,6 +14,7 @@ use Modules\Accounting\App\Models\AccountingModel;
 use Modules\AppsApi\App\Services\JsonRequestResponse;
 use Modules\Core\App\Models\UserModel;
 use Modules\Domain\App\Models\DomainModel;
+use Modules\Inventory\App\Entities\Config;
 use Modules\Inventory\App\Models\ConfigDiscountModel;
 use Modules\Inventory\App\Models\ConfigModel;
 use Modules\Inventory\App\Models\ConfigProductModel;
@@ -52,26 +53,19 @@ class DomainConfigController extends Controller
         return $entity;
     }
 
-    public function inventoryConfig(Request $request)
+    public function inventoryConfig(Request $request,$id)
     {
-        $validated = $request->validate([
-            'id'  => 'required|integer',
-            'field_name' => 'required|string',
-            'value'      => 'required',
-        ]);
 
         DB::beginTransaction();
+        $domain = UserModel::getDomainData($id);
+        $config = $domain['config_id'];
+        $entity = ConfigModel::find($config);
         try {
-            $id = $validated['id'];
-            $globalDomainId = $this->domain['global_id'] ?? null;
-            if (!$globalDomainId) {
-                throw new \RuntimeException('Global domain context missing');
-            }
+            $entity->update($request->all());
             DB::commit();
             $service = new JsonRequestResponse();
             $return = $service->returnJosnResponse($this->domainConfigById($id));
             return $return;
-
         } catch (ModelNotFoundException $e) {
             DB::rollBack();
             return response()->json([

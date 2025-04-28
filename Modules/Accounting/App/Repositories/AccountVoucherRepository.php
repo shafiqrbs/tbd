@@ -63,5 +63,10 @@ class AccountVoucherRepository extends EntityRepository
             $em->persist($entity);
             $em->flush();
         }
+
+        $vouchers = $em->getRepository(AccountVoucher::class)->findBy(['config'=> $configId]);
+        return $vouchers;
+
+
     }
 }

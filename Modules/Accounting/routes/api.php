@@ -43,6 +43,7 @@ Route::prefix('/accounting')->middleware([HeaderAuthenticationMiddleware::class]
     Route::apiResource('/account-head', AccountHeadController::class)->middleware([HeaderAuthenticationMiddleware::class]);
     Route::get('/account-head-generate', [AccountHeadController::class,'generateAccountHead'])->name('account_head_generate');
     Route::get('/account-head-reset', [AccountHeadController::class,'resetAccountHead'])->name('account_head_reset');
+    Route::get('/account-voucher-reset', [AccountHeadController::class,'resetAccountHead'])->name('account_head_reset');
     Route::get('/account-sub-head', [AccountHeadController::class,'accountSubHead'])->name('account_sub_head');
     Route::get('/account-ledger', [AccountHeadController::class,'accountLedger'])->name('account_ledger');
 

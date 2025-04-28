@@ -127,9 +127,7 @@ class AccountHeadController extends Controller
     public function generateAccountHead(EntityManager $em)
     {
         $config_id = $this->domain['acc_config'];
-        $em->getRepository(AccountVoucher::class)->resetVoucher($config_id);
         $entity = $em->getRepository(AccountHead::class)->generateAccountHead($config_id);
-
         $service = new JsonRequestResponse();
         return $service->returnJosnResponse($entity);
     }
@@ -141,6 +139,17 @@ class AccountHeadController extends Controller
     {
         $config_id = $this->domain['acc_config'];
         $entity = $em->getRepository(AccountHead::class)->resetAccountHead($config_id);
+        $service = new JsonRequestResponse();
+        return $service->returnJosnResponse($entity);
+    }
+
+    /**
+     * Store a newly created resource in storage.
+     */
+    public function resetAccountVoucher(EntityManager $em)
+    {
+        $config_id = $this->domain['acc_config'];
+        $entity = $em->getRepository(AccountVoucher::class)->resetVoucher($config_id);
         $service = new JsonRequestResponse();
         return $service->returnJosnResponse($entity);
     }
