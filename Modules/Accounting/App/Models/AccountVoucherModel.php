@@ -62,7 +62,7 @@ class AccountVoucherModel extends Model
         $entity = self:: where('acc_voucher.config_id', $domain['acc_config'])
             ->leftJoin('acc_setting','acc_setting.id','=','acc_voucher.voucher_type_id')
             ->select([
-                'acc_setting.id',
+                'acc_voucher.id',
                 'acc_setting.id as voucher_type_id',
                 'acc_setting.name as voucher_type_name',
                 'acc_voucher.name as name',
