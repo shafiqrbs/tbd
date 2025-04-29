@@ -51,6 +51,13 @@ class ConfigDiscount
      */
     private $discountWithCustomer = false;
 
+    /**
+     * @var boolean
+     *
+     * @ORM\Column(type="boolean" ,options={"default"="false"})
+     */
+    private $onlineB2BCustomer = false;
+
 
     /**
      * @var \DateTime
@@ -167,20 +174,53 @@ class ConfigDiscount
     }
 
     /**
-     * @return bool
+     * @return float
      */
-    public function isStatus()
+    public function getMaxDiscount()
     {
-        return $this->status;
+        return $this->maxDiscount;
     }
 
     /**
-     * @param bool $status
+     * @param float $maxDiscount
      */
-    public function setStatus($status)
+    public function setMaxDiscount($maxDiscount)
     {
-        $this->status = $status;
+        $this->maxDiscount = $maxDiscount;
     }
+
+    /**
+     * @return bool
+     */
+    public function isDiscountWithCustomer()
+    {
+        return $this->discountWithCustomer;
+    }
+
+    /**
+     * @param bool $discountWithCustomer
+     */
+    public function setDiscountWithCustomer($discountWithCustomer)
+    {
+        $this->discountWithCustomer = $discountWithCustomer;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isOnlineB2BCustomer()
+    {
+        return $this->onlineB2BCustomer;
+    }
+
+    /**
+     * @param bool $onlineB2BCustomer
+     */
+    public function setOnlineB2BCustomer($onlineB2BCustomer)
+    {
+        $this->onlineB2BCustomer = $onlineB2BCustomer;
+    }
+
 
 
 }
