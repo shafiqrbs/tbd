@@ -56,7 +56,7 @@ class ConfigDiscount
      *
      * @ORM\Column(type="boolean" ,options={"default"="false"})
      */
-    private $onlineB2BCustomer = false;
+    private $onlineCustomer = false;
 
 
     /**
@@ -208,18 +208,20 @@ class ConfigDiscount
     /**
      * @return bool
      */
-    public function isOnlineB2BCustomer()
+    public function isOnlineCustomer()
     {
-        return $this->onlineB2BCustomer;
+        return $this->onlineCustomer;
     }
 
     /**
-     * @param bool $onlineB2BCustomer
+     * @param bool $onlineCustomer
      */
-    public function setOnlineB2BCustomer($onlineB2BCustomer)
+    public function setOnlineCustomer($onlineCustomer)
     {
-        $this->onlineB2BCustomer = $onlineB2BCustomer;
+        $this->onlineCustomer = $onlineCustomer;
     }
+
+
 
 
 

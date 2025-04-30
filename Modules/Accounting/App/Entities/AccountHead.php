@@ -155,6 +155,13 @@ class AccountHead
      */
     private $creditPeriod=0;
 
+
+    /**
+     * @var integer
+     * @ORM\Column(type="integer", options={"default":0})
+     */
+    private $earnPoint=0;
+
     /**
      * @var boolean
      *
@@ -821,6 +828,24 @@ class AccountHead
     {
         $this->mode = $mode;
     }
+
+    /**
+     * @return int
+     */
+    public function getEarnPoint()
+    {
+        return $this->earnPoint;
+    }
+
+    /**
+     * @param int $earnPoint
+     */
+    public function setEarnPoint($earnPoint)
+    {
+        $this->earnPoint = $earnPoint;
+    }
+
+
 
 }
 
