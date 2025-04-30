@@ -30,10 +30,15 @@ class  ProductUnitMeasurement
 
     /**
      * @ORM\ManyToOne(targetEntity="Particular")
+     * @ORM\JoinColumn(name="unitmeasurement_id", referencedColumnName="id", nullable=true, onDelete="SET NULL")
+     **/
+    private $unitMeasurement;
+
+    /**
+     * @ORM\ManyToOne(targetEntity="Particular")
      * @ORM\JoinColumn(name="unit_id", referencedColumnName="id", nullable=true, onDelete="SET NULL")
      **/
     private $unit;
-
 
     /**
      * @var integer

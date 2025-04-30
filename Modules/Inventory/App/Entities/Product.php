@@ -76,6 +76,14 @@ class Product
     private $unit;
 
 
+
+     /**
+     * @ORM\ManyToOne(targetEntity="Particular", inversedBy="product")
+     * @ORM\JoinColumn(name="unitmeasurement_id", referencedColumnName="id", nullable=true, onDelete="SET NULL")
+     **/
+    private $unitMeasurement;
+
+
     /**
      * @var string
      *
@@ -451,7 +459,21 @@ class Product
         $this->children = $children;
     }
 
+    /**
+     * @return mixed
+     */
+    public function getUnitMeasurement()
+    {
+        return $this->unitMeasurement;
+    }
 
+    /**
+     * @param mixed $unitMeasurement
+     */
+    public function setUnitMeasurement($unitMeasurement)
+    {
+        $this->unitMeasurement = $unitMeasurement;
+    }
 
 }
 
