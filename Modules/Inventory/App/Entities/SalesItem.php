@@ -69,7 +69,7 @@ class SalesItem
      * @ORM\ManyToOne(targetEntity="ProductUnitMeasurement")
      * @ORM\JoinColumn(referencedColumnName="id", nullable=true, onDelete="SET NULL")
      */
-    private  $productPrice;
+    private  $measurementUnit;
 
      /**
      * @ORM\ManyToOne(targetEntity="StockItemPriceMatrix")
@@ -82,7 +82,7 @@ class SalesItem
      *
      * @ORM\Column(type="string", length=225, nullable=true)
      */
-    private $measurementUnit;
+    private $measurementUnitString;
 
      /**
      * @var string
