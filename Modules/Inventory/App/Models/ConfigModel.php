@@ -49,6 +49,7 @@ class ConfigModel extends Model
         'sd_percent',
         'sd_enable',
         'hs_code_enable',
+        'vat_integration',
         'sd_enable',
         'bonus_from_stock',
         'condition_sales',
