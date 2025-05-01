@@ -38,6 +38,8 @@ class SalesItemModel extends Model
         'width',
         'total_quantity',
         'sub_quantity',
+        'product_unit_measurement_id',
+        'measurement_unit',
     ];
 
     public static function boot() {
@@ -106,6 +108,8 @@ class SalesItemModel extends Model
                 'discount_price' => self::calculateDiscountPrice($item['percent'] ?? 0, $item['sales_price'] ?? 0),
                 'created_at'     => $timestamp,
                 'updated_at'     => $timestamp,
+                'measurement_unit' => $item['measurement_string'] ?? null,
+                'product_unit_measurement_id' => $item['measurement_unit_id'] ?? null,
             ];
         }, $items);
 
