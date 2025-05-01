@@ -80,6 +80,7 @@ Route::prefix('/inventory')->middleware([HeaderAuthenticationMiddleware::class])
     Route::prefix('/discount')->middleware([HeaderAuthenticationMiddleware::class])->group(function() {
         Route::get('config', [DiscountConfigController::class,'index'])->name('discount_config');
         Route::get('users', [DiscountConfigController::class,'userDiscount'])->name('discount_config');
+        Route::POST('user-update/{id}', [DiscountConfigController::class,'userDiscountUpdate'])->name('discount_config');
     });
 
     Route::apiResource('/discount', DiscountConfigController::class)

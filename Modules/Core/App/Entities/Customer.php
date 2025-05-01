@@ -70,7 +70,6 @@ class Customer
     protected $marketing;
 
 
-
     /**
      * @var integer
      *
@@ -300,6 +299,12 @@ class Customer
      */
     private $address;
 
+    /**
+     * @var string
+     * B2B,Corporate,Official
+     * @ORM\Column(type="string", length=20, nullable =true)
+     */
+     private $customerMode;
 
     /**
      * @var string
@@ -309,7 +314,7 @@ class Customer
     private $bloodGroup;
 
     /**
-     * @var Date
+     * @var \DateTime
      *
      * @ORM\Column(name="dob", type="datetime", nullable=true)
      */
@@ -321,6 +326,7 @@ class Customer
      * @ORM\Column(type="string",length=10 , nullable = true)
      */
     private $ageGroup;
+
 
     /**
      * @var string
@@ -455,22 +461,6 @@ class Customer
 
 
     /**
-     * @var string
-     *
-     * @ORM\Column(name="studentBatch", type="string", nullable=true)
-     */
-    private $studentBatch;
-
-
-    /**
-     * @var string
-     *
-     * @ORM\Column(name="batchYear", type="string", nullable=true)
-     */
-    private $batchYear;
-
-
-    /**
      * @var float
      *
      * @ORM\Column(name="opening_balance", type="float", nullable=true)
@@ -515,7 +505,6 @@ class Customer
      */
     private $discountPercent;
 
-
     /**
      * @var float
      *
@@ -544,6 +533,7 @@ class Customer
      * @ORM\Column(name="isNew", type="boolean", nullable=true)
      */
     private $isNew = true;
+
 
      /**
      * @var boolean

@@ -65,10 +65,23 @@ class SalesItem
      */
     private  $unit;
 
-      /**
+    /**
+     * @ORM\ManyToOne(targetEntity="ProductUnitMeasurement")
+     * @ORM\JoinColumn(referencedColumnName="id", nullable=true, onDelete="SET NULL")
+     */
+    private  $productUnitMeasurement;
+
+    /**
      * @var string
      *
      * @ORM\Column(type="string", length=225, nullable=true)
+     */
+    private $measurementUnit;
+
+     /**
+     * @var string
+     *
+     * @ORM\Column(type="string", length=50, nullable=true)
      */
     private $uom;
 
@@ -892,6 +905,8 @@ class SalesItem
     {
         $this->warehouse = $warehouse;
     }
+
+
 
 
 

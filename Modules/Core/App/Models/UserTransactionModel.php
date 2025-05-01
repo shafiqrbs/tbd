@@ -16,7 +16,9 @@ class UserTransactionModel extends Model
     protected $guarded = ['id'];
     protected $fillable = [
         'user_id',
-        'max_discount'
+        'max_discount',
+        'sales_target',
+        'discount_percent'
     ];
     protected $dates = ['created_at'];
 

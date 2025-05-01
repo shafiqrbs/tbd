@@ -24,6 +24,8 @@ class ConfigDiscountModel extends Model
     protected $fillable = [
         'config_id',
         'max_discount',
+        'discount_with_customer',
+        'online_customer',
     ];
 
 
