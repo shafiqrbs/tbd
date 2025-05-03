@@ -396,7 +396,6 @@ class StockItem
      */
     private $isMaster= false;
 
-    /
     /**
      * @var boolean
      *

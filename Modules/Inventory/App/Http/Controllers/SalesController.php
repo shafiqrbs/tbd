@@ -20,6 +20,7 @@ use Modules\Inventory\App\Entities\SalesItem;
 use Modules\Inventory\App\Http\Requests\ProductRequest;
 use Modules\Inventory\App\Http\Requests\SalesRequest;
 use Modules\Inventory\App\Models\ConfigModel;
+use Modules\Inventory\App\Models\ConfigSalesModel;
 use Modules\Inventory\App\Models\ProductModel;
 use Modules\Inventory\App\Models\PurchaseItemModel;
 use Modules\Inventory\App\Models\PurchaseModel;
@@ -73,6 +74,10 @@ class SalesController extends Controller
         DB::beginTransaction();
 
         try {
+
+            if (empty($input['sales_by_id'])){
+                $input['sales_by_id'] = $this->domain['user_id'];
+            }
             // Create Sales Record
             $sales = SalesModel::create($input);
             $sales->refresh();
@@ -86,10 +91,10 @@ class SalesController extends Controller
             // Stock Maintenance Logic (Auto Approval)
             $findCustomer = CustomerModel::find($input['customer_id']);
             $findUserType = \Modules\Core\App\Models\SettingModel::find($findCustomer->customer_group_id);
-            $findConfig = ConfigModel::find($this->domain['config_id']);
+            $findInvConfig = ConfigSalesModel::where('config_id',$this->domain['inv_config'])->first();
 
             if (
-                $findConfig->is_sales_auto_approved &&
+                $findInvConfig->is_sales_auto_approved &&
                 (!$findUserType || $findUserType->name !== 'Domain')
             ) {
                 $sales->update(['approved_by_id' => $this->domain['user_id']]);

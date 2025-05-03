@@ -26,7 +26,8 @@ class StockItemHistoryModel extends Model
         'sales_price',
         'purchase_price',
         'opening_balance',
-        'created_by'
+        'created_by',
+        'item_name'
     ];
 
     public static function boot() {
@@ -132,6 +133,7 @@ class StockItemHistoryModel extends Model
     {
         return [
             'stock_item_id' => $item->stock_item_id,
+            'item_name' => $item->name,
             'config_id' => $item->config_id,
             'quantity' => $quantity,
             'purchase_price' => $item->purchase_price ?? 0,
