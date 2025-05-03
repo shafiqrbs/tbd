@@ -50,18 +50,19 @@ class PurchaseModel extends Model
         return $this->hasMany(StockItemInventoryHistoryModel::class, 'purchase_id');
     }
 
-    public function insertPurchaseItems($sales,$items)
+    public function insertPurchaseItems($purchase,$items)
     {
         $timestamp = Carbon::now();
 
         $items = array_map(function($item) {
             $item['stock_item_id'] = $item['product_id'];
+            $item['name'] = $item['name'];
             unset($item['product_id']);
             return $item;
         }, $items);
         foreach ($items as &$record) {
-            $record['purchase_id'] = $sales->id;
-            $record['config_id'] = $sales->config_id;
+            $record['purchase_id'] = $purchase->id;
+            $record['config_id'] = $purchase->config_id;
             $record['created_at'] = $timestamp;
             $record['updated_at'] = $timestamp;
         }

@@ -108,7 +108,8 @@ class ProductModel extends Model
             ->leftjoin('inv_particular as grade','grade.id','=','inv_stock.grade_id')
             ->leftjoin('inv_particular as size','size.id','=','inv_stock.size_id')
             ->select([
-                'inv_product.id',
+                'inv_product.id as product_id',
+                'inv_stock.id',
                 'inv_stock.name as product_name',
                 'inv_product.slug',
                 'inv_category.name as category_name',
@@ -117,6 +118,7 @@ class ProductModel extends Model
                 'inv_product.alternative_name',
                 'inv_setting.name as product_type',
                 'inv_stock.quantity',
+                'inv_stock.quantity as rem_quantity',
                 'inv_stock.bangla_name',
                 'inv_product.status',
                 'inv_product.parent_id',

@@ -13,6 +13,8 @@ use Modules\Inventory\App\Entities\PurchaseItem;
 use Modules\Inventory\App\Http\Requests\ProductRequest;
 use Modules\Inventory\App\Http\Requests\PurchaseRequest;
 use Modules\Inventory\App\Models\ConfigModel;
+use Modules\Inventory\App\Models\ConfigPurchaseModel;
+use Modules\Inventory\App\Models\ConfigSalesModel;
 use Modules\Inventory\App\Models\PurchaseItemModel;
 use Modules\Inventory\App\Models\PurchaseModel;
 use Modules\Inventory\App\Models\SalesItemModel;
@@ -58,12 +60,15 @@ class PurchaseController extends Controller
         $input = $request->validated();
 
         $input['config_id'] = $this->domain['config_id'];
+        $input['created_by_id'] = $this->domain['user_id'];
         $entity = PurchaseModel::create($input);
+
         $process = new PurchaseModel();
         $process->insertPurchaseItems($entity,$input['items']);
 
-        $findConfig = ConfigModel::find($this->domain['config_id']);
-        if ($findConfig->is_purchase_auto_approved){
+        $findInvConfig = ConfigPurchaseModel::where('config_id',$this->domain['inv_config'])->first();
+
+        if ($findInvConfig->is_purchase_auto_approved){
             $entity->update([
                 'approved_by_id' => $this->domain['user_id'],
                 'process' => 'Approved'

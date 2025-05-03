@@ -182,6 +182,14 @@ class PurchaseItem
     /**
      * @var string
      *
+     * @ORM\Column(name="name", type="string",  nullable = true)
+     */
+    private $name;
+
+
+    /**
+     * @var string
+     *
      * @ORM\Column(type="string",options={"default"="purchase"})
      */
     private $mode;
