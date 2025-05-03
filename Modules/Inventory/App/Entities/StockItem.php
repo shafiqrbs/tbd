@@ -396,6 +396,7 @@ class StockItem
      */
     private $isMaster= false;
 
+    /
     /**
      * @var boolean
      *
@@ -410,6 +411,14 @@ class StockItem
      * @ORM\Column(type="boolean", options={"default":0})
      */
     private $withoutDiscount = false;
+
+
+     /**
+     * @var boolean
+     *
+     * @ORM\Column(type="boolean", options={"default":0})
+     */
+    private $offerProduct = false;
 
 
     /**

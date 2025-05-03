@@ -32,6 +32,12 @@ class Config
 
     /**
      * @ORM\OneToOne(targetEntity="AccountHead")
+     * @ORM\JoinColumn(name="capital_investment_id", referencedColumnName="id", nullable=true, onDelete="SET NULL")
+     **/
+    private $capitalInvestment;
+
+    /**
+     * @ORM\OneToOne(targetEntity="AccountHead")
      * @ORM\JoinColumn(name="account_cash_id", referencedColumnName="id", nullable=true, onDelete="SET NULL")
      **/
     private $accountCash;

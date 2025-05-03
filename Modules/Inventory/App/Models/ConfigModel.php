@@ -148,7 +148,7 @@ class ConfigModel extends Model
         return $this->belongsTo(DomainModel::class,'domain_id','id');
     }
 
-     public function businessModel(): BelongsTo
+    public function businessModel(): BelongsTo
     {
         return $this->belongsTo(SettingModel::class,'business_model_id','id');
     }
@@ -254,7 +254,6 @@ class ConfigModel extends Model
         $columns = \Illuminate\Support\Facades\Schema::getColumnListing($table);
         $columnsToReset = array_diff($columns, $columnsToExclude);
 
-
         // Create SQL SET expressions
         $setStatements = [];
         foreach ($columnsToReset as $column) {
@@ -270,9 +269,6 @@ class ConfigModel extends Model
 
         // Execute raw query with properly formatted SET statements
         DB::statement("UPDATE `$table` SET " . implode(', ', $setStatements) . " WHERE id = ?", [$id]);
-
-
-
 
     }
 
