@@ -96,4 +96,23 @@ class UserWarehouseModel extends Model
             ->get()->toArray();
         return $data;
     }
+
+    public static function getUserActiveWarehouse($userId)
+    {
+
+        $data = self::where('cor_user_warehouse.user_id',$userId)
+            ->where('cor_user_warehouse.is_status',true)
+            ->join('cor_warehouses','cor_warehouses.id','=','cor_user_warehouse.warehouse_id')
+            ->select([
+                'cor_user_warehouse.id',
+                'cor_user_warehouse.is_status as status',
+                'cor_user_warehouse.user_id',
+                'cor_warehouses.name as warehouse_name',
+                'cor_warehouses.location as warehouse_location',
+                'cor_warehouses.contract_person',
+                'cor_warehouses.mobile as warehouse_mobile',
+            ])
+            ->get()->toArray();
+        return $data;
+    }
 }

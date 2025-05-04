@@ -11,6 +11,7 @@ use Modules\AppsApi\App\Services\JsonRequestResponse;
 use Modules\Core\App\Http\Requests\UserLoginRequest;
 use Modules\Core\App\Http\Requests\UserRequest;
 use Modules\Core\App\Models\UserModel;
+use Modules\Core\App\Models\UserWarehouseModel;
 
 class LoginController extends Controller
 {
@@ -45,6 +46,8 @@ class LoginController extends Controller
 
         $accessRole = \DB::table('cor_user_role')->where('user_id',$userExists->id)->first();
 
+        $getUserWareHouse = UserWarehouseModel::getUserActiveWarehouse($userExists->id);
+
         $arrayData=[
             'id'=>$userExists->id,
             'name'=>$userExists->name,
@@ -55,6 +58,7 @@ class LoginController extends Controller
             'domain_id'=>$userExists->domain_id,
             'access_control_role' => $accessRole?$accessRole->access_control_role:[],
             'android_control_role' => $accessRole?$accessRole->android_control_role:[],
+            'user_warehouse'=>$getUserWareHouse? $getUserWareHouse:[],
         ];
         return new JsonResponse([
             'status'=>200,
