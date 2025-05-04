@@ -471,12 +471,12 @@ class StockItem
         return $this->id;
     }
 
-    public function getItemSize(): string
+    public function getItemSize()
     {
         return $this->itemSize;
     }
 
-    public function setItemSize(string $itemSize): void
+    public function setItemSize($itemSize)
     {
         $this->itemSize = $itemSize;
     }
