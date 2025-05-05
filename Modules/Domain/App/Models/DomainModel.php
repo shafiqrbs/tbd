@@ -28,6 +28,7 @@ class DomainModel extends Model
         'modules',
         'address',
         'alternative_mobile',
+        'license_no',
         'company_name',
     ];
 

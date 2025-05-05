@@ -69,6 +69,13 @@ class Setting
      */
     private $status= true;
 
+    /**
+     * @var boolean
+     *
+     * @ORM\Column(type="boolean" ,options={"default":0})
+     */
+    private $isSystem = false;
+
 
 
 }

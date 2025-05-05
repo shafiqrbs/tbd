@@ -10,12 +10,15 @@ use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Session;
+use Modules\Accounting\App\Entities\AccountHead;
+use Modules\Accounting\App\Entities\AccountJournal;
 use Modules\Accounting\App\Entities\Config;
 use Modules\Accounting\App\Models\TransactionModeModel;
 use Modules\AppsApi\App\Services\JsonRequestResponse;
 use Modules\Core\App\Models\CustomerModel;
 use Modules\Core\App\Models\UserModel;
 use Modules\Core\App\Models\VendorModel;
+use Modules\Domain\App\Models\DomainModel;
 use Modules\Inventory\App\Entities\SalesItem;
 use Modules\Inventory\App\Http\Requests\ProductRequest;
 use Modules\Inventory\App\Http\Requests\SalesRequest;
@@ -64,7 +67,7 @@ class SalesController extends Controller
      * Store a newly created resource in storage.
      */
 
-    public function store(SalesRequest $request)
+    public function store(SalesRequest $request, EntityManager $em)
     {
         $input = $request->validated();
         $input['config_id'] = $this->domain['config_id'];
@@ -88,23 +91,32 @@ class SalesController extends Controller
             // Fetch Sales Data for Response
             $salesData = SalesModel::getShow($sales->id, $this->domain);
 
+
             // Stock Maintenance Logic (Auto Approval)
-            $findCustomer = CustomerModel::find($input['customer_id']);
-            $findUserType = \Modules\Core\App\Models\SettingModel::find($findCustomer->customer_group_id);
+
+            if(empty($input['customer_id'])){
+                $domain = DomainModel::find($this->domain->domain_id);
+                $license = ($domain['license_no']) ? $domain['license_no'] : $domain['mobile'];
+                $findCustomer = CustomerModel::where([
+                    ['is_default_customer', '=', 1],
+                    ['domain_id', '=', $this->domain->domain_id],
+                ])->select('id')->first()->id;
+            }else{
+                $findCustomer = CustomerModel::find($input['customer_id'])->id;
+            }
             $findInvConfig = ConfigSalesModel::where('config_id',$this->domain['inv_config'])->first();
 
-            if (
-                $findInvConfig->is_sales_auto_approved &&
-                (!$findUserType || $findUserType->name !== 'Domain')
-            ) {
-                $sales->update(['approved_by_id' => $this->domain['user_id']]);
-
+            if ($findInvConfig->is_sales_auto_approved) {
+                $sales->update(['customer_id' => $findCustomer, 'approved_by_id' => $this->domain['user_id']]);
                 if ($sales->salesItems->count() > 0) {
                     foreach ($sales->salesItems as $item) {
                         StockItemHistoryModel::openingStockQuantity($item, 'sales', $this->domain);
                     }
                 }
+            }else{
+                $sales->update(['customer_id' => $findCustomer]);
             }
+            $em->getRepository(AccountJournal::class)->insertAccountSales($sales->id);
 
             // Commit Transaction
             DB::commit();

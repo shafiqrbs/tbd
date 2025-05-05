@@ -144,7 +144,12 @@ class GlobalOption
      */
     private $subDomain;
 
-
+    /**
+     * @var string
+     *
+     * @ORM\Column(type="string", length=255 , unique=true, nullable=true)
+     */
+    private $licenseNo;
 
     /**
      * @var boolean

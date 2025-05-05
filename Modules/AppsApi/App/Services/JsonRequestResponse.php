@@ -28,6 +28,28 @@ class JsonRequestResponse
         }
     }
 
+    public function returnPagingJosnResponse($data = [])
+    {
+        $entities = $data['entities'];
+        $total = $data['count'];
+        try{
+            $response = new Response();
+            $response->headers->set('Content-Type','application/json');
+            $response->setContent(json_encode([
+                'message' => 'success',
+                'status' => Response::HTTP_OK,
+                'data' => $entities,
+                'total' => $total
+            ]));
+            $response->setStatusCode(Response::HTTP_OK);
+            return $response;
+        }catch(\Exception $ex){
+            return \response([
+                'message' => $ex->getMessage()
+            ]);
+        }
+    }
+
     public function clearCaches($prefix)
     {
         // Increase loop if you need, the loop will stop when key not found

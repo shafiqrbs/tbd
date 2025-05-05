@@ -62,6 +62,7 @@ class CustomerModel extends Model
         'domain_id',
         'discount_percent',
         'bonus_percent',
+        'is_default_customer',
         'monthly_target_amount'
     ];
     public static function getAllCustomers(){

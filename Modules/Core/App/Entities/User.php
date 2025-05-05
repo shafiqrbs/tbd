@@ -61,7 +61,7 @@ class User
 	 *
 	 * @ORM\Column(type="string", nullable=true , options={"default"="user"})
 	 */
-	private $userGroup = "user";
+	private $userGroup;
 
 	/**
 	 * @var string

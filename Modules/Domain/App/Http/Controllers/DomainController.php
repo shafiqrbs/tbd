@@ -89,6 +89,7 @@ class DomainController extends Controller
         try {
             // Step 1: Create the domain the entity
             $data['modules'] = json_encode($data['modules'], JSON_PRETTY_PRINT);
+            $data['license_no'] = $data['mobile'];
             $entity = DomainModel::create($data);
 
             // Step 2: Prepare email and password, then create user
@@ -115,40 +116,60 @@ class DomainController extends Controller
 
             // Fetch the customer
             $customer = CustomerModel::where('domain_id',$entity->id)->first();
-
             if (!$customer) {
                 $getCoreSettingTypeId = SettingTypeModel::where('slug', 'customer-group')->first();
-                $getCustomerGroupId = SettingModel::where('setting_type_id', $getCoreSettingTypeId->id)
-                    ->where('name', 'Domain')->where('domain_id', $this->domain['global_id'])->first();
 
-                if (empty($getCustomerGroupId)) {
-                    $getCustomerGroupId = SettingModel::create([
-                        'domain_id' => $this->domain['global_id'],
+                $getCustomerGroupId = SettingModel::updateOrCreate(
+                    [
+                        'domain_id' => $entity->id,
+                        'setting_type_id' => $getCoreSettingTypeId->id,
+                        'name' => 'Domain',
+                        'slug' => 'domain',
+                        'is_system' => true,
+                    ],
+                    [
+                        'status' => true,
+                        'created_at' => now(),
+                        'updated_at' => now(),
+                    ]
+                );
+
+                SettingModel::updateOrCreate(
+                    [
+                        'domain_id' => $entity->id,
+                        'setting_type_id' => $getCoreSettingTypeId->id,
                         'name' => 'Default',
-                        'setting_type_id' => $getCoreSettingTypeId->id, // Ensure this variable has a value
                         'slug' => 'default',
-                        'status' => 1,
-                        'created_at' => now(),  // Add the current timestamp
-                        'updated_at' => now()   // If you also have `updated_at`
-                    ]);
-                }
+                    ],
+                    [
+                        'status' => true,
+                        'created_at' => now(),
+                        'updated_at' => now(),
+                    ]
+                );
 
                 // Handle Customer
                 $code = $this->generateCustomerCode($patternCodeService);
-
-                CustomerModel::create([
-                    'domain_id' => $entity->id,
-                    'code' => $code['code'],
-                    'name' => $data['username'],
-                    'mobile' => $data['mobile'],
-                    'email' => $entity->email,
-                    'status' => true,
-                    'address' => $entity->address,
-                    'customer_group_id' => $getCustomerGroupId->id ?? null, // Default group
-                    'slug' => Str::slug($entity->name),
-                    'customerId' => $code['generateId'], // Generated ID from the pattern code
-                ]);
+                CustomerModel::updateOrCreate(
+                    [
+                        'domain_id' => $entity->id,
+                        'name' => 'Default',
+                        'mobile' => $data['mobile'],
+                        'customer_group_id' => $getCustomerGroupId->id ?? null,
+                    ],
+                    [
+                        'slug' => Str::slug($entity->name),
+                        'customerId' => $code['generateId'],
+                        'email' => $entity->email,
+                        'address' => $entity->address,
+                        'is_default_customer' => true,
+                        'status' => true,
+                        'created_at' => now(),
+                        'updated_at' => now(),
+                    ]
+                );
             }
+
 
             // Step 3: Create the inventory configuration (config)
             $currency = CurrencyModel::find(1);
@@ -172,6 +193,7 @@ class DomainController extends Controller
             // Step 4: Create the accounting data
             ConfigSalesModel::create([
                 'config_id' => $config->id,
+                'customer_group_id' => $getCustomerGroupId->id,
             ]);
 
             // Step 4: Create the accounting data
@@ -179,13 +201,11 @@ class DomainController extends Controller
                 'config_id' => $config->id,
             ]);
 
-
-
             // Step 4: Create the accounting data
             $accountingConfig = AccountingModel::create([
                 'domain_id' => $entity->id,
-                'financial_start_date' => date('Y-m-d'),
-                'financial_end_date' => date('Y-m-d'),
+                'financial_start_date' =>  now(),
+                'financial_end_date' =>  now(),
             ]);
 
             // Step 4: Create the accounting data

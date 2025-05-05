@@ -125,7 +125,6 @@ class StockItemHistoryModel extends Model
             $closing_quantity = $quantity;
             $closing_balance = $subTotal;
         }
-
         return [$closing_quantity, $closing_balance, $quantity];
     }
 

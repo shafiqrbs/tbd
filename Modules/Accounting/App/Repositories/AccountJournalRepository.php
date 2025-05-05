@@ -129,11 +129,14 @@ class AccountJournalRepository extends EntityRepository
         return $result;
     }
 
+
+
     public function insertOpeningPurchase($configId , PurchaseItem $purchaseItem)
     {
         $em  = $this->_em;
         $config = $em->getRepository(Config::class)->find($configId);
         $exist = $this->findOneBy(['purchaseItem' => $purchaseItem]);
+
         $voucherType = $em->getRepository(AccountVoucher::class)->findOneBy(['slug'=>'ov']);
         $entity = new AccountJournal();
         $entity->setConfig($config);
@@ -155,6 +158,93 @@ class AccountJournalRepository extends EntityRepository
         }
         return $exist;
     }
+
+
+    public function salesTransaction($entity,$data)
+    {
+        $em = $this->_em;
+        $journal = $em->getRepository(AccountJournal::class)->insertJournalOrderDelivery($entity,$data);
+        $this->insertSalesItem($journal,$entity);
+        $this->insertSalesCash($journal,$entity,$data);
+        $this->insertSalesAccountReceivable($journal,$entity);
+    }
+
+
+    private function insertSalesItem(AccountJournal $journal,OrderDelivery $entity)
+    {
+        $em = $this->_em;
+        $categories = $em->getRepository(OrderDeliveryItem::class)->returnCategoryBasePrice($entity->getId());
+        foreach ($categories as $category){
+            $account = $em->getRepository(AccountHead::class)->findOneBy(['accountProduct' => $category['categoryId']]);
+            $amount = $category['amount'];
+            $exist = $this->findOneBy(['processHead' => 'Delivery-Order','accountRefNo' => $entity->getId(),'accountHead' => $account]);
+            if(empty($exist)){
+                $transaction = new Transaction();
+                $transaction->setProcessHead('Delivery-Order');
+                $transaction->setProcess('Inventory-Sales');
+                $transaction->setAccountJournal($journal);
+                $transaction->setAccountRefNo($entity->getId());
+                $transaction->setAccountHead($account->getParent());
+                $transaction->setSubAccountHead($account);
+                $transaction->setAmount("-".$amount);
+                $transaction->setCredit($amount);
+                $em->persist($transaction);
+                $em->flush();
+                $this->updateAccountHeadBalance($account,'head');
+            }
+        }
+    }
+
+    private function insertSalesCash(AccountJournal $journal,OrderDelivery $entity,$data)
+    {
+        $em = $this->_em;
+        $amount = $entity->getAmount();
+        $exist = $this->findOneBy(['processHead' => 'Delivery-Order','accountRefNo' => $entity->getId(),'subAccountHead' => $entity->getBankAccountSubHead()]);
+        if(empty($exist) and $amount > 0 and $entity->getBankAccountSubHead()) {
+            $journalItem = $em->getRepository(AccountJournalItem::class)->insertCustomerPaymentReceive($entity,$data);
+            $transaction = new Transaction();
+            $transaction->setAccountJournal($journal);
+            $transaction->setAccountRefNo($entity->getId());
+            $transaction->setProcessHead('Delivery-Order');
+            $transaction->setProcess('Inventory-Sales');
+            $transaction->setUpdated($entity->getUpdated());
+            $transaction->setAccountHead($entity->getDebitAccountHead());
+            $transaction->setAccountJournalItem($journalItem);
+            if ($entity->getBankAccountSubHead()) {
+                $transaction->setSubAccountHead($entity->getBankAccountSubHead());
+            }
+            $transaction->setAmount($amount);
+            $transaction->setDebit($amount);
+            $this->_em->persist($transaction);
+            $this->_em->flush();
+            $this->updateAccountHeadBalance($transaction->getAccountHead(),'head');
+            $this->updateAccountHeadBalance($transaction->getSubAccountHead(),'subHead');
+        }
+    }
+
+    private function insertSalesAccountReceivable(AccountJournal $journal,OrderDelivery $entity)
+    {
+        $em = $this->_em;
+        $amount = ($entity->getSubTotal() - $entity->getAmount());
+        $accountSubHead = $entity->getDebitAccountSubHead();
+        $exist = $this->findOneBy(['processHead' => 'Delivery-Order','accountRefNo' => $entity->getId(),'subAccountHead' => $accountSubHead]);
+        if(empty($exist) and $amount > 0 and $accountSubHead){
+            $transaction = new Transaction();
+            $transaction->setAccountJournal($journal);
+            $transaction->setAccountRefNo($entity->getId());
+            $transaction->setProcessHead('Delivery-Order');
+            $transaction->setProcess('Inventory-Sales');
+            $transaction->setAccountHead($accountSubHead->getParent());
+            $transaction->setSubAccountHead($accountSubHead);
+            $transaction->setAmount($amount);
+            $transaction->setDebit($amount);
+            $em->persist($transaction);
+            $em->flush();
+            $this->updateAccountHeadBalance($transaction->getAccountHead(),'head');
+            $this->updateAccountHeadBalance($transaction->getSubAccountHead(),'subHead');
+        }
+    }
+
 
     public function insertJournalOrderDelivery(OrderDelivery $order, $data)
     {

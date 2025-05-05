@@ -20,6 +20,7 @@ class SettingModel extends Model
         'name',
         'setting_type_id',
         'domain_id',
+        'is_system',
         'status'
     ];
 

@@ -37,16 +37,9 @@ class AccountVoucherController extends Controller
     public function index(Request $request){
 
         $data = AccountVoucherModel::getRecords($request,$this->domain);
-        $response = new Response();
-        $response->headers->set('Content-Type','application/json');
-        $response->setContent(json_encode([
-            'message' => 'success',
-            'status' => Response::HTTP_OK,
-            'total' => $data['count'],
-            'data' => $data['entities']
-        ]));
-        $response->setStatusCode(Response::HTTP_OK);
-        return $response;
+        $service = new JsonRequestResponse();
+        return $service->returnPagingJosnResponse($data);
+
     }
 
 
@@ -69,7 +62,7 @@ class AccountVoucherController extends Controller
     public function show($id)
     {
         $service = new JsonRequestResponse();
-        $entity = SettingModel::find($id);
+        $entity = AccountVoucherModel::find($id);
         if (!$entity){
             $entity = 'Data not found';
         }
@@ -83,7 +76,7 @@ class AccountVoucherController extends Controller
     public function edit($id)
     {
         $service = new JsonRequestResponse();
-        $entity = SettingModel::find($id);
+        $entity = AccountVoucherModel::find($id);
         if (!$entity){
             $entity = 'Data not found';
         }
@@ -98,7 +91,7 @@ class AccountVoucherController extends Controller
     {
 
         $data = $request->validated();
-        $entity = SettingModel::find($id);
+        $entity = AccountVoucherModel::find($id);
         $entity->update($data);
         $service = new JsonRequestResponse();
         return $service->returnJosnResponse($entity);
@@ -110,7 +103,7 @@ class AccountVoucherController extends Controller
     public function destroy($id)
     {
         $service = new JsonRequestResponse();
-        SettingModel::find($id)->delete();
+        AccountVoucherModel::find($id)->delete();
         $entity = ['message'=>'delete'];
         $data = $service->returnJosnResponse($entity);
         return $data;
@@ -118,7 +111,7 @@ class AccountVoucherController extends Controller
 
 
     public function LocalStorage(Request $request){
-        $data = SettingModel::getRecordsForLocalStorage($request,$this->domain);
+        $data = AccountVoucherModel::getRecordsForLocalStorage($request,$this->domain);
         $response = new Response();
         $response->headers->set('Content-Type','application/json');
         $response->setContent(json_encode([
