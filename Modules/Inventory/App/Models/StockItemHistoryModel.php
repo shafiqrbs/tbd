@@ -4,6 +4,7 @@ namespace Modules\Inventory\App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Support\Facades\DB;
 
 class StockItemHistoryModel extends Model
 {
@@ -146,5 +147,49 @@ class StockItemHistoryModel extends Model
             'process' => 'approved',
             'created_by' => $domain['user_id']
         ];
+    }
+
+    public static function getUserWarehouseProductionItem($userId)
+    {
+        $sub = DB::table('inv_stock_item_history')
+            ->select('stock_item_id', 'warehouse_id', DB::raw('MAX(created_at) as max_created'))
+            ->groupBy('stock_item_id', 'warehouse_id');
+
+        $latestEntries = DB::table('inv_stock_item_history as h1')
+            ->select([
+                'h1.id',
+                'h1.stock_item_id',
+                'h1.sales_price',
+                'h1.quantity',
+                'h1.opening_quantity',
+                'h1.opening_balance',
+                'h1.closing_quantity',
+                'h1.closing_balance',
+                'h1.process',
+                'h1.mode',
+                'h1.warehouse_id',
+                'w.name as warehouse_name',
+                'si.name as item_name',
+                'si.uom',
+                'uw.id as user_warehouse_id'
+            ])
+            ->join('cor_user_warehouse as uw', function($join) use ($userId) {
+                $join->on('uw.warehouse_id', '=', 'h1.warehouse_id')
+                    ->where('uw.user_id', $userId);
+            })
+            ->join('cor_warehouses as w', 'w.id', '=', 'uw.warehouse_id')
+            ->join('inv_stock as si', 'si.id', '=', 'h1.stock_item_id')
+
+            ->joinSub($sub, 'h2', function($join) {
+                $join->on('h1.stock_item_id', '=', 'h2.stock_item_id')
+                    ->on('h1.warehouse_id', '=', 'h2.warehouse_id')
+                    ->on('h1.created_at', '=', 'h2.max_created');
+            })
+            ->where('h1.closing_quantity','>',0)
+            ->get()
+            ->toArray();
+
+        return $latestEntries;
+
     }
 }

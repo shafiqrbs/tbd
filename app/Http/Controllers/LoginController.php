@@ -12,6 +12,7 @@ use Modules\Core\App\Http\Requests\UserLoginRequest;
 use Modules\Core\App\Http\Requests\UserRequest;
 use Modules\Core\App\Models\UserModel;
 use Modules\Core\App\Models\UserWarehouseModel;
+use Modules\Inventory\App\Models\StockItemHistoryModel;
 
 class LoginController extends Controller
 {
@@ -47,6 +48,7 @@ class LoginController extends Controller
         $accessRole = \DB::table('cor_user_role')->where('user_id',$userExists->id)->first();
 
         $getUserWareHouse = UserWarehouseModel::getUserActiveWarehouse($userExists->id);
+        $getUserWareHouseItem = StockItemHistoryModel::getUserWarehouseProductionItem($userExists->id);
 
         $arrayData=[
             'id'=>$userExists->id,
@@ -59,6 +61,7 @@ class LoginController extends Controller
             'access_control_role' => $accessRole?$accessRole->access_control_role:[],
             'android_control_role' => $accessRole?$accessRole->android_control_role:[],
             'user_warehouse'=>$getUserWareHouse? $getUserWareHouse:[],
+            'production_item'=>$getUserWareHouseItem? $getUserWareHouseItem:[],
         ];
         return new JsonResponse([
             'status'=>200,
