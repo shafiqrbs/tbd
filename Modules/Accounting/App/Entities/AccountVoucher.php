@@ -289,8 +289,5 @@ class AccountVoucher
         $this->accountHeads = $accountHeads;
     }
 
-
-
-
 }
 
