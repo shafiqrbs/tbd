@@ -34,6 +34,12 @@ class AccountVoucher
      **/
     private $voucherType;
 
+    /**
+     * @ORM\ManyToMany(targetEntity="AccountHead")
+     * @ORM\JoinColumn(nullable=true, onDelete="cascade")
+     **/
+    private $accountHeads;
+
 
     /**
      * @var string
@@ -266,6 +272,24 @@ class AccountVoucher
     {
         $this->updatedAt = $updatedAt;
     }
+
+    /**
+     * @return mixed
+     */
+    public function getAccountHeads()
+    {
+        return $this->accountHeads;
+    }
+
+    /**
+     * @param mixed $accountHeads
+     */
+    public function setAccountHeads($accountHeads)
+    {
+        $this->accountHeads = $accountHeads;
+    }
+
+
 
 
 }
