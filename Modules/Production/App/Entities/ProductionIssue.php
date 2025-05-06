@@ -43,7 +43,7 @@ class ProductionIssue
      * @ORM\ManyToOne(targetEntity="Modules\Core\App\Entities\Warehouse")
      * @ORM\JoinColumn(onDelete="CASCADE")
      **/
-    private  $wearhouse;
+    private  $warehouse;
 
 
      /**
@@ -68,6 +68,18 @@ class ProductionIssue
      */
     private $process = "In-progress";
 
+
+    /**
+     * @var string
+     * @ORM\Column(name="issue_type", type="string", length=50, nullable=true)
+     */
+    private $issueType;
+
+    /**
+     * @ORM\ManyToOne(targetEntity="Modules\Core\App\Entities\Vendor")
+     **/
+    private  $vendor;
+
     /**
      * @Gedmo\Blameable(on="create")
      * @ORM\ManyToOne(targetEntity="Modules\Core\App\Entities\User")
@@ -83,7 +95,7 @@ class ProductionIssue
     /**
      * @var DateTime
      *
-     * @ORM\Column(type="datetime", nullable=true)
+     * @ORM\Column(type="date", nullable=true)
      */
     private $issueDate;
 

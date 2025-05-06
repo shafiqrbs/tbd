@@ -2,11 +2,11 @@
 
 namespace Modules\Inventory\App\Models;
 
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 
-class StockItemHistoryModel extends Model
+class StockItemHistoryModel_BK extends Model
 {
     use HasFactory;
 
@@ -43,14 +43,9 @@ class StockItemHistoryModel extends Model
     public static function openingStockQuantity($item, $process = 'opening',$domain)
     {
         try {
-            $configId = $item->config_id;
-            if ($process === 'production-issue'){
-                $findStockItem = StockItemModel::find($item->stock_item_id);
-                $configId = $findStockItem->config_id;
-            }
             // Fetch the latest stock history
             $existingStockHistory = self::where('stock_item_id', $item->stock_item_id)
-                ->where('config_id', $configId)
+                ->where('config_id', $item->config_id)
                 ->latest()
                 ->first();
 
@@ -59,7 +54,6 @@ class StockItemHistoryModel extends Model
                 'opening' => '+',
                 'purchase' => '+',
                 'production' => '-',
-                'production-issue' => '-',
                 'sales' => '-',
             ];
 
@@ -81,8 +75,7 @@ class StockItemHistoryModel extends Model
                 $closing_balance,
                 $quantity,
                 $process,
-                $domain,
-                $configId
+                $domain
             );
 
             // Create stock history record
@@ -106,9 +99,7 @@ class StockItemHistoryModel extends Model
             }
 
             // Log inventory history
-            if ($process != 'production-issue') {
-                StockItemInventoryHistoryModel::openingInventoryHistory($item, $stockHistory, $process, $domain);
-            }
+            StockItemInventoryHistoryModel::openingInventoryHistory($item, $stockHistory,$process,$domain);
 
             return true;
 
@@ -138,12 +129,12 @@ class StockItemHistoryModel extends Model
         return [$closing_quantity, $closing_balance, $quantity];
     }
 
-    private static function prepareStockHistoryData($existingStockHistory, $item, $closing_quantity, $closing_balance, $quantity, $process,$domain,$configId)
+    private static function prepareStockHistoryData($existingStockHistory, $item, $closing_quantity, $closing_balance, $quantity, $process,$domain)
     {
         return [
             'stock_item_id' => $item->stock_item_id,
             'item_name' => $item->name,
-            'config_id' => $configId,
+            'config_id' => $item->config_id,
             'quantity' => $quantity,
             'purchase_price' => $item->purchase_price ?? 0,
             'sales_price' => $item->sales_price ?? 0,

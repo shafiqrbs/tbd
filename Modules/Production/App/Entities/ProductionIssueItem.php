@@ -36,23 +36,33 @@ class ProductionIssueItem
      **/
     private  $stockItem;
 
+    /**
+     * @ORM\ManyToOne(targetEntity="Modules\Production\App\Entities\ProductionIssue")
+     * @ORM\JoinColumn(onDelete="CASCADE")
+     **/
+    private  $productionIssue;
+
 
     /**
      *
-     * @ORM\ManyToOne(targetEntity="Modules\Core\App\Entities\Setting")
+     * @ORM\ManyToOne(targetEntity="Modules\Core\App\Entities\Warehouse")
      * @ORM\JoinColumn(onDelete="CASCADE")
      **/
-    private  $wearhouse;
+    private  $warehouse;
 
 
 
     /**
      * @var string
-     *
      * @ORM\Column(name="name", type="string", nullable=true)
      */
     private $name;
 
+    /**
+     * @var float
+     * @ORM\Column(name="quantity", type="float",nullable=true)
+     */
+    private $quantity;
 
     /**
      * @var string
@@ -68,14 +78,6 @@ class ProductionIssueItem
      * @ORM\Column(name="process", type="string", length=50, nullable=true)
      */
     private $process = "In-progress";
-
-
-    /**`
-     * @var integer
-     *
-     * @ORM\Column(name="quantity", type="integer",nullable=true)
-     */
-    private $quantity;
 
     /**
      * @var float
@@ -96,7 +98,7 @@ class ProductionIssueItem
     /**
      * @var DateTime
      *
-     * @ORM\Column(type="datetime", nullable=true)
+     * @ORM\Column(type="date", nullable=true)
      */
     private $issueDate;
 

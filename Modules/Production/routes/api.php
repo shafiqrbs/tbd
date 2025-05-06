@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Route;
 use Modules\Production\App\Http\Controllers\ConfigController;
 use Modules\Production\App\Http\Controllers\ProductionInhouseController;
 use Modules\Production\App\Http\Controllers\ProductionBatchController;
+use Modules\Production\App\Http\Controllers\ProductionIssueController;
 use Modules\Production\App\Http\Controllers\ProductionRecipeController;
 use Modules\Production\App\Http\Controllers\ProductionRecipeItemsController;
 use Modules\Production\App\Http\Controllers\SettingController;
@@ -29,6 +30,17 @@ Route::prefix('/production/select')->middleware([HeaderAuthenticationMiddleware:
 });
 
 Route::prefix('/production')->middleware([HeaderAuthenticationMiddleware::class])->group(function() {
+
+    Route::apiResource('issue', ProductionIssueController::class)
+        ->middleware([HeaderAuthenticationMiddleware::class])
+        ->names([
+            'index' => 'production.issue.index',
+            'store' => 'production.issue.store',
+            'show' => 'production.issue.show',
+            'update' => 'production.issue.update',
+            'destroy' => 'production.issue.destroy'
+        ]);
+    ;
 
     Route::apiResource('setting', SettingController::class)
         ->middleware([HeaderAuthenticationMiddleware::class])
