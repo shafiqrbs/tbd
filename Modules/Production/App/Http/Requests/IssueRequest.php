@@ -41,7 +41,7 @@ class IssueRequest extends FormRequest
                     'issue_date' => 'required|date',
                     'issued_by' => 'required|string',
                     'issue_type' => 'required|string',
-                    'warehouse_id' => 'nullable',
+                    'issue_warehouse_id' => 'nullable',
                     'factory_id' => 'nullable',
                     'vendor_id' => 'nullable',
                     'narration' => 'nullable',

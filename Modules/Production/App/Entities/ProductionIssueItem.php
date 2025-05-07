@@ -46,7 +46,7 @@ class ProductionIssueItem
     /**
      *
      * @ORM\ManyToOne(targetEntity="Modules\Core\App\Entities\Warehouse")
-     * @ORM\JoinColumn(onDelete="CASCADE")
+     * @ORM\JoinColumn(name="product_warehouse_id",onDelete="CASCADE")
      **/
     private  $warehouse;
 

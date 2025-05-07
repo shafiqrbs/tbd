@@ -18,7 +18,7 @@ class ProductionIssueModel extends Model
         'process',
         'issue_date',
         'issue_type',
-        'warehouse_id',
+        'issue_warehouse_id',
         'production_batch_id',
         'invoice',
         'created_by_id',

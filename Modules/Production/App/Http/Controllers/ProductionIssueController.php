@@ -63,9 +63,12 @@ class ProductionIssueController extends Controller
 
             ProductionIssueItemModel::insertIssueItems($issue, $input['items']);
 
+            // auto approve production issue
             $issue->update(['approved_by_id' => $this->domain['user_id'],'process' => 'Approved']);
             if ($issue->issueItems->count() > 0) {
                 foreach ($issue->issueItems as $item) {
+                    $item['warehouse_id'] = $item['product_warehouse_id'];
+                    unset($item['product_warehouse_id']);
                     StockItemHistoryModel::openingStockQuantity($item, 'production-issue', $this->domain);
                 }
             }

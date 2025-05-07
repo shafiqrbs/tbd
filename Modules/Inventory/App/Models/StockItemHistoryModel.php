@@ -5,6 +5,7 @@ namespace Modules\Inventory\App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Support\Facades\DB;
+use Modules\Production\App\Models\ProductionStockHistory;
 
 class StockItemHistoryModel extends Model
 {
@@ -106,7 +107,9 @@ class StockItemHistoryModel extends Model
             }
 
             // Log inventory history
-            if ($process != 'production-issue') {
+            if ($process == 'production-issue') {
+                ProductionStockHistory::openingInventoryHistory($item, $stockHistory, $process, $domain);
+            }else{
                 StockItemInventoryHistoryModel::openingInventoryHistory($item, $stockHistory, $process, $domain);
             }
 
@@ -173,6 +176,7 @@ class StockItemHistoryModel extends Model
                 'h1.opening_quantity',
                 'h1.opening_balance',
                 'h1.closing_quantity',
+                'h1.purchase_price',
                 'h1.closing_balance',
                 'h1.process',
                 'h1.mode',

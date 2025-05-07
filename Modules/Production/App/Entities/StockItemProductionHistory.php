@@ -41,6 +41,12 @@ class StockItemProductionHistory
     protected  $productionIssue;
 
     /**
+     * @ORM\ManyToOne(targetEntity="ProductionIssueItem")
+     * @ORM\JoinColumn(onDelete="CASCADE")
+     **/
+    protected  $productionIssueItem;
+
+    /**
      * @ORM\ManyToOne(targetEntity="ProductionInventory")
      * @ORM\JoinColumn(onDelete="CASCADE")
      **/

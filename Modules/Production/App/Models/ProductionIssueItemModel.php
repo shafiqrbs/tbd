@@ -22,7 +22,7 @@ class ProductionIssueItemModel extends Model
         'quantity',
         'name',
         'uom',
-        'warehouse_id',
+        'product_warehouse_id',
         'purchase_price',
         'sales_price',
         'issue_date',
@@ -65,12 +65,13 @@ class ProductionIssueItemModel extends Model
                 'production_issue_id'       => $issue->id,
                 'config_id'      => $issue->config_id,
                 'stock_item_id'  => $findStockHistory->stock_item_id ?? null,
-                'warehouse_id'  => $issue->warehouse_id ?? null,
+                'product_warehouse_id'  => $item['product_warehouse_id'] ?? null,
                 'issue_date'  => $issue->issue_date ?? null,
                 'name'  => $item['display_name'] ?? null,
                 'quantity'  => $item['quantity'] ?? null,
                 'uom'  => $item['unit_name'] ?? null,
                 'sales_price'      => $item['sales_price'] ?? 0,
+                'purchase_price'      => $item['purchase_price'] ?? 0,
                 'created_at'     => $timestamp,
                 'updated_at'     => $timestamp
             ];
