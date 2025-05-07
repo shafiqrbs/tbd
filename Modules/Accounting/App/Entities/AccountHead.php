@@ -242,6 +242,13 @@ class AccountHead
     private $provideBankDetails = false;
 
     /**
+     * @var boolean
+     *
+     * @ORM\Column(type="boolean", nullable=true)
+     */
+    private $isPrivate = false;
+
+    /**
      * @var \DateTime
      * @Gedmo\Timestampable(on="create")
      * @ORM\Column(type="datetime",nullable=true)
@@ -844,6 +851,24 @@ class AccountHead
     {
         $this->earnPoint = $earnPoint;
     }
+
+    /**
+     * @return bool
+     */
+    public function isPrivate()
+    {
+        return $this->isPrivate;
+    }
+
+    /**
+     * @param bool $isPrivate
+     */
+    public function setIsPrivate($isPrivate)
+    {
+        $this->isPrivate = $isPrivate;
+    }
+
+
 
 
 

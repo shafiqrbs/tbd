@@ -34,9 +34,10 @@ class AccountHeadRequest extends FormRequest
                     'name' => 'required|string',
                     'code' => 'required',
                     'head_group' => 'required|string',
+                    'mother_account_id' => 'integer|nullable',
+                    'parent_id' => 'integer|nullable',
                 ];
             }
-
             default:break;
         }
     }

@@ -44,6 +44,7 @@ class AccountVoucherModel extends Model
                 'acc_voucher.short_name as short_name',
                 'acc_voucher.short_code as short_code',
                 'acc_voucher.mode as mode',
+                'acc_voucher.is_private as is_private',
                 'acc_voucher.status as status',
             ])
             ->where([

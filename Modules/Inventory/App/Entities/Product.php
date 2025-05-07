@@ -136,7 +136,12 @@ class Product
      */
     private $quantity=0;
 
-
+    /**
+     * @var boolean
+     *
+     * @ORM\Column(type="boolean", nullable=true)
+     */
+    private $isPrivate = false;
 
     /**
      * @var boolean
@@ -474,6 +479,24 @@ class Product
     {
         $this->unitMeasurement = $unitMeasurement;
     }
+
+    /**
+     * @return bool
+     */
+    public function isPrivate()
+    {
+        return $this->isPrivate;
+    }
+
+    /**
+     * @param bool $isPrivate
+     */
+    public function setIsPrivate($isPrivate)
+    {
+        $this->isPrivate = $isPrivate;
+    }
+
+
 
 }
 

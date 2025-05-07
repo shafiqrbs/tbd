@@ -31,7 +31,7 @@ class AccountHeadModel extends Model
         'amount',
         'credit',
         'debit',
-        'isParent',
+        'is_parent',
         'showAmount',
         'opening_balance',
         'credit_limit',
@@ -47,8 +47,8 @@ class AccountHeadModel extends Model
         'amount' => 0,
         'credit' => 0,
         'debit' => 0,
-        'isParent' => 0,
-        'showAmount' => 0,
+        'is_parent' => 0,
+        'show_amount' => 0,
         'opening_balance' => 0,
         'credit_limit' => 0,
         'credit_period' => 0,
@@ -361,7 +361,7 @@ class AccountHeadModel extends Model
             })->values()->toArray();
         return $data;
     }
-    public static function getAccountAllDropdownBySlug($domain,$head='account-head')
+    public static function getAccountAllDropdownBySlug($domain,$head='head')
     {
         $data = self::where('acc_head.config_id', $domain['acc_config'])
             ->leftjoin('acc_head as l_head', 'l_head.id', '=', 'acc_head.parent_id')
@@ -377,6 +377,7 @@ class AccountHeadModel extends Model
                 'acc_head.code',
                 'acc_head.head_group',
                 'acc_head.level',
+                'is_private as is_private',
             ])
             ->get()->toArray();
         return $data;

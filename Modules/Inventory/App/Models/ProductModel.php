@@ -29,6 +29,7 @@ class ProductModel extends Model
         'parent_id',
         'description',
         'quantity',
+        'is_private',
         'vendor_id',
     ];
 

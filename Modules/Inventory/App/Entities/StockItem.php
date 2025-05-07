@@ -419,6 +419,13 @@ class StockItem
      */
     private $offerProduct = false;
 
+    /**
+     * @var boolean
+     *
+     * @ORM\Column(type="boolean", nullable=true)
+     */
+    private $isPrivate = false;
+
 
     /**
      * @var \DateTime
@@ -1449,6 +1456,24 @@ class StockItem
     {
         $this->parentStockItem = $parentStockItem;
     }
+
+    /**
+     * @return bool
+     */
+    public function isPrivate()
+    {
+        return $this->isPrivate;
+    }
+
+    /**
+     * @param bool $isPrivate
+     */
+    public function setIsPrivate($isPrivate)
+    {
+        $this->isPrivate = $isPrivate;
+    }
+
+
 
 
 }

@@ -87,7 +87,7 @@ class AccountVoucherController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(AccountHeadRequest $request, $id)
+    public function update(AccountVoucherRequest $request, $id)
     {
 
         $data = $request->validated();

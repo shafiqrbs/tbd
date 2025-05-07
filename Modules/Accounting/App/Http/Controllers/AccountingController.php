@@ -107,11 +107,9 @@ class AccountingController extends Controller
     {
         $mode = $request->get('dropdown-type');
         $dropdown = AccountHeadModel::getAccountAllDropdownBySlug($this->domain,$mode);
-        return response()->json([
-            'status' => 200,
-            'success' => true,
-            'data' => $dropdown,
-        ]);
+        $service = new JsonRequestResponse();
+        return $service->returnJosnResponse($dropdown);
+
     }
 
 

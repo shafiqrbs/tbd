@@ -83,6 +83,13 @@ class AccountVoucher
      */
     private $status = true;
 
+    /**
+     * @var boolean
+     *
+     * @ORM\Column(type="boolean", nullable=true)
+     */
+    private $isPrivate = false;
+
 
     /**
      * @var \DateTime
@@ -288,6 +295,24 @@ class AccountVoucher
     {
         $this->accountHeads = $accountHeads;
     }
+
+    /**
+     * @return bool
+     */
+    public function isPrivate()
+    {
+        return $this->isPrivate;
+    }
+
+    /**
+     * @param bool $isPrivate
+     */
+    public function setIsPrivate($isPrivate)
+    {
+        $this->isPrivate = $isPrivate;
+    }
+
+
 
 }
 
