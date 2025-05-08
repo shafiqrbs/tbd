@@ -86,5 +86,65 @@ class ProductionElements extends Model
         return $data;
     }
 
+    public static function getProItemsWiseRecipeItems($proItemIds,$proConfig){
+        /*$items = self::where('pro_element.config_id',$proConfig)->whereIn('pro_element.production_item_id',$proItemIds)
+            ->join('pro_item','pro_item.id','=','pro_element.production_item_id')
+            ->join('inv_stock as pro_item_stock','pro_item_stock.id','=','pro_item.item_id')
+            ->join('inv_stock as recipe','recipe.id','=','pro_element.material_id')
+            ->select([
+                'pro_element.id',
+                'pro_element.material_id',
+                'pro_element.production_item_id',
+                'pro_item_stock.display_name as pro_item_name',
+                'recipe.display_name as recipe_name',
+                'recipe.uom as uom',
+                DB::raw('SUM(pro_element.quantity) as total_quantity'),
+            ])
+            ->groupBy('pro_element.material_id')
+            ->get()->toArray();*/
+
+        /*$items = self::where('pro_element.config_id', $proConfig)
+            ->whereIn('pro_element.production_item_id', $proItemIds)
+            ->join('pro_item', 'pro_item.id', '=', 'pro_element.production_item_id')
+            ->join('inv_stock as pro_item_stock', 'pro_item_stock.id', '=', 'pro_item.item_id')
+            ->join('inv_stock as recipe', 'recipe.id', '=', 'pro_element.material_id')
+            ->select([
+                'pro_element.material_id',
+                'pro_item_stock.display_name as pro_item_name',
+                'recipe.display_name as recipe_name',
+                'recipe.uom as uom',
+                DB::raw('SUM(pro_element.quantity) as total_quantity'),
+            ])
+            ->groupBy('pro_element.material_id')
+            ->get();
+
+// Extract and format all unique pro_item_name values into a comma-separated string
+        $proItemNames = $items->pluck('pro_item_name')->unique()->implode(', ');
+        dump($proItemNames);*/
+//        dump($proItemIds);
+
+        $items = self::where('pro_element.config_id', $proConfig)
+            ->whereIn('pro_element.production_item_id', $proItemIds)
+            ->join('pro_item', 'pro_item.id', '=', 'pro_element.production_item_id')
+            ->join('inv_stock as pro_item_stock', 'pro_item_stock.id', '=', 'pro_item.item_id')
+            ->join('inv_stock as recipe', 'recipe.id', '=', 'pro_element.material_id')
+            ->select([
+                'pro_element.material_id',
+                'recipe.display_name as recipe_name',
+                'recipe.uom as uom',
+                DB::raw('GROUP_CONCAT(DISTINCT pro_element.production_item_id SEPARATOR ", ") as production_item_id'),
+                DB::raw('GROUP_CONCAT(DISTINCT pro_item_stock.display_name SEPARATOR ", ") as pro_item_names'),
+                DB::raw('SUM(pro_element.quantity) as total_quantity'),
+            ])
+            ->groupBy('pro_element.material_id')
+            ->get()
+            ->map(function ($item, $index) {
+                $item->id = $index + 1;
+                return $item;
+            })
+            ->toArray();
+        return $items;
+    }
+
 
 }

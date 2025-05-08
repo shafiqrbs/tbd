@@ -526,4 +526,54 @@ class ProductionBatchController extends Controller
     }
 
 
+    public function batchDropdown(){
+        try {
+            $productionBatchDropdown = ProductionBatchModel::getBatchDropdown($this->domain);
+            // Return success response
+            return response()->json([
+                'success' => true,
+                'message' => 'Production batch dropdown.',
+                'data' => $productionBatchDropdown,
+            ], 201);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function getBatchRecipe($id){
+        try {
+            $findBatch = ProductionBatchModel::find($id);
+            if (!$findBatch) {
+                return response()->json([
+                    'status' => 404,
+                    'success' => false,
+                    'message' => 'Data not found',
+                ], 404);
+            }
+            $batchItemsId = $findBatch->batchItems->pluck('production_item_id')->toArray();
+            $recipeItems = [];
+            if (count($batchItemsId) > 0) {
+                $recipeItems = ProductionElements::getProItemsWiseRecipeItems($batchItemsId,$this->domain['pro_config']);
+            }
+
+            // Return success response
+            return response()->json([
+                'status' => 200,
+                'success' => true,
+                'message' => 'Production recipe items',
+                'data' => $recipeItems,
+            ], 200);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
+
 }

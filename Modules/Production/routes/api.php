@@ -26,6 +26,7 @@ Route::prefix('/production/select')->middleware([HeaderAuthenticationMiddleware:
     Route::get('/setting-type', [SettingController::class,'settingTypeDropdown'])->name('pro_setting_type_dropdown');
     Route::get('/config-dropdown', [ConfigController::class,'configDropdown'])->name('pro_config_dropdown');
     Route::get('/items-dropdown', [ProductionRecipeItemsController::class,'dropdown'])->name('pro_item_dropdown');
+    Route::get('/batch-dropdown', [ProductionBatchController::class,'batchDropdown'])->name('pro_batch_dropdown');
 
 });
 
@@ -101,6 +102,7 @@ Route::prefix('/production')->middleware([HeaderAuthenticationMiddleware::class]
     Route::post('/batch/item/inline-quantity-update', [ProductionBatchController::class,'batchItemQuantityInlineUpdate'])->name('production_batch_item_quantity_update');
     Route::post('/batch/approve/{id}', [ProductionBatchController::class,'batchApproved'])->name('production_batch_approve');
     Route::post('/batch/confirm-receive/{id}', [ProductionBatchController::class,'batchConfirmReceive'])->name('production_batch_receive_confirm');
+    Route::get('/batch/recipe/{id}', [ProductionBatchController::class,'getBatchRecipe'])->name('production_batch_wise_recipe');;
 
 
     Route::prefix('restore')->middleware([HeaderAuthenticationMiddleware::class])->group(function() {

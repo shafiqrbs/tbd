@@ -150,6 +150,11 @@ class ProductionBatchModel extends Model
         return $entity;
     }
 
+    public static function getBatchDropdown($domain)
+    {
+        return self::where([['pro_batch.config_id',$domain['pro_config']],['pro_batch.status',1]])->select(['pro_batch.id','pro_batch.invoice','mode','issue_date',DB::raw('DATE_FORMAT(pro_batch.created_at, "%d-%M-%Y") as created_date')])->get();
+    }
+
 
 
 }
