@@ -50,11 +50,6 @@ class CustomerController extends Controller
         $service = new JsonRequestResponse();
         $input = $request->validated();
         $input['domain_id'] = $this->domain['global_id'];
-        $input['customer_unique_id'] = "{$this->domain['global_id']}@{$input['mobile']}-{$input['name']}";
-        $params = ['domain' => $this->domain['global_id'],'table' => 'cor_customers','prefix' => 'EMP-'];
-        $pattern = $patternCodeService->customerCode($params);
-        $input['code'] = $pattern['code'];
-        $input['customerId'] = $pattern['generateId'];
         $entity = CustomerModel::create($input);
         $ledgerExist = AccountHeadModel::where('customer_id',$entity->id)->where('config_id', $this->domain['acc_config_id'])->first();
         if (empty($ledgerExist)){

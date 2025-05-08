@@ -71,6 +71,7 @@ class ConfigSalesModel extends Model
             'is_zero_receive_allow' => false,
             'discount_with_customer' => false,
             'is_bonus_quantity' => false,
+            'is_barcode' => false,
             'is_sales_auto_approved' => true,
         ];
 

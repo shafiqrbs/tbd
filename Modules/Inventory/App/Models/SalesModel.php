@@ -6,6 +6,7 @@ use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Support\Facades\DB;
+use Modules\AppsApi\App\Services\GeneratePatternCodeService;
 use Modules\Core\App\Models\CustomerModel;
 use Ramsey\Collection\Collection;
 
@@ -18,19 +19,36 @@ class SalesModel extends Model
     protected $guarded = ['id'];
 
     protected $fillable = [
-        'customer_id','config_id','invoice_batch_id','created_by_id','sales_by_id','sub_total','total','is_domain_sales_completed','approved_by_id','discount','discount_calculation','discount_type','payment','process','transaction_mode_id','sales_form'
+        'customer_id',
+        'config_id',
+        'invoice_batch_id',
+        'created_by_id',
+        'sales_by_id',
+        'sub_total',
+        'total',
+        'is_domain_sales_completed',
+        'approved_by_id',
+        'discount',
+        'discount_calculation',
+        'discount_type',
+        'payment',
+        'process',
+        'transaction_mode_id',
+        'sales_form'
     ];
+
+
 
     public static function boot() {
         parent::boot();
         self::creating(function ($model) {
-            $model->invoice = self::quickRandom();
+            $model->invoice = self::salesEventListener($model)['generateId'];
+            $model->code = self::salesEventListener($model)['code'];
             $date =  new \DateTime("now");
             $model->created_at = $date;
         });
 
         self::updating(function ($model) {
-            $model->invoice = self::quickRandom();
             $date =  new \DateTime("now");
             $model->updated_at = $date;
         });
@@ -40,6 +58,17 @@ class SalesModel extends Model
     {
         $pool = '0123456789';
         return substr(str_shuffle(str_repeat($pool, $length)), 0, $length);
+    }
+
+    public static function salesEventListener($model)
+    {
+        $patternCodeService = app(GeneratePatternCodeService::class);
+        $params = [
+            'config' => $model->config_id,
+            'table' => 'inv_sales',
+            'prefix' => 'INV-',
+        ];
+        return $patternCodeService->invoiceNo($params);
     }
 
     public function salesItems()
@@ -268,6 +297,5 @@ class SalesModel extends Model
 
         return $entity;
     }
-
 
 }

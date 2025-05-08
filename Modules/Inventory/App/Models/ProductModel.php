@@ -128,9 +128,10 @@ class ProductModel extends Model
                 'color.name as color_name',
                 'grade.name as grade_name',
                 'size.name as size_name',
-                'inv_stock.purchase_price',
-                'inv_stock.sales_price',
-                'inv_stock.average_price',
+                DB::raw('ROUND(inv_stock.price, 2) as price'),
+                DB::raw('ROUND(inv_stock.purchase_price, 2) as purchase_price'),
+                DB::raw('ROUND(inv_stock.sales_price, 2) as sales_price'),
+                DB::raw('ROUND(inv_stock.average_price, 2) as average_price'),
             ])->with(['images' => function ($query) {
                 $query->select([
                     'inv_product_gallery.id',
@@ -211,9 +212,10 @@ class ProductModel extends Model
                 'color.name as color_name',
                 'grade.name as grade_name',
                 'size.name as size_name',
-                'inv_stock.purchase_price',
-                'inv_stock.sales_price',
-                'inv_stock.average_price',
+                DB::raw('ROUND(inv_stock.price, 2) as price'),
+                DB::raw('ROUND(inv_stock.purchase_price, 2) as purchase_price'),
+                DB::raw('ROUND(inv_stock.sales_price, 2) as sales_price'),
+                DB::raw('ROUND(inv_stock.average_price, 2) as average_price'),
             ]);
 
         $entities = $products->orderBy('inv_product.id','DESC')->get()->toArray();

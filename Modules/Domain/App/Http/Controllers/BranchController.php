@@ -274,7 +274,7 @@ class BranchController extends Controller
             'customer_group_id' => $getCustomerGroupId->id ?? null, // Default group
             'slug' => Str::slug($childDomain->name),
             'sub_domain_id' => $childDomain->id,
-            'customerId' => $code['generateId'], // Generated ID from the pattern code
+            'customer_id' => $code['generate_id'], // Generated ID from the pattern code
         ];
     }
 

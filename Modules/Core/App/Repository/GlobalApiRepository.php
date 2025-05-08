@@ -57,7 +57,7 @@ class GlobalApiRepository extends EntityRepository {
         $em = $this->_em;
         $qb = $em->createQueryBuilder();
         $qb->from(Customer::class,'customer');
-        $qb->select('customer.id as customerId','customer.name as name','customer.mobile as mobile');
+        $qb->select('customer.id as customer_id','customer.name as name','customer.mobile as mobile');
         $qb->where("customer.globalOption = :globalOption");
         $qb->andWhere("customer.mobile IS NOT NULL");
         $qb->setParameter('globalOption', $option->getId());
@@ -67,7 +67,7 @@ class GlobalApiRepository extends EntityRepository {
         $data = array();
         foreach($result as $key => $row) {
             $data[$key]['global_id']            = (int) $option->getId();
-            $data[$key]['customer_id']          = (int) $row['customerId'];
+            $data[$key]['customer_id']          = (int) $row['customer_id'];
             $data[$key]['name']                 = $row['name'];
             $data[$key]['mobile']               = $row['mobile'];
         }

@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Facades\DB;
+use Modules\AppsApi\App\Services\GeneratePatternCodeService;
 use Modules\Core\App\Entities\Customer;
 
 
@@ -34,7 +35,7 @@ class CustomerModel extends Model
         'opening_balance',
         'marketing_id',
         'code',
-        'customerId',
+        'customer_id',
         'bloodGroup',
         'dob',
         'age',
@@ -54,7 +55,7 @@ class CustomerModel extends Model
         'diabetes',
         'firstName',
         'lastName',
-        'customerId',
+        'customer_id',
         'customer_unique_name',
         'unique_id',
         'status',
@@ -86,6 +87,8 @@ class CustomerModel extends Model
         self::creating(function ($model) {
             $date =  new \DateTime("now");
             $model->unique_id = self::quickRandom();
+            $model->customer_id = self::customerEventListener($model)['generateId'];
+            $model->code = self::customerEventListener($model)['code'];
             $model->created_at = $date;
             $model->updated_at = $date;
             $model->created = $date;
@@ -121,6 +124,17 @@ class CustomerModel extends Model
     {
         $pool = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
         return substr(str_shuffle(str_repeat($pool, $length)), 0, $length);
+    }
+
+    public static function customerEventListener($model)
+    {
+        $patternCodeService = app(GeneratePatternCodeService::class);
+        $params = [
+            'domain' => $model->domain_id,
+            'table' => 'cor_customers',
+            'prefix' => 'CUS-',
+        ];
+        return $patternCodeService->customerCode($params);
     }
 
 
@@ -185,7 +199,7 @@ class CustomerModel extends Model
                 'cor_customers.address',
                 'cor_customers.email',
                 'cor_customers.code',
-                'cor_customers.customerId as customer_id',
+                'cor_customers.customer_id as customer_id',
                 'cor_customers.alternative_mobile',
                 'cor_customers.reference_id',
                 'cor_customers.credit_limit',
@@ -232,5 +246,18 @@ class CustomerModel extends Model
                 'cor_customers.monthly_target_amount',
             ])
             ->first();
+    }
+
+    public static function insertSalesCustomer($domain,$input)
+    {
+        $customer['domain_id'] =  $domain;
+        $customer['name'] = ($input['customer_name']) ? $input['customer_name'] :'';
+        $customer['mobile'] = ($input['customer_mobile']) ? $input['customer_mobile'] :'';
+        $customer['email'] = ($input['customer_email']) ? $input['customer_email'] :'';
+        return self::create($customer);
+    }
+
+    public static function uniqueCustomerCheck($domain,$mobile,$name){
+        return self::where([['name',$name],['mobile',$mobile],['domain_id',$domain]])->first();
     }
 }

@@ -36,7 +36,7 @@ class ConfigController extends Controller
         $id = $this->domain['config_id'];
 
         $service = new JsonRequestResponse();
-        $entity = ConfigModel::with('domain','currency','businessModel','pos_invoice_mode','configProduct','configPurchase','configSales','configDiscount')->find($id);
+        $entity = ConfigModel::with('domain','currency','businessModel','pos_invoice_mode','configProduct','configPurchase','configSales','configDiscount','configVat')->find($id);
         $inv_product_type = SettingModel::where('parent_slug', 'product-type')->where('config_id', $id)
             ->select('id', 'slug', 'name', 'status')
             ->get()

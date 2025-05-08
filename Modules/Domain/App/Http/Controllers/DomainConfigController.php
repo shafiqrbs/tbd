@@ -21,6 +21,7 @@ use Modules\Inventory\App\Models\ConfigProductModel;
 use Modules\Inventory\App\Models\ConfigPurchaseModel;
 use Modules\Inventory\App\Models\ConfigRequsitionModel;
 use Modules\Inventory\App\Models\ConfigSalesModel;
+use Modules\Inventory\App\Models\ConfigVatModel;
 use Modules\NbrVatTax\App\Models\NbrVatConfigModel;
 use Modules\Production\App\Models\ProductionConfig;
 use Symfony\Component\HttpFoundation\Response as ResponseAlias;
@@ -43,7 +44,7 @@ class DomainConfigController extends Controller
         $entity = DomainModel::with('accountConfig',
             'accountConfig.capital_investment','accountConfig.account_cash','accountConfig.account_bank','accountConfig.account_mobile','accountConfig.account_user','accountConfig.account_vendor','accountConfig.account_customer','accountConfig.account_product_group','accountConfig.account_category',
             'accountConfig.voucher_stock_opening','accountConfig.voucher_purchase','accountConfig.voucher_sales','accountConfig.voucher_purchase_return','accountConfig.voucher_stock_reconciliation',
-            'productionConfig','gstConfig','inventoryConfig','inventoryConfig.configPurchase','inventoryConfig.configSales','inventoryConfig.configProduct','inventoryConfig.configDiscount','inventoryConfig.businessModel','inventoryConfig.currency')->find($this
+            'productionConfig','gstConfig','inventoryConfig','inventoryConfig.configPurchase','inventoryConfig.configSales','inventoryConfig.configProduct','inventoryConfig.configDiscount','inventoryConfig.configVat','inventoryConfig.businessModel','inventoryConfig.currency')->find($this
             ->domain['global_id']);
         $service = new JsonRequestResponse();
         return $service->returnJosnResponse($entity);
@@ -55,7 +56,7 @@ class DomainConfigController extends Controller
         $entity = DomainModel::with('accountConfig',
             'accountConfig.capital_investment','accountConfig.account_cash','accountConfig.account_bank','accountConfig.account_mobile','accountConfig.account_user','accountConfig.account_vendor','accountConfig.account_customer','accountConfig.account_product_group','accountConfig.account_category',
             'accountConfig.voucher_stock_opening','accountConfig.voucher_purchase','accountConfig.voucher_sales','accountConfig.voucher_purchase_return','accountConfig.voucher_stock_reconciliation',
-            'productionConfig','gstConfig','inventoryConfig','inventoryConfig.configPurchase','inventoryConfig.configSales','inventoryConfig.configProduct','inventoryConfig.configDiscount','inventoryConfig.businessModel','inventoryConfig.currency')->find($id);
+            'productionConfig','gstConfig','inventoryConfig','inventoryConfig.configPurchase','inventoryConfig.configSales','inventoryConfig.configProduct','inventoryConfig.configDiscount','inventoryConfig.configVat','inventoryConfig.businessModel','inventoryConfig.currency')->find($id);
         return $entity;
     }
 
@@ -187,6 +188,39 @@ class DomainConfigController extends Controller
         }
     }
 
+    public function inventoryVatConfig(Request $request,$id)
+    {
+
+        $domain = UserModel::getDomainData($id);
+
+        $config = $domain['config_id'];
+        $entity = ConfigVatModel::updateOrCreate([
+            'config_id' => $config,
+        ]);
+        DB::beginTransaction();
+        try {
+            $entity->update($request->all());
+            DB::commit();
+            $service = new JsonRequestResponse();
+            $return = $service->returnJosnResponse($this->domainConfigById($id));
+            return $return;
+
+        } catch (ModelNotFoundException $e) {
+            DB::rollBack();
+            return response()->json([
+                'message' => 'Resource not found',
+                'status'  => ResponseAlias::HTTP_NOT_FOUND
+            ], ResponseAlias::HTTP_NOT_FOUND);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'message' => 'Operation failed: ' . $e->getMessage(),
+                'error'   => $e->getMessage(),
+                'status'  => ResponseAlias::HTTP_INTERNAL_SERVER_ERROR
+            ], ResponseAlias::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
+
     public function inventoryDiscountConfig(Request $request,$id)
     {
 
@@ -252,36 +286,6 @@ class DomainConfigController extends Controller
     }
 
     public function inventoryPosConfig(Request $request,$id)
-    {
-
-        $entity = ConfigModel::updateOrCreate([
-            'domain_id' =>$id,
-        ]);
-        DB::beginTransaction();
-        try {
-            $entity->update($request->all());
-            DB::commit();
-            $service = new JsonRequestResponse();
-            $return = $service->returnJosnResponse($this->domainConfigById($id));
-            return $return;
-
-        } catch (ModelNotFoundException $e) {
-            DB::rollBack();
-            return response()->json([
-                'message' => 'Resource not found',
-                'status'  => ResponseAlias::HTTP_NOT_FOUND
-            ], ResponseAlias::HTTP_NOT_FOUND);
-        } catch (\Exception $e) {
-            DB::rollBack();
-            return response()->json([
-                'message' => 'Operation failed: ' . $e->getMessage(),
-                'error'   => $e->getMessage(),
-                'status'  => ResponseAlias::HTTP_INTERNAL_SERVER_ERROR
-            ], ResponseAlias::HTTP_INTERNAL_SERVER_ERROR);
-        }
-    }
-
-    public function inventoryVatConfig(Request $request,$id)
     {
 
         $entity = ConfigModel::updateOrCreate([
@@ -451,6 +455,11 @@ class DomainConfigController extends Controller
 
         // Step 4: Create the accounting data
         ConfigPurchaseModel::updateOrCreate([
+            'config_id' => $domain->config_id,
+        ]);
+
+        // Step 4: Create the accounting data
+        ConfigVatModel::updateOrCreate([
             'config_id' => $domain->config_id,
         ]);
 

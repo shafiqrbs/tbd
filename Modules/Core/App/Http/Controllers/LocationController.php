@@ -49,7 +49,7 @@ class LocationController extends Controller
         $params = ['domain' => $domain,'table' => 'cor_customers'];
         $pattern = $patternCodeService->customerCode($params);
         $input['code'] = $pattern['code'];
-        $input['customerId'] = $pattern['generateId'];
+        $input['customer_id'] = $pattern['generateId'];
         DB::beginTransaction();
         try {
             $entity = CustomerModel::create($input);

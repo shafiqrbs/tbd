@@ -10,7 +10,7 @@ use Gedmo\Mapping\Annotation as Gedmo;
  * Customer
  * @ORM\Table(name="cor_customers" , indexes={
  *     @ORM\Index(name="allowIndex", columns={"name"}),
- *     @ORM\Index(name="customerIdIndex", columns={"customerId"}),
+ *     @ORM\Index(name="customerIdIndex", columns={"customer_id"}),
  *     @ORM\Index(name="mobileIndex", columns={"mobile"}),
  *     @ORM\Index(name="createdIndex", columns={"created_at"}),
  *     @ORM\Index(name="updatedIndex", columns={"updated_at"}),
@@ -94,7 +94,7 @@ class Customer
     /**
      * @var string
      *
-     * @ORM\Column(name="customerId", type="string",  nullable=true)
+     * @ORM\Column(name="customer_id", type="string",  nullable=true)
      */
     private $customerId;
 

@@ -81,6 +81,13 @@ class StockItemHistory
      */
     private $openingQuantity= 0.00;
 
+    /**
+     * @var float
+     *
+     * @ORM\Column(type="float", nullable = true)
+     */
+    private $warehouseOpeningQuantity= 0.00;
+
 
     /**
      * @var float
@@ -88,6 +95,13 @@ class StockItemHistory
      * @ORM\Column(type="float", nullable = true)
      */
     private $openingBalance= 0.00;
+
+    /**
+     * @var float
+     *
+     * @ORM\Column(type="float", nullable = true)
+     */
+    private $warehouseOpeningBalance= 0.00;
 
     /**
      * @var float
@@ -102,6 +116,20 @@ class StockItemHistory
      * @ORM\Column(type="float", nullable = true)
      */
     private $closingBalance= 0.00;
+
+    /**
+     * @var float
+     *
+     * @ORM\Column(type="float", nullable = true)
+     */
+    private $warehouseClosingQuantity= 0.00;
+
+    /**
+     * @var float
+     *
+     * @ORM\Column(type="float", nullable = true)
+     */
+    private $warehouseClosingBalance= 0.00;
 
 
     /**
@@ -470,18 +498,116 @@ class StockItemHistory
     /**
      * @return mixed
      */
-    public function getWearhouse()
+    public function getWarehouse()
     {
-        return $this->wearhouse;
+        return $this->warehouse;
     }
 
     /**
-     * @param mixed $wearhouse
+     * @param mixed $warehouse
      */
-    public function setWearhouse($wearhouse)
+    public function setWarehouse($warehouse)
     {
-        $this->wearhouse = $wearhouse;
+        $this->warehouse = $warehouse;
     }
+
+    /**
+     * @return float
+     */
+    public function getSalesPrice()
+    {
+        return $this->salesPrice;
+    }
+
+    /**
+     * @param float $salesPrice
+     */
+    public function setSalesPrice($salesPrice)
+    {
+        $this->salesPrice = $salesPrice;
+    }
+
+    /**
+     * @return float
+     */
+    public function getPurchasePrice()
+    {
+        return $this->purchasePrice;
+    }
+
+    /**
+     * @param float $purchasePrice
+     */
+    public function setPurchasePrice($purchasePrice)
+    {
+        $this->purchasePrice = $purchasePrice;
+    }
+
+    /**
+     * @return float
+     */
+    public function getWarehouseOpeningQuantity()
+    {
+        return $this->warehouseOpeningQuantity;
+    }
+
+    /**
+     * @param float $warehouseOpeningQuantity
+     */
+    public function setWarehouseOpeningQuantity($warehouseOpeningQuantity)
+    {
+        $this->warehouseOpeningQuantity = $warehouseOpeningQuantity;
+    }
+
+    /**
+     * @return float
+     */
+    public function getWarehouseOpeningBalance()
+    {
+        return $this->warehouseOpeningBalance;
+    }
+
+    /**
+     * @param float $warehouseOpeningBalance
+     */
+    public function setWarehouseOpeningBalance($warehouseOpeningBalance)
+    {
+        $this->warehouseOpeningBalance = $warehouseOpeningBalance;
+    }
+
+    /**
+     * @return float
+     */
+    public function getWarehouseClosingQuantity()
+    {
+        return $this->warehouseClosingQuantity;
+    }
+
+    /**
+     * @param float $warehouseClosingQuantity
+     */
+    public function setWarehouseClosingQuantity($warehouseClosingQuantity)
+    {
+        $this->warehouseClosingQuantity = $warehouseClosingQuantity;
+    }
+
+    /**
+     * @return float
+     */
+    public function getWarehouseClosingBalance()
+    {
+        return $this->warehouseClosingBalance;
+    }
+
+    /**
+     * @param float $warehouseClosingBalance
+     */
+    public function setWarehouseClosingBalance($warehouseClosingBalance)
+    {
+        $this->warehouseClosingBalance = $warehouseClosingBalance;
+    }
+
+
 
 
 

@@ -133,6 +133,11 @@ class ConfigModel extends Model
         return $this->hasOne(ConfigDiscountModel::class, 'config_id', 'id');
     }
 
+    public function configVat(): HasOne
+    {
+        return $this->hasOne(ConfigVatModel::class, 'config_id', 'id');
+    }
+
     public function configPurchase(): HasOne
     {
         return $this->hasOne(ConfigPurchaseModel::class, 'config_id', 'id');

@@ -51,10 +51,10 @@ class CustomerRepository extends EntityRepository {
         $query = $this->createQueryBuilder('e');
         $query->select('e.id as id');
         $query->addSelect('e.id as customer');
-        $query->addSelect('CONCAT(e.customerId, \' - \',e.mobile, \' - \', e.name) AS text');
+        $query->addSelect('CONCAT(e.customer_id, \' - \',e.mobile, \' - \', e.name) AS text');
         $query->where($query->expr()->like("e.mobile", "'$q%'"  ));
         $query->orWhere($query->expr()->like("e.name", "'%$q%'"  ));
-        $query->orWhere($query->expr()->like("e.customerId", "'%$q%'"  ));
+        $query->orWhere($query->expr()->like("e.customer_id", "'%$q%'"  ));
         $query->andWhere("e.globalOption = :globalOption");
         $query->setParameter('globalOption', $globalOption->getId());
         $query->andWhere('e.status=1');
@@ -120,12 +120,12 @@ class CustomerRepository extends EntityRepository {
 
         $query->select('e.mobile as id');
         $query->addSelect('e.id as customer');
-        $query->addSelect('e.customerId as text');
+        $query->addSelect('e.customer_id as text');
         //$query->addSelect('CONCAT(e.customerId, " - ", e.name) AS text');
-        $query->where($query->expr()->like("e.customerId", "'$q%'"  ));
+        $query->where($query->expr()->like("e.customer_id", "'$q%'"  ));
         $query->andWhere("e.globalOption = :globalOption");
         $query->setParameter('globalOption', $globalOption->getId());
-        $query->orderBy('e.customerId', 'ASC');
+        $query->orderBy('e.customer_id', 'ASC');
         $query->setMaxResults( '10' );
         return $query->getQuery()->getResult();
 

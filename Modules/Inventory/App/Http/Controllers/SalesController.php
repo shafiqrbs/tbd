@@ -14,6 +14,7 @@ use Modules\Accounting\App\Entities\AccountHead;
 use Modules\Accounting\App\Entities\AccountJournal;
 use Modules\Accounting\App\Entities\Config;
 use Modules\Accounting\App\Models\TransactionModeModel;
+use Modules\AppsApi\App\Services\GeneratePatternCodeService;
 use Modules\AppsApi\App\Services\JsonRequestResponse;
 use Modules\Core\App\Models\CustomerModel;
 use Modules\Core\App\Models\UserModel;
@@ -67,7 +68,7 @@ class SalesController extends Controller
      * Store a newly created resource in storage.
      */
 
-    public function store(SalesRequest $request, EntityManager $em)
+    public function store(SalesRequest $request, EntityManager $em,GeneratePatternCodeService $patternCodeService)
     {
         $input = $request->validated();
         $input['config_id'] = $this->domain['config_id'];
@@ -81,6 +82,7 @@ class SalesController extends Controller
             if (empty($input['sales_by_id'])){
                 $input['sales_by_id'] = $this->domain['user_id'];
             }
+            $input['inv_config'] = $this->domain['inv_config'];
             // Create Sales Record
             $sales = SalesModel::create($input);
             $sales->refresh();
@@ -91,23 +93,28 @@ class SalesController extends Controller
             // Fetch Sales Data for Response
             $salesData = SalesModel::getShow($sales->id, $this->domain);
 
-
-            // Stock Maintenance Logic (Auto Approval)
-
-            if(empty($input['customer_id'])){
+            // Customer Maintenance Logic (Auto Approval)
+            if(empty($input['customer_id']) and $input['customer_name'] and $input['customer_mobile']) {
+                $findCustomer = CustomerModel::uniqueCustomerCheck($this->domain['domain_id'],$input['customer_mobile'],$input['customer_name']);
+                if(empty($findCustomer)){
+                    $findCustomer = CustomerModel::insertSalesCustomer($this->domain['domain_id'],$input);
+                    $findCustomer = $findCustomer->refresh();
+                }
+            }elseif(empty($input['customer_id'])){
                 $domain = DomainModel::find($this->domain->domain_id);
                 $license = ($domain['license_no']) ? $domain['license_no'] : $domain['mobile'];
                 $findCustomer = CustomerModel::where([
                     ['is_default_customer', '=', 1],
+                    ['mobile', '=', $license],
                     ['domain_id', '=', $this->domain->domain_id],
-                ])->select('id')->first()->id;
+                ])->select('id')->first();
             }else{
-                $findCustomer = CustomerModel::find($input['customer_id'])->id;
+                $findCustomer = CustomerModel::find($input['customer_id']);
             }
-            $findInvConfig = ConfigSalesModel::where('config_id',$this->domain['inv_config'])->first();
 
+            $findInvConfig = ConfigSalesModel::where('config_id',$this->domain['inv_config'])->first();
             if ($findInvConfig->is_sales_auto_approved) {
-                $sales->update(['customer_id' => $findCustomer, 'approved_by_id' => $this->domain['user_id']]);
+                $sales->update(['customer_id' => $findCustomer->id, 'approved_by_id' => $this->domain['user_id']]);
                 if ($sales->salesItems->count() > 0) {
                     foreach ($sales->salesItems as $item) {
                         StockItemHistoryModel::openingStockQuantity($item, 'sales', $this->domain);
@@ -116,7 +123,8 @@ class SalesController extends Controller
             }else{
                 $sales->update(['customer_id' => $findCustomer]);
             }
-            $em->getRepository(AccountJournal::class)->insertAccountSales($sales->id);
+
+          //  $em->getRepository(AccountJournal::class)->insertAccountSales($sales->id);
 
             // Commit Transaction
             DB::commit();

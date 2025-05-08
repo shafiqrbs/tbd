@@ -6,6 +6,7 @@ use Cviebrock\EloquentSluggable\Sluggable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Facades\DB;
 use Modules\Domain\App\Models\B2BCategoryPriceMatrixModel;
 use Modules\Inventory\App\Entities\Product;
 use Modules\Inventory\App\Entities\StockItem;
@@ -200,8 +201,10 @@ class StockItemModel extends Model
                     'unit_id'           => $product->unit_id ?? null,
                     'unit_name'         => $product->unit->name ?? null,
                     'quantity'          => $stock->quantity,
-                    'sales_price'       => $stock->sales_price,
-                    'purchase_price'    => $stock->purchase_price,
+                    'price'       => ROUND($stock->price,2),
+                    'sales_price'       => ROUND($stock->sales_price,2),
+                    'purchase_price'    => ROUND($stock->purchase_price,2),
+                    'average_price'    => ROUND($stock->average_price,2),
                     'barcode'           => $stock->barcode,
                     'product_nature'    => $product->setting->slug ?? null,
                     'feature_image'     => optional(optional($product)->images)->feature_image ?? null,

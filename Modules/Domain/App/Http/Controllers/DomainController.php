@@ -159,7 +159,7 @@ class DomainController extends Controller
                     ],
                     [
                         'slug' => Str::slug($entity->name),
-                        'customerId' => $code['generateId'],
+                        'customer_id' => $code['generate_id'],
                         'email' => $entity->email,
                         'address' => $entity->address,
                         'is_default_customer' => true,
