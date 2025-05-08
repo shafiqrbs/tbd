@@ -36,6 +36,8 @@ class ConfigSalesModel extends Model
         'is_multi_price',
         'item_sales_percent',
         'discount_with_customer',
+        'is_bonus_quantity',
+        'is_barcode',
         'default_customer_group_id'
     ];
 
@@ -68,6 +70,7 @@ class ConfigSalesModel extends Model
             'is_multi_price' => false,
             'is_zero_receive_allow' => false,
             'discount_with_customer' => false,
+            'is_bonus_quantity' => false,
             'is_sales_auto_approved' => true,
         ];
 

@@ -117,6 +117,22 @@ class ConfigSales
 
     /**
      * @var boolean
+     *
+     * @ORM\Column(type="boolean",options={"default"="false"})
+     */
+    private $isBonusQuantity;
+
+
+     /**
+     * @var boolean
+     *
+     * @ORM\Column(type="boolean",options={"default"="false"})
+     */
+    private $isBarcode;
+
+
+    /**
+     * @var boolean
      * @ORM\Column(type="boolean",options={"default"="true"})
      */
     private $isSalesAutoApproved;
@@ -466,6 +482,37 @@ class ConfigSales
         $this->discountWithCustomer = $discountWithCustomer;
     }
 
+    /**
+     * @return bool
+     */
+    public function isBonusQuantity()
+    {
+        return $this->isBonusQuantity;
+    }
+
+    /**
+     * @param bool $isBonusQuantity
+     */
+    public function setIsBonusQuantity($isBonusQuantity)
+    {
+        $this->isBonusQuantity = $isBonusQuantity;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isBarcode()
+    {
+        return $this->isBarcode;
+    }
+
+    /**
+     * @param bool $isBarcode
+     */
+    public function setIsBarcode($isBarcode)
+    {
+        $this->isBarcode = $isBarcode;
+    }
 
 
 }
