@@ -78,7 +78,7 @@ class RequisitionItem
      * @ORM\ManyToOne(targetEntity="Modules\Core\App\Entities\Warehouse")
      * @ORM\JoinColumn(onDelete="CASCADE")
      **/
-    private  $wearhouse;
+    private  $warehouse;
 
 
     /**

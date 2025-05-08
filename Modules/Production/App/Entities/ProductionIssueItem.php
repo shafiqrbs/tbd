@@ -51,12 +51,18 @@ class ProductionIssueItem
     private  $warehouse;
 
 
-
     /**
      * @var string
      * @ORM\Column(name="name", type="string", nullable=true)
      */
     private $name;
+
+    /**
+     * @var float
+     * @ORM\Column(name="batch_quantity", type="float",nullable=true)
+     */
+    private $batchQuantity;
+
 
     /**
      * @var float

@@ -30,14 +30,6 @@ class ProductionIssue
      **/
     private $config;
 
-    /**
-     *
-     * @ORM\ManyToOne(targetEntity="Modules\Core\App\Entities\Setting")
-     * @ORM\JoinColumn(onDelete="CASCADE")
-     **/
-    private  $factory;
-
-
      /**
      *
      * @ORM\ManyToOne(targetEntity="Modules\Core\App\Entities\Warehouse")
@@ -45,6 +37,10 @@ class ProductionIssue
      **/
     private  $warehouse;
 
+    /**
+     * @ORM\ManyToOne(targetEntity="Modules\Core\App\Entities\Vendor")
+     **/
+    private  $vendor;
 
      /**
      *
@@ -75,10 +71,7 @@ class ProductionIssue
      */
     private $issueType;
 
-    /**
-     * @ORM\ManyToOne(targetEntity="Modules\Core\App\Entities\Vendor")
-     **/
-    private  $vendor;
+
 
     /**
      * @Gedmo\Blameable(on="create")
