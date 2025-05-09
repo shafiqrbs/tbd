@@ -7,6 +7,7 @@ use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Modules\Inventory\App\Models\SalesModel;
 use Modules\Inventory\App\Models\StockItemHistoryModel;
+use Modules\Inventory\App\Models\StockItemModel;
 
 
 class ProductionIssueItemModel extends Model
@@ -26,6 +27,7 @@ class ProductionIssueItemModel extends Model
         'purchase_price',
         'sales_price',
         'issue_date',
+        'batch_quantity',
         'production_issue_id'
     ];
 
@@ -60,11 +62,23 @@ class ProductionIssueItemModel extends Model
         $timestamp = Carbon::now();
 
         $formattedItems = array_map(function ($item) use ($issue, $timestamp) {
-            $findStockHistory = StockItemHistoryModel::find($item['product_id']);
+            $stockId = null;
+            if ($item['type'] === 'batch_issue') {
+                $findStockHistory = StockItemModel::find($item['product_id']);
+                if ($findStockHistory) {
+                    $stockId = $findStockHistory->id;
+                }
+            } elseif ($item['type'] === 'general_issue') {
+                $findStockHistory = StockItemHistoryModel::find($item['product_id']);
+                if ($findStockHistory) {
+                    $stockId = $findStockHistory->stock_item_id;
+                }
+            }
+
             return [
                 'production_issue_id'       => $issue->id,
                 'config_id'      => $issue->config_id,
-                'stock_item_id'  => $findStockHistory->stock_item_id ?? null,
+                'stock_item_id'  => $stockId ?? null,
                 'product_warehouse_id'  => $item['product_warehouse_id'] ?? null,
                 'issue_date'  => $issue->issue_date ?? null,
                 'name'  => $item['display_name'] ?? null,
@@ -72,6 +86,7 @@ class ProductionIssueItemModel extends Model
                 'uom'  => $item['unit_name'] ?? null,
                 'sales_price'      => $item['sales_price'] ?? 0,
                 'purchase_price'      => $item['purchase_price'] ?? 0,
+                'batch_quantity'      => $item['batch_quantity'] ?? 0,
                 'created_at'     => $timestamp,
                 'updated_at'     => $timestamp
             ];

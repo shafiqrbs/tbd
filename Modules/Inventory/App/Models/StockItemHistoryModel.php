@@ -183,6 +183,7 @@ class StockItemHistoryModel extends Model
                 'h1.warehouse_id',
                 'w.name as warehouse_name',
                 'si.name as item_name',
+                'si.quantity as stock_quantity',
                 'si.uom',
                 'uw.id as user_warehouse_id'
             ])

@@ -555,9 +555,10 @@ class ProductionBatchController extends Controller
                 ], 404);
             }
             $batchItemsId = $findBatch->batchItems->pluck('production_item_id')->toArray();
+            $batchItems = $findBatch->batchItems->pluck('id')->toArray();
             $recipeItems = [];
             if (count($batchItemsId) > 0) {
-                $recipeItems = ProductionElements::getProItemsWiseRecipeItems($batchItemsId,$this->domain['pro_config']);
+                $recipeItems = ProductionElements::getProItemsWiseRecipeItems($batchItemsId,$this->domain['pro_config'],$batchItems);
             }
 
             // Return success response
