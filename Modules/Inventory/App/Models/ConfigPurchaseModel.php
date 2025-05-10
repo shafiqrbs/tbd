@@ -29,8 +29,13 @@ class ConfigPurchaseModel extends Model
         'search_by_product_nature',
         'search_by_category',
         'show_product',
+        'item_percent',
         'is_measurement_enable',
-        'is_purchase_auto_approved'
+        'is_purchase_auto_approved',
+        'is_warehouse',
+        'is_bonus_quantity',
+        'is_purchase_by_purchase_price',
+        'is_barcode'
     ];
 
 
@@ -56,7 +61,12 @@ class ConfigPurchaseModel extends Model
             'search_by_category' => false,
             'show_product' => false,
             'is_measurement_enable' => false,
-            'is_purchase_auto_approved' => false
+            'is_purchase_auto_approved' => false,
+            'item_percent' => false,
+            'is_warehouse' => false,
+            'is_bonus_quantity' => false,
+            'is_purchase_by_purchase_price' => false,
+            'is_barcode' => false
         ];
 
         $columns = \Illuminate\Support\Facades\Schema::getColumnListing($table);

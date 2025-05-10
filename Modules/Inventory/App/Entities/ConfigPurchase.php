@@ -74,8 +74,6 @@ class ConfigPurchase
     private $defaultVendorGroup;
 
 
-
-
     /**
      * @var boolean
      *
@@ -89,6 +87,39 @@ class ConfigPurchase
      * @ORM\Column(type="boolean",options={"default"="true"})
      */
     private $isPurchaseAutoApproved;
+
+
+     /**
+     * @var boolean
+     * @ORM\Column(type="boolean",options={"default"="true"})
+     */
+    private $isBarcode;
+
+
+     /**
+     * @var boolean
+     * @ORM\Column(type="boolean",options={"default"="true"})
+     */
+    private $itemPercent;
+
+    /**
+     * @var boolean
+     * @ORM\Column(type="boolean",options={"default"="true"})
+     */
+    private $isWarehouse;
+
+    /**
+     * @var boolean
+     * @ORM\Column(type="boolean",options={"default"="true"})
+     */
+    private $isBonusQuantity;
+
+
+    /**
+     * @var boolean
+     * @ORM\Column(type="boolean",options={"default"="true"})
+     */
+    private $isPurchaseByPurchasePrice;
 
 
     /**
@@ -283,117 +314,6 @@ class ConfigPurchase
         $this->multiUnit = $multiUnit;
     }
 
-    /**
-     * @return bool
-     */
-    public function isPayFirst()
-    {
-        return $this->isPayFirst;
-    }
-
-    /**
-     * @param bool $isPayFirst
-     */
-    public function setIsPayFirst($isPayFirst)
-    {
-        $this->isPayFirst = $isPayFirst;
-    }
-
-    /**
-     * @return bool
-     */
-    public function isZeroReceiveAllow()
-    {
-        return $this->isZeroReceiveAllow;
-    }
-
-    /**
-     * @param bool $isZeroReceiveAllow
-     */
-    public function setIsZeroReceiveAllow($isZeroReceiveAllow)
-    {
-        $this->isZeroReceiveAllow = $isZeroReceiveAllow;
-    }
-
-    /**
-     * @return bool
-     */
-    public function isDueSalesWithoutCustomer()
-    {
-        return $this->dueSalesWithoutCustomer;
-    }
-
-    /**
-     * @param bool $dueSalesWithoutCustomer
-     */
-    public function setDueSalesWithoutCustomer($dueSalesWithoutCustomer)
-    {
-        $this->dueSalesWithoutCustomer = $dueSalesWithoutCustomer;
-    }
-
-    /**
-     * @return bool
-     */
-    public function isZeroStock()
-    {
-        return $this->zeroStock;
-    }
-
-    /**
-     * @param bool $zeroStock
-     */
-    public function setZeroStock($zeroStock)
-    {
-        $this->zeroStock = $zeroStock;
-    }
-
-    /**
-     * @return bool
-     */
-    public function isSalesAutoApproved()
-    {
-        return $this->isSalesAutoApproved;
-    }
-
-    /**
-     * @param bool $isSalesAutoApproved
-     */
-    public function setIsSalesAutoApproved($isSalesAutoApproved)
-    {
-        $this->isSalesAutoApproved = $isSalesAutoApproved;
-    }
-
-    /**
-     * @return bool
-     */
-    public function isRemoveImage()
-    {
-        return $this->removeImage;
-    }
-
-    /**
-     * @param bool $removeImage
-     */
-    public function setRemoveImage($removeImage)
-    {
-        $this->removeImage = $removeImage;
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getPath()
-    {
-        return $this->path;
-    }
-
-    /**
-     * @param mixed $path
-     */
-    public function setPath($path)
-    {
-        $this->path = $path;
-    }
 
     /**
      * @return \DateTime
@@ -427,6 +347,85 @@ class ConfigPurchase
         $this->updatedAt = $updatedAt;
     }
 
+    /**
+     * @return bool
+     */
+    public function isBarcode()
+    {
+        return $this->isBarcode;
+    }
+
+    /**
+     * @param bool $isBarcode
+     */
+    public function setIsBarcode($isBarcode)
+    {
+        $this->isBarcode = $isBarcode;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isItemPercent()
+    {
+        return $this->itemPercent;
+    }
+
+    /**
+     * @param bool $itemPercent
+     */
+    public function setItemPercent($itemPercent)
+    {
+        $this->itemPercent = $itemPercent;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isWarehouse()
+    {
+        return $this->isWarehouse;
+    }
+
+    /**
+     * @param bool $isWarehouse
+     */
+    public function setIsWarehouse($isWarehouse)
+    {
+        $this->isWarehouse = $isWarehouse;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isBonusQuantity()
+    {
+        return $this->isBonusQuantity;
+    }
+
+    /**
+     * @param bool $isBonusQuantity
+     */
+    public function setIsBonusQuantity($isBonusQuantity)
+    {
+        $this->isBonusQuantity = $isBonusQuantity;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isPurchaseByPurchasePrice()
+    {
+        return $this->isPurchaseByPurchasePrice;
+    }
+
+    /**
+     * @param bool $isPurchaseByPurchasePrice
+     */
+    public function setIsPurchaseByPurchasePrice($isPurchaseByPurchasePrice)
+    {
+        $this->isPurchaseByPurchasePrice = $isPurchaseByPurchasePrice;
+    }
 
 
 
