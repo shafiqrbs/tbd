@@ -44,6 +44,13 @@ class Config
      *
      * @ORM\Column(type="boolean",options={"default"="false"})
      */
+    private $isAutoApproved;
+
+    /**
+     * @var boolean
+     *
+     * @ORM\Column(type="boolean",options={"default"="false"})
+     */
     private $issueWithWarehouse;
 
     /**
@@ -216,7 +223,53 @@ class Config
         $this->isMeasurement = $isMeasurement;
     }
 
+    /**
+     * @return bool
+     */
+    public function isAutoApproved()
+    {
+        return $this->isAutoApproved;
+    }
 
+    /**
+     * @param bool $isAutoApproved
+     */
+    public function setIsAutoApproved($isAutoApproved)
+    {
+        $this->isAutoApproved = $isAutoApproved;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isIssueWithWarehouse()
+    {
+        return $this->issueWithWarehouse;
+    }
+
+    /**
+     * @param bool $issueWithWarehouse
+     */
+    public function setIssueWithWarehouse($issueWithWarehouse)
+    {
+        $this->issueWithWarehouse = $issueWithWarehouse;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isIssueByProductionBatch()
+    {
+        return $this->issueByProductionBatch;
+    }
+
+    /**
+     * @param bool $issueByProductionBatch
+     */
+    public function setIssueByProductionBatch($issueByProductionBatch)
+    {
+        $this->issueByProductionBatch = $issueByProductionBatch;
+    }
 
 
 }

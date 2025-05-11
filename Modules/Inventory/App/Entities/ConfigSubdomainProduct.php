@@ -47,6 +47,7 @@ class ConfigSubdomainProduct
     /**
      * @Gedmo\Blameable(on="create")
      * @ORM\ManyToOne(targetEntity="Modules\Core\App\Entities\User")
+     * @ORM\JoinColumn(onDelete="CASCADE")
      **/
     private  $createdBy;
 
@@ -56,7 +57,7 @@ class ConfigSubdomainProduct
      * @ORM\OrderBy({"sorting" = "ASC"})
      **/
     private $category;
-    
+
 
     /**
      * @ORM\ManyToOne(targetEntity="Modules\Inventory\App\Entities\Category")
