@@ -77,6 +77,14 @@ class Setting
     private $isSystem = false;
 
 
+    /**
+     * @var boolean
+     *
+     * @ORM\Column(type="boolean" ,options={"default":0})
+     */
+    private $isPrivate = false;
+
+
 
 }
 

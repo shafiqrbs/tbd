@@ -76,6 +76,13 @@ class Particular
     private $status= true;
 
     /**
+     * @var boolean
+     *
+     * @ORM\Column(type="boolean" ,options={"default":0})
+     */
+    private $isPrivate = false;
+
+    /**
      * @return int
      */
     public function getId()
@@ -218,6 +225,24 @@ class Particular
     {
         $this->status = $status;
     }
+
+    /**
+     * @return bool
+     */
+    public function isPrivate()
+    {
+        return $this->isPrivate;
+    }
+
+    /**
+     * @param bool $isPrivate
+     */
+    public function setIsPrivate($isPrivate)
+    {
+        $this->isPrivate = $isPrivate;
+    }
+
+
 
 
 }

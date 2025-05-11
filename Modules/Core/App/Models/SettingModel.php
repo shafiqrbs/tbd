@@ -21,6 +21,7 @@ class SettingModel extends Model
         'setting_type_id',
         'domain_id',
         'is_system',
+        'is_private',
         'status'
     ];
 
@@ -72,12 +73,12 @@ class SettingModel extends Model
                 'cor_setting.name as name',
                 'cor_setting.status as status',
                 'cst.name as setting_name',
+                'cor_setting.is_private',
                 'cst.id as setting_id'
+
             ]) ->where([
                 ['cor_setting.domain_id', $domain],
-            ])
-
-        ;
+            ]);
 
 
         if (isset($request['term']) && !empty($request['term'])){

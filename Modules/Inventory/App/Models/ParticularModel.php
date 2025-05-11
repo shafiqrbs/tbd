@@ -21,6 +21,7 @@ class ParticularModel extends Model
         'config_id',
         'name',
         'slug',
+        'is_private',
         'status'
     ];
 
@@ -72,6 +73,7 @@ class ParticularModel extends Model
                 'inv_particular.name',
                 'inv_particular.slug',
                 'inv_particular.status',
+                'inv_particular.is_private',
                 DB::raw('DATE_FORMAT(inv_particular.created_at, "%d-%M-%Y") as created'),
                 'inv_particular_type.name as setting_type_name',
                 'inv_particular_type.slug as setting_type_slug',
