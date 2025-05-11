@@ -64,6 +64,14 @@ class Setting
     private $status= true;
 
     /**
+    /**
+     * @var boolean
+     *
+     * @ORM\Column(type="boolean", nullable=true)
+     */
+    private $isPrivate = false;
+
+    /**
      * @return int
      */
     public function getId()

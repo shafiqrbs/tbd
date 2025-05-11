@@ -48,8 +48,6 @@ class TransactionMode
      */
     private $accountOwner;
 
-
-
     /**
      * @var string
      *
@@ -146,14 +144,11 @@ class TransactionMode
      **/
     private $accountMode;
 
-
-
     /**
      * @ORM\ManyToOne(targetEntity="Modules\Accounting\App\Entities\Setting", cascade={"persist", "remove"})
      * @ORM\JoinColumn(onDelete="SET NULL", nullable=true)
      **/
     private $accountTypeMode;
-
 
 
     /**
@@ -163,7 +158,12 @@ class TransactionMode
      */
     private $accountType;
 
-
+    /**
+     * @var boolean
+     *
+     * @ORM\Column(type="boolean", nullable=true)
+     */
+    private $isPrivate = false;
 
     /**
      * @var \DateTime
