@@ -18,6 +18,7 @@ class SettingModel extends Model
     protected $fillable = [
         'setting_type',
         'name',
+        'is_private',
         'status'
     ];
 

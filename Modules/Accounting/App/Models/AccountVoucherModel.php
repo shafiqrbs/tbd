@@ -22,6 +22,7 @@ class AccountVoucherModel extends Model
         'short_name',
         'short_code',
         'mode',
+        'is_private',
         'status'
     ];
 

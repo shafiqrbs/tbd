@@ -32,6 +32,7 @@ class AccountHeadModel extends Model
         'credit',
         'debit',
         'is_parent',
+        'is_private',
         'showAmount',
         'opening_balance',
         'credit_limit',

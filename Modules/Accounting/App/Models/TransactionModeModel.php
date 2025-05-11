@@ -27,6 +27,7 @@ class TransactionModeModel extends Model
         'path',
         'status',
         'config_id',
+        'is_private',
         'is_selected',
     ];
 
