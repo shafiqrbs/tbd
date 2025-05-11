@@ -58,15 +58,15 @@ class ConfigDiscountModel extends Model
             if (array_key_exists($column, $booleanFields)) {
                 // Handle boolean fields
                 $value = $booleanFields[$column] ? 1 : 0;
-                $setStatements[] = "'$column' = $value";
+                $setStatements[] = "`$column` = $value";
             } else {
                 // Set other fields to NULL
-                $setStatements[] = "'$column' = NULL";
+                $setStatements[] = "`$column` = NULL";
             }
         }
 
         // Execute raw query with properly formatted SET statements
-        DB::statement("UPDATE '$table' SET " . implode(', ', $setStatements) . " WHERE id = ?", [$id]);
+     //   DB::statement("UPDATE '$table' SET " . implode(', ', $setStatements) . " WHERE id = ?", [$id]);
 
     }
 

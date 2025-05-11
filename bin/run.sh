@@ -1,3 +1,3 @@
-echo "Date base generated"
-php artisan doctrine:schema:update --force
-php artisan optimize:clear
+ composer install
+ php artisan doctrine:schema:update --force --complete
+ php artisan optimize:clear

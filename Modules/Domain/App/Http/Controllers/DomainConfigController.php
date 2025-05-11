@@ -416,7 +416,7 @@ class DomainConfigController extends Controller
         }
 
         if($domain->inv_config_discount){
-            //  ConfigDiscountModel::resetConfig($domain->inv_config_discount);
+            ConfigDiscountModel::resetConfig($domain->inv_config_discount);
         }
 
         if($domain->inv_config_purchase){
@@ -438,6 +438,7 @@ class DomainConfigController extends Controller
         if($domain->pro_config){
             ProductionConfig::resetConfig($domain->pro_config);
         }
+
         if($domain->nbr_config){
              NbrVatConfigModel::resetConfig($domain->nbr_config);
         }
