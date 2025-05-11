@@ -24,6 +24,8 @@ class ProductionIssueModel extends Model
         'created_by_id',
         'approved_by_id',
         'vendor_id',
+        'type',
+        'narration',
         'amount'
     ];
 

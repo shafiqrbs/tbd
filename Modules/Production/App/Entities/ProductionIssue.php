@@ -71,6 +71,18 @@ class ProductionIssue
      */
     private $issueType;
 
+    /**
+     * @var string
+     * @ORM\Column(name="type", type="string", length=20)
+     */
+    private $type;
+
+    /**
+     * @var string
+     * @ORM\Column(name="narration", type="string" , nullable=true)
+     */
+    private $narration;
+
 
 
     /**
