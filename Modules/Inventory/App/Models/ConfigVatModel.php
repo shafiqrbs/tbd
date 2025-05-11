@@ -71,12 +71,12 @@ class ConfigVatModel extends Model
                 $setStatements[] = "'$column' = $value";
             } else {
                 // Set other fields to NULL
-                $setStatements[] = "'$column' = NULL";
+                $setStatements[] = "'$column' = {0}";
             }
         }
 
         // Execute raw query with properly formatted SET statements
-        DB::statement("UPDATE '$table' SET " . implode(', ', $setStatements) . " WHERE id = ?", [$id]);
+      //  $row = DB::statement("UPDATE '$table' SET " . implode(', ', $setStatements) . " WHERE id = ?", [$id]);
 
     }
 
