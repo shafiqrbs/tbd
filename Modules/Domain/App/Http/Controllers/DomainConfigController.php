@@ -12,6 +12,8 @@ use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
 use Modules\Accounting\App\Models\AccountingModel;
 use Modules\AppsApi\App\Services\JsonRequestResponse;
+use Modules\Core\App\Models\SettingModel;
+use Modules\Core\App\Models\SettingTypeModel;
 use Modules\Core\App\Models\UserModel;
 use Modules\Domain\App\Models\DomainModel;
 use Modules\Inventory\App\Entities\Config;
@@ -468,6 +470,36 @@ class DomainConfigController extends Controller
         ConfigVatModel::updateOrCreate([
             'config_id' => $domain->config_id,
         ]);
+
+        $getCoreSettingTypeId = SettingTypeModel::where('slug', 'customer-group')->first();
+        SettingModel::updateOrCreate(
+            [
+                'domain_id' => $domain->domain_id,
+                'setting_type_id' => $getCoreSettingTypeId->id,
+                'name' => 'Domain',
+                'is_system' => true,
+                'is_private' => true,
+            ],
+            [
+                'status' => true,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]
+        );
+
+        SettingModel::updateOrCreate(
+            [
+                'domain_id' => $domain->domain_id,
+                'setting_type_id' => $getCoreSettingTypeId->id,
+                'name' => 'Default',
+                'is_private' => true,
+            ],
+            [
+                'status' => true,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]
+        );
 
         $service = new JsonRequestResponse();
         $return = $service->returnJosnResponse($this->domainConfigById($id));

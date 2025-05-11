@@ -118,14 +118,12 @@ class DomainController extends Controller
             $customer = CustomerModel::where('domain_id',$entity->id)->first();
             if (!$customer) {
                 $getCoreSettingTypeId = SettingTypeModel::where('slug', 'customer-group')->first();
-
                 $getCustomerGroupId = SettingModel::updateOrCreate(
                     [
                         'domain_id' => $entity->id,
                         'setting_type_id' => $getCoreSettingTypeId->id,
                         'name' => 'Domain',
-                        'slug' => 'domain',
-                        'is_system' => true,
+                        'is_private' => true,
                     ],
                     [
                         'status' => true,
@@ -139,7 +137,7 @@ class DomainController extends Controller
                         'domain_id' => $entity->id,
                         'setting_type_id' => $getCoreSettingTypeId->id,
                         'name' => 'Default',
-                        'slug' => 'default',
+                        'is_private' => true,
                     ],
                     [
                         'status' => true,
