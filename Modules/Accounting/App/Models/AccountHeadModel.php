@@ -231,6 +231,7 @@ class AccountHeadModel extends Model
                     'acc_head.name',
                     'acc_head.slug',
                     'acc_head.code',
+                    'acc_head.is_private',
                     'acc_head.amount',
                     'parent.name as parent_name',
                     'mother.name as mother_name'
@@ -292,6 +293,7 @@ class AccountHeadModel extends Model
                 'acc_head.level',
                 'acc_head.name',
                 'acc_head.slug',
+                'acc_head.is_private',
                 'parent.name as parent_name',
                 'mother.name as mother_name'
             ])

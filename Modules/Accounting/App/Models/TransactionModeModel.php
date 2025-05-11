@@ -78,6 +78,7 @@ class TransactionModeModel extends Model
                 'acc_transaction_mode.account_owner',
                 'acc_transaction_mode.short_name',
                 'method.name as method_name',
+                'method.name as is_private',
                 'authorized.name as authorized_name',
                 'account_type.name as account_type_name',
                 DB::raw("CONCAT('".url('')."/uploads/accounting/transaction-mode/', acc_transaction_mode.path) AS path")

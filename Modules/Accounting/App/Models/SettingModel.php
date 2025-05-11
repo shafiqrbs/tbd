@@ -76,6 +76,7 @@ class SettingModel extends Model
                 'acc_setting.id',
                 'acc_setting.name',
                 'acc_setting.slug',
+                'acc_setting.is_private',
                 'acc_setting_type.name as type_name',
                 'acc_setting_type.slug as type_slug',
             ])
