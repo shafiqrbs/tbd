@@ -152,6 +152,7 @@ class UserModel extends Model
             'inv_config_discount.id as inv_config_discount',
             'inv_config_sales.id as inv_config_sales',
             'inv_config_purchase.id as inv_config_purchase',
+            'inv_config_vat.id as inv_config_vat',
             'acc_config.id as acc_config',
             'pro_config.id as pro_config',
             'nbr_config.id as nbr_config'
@@ -165,6 +166,7 @@ class UserModel extends Model
             ->leftjoin('inv_config_discount','inv_config_discount.config_id','=','inv_config.id')
             ->leftjoin('inv_config_sales','inv_config_sales.config_id','=','inv_config.id')
             ->leftjoin('inv_config_purchase','inv_config_purchase.config_id','=','inv_config.id')
+            ->leftjoin('inv_config_vat','inv_config_vat.config_id','=','inv_config.id')
             ->where('dom_domain.id',$id)->first();
         return $data;
     }

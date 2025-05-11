@@ -427,6 +427,10 @@ class DomainConfigController extends Controller
             ConfigSalesModel::resetConfig($domain->inv_config_sales);
         }
 
+        if($domain->inv_config_vat){
+            ConfigVatModel::resetConfig($domain->inv_config_sales);
+        }
+
         if($domain->acc_config){
             AccountingModel::resetConfig($domain->acc_config);
         }

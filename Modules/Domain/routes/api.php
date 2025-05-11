@@ -43,7 +43,7 @@ Route::prefix('/domain')->middleware(array(HeaderAuthenticationMiddleware::class
     });
 
     Route::prefix('config')->middleware([HeaderAuthenticationMiddleware::class])->group(function() {
-        Route::get('/', [DomainConfigController::class,'domainConfig'])->name('domain_reset');
+        Route::get('/', [DomainConfigController::class,'domainConfig'])->name('domain_config');
         Route::post('inventory/{id}', [DomainConfigController::class,'inventoryConfig'])->name('domain_config');
         Route::post('inventory-product/{id}', [DomainConfigController::class,'inventoryProductConfig'])->name('domain_config');
         Route::post('inventory-sales/{id}', [DomainConfigController::class,'inventorySalesConfig'])->name('domain_config');
