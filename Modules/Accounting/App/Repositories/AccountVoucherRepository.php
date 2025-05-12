@@ -60,6 +60,7 @@ class AccountVoucherRepository extends EntityRepository
             $entity->setSlug($head->getSlug());
             $entity->setMode($head->getMode());
             $entity->setStatus(1);
+            $entity->setIsPrivate(1);
             $em->persist($entity);
             $em->flush();
         }

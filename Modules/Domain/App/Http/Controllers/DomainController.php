@@ -12,8 +12,10 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use Modules\Accounting\App\Entities\AccountHead;
+use Modules\Accounting\App\Entities\AccountVoucher;
 use Modules\Accounting\App\Entities\TransactionMode;
 use Modules\Accounting\App\Models\AccountingModel;
+use Modules\Accounting\App\Models\AccountVoucherModel;
 use Modules\Accounting\App\Models\TransactionModeModel;
 use Modules\AppsApi\App\Services\GeneratePatternCodeService;
 use Modules\AppsApi\App\Services\JsonRequestResponse;
@@ -575,82 +577,115 @@ class DomainController extends Controller
         return response()->json(['message' => 'Domain reset successfully', 'status' => Response::HTTP_OK], Response::HTTP_OK);
     }
 
-    public function restoreData($id)
+    public function restoreData($id, EntityManager $em)
     {
-        // Ensure the domain exists
-        $findDomain = DomainModel::findOrFail($id);
 
-        // Fetch domain config
-        $allConfigId = DomainModel::getDomainConfigData($id)->toArray();
-
-        if (empty($allConfigId['inv_config'])) {
-            return response()->json(['message' => 'Inventory config not found', 'status' => Response::HTTP_NOT_FOUND], Response::HTTP_NOT_FOUND);
-        }
-
-        $invConfig = $allConfigId['inv_config'];
+        $entity = UserModel::getDomainData($id);
+        $domain = $entity;
+        $invConfig = $entity['inv_config'];
         StockItemHistoryModel::where('config_id', $invConfig)->delete();
         SalesModel::where('config_id', $invConfig)->delete();
         PurchaseItemModel::where('config_id', $invConfig)->delete();
         PurchaseModel::where('config_id', $invConfig)->delete();
         // Bulk update stock item quantities
-        StockItemModel::where('config_id', $allConfigId['inv_config'])->update(['quantity' => 0]);
+        StockItemModel::where('config_id',$invConfig)->update(['quantity' => 0]);
 
         // Start the transaction
         DB::beginTransaction();
 
         try {
 
-            // Fetch the customer
-            $customer = CustomerModel::where('domain_id',$entity->id)->first();
-            if (!$customer) {
-                $getCoreSettingTypeId = SettingTypeModel::where('slug', 'customer-group')->first();
-                $getCustomerGroupId = SettingModel::updateOrCreate(
-                    [
-                        'domain_id' => $entity->id,
-                        'setting_type_id' => $getCoreSettingTypeId->id,
-                        'name' => 'Domain',
-                        'is_private' => true,
-                    ],
-                    [
-                        'status' => true,
-                        'created_at' => now(),
-                        'updated_at' => now(),
-                    ]
-                );
+            $getCoreSettingTypeId = SettingTypeModel::where('slug', 'customer-group')->first();
+            $getCustomerGroupId = SettingModel::updateOrCreate(
+                [
+                    'domain_id' => $entity->id,
+                    'setting_type_id' => $getCoreSettingTypeId->id,
+                    'name' => 'Domain',
+                    'is_private' => true,
+                ],
+                [
+                    'status' => true,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]
+            );
+            SettingModel::updateOrCreate(
+                [
+                    'domain_id' => $entity->id,
+                    'setting_type_id' => $getCoreSettingTypeId->id,
+                    'name' => 'Default',
+                    'is_private' => true,
+                ],
+                [
+                    'status' => true,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]
+            );
+            CustomerModel::updateOrCreate(
+                [
+                    'domain_id' => $entity->id,
+                    'name' => 'Default',
+                    'mobile' => $entity['license_no'],
+                    'customer_group_id' => $getCustomerGroupId->id ?? null,
+                ],
+                [
+                    'slug' => Str::slug($entity->name),
+                    'email' => $entity->email,
+                    'address' => $entity->address,
+                    'is_default_customer' => true,
+                    'status' => true,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]
+            );
+            CustomerModel::updateOrCreate(
+                [
+                    'domain_id' => $entity->id,
+                    'name' => 'Default',
+                    'mobile' => $entity['license_no'],
+                    'customer_group_id' => $getCustomerGroupId->id ?? null,
+                ],
+                [
+                    'slug' => Str::slug($entity->name),
+                    'email' => $entity->email,
+                    'address' => $entity->address,
+                    'is_default_customer' => true,
+                    'status' => true,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]
+            );
 
-                SettingModel::updateOrCreate(
-                    [
-                        'domain_id' => $entity->id,
-                        'setting_type_id' => $getCoreSettingTypeId->id,
-                        'name' => 'Default',
-                        'is_private' => true,
-                    ],
-                    [
-                        'status' => true,
-                        'created_at' => now(),
-                        'updated_at' => now(),
-                    ]
-                );
+            $vendorSettingType = SettingTypeModel::where('slug', 'vendor-group')->first();
 
+            $getVendorGroupId = SettingModel::updateOrCreate(
+                [
+                    'domain_id' => $entity->id,
+                    'setting_type_id' => $vendorSettingType->id,
+                    'name' => 'Domain',
+                    'is_private' => true,
+                ],
+                [
+                    'status' => true,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]
+            );
+            SettingModel::updateOrCreate(
+                [
+                    'domain_id' => $entity->id,
+                    'setting_type_id' => $vendorSettingType->id,
+                    'name' => 'Default',
+                    'is_private' => true,
+                ],
+                [
+                    'status' => true,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]
+            );
 
-                CustomerModel::updateOrCreate(
-                    [
-                        'domain_id' => $entity->id,
-                        'name' => 'Default',
-                        'mobile' => $entity['license_no'],
-                        'customer_group_id' => $getCustomerGroupId->id ?? null,
-                    ],
-                    [
-                        'slug' => Str::slug($entity->name),
-                        'email' => $entity->email,
-                        'address' => $entity->address,
-                        'is_default_customer' => true,
-                        'status' => true,
-                        'created_at' => now(),
-                        'updated_at' => now(),
-                    ]
-                );
-            }
 
 
             // Step 3: Create the inventory configuration (config)
@@ -678,14 +713,16 @@ class DomainController extends Controller
             ]);
 
             // Step 4: Create the accounting data
-            ConfigSalesModel::updateOrCreate([
-                'config_id' => $domain->config_id,
-            ]);
+            ConfigSalesModel::updateOrCreate(
+                ['config_id' => $domain->config_id],
+                ['default_customer_group_id' => $getCustomerGroupId->id ?? null]
+            );
 
             // Step 4: Create the accounting data
-            ConfigPurchaseModel::updateOrCreate([
-                'config_id' => $domain->config_id,
-            ]);
+            ConfigPurchaseModel::updateOrCreate(
+                ['config_id' => $domain->config_id],
+                ['default_vendor_group_id' => $getVendorGroupId->id ?? null]
+            );
 
             // Step 4: Create the accounting data
             ConfigVatModel::updateOrCreate([
@@ -765,6 +802,7 @@ class DomainController extends Controller
                     'path' => null,
                     'account_type' => 'Current',
                     'method_id' => 20,
+                    'is_private' => 1,
                     'status' => true
                 ]);
             }
@@ -773,6 +811,15 @@ class DomainController extends Controller
             // Commit all database operations
             DB::commit();
             $em->getRepository(AccountHead::class)->generateAccountHead($accountingConfig->id);
+            $em->getRepository(AccountVoucher::class)->resetVoucher($accountingConfig->id);
+
+
+            $entity = DomainModel::with('accountConfig',
+                'accountConfig.capital_investment','accountConfig.account_cash','accountConfig.account_bank','accountConfig.account_mobile','accountConfig.account_user','accountConfig.account_vendor','accountConfig.account_customer','accountConfig.account_product_group','accountConfig.account_category',
+                'accountConfig.voucher_stock_opening','accountConfig.voucher_purchase','accountConfig.voucher_sales','accountConfig.voucher_purchase_return','accountConfig.voucher_stock_reconciliation',
+                'productionConfig','gstConfig','inventoryConfig','inventoryConfig.configPurchase','inventoryConfig.configSales','inventoryConfig.configProduct','inventoryConfig.configDiscount','inventoryConfig.configVat','inventoryConfig.businessModel','inventoryConfig.currency')->find($id);
+
+
             // Return the response
             $service = new JsonRequestResponse();
             return $service->returnJosnResponse($entity);

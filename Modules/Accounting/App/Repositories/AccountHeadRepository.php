@@ -281,6 +281,7 @@ class AccountHeadRepository extends EntityRepository
             $entity->setSlug($head->getSlug());
             $entity->setHeadGroup($head->getHeadGroup());
             $entity->setLevel($head->getLevel());
+            $entity->setIsPrivate(1);
             $em->persist($entity);
             $em->flush();
             if($head->getChildren()){
@@ -294,6 +295,7 @@ class AccountHeadRepository extends EntityRepository
                     $subHead->setSlug($child->getSlug());
                     $subHead->setHeadGroup($child->getHeadGroup());
                     $subHead->setLevel($child->getLevel());
+                    $subHead->setIsPrivate(1);
                     $em->persist($subHead);
                     $em->flush();
                     if(empty($subHead->getHeadDetail())){
