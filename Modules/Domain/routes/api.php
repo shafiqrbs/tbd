@@ -59,6 +59,7 @@ Route::prefix('/domain')->middleware(array(HeaderAuthenticationMiddleware::class
     });
 
     Route::prefix('restore')->middleware([HeaderAuthenticationMiddleware::class])->group(function() {
+        Route::get('{id}', [DomainController::class,'restoreData'])->name('domain_restore');
         Route::get('reset/{domain}', [DomainController::class,'resetData'])->name('domain_reset');
         Route::get('delete/{id}', [DomainController::class,'deleteData'])->name('domain_delete');
     });

@@ -29,14 +29,20 @@ use Modules\Domain\App\Http\Requests\DomainRequest;
 use Modules\Core\App\Models\UserModel;
 use Modules\Domain\App\Models\CurrencyModel;
 use Modules\Domain\App\Models\DomainModel;
+use Modules\Inventory\App\Entities\PurchaseItem;
 use Modules\Inventory\App\Entities\Setting;
+use Modules\Inventory\App\Entities\StockItemInventoryHistory;
 use Modules\Inventory\App\Models\ConfigDiscountModel;
 use Modules\Inventory\App\Models\ConfigModel;
 use Modules\Inventory\App\Models\ConfigProductModel;
 use Modules\Inventory\App\Models\ConfigPurchaseModel;
 use Modules\Inventory\App\Models\ConfigSalesModel;
+use Modules\Inventory\App\Models\ConfigVatModel;
+use Modules\Inventory\App\Models\PurchaseItemModel;
 use Modules\Inventory\App\Models\PurchaseModel;
 use Modules\Inventory\App\Models\SalesModel;
+use Modules\Inventory\App\Models\StockItemHistoryModel;
+use Modules\Inventory\App\Models\StockItemInventoryHistoryModel;
 use Modules\Inventory\App\Models\StockItemModel;
 use Modules\NbrVatTax\App\Models\NbrVatConfigModel;
 use Modules\Production\App\Models\ProductionConfig;
@@ -295,9 +301,7 @@ class DomainController extends Controller
             'table' => 'cor_customers',
             'prefix' => 'CUS-',
         ];
-
         $pattern = $patternCodeService->customerCode($params);
-
         return $pattern;
     }
 
@@ -523,7 +527,9 @@ class DomainController extends Controller
             return response()->json(['message' => 'Inventory config not found', 'status' => Response::HTTP_NOT_FOUND], Response::HTTP_NOT_FOUND);
         }
 
-        // Delete purchases and related data using chunking
+
+
+       /* // Delete purchases and related data using chunking
         PurchaseModel::with('purchaseItems.stock.stockItemHistory')
             ->where('config_id', $allConfigId['inv_config'])
             ->chunk(100, function ($purchases) {
@@ -537,12 +543,10 @@ class DomainController extends Controller
                     });
                     $purchase->delete();
                 });
-            });
+            });*/
 
-        // Bulk delete vendors and customers
-        VendorModel::where('domain_id', $id)->delete();
 
-        // Delete sales and related data using chunking
+        /*// Delete sales and related data using chunking
         SalesModel::with('salesItems.stock.stockItemHistory')
             ->where('config_id', $allConfigId['inv_config'])
             ->chunk(100, function ($sales) {
@@ -556,12 +560,249 @@ class DomainController extends Controller
                     });
                     $sale->delete();
                 });
-            });
+            });*/
+
+
+        $invConfig = $allConfigId['inv_config'];
+        StockItemHistoryModel::where('config_id', $invConfig)->delete();
+        SalesModel::where('config_id', $invConfig)->delete();
+        PurchaseItemModel::where('config_id', $invConfig)->delete();
+        PurchaseModel::where('config_id', $invConfig)->delete();
+
 
         // Bulk update stock item quantities
         StockItemModel::where('config_id', $allConfigId['inv_config'])->update(['quantity' => 0]);
-
         return response()->json(['message' => 'Domain reset successfully', 'status' => Response::HTTP_OK], Response::HTTP_OK);
+    }
+
+    public function restoreData($id)
+    {
+        // Ensure the domain exists
+        $findDomain = DomainModel::findOrFail($id);
+
+        // Fetch domain config
+        $allConfigId = DomainModel::getDomainConfigData($id)->toArray();
+
+        if (empty($allConfigId['inv_config'])) {
+            return response()->json(['message' => 'Inventory config not found', 'status' => Response::HTTP_NOT_FOUND], Response::HTTP_NOT_FOUND);
+        }
+
+        $invConfig = $allConfigId['inv_config'];
+        StockItemHistoryModel::where('config_id', $invConfig)->delete();
+        SalesModel::where('config_id', $invConfig)->delete();
+        PurchaseItemModel::where('config_id', $invConfig)->delete();
+        PurchaseModel::where('config_id', $invConfig)->delete();
+        // Bulk update stock item quantities
+        StockItemModel::where('config_id', $allConfigId['inv_config'])->update(['quantity' => 0]);
+
+        // Start the transaction
+        DB::beginTransaction();
+
+        try {
+
+            // Fetch the customer
+            $customer = CustomerModel::where('domain_id',$entity->id)->first();
+            if (!$customer) {
+                $getCoreSettingTypeId = SettingTypeModel::where('slug', 'customer-group')->first();
+                $getCustomerGroupId = SettingModel::updateOrCreate(
+                    [
+                        'domain_id' => $entity->id,
+                        'setting_type_id' => $getCoreSettingTypeId->id,
+                        'name' => 'Domain',
+                        'is_private' => true,
+                    ],
+                    [
+                        'status' => true,
+                        'created_at' => now(),
+                        'updated_at' => now(),
+                    ]
+                );
+
+                SettingModel::updateOrCreate(
+                    [
+                        'domain_id' => $entity->id,
+                        'setting_type_id' => $getCoreSettingTypeId->id,
+                        'name' => 'Default',
+                        'is_private' => true,
+                    ],
+                    [
+                        'status' => true,
+                        'created_at' => now(),
+                        'updated_at' => now(),
+                    ]
+                );
+
+
+                CustomerModel::updateOrCreate(
+                    [
+                        'domain_id' => $entity->id,
+                        'name' => 'Default',
+                        'mobile' => $entity['license_no'],
+                        'customer_group_id' => $getCustomerGroupId->id ?? null,
+                    ],
+                    [
+                        'slug' => Str::slug($entity->name),
+                        'email' => $entity->email,
+                        'address' => $entity->address,
+                        'is_default_customer' => true,
+                        'status' => true,
+                        'created_at' => now(),
+                        'updated_at' => now(),
+                    ]
+                );
+            }
+
+
+            // Step 3: Create the inventory configuration (config)
+            $currency = CurrencyModel::find(1);
+
+            $config = $config =  ConfigModel::create([
+                'domain_id' => $entity->id,
+                'currency_id' => $currency->id,
+                'zero_stock' => true,
+                'is_sku' => false,
+                'is_measurement' => false,
+                'is_product_gallery' => false,
+                'is_multi_price' => false,
+                'business_model_id' => $entity->business_model_id,
+            ]);
+
+            // Step 4: Create the accounting data
+            ConfigProductModel::updateOrCreate([
+                'config_id' => $domain->config_id,
+            ]);
+
+            // Step 4: Create the accounting data
+            ConfigDiscountModel::updateOrCreate([
+                'config_id' => $domain->config_id,
+            ]);
+
+            // Step 4: Create the accounting data
+            ConfigSalesModel::updateOrCreate([
+                'config_id' => $domain->config_id,
+            ]);
+
+            // Step 4: Create the accounting data
+            ConfigPurchaseModel::updateOrCreate([
+                'config_id' => $domain->config_id,
+            ]);
+
+            // Step 4: Create the accounting data
+            ConfigVatModel::updateOrCreate([
+                'config_id' => $domain->config_id,
+            ]);
+
+            // Step 4: Create the accounting data
+            ConfigProductModel::create([
+                'config_id' => $config->id,
+            ]);
+
+            // Step 4: Create the accounting data
+            ConfigSalesModel::create([
+                'config_id' => $config->id,
+                'customer_group_id' => $getCustomerGroupId->id,
+            ]);
+
+            // Step 4: Create the accounting data
+            ConfigPurchaseModel::create([
+                'config_id' => $config->id,
+            ]);
+
+            // Step 4: Create the accounting data
+            $accountingConfig = AccountingModel::create([
+                'domain_id' => $entity->id,
+                'financial_start_date' =>  now(),
+                'financial_end_date' =>  now(),
+            ]);
+
+            // Step 4: Create the accounting data
+            NbrVatConfigModel::create([
+                'domain_id' => $entity->id,
+            ]);
+
+            // Step 5: Create the Production data
+            ProductionConfig::create([
+                'domain_id' => $entity->id,
+            ]);
+
+            $getProductType = UtilitySettingModel::getEntityDropdown('product-type');
+            if (count($getProductType) > 0) {
+                // If no inventory config found, return JSON response.
+                if (!$config) {
+                    DB::rollBack();
+                    $response = new Response();
+                    $response->headers->set('Content-Type', 'application/json');
+                    $response->setContent(json_encode([
+                        'message' => 'Inventory config not found',
+                        'status' => Response::HTTP_NOT_FOUND,
+                    ]));
+                    $response->setStatusCode(Response::HTTP_OK);
+                    return $response;
+                }
+
+                // Loop through each product type and either find or create inventory setting.
+                foreach ($getProductType as $type) {
+                    // If the inventory setting is not found, create a new one.
+                    InventorySettingModel::create([
+                        'config_id' => $config->id,
+                        'setting_id' => $type->id,
+                        'name' => $type->name,
+                        'slug' => $type->slug,
+                        'parent_slug' => 'product-type',
+                        'is_production' => in_array($type->slug,
+                            ['post-production', 'mid-production', 'pre-production']) ? 1 : 0,
+                    ]);
+                }
+
+                TransactionModeModel::create([
+                    'config_id' => $accountingConfig->id,
+                    'account_owner' => 'Cash',
+                    'authorised' => 'Cash',
+                    'name' => 'Cash',
+                    'short_name' => 'Cash',
+                    'slug' => 'cash',
+                    'is_selected' => true,
+                    'path' => null,
+                    'account_type' => 'Current',
+                    'method_id' => 20,
+                    'status' => true
+                ]);
+            }
+
+
+            // Commit all database operations
+            DB::commit();
+            $em->getRepository(AccountHead::class)->generateAccountHead($accountingConfig->id);
+            // Return the response
+            $service = new JsonRequestResponse();
+            return $service->returnJosnResponse($entity);
+
+        } catch (Exception $e) {
+            // Something went wrong, rollback the transaction
+            DB::rollBack();
+
+            // Optionally log the exception for debugging purposes
+            \Log::error('Error storing domain and related data: ' . $e->getMessage());
+
+            // Return an error response
+            $response = new Response();
+            $response->headers->set('Content-Type', 'application/json');
+            $response->setContent(json_encode([
+                'message' => 'An error occurred while saving the domain and related data.',
+                'error' => $e->getMessage(),
+                'status' => Response::HTTP_INTERNAL_SERVER_ERROR,
+            ]));
+            $response->setStatusCode(Response::HTTP_INTERNAL_SERVER_ERROR);
+            return $response;
+        }
+
+        return response()->json(
+            [
+                'message' => 'Domain reset successfully',
+                'status' => Response::HTTP_OK
+            ],
+            Response::HTTP_OK
+        );
     }
 
 
@@ -611,10 +852,4 @@ class DomainController extends Controller
         return $data;
     }
 
-    public function domainConfig()
-    {
-        $entity = DomainModel::with('inventoryConfig','inventoryConfig.configPurchase','inventoryConfig.configSales','inventoryConfig.configProduct','inventoryConfig.configDiscount')->find($this
-        ->domain['global_id']);
-        return $entity;
-    }
 }

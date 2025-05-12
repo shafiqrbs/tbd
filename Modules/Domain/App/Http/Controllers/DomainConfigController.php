@@ -471,6 +471,7 @@ class DomainConfigController extends Controller
             'config_id' => $domain->config_id,
         ]);
 
+
         $getCoreSettingTypeId = SettingTypeModel::where('slug', 'customer-group')->first();
         SettingModel::updateOrCreate(
             [
