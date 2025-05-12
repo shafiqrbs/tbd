@@ -45,13 +45,23 @@ class StockItemHistoryModel extends Model
     {
         try {
             $configId = $item->config_id;
+            $warehouseId = $item->warehouse_id;
             if ($process === 'production-issue'){
                 $findStockItem = StockItemModel::find($item->stock_item_id);
                 $configId = $findStockItem->config_id;
+                $warehouseId = $item->product_warehouse_id;
             }
             // Fetch the latest stock history
+            /*$existingStockHistory = self::where('stock_item_id', $item->stock_item_id)
+                ->where('config_id', $configId)
+                ->latest()
+                ->first();*/
+
             $existingStockHistory = self::where('stock_item_id', $item->stock_item_id)
                 ->where('config_id', $configId)
+                ->when(!empty($warehouseId), function ($query) use ($warehouseId) {
+                    $query->where('warehouse_id', $warehouseId);
+                })
                 ->latest()
                 ->first();
 
@@ -83,7 +93,8 @@ class StockItemHistoryModel extends Model
                 $quantity,
                 $process,
                 $domain,
-                $configId
+                $configId,
+                $warehouseId
             );
 
             // Create stock history record
@@ -141,7 +152,7 @@ class StockItemHistoryModel extends Model
         return [$closing_quantity, $closing_balance, $quantity];
     }
 
-    private static function prepareStockHistoryData($existingStockHistory, $item, $closing_quantity, $closing_balance, $quantity, $process,$domain,$configId)
+    private static function prepareStockHistoryData($existingStockHistory, $item, $closing_quantity, $closing_balance, $quantity, $process,$domain,$configId,$warehouseId = null)
     {
         return [
             'stock_item_id' => $item->stock_item_id,
@@ -154,10 +165,10 @@ class StockItemHistoryModel extends Model
             'opening_balance' => $existingStockHistory->closing_balance ?? 0,
             'closing_quantity' => $closing_quantity,
             'closing_balance' => $closing_balance,
-            'warehouse_id' => $item->warehouse_id ?? null,
+            'warehouse_id' => $warehouseId,
             'mode' => $process,
             'process' => 'approved',
-            'created_by' => $domain['user_id']
+            'created_by' => $domain['user_id'],
         ];
     }
 

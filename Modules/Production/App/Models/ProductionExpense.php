@@ -50,7 +50,6 @@ class ProductionExpense extends Model
             ->join('inv_stock as pro_item_stock', 'pro_item_stock.id', '=', 'pro_item.item_id')
             ->join('inv_stock as recipe', 'recipe.id', '=', 'pro_element.material_id')
             ->select([
-                'pro_expense.id',
                 'pro_expense.production_batch_item_id',
                 'pro_element.material_id as stock_item_id',
                 'recipe.sales_price',
@@ -58,7 +57,7 @@ class ProductionExpense extends Model
                 'recipe.quantity as stock_quantity',
                 'recipe.display_name as display_name',
                 'recipe.uom as unit_name',
-                DB::raw('GROUP_CONCAT(DISTINCT pro_expense.production_item_id SEPARATOR ", ") as production_item_id'),
+//                DB::raw('GROUP_CONCAT(DISTINCT pro_expense.production_item_id SEPARATOR ", ") as production_item_id'),
 //                DB::raw('GROUP_CONCAT(DISTINCT pro_item_stock.display_name SEPARATOR ", ") as pro_item_names'),
                 DB::raw('SUM(pro_expense.quantity) as batch_quantity'),
             ])

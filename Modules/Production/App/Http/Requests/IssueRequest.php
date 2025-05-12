@@ -26,25 +26,20 @@ class IssueRequest extends FormRequest
         {
 
             case 'PATCH':
-            {
-                return [
-                    'remark' => 'nullable|string',
-                    'issue_date' => 'nullable|date',
-                    'receive_date' => 'nullable|date',
-                    'process' => 'nullable|string',
-                ];
-            }
             case 'PUT':
             case 'POST':
             {
                 return [
                     'issue_date' => 'required|date',
-                    'issued_by' => 'required|string',
+                    'issued_by' => 'nullable|string',
+                    'batch_id' => 'nullable|string',
                     'issue_type' => 'required|string',
                     'issue_warehouse_id' => 'nullable',
                     'factory_id' => 'nullable',
+                    'production_batch_id' => 'nullable',
                     'vendor_id' => 'nullable',
                     'narration' => 'nullable',
+                    'type' => 'nullable',
                     'items' => 'required|array',
                 ];
             }

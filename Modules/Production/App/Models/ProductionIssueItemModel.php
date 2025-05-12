@@ -63,7 +63,7 @@ class ProductionIssueItemModel extends Model
 
         $formattedItems = array_map(function ($item) use ($issue, $timestamp) {
             $stockId = null;
-            if ($item['type'] === 'batch_issue') {
+            /*if ($item['type'] === 'batch_issue') {
                 $findStockHistory = StockItemModel::find($item['product_id']);
                 if ($findStockHistory) {
                     $stockId = $findStockHistory->id;
@@ -73,12 +73,13 @@ class ProductionIssueItemModel extends Model
                 if ($findStockHistory) {
                     $stockId = $findStockHistory->stock_item_id;
                 }
-            }
+            }*/
+//            $findStockHistory = StockItemHistoryModel::find($item['stock_item_id']);
 
             return [
                 'production_issue_id'       => $issue->id,
                 'config_id'      => $issue->config_id,
-                'stock_item_id'  => $stockId ?? null,
+                'stock_item_id'  => $item['stock_item_id'],
                 'product_warehouse_id'  => $item['product_warehouse_id'] ?? null,
                 'issue_date'  => $issue->issue_date ?? null,
                 'name'  => $item['display_name'] ?? null,

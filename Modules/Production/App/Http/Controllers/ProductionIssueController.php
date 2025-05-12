@@ -63,18 +63,6 @@ class ProductionIssueController extends Controller
             $issue = ProductionIssueModel::create($input);
             $issue->refresh();
 
-//            ProductionIssueItemModel::insertIssueItems($issue, $input['items']);
-
-            // auto approve production issue
-            /*$issue->update(['approved_by_id' => $this->domain['user_id'],'process' => 'Approved']);
-            if ($issue->issueItems->count() > 0) {
-                foreach ($issue->issueItems as $item) {
-                    $item['warehouse_id'] = $item['product_warehouse_id'];
-                    unset($item['product_warehouse_id']);
-                    StockItemHistoryModel::openingStockQuantity($item, 'production-issue', $this->domain);
-                }
-            }*/
-
             // Commit Transaction
             DB::commit();
 
@@ -103,20 +91,6 @@ class ProductionIssueController extends Controller
 
     public function show($id){
         try {
-
-        /*{
-            "product_id": 2454,
-            "sales_price": 600,
-            "purchase_price": 500,
-            "stock_quantity": -1800,
-            "display_name": "Custard Powder",
-            "unit_name": "Pcs",
-            "production_item_id": "978, 979",
-            "pro_item_names": "Fanta 250ml Pet, Minarel Water",
-            "total_quantity": 75,
-            "id": 2,
-            "type": "batch_issue"
-        },*/
             $findIssue = ProductionIssueModel::with(['issueItems' => function ($query) {
                 $query->select(
                     'pro_issue_item.id',
@@ -160,27 +134,99 @@ class ProductionIssueController extends Controller
         }
     }
 
-    public function store1(IssueRequest $request)
+    public function update(IssueRequest $request, $id)
     {
         $input = $request->validated();
         $input['config_id'] = $this->domain['pro_config'];
         $input['created_by_id'] = $this->domain['user_id'];
 
+        DB::beginTransaction();
+
+        try {
+            $findIssue = ProductionIssueModel::find($id);
+
+            if (!$findIssue) {
+                return response()->json([
+                    'status' => 404,
+                    'success' => false,
+                    'message' => 'Data not found',
+                ]);
+            }
+
+            $findIssue->update($input);
+            $findIssue->refresh()->load('issueItems');
+
+            // Delete and re-insert issue items
+            $findIssue->issueItems()->delete();
+            ProductionIssueItemModel::insertIssueItems($findIssue, $input['items']);
+
+            // Approve the issue
+            $findIssue->update([
+                'approved_by_id' => $this->domain['user_id'],
+                'process' => 'Approved'
+            ]);
+
+            // Reload issueItems after insert
+            $findIssue->load('issueItems');
+
+            foreach ($findIssue->issueItems as $item) {
+                StockItemHistoryModel::openingStockQuantity($item, 'production-issue', $this->domain);
+            }
+
+            DB::commit();
+
+            return response()->json([
+                'status' => 200,
+                'success' => true,
+                'message' => 'Issues updated successfully.',
+                'data' => $findIssue,
+            ]);
+
+        } catch (\Throwable $e) {
+            DB::rollBack();
+
+            \Log::error('Issue transaction failed', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+
+            return response()->json([
+                'message' => 'An error occurred while updating the issue.',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
+
+    /*public function update(IssueRequest $request,$id)
+    {
+        $input = $request->validated();
+        $input['config_id'] = $this->domain['pro_config'];
+        $input['created_by_id'] = $this->domain['user_id'];
         // Start Database Transaction to Ensure Data Consistency
         DB::beginTransaction();
 
         try {
-            $issue = ProductionIssueModel::create($input);
-            $issue->refresh();
+            $findIssue = ProductionIssueModel::find($id);
+            if (!$findIssue) {
+                return response()->json([
+                    'status' => 404,
+                    'success' => false,
+                    'message' => 'Data not found',
+                ]);
+            }
+            $findIssue->update($input);
+            $findIssue->refresh();
 
-            ProductionIssueItemModel::insertIssueItems($issue, $input['items']);
+            if ($findIssue->issueItems) {
+                $findIssue->issueItems()->delete();
+            }
+            ProductionIssueItemModel::insertIssueItems($findIssue, $input['items']);
 
             // auto approve production issue
-            $issue->update(['approved_by_id' => $this->domain['user_id'],'process' => 'Approved']);
-            if ($issue->issueItems->count() > 0) {
-                foreach ($issue->issueItems as $item) {
-                    $item['warehouse_id'] = $item['product_warehouse_id'];
-                    unset($item['product_warehouse_id']);
+            $findIssue->update(['approved_by_id' => $this->domain['user_id'],'process' => 'Approved']);
+            if ($findIssue->issueItems->count() > 0) {
+                foreach ($findIssue->issueItems as $item) {
                     StockItemHistoryModel::openingStockQuantity($item, 'production-issue', $this->domain);
                 }
             }
@@ -193,7 +239,7 @@ class ProductionIssueController extends Controller
                 'status' => 200,
                 'success' => true,
                 'message' => 'Issues updated successfully.',
-                'data' => $issue,
+                'data' => $findIssue,
             ]);
         } catch (Exception $e) {
             // Rollback Transaction on Failure
@@ -208,6 +254,6 @@ class ProductionIssueController extends Controller
                 'error' => $e->getMessage()
             ], 500);
         }
-    }
+    }*/
 
 }
