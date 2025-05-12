@@ -143,6 +143,8 @@ class UserModel extends Model
     public static function getDomainData($id)
     {
         $data = self::select([
+            'dom_domain.id as id',
+            'dom_domain.license_no as license_no',
             'dom_domain.id as global_id',
             'dom_domain.id as domain_id',
             'users.id as user_id',

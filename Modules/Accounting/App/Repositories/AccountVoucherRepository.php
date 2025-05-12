@@ -34,23 +34,22 @@ class AccountVoucherRepository extends EntityRepository
     {
 
         $em = $this->_em;
-        $qb = $this->getEntityManager()
-            ->getConnection()
-            ->createQueryBuilder()
-            ->delete('acc_voucher')
-            ->where('config_id =:config_id')
-            ->setParameter('config_id', $configId);
-        $qb->execute();
-
-
         $config = $em->getRepository(Config::class)->find($configId);
+        if(empty($config)){
+            $qb = $this->getEntityManager()
+                ->getConnection()
+                ->createQueryBuilder()
+                ->delete('acc_voucher')
+                ->where('config_id =:config_id')
+                ->setParameter('config_id', $configId);
+            $qb->execute();
+        }
 
         $parentHeads = $em->getRepository(AccountMasterVoucher::class)->findBy(['status'=> 1]);
 
         /** @var AccountVoucher $head */
 
         foreach ($parentHeads as $head){
-
             $entity = new AccountVoucher();
             $entity->setConfig($config);
             $entity->setVoucherType($head->getVoucherType());
@@ -64,7 +63,6 @@ class AccountVoucherRepository extends EntityRepository
             $em->persist($entity);
             $em->flush();
         }
-
         $vouchers = $em->getRepository(AccountVoucher::class)->findBy(['config'=> $configId]);
         return $vouchers;
 

@@ -579,7 +579,16 @@ class DomainController extends Controller
 
     public function restoreData($id, EntityManager $em)
     {
-
+        $findDomain = DomainModel::findOrFail($id);
+        if(empty($findDomain)){
+            return response()->json(
+                [
+                    'message' => 'Inventory config not found',
+                    'status' => Response::HTTP_NOT_FOUND
+                ],
+                Response::HTTP_NOT_FOUND
+            );
+        }
         $entity = UserModel::getDomainData($id);
         $domain = $entity;
         $invConfig = $entity['inv_config'];
@@ -598,7 +607,7 @@ class DomainController extends Controller
             $getCoreSettingTypeId = SettingTypeModel::where('slug', 'customer-group')->first();
             $getCustomerGroupId = SettingModel::updateOrCreate(
                 [
-                    'domain_id' => $entity->id,
+                    'domain_id' => $id,
                     'setting_type_id' => $getCoreSettingTypeId->id,
                     'name' => 'Domain',
                     'is_private' => true,
@@ -611,7 +620,7 @@ class DomainController extends Controller
             );
             SettingModel::updateOrCreate(
                 [
-                    'domain_id' => $entity->id,
+                    'domain_id' => $id,
                     'setting_type_id' => $getCoreSettingTypeId->id,
                     'name' => 'Default',
                     'is_private' => true,
@@ -624,24 +633,7 @@ class DomainController extends Controller
             );
             CustomerModel::updateOrCreate(
                 [
-                    'domain_id' => $entity->id,
-                    'name' => 'Default',
-                    'mobile' => $entity['license_no'],
-                    'customer_group_id' => $getCustomerGroupId->id ?? null,
-                ],
-                [
-                    'slug' => Str::slug($entity->name),
-                    'email' => $entity->email,
-                    'address' => $entity->address,
-                    'is_default_customer' => true,
-                    'status' => true,
-                    'created_at' => now(),
-                    'updated_at' => now(),
-                ]
-            );
-            CustomerModel::updateOrCreate(
-                [
-                    'domain_id' => $entity->id,
+                    'domain_id' => $id,
                     'name' => 'Default',
                     'mobile' => $entity['license_no'],
                     'customer_group_id' => $getCustomerGroupId->id ?? null,
@@ -661,7 +653,7 @@ class DomainController extends Controller
 
             $getVendorGroupId = SettingModel::updateOrCreate(
                 [
-                    'domain_id' => $entity->id,
+                    'domain_id' => $id,
                     'setting_type_id' => $vendorSettingType->id,
                     'name' => 'Domain',
                     'is_private' => true,
@@ -674,7 +666,7 @@ class DomainController extends Controller
             );
             SettingModel::updateOrCreate(
                 [
-                    'domain_id' => $entity->id,
+                    'domain_id' => $id,
                     'setting_type_id' => $vendorSettingType->id,
                     'name' => 'Default',
                     'is_private' => true,
@@ -691,8 +683,9 @@ class DomainController extends Controller
             // Step 3: Create the inventory configuration (config)
             $currency = CurrencyModel::find(1);
 
-            $config = $config =  ConfigModel::create([
-                'domain_id' => $entity->id,
+            $config =  ConfigModel::updateOrCreate([
+                'domain_id' => $id,
+                ],[
                 'currency_id' => $currency->id,
                 'zero_stock' => true,
                 'is_sku' => false,
@@ -701,6 +694,7 @@ class DomainController extends Controller
                 'is_multi_price' => false,
                 'business_model_id' => $entity->business_model_id,
             ]);
+
 
             // Step 4: Create the accounting data
             ConfigProductModel::updateOrCreate([
@@ -729,36 +723,21 @@ class DomainController extends Controller
                 'config_id' => $domain->config_id,
             ]);
 
-            // Step 4: Create the accounting data
-            ConfigProductModel::create([
-                'config_id' => $config->id,
-            ]);
 
             // Step 4: Create the accounting data
-            ConfigSalesModel::create([
-                'config_id' => $config->id,
-                'customer_group_id' => $getCustomerGroupId->id,
-            ]);
-
-            // Step 4: Create the accounting data
-            ConfigPurchaseModel::create([
-                'config_id' => $config->id,
-            ]);
-
-            // Step 4: Create the accounting data
-            $accountingConfig = AccountingModel::create([
+            $accountingConfig = AccountingModel::updateOrCreate([
                 'domain_id' => $entity->id,
                 'financial_start_date' =>  now(),
                 'financial_end_date' =>  now(),
             ]);
 
             // Step 4: Create the accounting data
-            NbrVatConfigModel::create([
+            NbrVatConfigModel::updateOrCreate([
                 'domain_id' => $entity->id,
             ]);
 
             // Step 5: Create the Production data
-            ProductionConfig::create([
+            ProductionConfig::updateOrCreate([
                 'domain_id' => $entity->id,
             ]);
 
@@ -791,8 +770,8 @@ class DomainController extends Controller
                     ]);
                 }
 
-                TransactionModeModel::create([
-                    'config_id' => $accountingConfig->id,
+                TransactionModeModel::updateOrCreate([
+                    'config_id' => $accountingConfig->id],[
                     'account_owner' => 'Cash',
                     'authorised' => 'Cash',
                     'name' => 'Cash',
