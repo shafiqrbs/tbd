@@ -41,7 +41,6 @@ class AccountHeadController extends Controller
     public function index(Request $request){
 
         $data = AccountHeadModel::getRecords($request,$this->domain);
-
         return response()->json([
             'status' => 200,
             'message' => 'success',

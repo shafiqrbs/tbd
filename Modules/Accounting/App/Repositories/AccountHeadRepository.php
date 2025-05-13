@@ -407,7 +407,7 @@ class AccountHeadRepository extends EntityRepository
             $parent = '';
             $head = new AccountHead();
             if($entity->getMethod()->getSlug() == 'cash'){
-                $parent = $this->findOneBy(array('config' => $entity->getConfig(),'accountMasterHead' => 2));
+                $parent = $this->findOneBy(array('config' => $entity->getConfig(),'accountMasterHead' => 30));
             }elseif($entity->getMethod()->getSlug() == 'bank'){
                 $parent = $this->findOneBy(array('config' => $entity->getConfig(),'accountMasterHead' => 3));
             }elseif($entity->getMethod()->getSlug() == 'mobile'){
@@ -422,6 +422,7 @@ class AccountHeadRepository extends EntityRepository
                 $head->setTransaction($entity);
                 $head->setLevel(3);
                 $head->setMode('debit');
+                $head->setIsPrivate(1);
                 $em->persist($head);
                 $em->flush();
                 if(empty($head->getHeadDetail())){

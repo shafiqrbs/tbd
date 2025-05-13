@@ -725,11 +725,13 @@ class DomainController extends Controller
 
 
             // Step 4: Create the accounting data
-            $accountingConfig = AccountingModel::updateOrCreate([
-                'domain_id' => $entity->id,
+            $accountingConfig = AccountingModel::updateOrCreate(
+                ['domain_id' => $entity->id],
+                [
                 'financial_start_date' =>  now(),
-                'financial_end_date' =>  now(),
-            ]);
+                'financial_end_date' =>  now()
+                ]
+            );
 
             // Step 4: Create the accounting data
             NbrVatConfigModel::updateOrCreate([
@@ -797,7 +799,6 @@ class DomainController extends Controller
                 'accountConfig.capital_investment','accountConfig.account_cash','accountConfig.account_bank','accountConfig.account_mobile','accountConfig.account_user','accountConfig.account_vendor','accountConfig.account_customer','accountConfig.account_product_group','accountConfig.account_category',
                 'accountConfig.voucher_stock_opening','accountConfig.voucher_purchase','accountConfig.voucher_sales','accountConfig.voucher_purchase_return','accountConfig.voucher_stock_reconciliation',
                 'productionConfig','gstConfig','inventoryConfig','inventoryConfig.configPurchase','inventoryConfig.configSales','inventoryConfig.configProduct','inventoryConfig.configDiscount','inventoryConfig.configVat','inventoryConfig.businessModel','inventoryConfig.currency')->find($id);
-
 
             // Return the response
             $service = new JsonRequestResponse();
