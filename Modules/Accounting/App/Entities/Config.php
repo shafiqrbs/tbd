@@ -85,6 +85,13 @@ class Config
     private  $accountCategory;
 
     /**
+     * @ORM\OneToOne(targetEntity="AccountHead")
+     * @ORM\JoinColumn(name="account_stock_opening_id", referencedColumnName="id", nullable=true, onDelete="SET NULL")
+     **/
+    private $accountStockOpening;
+
+
+    /**
      * @ORM\OneToOne(targetEntity="AccountVoucher")
      * @ORM\JoinColumn(name="voucher_stock_opening_id", referencedColumnName="id", nullable=true, onDelete="SET NULL")
      **/
@@ -472,6 +479,37 @@ class Config
         $this->voucherStockReconciliation = $voucherStockReconciliation;
     }
 
+    /**
+     * @return mixed
+     */
+    public function getCapitalInvestment()
+    {
+        return $this->capitalInvestment;
+    }
+
+    /**
+     * @param mixed $capitalInvestment
+     */
+    public function setCapitalInvestment($capitalInvestment)
+    {
+        $this->capitalInvestment = $capitalInvestment;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getAccountStockOpening()
+    {
+        return $this->accountStockOpening;
+    }
+
+    /**
+     * @param mixed $accountStockOpening
+     */
+    public function setAccountStockOpening($accountStockOpening)
+    {
+        $this->accountStockOpening = $accountStockOpening;
+    }
 
 
 
