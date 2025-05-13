@@ -34,6 +34,7 @@ class IssueRequest extends FormRequest
                     'issued_by' => 'nullable|string',
                     'batch_id' => 'nullable|string',
                     'issue_type' => 'required|string',
+                    'issued_by_id' => 'nullable|string',
                     'issue_warehouse_id' => 'nullable',
                     'factory_id' => 'nullable',
                     'production_batch_id' => 'nullable',

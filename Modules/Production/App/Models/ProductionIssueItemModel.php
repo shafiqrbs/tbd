@@ -62,19 +62,6 @@ class ProductionIssueItemModel extends Model
         $timestamp = Carbon::now();
 
         $formattedItems = array_map(function ($item) use ($issue, $timestamp) {
-            $stockId = null;
-            /*if ($item['type'] === 'batch_issue') {
-                $findStockHistory = StockItemModel::find($item['product_id']);
-                if ($findStockHistory) {
-                    $stockId = $findStockHistory->id;
-                }
-            } elseif ($item['type'] === 'general_issue') {
-                $findStockHistory = StockItemHistoryModel::find($item['product_id']);
-                if ($findStockHistory) {
-                    $stockId = $findStockHistory->stock_item_id;
-                }
-            }*/
-//            $findStockHistory = StockItemHistoryModel::find($item['stock_item_id']);
 
             return [
                 'production_issue_id'       => $issue->id,

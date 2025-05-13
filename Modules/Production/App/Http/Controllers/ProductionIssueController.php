@@ -47,6 +47,21 @@ class ProductionIssueController extends Controller
         }
     }
 
+    public function index(Request $request)
+    {
+        $data = ProductionIssueModel::getRecords($request, $this->domain);
+        $response = new Response();
+        $response->headers->set('Content-Type', 'application/json');
+        $response->setContent(json_encode([
+            'message' => 'success',
+            'status' => Response::HTTP_OK,
+            'total' => $data['count'],
+            'data' => $data['entities']
+        ]));
+        $response->setStatusCode(Response::HTTP_OK);
+        return $response;
+    }
+
     /**
      * Show the form for creating a new resource.
      */

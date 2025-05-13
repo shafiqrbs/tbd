@@ -84,12 +84,17 @@ class ProductionIssue
     private $narration;
 
 
-
     /**
      * @Gedmo\Blameable(on="create")
      * @ORM\ManyToOne(targetEntity="Modules\Core\App\Entities\User")
      **/
     private  $createdBy;
+
+    /**
+     * @Gedmo\Blameable(on="create")
+     * @ORM\ManyToOne(targetEntity="Modules\Core\App\Entities\User")
+     **/
+    private  $issuedBy;
 
     /**
      * @ORM\ManyToOne(targetEntity="Modules\Core\App\Entities\User")
