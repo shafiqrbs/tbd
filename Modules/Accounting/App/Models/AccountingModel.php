@@ -25,6 +25,7 @@ class AccountingModel extends Model
         'account_customer_id',
         'account_product_group_id',
         'account_category_id',
+        'account_stock_opening_id',
         'voucher_stock_opening_id',
         'voucher_purchase_id',
         'voucher_sales_id',
