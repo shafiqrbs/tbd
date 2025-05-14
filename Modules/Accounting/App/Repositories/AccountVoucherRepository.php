@@ -35,7 +35,8 @@ class AccountVoucherRepository extends EntityRepository
 
         $em = $this->_em;
         $config = $em->getRepository(Config::class)->find($configId);
-        if(empty($config)){
+
+        if($config){
             $qb = $this->getEntityManager()
                 ->getConnection()
                 ->createQueryBuilder()
