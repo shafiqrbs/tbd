@@ -238,6 +238,7 @@ class SalesController extends Controller
 
             // get customer domain
             $customerDomain = $getSales->customerDomain;
+
             if ($customerDomain){
                 // parent domain data
                 $getVendor = VendorModel::where('customer_id', $customerDomain->id)->first();

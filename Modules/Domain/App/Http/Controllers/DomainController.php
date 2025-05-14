@@ -106,6 +106,7 @@ class DomainController extends Controller
 
             $user = UserModel::create([
                 'username' => $data['username'],
+                'name' => $data['name'],
                 'email' => $email,
                 'password' => Hash::make($password),
                 'domain_id' => $entity->id,
@@ -270,7 +271,7 @@ class DomainController extends Controller
 
             // Commit all database operations
             DB::commit();
-            $em->getRepository(AccountHead::class)->generateAccountHead($accountingConfig->id);
+//            $em->getRepository(AccountHead::class)->generateAccountHead($accountingConfig->id);
             // Return the response
             $service = new JsonRequestResponse();
             return $service->returnJosnResponse($entity);

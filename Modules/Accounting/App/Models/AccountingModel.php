@@ -14,6 +14,7 @@ class AccountingModel extends Model
     public $timestamps = true;
     protected $guarded = ['id'];
     protected $fillable = [
+        'domain_id',
         'financial_start_date',
         'financial_end_date',
         'capital_investment_id',
