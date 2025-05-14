@@ -156,12 +156,11 @@ class DomainController extends Controller
                 );
 
                 // Handle Customer
-                $code = $this->generateCustomerCode($patternCodeService);
                 CustomerModel::updateOrCreate(
                     [
                         'domain_id' => $entity->id,
                         'name' => 'Default',
-                        'mobile' => $data['mobile'],
+                        'mobile' => $data['license_no'],
                         'customer_group_id' => $getCustomerGroupId->id ?? null,
                     ],
                     [
@@ -263,6 +262,7 @@ class DomainController extends Controller
                     'is_selected' => true,
                     'path' => null,
                     'account_type' => 'Current',
+                    'is_private' => 1,
                     'method_id' => 20,
                     'status' => true
                 ]);
@@ -271,7 +271,7 @@ class DomainController extends Controller
 
             // Commit all database operations
             DB::commit();
-//            $em->getRepository(AccountHead::class)->generateAccountHead($accountingConfig->id);
+            $em->getRepository(AccountHead::class)->generateAccountHead($accountingConfig->id);
             // Return the response
             $service = new JsonRequestResponse();
             return $service->returnJosnResponse($entity);
