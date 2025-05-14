@@ -8,6 +8,8 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
 use Modules\Accounting\App\Entities\AccountJournal;
+use Modules\Accounting\App\Models\AccountJournalModel;
+use Modules\Accounting\App\Models\AccountVoucherModel;
 use Modules\AppsApi\App\Services\JsonRequestResponse;
 use Modules\Core\App\Models\UserModel;
 use Modules\Inventory\App\Entities\PurchaseItem;
@@ -107,11 +109,12 @@ class OpeningStockController extends Controller
     {
         $response = new Response();
         $response->headers->set('Content-Type', 'application/json');
+        $getPurchaseItem = PurchaseItemModel::find($request->id);
 
         // Start the database transaction
         DB::beginTransaction();
-
         try {
+
             $getPurchaseItem = PurchaseItemModel::find($request->id);
 
             // Validate purchase item existence
@@ -131,6 +134,7 @@ class OpeningStockController extends Controller
 
                 // Call the opening stock quantity method
                 StockItemHistoryModel::openingStockQuantity($getPurchaseItem, 'opening',$this->domain);
+                AccountJournalModel::insertOpeningStockAccountJournal($this->domain,$getPurchaseItem->id);
             }
 
             if ($request->field_name === 'opening_quantity') {

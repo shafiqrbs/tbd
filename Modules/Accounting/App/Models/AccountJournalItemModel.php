@@ -15,14 +15,13 @@ class AccountJournalItemModel extends Model
     public $timestamps = true;
     protected $guarded = ['id'];
     protected $fillable = [
-        'name',
-        'config_id',
-        'mother_account_id',
-        'account_group_id',
-        'account_subgroup_id',
+        'account_journal_id',
+        'account_head_id',
+        'account_sub_head_id',
         'amount',
         'debit',
         'credit',
+        'mode',
     ];
 
     public static function boot()

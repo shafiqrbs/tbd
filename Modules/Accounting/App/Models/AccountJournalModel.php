@@ -6,6 +6,7 @@ use Cviebrock\EloquentSluggable\Sluggable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Support\Facades\DB;
+use Modules\Inventory\App\Models\PurchaseItemModel;
 
 class AccountJournalModel extends Model
 {
@@ -14,14 +15,7 @@ class AccountJournalModel extends Model
     protected $table = 'acc_journal';
     public $timestamps = true;
     protected $guarded = ['id'];
-    protected $fillable = [
-        'name',
-        'config_id',
-        'account_voucher_id',
-        'amount',
-        'debit',
-        'credit',
-    ];
+
 
     public static function boot()
     {
@@ -97,6 +91,44 @@ class AccountJournalModel extends Model
 
         $data = array('count' => $total, 'entities' => $entities);
         return $data;
+    }
+
+    public static function insertOpeningStockAccountJournal($domain,$openingId){
+
+        $config = ConfigModel::find($domain['acc_config']);
+        $purchaseItem = PurchaseItemModel::find($openingId);
+
+        $input['config_id'] = $domain['acc_config'];
+        $input['voucher_id'] = $config->voucher_stock_opening_id;
+        $input['amount'] = $purchaseItem->sub_total;
+        $input['created_by_id'] = $purchaseItem->created_by_id;
+        $input['approved_by_id'] = $purchaseItem->approved_by_id;
+        $input['purchase_item_id'] = $purchaseItem->id;
+        $input['module'] = 'opening-stock';
+        $input['process'] = 'Approved';
+        $input['waiting_process'] = 'Approved';
+        $entity = self::create($input);
+
+
+        $accountDebit['account_journal_id'] = $entity->id;
+        $accountDebit['account_head_id'] = $config->account_stock_opening_id;
+        $accountDebit['account_sub_head_id'] = $config->account_stock_opening_id;
+        $accountDebit['amount'] = $purchaseItem->sub_total;
+        $accountDebit['debit'] = $purchaseItem->sub_total;
+        $accountDebit['mode'] = 'Debit';
+        $debit = AccountJournalItemModel::create($accountDebit);
+
+
+        $accountCredit['account_journal_id'] = $entity->id;
+        $accountCredit['parent'] = $debit->id;
+        $accountCredit['account_head_id'] = $config->capital_investment_id;
+        $accountCredit['account_sub_head_id'] = $config->capital_investment_id;
+        $accountCredit['amount'] = "-".$purchaseItem->sub_total;
+        $accountCredit['credit'] = $purchaseItem->sub_total;
+        $accountCredit['mode'] = 'Credit';
+        AccountJournalItemModel::create($accountCredit);
+        return true;
+
     }
 }
 
