@@ -4,6 +4,7 @@ namespace Modules\Domain\App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
@@ -14,6 +15,7 @@ use Modules\Core\App\Models\CustomerModel;
 use Modules\Core\App\Models\SettingModel;
 use Modules\Core\App\Models\SettingTypeModel;
 use Modules\Core\App\Models\UserModel;
+use Modules\Core\App\Models\UserWarehouseModel;
 use Modules\Core\App\Models\VendorModel;
 use Modules\Domain\App\Http\Requests\B2bCategoryWiseProductRequest;
 use Modules\Domain\App\Models\B2BCategoryPriceMatrixModel;
@@ -23,6 +25,7 @@ use Modules\Domain\App\Models\SubDomainModel;
 use Modules\Inventory\App\Models\CategoryModel;
 use Modules\Inventory\App\Models\ParticularModel;
 use Modules\Inventory\App\Models\ProductModel;
+use Modules\Inventory\App\Models\StockItemHistoryModel;
 use Modules\Inventory\App\Models\StockItemModel;
 use Symfony\Component\HttpFoundation\Response as ResponseAlias;
 
@@ -884,6 +887,48 @@ class B2bController extends Controller
                 'error' => $e->getMessage()
             ], ResponseAlias::HTTP_INTERNAL_SERVER_ERROR);
         }
+    }
+
+    public function impersonate($subDomainId,$user)
+    {
+
+        $domain = $this->domain['domain_id'];
+        $subDomain = SubDomainModel::where('sub_domain_id', $subDomainId)
+            ->where('domain_id',$domain)
+            ->firstOrFail();
+        if ($subDomain){
+
+            $userExists = UserModel::where('id', $user)
+                ->where('domain_id',$subDomainId)
+                ->firstOrFail();
+
+            $accessRole = \DB::table('cor_user_role')->where('user_id',$userExists->id)->first();
+            $getUserWareHouse = UserWarehouseModel::getUserActiveWarehouse($userExists->id);
+            $getUserWareHouseItem = StockItemHistoryModel::getUserWarehouseProductionItem($userExists->id);
+
+            $arrayData=[
+
+                'id'=> $userExists->id,
+                'name'=> $userExists->name,
+                'mobile'=> $userExists->mobile,
+                'email'=> $userExists->email,
+                'username'=> $userExists->username,
+                'user_group'=> $userExists->user_group,
+                'domain_id'=> $userExists->domain_id,
+                'access_control_role' => $accessRole?$accessRole->access_control_role:[],
+                'android_control_role' => $accessRole?$accessRole->android_control_role:[],
+                'user_warehouse'=> $getUserWareHouse? $getUserWareHouse:[],
+                'production_item'=> $getUserWareHouseItem? $getUserWareHouseItem:[],
+
+            ];
+
+            return new JsonResponse([
+                'status'=>200,
+                'message'=>'success',
+                'data'=> $arrayData
+            ]);
+        }
+
     }
 
     /*public function b2bSubDomainProduct(Request $request, $id)

@@ -18,6 +18,8 @@ class AccountJournalItemModel extends Model
         'account_journal_id',
         'account_head_id',
         'account_sub_head_id',
+        'is_parent',
+        'parent_id',
         'amount',
         'debit',
         'credit',

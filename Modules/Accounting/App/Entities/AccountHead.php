@@ -204,8 +204,6 @@ class AccountHead
     private $slug;
 
 
-
-
 	/**
 	 * @var integer
 	 *
@@ -216,7 +214,7 @@ class AccountHead
     /**
      * @var boolean
      *
-     * @ORM\Column(type="boolean" , nullable=true)
+     * @ORM\Column(name="is_parent",type="boolean" , nullable=true)
      */
     private $isParent = false;
 

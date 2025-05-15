@@ -58,7 +58,7 @@ class AccountJournalItem
 
     /**
      * @ORM\ManyToOne(targetEntity="AccountJournalItem", inversedBy="children", cascade={"detach","merge"})
-     * @ORM\JoinColumn(name="parent", referencedColumnName="id", onDelete="CASCADE")
+     * @ORM\JoinColumn(name="parent_id", referencedColumnName="id", onDelete="CASCADE")
      */
     protected $parent;
 
@@ -208,7 +208,7 @@ class AccountJournalItem
     /**
      * @var boolean
      *
-     * @ORM\Column(name="isParent", type="boolean" , nullable=true)
+     * @ORM\Column(type="boolean" , nullable=true)
      */
     private $isParent = false;
 

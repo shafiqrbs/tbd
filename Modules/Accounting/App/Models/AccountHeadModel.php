@@ -31,7 +31,8 @@ class AccountHeadModel extends Model
         'amount',
         'credit',
         'debit',
-        'is_parent',
+        'parent',
+        'isParent',
         'is_private',
         'showAmount',
         'opening_balance',
@@ -383,6 +384,21 @@ class AccountHeadModel extends Model
             ])
             ->get()->toArray();
         return $data;
+    }
+
+    public static function getAccountHeadWithParent($id)
+    {
+
+        $entity = self::where('id', $id)
+            ->select([
+                'acc_head.id',
+                'acc_head.parent_id as parent_id',
+                'acc_head.level',
+                'acc_head.name',
+                'acc_head.slug'
+            ])
+            ->get()->first();
+        return $entity;
     }
 
 

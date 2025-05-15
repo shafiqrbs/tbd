@@ -6,6 +6,7 @@ use Cviebrock\EloquentSluggable\Sluggable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Support\Facades\DB;
+use Modules\Accounting\App\Entities\AccountHead;
 use Modules\Inventory\App\Models\PurchaseItemModel;
 
 class AccountJournalModel extends Model
@@ -109,19 +110,21 @@ class AccountJournalModel extends Model
         $input['waiting_process'] = 'Approved';
         $entity = self::create($input);
 
-
+        $head = AccountHeadModel::getAccountHeadWithParent($config->account_stock_opening_id);
         $accountDebit['account_journal_id'] = $entity->id;
-        $accountDebit['account_head_id'] = $config->account_stock_opening_id;
+        $accountDebit['account_head_id'] = $head->parent_id;
         $accountDebit['account_sub_head_id'] = $config->account_stock_opening_id;
         $accountDebit['amount'] = $purchaseItem->sub_total;
         $accountDebit['debit'] = $purchaseItem->sub_total;
         $accountDebit['mode'] = 'Debit';
+        $accountDebit['is_parent'] = true;
         $debit = AccountJournalItemModel::create($accountDebit);
 
 
+        $head1 = AccountHeadModel::getAccountHeadWithParent($config->capital_investment_id);
         $accountCredit['account_journal_id'] = $entity->id;
-        $accountCredit['parent'] = $debit->id;
-        $accountCredit['account_head_id'] = $config->capital_investment_id;
+        $accountCredit['parent_id'] = $debit->id;
+        $accountCredit['account_head_id'] = $head1->parent_id;
         $accountCredit['account_sub_head_id'] = $config->capital_investment_id;
         $accountCredit['amount'] = "-".$purchaseItem->sub_total;
         $accountCredit['credit'] = $purchaseItem->sub_total;

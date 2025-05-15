@@ -49,7 +49,6 @@ class LoginController extends Controller
 
         $getUserWareHouse = UserWarehouseModel::getUserActiveWarehouse($userExists->id);
         $getUserWareHouseItem = StockItemHistoryModel::getUserWarehouseProductionItem($userExists->id);
-
         $arrayData=[
             'id'=>$userExists->id,
             'name'=>$userExists->name,
@@ -67,6 +66,30 @@ class LoginController extends Controller
             'status'=>200,
             'message'=>'success',
             'data'=>$arrayData
+        ]);
+    }
+
+    public function changePassword(Request $request)
+    {
+        $request->validate([
+            'oldPassword'      => 'required',
+            'newPassword'      => 'required|min:8|confirmed',
+            'newPassword_confirmation'  => 'required|same:newPassword',
+        ]);
+
+        $user = auth()->user();
+        if (!Hash::check($request->oldPassword, $user->password)) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Old password is incorrect.'
+            ], 422);
+        }
+        $user->password = Hash::make($request->newPassword);
+        $user->save();
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Password updated successfully.'
         ]);
     }
 }

@@ -109,9 +109,19 @@ class DomainController extends Controller
                 'name' => $data['name'],
                 'email' => $email,
                 'password' => Hash::make($password),
-                'domain_id' => $entity->id,
-                'user_group' => 'domain'
+                'domain_id' => $entity->id
+
             ]);
+            UserModel::updateOrCreate(
+                [
+                    'id' => $user->id,
+                    'domain_id' => $entity->id
+                ],
+                [
+                    'user_group' => 'domain'
+                ]
+            );
+
             $accessControlRoles = array('role_domain');
             $accessControlRolesJson = json_encode($accessControlRoles, JSON_PRETTY_PRINT);
 
@@ -838,7 +848,6 @@ class DomainController extends Controller
      */
     public function users(Request $request)
     {
-
         $data = UserModel::getRecordsForDomain($request);
         $response = new Response();
         $response->headers->set('Content-Type','application/json');

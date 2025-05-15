@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\LoginController;
 use App\Http\Middleware\HeaderAuthenticationMiddleware;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -52,6 +53,7 @@ Route::prefix('/core')->middleware([HeaderAuthenticationMiddleware::class])->gro
     Route::post('/user/image-inline/{id}', [UserController::class,'updateImage'])->name('core_user_update_image');
 
     Route::apiResource('user', UserController::class)->middleware([HeaderAuthenticationMiddleware::class]);
+    Route::post('/change-password', [LoginController::class, 'changePassword'])->name('change_password');
 
     Route::apiResource('location', LocationController::class)->middleware([HeaderAuthenticationMiddleware::class]);
     Route::apiResource('customer', CustomerController::class)->middleware([HeaderAuthenticationMiddleware::class]);
