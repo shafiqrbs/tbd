@@ -19,7 +19,7 @@ class SalesRequest extends FormRequest
 
         // Common validation rules for 'POST', 'PUT', and 'PATCH' methods
         return [
-            /*'customer_id' => 'required|integer|regex:/^\d+(\.\d{1,2})?$/',*/
+            'customer_id' => 'required|integer|regex:/^\d+(\.\d{1,2})?$/',
             'sub_total' => 'required|regex:/^\d+(\.\d{1,2})?$/',
             'discount_calculation' => 'nullable|regex:/^\d+(\.\d{1,2})?$/',
             'discount' => 'nullable|regex:/^\d+(\.\d{1,2})?$/',

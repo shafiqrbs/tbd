@@ -329,6 +329,12 @@ class Sales
      */
     private $salesForm;
 
+    /**
+     * @var string
+     * @ORM\Column(name="narration", type="text", nullable=true)
+     */
+    private $narration;
+
 
 }
 

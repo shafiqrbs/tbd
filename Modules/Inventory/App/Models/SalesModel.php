@@ -32,6 +32,8 @@ class SalesModel extends Model
         'discount_calculation',
         'discount_type',
         'payment',
+        'invoice_date',
+        'narration',
         'process',
         'transaction_mode_id',
         'sales_form'
@@ -253,6 +255,7 @@ class SalesModel extends Model
                 'inv_sales.invoice as invoice',
                 'inv_sales.sub_total as sub_total',
                 'inv_sales.total as total',
+                'inv_sales.narration',
                 'inv_sales.payment as payment',
                 'inv_sales.discount as discount',
                 'inv_sales.discount_calculation as discount_calculation',

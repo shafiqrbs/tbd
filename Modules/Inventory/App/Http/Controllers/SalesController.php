@@ -73,7 +73,6 @@ class SalesController extends Controller
         $input = $request->validated();
         $input['config_id'] = $this->domain['config_id'];
         $input['sales_form'] = 'inventory';
-
         // Start Database Transaction to Ensure Data Consistency
         DB::beginTransaction();
 
@@ -94,7 +93,7 @@ class SalesController extends Controller
             $salesData = SalesModel::getShow($sales->id, $this->domain);
 
             // Customer Maintenance Logic (Auto Approval)
-            if(empty($input['customer_id']) and $input['customer_name'] and $input['customer_mobile']) {
+            if(empty($input['customer_id']) and isset($input['customer_name']) and isset($input['customer_mobile'])) {
                 $findCustomer = CustomerModel::uniqueCustomerCheck($this->domain['domain_id'],$input['customer_mobile'],$input['customer_name']);
                 if(empty($findCustomer)){
                     $findCustomer = CustomerModel::insertSalesCustomer($this->domain['domain_id'],$input);
@@ -111,17 +110,17 @@ class SalesController extends Controller
             }else{
                 $findCustomer = CustomerModel::find($input['customer_id']);
             }
+            $sales->update(['customer_id' => $findCustomer->id]);
 
             $findInvConfig = ConfigSalesModel::where('config_id',$this->domain['inv_config'])->first();
+
             if ($findInvConfig->is_sales_auto_approved) {
-                $sales->update(['customer_id' => $findCustomer->id, 'approved_by_id' => $this->domain['user_id']]);
+                $sales->update(['approved_by_id' => $this->domain['user_id']]);
                 if ($sales->salesItems->count() > 0) {
                     foreach ($sales->salesItems as $item) {
                         StockItemHistoryModel::openingStockQuantity($item, 'sales', $this->domain);
                     }
                 }
-            }else{
-                $sales->update(['customer_id' => $findCustomer]);
             }
 
           //  $em->getRepository(AccountJournal::class)->insertAccountSales($sales->id);
@@ -133,7 +132,7 @@ class SalesController extends Controller
             return response()->json([
                 'status' => 200,
                 'success' => true,
-                'message' => 'Sales updated successfully.',
+                'message' => 'Sales created successfully.',
                 'data' => $salesData,
             ]);
         } catch (Exception $e) {
