@@ -861,6 +861,26 @@ class DomainController extends Controller
 
     }
 
+
+    /**
+     * Reset the specified resource from storage.
+     */
+    public function subDomainUsers(Request $request)
+    {
+        $domain = $this->domain['domain_id'];
+        $data = UserModel::getRecordsForSubDomain($request,$domain);
+        $response = new Response();
+        $response->headers->set('Content-Type','application/json');
+        $response->setContent(json_encode([
+            'message' => 'success',
+            'status' => Response::HTTP_OK,
+            'total' => $data['count'],
+            'data' => $data['entities']
+        ]));
+        return $response->setStatusCode(Response::HTTP_OK);
+
+    }
+
     /**
      * Remove the specified resource from storage.
      */

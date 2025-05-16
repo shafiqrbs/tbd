@@ -6,7 +6,9 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Validator;
 use Modules\AppsApi\App\Services\JsonRequestResponse;
 use Modules\Core\App\Http\Requests\UserLoginRequest;
 use Modules\Core\App\Http\Requests\UserRequest;
@@ -35,7 +37,6 @@ class LoginController extends Controller
         $data = $request->validated();
 
         $userExists = UserModel::where('username',$data['username'])->first();
-
         if ($userExists){
             $verify = password_verify($data['password'], $userExists->password);
             if (!$verify){
@@ -71,22 +72,30 @@ class LoginController extends Controller
 
     public function changePassword(Request $request)
     {
-        $request->validate([
-            'oldPassword'      => 'required',
-            'newPassword'      => 'required|min:8|confirmed',
-            'newPassword_confirmation'  => 'required|same:newPassword',
-        ]);
 
-        $user = auth()->user();
-        if (!Hash::check($request->oldPassword, $user->password)) {
+        $validator = Validator::make($request->all(), [
+            'current_password'      => 'required',
+            'new_password'          => 'required|min:8',
+        ], [
+            'current_password.required' => 'Please enter your current password.',
+            'new_password.required' => 'Please enter a new password.',
+            'new_password.min' => 'Your new password must have at least :min characters.',
+        ]);
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => 'error',
+                'errors' => $validator->errors(),
+            ], 422);
+        }
+        $user = UserModel::find($this->domain['user_id']); // or any User object you have
+        if (!Hash::check($request->current_password, $user->password)) {
             return response()->json([
                 'status' => false,
                 'message' => 'Old password is incorrect.'
             ], 422);
         }
-        $user->password = Hash::make($request->newPassword);
+        $user->password = Hash::make($request->new_password);
         $user->save();
-
         return response()->json([
             'status' => true,
             'message' => 'Password updated successfully.'

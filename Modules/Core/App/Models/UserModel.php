@@ -233,6 +233,41 @@ class UserModel extends Model
 
     }
 
+    public static function getRecordsForSubDomain($request,$domain){
+
+        $page =  isset($request['page']) && $request['page'] > 0?($request['page'] - 1 ) : 0;
+        $perPage = isset($request['offset']) && $request['offset']!=''? (int)($request['offset']):50;
+        $skip = isset($page) && $page!=''? (int)$page * $perPage:0;
+
+        $users = self::where('users.user_group','domain')->whereNull('users.deleted_at')->where('dom_sub_domain.domain_id',$domain)
+            ->join('dom_domain','dom_domain.id','=','users.domain_id')
+            ->join('dom_sub_domain','dom_sub_domain.sub_domain_id','=','dom_domain.id')
+            ->leftJoin('cor_user_role','cor_user_role.user_id','=','users.id')
+            ->select([
+                'users.id',
+                'users.name',
+                'users.username',
+                'users.email',
+                'users.mobile',
+                DB::raw('DATE_FORMAT(users.created_at, "%d-%m-%Y") as created_date'),
+                'dom_domain.id as domain_id',
+                'dom_domain.company_name as company_name',
+                'dom_domain.mobile as company_mobile',
+                'dom_domain.status as company_status',
+                'users.created_at'
+            ]);
+        $total  = $users->count();
+        $entities = $users->skip($skip)
+            ->take($perPage)
+            ->orderBy('id','DESC')
+            ->get();
+
+        $data = array('count'=>$total,'entities' => $entities);
+        return $data;
+
+
+    }
+
     public static function showUserDetails($id)
     {
         $data = self::select([

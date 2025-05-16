@@ -896,8 +896,8 @@ class B2bController extends Controller
         $subDomain = SubDomainModel::where('sub_domain_id', $subDomainId)
             ->where('domain_id',$domain)
             ->firstOrFail();
-        if ($subDomain){
 
+        if ($subDomain){
             $userExists = UserModel::where('id', $user)
                 ->where('domain_id',$subDomainId)
                 ->firstOrFail();
