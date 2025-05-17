@@ -66,7 +66,6 @@ class VendorController extends Controller
         $input['vendor_code'] = $pattern['generateId'];
         $entity = VendorModel::create($input);
         $config = AccountingModel::where('id',$this->domain['acc_config'])->first();
-
         $ledgerExist = AccountHeadModel::where('vendor_id',$entity->id)->where('config_id',$this->domain['acc_config'])->where('parent_id',$config->account_vendor_id)->first();
         if (empty($ledgerExist)){
             AccountHeadModel::insertVendorLedger($config,$entity);

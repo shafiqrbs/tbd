@@ -7,6 +7,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Modules\Accounting\App\Models\AccountHeadModel;
+use Modules\Accounting\App\Models\AccountingModel;
 use Modules\AppsApi\App\Services\GeneratePatternCodeService;
 use Modules\AppsApi\App\Services\JsonRequestResponse;
 use Modules\Core\App\Http\Requests\CustomerRequest;
@@ -45,15 +46,18 @@ class CustomerController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(CustomerRequest $request, GeneratePatternCodeService $patternCodeService )
+    public function store(CustomerRequest $request)
     {
+
         $service = new JsonRequestResponse();
         $input = $request->validated();
         $input['domain_id'] = $this->domain['global_id'];
         $entity = CustomerModel::create($input);
-        $ledgerExist = AccountHeadModel::where('customer_id',$entity->id)->where('config_id', $this->domain['acc_config_id'])->first();
+
+        $config = AccountingModel::where('id',$this->domain['acc_config'])->first();
+        $ledgerExist = AccountHeadModel::where('customer_id',$entity->id)->where('config_id',$this->domain['acc_config'])->where('parent_id',$config->account_customer_id)->first();
         if (empty($ledgerExist)){
-            AccountHeadModel::insertCustomerLedger( $this->domain['acc_config_id'],$entity);
+            AccountHeadModel::insertCustomerLedger($config,$entity);
         }
         $data = $service->returnJosnResponse($entity);
         return $data;

@@ -15,6 +15,7 @@ class AccountHeadModel extends Model
     protected $guarded = ['id'];
     protected $fillable = [
         'name',
+        'display_name',
         'config_id',
         'mother_account_id',
         'parent_id',
@@ -137,17 +138,18 @@ class AccountHeadModel extends Model
     public static function insertCustomerLedger($config, $entity)
     {
         $name = "{$entity['mobile']}-{$entity['name']}";
-        $parent = AccountHeadModel::where('config_id',$config)->where('slug','account-receivable')->where('level', 2)->where('head_group', 'sub-head')->first();
-        if($parent){
+        $accountHead = $config['account_customer_id'];
+        if($accountHead){
             self::create(
                 [
                     'name' => $name,
-                    'parent_id' => $parent['id'],
+                    'parent_id' => $accountHead,
                     'customer_id' => $entity['id'],
                     'level' => '3',
+                    'credit_limit' => $entity['credit_limit'],
                     'source' => 'customer',
                     'head_group' => 'ledger',
-                    'config_id' => $config
+                    'config_id' => $config->id
                 ]
             );
         }
@@ -156,7 +158,7 @@ class AccountHeadModel extends Model
 
     public static function insertVendorLedger($config, $entity)
     {
-        $name = "{$entity['company_name']}-{$entity['mobile']}";
+        $name = "{$entity['mobile']}-{$entity['company_name']}";
         $accountHead = $config['account_vendor_id'];
         if($accountHead) {
             self::create(

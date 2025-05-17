@@ -114,6 +114,13 @@ class AccountHead
      */
     private $name;
 
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="display_name", type="string", length=255)
+     */
+    private $displayName;
+
      /**
      * @var float
      *
@@ -868,7 +875,21 @@ class AccountHead
         $this->isPrivate = $isPrivate;
     }
 
+    /**
+     * @return string
+     */
+    public function getDisplayName()
+    {
+        return $this->displayName;
+    }
 
+    /**
+     * @param string $displayName
+     */
+    public function setDisplayName($displayName)
+    {
+        $this->displayName = $displayName;
+    }
 
 
 
