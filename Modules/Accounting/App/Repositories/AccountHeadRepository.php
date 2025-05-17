@@ -278,6 +278,7 @@ class AccountHeadRepository extends EntityRepository
             $entity->setMotherAccount($head->getMotherAccount());
             $entity->setAccountMasterHead($head);
             $entity->setName($head->getName());
+            $entity->setDisplayName($head->getName());
             $entity->setSlug($head->getSlug());
             $entity->setHeadGroup('head');
             $entity->setLevel($head->getLevel());
@@ -292,6 +293,7 @@ class AccountHeadRepository extends EntityRepository
                     $subHead->setAccountMasterHead($child);
                     $subHead->setParent($entity);
                     $subHead->setName($child->getName());
+                    $subHead->setDisplayName($child->getName());
                     $subHead->setSlug($child->getSlug());
                     $subHead->setHeadGroup('sub-head');
                     $subHead->setLevel($child->getLevel());
@@ -416,6 +418,7 @@ class AccountHeadRepository extends EntityRepository
             if(!empty($parent)){
                 $head->setConfig($entity->getConfig());
                 $head->setName($entity->getName());
+                $head->setDisplayName($entity->getName());
                 $head->setSlug($entity->getSlug());
                 $head->setParent($parent);
                 $head->setHeadGroup('ledger');
@@ -442,10 +445,12 @@ class AccountHeadRepository extends EntityRepository
         $em = $this->_em;
         $exist = $this->findOneBy(array('customer' => $entity));
         if(empty($exist)){
+            $name = "{$entity['mobile']}-{$entity['name']}";
             $head = new AccountHead();
             $parent = $this->findOneBy(array('config' => $config ,'accountMasterHead' => 4));
             $head->setConfig($config);
-            $head->setName($entity->getName());
+            $head->setName($name);
+            $head->setDisplayName($entity->getName());
             $head->setSlug($entity->getSlug());
             $head->setHeadGroup('ledger');
             $head->setParent($parent);
@@ -468,10 +473,12 @@ class AccountHeadRepository extends EntityRepository
         $em = $this->_em;
         $exist = $this->findOneBy(array('vendor' => $entity));
         if(empty($exist)){
+            $name = "{$entity['mobile']}-{$entity['company_name']}";
             $head = new AccountHead();
             $parent = $this->findOneBy(array('config' => $config ,'accountMasterHead' => 13));
             $head->setConfig($config);
-            $head->setName($entity->getName());
+            $head->setName($name);
+            $head->setDisplayName($entity->getCompanyName());
             $head->setSlug($entity->getSlug());
             $head->setHeadGroup('ledger');
             $head->setParent($parent);
@@ -499,6 +506,7 @@ class AccountHeadRepository extends EntityRepository
             $head->setConfig($config);
             $head->setParent($parent);
             $head->setName($user->getName());
+            $head->setDisplayName($user->getName());
             $head->setSlug($user->getName());
             $head->setHeadGroup('ledger');
             $head->setUser($user);
@@ -525,6 +533,7 @@ class AccountHeadRepository extends EntityRepository
             $head->setConfig($config);
             $head->setParent($parent);
             $head->setName($user->getName());
+            $head->setDisplayName($user->getName());
             $head->setSlug($user->getName());
             $head->setHeadGroup('ledger');
             $head->setUser($user);
@@ -548,6 +557,7 @@ class AccountHeadRepository extends EntityRepository
         $head = new AccountHead();
         $head->setConfig($config);
         $head->setName($entity->getName());
+        $head->setDisplayName($entity->getName());
         $head->setParent($parent);
         $head->setProductGroup($entity);
         $head->setHeadGroup('account-head');
@@ -571,6 +581,7 @@ class AccountHeadRepository extends EntityRepository
         $head = new AccountHead();
         $head->setConfig($parent->getConfig());
         $head->setName($entity->getName());
+        $head->setDisplayName($entity->getName());
         $head->setParent($parent);
         $head->setCategory($entity);
         $head->setLevel(3);

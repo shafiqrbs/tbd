@@ -102,6 +102,7 @@ class AccountHeadModel extends Model
             self::create(
                 [
                     'name' => $name,
+                    'display_name' => $name,
                     'product_group_id' => $entity['id'],
                     'parent_id' => $parent['id'],
                     'level' => '2',
@@ -123,6 +124,7 @@ class AccountHeadModel extends Model
             self::create(
                 [
                     'name' => $name,
+                    'display_name' => $name,
                     'category_id' => $entity->id,
                     'parent_id' => $parent->id,
                     'level' => '3',
@@ -143,6 +145,7 @@ class AccountHeadModel extends Model
             self::create(
                 [
                     'name' => $name,
+                    'display_name' => $entity['name'],
                     'parent_id' => $accountHead,
                     'customer_id' => $entity['id'],
                     'level' => '3',
@@ -164,6 +167,7 @@ class AccountHeadModel extends Model
             self::create(
                 [
                     'name' => $name,
+                    'display_name' => $entity['company_name'],
                     'parent_id' => $accountHead,
                     'level' => '3',
                     'vendor_id' => $entity['id'],
@@ -181,6 +185,7 @@ class AccountHeadModel extends Model
         $name = "{$entity['name']}";
         $array=[
             'name' => $name,
+            'display_name' => $name,
             'source' => 'vendor',
             'parent_id' => '5',
             'level' => '3',
@@ -327,6 +332,7 @@ class AccountHeadModel extends Model
                 'acc_head.id',
                 'acc_head.parent_id',
                 'acc_head.name',
+                'acc_head.display_name',
                 'acc_head.slug',
                 'acc_head.code',
                 'acc_head.head_group',
@@ -350,6 +356,7 @@ class AccountHeadModel extends Model
                 'l_head.name as parent_name',
                 'l_head.slug as parent_slug',
                 'acc_head.name',
+                'acc_head.display_name',
                 'acc_head.slug',
                 'acc_head.code',
             ])
@@ -378,6 +385,7 @@ class AccountHeadModel extends Model
                 'l_head.name as parent_name',
                 'l_head.slug as parent_slug',
                 'acc_head.name',
+                'acc_head.display_name',
                 'acc_head.slug',
                 'acc_head.code',
                 'acc_head.head_group',
@@ -397,6 +405,7 @@ class AccountHeadModel extends Model
                 'acc_head.parent_id as parent_id',
                 'acc_head.level',
                 'acc_head.name',
+                'acc_head.display_name',
                 'acc_head.slug'
             ])
             ->get()->first();
