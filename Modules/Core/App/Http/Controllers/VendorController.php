@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Validation\ValidationException;
 use Modules\Accounting\App\Models\AccountHeadModel;
+use Modules\Accounting\App\Models\AccountingModel;
 use Modules\AppsApi\App\Services\GeneratePatternCodeService;
 use Modules\AppsApi\App\Services\JsonRequestResponse;
 use Modules\Core\App\Http\Requests\VendorRequest;
@@ -51,7 +52,6 @@ class VendorController extends Controller
 
         if ($request->filled('customer_id')){
             $customerExists = VendorModel::where('customer_id', $input['customer_id'])->first();
-
             if ($customerExists) {
                 throw ValidationException::withMessages([
                     'customer_id' => ['The customer ID is already in use.'],
@@ -65,9 +65,11 @@ class VendorController extends Controller
         $input['code'] = $pattern['code'];
         $input['vendor_code'] = $pattern['generateId'];
         $entity = VendorModel::create($input);
-        $ledgerExist = AccountHeadModel::where('vendor_id',$entity->id)->where('config_id',$this->domain['acc_config'])->first();
+        $config = AccountingModel::where('id',$this->domain['acc_config'])->first();
+
+        $ledgerExist = AccountHeadModel::where('vendor_id',$entity->id)->where('config_id',$this->domain['acc_config'])->where('parent_id',$config->account_vendor_id)->first();
         if (empty($ledgerExist)){
-            AccountHeadModel::insertVendorLedger($this->domain['acc_config'],$entity);
+            AccountHeadModel::insertVendorLedger($config,$entity);
         }
         $data = $service->returnJosnResponse($entity);
         return $data;

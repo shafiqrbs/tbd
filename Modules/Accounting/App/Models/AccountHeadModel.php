@@ -156,18 +156,18 @@ class AccountHeadModel extends Model
 
     public static function insertVendorLedger($config, $entity)
     {
-        $name = "{$entity['mobile']}-{$entity['company_name']}";
-        $parent = AccountHeadModel::where('config_id',$config)->where('slug','account-payable')->where('level', 2)->where('head_group','sub-head')->first();
-        if($parent) {
+        $name = "{$entity['company_name']}-{$entity['mobile']}";
+        $accountHead = $config['account_vendor_id'];
+        if($accountHead) {
             self::create(
                 [
                     'name' => $name,
-                    'parent_id' => $parent['id'],
+                    'parent_id' => $accountHead,
                     'level' => '3',
                     'vendor_id' => $entity['id'],
                     'head_group' => 'ledger',
                     'source' => 'vendor',
-                    'config_id' => $config
+                    'config_id' => $config['id']
                 ]
             );
         }

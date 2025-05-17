@@ -133,5 +133,49 @@ class AccountJournalModel extends Model
         return true;
 
     }
+
+    public static function insertPurchaseAccountJournal($domain,$purchase){
+
+        dd($domain);
+
+
+        $config = ConfigModel::find($domain['acc_config']);
+
+        $purchaseItem = PurchaseItemModel::find($openingId);
+
+        $input['config_id'] = $domain['acc_config'];
+        $input['voucher_id'] = $config->voucher_stock_opening_id;
+        $input['amount'] = $purchaseItem->sub_total;
+        $input['created_by_id'] = $purchaseItem->created_by_id;
+        $input['approved_by_id'] = $purchaseItem->approved_by_id;
+        $input['purchase_item_id'] = $purchaseItem->id;
+        $input['module'] = 'opening-stock';
+        $input['process'] = 'Approved';
+        $input['waiting_process'] = 'Approved';
+        $entity = self::create($input);
+
+        $head = AccountHeadModel::getAccountHeadWithParent($config->account_stock_opening_id);
+        $accountDebit['account_journal_id'] = $entity->id;
+        $accountDebit['account_head_id'] = $head->parent_id;
+        $accountDebit['account_sub_head_id'] = $config->account_stock_opening_id;
+        $accountDebit['amount'] = $purchaseItem->sub_total;
+        $accountDebit['debit'] = $purchaseItem->sub_total;
+        $accountDebit['mode'] = 'Debit';
+        $accountDebit['is_parent'] = true;
+        $debit = AccountJournalItemModel::create($accountDebit);
+
+
+        $head1 = AccountHeadModel::getAccountHeadWithParent($config->capital_investment_id);
+        $accountCredit['account_journal_id'] = $entity->id;
+        $accountCredit['parent_id'] = $debit->id;
+        $accountCredit['account_head_id'] = $head1->parent_id;
+        $accountCredit['account_sub_head_id'] = $config->capital_investment_id;
+        $accountCredit['amount'] = "-".$purchaseItem->sub_total;
+        $accountCredit['credit'] = $purchaseItem->sub_total;
+        $accountCredit['mode'] = 'Credit';
+        AccountJournalItemModel::create($accountCredit);
+        return true;
+
+    }
 }
 

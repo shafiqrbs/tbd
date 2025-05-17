@@ -7,6 +7,7 @@ use Doctrine\ORM\EntityManager;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
+use Modules\Accounting\App\Models\AccountJournalModel;
 use Modules\AppsApi\App\Services\JsonRequestResponse;
 use Modules\Core\App\Models\UserModel;
 use Modules\Inventory\App\Entities\PurchaseItem;
@@ -65,25 +66,22 @@ class PurchaseController extends Controller
 
         $process = new PurchaseModel();
         $process->insertPurchaseItems($entity,$input['items']);
-
         $findInvConfig = ConfigPurchaseModel::where('config_id',$this->domain['inv_config'])->first();
-
-        if ($findInvConfig->is_purchase_auto_approved){
-            $entity->update([
-                'approved_by_id' => $this->domain['user_id'],
-                'process' => 'Approved'
-            ]);
+        if ($findInvConfig->is_purchase_auto_approved == 1){
             if (sizeof($entity->purchaseItems)>0){
                 foreach ($entity->purchaseItems as $item){
                     // get average price
                     $itemAveragePrice = StockItemModel::calculateStockItemAveragePrice($item->stock_item_id,$item->config_id,$item);
                     //set average price
-                    StockItemModel::where('id', $item->stock_item_id)->where('config_id',$item->config_id)->update(['average_price' => $itemAveragePrice]);
-
+                    StockItemModel::where('id', $item->stock_item_id)->where('config_id',$item->config_id)->update(['average_price' => $itemAveragePrice,'purchase_price' => $item['purchase_price'],'price' => $item['sales_price'],'sales_price' => $item['sales_price']]);
                     $item->update(['approved_by_id' => $this->domain['user_id']]);
                     StockItemHistoryModel::openingStockQuantity($item,'purchase',$this->domain);
                 }
             }
+            $entity->update([
+                'approved_by_id' => $this->domain['user_id'],
+                'process' => 'Approved'
+            ]);
         }
 
         $data = $service->returnJosnResponse($entity);
@@ -208,11 +206,11 @@ class PurchaseController extends Controller
                     // get average price
                     $itemAveragePrice = StockItemModel::calculateStockItemAveragePrice($item->stock_item_id,$item->config_id,$item);
                     //set average price
-                    StockItemModel::where('id', $item->stock_item_id)->where('config_id',$item->config_id)->update(['average_price' => $itemAveragePrice]);
-
+                    StockItemModel::where('id', $item->stock_item_id)->where('config_id',$item->config_id)->update(['average_price' => $itemAveragePrice,'purchase_price' => $item['purchase_price'],'price' => $item['sales_price'],'sales_price' => $item['sales_price']]);
                     $item->update(['approved_by_id' => $this->domain['user_id']]);
                     StockItemHistoryModel::openingStockQuantity($item,'purchase',$this->domain);
                 }
+                AccountJournalModel::insertPurchaseAccountJournal($this->domain,$purchase);
             }
             // Commit the transaction after all updates are successful
             DB::commit();
