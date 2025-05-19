@@ -408,19 +408,23 @@ class AccountHeadRepository extends EntityRepository
         if (empty($exist)) {
             $parent = '';
             $head = new AccountHead();
+
+            /* @var $config Config */
+            $config = $em->getRepository(Config::class)->find($entity->getConfig());
             if($entity->getMethod()->getSlug() == 'cash'){
-                $parent = $this->findOneBy(array('config' => $entity->getConfig(),'accountMasterHead' => 30));
+                $parent = $config->getAccountCash();
             }elseif($entity->getMethod()->getSlug() == 'bank'){
-                $parent = $this->findOneBy(array('config' => $entity->getConfig(),'accountMasterHead' => 3));
+                $parent = $config->getAccountBank();
             }elseif($entity->getMethod()->getSlug() == 'mobile'){
-                $parent = $this->findOneBy(array('config' => $entity->getConfig(),'accountMasterHead' => 10));
+                $parent = $config->getAccountMobile();
             }
             if(!empty($parent)){
+
                 $head->setConfig($entity->getConfig());
                 $head->setName($entity->getName());
                 $head->setDisplayName($entity->getName());
                 $head->setSlug($entity->getSlug());
-                $head->setParent($parent);
+                if($parent){ $head->setParent($parent);}
                 $head->setHeadGroup('ledger');
                 $head->setTransaction($entity);
                 $head->setLevel(3);
@@ -447,13 +451,15 @@ class AccountHeadRepository extends EntityRepository
         if(empty($exist)){
             $name = "{$entity['mobile']}-{$entity['name']}";
             $head = new AccountHead();
-            $parent = $this->findOneBy(array('config' => $config ,'accountMasterHead' => 4));
+
             $head->setConfig($config);
+            if($config && $config->getAccountCustomer()) {
+                $head->setParent($config->getAccountCustomer());
+            }
             $head->setName($name);
             $head->setDisplayName($entity->getName());
             $head->setSlug($entity->getSlug());
             $head->setHeadGroup('ledger');
-            $head->setParent($parent);
             $head->setCustomer($entity);
             $head->setLevel(3);
             $head->setMode('debit');
@@ -475,13 +481,15 @@ class AccountHeadRepository extends EntityRepository
         if(empty($exist)){
             $name = "{$entity['mobile']}-{$entity['company_name']}";
             $head = new AccountHead();
-            $parent = $this->findOneBy(array('config' => $config ,'accountMasterHead' => 13));
+
             $head->setConfig($config);
+            if($config && $config->getAccountVendor()) {
+                $head->setParent($config->getAccountVendor());
+            }
             $head->setName($name);
             $head->setDisplayName($entity->getCompanyName());
             $head->setSlug($entity->getSlug());
             $head->setHeadGroup('ledger');
-            $head->setParent($parent);
             $head->setVendor($entity);
             $head->setLevel(3);
             $head->setMode('credit');
@@ -501,10 +509,12 @@ class AccountHeadRepository extends EntityRepository
 
         $exist = $this->findOneBy(array('user' => $user));
         if(empty($exist)){
-            $parent = $this->findOneBy(array('config' => $config ,'accountMasterHead' => 25));
+
             $head = new AccountHead();
             $head->setConfig($config);
-            $head->setParent($parent);
+            if($config && $config->getAccountUser()){
+                $head->setParent($config->getAccountUser());
+            }
             $head->setName($user->getName());
             $head->setDisplayName($user->getName());
             $head->setSlug($user->getName());
@@ -528,10 +538,12 @@ class AccountHeadRepository extends EntityRepository
         /* @var $exist AccountHead */
         $exist = $this->findOneBy(array('user' => $user));
         if(empty($exist)){
-            $parent = $this->findOneBy(array('config' => $config ,'accountMasterHead' => 49));
+
             $head = new AccountHead();
             $head->setConfig($config);
-            $head->setParent($parent);
+            if($config && $config->getCapitalInvestment()){
+                $head->setParent($config->getCapitalInvestment());
+            }
             $head->setName($user->getName());
             $head->setDisplayName($user->getName());
             $head->setSlug($user->getName());
@@ -552,13 +564,14 @@ class AccountHeadRepository extends EntityRepository
 
         /* @var $exist AccountHead */
 
-        $parent = $this->findOneBy(array('config'=>$config,'headGroup' => 'account-head','slug' => 'inventory-assets'));
         $em = $this->_em;
         $head = new AccountHead();
         $head->setConfig($config);
+        if($config && $config->getAccountProductGroup()){
+            $head->setParent($config->getAccountProductGroup());
+        }
         $head->setName($entity->getName());
         $head->setDisplayName($entity->getName());
-        $head->setParent($parent);
         $head->setProductGroup($entity);
         $head->setHeadGroup('account-head');
         $head->setLevel(2);
