@@ -74,11 +74,13 @@ class RequisitionController extends Controller
                 throw new \Exception("Vendor not found");
             }
 
-            $input['customer_id'] = $findVendor->customer_id;
-            $input['customer_config_id'] = $this->domain['config_id'];
-            $input['vendor_config_id'] = ConfigModel::where('domain_id', $findVendor->sub_domain_id)
-                ->first()
-                ->id;
+            if ($findVendor->customer_id) {
+                $input['customer_id'] = $findVendor->customer_id;
+                $input['customer_config_id'] = $this->domain['config_id'];
+                $input['vendor_config_id'] = ConfigModel::where('domain_id', $findVendor->sub_domain_id)
+                    ->first()
+                    ->id;
+            }
 
             $requisition = RequisitionModel::create($input);
 
@@ -110,6 +112,7 @@ class RequisitionController extends Controller
                         'purchase_price' => $val['purchase_price'],
                         'sales_price' => $val['sales_price'],
                         'sub_total' => $val['sub_total'],
+                        'warehouse_id' => $val['warehouse_id'] ?? null,
                         'unit_id' => $findProduct->unit_id,
                         'unit_name' => $customerStockItem->uom,
                         'created_at' => now(),

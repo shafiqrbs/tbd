@@ -169,7 +169,7 @@ class VendorController extends Controller
         $response->setContent(json_encode([
             'message' => 'success',
             'status' => Response::HTTP_OK,
-            'data' => $data['entities']
+            'data' => $data
         ]));
         $response->setStatusCode(Response::HTTP_OK);
         return $response;

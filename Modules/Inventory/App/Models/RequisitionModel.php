@@ -153,6 +153,7 @@ class RequisitionModel extends Model
                     'inv_requisition_item.purchase_price',
                     'inv_requisition_item.sales_price',
                     'inv_requisition_item.sub_total',
+                    'inv_requisition_item.warehouse_id',
                     'inv_requisition_item.unit_name as unit_name',
                 ])
                     ->join('inv_stock','inv_stock.id','=','inv_requisition_item.customer_stock_item_id')
