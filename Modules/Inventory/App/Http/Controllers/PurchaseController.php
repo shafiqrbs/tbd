@@ -209,12 +209,16 @@ class PurchaseController extends Controller
     {
         $response = new Response();
         $response->headers->set('Content-Type', 'application/json');
-
+        $purchase = PurchaseModel::find($id);
+        AccountJournalModel::insertPurchaseAccountJournal($this->domain,$id);
+        exit;
         // Start the database transaction
         DB::beginTransaction();
 
         try {
             $purchase = PurchaseModel::find($id);
+            AccountJournalModel::insertPurchaseAccountJournal($this->domain,$id);
+            exit;
             $purchase->update([
                 'approved_by_id' => $this->domain['user_id'],
                 'process' => 'Approved'
@@ -228,7 +232,7 @@ class PurchaseController extends Controller
                     $item->update(['approved_by_id' => $this->domain['user_id']]);
                     StockItemHistoryModel::openingStockQuantity($item,'purchase',$this->domain);
                 }
-                AccountJournalModel::insertPurchaseAccountJournal($this->domain,$purchase);
+
             }
             // Commit the transaction after all updates are successful
             DB::commit();

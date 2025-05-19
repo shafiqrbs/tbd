@@ -412,6 +412,22 @@ class AccountHeadModel extends Model
         return $entity;
     }
 
+    public static function getAccountHeadWithParentPramValue($pram,$value)
+    {
+
+        $entity = self::where($pram,$value)
+            ->select([
+                'acc_head.id',
+                'acc_head.parent_id as parent_id',
+                'acc_head.level',
+                'acc_head.name',
+                'acc_head.display_name',
+                'acc_head.slug'
+            ])
+            ->get()->first();
+        return $entity;
+    }
+
 
 
 }

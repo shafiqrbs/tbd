@@ -171,9 +171,10 @@ class AccountJournal
     /**
      * @var string
      *
-     * @ORM\Column(name="account_refno", type="string", length=150, nullable=true)
+     * @ORM\Column(name="invoice_no", type="string", length=150, nullable=true)
      */
-    private $accountRefno;
+    private $invoiceNo;
+
 
     /**
      * @var integer
@@ -588,22 +589,6 @@ class AccountJournal
     }
 
     /**
-     * @return string
-     */
-    public function getAccountRefNo()
-    {
-        return $this->accountRefNo;
-    }
-
-    /**
-     * @param string $accountRefNo
-     */
-    public function setAccountRefNo($accountRefNo)
-    {
-        $this->accountRefNo = $accountRefNo;
-    }
-
-    /**
      * @return int
      */
     public function getCode()
@@ -763,9 +748,21 @@ class AccountJournal
         $this->updatedAt = $updatedAt;
     }
 
+    /**
+     * @return string
+     */
+    public function getInvoiceNo()
+    {
+        return $this->invoiceNo;
+    }
 
-
-
+    /**
+     * @param string $invoiceNo
+     */
+    public function setInvoiceNo($invoiceNo)
+    {
+        $this->invoiceNo = $invoiceNo;
+    }
 
 
 }

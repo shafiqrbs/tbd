@@ -38,13 +38,12 @@ class GeneratePatternCodeService
 
     }
 
-    public function invoiceNo($queryParams = [])
+    public function invoiceNo($queryParams)
     {
 
         $prefix     = $queryParams['prefix'];
         $domain     = $queryParams['config'];
         $table      = $queryParams['table'];
-
         $datetime = new \DateTime("now");
         $date = $datetime->format('Y-m-01');
         $entity = DB::table("{$table} as e")
