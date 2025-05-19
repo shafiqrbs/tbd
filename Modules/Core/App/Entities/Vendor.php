@@ -199,6 +199,12 @@ class Vendor
     protected $subDomain;
 
     /**
+     * @ORM\ManyToOne(targetEntity="Modules\Core\App\Entities\Setting")
+     * @ORM\JoinColumn(name="vendor_group_id", referencedColumnName="id", nullable=true, onDelete="SET NULL")
+     **/
+    protected $vendorGroup;
+
+    /**
      * @return int
      */
     public function getId()
@@ -565,6 +571,24 @@ class Vendor
     {
         $this->updatedAt = $updatedAt;
     }
+
+    /**
+     * @return mixed
+     */
+    public function getVendorGroup()
+    {
+        return $this->vendorGroup;
+    }
+
+    /**
+     * @param mixed $vendorGroup
+     */
+    public function setVendorGroup($vendorGroup)
+    {
+        $this->vendorGroup = $vendorGroup;
+    }
+
+
 
 
 

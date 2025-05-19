@@ -31,6 +31,10 @@ class VendorRequest extends FormRequest
                         'required',
                         Rule::unique('Modules\Core\App\Entities\Vendor', 'mobile')
                     ],
+                    'vendor_group_id' => [
+                        'nullable',
+//                        Rule::unique('Modules\Core\App\Entities\Vendor', 'customer_id'),
+                    ],
                     'customer_id' => [
                         'nullable',
 //                        Rule::unique('Modules\Core\App\Entities\Vendor', 'customer_id'),
@@ -52,10 +56,15 @@ class VendorRequest extends FormRequest
                         Rule::unique('Modules\Core\App\Entities\Vendor', 'mobile')->ignore($vendor)
                     ],
                     'email' => 'email|nullable',
+                    'vendor_group_id' => [
+                        'nullable',
+//                        Rule::unique('Modules\Core\App\Entities\Vendor', 'customer_id'),
+                    ],
                     'customer_id' => [
                         'nullable',
 //                        Rule::unique('Modules\Core\App\Entities\Customer', 'id')->ignore($vendor)
                     ],
+
                     'address' => 'string|nullable',
                 ];
             }

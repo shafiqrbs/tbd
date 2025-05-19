@@ -12,6 +12,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Facades\DB;
 use Modules\AppsApi\App\Services\GeneratePatternCodeService;
 use Modules\Core\App\Entities\Customer;
+use Modules\Domain\App\Models\DomainModel;
+use Modules\Inventory\App\Models\ConfigSalesModel;
 
 
 class CustomerModel extends Model
@@ -250,11 +252,17 @@ class CustomerModel extends Model
 
     public static function insertSalesCustomer($domain,$input)
     {
-        $customer['domain_id'] =  $domain;
+        $domainConfig = ConfigSalesModel::where(['config_id',$domain['inv_config']]);
+        if($domainConfig and $domainConfig->default_customer_group_id){
+            $customer['customer_group_id'] = $domainConfig->default_customer_group_id;
+        }
+        $customer['domain_id'] =  $domain['domain_id'];
         $customer['name'] = ($input['customer_name']) ? $input['customer_name'] :'';
         $customer['mobile'] = ($input['customer_mobile']) ? $input['customer_mobile'] :'';
         $customer['email'] = ($input['customer_email']) ? $input['customer_email'] :'';
         return self::create($customer);
+
+
     }
 
     public static function uniqueCustomerCheck($domain,$mobile,$name){

@@ -13,6 +13,8 @@ use Illuminate\Support\Facades\Session;
 use Modules\Accounting\App\Entities\AccountHead;
 use Modules\Accounting\App\Entities\AccountJournal;
 use Modules\Accounting\App\Entities\Config;
+use Modules\Accounting\App\Models\AccountHeadModel;
+use Modules\Accounting\App\Models\AccountingModel;
 use Modules\Accounting\App\Models\TransactionModeModel;
 use Modules\AppsApi\App\Services\GeneratePatternCodeService;
 use Modules\AppsApi\App\Services\JsonRequestResponse;
@@ -96,7 +98,12 @@ class SalesController extends Controller
             if(empty($input['customer_id']) and isset($input['customer_name']) and isset($input['customer_mobile'])) {
                 $findCustomer = CustomerModel::uniqueCustomerCheck($this->domain['domain_id'],$input['customer_mobile'],$input['customer_name']);
                 if(empty($findCustomer)){
-                    $findCustomer = CustomerModel::insertSalesCustomer($this->domain['domain_id'],$input);
+                    $findCustomer = CustomerModel::insertSalesCustomer($this->domain,$input);
+                    $config = AccountingModel::where('id',$this->domain['acc_config'])->first();
+                    $ledgerExist = AccountHeadModel::where('customer_id',$findCustomer->id)->where('config_id',$this->domain['acc_config'])->where('parent_id',$config->account_customer_id)->first();
+                    if (empty($ledgerExist)){
+                        AccountHeadModel::insertCustomerLedger($config,$findCustomer);
+                    }
                     $findCustomer = $findCustomer->refresh();
                 }
             }elseif(empty($input['customer_id'])){

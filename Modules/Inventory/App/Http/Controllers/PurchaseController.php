@@ -7,9 +7,12 @@ use Doctrine\ORM\EntityManager;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
+use Modules\Accounting\App\Models\AccountHeadModel;
+use Modules\Accounting\App\Models\AccountingModel;
 use Modules\Accounting\App\Models\AccountJournalModel;
 use Modules\AppsApi\App\Services\JsonRequestResponse;
 use Modules\Core\App\Models\UserModel;
+use Modules\Core\App\Models\VendorModel;
 use Modules\Inventory\App\Entities\PurchaseItem;
 use Modules\Inventory\App\Http\Requests\ProductRequest;
 use Modules\Inventory\App\Http\Requests\PurchaseRequest;
@@ -62,8 +65,23 @@ class PurchaseController extends Controller
 
         $input['config_id'] = $this->domain['config_id'];
         $input['created_by_id'] = $this->domain['user_id'];
-        $entity = PurchaseModel::create($input);
 
+        if(empty($input['vendor_id']) and isset($input['vendor_name']) and isset($input['vendor_mobile'])) {
+            $find = VendorModel::uniqueVendorCheck($this->domain['domain_id'], $input['vendor_mobile'], $input['vendor_name']);
+            if (empty($find)) {
+                $find = VendorModel::insertPurchaseVendor($this->domain, $input);
+                $config = AccountingModel::where('id', $this->domain['acc_config'])->first();
+                $ledgerExist = AccountHeadModel::where('vendor_id', $find->id)->where('config_id', $this->domain['acc_config'])->where('parent_id', $config->account_vendor_id)->first();
+                if (empty($ledgerExist)) {
+                    AccountHeadModel::insertVendorLedger($config, $find);
+                }
+                $vendor = $find->refresh();
+                $input['vendor_id'] = $vendor->id;
+            }else{
+                $input['vendor_id'] = $find->id;
+            }
+        }
+        $entity = PurchaseModel::create($input);
         $process = new PurchaseModel();
         $process->insertPurchaseItems($entity,$input['items']);
         $findInvConfig = ConfigPurchaseModel::where('config_id',$this->domain['inv_config'])->first();
