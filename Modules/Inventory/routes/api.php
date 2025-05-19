@@ -75,6 +75,7 @@ Route::prefix('/inventory')->middleware([HeaderAuthenticationMiddleware::class])
         Route::delete('/stock/sku/{product}', [StockItemController::class,'stockItemDelete'])->name('product_stock_delete');
         Route::post('/stock/sku/inline-update/{stock_id}', [StockItemController::class,'stockSkuInlineUpdate'])->name('product_stock_sku_inline_update');
         Route::post('/gallery', [ProductController::class,'galleryAdded'])->name('product_gallery_added');
+        Route::post('/gallery/delete', [ProductController::class,'galleryDelete'])->name('product_gallery_delete');
     });
 
     Route::prefix('/discount')->middleware([HeaderAuthenticationMiddleware::class])->group(function() {

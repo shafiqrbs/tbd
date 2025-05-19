@@ -3,6 +3,7 @@
 namespace Modules\Inventory\App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Traits\HandlesFileUploads;
 use Doctrine\ORM\EntityManagerInterface;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -23,9 +24,11 @@ use Modules\Inventory\App\Models\StockItemModel;
 use Modules\Inventory\App\Repositories\StockItemRepository;
 use Modules\NbrVatTax\App\Models\NbrItemVat;
 use Modules\NbrVatTax\App\Models\NbrTaxTariff;
+use Symfony\Component\HttpFoundation\Response as ResponseAlias;
 
 class ProductController extends Controller
 {
+    use HandlesFileUploads;
     protected $domain;
 
     public function __construct(Request $request)
@@ -304,13 +307,7 @@ class ProductController extends Controller
         ];
 
         $targetLocation = $targetMap[$data['type']] ?? null;
-        $deletePath = $findProduct ? $findProduct->{$data['type']} : null;
-
-        $productPath = $this->processFileUpload($request->file('image'), $targetLocation);
-
-        if ($findProduct) {
-            File::delete(public_path($targetLocation . '/' . $deletePath));
-        }
+        $productPath = $this->handleFileUpload($request, $findProduct,'image',$targetLocation,'public');
 
         $data[$data['type']] = $productPath;
 
@@ -323,22 +320,23 @@ class ProductController extends Controller
         ], Response::HTTP_OK);
     }
 
-
-    private function processFileUpload($file, $uploadDir)
+    public function galleryDelete(Request $request)
     {
-        if ($file) {
-            $uploadDirPath = public_path($uploadDir);
-            if (!file_exists($uploadDirPath)) {
-                mkdir($uploadDirPath, 0777, true);
-            }
+        $data = $request->only('product_id','type');
+        $type = $data['type'];
 
-            $fileName = time() . '.' . $file->extension();
+        $findProduct = ProductGalleryModel::where('product_id', $data['product_id'])->first();
 
-            $file->move($uploadDirPath, $fileName);
-            return $fileName;
+        $productPath = $this->deleteFile($findProduct[$type],'public');
+        if ($productPath) {
+            $findProduct->update([$data['type'] => null]);
         }
-
-        return null;
+        $findProduct->refresh();
+        return response()->json([
+            'message' => 'success',
+            'status' => ResponseAlias::HTTP_OK,
+            'data' => $findProduct,
+        ], ResponseAlias::HTTP_OK);
     }
 
     public function nbrTariff($id)
