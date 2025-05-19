@@ -9,7 +9,9 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Support\Facades\DB;
+use Modules\Accounting\App\Models\AccountHeadModel;
 use Modules\AppsApi\App\Services\GeneratePatternCodeService;
 use Modules\Core\App\Entities\Customer;
 use Modules\Domain\App\Models\DomainModel;
@@ -82,6 +84,11 @@ class CustomerModel extends Model
     public function location(): BelongsTo
     {
         return $this->belongsTo(LocationModel::class);
+    }
+
+    public function accountHead(): HasOne
+    {
+        return $this->hasOne(AccountHeadModel::class,'customer_id');
     }
 
     public static function boot() {

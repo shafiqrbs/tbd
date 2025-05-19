@@ -92,6 +92,61 @@ class Config
 
 
     /**
+     * @ORM\OneToOne(targetEntity="AccountHead")
+     * @ORM\JoinColumn(name="account_purchase_id", referencedColumnName="id", nullable=true, onDelete="SET NULL")
+     **/
+    private $accountPurchase;
+
+
+    /**
+     * @ORM\OneToOne(targetEntity="AccountHead")
+     * @ORM\JoinColumn(name="account_purchase_discount_id", referencedColumnName="id", nullable=true, onDelete="SET NULL")
+     **/
+    private $accountPurchaseDiscount;
+
+    /**
+     * @ORM\OneToOne(targetEntity="AccountHead")
+     * @ORM\JoinColumn(name="account_sales_id", referencedColumnName="id", nullable=true, onDelete="SET NULL")
+     **/
+    private $accountSales;
+
+
+    /**
+     * @ORM\OneToOne(targetEntity="AccountHead")
+     * @ORM\JoinColumn(name="account_sales_discount_id", referencedColumnName="id", nullable=true, onDelete="SET NULL")
+     **/
+    private $accountSalesDiscount;
+
+
+
+     /**
+     * @ORM\OneToOne(targetEntity="AccountHead")
+     * @ORM\JoinColumn(name="account_vat_id", referencedColumnName="id", nullable=true, onDelete="SET NULL")
+     **/
+    private $accountVat;
+
+    /**
+     * @ORM\OneToOne(targetEntity="AccountHead")
+     * @ORM\JoinColumn(name="account_ait_id", referencedColumnName="id", nullable=true, onDelete="SET NULL")
+     **/
+    private $accountAit;
+
+
+     /**
+     * @ORM\OneToOne(targetEntity="AccountHead")
+     * @ORM\JoinColumn(name="account_zakat_id", referencedColumnName="id", nullable=true, onDelete="SET NULL")
+     **/
+    private $accountZakat;
+
+
+    /**
+     * @ORM\OneToOne(targetEntity="AccountHead")
+     * @ORM\JoinColumn(name="account_sd_id", referencedColumnName="id", nullable=true, onDelete="SET NULL")
+     **/
+    private $accountSd;
+
+
+    /**
      * @ORM\OneToOne(targetEntity="AccountVoucher")
      * @ORM\JoinColumn(name="voucher_stock_opening_id", referencedColumnName="id", nullable=true, onDelete="SET NULL")
      **/
@@ -511,6 +566,133 @@ class Config
         $this->accountStockOpening = $accountStockOpening;
     }
 
+    /**
+     * @return mixed
+     */
+    public function getAccountPurchaseDiscount()
+    {
+        return $this->accountPurchaseDiscount;
+    }
+
+    /**
+     * @param mixed $accountPurchaseDiscount
+     */
+    public function setAccountPurchaseDiscount($accountPurchaseDiscount)
+    {
+        $this->accountPurchaseDiscount = $accountPurchaseDiscount;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getAccountSalesDiscount()
+    {
+        return $this->accountSalesDiscount;
+    }
+
+    /**
+     * @param mixed $accountSalesDiscount
+     */
+    public function setAccountSalesDiscount($accountSalesDiscount)
+    {
+        $this->accountSalesDiscount = $accountSalesDiscount;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getAccountVat()
+    {
+        return $this->accountVat;
+    }
+
+    /**
+     * @param mixed $accountVat
+     */
+    public function setAccountVat($accountVat)
+    {
+        $this->accountVat = $accountVat;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getAccountAit()
+    {
+        return $this->accountAit;
+    }
+
+    /**
+     * @param mixed $accountAit
+     */
+    public function setAccountAit($accountAit)
+    {
+        $this->accountAit = $accountAit;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getAccountZakat()
+    {
+        return $this->accountZakat;
+    }
+
+    /**
+     * @param mixed $accountZakat
+     */
+    public function setAccountZakat($accountZakat)
+    {
+        $this->accountZakat = $accountZakat;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getAccountSd()
+    {
+        return $this->accountSd;
+    }
+
+    /**
+     * @param mixed $accountSd
+     */
+    public function setAccountSd($accountSd)
+    {
+        $this->accountSd = $accountSd;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getAccountPurchase()
+    {
+        return $this->accountPurchase;
+    }
+
+    /**
+     * @param mixed $accountPurchase
+     */
+    public function setAccountPurchase($accountPurchase)
+    {
+        $this->accountPurchase = $accountPurchase;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getAccountSales()
+    {
+        return $this->accountSales;
+    }
+
+    /**
+     * @param mixed $accountSales
+     */
+    public function setAccountSales($accountSales)
+    {
+        $this->accountSales = $accountSales;
+    }
 
 
 

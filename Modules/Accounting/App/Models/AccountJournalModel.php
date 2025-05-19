@@ -7,7 +7,9 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Support\Facades\DB;
 use Modules\Accounting\App\Entities\AccountHead;
+use Modules\AppsApi\App\Services\GeneratePatternCodeService;
 use Modules\Inventory\App\Models\PurchaseItemModel;
+use Modules\Inventory\App\Models\PurchaseModel;
 
 class AccountJournalModel extends Model
 {
@@ -22,6 +24,8 @@ class AccountJournalModel extends Model
     {
         parent::boot();
         self::creating(function ($model) {
+            $model->invoice_no = self::journalEventListener($model)['generateId'];
+            $model->code = self::journalEventListener($model)['code'];
             $date = new \DateTime("now");
             $model->created_at = $date;
         });
@@ -30,6 +34,17 @@ class AccountJournalModel extends Model
             $date = new \DateTime("now");
             $model->updated_at = $date;
         });
+    }
+    public static function journalEventListener($model)
+    {
+
+        $patternCodeService = app(GeneratePatternCodeService::class);
+        $params = [
+            'config' => $model->config_id,
+            'table' => 'acc_journal',
+            'prefix' => 'JA-',
+        ];
+        return $patternCodeService->invoiceNo($params);
     }
 
     public static function insertCustomerJournalVoucher($config, $entity)
@@ -136,46 +151,126 @@ class AccountJournalModel extends Model
 
     public static function insertPurchaseAccountJournal($domain,$purchase){
 
-        dd($domain);
-
 
         $config = ConfigModel::find($domain['acc_config']);
+        $entity = PurchaseModel::find($purchase);
 
-        $purchaseItem = PurchaseItemModel::find($openingId);
+        $subTotal = ($entity->sub_total) ? floatval($entity->sub_total) : 0;
+        $payment = ($entity->payment) ? floatval($entity->payment) : 0;
+        $discount = ($entity->discount) ? floatval($entity->discount) : 0;
 
-        $input['config_id'] = $domain['acc_config'];
-        $input['voucher_id'] = $config->voucher_stock_opening_id;
-        $input['amount'] = $purchaseItem->sub_total;
-        $input['created_by_id'] = $purchaseItem->created_by_id;
-        $input['approved_by_id'] = $purchaseItem->approved_by_id;
-        $input['purchase_item_id'] = $purchaseItem->id;
-        $input['module'] = 'opening-stock';
+
+        $input['config_id'] = $config->id;
+        $input['voucher_id'] = $config->voucher_purchase_id;
+        $input['amount'] = $subTotal;
+        $input['created_by_id'] = $entity->created_by_id;
+        $input['approved_by_id'] = $entity->approved_by_id;
+        $input['purchase_id'] = $entity->id;
+        $input['module'] = 'purchase';
         $input['process'] = 'Approved';
         $input['waiting_process'] = 'Approved';
-        $entity = self::create($input);
+        $journal = self::create($input);
 
-        $head = AccountHeadModel::getAccountHeadWithParent($config->account_stock_opening_id);
-        $accountDebit['account_journal_id'] = $entity->id;
-        $accountDebit['account_head_id'] = $head->parent_id;
-        $accountDebit['account_sub_head_id'] = $config->account_stock_opening_id;
-        $accountDebit['amount'] = $purchaseItem->sub_total;
-        $accountDebit['debit'] = $purchaseItem->sub_total;
-        $accountDebit['mode'] = 'Debit';
-        $accountDebit['is_parent'] = true;
-        $debit = AccountJournalItemModel::create($accountDebit);
+        $journalItem = self::purchaseEntry($config,$journal,$subTotal);
+        if($journalItem and $discount > 0){
+            self::purchaseDiscountEntry($config,$journal,$discount,$journalItem);
+        }
+        if($journalItem){
+            self::purchasePayableEntry($journal, $entity, $journalItem);
+        }
+        if($payment > 0){
+            $journalItem = self::purchasePayableDebitEntry($journal, $entity);
+            if($journalItem){
+                self::purchasePayablePaymentEntry($config, $journal, $entity , $journalItem);
+            }
+        }
+    }
 
+    public static function purchaseEntry($config,$journal,$amount){
 
-        $head1 = AccountHeadModel::getAccountHeadWithParent($config->capital_investment_id);
-        $accountCredit['account_journal_id'] = $entity->id;
-        $accountCredit['parent_id'] = $debit->id;
-        $accountCredit['account_head_id'] = $head1->parent_id;
-        $accountCredit['account_sub_head_id'] = $config->capital_investment_id;
-        $accountCredit['amount'] = "-".$purchaseItem->sub_total;
-        $accountCredit['credit'] = $purchaseItem->sub_total;
-        $accountCredit['mode'] = 'Credit';
-        AccountJournalItemModel::create($accountCredit);
-        return true;
+        $head = AccountHeadModel::getAccountHeadWithParent($config->account_purchase_id);
+        if($head){
+            $accountDebit['account_journal_id'] = $journal->id;
+            $accountDebit['account_head_id'] = $head->parent_id;
+            $accountDebit['account_sub_head_id'] = $head->id;
+            $accountDebit['amount'] = $amount;
+            $accountDebit['debit'] = $amount;
+            $accountDebit['mode'] = 'debit';
+            $accountDebit['is_parent'] = true;
+            $journalItem = AccountJournalItemModel::create($accountDebit);
+            return $journalItem->id;
+        }
 
     }
+
+    public static function purchaseDiscountEntry($config,$journal,$amount,$journalItem){
+
+        $head = AccountHeadModel::getAccountHeadWithParent($config->account_purchase_discount_id);
+        if($head){
+            $accountDebit['account_journal_id'] = $journal->id;
+            $accountDebit['account_head_id'] = $head->parent_id;
+            $accountDebit['account_sub_head_id'] = $config->account_purchase_discount_id;
+            $accountDebit['parent_id'] = $journalItem;
+            $accountDebit['amount'] = "-{$amount}";
+            $accountDebit['credit'] = $amount;
+            $accountDebit['mode'] = 'credit';
+            AccountJournalItemModel::create($accountDebit);
+        }
+    }
+
+    public static function purchasePayableEntry($journal,$entity,$journalItem){
+
+        $amount = $entity->total;
+        $vendor = $entity->vendor_id;
+        $head = AccountHeadModel::getAccountHeadWithParentPramValue('vendor_id',$vendor);
+        if($head){
+            $accountDebit['account_journal_id'] = $journal->id;
+            $accountDebit['account_head_id'] = $head->parent_id;
+            $accountDebit['account_sub_head_id'] = $head->id;
+            $accountDebit['parent_id'] = $journalItem;
+            $accountDebit['amount'] = "-{$amount}";
+            $accountDebit['credit'] = $amount;
+            $accountDebit['mode'] = 'credit';
+            AccountJournalItemModel::create($accountDebit);
+        }
+    }
+
+    public static function purchasePayableDebitEntry($journal,$entity){
+
+        $amount = $entity->payment;
+        $vendor = $entity->vendor_id;
+        $head = AccountHeadModel::getAccountHeadWithParentPramValue('vendor_id',$vendor);
+        if($head){
+            $accountDebit['account_journal_id'] = $journal->id;
+            $accountDebit['account_head_id'] = $head->parent_id;
+            $accountDebit['account_sub_head_id'] = $head->id;
+            $accountDebit['amount'] = $amount;
+            $accountDebit['credit'] = $amount;
+            $accountDebit['mode'] = 'debit';
+            $accountDebit['is_parent'] = true;
+            $journalItem = AccountJournalItemModel::create($accountDebit);
+            return $journalItem->id;
+        }
+        return false;
+    }
+
+    public static function purchasePayablePaymentEntry($config,$journal,$entity,$journalItem){
+
+        $amount = $entity->payment;
+        $value = $entity->transaction_mode_id;
+        $head = AccountHeadModel::getAccountHeadWithParentPramValue('account_id',$value);
+        if($head){
+            $accountDebit['account_journal_id'] = $journal->id;
+            $accountDebit['account_head_id'] = $head->parent_id;
+            $accountDebit['account_sub_head_id'] = $head->id;
+            $accountDebit['parent_id'] = $journalItem;
+            $accountDebit['amount'] = "-{$amount}";
+            $accountDebit['credit'] = $amount;
+            $accountDebit['mode'] = 'credit';
+            AccountJournalItemModel::create($accountDebit);
+        }
+
+    }
+
 }
 

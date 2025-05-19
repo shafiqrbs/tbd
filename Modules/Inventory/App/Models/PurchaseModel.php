@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\DB;
+use Modules\AppsApi\App\Services\GeneratePatternCodeService;
 use Ramsey\Collection\Collection;
 
 class PurchaseModel extends Model
@@ -23,6 +24,8 @@ class PurchaseModel extends Model
         parent::boot();
         self::creating(function ($model) {
             $model->invoice = self::quickRandom();
+            $model->invoice = self::salesEventListener($model)['generateId'];
+            $model->code = self::salesEventListener($model)['code'];
             $date =  new \DateTime("now");
             $model->created_at = $date;
         });
@@ -38,6 +41,17 @@ class PurchaseModel extends Model
     {
         $pool = '0123456789';
         return substr(str_shuffle(str_repeat($pool, $length)), 0, $length);
+    }
+
+    public static function salesEventListener($model)
+    {
+        $patternCodeService = app(GeneratePatternCodeService::class);
+        $params = [
+            'config' => $model->config_id,
+            'table' => 'inv_purchase',
+            'prefix' => 'INV-',
+        ];
+        return $patternCodeService->invoiceNo($params);
     }
 
     public function purchaseItems()
