@@ -259,7 +259,7 @@ class CustomerModel extends Model
 
     public static function insertSalesCustomer($domain,$input)
     {
-        $domainConfig = ConfigSalesModel::where(['config_id',$domain['inv_config']]);
+        $domainConfig = ConfigSalesModel::where('config_id',$domain['inv_config'])->first();
         if($domainConfig and $domainConfig->default_customer_group_id){
             $customer['customer_group_id'] = $domainConfig->default_customer_group_id;
         }

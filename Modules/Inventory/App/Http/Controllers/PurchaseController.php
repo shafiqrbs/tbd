@@ -217,8 +217,6 @@ class PurchaseController extends Controller
 
         try {
             $purchase = PurchaseModel::find($id);
-            AccountJournalModel::insertPurchaseAccountJournal($this->domain,$id);
-            exit;
             $purchase->update([
                 'approved_by_id' => $this->domain['user_id'],
                 'process' => 'Approved'
@@ -232,7 +230,7 @@ class PurchaseController extends Controller
                     $item->update(['approved_by_id' => $this->domain['user_id']]);
                     StockItemHistoryModel::openingStockQuantity($item,'purchase',$this->domain);
                 }
-
+                AccountJournalModel::insertPurchaseAccountJournal($this->domain,$id);
             }
             // Commit the transaction after all updates are successful
             DB::commit();

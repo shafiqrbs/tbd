@@ -151,7 +151,7 @@ class VendorModel extends Model
 
     public static function insertPurchaseVendor($domain,$input)
     {
-        $domainConfig = ConfigPurchaseModel::where(['config_id',$domain['inv_config']]);
+        $domainConfig = ConfigPurchaseModel::where('config_id',$domain['inv_config']);
         if($domainConfig and $domainConfig->default_purchase_group_id){
             $customer['vendor_group_id'] = $domainConfig->default_purchase_group_id;
         }

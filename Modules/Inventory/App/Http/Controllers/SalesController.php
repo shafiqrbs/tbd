@@ -15,6 +15,7 @@ use Modules\Accounting\App\Entities\AccountJournal;
 use Modules\Accounting\App\Entities\Config;
 use Modules\Accounting\App\Models\AccountHeadModel;
 use Modules\Accounting\App\Models\AccountingModel;
+use Modules\Accounting\App\Models\AccountJournalModel;
 use Modules\Accounting\App\Models\TransactionModeModel;
 use Modules\AppsApi\App\Services\GeneratePatternCodeService;
 use Modules\AppsApi\App\Services\JsonRequestResponse;
@@ -117,10 +118,10 @@ class SalesController extends Controller
             }else{
                 $findCustomer = CustomerModel::find($input['customer_id']);
             }
+
             $sales->update(['customer_id' => $findCustomer->id]);
 
             $findInvConfig = ConfigSalesModel::where('config_id',$this->domain['inv_config'])->first();
-
             if ($findInvConfig->is_sales_auto_approved) {
                 $sales->update(['approved_by_id' => $this->domain['user_id']]);
                 if ($sales->salesItems->count() > 0) {
@@ -128,11 +129,8 @@ class SalesController extends Controller
                         StockItemHistoryModel::openingStockQuantity($item, 'sales', $this->domain);
                     }
                 }
+                AccountJournalModel::insertSalesAccountJournal($this->domain,$sales->id);
             }
-
-          //  $em->getRepository(AccountJournal::class)->insertAccountSales($sales->id);
-
-            // Commit Transaction
             DB::commit();
 
             // Send Success Response
