@@ -5,7 +5,7 @@ namespace Modules\Accounting\App\Http\Requests;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
-class AccountVoucherRequest extends FormRequest
+class AccountHeadMasterRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -32,14 +32,12 @@ class AccountVoucherRequest extends FormRequest
             {
                 return [
                     'name' => 'required|string',
-                    'voucher_type_id' => 'required|integer',
-                    'ledger_account_head_id' => 'required|integer',
-                    'short_name' => 'required|string',
-                    'short_code' => 'required|string',
-                    'mode' => 'required|string',
+                    'code' => 'required',
+                    'head_group' => 'required|string',
+                    'mother_account_id' => 'integer|nullable',
+                    'parent_id' => 'integer|nullable',
                 ];
             }
-
             default:break;
         }
     }

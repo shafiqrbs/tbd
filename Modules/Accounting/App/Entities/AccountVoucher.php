@@ -40,11 +40,12 @@ class AccountVoucher
      **/
     private $masterVoucher;
 
+
     /**
-     * @ORM\ManyToMany(targetEntity="AccountHead")
-     * @ORM\JoinColumn(nullable=true, onDelete="cascade")
+     * @ORM\ManyToOne(targetEntity="AccountHead")
+     * @ORM\JoinColumn(name="ledger_account_head_id", referencedColumnName="id", nullable=true, onDelete="cascade")
      **/
-    private $accountHeads;
+    private $ledgerAccountHead;
 
 
     /**
@@ -333,6 +334,24 @@ class AccountVoucher
     {
         $this->masterVoucher = $masterVoucher;
     }
+
+    /**
+     * @return mixed
+     */
+    public function getLedgerAccountHead()
+    {
+        return $this->ledgerAccountHead;
+    }
+
+    /**
+     * @param mixed $ledgerAccountHead
+     */
+    public function setLedgerAccountHead($ledgerAccountHead)
+    {
+        $this->ledgerAccountHead = $ledgerAccountHead;
+    }
+
+
 
 
 }
