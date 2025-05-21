@@ -229,7 +229,7 @@ class Config
      * @ORM\ManyToOne(targetEntity="Modules\Utility\App\Entities\Setting")
      * @ORM\JoinColumn(onDelete="CASCADE", nullable=true)
      **/
-    private ?Setting $posInvoiceMode = null;
+    private $posInvoiceMode = null;
 
     /**
      * @var boolean

@@ -266,6 +266,7 @@ class AccountHeadRepository extends EntityRepository
         $qb->execute();
 
         /** @var  Config $config */
+
         $config = $em->getRepository(Config::class)->find($configId);
         $parentHeads = $em->getRepository(AccountMasterHead::class)->findBy(['parent'=> NULL]);
 
@@ -303,7 +304,26 @@ class AccountHeadRepository extends EntityRepository
                     if(empty($subHead->getHeadDetail())){
                         $this->insertUpdateHeadDetails($subHead);
                     }
+                    foreach ($child->getChildren() as $row):
+                        $ledger = new AccountHead();
+                        $ledger->setConfig($config);
+                        $ledger->setMotherAccount($row->getMotherAccount());
+                        $ledger->setAccountMasterHead($row);
+                        $ledger->setParent($child);
+                        $ledger->setName($row->getName());
+                        $ledger->setDisplayName($row->getName());
+                        $ledger->setSlug($row->getSlug());
+                        $ledger->setHeadGroup('ledger');
+                        $ledger->setLevel($row->getLevel());
+                        $ledger->setIsPrivate(1);
+                        $em->persist($ledger);
+                        $em->flush();
+                        if(empty($ledger->getHeadDetail())){
+                            $this->insertUpdateHeadDetails($ledger);
+                        }
+                    endforeach;
                 }
+
             }
         }
 
@@ -330,6 +350,12 @@ class AccountHeadRepository extends EntityRepository
         $investors = $em->getRepository(User::class)->findBy(['domain' => $config->getDomain(),'userGroup'=>'investor','enabled'=>1]);
         foreach ($investors as $investor){
              $this->insertCapitalInvestmentAccount($config,$investor);
+        }
+
+        $inv = $em->getRepository(\Modules\Inventory\App\Entities\Config::class)->findOneBy(['domain' => $config->getDomain()]);
+        $groups = $em->getRepository(Category::class)->findBy(['config' => $inv,'parent'=>null,'status'=>1]);
+        foreach ($groups as $group){
+            $this->insertCategoryGroupAccount($config,$group);
         }
         $config = $this->find($configId);
         return $config;
@@ -449,7 +475,7 @@ class AccountHeadRepository extends EntityRepository
         $em = $this->_em;
         $exist = $this->findOneBy(array('customer' => $entity));
         if(empty($exist)){
-            $name = "{$entity['mobile']}-{$entity['name']}";
+            $name = "{$entity->getMobile()}-{$entity->getName()}";
             $head = new AccountHead();
 
             $head->setConfig($config);
@@ -479,7 +505,7 @@ class AccountHeadRepository extends EntityRepository
         $em = $this->_em;
         $exist = $this->findOneBy(array('vendor' => $entity));
         if(empty($exist)){
-            $name = "{$entity['mobile']}-{$entity['company_name']}";
+            $name = "{$entity->getMobile()}-{$entity->getCompanyName()}";
             $head = new AccountHead();
 
             $head->setConfig($config);
@@ -564,24 +590,28 @@ class AccountHeadRepository extends EntityRepository
 
         /* @var $exist AccountHead */
 
-        $em = $this->_em;
-        $head = new AccountHead();
-        $head->setConfig($config);
-        if($config && $config->getAccountProductGroup()){
-            $head->setParent($config->getAccountProductGroup());
+        $exist = $this->findOneBy(array('productGroup' => $entity));
+        if(empty($exist)){
+            $em = $this->_em;
+            $head = new AccountHead();
+            $head->setConfig($config);
+            if($config && $config->getAccountProductGroup()){
+                $head->setParent($config->getAccountProductGroup());
+            }
+            $head->setName($entity->getName());
+            $head->setDisplayName($entity->getName());
+            $head->setProductGroup($entity);
+            $head->setHeadGroup('ledger');
+            $head->setLevel(3);
+            $head->setIsPrivate(1);
+            $head->setMode('debit');
+            $em->persist($head);
+            $em->flush();
+            if(empty($head->getHeadDetail())){
+                $this->insertUpdateHeadDetails($head);
+            }
         }
-        $head->setName($entity->getName());
-        $head->setDisplayName($entity->getName());
-        $head->setProductGroup($entity);
-        $head->setHeadGroup('account-head');
-        $head->setLevel(2);
-        $head->setMode('debit');
-        $em->persist($head);
-        $em->flush();
-        if(empty($head->getHeadDetail())){
-            $this->insertUpdateHeadDetails($head);
-        }
-        return $head;
+
 
     }
 

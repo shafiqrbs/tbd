@@ -100,6 +100,7 @@ class PurchaseController extends Controller
                 'approved_by_id' => $this->domain['user_id'],
                 'process' => 'Approved'
             ]);
+            AccountJournalModel::insertPurchaseAccountJournal($this->domain,$entity->id);
         }
 
         $data = $service->returnJosnResponse($entity);
@@ -209,9 +210,7 @@ class PurchaseController extends Controller
     {
         $response = new Response();
         $response->headers->set('Content-Type', 'application/json');
-        $purchase = PurchaseModel::find($id);
-        AccountJournalModel::insertPurchaseAccountJournal($this->domain,$id);
-        exit;
+
         // Start the database transaction
         DB::beginTransaction();
 
@@ -230,7 +229,7 @@ class PurchaseController extends Controller
                     $item->update(['approved_by_id' => $this->domain['user_id']]);
                     StockItemHistoryModel::openingStockQuantity($item,'purchase',$this->domain);
                 }
-                AccountJournalModel::insertPurchaseAccountJournal($this->domain,$id);
+                AccountJournalModel::insertPurchaseAccountJournal($this->domain,$purchase->id);
             }
             // Commit the transaction after all updates are successful
             DB::commit();

@@ -801,9 +801,8 @@ class DomainController extends Controller
 
             // Commit all database operations
             DB::commit();
-            $em->getRepository(AccountHead::class)->generateAccountHead($accountingConfig->id);
             $em->getRepository(AccountVoucher::class)->resetVoucher($accountingConfig->id);
-
+            $em->getRepository(AccountHead::class)->generateAccountHead($accountingConfig->id);
 
             $entity = DomainModel::with('accountConfig',
                 'accountConfig.capital_investment','accountConfig.account_cash','accountConfig.account_bank','accountConfig.account_mobile','accountConfig.account_user','accountConfig.account_vendor','accountConfig.account_customer','accountConfig.account_product_group','accountConfig.account_category',

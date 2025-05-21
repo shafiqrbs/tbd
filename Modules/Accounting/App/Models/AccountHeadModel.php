@@ -97,18 +97,19 @@ class AccountHeadModel extends Model
     public static function insertCategoryGroupLedger($config, $entity)
     {
         $name = "{$entity['name']}";
-        $parent = AccountHeadModel::where('config_id',$config)->where('slug', 'inventory-assets')->where('head_group', 'account-head')->first();
-        if($parent){
+        $parent = AccountingModel::find($config);
+        if($parent and $parent->account_product_group_id){
             self::create(
                 [
                     'name' => $name,
                     'display_name' => $name,
                     'product_group_id' => $entity['id'],
-                    'parent_id' => $parent['id'],
-                    'level' => '2',
+                    'parent_id' => $parent->account_product_group_id,
+                    'level' => '3',
                     'source' => 'product-group',
-                    'head_group' => 'sub-head',
-                    'config_id' => $config
+                    'head_group' => 'ledger',
+                    'config_id' => $config,
+                    'is_private' => 1
                 ]
             );
         }

@@ -120,7 +120,6 @@ class SalesController extends Controller
             }
 
             $sales->update(['customer_id' => $findCustomer->id]);
-
             $findInvConfig = ConfigSalesModel::where('config_id',$this->domain['inv_config'])->first();
             if ($findInvConfig->is_sales_auto_approved) {
                 $sales->update(['approved_by_id' => $this->domain['user_id']]);
@@ -360,6 +359,52 @@ class SalesController extends Controller
         SalesModel::find($id)->delete();
         $entity = ['message' => 'delete'];
         return $service->returnJosnResponse($entity);
+    }
+
+    /**
+     * Approve the specified resource from storage.
+     */
+    public function approve($id)
+    {
+        $response = new Response();
+        $response->headers->set('Content-Type', 'application/json');
+
+        // Start the database transaction
+        DB::beginTransaction();
+
+        try {
+            $entity = SalesModel::find($id);
+            $entity->update([
+                'approved_by_id' => $this->domain['user_id'],
+                'process' => 'Approved'
+            ]);
+            $entity->update(['approved_by_id' => $this->domain['user_id']]);
+            if ($entity->salesItems->count() > 0) {
+                foreach ($entity->salesItems as $item) {
+                    StockItemHistoryModel::openingStockQuantity($item, 'sales', $this->domain);
+                }
+            }
+            AccountJournalModel::insertSalesAccountJournal($this->domain,$entity->id);
+            // Commit the transaction after all updates are successful
+            DB::commit();
+
+            $response->setContent(json_encode([
+                'status' => Response::HTTP_OK,
+                'message' => 'Approved successfully',
+            ]));
+            $response->setStatusCode(Response::HTTP_OK);
+        } catch (\Exception $e) {
+            // Rollback the transaction in case of an error
+            DB::rollBack();
+
+            $response->setContent(json_encode([
+                'status' => Response::HTTP_INTERNAL_SERVER_ERROR,
+                'message' => 'An error occurred: ' . $e->getMessage(),
+            ]));
+            $response->setStatusCode(Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+
+        return $response;
     }
 
 }

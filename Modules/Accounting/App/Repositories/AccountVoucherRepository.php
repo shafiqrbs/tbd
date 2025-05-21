@@ -53,6 +53,7 @@ class AccountVoucherRepository extends EntityRepository
         foreach ($parentHeads as $head){
             $entity = new AccountVoucher();
             $entity->setConfig($config);
+            $entity->setMasterVoucher($head);
             $entity->setVoucherType($head->getVoucherType());
             $entity->setName($head->getName());
             $entity->setShortName($head->getShortName());
@@ -64,6 +65,7 @@ class AccountVoucherRepository extends EntityRepository
             $em->persist($entity);
             $em->flush();
         }
+
         $vouchers = $em->getRepository(AccountVoucher::class)->findBy(['config'=> $configId]);
         return $vouchers;
 

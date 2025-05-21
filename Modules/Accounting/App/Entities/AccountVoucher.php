@@ -35,6 +35,12 @@ class AccountVoucher
     private $voucherType;
 
     /**
+     * @ORM\ManyToOne(targetEntity="AccountMasterVoucher")
+     * @ORM\JoinColumn(name="master_voucher_id", referencedColumnName="id", nullable=true, onDelete="cascade")
+     **/
+    private $masterVoucher;
+
+    /**
      * @ORM\ManyToMany(targetEntity="AccountHead")
      * @ORM\JoinColumn(nullable=true, onDelete="cascade")
      **/
@@ -312,6 +318,21 @@ class AccountVoucher
         $this->isPrivate = $isPrivate;
     }
 
+    /**
+     * @return mixed
+     */
+    public function getMasterVoucher()
+    {
+        return $this->masterVoucher;
+    }
+
+    /**
+     * @param mixed $masterVoucher
+     */
+    public function setMasterVoucher($masterVoucher)
+    {
+        $this->masterVoucher = $masterVoucher;
+    }
 
 
 }

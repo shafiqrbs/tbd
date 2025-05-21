@@ -146,6 +146,13 @@ class Config
     private $accountSd;
 
 
+     /**
+     * @ORM\OneToOne(targetEntity="AccountHead")
+     * @ORM\JoinColumn(name="account_tds_id", referencedColumnName="id", nullable=true, onDelete="SET NULL")
+     **/
+    private $accountTds;
+
+
     /**
      * @ORM\OneToOne(targetEntity="AccountVoucher")
      * @ORM\JoinColumn(name="voucher_stock_opening_id", referencedColumnName="id", nullable=true, onDelete="SET NULL")
@@ -693,6 +700,24 @@ class Config
     {
         $this->accountSales = $accountSales;
     }
+
+    /**
+     * @return mixed
+     */
+    public function getAccountTds()
+    {
+        return $this->accountTds;
+    }
+
+    /**
+     * @param mixed $accountTds
+     */
+    public function setAccountTds($accountTds)
+    {
+        $this->accountTds = $accountTds;
+    }
+
+
 
 
 
