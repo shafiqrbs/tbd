@@ -35,7 +35,6 @@ class AccountVoucherController extends Controller
      */
 
     public function index(Request $request){
-
         $data = AccountVoucherModel::getRecords($request,$this->domain);
         $service = new JsonRequestResponse();
         return $service->returnPagingJosnResponse($data);
@@ -121,6 +120,18 @@ class AccountVoucherController extends Controller
         ]));
         $response->setStatusCode(Response::HTTP_OK);
         return $response;
+    }
+
+
+    public function accountVoucherWiseLedger(Request $request)
+    {
+        $data = AccountVoucherModel::getVoucherWiseLedgerDetails($request,$this->domain);
+        return response()->json([
+            'status' => 200,
+            'success' => true,
+            'message' => 'Voucher Wise Ledger Details',
+            'data' => $data??[],
+        ]);
     }
 
 }

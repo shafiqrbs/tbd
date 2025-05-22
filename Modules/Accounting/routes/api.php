@@ -47,6 +47,7 @@ Route::prefix('/accounting')->middleware([HeaderAuthenticationMiddleware::class]
     Route::get('/account-sub-head', [AccountHeadController::class,'accountSubHead'])->name('account_sub_head');
     Route::get('/account-ledger', [AccountHeadController::class,'accountLedger'])->name('account_ledger');
 
+    Route::get('/voucher/wise-ledger-details', [AccountVoucherController::class,'accountVoucherWiseLedger'])->name('account_voucher_wise_ledger');
     Route::apiResource('/voucher',
         AccountVoucherController::class)
         ->middleware([HeaderAuthenticationMiddleware::class])
@@ -58,6 +59,7 @@ Route::prefix('/accounting')->middleware([HeaderAuthenticationMiddleware::class]
             'update' => 'accounting.voucher.update',
             'destroy' => 'accounting.voucher.destroy'
         ]);
+
 
     Route::apiResource('/setting', AccountSettingController::class)
         ->middleware([HeaderAuthenticationMiddleware::class])
