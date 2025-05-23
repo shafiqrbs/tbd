@@ -47,6 +47,24 @@ class AccountVoucher
      **/
     private $ledgerAccountHead;
 
+    /**
+     * @ORM\ManyToMany(targetEntity="AccountHead")
+     * @ORM\JoinTable(name="acc_voucher_account_primary",
+     *   joinColumns={@ORM\JoinColumn(name="account_voucher_id", referencedColumnName="id")},
+     *   inverseJoinColumns={@ORM\JoinColumn(name="primary_account_head_id", referencedColumnName="id")}
+     * )
+     */
+    private $primaryAccountHead;
+
+    /**
+     * @ORM\ManyToMany(targetEntity="AccountHead")
+     * @ORM\JoinTable(name="acc_voucher_account_secondary",
+     *   joinColumns={@ORM\JoinColumn(name="account_voucher_id", referencedColumnName="id")},
+     *   inverseJoinColumns={@ORM\JoinColumn(name="secondary_account_head_id", referencedColumnName="id")}
+     * )
+     */
+    private $secondaryAccountHead;
+
 
     /**
      * @var string
@@ -89,6 +107,13 @@ class AccountVoucher
      * @ORM\Column(name="status", type="boolean")
      */
     private $status = true;
+
+    /**
+     * @var boolean
+     *
+     * @ORM\Column(name="is_dafult", type="boolean")
+     */
+    private $isDefault = true;
 
     /**
      * @var boolean

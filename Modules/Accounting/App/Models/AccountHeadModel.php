@@ -4,6 +4,8 @@ namespace Modules\Accounting\App\Models;
 
 use Cviebrock\EloquentSluggable\Sluggable;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\DB;
 
 class AccountHeadModel extends Model
@@ -78,6 +80,17 @@ class AccountHeadModel extends Model
     public function accountHeadDetails()
     {
         return $this->hasOne(AccountHeadDetailsModel::class,'account_id','id');
+    }
+
+    public function parent_account_head(): BelongsTo
+    {
+        return $this->belongsTo(AccountHeadModel::class, 'parent_id');
+    }
+
+    // Optional: Self-referencing relationship for children
+    public function child_account_heads(): HasMany
+    {
+        return $this->hasMany(AccountHeadModel::class, 'parent_id');
     }
 
     public static function boot()

@@ -5,6 +5,8 @@ namespace Modules\Accounting\App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\DB;
 
@@ -37,6 +39,36 @@ class AccountVoucherModel extends Model
     {
         return $this->hasMany(AccountHeadModel::class,'parent_id','ledger_account_head_id');
     }
+
+    public function ledger_account_head_primary(): BelongsToMany
+    {
+        return $this->belongsToMany(
+            AccountHeadModel::class,
+            'acc_voucher_account_primary',
+            'account_voucher_id',
+            'primary_account_head_id'
+        );
+    }
+
+    public function parent_account_head(): BelongsTo
+    {
+        return $this->belongsTo(AccountHeadModel::class, 'parent_id');
+    }
+
+    /*public function ledger_account_head_primary(): BelongsToMany
+    {
+        return $this->belongsToMany(AccountHeadModel::class, 'acc_voucher_account_primary', 'account_voucher_id',  // foreign key for current model
+            'primary_account_head_id');
+    }*/
+    /*public function ledger_account_head_primary(): HasMany
+    {
+        return $this->belongsToMany(AccountHeadModel::class,'acc_voucher_account_primary','primary_account_head_id','account_voucher_id');
+    }*/
+/*
+    public function ledger_account_head_secondary(): HasMany
+    {
+        return $this->hasMany(AccountHeadModel::class,'parent_id','ledger_account_head_id');
+    }*/
 
 
     public static function getEntityDropdown($request, $domain)
@@ -104,7 +136,7 @@ class AccountVoucherModel extends Model
         return $data;
     }
 
-    public static function getVoucherWiseLedgerDetails($request, $domain)
+    /*public static function getVoucherWiseLedgerDetails($request, $domain)
     {
 
         $data = self::where('acc_voucher.status','1')
@@ -113,6 +145,12 @@ class AccountVoucherModel extends Model
             ->leftJoin('acc_setting','acc_setting.id','=','acc_voucher.voucher_type_id')
             ->with([
                 'ledger_account_head' => function ($query) {
+                    $query->where('status', 1)
+                        ->select('id','parent_id','account_id','account_master_head_id','vendor_id','customer_id','code','name','amount','credit','debit','level','head_group','slug','display_name','opening_balance');
+                }
+            ])
+            ->with([
+                'ledger_account_head_primary' => function ($query) {
                     $query->where('status', 1)
                         ->select('id','parent_id','account_id','account_master_head_id','vendor_id','customer_id','code','name','amount','credit','debit','level','head_group','slug','display_name','opening_balance');
                 }
@@ -133,6 +171,128 @@ class AccountVoucherModel extends Model
             ->get()
             ->toArray();
         return $data;
+    }*/
+
+    /*public static function getVoucherWiseLedgerDetails($request, $domain)
+    {
+        return self::where('acc_voucher.status', '1')
+            ->where('acc_voucher.config_id', $domain['acc_config'])
+            ->whereNotNull('ledger_account_head_id')
+            ->leftJoin('acc_setting', 'acc_setting.id', '=', 'acc_voucher.voucher_type_id')
+            ->with([
+                'ledger_account_head' => function ($query) {
+                    $query->where('status', 1)
+                        ->select([
+                            'id', 'parent_id', 'account_id', 'account_master_head_id',
+                            'vendor_id', 'customer_id', 'code', 'name', 'amount',
+                            'credit', 'debit', 'level', 'head_group', 'slug',
+                            'display_name', 'opening_balance'
+                        ]);
+                },
+                'ledger_account_head_primary' => function ($query) {
+                    $query->where('status', 1)
+                        ->select([
+                            'id', 'parent_id', 'account_id', 'account_master_head_id',
+                            'vendor_id', 'customer_id', 'code', 'name', 'amount',
+                            'credit', 'debit', 'level', 'head_group', 'slug',
+                            'display_name', 'opening_balance'
+                        ]);
+                }
+            ])
+            ->select([
+                'acc_voucher.id',
+                'acc_setting.id as voucher_type_id',
+                'acc_setting.name as voucher_type_name',
+                'acc_voucher.name',
+                'acc_voucher.short_name',
+                'acc_voucher.short_code',
+                'acc_voucher.mode',
+                'acc_voucher.is_private',
+                'acc_voucher.status',
+                'acc_voucher.ledger_account_head_id'
+            ])
+            ->orderBy('acc_voucher.name', 'ASC')
+            ->get()
+            ->toArray();
+    }*/
+
+    public static function getVoucherWiseLedgerDetails($request, $domain)
+    {
+        return self::where('acc_voucher.status', '1')
+            ->where('acc_voucher.config_id', $domain['acc_config'])
+            ->whereNotNull('ledger_account_head_id')
+            ->leftJoin('acc_setting', 'acc_setting.id', '=', 'acc_voucher.voucher_type_id')
+            ->with([
+                'ledger_account_head' => function ($query) {
+                    $query->where('status', 1)
+                        ->select([
+                            'id', 'parent_id', 'account_id', 'account_master_head_id',
+                            'vendor_id', 'customer_id', 'code', 'name', 'amount',
+                            'credit', 'debit', 'level', 'head_group', 'slug',
+                            'display_name', 'opening_balance'
+                        ]);
+                },
+
+                'ledger_account_head_primary' => function ($query) {
+                    $query->where('status', 1)
+                        ->select([
+                            'id', 'parent_id', 'account_id', 'account_master_head_id',
+                            'vendor_id', 'customer_id', 'code', 'name', 'amount',
+                            'credit', 'debit', 'level', 'head_group', 'slug',
+                            'display_name', 'opening_balance'
+                        ])
+                        ->with(['child_account_heads' => function ($subQuery) {
+                            $subQuery->where('status', 1)
+                                ->select([
+                                    'id', 'parent_id', 'account_id', 'account_master_head_id',
+                                    'vendor_id', 'customer_id', 'code', 'name', 'amount',
+                                    'credit', 'debit', 'level', 'head_group', 'slug',
+                                    'display_name', 'opening_balance'
+                                ]);
+                        }]);
+                }
+                /*'ledger_account_head_primary' => function ($query) {
+                    $query->where('status', 1)
+                        ->select([
+                            'id', 'parent_id', 'account_id', 'account_master_head_id',
+                            'vendor_id', 'customer_id', 'code', 'name', 'amount',
+                            'credit', 'debit', 'level', 'head_group', 'slug',
+                            'display_name', 'opening_balance'
+                        ]);
+                        ->with(['parent_account_head' => function ($subQuery) {
+                            $subQuery->where('status', 1)
+                                ->select([
+                                    'id', 'parent_id', 'account_id', 'account_master_head_id',
+                                    'vendor_id', 'customer_id', 'code', 'name', 'amount',
+                                    'credit', 'debit', 'level', 'head_group', 'slug',
+                                    'display_name', 'opening_balance'
+                                ]);
+                        }]);
+                },*/
+                /*'ledger_account_head_primary.parent_account_head' => function ($query) {
+        $query->where('status', 1)
+            ->select([
+                'id', 'parent_id', 'account_id', 'account_master_head_id',
+                'vendor_id', 'customer_id', 'code', 'name', 'amount',
+                'credit', 'debit', 'level', 'head_group', 'slug',
+                'display_name', 'opening_balance'
+            ]);
+    }*/
+            ])
+            ->select([
+                'acc_voucher.id',
+                'acc_setting.id as voucher_type_id',
+                'acc_setting.name as voucher_type_name',
+                'acc_voucher.name',
+                'acc_voucher.short_name',
+                'acc_voucher.short_code',
+                'acc_voucher.mode',
+                'acc_voucher.is_private',
+                'acc_voucher.status',
+                'acc_voucher.ledger_account_head_id'
+            ])
+            ->orderBy('acc_voucher.name', 'ASC')
+            ->get();
     }
 
 
