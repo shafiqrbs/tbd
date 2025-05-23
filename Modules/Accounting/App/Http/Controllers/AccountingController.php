@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Modules\Accounting\App\Models\AccountHeadMasterModel;
 use Modules\Accounting\App\Models\AccountHeadModel;
 use Modules\Accounting\App\Models\AccountVoucherModel;
 use Modules\Accounting\App\Models\SettingModel;
@@ -85,6 +86,16 @@ class AccountingController extends Controller
     {
         $mode = $request->get('dropdown-type');
         $dropdown = AccountHeadModel::getAccountHeadDropdown($this->domain,$mode);
+        $service = new JsonRequestResponse();
+        return $service->returnJosnResponse($dropdown);
+    }
+
+    /**
+     * Show the form for editing the specified resource.
+     */
+    public function accountHeadMasterDropdown(Request $request)
+    {
+        $dropdown = AccountHeadMasterModel::getAccountHeadMasterDropdown();
         $service = new JsonRequestResponse();
         return $service->returnJosnResponse($dropdown);
     }

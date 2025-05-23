@@ -4,6 +4,7 @@ use App\Http\Middleware\HeaderAuthenticationMiddleware;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Modules\Accounting\App\Http\Controllers\AccountGroupHeadController;
+use Modules\Accounting\App\Http\Controllers\AccountHeadMasterController;
 use Modules\Accounting\App\Http\Controllers\AccountingController;
 use Modules\Accounting\App\Http\Controllers\AccountHeadController;
 use Modules\Accounting\App\Http\Controllers\AccountSettingController;
@@ -28,6 +29,7 @@ Route::prefix('/accounting/select')->middleware([HeaderAuthenticationMiddleware:
     Route::get('/setting-type', [AccountingController::class,'settingTypeDropdown'])->name('setting_accounting_dropdown_type');
     Route::get('/voucher', [AccountingController::class,'accountVoucherDropdown'])->name('accounting_head_dropdown');
     Route::get('/head', [AccountingController::class,'accountHeadDropdown'])->name('accounting_head_dropdown');
+    Route::get('/head-master', [AccountingController::class,'accountHeadMasterDropdown'])->name('accounting_head_master_dropdown');
     Route::get('/ledger', [AccountingController::class,'accountLedgerDropdown'])->name('accounting_ledger_dropdown');
     Route::get('/head-dropdown', [AccountingController::class,'accountAllDropdownBySlug'])->name('account_all_dropdown_by_slug');
 });
@@ -58,6 +60,19 @@ Route::prefix('/accounting')->middleware([HeaderAuthenticationMiddleware::class]
             'show' => 'accounting.voucher.show',
             'update' => 'accounting.voucher.update',
             'destroy' => 'accounting.voucher.destroy'
+        ]);
+
+
+    Route::apiResource('/account-head-master',
+        AccountHeadMasterController::class)
+        ->middleware([HeaderAuthenticationMiddleware::class])
+        ->parameters(['setting' => 'accounting.headmaster'])
+        ->names([
+            'index' => 'accounting.headmaster.index',
+            'store' => 'accounting.headmaster.store',
+            'show' => 'accounting.headmaster.show',
+            'update' => 'accounting.headmaster.update',
+            'destroy' => 'accounting.headmaster.destroy'
         ]);
 
 

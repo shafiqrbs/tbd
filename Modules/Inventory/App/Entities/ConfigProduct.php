@@ -30,13 +30,37 @@ class ConfigProduct
      **/
     private $config;
 
+    /**
+     * @var boolean
+     *
+     * @ORM\Column(type="boolean",options={"default"="false"})
+     */
+    private $isSku;
+
 
     /**
      * @var boolean
      *
      * @ORM\Column(type="boolean",options={"default"="false"})
      */
-    private $skuCategory;
+    private $isMultiPrice;
+
+
+    /**
+     * @var boolean
+     *
+     * @ORM\Column(type="boolean",options={"default"="false"})
+     */
+    private $isMeasurement;
+
+
+    /**
+     * @var boolean
+     *
+     * @ORM\Column(type="boolean",options={"default"="false"})
+     */
+    private $isProductGallery;
+
 
     /**
      * @var boolean
@@ -66,12 +90,14 @@ class ConfigProduct
      */
     private $skuSize;
 
+
     /**
      * @var boolean
      *
      * @ORM\Column(type="boolean",options={"default"="false"})
      */
-    private $skuWarehouse;
+    private $skuGrade;
+
 
     /**
      * @var boolean
@@ -113,66 +139,15 @@ class ConfigProduct
      *
      * @ORM\Column(type="boolean",options={"default"="false"})
      */
-    private $isBrand;
+    private $barcodeGrade;
 
     /**
      * @var boolean
      *
      * @ORM\Column(type="boolean",options={"default"="false"})
      */
-    private $isColor;
+    private $barcodeModel;
 
-    /**
-     * @var boolean
-     *
-     * @ORM\Column(type="boolean",options={"default"="false"})
-     */
-    private $isSize;
-
-    /**
-     * @var boolean
-     *
-     * @ORM\Column(type="boolean",options={"default"="false"})
-     */
-    private $isGrade;
-
-    /**
-     * @var boolean
-     *
-     * @ORM\Column(type="boolean",options={"default"="false"})
-     */
-    private $isSku;
-
-    /**
-     * @var boolean
-     *
-     * @ORM\Column(type="boolean",options={"default"="false"})
-     */
-    private $isModel;
-
-
-    /**
-     * @var boolean
-     *
-     * @ORM\Column(type="boolean",options={"default"="false"})
-     */
-    private $isMultiPrice;
-
-
-    /**
-     * @var boolean
-     *
-     * @ORM\Column(type="boolean",options={"default"="false"})
-     */
-    private $isMeasurement;
-
-
-    /**
-     * @var boolean
-     *
-     * @ORM\Column(type="boolean",options={"default"="false"})
-     */
-    private $isProductGallery;
 
     /**
      * @var \DateTime
@@ -222,17 +197,49 @@ class ConfigProduct
     /**
      * @return bool
      */
-    public function isSkuCategory()
+    public function isMultiPrice()
     {
-        return $this->skuCategory;
+        return $this->isMultiPrice;
     }
 
     /**
-     * @param bool $skuCategory
+     * @param bool $isMultiPrice
      */
-    public function setSkuCategory($skuCategory)
+    public function setIsMultiPrice($isMultiPrice)
     {
-        $this->skuCategory = $skuCategory;
+        $this->isMultiPrice = $isMultiPrice;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isMeasurement()
+    {
+        return $this->isMeasurement;
+    }
+
+    /**
+     * @param bool $isMeasurement
+     */
+    public function setIsMeasurement($isMeasurement)
+    {
+        $this->isMeasurement = $isMeasurement;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isProductGallery()
+    {
+        return $this->isProductGallery;
+    }
+
+    /**
+     * @param bool $isProductGallery
+     */
+    public function setIsProductGallery($isProductGallery)
+    {
+        $this->isProductGallery = $isProductGallery;
     }
 
     /**
@@ -302,17 +309,17 @@ class ConfigProduct
     /**
      * @return bool
      */
-    public function isSkuWarehouse()
+    public function isSkuGrade()
     {
-        return $this->skuWarehouse;
+        return $this->skuGrade;
     }
 
     /**
-     * @param bool $skuWarehouse
+     * @param bool $skuGrade
      */
-    public function setSkuWarehouse($skuWarehouse)
+    public function setSkuGrade($skuGrade)
     {
-        $this->skuWarehouse = $skuWarehouse;
+        $this->skuGrade = $skuGrade;
     }
 
     /**
@@ -398,145 +405,33 @@ class ConfigProduct
     /**
      * @return bool
      */
-    public function isBrand()
+    public function isBarcodeGrade()
     {
-        return $this->isBrand;
+        return $this->barcodeGrade;
     }
 
     /**
-     * @param bool $isBrand
+     * @param bool $barcodeGrade
      */
-    public function setIsBrand($isBrand)
+    public function setBarcodeGrade($barcodeGrade)
     {
-        $this->isBrand = $isBrand;
-    }
-
-    /**
-     * @return bool
-     */
-    public function isColor()
-    {
-        return $this->isColor;
-    }
-
-    /**
-     * @param bool $isColor
-     */
-    public function setIsColor($isColor)
-    {
-        $this->isColor = $isColor;
+        $this->barcodeGrade = $barcodeGrade;
     }
 
     /**
      * @return bool
      */
-    public function isSize()
+    public function isBarcodeModel()
     {
-        return $this->isSize;
+        return $this->barcodeModel;
     }
 
     /**
-     * @param bool $isSize
+     * @param bool $barcodeModel
      */
-    public function setIsSize($isSize)
+    public function setBarcodeModel($barcodeModel)
     {
-        $this->isSize = $isSize;
-    }
-
-    /**
-     * @return bool
-     */
-    public function isGrade()
-    {
-        return $this->isGrade;
-    }
-
-    /**
-     * @param bool $isGrade
-     */
-    public function setIsGrade($isGrade)
-    {
-        $this->isGrade = $isGrade;
-    }
-
-    /**
-     * @return bool
-     */
-    public function isSku()
-    {
-        return $this->isSku;
-    }
-
-    /**
-     * @param bool $isSku
-     */
-    public function setIsSku($isSku)
-    {
-        $this->isSku = $isSku;
-    }
-
-    /**
-     * @return bool
-     */
-    public function isModel()
-    {
-        return $this->isModel;
-    }
-
-    /**
-     * @param bool $isModel
-     */
-    public function setIsModel($isModel)
-    {
-        $this->isModel = $isModel;
-    }
-
-    /**
-     * @return bool
-     */
-    public function isMultiPrice()
-    {
-        return $this->isMultiPrice;
-    }
-
-    /**
-     * @param bool $isMultiPrice
-     */
-    public function setIsMultiPrice($isMultiPrice)
-    {
-        $this->isMultiPrice = $isMultiPrice;
-    }
-
-    /**
-     * @return bool
-     */
-    public function isMeasurement()
-    {
-        return $this->isMeasurement;
-    }
-
-    /**
-     * @param bool $isMeasurement
-     */
-    public function setIsMeasurement($isMeasurement)
-    {
-        $this->isMeasurement = $isMeasurement;
-    }
-
-    /**
-     * @return bool
-     */
-    public function isProductGallery()
-    {
-        return $this->isProductGallery;
-    }
-
-    /**
-     * @param bool $isProductGallery
-     */
-    public function setIsProductGallery($isProductGallery)
-    {
-        $this->isProductGallery = $isProductGallery;
+        $this->barcodeModel = $barcodeModel;
     }
 
     /**

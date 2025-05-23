@@ -75,6 +75,14 @@ class AccountMasterHead
 
 
     /**
+     * @var string
+     *
+     * @ORM\Column(type="string", length=30, nullable=true)
+     */
+    private $mode;
+
+
+    /**
      * @Gedmo\Slug(fields={"name"})
      * @Doctrine\ORM\Mapping\Column(length=255)
      */
@@ -317,6 +325,24 @@ class AccountMasterHead
     {
         $this->level = $level;
     }
+
+    /**
+     * @return string
+     */
+    public function getMode()
+    {
+        return $this->mode;
+    }
+
+    /**
+     * @param string $mode
+     */
+    public function setMode($mode)
+    {
+        $this->mode = $mode;
+    }
+
+
 
 
 

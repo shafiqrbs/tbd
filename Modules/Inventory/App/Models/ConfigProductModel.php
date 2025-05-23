@@ -23,26 +23,23 @@ class ConfigProductModel extends Model
     protected $guarded = ['id'];
     protected $fillable = [
         'config_id',
-        'sku_category',
+        'is_sku',
+        'is_multi_price',
+        'is_measurement',
+        'is_product_gallery',
         'sku_brand',
         'sku_model',
         'sku_color',
         'sku_size',
-        'sku_warehouse',
+        'sku_grade',
         'barcode_print',
         'barcode_price_hide',
         'barcode_color',
         'barcode_size',
         'barcode_brand',
-        'is_brand',
-        'is_color',
-        'is_size',
-        'is_grade',
-        'is_sku',
-        'is_model',
-        'is_multi_price',
-        'is_measurement',
-        'is_product_gallery'
+        'barcode_model',
+        'barcode_grade',
+
     ];
 
 
@@ -65,26 +62,21 @@ class ConfigProductModel extends Model
 
         $booleanFields = [
             'is_sku' => false,
-            'sku_category' => false,
-            'sku_color' => false,
-            'sku_size' => false,
-            'sku_brand' => false,
-            'sku_model' => false,
-            'sku_warehouse' => false,
-            'is_brand' => false,
-            'is_color' => false,
-            'is_size' => false,
-            'is_model' => false,
             'is_multi_price' => false,
-            'is_grade' => false,
             'is_measurement' => false,
             'is_product_gallery' => false,
-            'is_category_item_quantity' => false,
+            'sku_brand' => false,
+            'sku_model' => false,
+            'sku_color' => false,
+            'sku_size' => false,
+            'sku_grade' => false,
             'barcode_print' => false,
             'barcode_price_hide' => false,
             'barcode_color' => false,
             'barcode_size' => false,
             'barcode_brand' => false,
+            'barcode_model' => false,
+            'barcode_grade' => false,
         ];
 
         $columns = \Illuminate\Support\Facades\Schema::getColumnListing($table);

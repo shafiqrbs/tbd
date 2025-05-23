@@ -67,16 +67,15 @@ class AccountHeadMasterModel extends Model
             $skip = ($currentPage - 1) * $perPage;
 
             // Base query
-            $query = self::leftJoin('acc_head as parent', 'parent.id', '=', 'acc_head.parent_id')
-                ->leftJoin('acc_setting as mother', 'acc_head.mother_account_id', '=', 'mother.id')
+            $query = self::leftJoin('acc_head_master as parent', 'parent.id', '=', 'acc_head_master.parent_id')
+                ->leftJoin('acc_setting as mother', 'acc_head_master.mother_account_id', '=', 'mother.id')
                 ->select([
-                    'acc_head.id',
-                    'acc_head.level',
-                    'acc_head.name',
-                    'acc_head.slug',
-                    'acc_head.code',
-                    'acc_head.is_private',
-                    'acc_head.amount',
+                    'acc_head_master.id',
+                    'acc_head_master.level',
+                    'acc_head_master.name',
+                    'acc_head_master.head_group',
+                    'acc_head_master.slug',
+                    'acc_head_master.code',
                     'parent.name as parent_name',
                     'mother.name as mother_name'
                 ]);
@@ -85,18 +84,18 @@ class AccountHeadMasterModel extends Model
             if (!empty($request['term'])) {
                 $searchTerm = '%' . $request['term'] . '%';
                 $query->where(function($q) use ($searchTerm) {
-                    $q->where('acc_head.name', 'LIKE', $searchTerm)
-                        ->orWhere('acc_head.slug', 'LIKE', $searchTerm);
+                    $q->where('acc_head_master.name', 'LIKE', $searchTerm)
+                        ->orWhere('acc_head_master.slug', 'LIKE', $searchTerm);
                 });
             }
 
             // Group filter
             if (!empty($request['group'])) {
-                $query->where('acc_head.head_group', $request['group']);
+               // $query->where('acc_head_master.head_group', $request['group']);
             }
 
             // Status filter
-            $query->where('acc_head.status', 1);
+          //  $query->where('acc_head_master.status', 1);
 
             // Get total count before pagination
             $total = $query->count();
@@ -104,7 +103,7 @@ class AccountHeadMasterModel extends Model
             // Apply pagination and ordering
             $entities = $query->skip($skip)
                 ->take($perPage)
-                ->orderBy('acc_head.id', 'DESC')
+                ->orderBy('acc_head_master.id', 'DESC')
                 ->get();
 
             return [
@@ -124,6 +123,23 @@ class AccountHeadMasterModel extends Model
                 'error' => 'An error occurred while fetching records'
             ];
         }
+    }
+
+    public static function getAccountHeadMasterDropdown()
+    {
+        return DB::table('acc_head_master')
+            ->select([
+                'acc_head_master.id',
+                'acc_head_master.parent_id',
+                DB::raw("CONCAT(acc_head_master.name, ' - ', acc_head_master.head_group) AS name"),
+                'acc_head_master.slug',
+                'acc_head_master.code',
+                'acc_head_master.head_group',
+                'acc_head_master.mode',
+                'acc_head_master.level',
+            ])
+            ->whereIn('acc_head_master.head_group', ['head', 'sub-head'])
+            ->get();
     }
 
 

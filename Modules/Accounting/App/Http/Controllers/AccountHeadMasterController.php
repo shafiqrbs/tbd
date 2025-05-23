@@ -31,7 +31,7 @@ class AccountHeadMasterController extends Controller
 
     public function index(Request $request){
 
-        $data = AccountHeadMasterModel::getRecords($request,$this->domain);
+        $data = AccountHeadMasterModel::getRecords($request);
         return response()->json([
             'status' => 200,
             'message' => 'success',
@@ -46,7 +46,6 @@ class AccountHeadMasterController extends Controller
     public function store(AccountHeadMasterRequest $request)
     {
         $data = $request->validated();
-        $data['config_id'] = $this->domain['acc_config'];
         $entity = AccountHeadMasterModel::create($data);
         return response()->json([
             'status' => 200,
