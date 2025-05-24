@@ -259,6 +259,13 @@ class Sales
     /**
      * @var boolean
      *
+     * @ORM\Column(type="boolean" )
+     */
+    private $isMultiPayment = false;
+
+    /**
+     * @var boolean
+     *
      * @ORM\Column(type="boolean", nullable=true)
      */
     private $isReversed;

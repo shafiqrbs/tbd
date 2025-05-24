@@ -62,7 +62,6 @@ Route::prefix('/accounting')->middleware([HeaderAuthenticationMiddleware::class]
             'destroy' => 'accounting.voucher.destroy'
         ]);
 
-
     Route::apiResource('/account-head-master',
         AccountHeadMasterController::class)
         ->middleware([HeaderAuthenticationMiddleware::class])
