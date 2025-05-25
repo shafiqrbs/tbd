@@ -103,6 +103,7 @@ class AccountHeadMasterModel extends Model
             // Apply pagination and ordering
             $entities = $query->skip($skip)
                 ->take($perPage)
+                //->orderBy('acc_head_master.name', 'ASC')
                 ->orderBy('acc_head_master.id', 'DESC')
                 ->get();
 
@@ -131,7 +132,7 @@ class AccountHeadMasterModel extends Model
             ->select([
                 'acc_head_master.id',
                 'acc_head_master.parent_id',
-                DB::raw("CONCAT(acc_head_master.name, ' - ', acc_head_master.head_group) AS name"),
+                DB::raw("CONCAT(acc_head_master.code, ' - ',acc_head_master.name, ' (', acc_head_master.head_group,')') AS name"),
                 'acc_head_master.slug',
                 'acc_head_master.code',
                 'acc_head_master.head_group',
@@ -139,6 +140,7 @@ class AccountHeadMasterModel extends Model
                 'acc_head_master.level',
             ])
             ->whereIn('acc_head_master.head_group', ['head', 'sub-head'])
+            ->orderBy('acc_head_master.name', 'ASC')
             ->get();
     }
 

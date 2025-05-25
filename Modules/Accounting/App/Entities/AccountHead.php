@@ -33,14 +33,15 @@ class AccountHead
     protected $config;
 
 
-      /**
-     * @ORM\ManyToOne(targetEntity="AccountMasterHead", inversedBy="children", cascade={"detach","merge"})
+    /**
+     * @ORM\ManyToOne(targetEntity="AccountMasterHead")
      * @ORM\JoinColumn(name="account_master_head_id", referencedColumnName="id", onDelete="CASCADE")
      */
     protected $accountMasterHead;
 
 
-     /**
+    /**
+     * @var AccountHead
      * @ORM\ManyToOne(targetEntity="AccountHead", inversedBy="children", cascade={"detach","merge"})
      * @ORM\JoinColumn(name="parent_id", referencedColumnName="id", onDelete="SET NULL")
      */
@@ -307,21 +308,6 @@ class AccountHead
         $this->config = $config;
     }
 
-    /**
-     * @return mixed
-     */
-    public function getParent()
-    {
-        return $this->parent;
-    }
-
-    /**
-     * @param mixed $parent
-     */
-    public function setParent($parent)
-    {
-        $this->parent = $parent;
-    }
 
     /**
      * @return mixed
@@ -890,6 +876,24 @@ class AccountHead
     {
         $this->displayName = $displayName;
     }
+
+    /**
+     * @return AccountHead
+     */
+    public function getParent()
+    {
+        return $this->parent;
+    }
+
+    /**
+     * @param AccountHead $parent
+     */
+    public function setParent($parent)
+    {
+        $this->parent = $parent;
+    }
+
+
 
 
 
