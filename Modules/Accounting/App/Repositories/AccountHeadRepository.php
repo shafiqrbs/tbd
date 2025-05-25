@@ -287,12 +287,15 @@ class AccountHeadRepository extends EntityRepository
             $em->persist($entity);
             $em->flush();
             if($head->getChildren()){
+                /* @var AccountMasterHead $child */
                 foreach ($head->getChildren() as $child){
                     $subHead = new AccountHead();
                     $subHead->setConfig($config);
                     $subHead->setMotherAccount($child->getMotherAccount());
                     $subHead->setAccountMasterHead($child);
-                    $subHead->setParent($entity);
+                    if($entity){
+                        $subHead->setParent($entity);
+                    }
                     $subHead->setName($child->getName());
                     $subHead->setDisplayName($child->getName());
                     $subHead->setSlug($child->getSlug());
@@ -304,28 +307,36 @@ class AccountHeadRepository extends EntityRepository
                     if(empty($subHead->getHeadDetail())){
                         $this->insertUpdateHeadDetails($subHead);
                     }
-                    foreach ($child->getChildren() as $row):
-                        $ledger = new AccountHead();
-                        $ledger->setConfig($config);
-                        $ledger->setMotherAccount($row->getMotherAccount());
-                        $ledger->setAccountMasterHead($row);
-                        $ledger->setParent($child);
-                        $ledger->setName($row->getName());
-                        $ledger->setDisplayName($row->getName());
-                        $ledger->setSlug($row->getSlug());
-                        $ledger->setHeadGroup('ledger');
-                        $ledger->setLevel($row->getLevel());
-                        $ledger->setIsPrivate(1);
-                        $em->persist($ledger);
-                        $em->flush();
-                        if(empty($ledger->getHeadDetail())){
-                            $this->insertUpdateHeadDetails($ledger);
-                        }
-                    endforeach;
+                    if($child->getChildren()){
+                        foreach ($child->getChildren() as $row):
+                            $ledger = new AccountHead();
+                            $ledger->setConfig($config);
+                            if($row->getMotherAccount()) {
+                                $ledger->setMotherAccount($row->getMotherAccount());
+                            }
+                            if($child){
+                                    $ledger->setParent($subHead);
+                            }
+                            $ledger->setAccountMasterHead($row);
+                            $ledger->setName($row->getName());
+                            $ledger->setDisplayName($row->getName());
+                            $ledger->setSlug($row->getSlug());
+                            $ledger->setHeadGroup('ledger');
+                            $ledger->setLevel($row->getLevel());
+                            $ledger->setIsPrivate(1);
+                            $em->persist($ledger);
+                            $em->flush();
+                            if(empty($ledger->getHeadDetail())){
+                                $this->insertUpdateHeadDetails($ledger);
+                            }
+                        endforeach;
+                    }
+
                 }
 
             }
         }
+        /*
 
         $currentAssets = $em->getRepository(TransactionMode::class)->findBy(['config' => $configId,'status'=>1]);
         foreach ($currentAssets as $asset){
@@ -356,7 +367,7 @@ class AccountHeadRepository extends EntityRepository
         $groups = $em->getRepository(Category::class)->findBy(['config' => $inv,'parent'=>null,'status'=>1]);
         foreach ($groups as $group){
             $this->insertCategoryGroupAccount($config,$group);
-        }
+        }*/
         $config = $this->find($configId);
         return $config;
     }
