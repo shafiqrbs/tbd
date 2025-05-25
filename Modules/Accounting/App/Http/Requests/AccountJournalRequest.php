@@ -27,23 +27,24 @@ class AccountJournalRequest extends FormRequest
         {
 
             case 'POST':
-            {
-                return [
-                    'voucher_type_id' => 'required|integer|nullable',
-                    'account_refno' => 'string|nullable',
-                    'description' => 'string|nullable'
-                ];
-            }
-
             case 'PUT':
             case 'PATCH':
-            {
-                return [
-                    'voucher_type_id' => 'required|string|nullable',
-                    'account_refno' => 'string|nullable',
-                    'description' => 'string|nullable'
-                ];
-            }
+        {
+            return [
+                'ref_no' => 'required|string',
+                'issue_date' => 'required|date',
+                'description' => 'string|nullable',
+                'debit' => 'required|integer',
+                'credit' => 'required|integer',
+                'voucher_id' => 'required|integer',
+                'items' => 'required|array|min:2',
+                'items.*.id' => 'required|integer',
+                'items.*.mode' => 'required|in:debit,credit',
+                'items.*.debit' => 'nullable|numeric|min:0',
+                'items.*.credit' => 'nullable|numeric|min:0',
+
+            ];
+        }
             default:break;
         }
     }

@@ -9,6 +9,7 @@ use Modules\Accounting\App\Http\Controllers\AccountingController;
 use Modules\Accounting\App\Http\Controllers\AccountHeadController;
 use Modules\Accounting\App\Http\Controllers\AccountSettingController;
 use Modules\Accounting\App\Http\Controllers\AccountVoucherController;
+use Modules\Accounting\App\Http\Controllers\AccountVoucherEntryController;
 use Modules\Accounting\App\Http\Controllers\TransactionModeController;
 
 /*
@@ -86,7 +87,7 @@ Route::prefix('/accounting')->middleware([HeaderAuthenticationMiddleware::class]
             'destroy' => 'accounting.setting.destroy'
         ]);
 
-    Route::apiResource('/voucher-entry', AccountSettingController::class)
+    Route::apiResource('/voucher-entry', AccountVoucherEntryController::class)
         ->middleware([HeaderAuthenticationMiddleware::class])
         ->parameters(['setting' => 'accounting.setting'])
         ->names([

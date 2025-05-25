@@ -111,7 +111,7 @@ class AccountVoucher
     /**
      * @var boolean
      *
-     * @ORM\Column(name="is_dafult", type="boolean")
+     * @ORM\Column(name="is_default", type="boolean")
      */
     private $isDefault = true;
 

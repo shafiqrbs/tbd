@@ -5,6 +5,7 @@ namespace Modules\Accounting\App\Models;
 use Cviebrock\EloquentSluggable\Sluggable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 
 class AccountJournalItemModel extends Model
@@ -101,5 +102,38 @@ class AccountJournalItemModel extends Model
         $data = array('count' => $total, 'entities' => $entities);
         return $data;
     }
+
+
+
+    /**
+     * Insert multiple journal items.
+     *
+     * @param AccountJournalModel $journal journal instance.
+     * @param array $items Incoming items to insert.
+     * @return bool
+     */
+    public static function insertJournalItems(AccountJournalModel $journal, array $items): bool
+    {
+        $timestamp = Carbon::now();
+        $formattedItems = array_map(function ($item) use ($journal, $timestamp) {
+            return [
+                'account_journal_id'       => $journal->id,
+                'account_ledger_id'        => $item['id'],
+                'amount'                   => $item['mode']==='debit'?$item['debit']:$item['credit'],
+                'debit'                    => $item['debit'] ?? 0,
+                'credit'                   => $item['credit'] ?? 0,
+                'mode'                     => $item['mode'] ?? 0,
+                'created_at'               => $timestamp,
+            ];
+        }, $items);
+
+        try {
+            return self::insert($formattedItems);
+        } catch (\Throwable $th) {
+            \Log::error('Failed to insert journal items: ' . $th->getMessage());
+            return false;
+        }
+    }
+
 }
 

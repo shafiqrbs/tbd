@@ -5,11 +5,13 @@ namespace Modules\Accounting\App\Models;
 use Cviebrock\EloquentSluggable\Sluggable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Modules\Accounting\App\Entities\AccountHead;
 use Modules\AppsApi\App\Services\GeneratePatternCodeService;
 use Modules\Inventory\App\Models\PurchaseItemModel;
 use Modules\Inventory\App\Models\PurchaseModel;
+use Modules\Inventory\App\Models\SalesItemModel;
 use Modules\Inventory\App\Models\SalesModel;
 
 class AccountJournalModel extends Model
@@ -84,26 +86,55 @@ class AccountJournalModel extends Model
         return $query->get();
     }
 
+    public function journalItems()
+    {
+        return $this->hasMany(AccountJournalItemModel::class, 'account_journal_id');
+    }
+
 
     public static function getRecords($request, $domain)
     {
         $page = isset($request['page']) && $request['page'] > 0 ? ($request['page'] - 1) : 0;
         $perPage = isset($request['offset']) && $request['offset'] != '' ? (int)($request['offset']) : 0;
         $skip = isset($page) && $page != '' ? (int)$page * $perPage : 0;
-        $entity = self::where('acc_head.config_id', $domain['acc_config_id'])
+
+        $entity = self::where('acc_journal.config_id', $domain['acc_config'])
+            ->join('acc_voucher','acc_voucher.id','=','acc_journal.voucher_id')
             ->select([
-                'acc_head.id',
-                'acc_head.name'
-            ]);
+                'acc_journal.id',
+                'acc_journal.voucher_id',
+                'acc_journal.created_by_id',
+                'acc_journal.process',
+                'acc_journal.debit',
+                'acc_journal.credit',
+                'acc_journal.description',
+                'acc_journal.issue_date',
+                'acc_journal.invoice_no',
+                'acc_journal.ref_no',
+                'acc_voucher.name as voucher_name',
+                'acc_voucher.mode as voucher_mode',
+            ])
+            ->with(['journalItems' => function ($query) {
+                $query->select([
+                    'acc_journal_item.id',
+                    'acc_journal_item.account_journal_id',
+                    'acc_journal_item.account_ledger_id',
+                    'acc_journal_item.amount',
+                    'acc_journal_item.debit',
+                    'acc_journal_item.credit',
+                    'acc_head.name as ledger_name',
+//                    DB::raw("CONCAT(cor_warehouses.name, ' (', cor_warehouses.location, ')') as warehouse_name"),
+                ])->leftjoin('acc_head','acc_head.id','=','acc_journal_item.account_ledger_id');
+            }]);
 
         if (isset($request['term']) && !empty($request['term'])) {
             $entity = $entity->whereAny(
-                ['acc_head.name', 'acc_head.slug'], 'LIKE', '%' . $request['term'] . '%');
+                ['acc_journal.name', 'acc_journal.slug'], 'LIKE', '%' . $request['term'] . '%');
         }
         $total = $entity->count();
         $entities = $entity->skip($skip)
             ->take($perPage)
-            ->orderBy('acc_head.id', 'DESC')
+            ->orderBy('acc_journal.id', 'DESC')
             ->get();
 
         $data = array('count' => $total, 'entities' => $entities);
@@ -395,6 +426,5 @@ class AccountJournalModel extends Model
             AccountJournalItemModel::create($accountDebit);
         }
     }
-
 }
 

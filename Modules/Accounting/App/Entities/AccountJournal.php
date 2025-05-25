@@ -185,6 +185,13 @@ class AccountJournal
 
 
     /**
+     * @var integer
+     * @ORM\Column(name="ref_no", type="integer",  nullable=true)
+     */
+    private $refNo;
+
+
+    /**
      * @Gedmo\Blameable(on="create")
      * @ORM\ManyToOne(targetEntity="Modules\Core\App\Entities\User")
      **/
@@ -225,7 +232,7 @@ class AccountJournal
     /**
      * @var \DateTime
      * @Gedmo\Timestampable(on="create")
-     * @ORM\Column(name="issue_date", type="datetime", nullable=true)
+     * @ORM\Column(name="issue_date", type="date", nullable=true)
      */
     private $issueDate;
 
