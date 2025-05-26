@@ -58,6 +58,17 @@ class AccountHeadMasterModel extends Model
         });
     }
 
+    // AccountMasterHead.php
+    public function children()
+    {
+        return $this->hasMany(self::class, 'parent_id');
+    }
+
+    public function motherAccount()
+    {
+        return $this->belongsTo(AccountHeadModel::class, 'mother_account_id');
+    }
+
     public static function getRecords($request)
     {
         try {

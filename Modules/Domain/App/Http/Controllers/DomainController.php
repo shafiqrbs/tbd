@@ -14,6 +14,7 @@ use Illuminate\Support\Str;
 use Modules\Accounting\App\Entities\AccountHead;
 use Modules\Accounting\App\Entities\AccountVoucher;
 use Modules\Accounting\App\Entities\TransactionMode;
+use Modules\Accounting\App\Models\AccountHeadModel;
 use Modules\Accounting\App\Models\AccountingModel;
 use Modules\Accounting\App\Models\AccountVoucherModel;
 use Modules\Accounting\App\Models\TransactionModeModel;
@@ -802,7 +803,8 @@ class DomainController extends Controller
             // Commit all database operations
             DB::commit();
             $em->getRepository(AccountVoucher::class)->resetVoucher($accountingConfig->id);
-            $em->getRepository(AccountHead::class)->generateAccountHead($accountingConfig->id);
+          //  $em->getRepository(AccountHead::class)->generateAccountHead($accountingConfig->id);
+            AccountHeadModel::generateAccountHead($domain);
 
             $entity = DomainModel::with('accountConfig',
                 'accountConfig.capital_investment','accountConfig.account_cash','accountConfig.account_bank','accountConfig.account_mobile','accountConfig.account_user','accountConfig.account_vendor','accountConfig.account_customer','accountConfig.account_product_group','accountConfig.account_category',

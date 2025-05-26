@@ -5,6 +5,7 @@ namespace Modules\Accounting\App\Models;
 use Cviebrock\EloquentSluggable\Sluggable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Facades\DB;
 
 class TransactionModeModel extends Model
@@ -57,6 +58,11 @@ class TransactionModeModel extends Model
             $date =  new \DateTime("now");
             $model->updated_at = $date;
         });
+    }
+
+    public function method(): BelongsTo
+    {
+        return $this->belongsTo(\Modules\Utility\App\Models\SettingModel::class);
     }
 
 

@@ -7,6 +7,10 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\DB;
+use Modules\Core\App\Models\CustomerModel;
+use Modules\Core\App\Models\UserModel;
+use Modules\Core\App\Models\VendorModel;
+use Modules\Inventory\App\Models\CategoryModel;
 
 class AccountHeadModel extends Model
 {
@@ -20,6 +24,7 @@ class AccountHeadModel extends Model
         'display_name',
         'config_id',
         'mother_account_id',
+        'account_master_head_id',
         'parent_id',
         'customer_id',
         'vendor_id',
@@ -41,6 +46,7 @@ class AccountHeadModel extends Model
         'opening_balance',
         'credit_limit',
         'credit_period',
+        'account_id',
         'balance_bill_by_bill',
         'is_credit_date_check_voucher_entry',
         'provide_bank_details'
@@ -79,13 +85,26 @@ class AccountHeadModel extends Model
 
     public function accountHeadDetails()
     {
-        return $this->hasOne(AccountHeadDetailsModel::class,'account_id','id');
+        return $this->hasOne(AccountHeadDetailsModel::class, 'account_id', 'id');
     }
 
     public function parent_account_head(): BelongsTo
     {
         return $this->belongsTo(AccountHeadModel::class, 'parent_id');
     }
+
+    public function headDetail()
+    {
+        return $this->hasOne(AccountHeadDetailsModel::class, 'account_id', 'id'); // assuming you have this model
+    }
+
+    public function parent()
+    {
+        return $this->belongsTo(AccountHeadModel::class, 'parent_id');
+    }
+
+
+
 
     // Optional: Self-referencing relationship for children
     public function child_account_heads(): HasMany
@@ -111,7 +130,7 @@ class AccountHeadModel extends Model
     {
         $name = "{$entity['name']}";
         $parent = AccountingModel::find($config);
-        if($parent and $parent->account_product_group_id){
+        if ($parent and $parent->account_product_group_id) {
             self::create(
                 [
                     'name' => $name,
@@ -133,8 +152,8 @@ class AccountHeadModel extends Model
     {
 
         $name = "{$entity['name']}";
-        $parent = AccountHeadModel::where('product_group_id',$entity->parent)->where('level', '2')->first();
-        if($parent) {
+        $parent = AccountHeadModel::where('product_group_id', $entity->parent)->where('level', '2')->first();
+        if ($parent) {
             self::create(
                 [
                     'name' => $name,
@@ -155,7 +174,7 @@ class AccountHeadModel extends Model
     {
         $name = "{$entity['mobile']}-{$entity['name']}";
         $accountHead = $config['account_customer_id'];
-        if($accountHead){
+        if ($accountHead) {
             self::create(
                 [
                     'name' => $name,
@@ -177,7 +196,7 @@ class AccountHeadModel extends Model
     {
         $name = "{$entity['mobile']}-{$entity['company_name']}";
         $accountHead = $config['account_vendor_id'];
-        if($accountHead) {
+        if ($accountHead) {
             self::create(
                 [
                     'name' => $name,
@@ -193,11 +212,10 @@ class AccountHeadModel extends Model
         }
     }
 
-
     public static function insertCurrentAssetsLedger($config, $entity)
     {
         $name = "{$entity['name']}";
-        $array=[
+        $array = [
             'name' => $name,
             'display_name' => $name,
             'source' => 'vendor',
@@ -211,11 +229,10 @@ class AccountHeadModel extends Model
         //AccountJournalModel::insertCustomerJournalVoucher($entity);
     }
 
-
-    public static function getLedger($request,$domain)
+    public static function getLedger($request, $domain)
     {
 
-        $query = self::select(['name', 'slug', 'id','level'])
+        $query = self::select(['name', 'slug', 'id', 'level'])
             ->where([['level', 1], ['config_id', $domain['config_id']]]);
         return $query->get()->toArray();
     }
@@ -233,7 +250,6 @@ class AccountHeadModel extends Model
             ->where([['status', 1], ['config_id', $domain['config_id']]]);
         return $query->get();
     }
-
 
     public static function getRecords($request, $domain)
     {
@@ -262,7 +278,7 @@ class AccountHeadModel extends Model
             // Search term filter
             if (!empty($request['term'])) {
                 $searchTerm = '%' . $request['term'] . '%';
-                $query->where(function($q) use ($searchTerm) {
+                $query->where(function ($q) use ($searchTerm) {
                     $q->where('acc_head.name', 'LIKE', $searchTerm)
                         ->orWhere('acc_head.slug', 'LIKE', $searchTerm);
                 });
@@ -282,7 +298,7 @@ class AccountHeadModel extends Model
             // Apply pagination and ordering
             $entities = $query->skip($skip)
                 ->take($perPage)
-                ->orderBy('acc_head.id', 'DESC')
+                ->orderBy('acc_head.name', 'ASC')
                 ->get();
 
             return [
@@ -304,12 +320,11 @@ class AccountHeadModel extends Model
         }
     }
 
-
-    public static function getRecordsForLocalStorage($request,$domain)
+    public static function getRecordsForLocalStorage($request, $domain)
     {
-       // dd($request->query('mode'));
-        $entities = self::leftjoin('acc_head as parent','parent.id','=','acc_head.parent_id')
-            ->leftjoin('acc_setting as mother','acc_head.mother_account_id','=','mother.id')
+        // dd($request->query('mode'));
+        $entities = self::leftjoin('acc_head as parent', 'parent.id', '=', 'acc_head.parent_id')
+            ->leftjoin('acc_setting as mother', 'acc_head.mother_account_id', '=', 'mother.id')
             ->select([
                 'acc_head.id',
                 'acc_head.level',
@@ -319,18 +334,18 @@ class AccountHeadModel extends Model
                 'parent.name as parent_name',
                 'mother.name as mother_name'
             ])
-            ->orderBy('acc_head.name','ASC')
+            ->orderBy('acc_head.name', 'ASC')
             ->get();
 
         $data = [];
-        if(sizeof($entities)>0){
-            foreach ($entities as $val){
-                if ($val['level'] == 2){
-                    $data[$val['level'].'-UserRole'][] = $val;
-                }elseif ($val['level'] == 1){
-                    $data[$val['level'].'-SubGroup'][] = $val;
-                }else{
-                    $data[$val['level'].'-Ledger'][] = $val;
+        if (sizeof($entities) > 0) {
+            foreach ($entities as $val) {
+                if ($val['level'] == 2) {
+                    $data[$val['level'] . '-UserRole'][] = $val;
+                } elseif ($val['level'] == 1) {
+                    $data[$val['level'] . '-SubGroup'][] = $val;
+                } else {
+                    $data[$val['level'] . '-Ledger'][] = $val;
                 }
             }
         }
@@ -339,7 +354,7 @@ class AccountHeadModel extends Model
         return $data;
     }
 
-    public static function getAccountHeadDropdown($domain,$head)
+    public static function getAccountHeadDropdown($domain, $head)
     {
         return DB::table('acc_head')
             ->select([
@@ -353,13 +368,13 @@ class AccountHeadModel extends Model
                 'acc_head.mode',
             ])
             ->where([
-                ['acc_head.config_id',$domain['acc_config']],
-                ['acc_head.head_group',$head]
+                ['acc_head.config_id', $domain['acc_config']],
+                ['acc_head.head_group', $head]
             ])
             ->get();
     }
 
-    public static function getAccountLedgerDropdown($domain,$head='')
+    public static function getAccountLedgerDropdown($domain, $head = '')
     {
         $data = self::where('acc_head.config_id', $domain['acc_config'])
             ->join('acc_head as l_head', 'l_head.id', '=', 'acc_head.parent_id')
@@ -388,11 +403,12 @@ class AccountHeadModel extends Model
             })->values()->toArray();
         return $data;
     }
-    public static function getAccountAllDropdownBySlug($domain,$head='head')
+
+    public static function getAccountAllDropdownBySlug($domain, $head = 'head')
     {
         $data = self::where('acc_head.config_id', $domain['acc_config'])
             ->leftjoin('acc_head as l_head', 'l_head.id', '=', 'acc_head.parent_id')
-            ->where('acc_head.head_group',$head)->where('acc_head.status',1)
+            ->where('acc_head.head_group', $head)->where('acc_head.status', 1)
             ->select([
                 'acc_head.id',
                 'acc_head.parent_id',
@@ -426,10 +442,10 @@ class AccountHeadModel extends Model
         return $entity;
     }
 
-    public static function getAccountHeadWithParentPramValue($pram,$value)
+    public static function getAccountHeadWithParentPramValue($pram, $value)
     {
 
-        $entity = self::where($pram,$value)
+        $entity = self::where($pram, $value)
             ->select([
                 'acc_head.id',
                 'acc_head.parent_id as parent_id',
@@ -442,7 +458,333 @@ class AccountHeadModel extends Model
         return $entity;
     }
 
+    public static function generateAccountHead($domain)
+    {
 
+        DB::transaction(function () use ($domain) {
+
+            $configId = $domain['acc_config'];
+            $domainId = $domain['domain_id'];
+
+            $config = AccountingModel::findOrFail($configId);
+            $parentHeads = AccountHeadMasterModel::whereNull('parent_id')->get();
+            foreach ($parentHeads as $head) {
+                $entity = AccountHeadModel::updateOrCreate(
+                    [
+                        'config_id' => $config->id,
+                        'account_master_head_id' => $head->id,
+                    ],
+                    [
+                        'mother_account_id' => $head->mother_account_id,
+                        'name' => $head->name,
+                        'display_name' => $head->name,
+                        'slug' => $head->slug,
+                        'head_group' => 'head',
+                        'level' => $head->level,
+                        'is_private' => true,
+                        'parent_id' => null,
+                    ]
+                );
+
+                foreach ($head->children as $child) {
+
+                    $subHead = AccountHeadModel::updateOrCreate(
+                        [
+                            'config_id' => $config->id,
+                            'account_master_head_id' => $child->id,
+                        ],
+                        [
+                            'mother_account_id' => $child->mother_account_id,
+                            'name' => $child->name,
+                            'display_name' => $child->name,
+                            'slug' => $child->slug,
+                            'head_group' => 'sub-head',
+                            'level' => $child->level,
+                            'is_private' => true,
+                            'parent_id' => $entity->id,
+                        ]
+                    );
+
+                    if (!$subHead->headDetail) {
+                        AccountHeadDetailsModel::updateOrCreate(
+                            [
+                                'config_id' => $config->id,
+                                'account_id' => $subHead->id,
+                            ]
+                        );
+                    }
+
+                    foreach ($child->children as $row) {
+                        $ledger = AccountHeadModel::updateOrCreate(
+                            [
+                                'config_id' => $config->id,
+                                'account_master_head_id' => $row->id,
+                            ],
+                            [
+                                'mother_account_id' => $row->mother_account_id,
+                                'name' => $row->name,
+                                'display_name' => $row->name,
+                                'slug' => $row->slug,
+                                'head_group' => 'ledger',
+                                'level' => $row->level,
+                                'is_private' => true,
+                                'parent_id' => $subHead->id,
+                            ]
+                        );
+                        if (!$row->headDetail) {
+                            AccountHeadDetailsModel::updateOrCreate(
+                                [
+                                    'config_id' => $config->id,
+                                    'account_id' => $ledger->id,
+                                ]
+                            );
+                        }
+                    }
+                }
+            }
+
+            $config = ConfigModel::findOrFail($configId);
+            $currentAssets = TransactionModeModel::where('config_id', $configId)
+                ->where('status', 1)
+                ->get();
+            foreach ($currentAssets as $asset) {
+                self::insertTransactionAccount($config,$asset);
+            }
+
+            $customers = CustomerModel::where('domain_id', $domainId)
+                ->where('status', 1)
+                ->get();
+            foreach ($customers as $customer) {
+                self::insertCustomerAccount($config,$customer);
+            }
+
+            $vendors = VendorModel::where('domain_id', $domainId)
+                ->where('status', 1)
+                ->get();
+            foreach ($vendors as $vendor) {
+                self::insertVendorAccount($config,$vendor);
+            }
+
+            $users = UserModel::where([
+                'domain_id'     => $domainId,
+                'user_group' => 'user',
+                'enabled'    => 1,
+            ])->get();
+            foreach ($users as $user) {
+                self::insertUserAccount($config, $user);
+            }
+
+            $investors = UserModel::where([
+                'domain_id'     => $config->domain,
+                'user_group' => 'investor',
+                'enabled'    => 1,
+            ])->get();
+
+            foreach ($investors as $investor) {
+                self::insertCapitalInvestmentAccount($config, $investor);
+            }
+
+            $groups = CategoryModel::where([
+                'config_id' => $domain['inv_config'],
+                'parent' => null,
+                'status'    => 1,
+            ])->get();
+            foreach ($groups as $group) {
+                self::insertCategoryGroupAccount($config, $group);
+            }
+
+        });
+    }
+
+    public static function insertTransactionAccount($config , $entity)
+    {
+
+        $parent = null;
+        $methodSlug = $entity->method->slug;
+        $parent = match($methodSlug){
+                'cash' => $config->account_cash_id,
+                'bank' => $config->account_bank_id,
+                'mobile' => $config->account_mobile_id,
+                default => null,
+        };
+
+       $head = AccountHeadModel::updateOrCreate(
+           [
+               'account_id' => $entity->id,
+               'config_id' => $config->id,
+           ],
+           [
+               'name' => $entity->name,
+               'display_name' => $entity->name,
+               'slug' => $entity->slug,
+               'parent_id' => $parent??null, // Assuming $parent is a model
+               'head_group' => 'ledger',
+               'level' => 3,
+               'mode' => 'debit',
+               'is_private' => true,
+           ]
+       );
+
+       if (!$head->headDetail) {
+           AccountHeadDetailsModel::updateOrCreate(
+               [
+                   'config_id' => $head->config_id,
+                   'account_id' => $head->id,
+               ]
+           );
+       }
+
+    }
+
+
+    public static function insertCustomerAccount($config, $entity)
+    {
+        $name = "{$entity->mobile}-{$entity->name}";
+
+        $head = AccountHeadModel::updateOrCreate(
+            [
+                'customer_id' => $entity->id,
+            ],
+            [
+                'config_id'    => $config->id,
+                'parent_id'    => $config->account_customer_id ?? null, // assuming it's an ID
+                'name'         => $name,
+                'display_name' => $entity->name,
+                'slug'         => $entity->slug,
+                'head_group'   => 'ledger',
+                'level'        => 3,
+                'mode'         => 'debit',
+                'is_private'   => true, // optional
+            ]
+        );
+
+        if (!$head->headDetail) {
+            AccountHeadDetailsModel::updateOrCreate(
+                [
+                    'config_id'  => $head->config_id,
+                    'account_id' => $head->id,
+                ]
+            );
+        }
+    }
+
+    public static function insertVendorAccount($config, $entity)
+    {
+        $name = "{$entity->mobile}-{$entity->company_name}";
+        $head = AccountHeadModel::updateOrCreate(
+            [
+                'vendor_id' => $entity->id,
+            ],
+            [
+                'config_id'    => $config->id,
+                'parent_id'    => $config->account_vendor_id ?? null, // assuming this is an ID
+                'name'         => $name,
+                'display_name' => $entity->company_name,
+                'slug'         => $entity->slug,
+                'head_group'   => 'ledger',
+                'level'        => 3,
+                'mode'         => 'credit',
+                'is_private'   => true,
+            ]
+        );
+
+        if (!$head->headDetail) {
+            AccountHeadDetailsModel::updateOrCreate(
+                [
+                    'config_id'  => $head->config_id,
+                    'account_id' => $head->id,
+                ]
+            );
+        }
+    }
+
+    public function insertUserAccount($config,$user)
+    {
+
+        $head = AccountHeadModel::updateOrCreate(
+            [
+                'user_id' => $user->id,
+            ],
+            [
+                'config_id'    => $config->id,
+                'parent_id'    => $config->account_user_id ?? null, // Assumes this is an ID field
+                'name'         => $user->name,
+                'display_name' => $user->name,
+                'slug'         => \Str::slug($user->name), // Optional: Convert name to slug format
+                'head_group'   => 'ledger',
+                'level'        => 3,
+                'mode'         => 'credit',
+                'is_private'   => true, // Optional if applicable
+            ]
+        );
+
+        if (!$head->headDetail) {
+            AccountHeadDetailsModel::updateOrCreate(
+                [
+                    'config_id'  => $head->config_id,
+                    'account_id' => $head->id,
+                ]
+            );
+        }
+    }
+
+    public function insertCapitalInvestmentAccount($config, $user)
+    {
+
+        $head = AccountHeadModel::updateOrCreate(
+            [
+                'user_id' => $user->id,
+            ],
+            [
+                'config_id'    => $config->id,
+                'parent_id'    => $config->capital_investment_id ?? null, // Assuming this is the ID
+                'name'         => $user->name,
+                'display_name' => $user->name,
+                'slug'         => \Str::slug($user->name),
+                'head_group'   => 'ledger',
+                'level'        => 3,
+                'mode'         => 'credit',
+                'is_private'   => true, // Optional, if applicable
+            ]
+        );
+
+        if (!$head->headDetail) {
+            AccountHeadDetailsModel::updateOrCreate(
+                [
+                    'config_id'  => $head->config_id,
+                    'account_id' => $head->id,
+                ]
+            );
+        }
+    }
+
+    public static function insertCategoryGroupAccount($config, $entity)
+    {
+        $head = AccountHeadModel::updateOrCreate(
+            [
+                'product_group_id' => $entity->id,
+            ],
+            [
+                'config_id'        => $config->id,
+                'parent_id'        => $config->account_product_group_id ?? null, // Ensure this is the correct field
+                'name'             => $entity->name,
+                'display_name'     => $entity->name,
+                'head_group'       => 'ledger',
+                'level'            => 3,
+                'is_private'       => true,
+                'mode'             => 'debit',
+            ]
+        );
+
+        if (!$head->headDetail) {
+            AccountHeadDetailsModel::updateOrCreate(
+                [
+                    'config_id'  => $head->config_id,
+                    'account_id' => $head->id,
+                ]
+            );
+        }
+    }
 
 }
 

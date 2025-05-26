@@ -257,13 +257,13 @@ class AccountHeadRepository extends EntityRepository
     public function generateAccountHead($configId)
     {
         $em = $this->_em;
-        $qb = $this->getEntityManager()
+       /* $qb = $this->getEntityManager()
             ->getConnection()
             ->createQueryBuilder()
             ->delete('acc_head')
             ->where('config_id =:config_id')
             ->setParameter('config_id', $configId);
-        $qb->execute();
+        $qb->execute();*/
 
         /** @var  Config $config */
 
@@ -273,7 +273,6 @@ class AccountHeadRepository extends EntityRepository
         /** @var AccountMasterHead $head */
 
         foreach ($parentHeads as $head){
-
             $entity = new AccountHead();
             $entity->setConfig($config);
             $entity->setMotherAccount($head->getMotherAccount());
@@ -336,7 +335,7 @@ class AccountHeadRepository extends EntityRepository
 
             }
         }
-        /*
+
 
         $currentAssets = $em->getRepository(TransactionMode::class)->findBy(['config' => $configId,'status'=>1]);
         foreach ($currentAssets as $asset){
@@ -367,7 +366,8 @@ class AccountHeadRepository extends EntityRepository
         $groups = $em->getRepository(Category::class)->findBy(['config' => $inv,'parent'=>null,'status'=>1]);
         foreach ($groups as $group){
             $this->insertCategoryGroupAccount($config,$group);
-        }*/
+        }
+
         $config = $this->find($configId);
         return $config;
     }
