@@ -35,10 +35,6 @@ class AccountVoucherModel extends Model
         return $this->belongsTo(SettingTypeModel::class);
     }
 
-    public function ledger_account_head(): HasMany
-    {
-        return $this->hasMany(AccountHeadModel::class,'parent_id','ledger_account_head_id');
-    }
 
     public function ledger_account_head_primary(): BelongsToMany
     {
@@ -133,21 +129,11 @@ class AccountVoucherModel extends Model
 
     public static function getVoucherWiseLedgerDetails($request, $domain)
     {
+
         return self::where('acc_voucher.status', '1')
             ->where('acc_voucher.config_id', $domain['acc_config'])
-            ->whereNotNull('ledger_account_head_id')
             ->leftJoin('acc_setting', 'acc_setting.id', '=', 'acc_voucher.voucher_type_id')
             ->with([
-                'ledger_account_head' => function ($query) {
-                    $query->where('status', 1)
-                        ->select([
-                            'id', 'parent_id', 'account_id', 'account_master_head_id',
-                            'vendor_id', 'customer_id', 'code', 'name', 'amount',
-                            'credit', 'debit', 'level', 'head_group', 'slug',
-                            'display_name', 'opening_balance'
-                        ]);
-                },
-
                 'ledger_account_head_primary' => function ($query) {
                     $query->where('status', 1)
                         ->select([

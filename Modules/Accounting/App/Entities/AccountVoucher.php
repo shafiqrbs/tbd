@@ -113,7 +113,7 @@ class AccountVoucher
      *
      * @ORM\Column(name="is_default", type="boolean")
      */
-    private $isDefault = true;
+    private $isDefault = false;
 
     /**
      * @var boolean
@@ -375,6 +375,24 @@ class AccountVoucher
     {
         $this->ledgerAccountHead = $ledgerAccountHead;
     }
+
+    /**
+     * @return bool
+     */
+    public function isDefault()
+    {
+        return $this->isDefault;
+    }
+
+    /**
+     * @param bool $isDefault
+     */
+    public function setIsDefault($isDefault)
+    {
+        $this->isDefault = $isDefault;
+    }
+
+
 
 
 

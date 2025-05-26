@@ -235,6 +235,63 @@ class StockItemModel extends Model
             });
     }
 
+    public static function getPosStockItem($domain)
+    {
+        return self::with(['product.measurement.unit', 'product.unit', 'product.category', 'product.setting', 'product.images','multiplePrice.priceUnitName'])
+          //  ->leftjoin('inv_setting','inv_setting.id','=','inv_product.product_type_id')
+            ->where('config_id', $domain['config_id'])
+         //   ->whereIN('inv_setting.slug',['pre-production','stockable','mid-production','post-production'])
+            ->where('status', 1)
+            ->orderByDesc('name')
+            ->get()
+            ->map(function($stock) {
+                $product = $stock->product;
+                return [
+                    'id'                => $stock->id,
+                    'stock_id'          => $stock->id,
+                    'name'              => $stock->display_name ?? $stock->name,
+                    'display_name'      => $stock->display_name ?? $stock->name,
+                    'product_name'      => $stock->name . '[' . ($stock->quantity ?? 0) . '] ' . ($product->unit->name ?? ''),
+                    'slug'              => $product->slug ?? null,
+                    'vendor_id'         => $product->vendor_id ?? null,
+                    'category_id'       => $product->category_id ?? null,
+                    'unit_id'           => $product->unit_id ?? null,
+                    'unit_name'         => $product->unit->name ?? null,
+                    'quantity'          => $stock->quantity,
+                    'price'       => ROUND($stock->price,2),
+                    'sales_price'       => ROUND($stock->sales_price,2),
+                    'purchase_price'    => ROUND($stock->purchase_price,2),
+                    'average_price'    => ROUND($stock->average_price,2),
+                    'barcode'           => $stock->barcode,
+                    'product_nature'    => $product->setting->slug ?? null,
+                    'feature_image'     => optional(optional($product)->images)->feature_image ?? null,
+                    'multi_price' => optional(optional($stock)->multiplePrice)->map(function ($m) {
+                        return [
+                            'id'                => $m->id,
+                            'price_unit_id'     => $m->price_unit_id,
+                            'price'             => $m->price,
+                            'field_name'        => $m->priceUnitName->name ?? null,
+                            'field_slug'        => $m->priceUnitName->slug ?? null,
+                            'parent_slug'       => $m->priceUnitName->parent_slug ?? null,
+                        ];
+                    }),
+                    'measurements' => optional(optional($product)->measurement)->map(function ($m) {
+                        return [
+                            'id'            => $m->id,
+                            'unit_id'       => $m->unit_id,
+                            'unit_name'     => $m->unit->name ?? null,
+                            'slug'          => $m->unit->slug ?? null,
+                            'is_base_unit'  => $m->is_base_unit,
+                            'is_sales'      => $m->is_sales,
+                            'is_purchase'   => $m->is_purchase,
+                            'quantity'      => $m->quantity,
+                        ];
+                    }),
+
+                ];
+            });
+    }
+
 
     public static function getStockItemBK($domain)
     {

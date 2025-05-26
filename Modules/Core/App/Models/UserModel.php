@@ -174,6 +174,7 @@ class UserModel extends Model
     }
 
     public static function getRecordsForLocalStorage($request,$domain){
+
         $users = self::where('users.domain_id',$domain['global_id'])->whereNull('users.deleted_at')
             ->leftJoin('cor_user_role','cor_user_role.user_id','=','users.id')
             ->leftJoin('cor_user_transaction','cor_user_transaction.user_id','=','users.id')

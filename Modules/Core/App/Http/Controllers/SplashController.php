@@ -41,6 +41,13 @@ class SplashController extends Controller
             ->leftjoin('acc_config','acc_config.domain_id','=','dom_domain.id')
             ->first();
 
+        $findDomain = DomainModel::where('license_no', $licenseKey)->where('unique_code',$activeKey)
+            ->with('accountConfig',
+                'accountConfig.capital_investment','accountConfig.account_cash','accountConfig.account_bank','accountConfig.account_mobile','accountConfig.account_user','accountConfig.account_vendor','accountConfig.account_customer','accountConfig.account_product_group','accountConfig.account_category',
+                'accountConfig.voucher_stock_opening','accountConfig.voucher_purchase','accountConfig.voucher_sales','accountConfig.voucher_purchase_return','accountConfig.voucher_stock_reconciliation',
+                'productionConfig','gstConfig','inventoryConfig','inventoryConfig.configPurchase','inventoryConfig.configSales','inventoryConfig.configProduct','inventoryConfig.configDiscount','inventoryConfig.configVat','inventoryConfig.businessModel','inventoryConfig.currency')->first();
+
+
         if (!$findDomain) {
             return response()->json([
                 'status' => 404,
@@ -48,33 +55,33 @@ class SplashController extends Controller
             ], 404);
         }
 
+
         $domainData = [
           'global_id' => $findDomain->id,
-          'acc_config' => $findDomain->acc_config,
-          'config_id' => $findDomain->config_id,
+          'acc_config' => $findDomain->accountConfig->id,
+          'config_id' => $findDomain->inventoryConfig->id,
         ];
 
         $allUsers = UserModel::getRecordsForLocalStorage('',$domainData)['entities'];
+
         $allCustomers = CustomerModel::getRecordsForLocalStorage($domainData,$request)['entities'];
-        $allVendors = VendorModel::getRecordsForLocalStorage($request,$domainData)['entities'];
-        $allTransactionMode = TransactionModeModel::getRecordsForLocalStorage($request,$domainData)['entities'];
-        $inventoryConfig = $this->getInventoryConfig($domainData['config_id'],$domainData['global_id']);
 
-        $domainConfig = $this->getDomainConfig($domainData['config_id'],$domainData['global_id']);
-        $stockItem = StockItemModel::getStockItem($domainData);
-
+        $vendors = VendorModel::getRecordsForLocalStorage($request,$domainData);
+        $allVendors = isset($vendors['entities']) ? $vendors['entities'] : [];
+        $transactionMode = TransactionModeModel::getRecordsForLocalStorage($request,$domainData)['entities'];
+        $allTransactionMode = isset($transactionMode['entities']) ? $transactionMode['entities'] : [];
+        $stockItem = StockItemModel::getPosStockItem($domainData);
 
         return response()->json([
             'status' => 200,
             'message' => 'success',
             'data' => [
-//                'users' => $allUsers,
-//                'customers' => $allCustomers,
-//                'vendors' => $allVendors,
-//                'transaction_modes' => $allTransactionMode,
-//                'inventory_config' => $inventoryConfig,
-                'domain_config' => $domainConfig,
-//                'stock_item' => $stockItem,
+                'users' => $allUsers,
+                'customers' => $allCustomers,
+                'vendors' => $allVendors,
+                'transaction_modes' => $allTransactionMode,
+                'domain_config' => $findDomain,
+               'stock_item' => $stockItem,
             ]
         ], 200);
     }
