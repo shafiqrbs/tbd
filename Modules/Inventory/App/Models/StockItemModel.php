@@ -238,12 +238,16 @@ class StockItemModel extends Model
     public static function getPosStockItem($domain)
     {
         return self::with(['product.measurement.unit', 'product.unit', 'product.category', 'product.setting', 'product.images','multiplePrice.priceUnitName'])
-          //  ->leftjoin('inv_setting','inv_setting.id','=','inv_product.product_type_id')
-            ->where('config_id', $domain['config_id'])
-         //   ->whereIN('inv_setting.slug',['pre-production','stockable','mid-production','post-production'])
-            ->where('status', 1)
-            ->orderByDesc('name')
+            ->where('inv_stock.config_id', $domain['config_id'])
+            ->whereHas('product.setting', function ($query) {
+                $query->whereIn('slug', [
+                    'pre-production', 'stockable', 'mid-production', 'post-production'
+                ]);
+            })
+            ->where('inv_stock.status', 1)
+            ->orderByDesc('inv_stock.name')
             ->get()
+
             ->map(function($stock) {
                 $product = $stock->product;
                 return [
