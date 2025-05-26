@@ -16,11 +16,14 @@ use Modules\Inventory\App\Http\Requests\ProductGalleryRequest;
 use Modules\Inventory\App\Http\Requests\ProductMeasurementRequest;
 use Modules\Inventory\App\Http\Requests\ProductMeasurementSalesPurchaseRequest;
 use Modules\Inventory\App\Http\Requests\ProductRequest;
+use Modules\Inventory\App\Models\ConfigModel;
 use Modules\Inventory\App\Models\ProductGalleryModel;
 use Modules\Inventory\App\Models\ProductMeasurementModel;
 use Modules\Inventory\App\Models\ProductModel;
+use Modules\Inventory\App\Models\SettingModel;
 use Modules\Inventory\App\Models\StockItemHistoryModel;
 use Modules\Inventory\App\Models\StockItemModel;
+use Modules\Inventory\App\Models\StockItemPriceMatrixModel;
 use Modules\Inventory\App\Repositories\StockItemRepository;
 use Modules\NbrVatTax\App\Models\NbrItemVat;
 use Modules\NbrVatTax\App\Models\NbrTaxTariff;
@@ -97,10 +100,45 @@ class ProductController extends Controller
     {
 
         $service = new JsonRequestResponse();
+
+        $isMultiplePrice = ConfigModel::where('id', $this->domain['inv_config'])->value('is_multi_price');
+
         $entity = ProductModel::getProductDetails($id, $this->domain);
+
+        if ($isMultiplePrice == 1 && $entity->stock_item_id) {
+            $getPriceField = SettingModel::where('inv_setting.status', 1)
+                ->where('parent_slug', 'price-mode')
+                ->select([
+                    'inv_setting.id',
+                    'inv_setting.name as price_field_name',
+                    'inv_setting.slug as price_field_slug',
+                    'inv_setting.parent_slug',
+                ])
+                ->get()->toArray();
+
+            if ($getPriceField) {
+                foreach ($getPriceField as &$val) {
+                    $multiPriceData = StockItemPriceMatrixModel::where('product_id', $id)
+                        ->where('stock_item_id', $entity->stock_item_id)
+                        ->where('price_unit_id', $val['id'])
+                        ->select(['price'])
+                        ->first();
+
+                    $val['price'] = $multiPriceData ? $multiPriceData->price : null;
+                }
+            }
+
+            $item['price_field'] = $getPriceField;
+            $item['price_field_array'] = array_column($getPriceField, 'price_field_name');
+        } else {
+            $item['price_field'] = null;
+            $item['price_field_array'] = [];
+        }
+
         if (!$entity) {
             $entity = 'Data not found';
         }
+        $entity->multi_price_field = $item;
         $data = $service->returnJosnResponse($entity);
         return $data;
     }

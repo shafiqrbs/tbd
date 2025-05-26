@@ -255,6 +255,7 @@ class ProductModel extends Model
                 'inv_stock.min_quantity as min_quantity',
                 'inv_stock.quantity as stock_quantity',
                 'inv_stock.sku as sku',
+                'inv_stock.id as stock_item_id',
                 'inv_product_gallery.feature_image',
                 'inv_product_gallery.path_one',
                 'inv_product_gallery.path_two',

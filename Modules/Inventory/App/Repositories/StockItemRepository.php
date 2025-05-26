@@ -187,6 +187,12 @@ class StockItemRepository extends EntityRepository
             $entity->setIsMaster(1);
             $entity->setCreatedAt(new \DateTime());
             $entity->setUpdatedAt(new \DateTime());
+            if (isset($data['purchase_price'])) {
+                $entity->setPurchasePrice($data['purchase_price']);
+            }
+            if (isset($data['sales_price'])) {
+                $entity->setSalesPrice($data['sales_price']);
+            }
             $em->persist($entity);
             $em->flush();
         }

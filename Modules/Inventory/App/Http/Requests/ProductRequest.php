@@ -40,6 +40,8 @@ class ProductRequest extends FormRequest
                     'size_id' => 'nullable|integer',
                     'grade_id' => 'nullable|integer',
                     'model_id' => 'nullable|integer',
+                    'purchase_price' => 'nullable',
+                    'sales_price' => 'nullable',
                 ];
             }
             case 'PUT':
