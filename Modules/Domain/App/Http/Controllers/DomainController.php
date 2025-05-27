@@ -600,6 +600,7 @@ class DomainController extends Controller
                 Response::HTTP_NOT_FOUND
             );
         }
+
         $entity = UserModel::getDomainData($id);
         $domain = $entity;
         $invConfig = $entity['inv_config'];
@@ -805,6 +806,11 @@ class DomainController extends Controller
             $em->getRepository(AccountVoucher::class)->resetVoucher($accountingConfig->id);
           //  $em->getRepository(AccountHead::class)->generateAccountHead($accountingConfig->id);
             AccountHeadModel::generateAccountHead($domain);
+            AccountingModel::initiateConfig($domain);
+
+            AccountHeadModel::generateAccountHead($domain);
+            AccountVoucherModel::resetVoucher($domain);
+            AccountingModel::initiateConfig($domain);
 
             $entity = DomainModel::with('accountConfig',
                 'accountConfig.capital_investment','accountConfig.account_cash','accountConfig.account_bank','accountConfig.account_mobile','accountConfig.account_user','accountConfig.account_vendor','accountConfig.account_customer','accountConfig.account_product_group','accountConfig.account_category',

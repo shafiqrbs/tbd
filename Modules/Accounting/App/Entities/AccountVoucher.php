@@ -41,17 +41,12 @@ class AccountVoucher
     private $masterVoucher;
 
 
-    /**
-     * @ORM\ManyToOne(targetEntity="AccountHead")
-     * @ORM\JoinColumn(name="ledger_account_head_id", referencedColumnName="id", nullable=true, onDelete="cascade")
-     **/
-    private $ledgerAccountHead;
 
     /**
      * @ORM\ManyToMany(targetEntity="AccountHead")
      * @ORM\JoinTable(name="acc_voucher_account_primary",
-     *   joinColumns={@ORM\JoinColumn(name="account_voucher_id", referencedColumnName="id")},
-     *   inverseJoinColumns={@ORM\JoinColumn(name="primary_account_head_id", referencedColumnName="id")}
+     *   joinColumns={@ORM\JoinColumn(name="account_voucher_id", referencedColumnName="id" , nullable=true, onDelete="cascade")},
+     *   inverseJoinColumns={@ORM\JoinColumn(name="primary_account_head_id", referencedColumnName="id" , nullable=true, onDelete="cascade")}
      * )
      */
     private $primaryAccountHead;
@@ -59,8 +54,8 @@ class AccountVoucher
     /**
      * @ORM\ManyToMany(targetEntity="AccountHead")
      * @ORM\JoinTable(name="acc_voucher_account_secondary",
-     *   joinColumns={@ORM\JoinColumn(name="account_voucher_id", referencedColumnName="id")},
-     *   inverseJoinColumns={@ORM\JoinColumn(name="secondary_account_head_id", referencedColumnName="id")}
+     *   joinColumns={@ORM\JoinColumn(name="account_voucher_id", referencedColumnName="id" , nullable=true, onDelete="cascade")},
+     *   inverseJoinColumns={@ORM\JoinColumn(name="secondary_account_head_id", referencedColumnName="id" , nullable=true, onDelete="cascade")}
      * )
      */
     private $secondaryAccountHead;
@@ -111,7 +106,7 @@ class AccountVoucher
     /**
      * @var boolean
      *
-     * @ORM\Column(name="is_default", type="boolean")
+     * @ORM\Column(name="is_default", type="boolean", nullable=true)
      */
     private $isDefault = false;
 

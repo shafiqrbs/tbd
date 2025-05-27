@@ -3,6 +3,7 @@
 namespace Modules\Accounting\App\Models;
 
 
+use Cviebrock\EloquentSluggable\Sluggable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -13,7 +14,7 @@ use Illuminate\Support\Facades\DB;
 
 class AccountVoucherModel extends Model
 {
-    use HasFactory;
+    use HasFactory,Sluggable;
 
     protected $table = 'acc_voucher';
     public $timestamps = true;
@@ -21,14 +22,43 @@ class AccountVoucherModel extends Model
     protected $fillable = [
         'config_id',
         'voucher_type_id',
-        'ledger_account_head_id',
+        'master_voucher_id',
         'name',
         'short_name',
         'short_code',
         'mode',
+        'is_default',
         'is_private',
         'status'
     ];
+
+    /**
+     * Return the sluggable configuration array for this model.
+     *
+     * @return array
+     */
+    public function sluggable(): array
+    {
+        return [
+            'slug' => [
+                'source' => 'name'
+            ]
+        ];
+    }
+
+
+    public static function boot() {
+        parent::boot();
+        self::creating(function ($model) {
+            $date =  new \DateTime("now");
+            $model->created_at = $date;
+        });
+
+        self::updating(function ($model) {
+            $date =  new \DateTime("now");
+            $model->updated_at = $date;
+        });
+    }
 
     public function voucher_type(): BelongsTo
     {
@@ -103,8 +133,7 @@ class AccountVoucherModel extends Model
                 'acc_voucher.short_code as short_code',
                 'acc_voucher.mode as mode',
                 'acc_voucher.is_private as is_private',
-                'acc_voucher.status as status',
-                'acc_voucher.ledger_account_head_id'
+                'acc_voucher.status as status'
 
             ])
             ->orderBy('acc_voucher.name','ASC');
@@ -183,10 +212,41 @@ class AccountVoucherModel extends Model
                 'acc_voucher.is_private',
                 'acc_voucher.status',
                 'acc_voucher.is_default',
-                'acc_voucher.ledger_account_head_id'
             ])
             ->orderBy('acc_voucher.name', 'ASC')
             ->get();
+    }
+
+    public static function resetVoucher($domain)
+    {
+
+        // Get active master vouchers
+
+        $configId = $domain['acc_config'];
+
+        $masterVouchers = AccountMasterVoucherModel::where('status', 1)->get();
+
+        foreach ($masterVouchers as $head) {
+
+            self::updateOrCreate(
+                [
+                    'config_id'         => $configId,
+                    'master_voucher_id' => $head->id,
+                ],
+                [
+                    'voucher_type'      => $head->voucher_type_id,
+                    'name'              => $head->name,
+                    'short_name'        => $head->short_name,
+                    'short_code'        => $head->short_code,
+                    'slug'              => $head->slug,
+                    'mode'              => $head->mode,
+                    'status'            => 1,
+                    'is_default'        => 0,
+                    'is_private'        => 1,
+                ]
+            );
+        }
+
     }
 
 

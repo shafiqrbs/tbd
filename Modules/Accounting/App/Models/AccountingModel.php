@@ -5,6 +5,8 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Facades\DB;
+use Modules\Accounting\App\Entities\AccountHead;
+use Modules\Inventory\App\Models\CategoryModel;
 
 class AccountingModel extends Model
 {
@@ -166,6 +168,249 @@ class AccountingModel extends Model
         // Execute raw query with properly formatted SET statements
         DB::statement("UPDATE `$table` SET " . implode(', ', $setStatements) . " WHERE id = ?", [$id]);
 
+    }
+
+    public static function initiateConfig($domain){
+
+
+        $head = self::updateOrCreate(
+            ['id' =>$domain['acc_config']],
+            [
+                'capital_investment_id' => self::getHeadConfig($domain['acc_config'],147),
+                'account_cash_id' => self::getHeadConfig($domain['acc_config'],96),
+                'account_bank_id' => self::getHeadConfig($domain['acc_config'],97),
+                'account_mobile_id' => self::getHeadConfig($domain['acc_config'],98),
+                'account_user_id' => self::getHeadConfig($domain['acc_config'],109),
+                'account_vendor_id' => self::getHeadConfig($domain['acc_config'],101),
+                'account_customer_id' => self::getHeadConfig($domain['acc_config'],99),
+                'account_product_group_id' => self::getHeadConfig($domain['acc_config'],105),
+                'account_stock_opening_id' => self::getHeadConfig($domain['acc_config'],141),
+                'account_purchase_discount_id' => self::getHeadConfig($domain['acc_config'],151),
+                'account_sales_discount_id' => self::getHeadConfig($domain['acc_config'],152),
+                'account_vat_id' => self::getHeadConfig($domain['acc_config'],136),
+                'account_ait_id' => self::getHeadConfig($domain['acc_config'],138),
+                'account_zakat_id' => self::getHeadConfig($domain['acc_config'],140),
+                'account_sd_id' => self::getHeadConfig($domain['acc_config'],139),
+                'account_purchase_id' => self::getHeadConfig($domain['acc_config'],119),
+                'account_sales_id' => self::getHeadConfig($domain['acc_config'],143),
+                'account_tds_id' => self::getHeadConfig($domain['acc_config'],137),
+                'voucher_stock_opening_id' => self::getVoucherConfig($domain['acc_config'],13),
+                'voucher_purchase_id' => self::getVoucherConfig($domain['acc_config'],17),
+                'voucher_sales_id' => self::getVoucherConfig($domain['acc_config'],18),
+                'voucher_sales_return_id' => self::getVoucherConfig($domain['acc_config'],6),
+                'voucher_purchase_return_id' => self::getVoucherConfig($domain['acc_config'],9),
+                'voucher_stock_reconciliation_id' => self::getVoucherConfig($domain['acc_config'],19),
+            ]
+        );
+        self::setAccountHeadVoucher($domain);
+
+    }
+
+    public static function getHeadConfig($config,$id){
+
+        $accountId = AccountHeadModel::where('config_id', $config)
+            ->where('account_master_head_id', $id)
+            ->where('status', 1)
+            ->value('id');
+        return $accountId;
+    }
+
+    public static function getVoucherConfig($config,$id){
+
+        $accountId = AccountVoucherModel::where('config_id', $config)
+            ->where('master_voucher_id', $id)
+            ->where('status', 1)
+            ->value('id');
+        return $accountId;
+    }
+
+    public static function setAccountHeadVoucher($domain)
+    {
+
+        $cash = self::getHeadConfig($domain['acc_config'],96);
+        $bank = self::getHeadConfig($domain['acc_config'],97);
+        $mobile = self::getHeadConfig($domain['acc_config'],98);
+
+        $userHead = self::getHeadConfig($domain['acc_config'],109);
+        $vendorHead = self::getHeadConfig($domain['acc_config'],101);
+        $customerHead = self::getHeadConfig($domain['acc_config'],99);
+
+
+         $customer = self::getVoucherConfig($domain['acc_config'],14);
+         $vendor = self::getVoucherConfig($domain['acc_config'],15);
+         $user = self::getVoucherConfig($domain['acc_config'],20);
+
+        VoucherAccountPrimaryModel::insertOrIgnore(
+            [
+                ['account_voucher_id' => $customer, 'primary_account_head_id' => $cash],
+                ['account_voucher_id' => $customer, 'primary_account_head_id' => $bank],
+                ['account_voucher_id' => $customer, 'primary_account_head_id' => $mobile],
+                ['account_voucher_id' => $customer, 'primary_account_head_id' => $customerHead],
+                ['account_voucher_id' => $vendor, 'primary_account_head_id' => $cash],
+                ['account_voucher_id' => $vendor, 'primary_account_head_id' => $bank],
+                ['account_voucher_id' => $vendor, 'primary_account_head_id' => $mobile],
+                ['account_voucher_id' => $vendor, 'primary_account_head_id' => $vendorHead],
+                ['account_voucher_id' => $user, 'primary_account_head_id' => $cash],
+                ['account_voucher_id' => $user, 'primary_account_head_id' => $bank],
+                ['account_voucher_id' => $user, 'primary_account_head_id' => $mobile],
+                ['account_voucher_id' => $user, 'primary_account_head_id' => $userHead],
+            ],
+            ['account_voucher_id', 'primary_account_head_id'], // Unique keys
+            [] // Fields to update (none in your case)
+        );
+
+        VoucherAccountSecondaryModel::insertOrIgnore(
+            [
+                ['account_voucher_id' => $customer, 'secondary_account_head_id' => $cash],
+                ['account_voucher_id' => $customer, 'secondary_account_head_id' => $bank],
+                ['account_voucher_id' => $customer, 'secondary_account_head_id' => $mobile],
+                ['account_voucher_id' => $customer, 'secondary_account_head_id' => $customerHead],
+                ['account_voucher_id' => $vendor, 'secondary_account_head_id' => $cash],
+                ['account_voucher_id' => $vendor, 'secondary_account_head_id' => $bank],
+                ['account_voucher_id' => $vendor, 'secondary_account_head_id' => $mobile],
+                ['account_voucher_id' => $vendor, 'secondary_account_head_id' => $vendorHead],
+                ['account_voucher_id' => $user, 'secondary_account_head_id' => $cash],
+                ['account_voucher_id' => $user, 'secondary_account_head_id' => $bank],
+                ['account_voucher_id' => $user, 'secondary_account_head_id' => $mobile],
+                ['account_voucher_id' => $user, 'secondary_account_head_id' => $userHead],
+            ],
+            ['account_voucher_id', 'secondary_account_head_id'],
+            []
+        );
+
+        /*exit;
+
+        $customerData = [
+                    [
+                        'account_voucher_id' => $customer,
+                        'primary_account_head_id' => $cash,
+                    ],
+
+                    [
+                        'account_voucher_id' => $customer,
+                        'primary_account_head_id' => $bank,
+                    ],
+                    [
+                        'account_voucher_id' => $customer,
+                        'primary_account_head_id' => $mobile,
+                    ],
+                    [
+                        'account_voucher_id' => $customer,
+                        'primary_account_head_id' => $customerHead,
+                    ]
+
+                ];
+        VoucherAccountPrimaryModel::insert($customerData);
+
+        $vendorData = [
+            [
+                'account_voucher_id' => $vendor,
+                'primary_account_head_id' => $cash,
+            ],
+
+            [
+                'account_voucher_id' => $vendor,
+                'primary_account_head_id' => $bank,
+            ],
+            [
+                'account_voucher_id' => $vendor,
+                'primary_account_head_id' => $mobile,
+            ],
+            [
+                'account_voucher_id' => $vendor,
+                'primary_account_head_id' => $vendorHead,
+            ]
+
+        ];
+        VoucherAccountPrimaryModel::insert($vendorData);
+
+        $userData = [
+            [
+                'account_voucher_id' => $user,
+                'primary_account_head_id' => $cash,
+            ],
+
+            [
+                'account_voucher_id' => $user,
+                'primary_account_head_id' => $bank,
+            ],
+            [
+                'account_voucher_id' => $user,
+                'primary_account_head_id' => $mobile,
+            ],
+            [
+                'account_voucher_id' => $user,
+                'primary_account_head_id' => $userHead,
+            ]
+
+        ];
+        VoucherAccountPrimaryModel::insert($userData);
+
+        $customerData1 = [
+            [
+                'account_voucher_id' => $customer,
+                'secondary_account_head_id' => $cash,
+            ],
+
+            [
+                'account_voucher_id' => $customer,
+                'secondary_account_head_id' => $bank,
+            ],
+            [
+                'account_voucher_id' => $customer,
+                'secondary_account_head_id' => $mobile,
+            ],
+            [
+                'account_voucher_id' => $customer,
+                'secondary_account_head_id' => $customerHead,
+            ]
+
+        ];
+        VoucherAccountSecondaryModel::insert($customerData1);
+
+        $vendorData1 = [
+            [
+                'account_voucher_id' => $vendor,
+                'secondary_account_head_id' => $cash,
+            ],
+
+            [
+                'account_voucher_id' => $vendor,
+                'secondary_account_head_id' => $bank,
+            ],
+            [
+                'account_voucher_id' => $vendor,
+                'secondary_account_head_id' => $mobile,
+            ],
+            [
+                'account_voucher_id' => $vendor,
+                'secondary_account_head_id' => $vendorHead,
+            ]
+
+        ];
+        VoucherAccountSecondaryModel::insert($vendorData1);
+
+        $userData1 = [
+            [
+                'account_voucher_id' => $user,
+                'secondary_account_head_id' => $cash,
+            ],
+
+            [
+                'account_voucher_id' => $user,
+                'secondary_account_head_id' => $bank,
+            ],
+            [
+                'account_voucher_id' => $user,
+                'secondary_account_head_id' => $mobile,
+            ],
+            [
+                'account_voucher_id' => $user,
+                'secondary_account_head_id' => $userHead,
+            ]
+
+        ];
+        VoucherAccountSecondaryModel::insert($userData1);*/
     }
 
 
