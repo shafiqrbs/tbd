@@ -256,12 +256,6 @@ class Sales
      */
     private $mobile;
 
-    /**
-     * @var boolean
-     *
-     * @ORM\Column(type="boolean" )
-     */
-    private $isMultiPayment = false;
 
     /**
      * @var boolean
@@ -288,6 +282,14 @@ class Sales
      * @ORM\Column(type="boolean", nullable=true)
      */
     private $isCondition;
+
+    /**
+     * @var boolean
+     * @ORM\Column(type="boolean",  options={"default"="0"},nullable=true)
+     */
+    private $isMultiPayment;
+
+
 
      /**
      * @var boolean
