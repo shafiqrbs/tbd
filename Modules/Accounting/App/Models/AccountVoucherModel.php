@@ -97,7 +97,6 @@ class AccountVoucherModel extends Model
 
         return DB::table('acc_voucher')
             ->leftJoin('acc_setting','acc_setting.id','=','acc_voucher.voucher_type_id')
-            ->with['ledger_account_head']
             ->select([
                 'acc_voucher.id',
                 'acc_setting.id as voucher_type_id',

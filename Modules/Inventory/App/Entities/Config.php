@@ -423,6 +423,7 @@ class Config
      */
     private $storeLedger;
 
+
     /**
      * @var smallint
      *

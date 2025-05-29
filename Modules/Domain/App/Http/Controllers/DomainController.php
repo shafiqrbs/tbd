@@ -803,11 +803,8 @@ class DomainController extends Controller
 
             // Commit all database operations
             DB::commit();
-            $em->getRepository(AccountVoucher::class)->resetVoucher($accountingConfig->id);
-          //  $em->getRepository(AccountHead::class)->generateAccountHead($accountingConfig->id);
             AccountHeadModel::generateAccountHead($domain);
             AccountingModel::initiateConfig($domain);
-
             AccountHeadModel::generateAccountHead($domain);
             AccountVoucherModel::resetVoucher($domain);
             AccountingModel::initiateConfig($domain);

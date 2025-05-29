@@ -44,8 +44,9 @@ Route::prefix('/domain')->middleware(array(HeaderAuthenticationMiddleware::class
 
     Route::prefix('config')->middleware([HeaderAuthenticationMiddleware::class])->group(function() {
         Route::get('/', [DomainConfigController::class,'domainConfig'])->name('domain_config');
-        Route::post('inventory/{id}', [DomainConfigController::class,'inventoryConfig'])->name('domain_config');
-        Route::post('inventory-product/{id}', [DomainConfigController::class,'inventoryProductConfig'])->name('domain_config');
+        Route::post('domain/{id}', [DomainConfigController::class,'domainConfigurationForm'])->name('domain_config_form');
+        Route::post('inventory/{id}', [DomainConfigController::class,'inventoryConfig'])->name('domain_inventory_config');
+        Route::post('inventory-product/{id}', [DomainConfigController::class,'inventoryProductConfig'])->name('domain_product_config');
         Route::post('inventory-sales/{id}', [DomainConfigController::class,'inventorySalesConfig'])->name('domain_config');
         Route::post('inventory-purchase/{id}', [DomainConfigController::class,'inventoryPurchaseConfig'])->name('domain_config');
         Route::post('inventory-discount/{id}', [DomainConfigController::class,'inventoryDiscountConfig'])->name('domain_config');

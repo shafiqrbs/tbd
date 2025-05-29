@@ -63,6 +63,43 @@ class DomainConfigController extends Controller
         return $entity;
     }
 
+    public function domainConfigurationForm(Request $request,$id)
+    {
+
+        DB::beginTransaction();
+        $domain = UserModel::getDomainData($id);
+        $config = $domain['config_id'];
+        $entity = ConfigModel::find($config);
+        $domainConfig = DomainModel::find($id);
+
+        try {
+            $data = $request->all();
+            $entity->update($data);
+            $configData =array(
+                'name'=> $data['shop_name'],
+                'business_model_id'=> $data['business_model_id'],
+            );
+            $domainConfig->update($configData);
+            DB::commit();
+            $service = new JsonRequestResponse();
+            $return = $service->returnJosnResponse($this->domainConfigById($id));
+            return $return;
+        } catch (ModelNotFoundException $e) {
+            DB::rollBack();
+            return response()->json([
+                'message' => 'Resource not found',
+                'status'  => ResponseAlias::HTTP_NOT_FOUND
+            ], ResponseAlias::HTTP_NOT_FOUND);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'message' => 'Operation failed: ' . $e->getMessage(),
+                'error'   => $e->getMessage(),
+                'status'  => ResponseAlias::HTTP_INTERNAL_SERVER_ERROR
+            ], ResponseAlias::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
+
     public function inventoryConfig(Request $request,$id)
     {
 
