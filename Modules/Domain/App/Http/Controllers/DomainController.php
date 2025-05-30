@@ -190,7 +190,7 @@ class DomainController extends Controller
             // Step 3: Create the inventory configuration (config)
             $currency = CurrencyModel::find(1);
 
-            $config = $config =  ConfigModel::create([
+            $config =  ConfigModel::create([
                 'domain_id' => $entity->id,
                 'currency_id' => $currency->id,
                 'zero_stock' => true,
@@ -223,6 +223,13 @@ class DomainController extends Controller
                 'financial_start_date' =>  now(),
                 'financial_end_date' =>  now(),
             ]);
+
+            $domain = UserModel::getDomainData($entity->id);
+            AccountHeadModel::generateAccountHead($domain);
+            AccountingModel::initiateConfig($domain);
+            AccountHeadModel::generateAccountHead($domain);
+            AccountVoucherModel::resetVoucher($domain);
+            AccountingModel::initiateConfig($domain);
 
             // Step 4: Create the accounting data
             NbrVatConfigModel::create([
@@ -282,7 +289,6 @@ class DomainController extends Controller
 
             // Commit all database operations
             DB::commit();
-            $em->getRepository(AccountHead::class)->generateAccountHead($accountingConfig->id);
             // Return the response
             $service = new JsonRequestResponse();
             return $service->returnJosnResponse($entity);
