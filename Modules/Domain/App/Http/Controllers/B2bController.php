@@ -10,6 +10,7 @@ use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Modules\Accounting\App\Models\AccountHeadModel;
+use Modules\Accounting\App\Models\AccountingModel;
 use Modules\AppsApi\App\Services\GeneratePatternCodeService;
 use Modules\Core\App\Models\CustomerModel;
 use Modules\Core\App\Models\SettingModel;
@@ -107,6 +108,7 @@ class B2bController extends Controller
                             fn() => $this->prepareCustomerData($childDomain, $patternCodeService)
                         );
                         $this->ensureCustomerLedger($customer);
+
                         $updateData['customer_id'] = $customer->id;
                     }
 
@@ -121,7 +123,7 @@ class B2bController extends Controller
                             true,
                             fn() => $this->prepareVendorData($childDomain, $parentDomain, $patternCodeService, $customer)
                         );
-                        $this->ensureVendorLedger($vendor, $childDomain->id);
+                        $this->ensureVendorLedger($vendor);
                         $updateData['vendor_id'] = $vendor->id;
                     }
 
@@ -338,7 +340,8 @@ class B2bController extends Controller
             ->exists();
 
         if (!$ledgerExist) {
-            AccountHeadModel::insertCustomerLedger($this->domain['acc_config'], $customer);
+            $accountConfig = AccountingModel::find($this->domain['acc_config']);
+            AccountHeadModel::insertCustomerLedger($accountConfig, $customer);
         }
     }
 
@@ -380,12 +383,9 @@ class B2bController extends Controller
         ];
     }
 
-    private function ensureVendorLedger(VendorModel $vendor, $childDomainId)
+    private function ensureVendorLedger(VendorModel $vendor)
     {
-        $childAccConfig = DB::table('acc_config')
-            ->where('domain_id', $childDomainId)
-            ->value('id');
-
+        $childAccConfig = AccountingModel::find($this->domain['acc_config']);
         $ledgerExist = AccountHeadModel::where('vendor_id', $vendor->id)
             ->where('config_id', $childAccConfig)
             ->exists();
