@@ -39,6 +39,7 @@ class InvoiceTable
 
     /**
      * @ORM\ManyToOne(targetEntity="Particular")
+     * @ORM\JoinColumn(onDelete="CASCADE")
      **/
     private $table;
 

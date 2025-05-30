@@ -177,7 +177,7 @@ class ProductModel extends Model
         $total = $products->count();
         $entities = $products->skip($skip)
             ->take($perPage)
-            ->orderBy('inv_product.id', 'DESC')
+            ->orderBy('inv_product.name', 'DESC')
             ->get();
 
         $data = array('count' => $total, 'entities' => $entities);
