@@ -173,7 +173,7 @@ class AccountingModel extends Model
     public static function initiateConfig($domain){
 
 
-        $head = self::updateOrCreate(
+        self::updateOrCreate(
             ['id' =>$domain['acc_config']],
             [
                 'capital_investment_id' => self::getHeadConfig($domain['acc_config'],147),
@@ -188,7 +188,7 @@ class AccountingModel extends Model
                 'account_purchase_id' => self::getHeadConfig($domain['acc_config'],120),
                 'account_purchase_discount_id' => self::getHeadConfig($domain['acc_config'],152),
                 'account_sales_id' => self::getHeadConfig($domain['acc_config'],154),
-                'account_sales_discount_id' => self::getHeadConfig($domain['acc_config'],153),
+                'account_sales_discount_id' => self::getHeadConfig($domain['acc_config'],135),
                 'account_vat_id' => self::getHeadConfig($domain['acc_config'],136),
                 'account_ait_id' => self::getHeadConfig($domain['acc_config'],138),
                 'account_zakat_id' => self::getHeadConfig($domain['acc_config'],140),

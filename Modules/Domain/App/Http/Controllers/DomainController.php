@@ -226,8 +226,6 @@ class DomainController extends Controller
 
             $domain = UserModel::getDomainData($entity->id);
             AccountHeadModel::generateAccountHead($domain);
-            AccountingModel::initiateConfig($domain);
-            AccountHeadModel::generateAccountHead($domain);
             AccountVoucherModel::resetVoucher($domain);
             AccountingModel::initiateConfig($domain);
 
@@ -809,8 +807,6 @@ class DomainController extends Controller
 
             // Commit all database operations
             DB::commit();
-            AccountHeadModel::generateAccountHead($domain);
-            AccountingModel::initiateConfig($domain);
             AccountHeadModel::generateAccountHead($domain);
             AccountVoucherModel::resetVoucher($domain);
             AccountingModel::initiateConfig($domain);
