@@ -501,40 +501,7 @@ class RequisitionController extends Controller
                 $itemsToInsert = [];
 
                 foreach ($groupedItems as $val) {
-                        // Define the criteria to check whether the record exists or should be updated
-                        $criteria = [
-                            'generate_date' => $expectedDate,
-                            'vendor_config_id' => $val['vendor_config_id'],
-                            'customer_stock_item_id' => $val['customer_stock_item_id'], // Add unique keys to avoid duplicate constraints
-                            'vendor_stock_item_id' => $val['vendor_stock_item_id']
-                        ];
-
-                        // Data to be updated or created
-                        $data = [
-                            'customer_config_id' => $val['customer_config_id'],
-                            'unit_id' => $val['unit_id'],
-                            'barcode' => $val['barcode'],
-                            'purchase_price' => $val['purchase_price'],
-                            'sales_price' => $val['sales_price'],
-                            'quantity' => $val['quantity'],
-                            'requested_quantity' => $val['quantity'],
-                            'approved_quantity' => $val['quantity'],
-                            'sub_total' => $val['sub_total'],
-                            'display_name' => $val['display_name'],
-                            'unit_name' => $val['unit_name'],
-                            'customer_id' => $val['customer_id'],
-                            'customer_name' => $val['customer_name'],
-                            'expected_date' => $val['expected_date'],
-                            'vendor_stock_quantity' => $val['vendor_stock_quantity'],
-                            'status' => true,
-                            'process' => 'Generated',
-                            'created_at' => now(), // Optional: use updated_at if tracking updates
-                        ];
-
-                        // Create or update the record
-                        RequisitionMatrixBoardModel::updateOrCreate($criteria, $data);
-
-                    /*// Check if a Generated record already exists for this vendor and expected date
+                    // Check if a Generated record already exists for this vendor and expected date
                     $exists = RequisitionMatrixBoardModel::where([
                         ['generate_date', $expectedDate],
                         ['process', 'Confirmed'],
@@ -567,10 +534,10 @@ class RequisitionController extends Controller
                             'process' => 'Generated',
                             'created_at' => now(),
                         ];
-                    }*/
+                    }
                 }
 
-                /*if (!empty($itemsToInsert)) {
+                if (!empty($itemsToInsert)) {
                     // Delete previously generated records before inserting new ones
                     RequisitionMatrixBoardModel::where([
                         ['generate_date', $expectedDate],
@@ -580,7 +547,7 @@ class RequisitionController extends Controller
 
                     // Insert new records
                     RequisitionMatrixBoardModel::insert($itemsToInsert);
-                }*/
+                }
             }
 
             // Commit the transaction
