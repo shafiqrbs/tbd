@@ -121,8 +121,16 @@ class AccountVoucherModel extends Model
         $page = isset($request['page']) && $request['page'] > 0 ? ($request['page'] - 1) : 1;
         $perPage = isset($request['offset']) && $request['offset'] != '' ? (int)($request['offset']) : 50;
         $skip = isset($page) && $page != '' ? (int)$page * $perPage : 0;
-        $entity = self:: where('acc_voucher.config_id', $domain['acc_config'])
-            ->leftJoin('acc_setting','acc_setting.id','=','acc_voucher.voucher_type_id')
+        $entity = self::where('acc_voucher.config_id', $domain['acc_config'])
+            ->leftJoin('acc_setting', 'acc_setting.id', '=', 'acc_voucher.voucher_type_id')
+            ->with([
+                'ledger_account_head_primary' => function ($query) {
+                    $query->where('status', 1)->select('id');
+                },
+                'ledger_account_head_secondary' => function ($query) {
+                    $query->where('status', 1)->select('id');
+                }
+            ])
             ->select([
                 'acc_voucher.id',
                 'acc_setting.id as voucher_type_id',

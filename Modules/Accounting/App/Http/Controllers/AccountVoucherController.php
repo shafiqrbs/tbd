@@ -6,7 +6,9 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\DB;
 use Modules\Accounting\App\Http\Requests\AccountHeadRequest;
+use Modules\Accounting\App\Http\Requests\AccountVoucherHeadRequest;
 use Modules\Accounting\App\Http\Requests\AccountVoucherRequest;
 use Modules\Accounting\App\Models\AccountVoucherModel;
 use Modules\Accounting\App\Models\SettingModel;
@@ -133,5 +135,66 @@ class AccountVoucherController extends Controller
             'data' => $data??[],
         ]);
     }
+
+    /**
+     * @throws \Throwable
+     */
+    public function updateVoucherHeads(AccountVoucherHeadRequest $request)
+    {
+        $input = $request->validated();
+
+        $voucherId = $input['account_voucher_id'];
+        $primaryHeadIds = $input['primary_head_id'] ?? [];
+        $secondaryHeadIds = $input['secondary_head_id'] ?? [];
+
+        DB::beginTransaction();
+
+        try {
+            // Delete existing data
+            DB::table('acc_voucher_account_primary')->where('account_voucher_id', $voucherId)->delete();
+            DB::table('acc_voucher_account_secondary')->where('account_voucher_id', $voucherId)->delete();
+
+            // Insert new primary heads
+            $primaryData = array_map(function ($headId) use ($voucherId) {
+                return [
+                    'account_voucher_id' => $voucherId,
+                    'primary_account_head_id' => $headId,
+                ];
+            }, $primaryHeadIds);
+
+            if (!empty($primaryData)) {
+                DB::table('acc_voucher_account_primary')->insert($primaryData);
+            }
+
+            // Insert new secondary heads
+            $secondaryData = array_map(function ($headId) use ($voucherId) {
+                return [
+                    'account_voucher_id' => $voucherId,
+                    'secondary_account_head_id' => $headId,
+                ];
+            }, $secondaryHeadIds);
+
+            if (!empty($secondaryData)) {
+                DB::table('acc_voucher_account_secondary')->insert($secondaryData);
+            }
+
+            DB::commit();
+
+            return response()->json([
+                'status' => 200,
+                'message' => 'Voucher heads updated successfully.'
+            ]);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            return response()->json([
+                'status' => 500,
+                'message' => 'Failed to update voucher heads.',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
 
 }

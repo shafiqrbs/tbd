@@ -51,6 +51,7 @@ Route::prefix('/accounting')->middleware([HeaderAuthenticationMiddleware::class]
     Route::get('/account-ledger', [AccountHeadController::class,'accountLedger'])->name('account_ledger');
 
     Route::get('/voucher/wise-ledger-details', [AccountVoucherController::class,'accountVoucherWiseLedger'])->name('account_voucher_wise_ledger');
+    Route::post('/voucher/update-heads', [AccountVoucherController::class, 'updateVoucherHeads'])->name('account_voucher_update_heads');
     Route::apiResource('/voucher',
         AccountVoucherController::class)
         ->middleware([HeaderAuthenticationMiddleware::class])
