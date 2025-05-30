@@ -21,6 +21,7 @@ class ConfigVatModel extends Model
         'vat_enable',
         'ait_enable',
         'zakat_enable',
+        'zakat_percent',
         'vat_percent',
         'ait_percent',
         'sd_percent',
