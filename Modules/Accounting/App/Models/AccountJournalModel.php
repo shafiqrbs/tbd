@@ -210,12 +210,18 @@ class AccountJournalModel extends Model
         if($journalItem){
             self::purchasePayableEntry($journal, $entity, $journalItem);
         }
-        if($payment > 0){
-            $journalItem = self::purchasePayableDebitEntry($journal, $entity);
-            if($journalItem){
-                self::purchasePayablePaymentEntry($config, $journal, $entity , $journalItem);
-            }
+
+        $goodsItem = self::purchaseGoodsEntry($journal,$config,$subTotal);
+        if($goodsItem){
+            self::goodsInStock($journal,$journalItem,$purchase);
         }
+
+       if($payment > 0){
+           $journalItem = self::purchasePayableDebitEntry($journal, $entity);
+           if($journalItem){
+               self::purchasePayablePaymentEntry($config, $journal, $entity , $journalItem);
+           }
+       }
     }
 
     public static function purchaseEntry($config,$journal,$amount){
@@ -267,6 +273,44 @@ class AccountJournalModel extends Model
         }
     }
 
+    public static function purchaseGoodsEntry($journal,$config,$amount){
+
+        $head = AccountHeadModel::getAccountHeadWithParent($config->account_purchase_id);
+        if($head){
+            $accountDebit['account_journal_id'] = $journal->id;
+            $accountDebit['account_head_id'] = $head->parent_id;
+            $accountDebit['account_sub_head_id'] = $head->id;
+            $accountDebit['amount'] = "-{$amount}";
+            $accountDebit['credit'] = $amount;
+            $accountDebit['mode'] = 'credit';
+            $accountDebit['is_parent'] = true;
+            $journalItem = AccountJournalItemModel::create($accountDebit);
+            return $journalItem;
+        }
+    }
+
+    public static function goodsInStock($journal,$journalItem,$purchase){
+
+
+        $records = PurchaseItemModel::getProductGroupPrice($purchase);
+
+        foreach ($records as $record){
+            $head = AccountHeadModel::getAccountHeadWithParentPramValue('product_group_id',$record['product_group_id']);
+            if($head and $record['amount'] > 0){
+                $amount = $record['amount'];
+                $accountDebit['account_journal_id'] = $journal->id;
+                $accountDebit['account_head_id'] = $head->parent_id;
+                $accountDebit['account_sub_head_id'] = $head->id;
+                $accountDebit['parent_id'] = $journalItem;
+                $accountDebit['amount'] = "{$amount}";
+                $accountDebit['debit'] = $amount;
+                $accountDebit['mode'] = 'debit';
+                AccountJournalItemModel::create($accountDebit);
+            }
+        }
+
+    }
+
     public static function purchasePayableDebitEntry($journal,$entity){
 
         $amount = $entity->payment;
@@ -277,7 +321,7 @@ class AccountJournalModel extends Model
             $accountDebit['account_head_id'] = $head->parent_id;
             $accountDebit['account_sub_head_id'] = $head->id;
             $accountDebit['amount'] = $amount;
-            $accountDebit['credit'] = $amount;
+            $accountDebit['debit'] = $amount;
             $accountDebit['mode'] = 'debit';
             $accountDebit['is_parent'] = true;
             $journalItem = AccountJournalItemModel::create($accountDebit);
@@ -303,7 +347,6 @@ class AccountJournalModel extends Model
         }
 
     }
-
 
     public static function insertSalesAccountJournal($domain,$sales){
 

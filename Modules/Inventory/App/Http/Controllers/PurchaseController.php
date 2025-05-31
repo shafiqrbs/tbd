@@ -239,7 +239,6 @@ class PurchaseController extends Controller
             }
             // Commit the transaction after all updates are successful
             DB::commit();
-
             $response->setContent(json_encode([
                 'status' => Response::HTTP_OK,
                 'message' => 'Approved successfully',

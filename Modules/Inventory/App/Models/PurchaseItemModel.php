@@ -118,5 +118,19 @@ class PurchaseItemModel extends Model
 
     }
 
+    public static function getProductGroupPrice($purchase)
+    {
+        $purchaseItems = self::where('purchase_id', $purchase)
+            ->join('inv_stock', 'inv_stock.id', '=', 'inv_purchase_item.stock_item_id')
+            ->join('inv_product', 'inv_product.id', '=', 'inv_stock.product_id')
+            ->join('inv_category', 'inv_category.id', '=', 'inv_product.category_id')
+            ->join('inv_category as parent', 'parent.id', '=', 'inv_category.parent')
+            ->selectRaw('SUM(inv_purchase_item.sub_total) as amount, parent.id as product_group_id')
+            ->groupBy('parent.id')
+            ->get();
+
+        return $purchaseItems;
+    }
+
 
 }
