@@ -232,6 +232,7 @@ class PurchaseController extends Controller
                         'price' => $item['sales_price'] ?? 0,
                         'sales_price' => $item['sales_price'] ?? 0
                     ]);
+
                     $item->update(['approved_by_id' => $this->domain['user_id']]);
                     StockItemHistoryModel::openingStockQuantity($item,'purchase',$this->domain);
                 }

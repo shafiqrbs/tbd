@@ -204,9 +204,9 @@ class AccountJournal
 
 
     /**
-     * @var string
+     * @var text
      *
-     * @ORM\Column(name="description", type="string", length=255, nullable = true)
+     * @ORM\Column(name="description", type="text", nullable = true)
      */
     private $description;
 

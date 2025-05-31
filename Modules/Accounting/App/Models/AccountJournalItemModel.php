@@ -116,9 +116,12 @@ class AccountJournalItemModel extends Model
     {
         $timestamp = Carbon::now();
         $formattedItems = array_map(function ($item) use ($journal, $timestamp) {
+            $parent = AccountHeadModel::find($item['id']);
             return [
                 'account_journal_id'       => $journal->id,
                 'account_ledger_id'        => $item['id'],
+                'account_sub_head_id'      => $item['id'],
+                'account_head_id'          => $parent->parent_id,
                 'amount'                   => $item['mode']==='debit'?$item['debit']:$item['credit'],
                 'debit'                    => $item['debit'] ?? 0,
                 'credit'                   => $item['credit'] ?? 0,

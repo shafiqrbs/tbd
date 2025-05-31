@@ -100,6 +100,8 @@ class AccountJournalModel extends Model
 
         $entity = self::where('acc_journal.config_id', $domain['acc_config'])
             ->join('acc_voucher','acc_voucher.id','=','acc_journal.voucher_id')
+            ->join('users','users.id','=','acc_journal.created_by_id')
+            ->leftjoin('users as approve','approve.id','=','acc_journal.approved_by_id')
             ->select([
                 'acc_journal.id',
                 'acc_journal.voucher_id',
@@ -108,23 +110,28 @@ class AccountJournalModel extends Model
                 'acc_journal.debit',
                 'acc_journal.credit',
                 'acc_journal.description',
-                'acc_journal.issue_date',
+                DB::raw('DATE_FORMAT(acc_journal.created_at, "%d-%m-%Y") as created'),
+                DB::raw('DATE_FORMAT(acc_journal.issue_date, "%d-%m-%Y") as issue_date'),
                 'acc_journal.invoice_no',
                 'acc_journal.ref_no',
                 'acc_voucher.name as voucher_name',
                 'acc_voucher.mode as voucher_mode',
+                'users.name as created_by_name',
+                'approve.name as approve_by_name',
             ])
             ->with(['journalItems' => function ($query) {
                 $query->select([
                     'acc_journal_item.id',
                     'acc_journal_item.account_journal_id',
-                    'acc_journal_item.account_ledger_id',
+                    'acc_journal_item.account_sub_head_id',
                     'acc_journal_item.amount',
                     'acc_journal_item.debit',
                     'acc_journal_item.credit',
                     'acc_head.name as ledger_name',
+                    'parent_head.name as head_name',
 //                    DB::raw("CONCAT(cor_warehouses.name, ' (', cor_warehouses.location, ')') as warehouse_name"),
-                ])->leftjoin('acc_head','acc_head.id','=','acc_journal_item.account_ledger_id');
+                ])->join('acc_head','acc_head.id','=','acc_journal_item.account_sub_head_id')
+                    ->join('acc_head as parent_head','parent_head.id','=','acc_journal_item.account_head_id');
             }]);
 
         if (isset($request['term']) && !empty($request['term'])) {
