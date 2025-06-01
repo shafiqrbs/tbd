@@ -171,39 +171,67 @@ class AccountVoucherModel extends Model
             ->leftJoin('acc_setting', 'acc_setting.id', '=', 'acc_voucher.voucher_type_id')
             ->with([
                 'ledger_account_head_primary' => function ($query) {
-                    $query->where('status', 1)
+                    $query->where('acc_head.status', 1)
                         ->select([
-                            'id', 'parent_id', 'account_id', 'account_master_head_id',
-                            'vendor_id', 'customer_id', 'code', 'name', 'amount',
-                            'credit', 'debit', 'level', 'head_group', 'slug',
-                            'display_name', 'opening_balance'
-                        ])
+                            'acc_head.id','acc_head_master.slug as slug',
+                            'acc_head.code', 'acc_head.name', 'acc_head.amount',
+                            'acc_head.display_name', 'acc_head.opening_balance'
+                        ])->leftjoin('acc_head_master','acc_head_master.id','=','acc_head.account_master_head_id')
                         ->with(['child_account_heads' => function ($subQuery) {
-                            $subQuery->where('status', 1)
+                            $subQuery->where('acc_head.status', 1)
                                 ->select([
-                                    'id', 'parent_id', 'account_id', 'account_master_head_id',
-                                    'vendor_id', 'customer_id', 'code', 'name', 'amount',
-                                    'credit', 'debit', 'level', 'head_group', 'slug',
-                                    'display_name', 'opening_balance'
+                                    'id',
+                                    'parent_id',
+                                    'account_id',
+                                    'vendor_id',
+                                    'customer_id',
+                                    'code',
+                                    'name',
+                                    'amount',
+                                    'credit',
+                                    'debit',
+                                    'display_name',
+                                    'opening_balance',
+                                    'credit_limit',
+                                    'credit_period',
+                                    'earn_point',
+                                    'is_credit_date_check_voucher_entry',
+                                    'show_amount',
+                                    'provide_bank_details',
+                                    'balance_bill_by_bill'
                                 ]);
                         }]);
                 },
 
                 'ledger_account_head_secondary' => function ($query) {
-                    $query->where('status', 1)
+                    $query->where('acc_head.status', 1)
                         ->select([
-                            'id', 'parent_id', 'account_id', 'account_master_head_id',
-                            'vendor_id', 'customer_id', 'code', 'name', 'amount',
-                            'credit', 'debit', 'level', 'head_group', 'slug',
-                            'display_name', 'opening_balance'
-                        ])
+                            'acc_head.id','acc_head_master.slug as slug',
+                            'acc_head.code', 'acc_head.name', 'acc_head.amount',
+                            'acc_head.display_name', 'acc_head.opening_balance'
+                        ])->leftjoin('acc_head_master','acc_head_master.id','=','acc_head.account_master_head_id')
                         ->with(['child_account_heads' => function ($subQuery) {
-                            $subQuery->where('status', 1)
+                            $subQuery->where('acc_head.status', 1)
                                 ->select([
-                                    'id', 'parent_id', 'account_id', 'account_master_head_id',
-                                    'vendor_id', 'customer_id', 'code', 'name', 'amount',
-                                    'credit', 'debit', 'level', 'head_group', 'slug',
-                                    'display_name', 'opening_balance'
+                                    'id',
+                                    'parent_id',
+                                    'account_id',
+                                    'vendor_id',
+                                    'customer_id',
+                                    'code',
+                                    'name',
+                                    'amount',
+                                    'credit',
+                                    'debit',
+                                    'display_name',
+                                    'opening_balance',
+                                    'credit_limit',
+                                    'credit_period',
+                                    'earn_point',
+                                    'is_credit_date_check_voucher_entry',
+                                    'show_amount',
+                                    'provide_bank_details',
+                                    'balance_bill_by_bill'
                                 ]);
                         }]);
                 }
