@@ -36,6 +36,7 @@ class AccountHeadRequest extends FormRequest
                     'head_group' => 'required|string',
                     'mother_account_id' => 'integer|nullable',
                     'parent_id' => 'integer|nullable',
+                    'display_name' => 'nullable',
                 ];
             }
             default:break;
