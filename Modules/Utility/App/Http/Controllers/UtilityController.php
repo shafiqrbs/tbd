@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Modules\AppsApi\App\Services\JsonRequestResponse;
 use Modules\Inventory\App\Models\ProductBrandModel;
+use Modules\Utility\App\Models\BanksModel;
 use Modules\Utility\App\Models\CurrencyModel;
 use Modules\Utility\App\Models\ProductUnitModel;
 use Modules\Utility\App\Models\SettingModel;
@@ -50,6 +51,13 @@ class UtilityController extends Controller
     public function currenciesDropdown(Request $request)
     {
         $dropdown = CurrencyModel::getEntityDropdown();
+        $service = new JsonRequestResponse();
+        return $service->returnJosnResponse($dropdown);
+    }
+
+    public function BanksDropdown(Request $request)
+    {
+        $dropdown = BanksModel::getEntityDropdown();
         $service = new JsonRequestResponse();
         return $service->returnJosnResponse($dropdown);
     }

@@ -24,6 +24,15 @@ class AccountJournalItemModel extends Model
         'amount',
         'debit',
         'credit',
+        'cheque_date',
+        'cross_using',
+        'amount',
+        'forwarding_name',
+        'pay_mode',
+        'bank_id',
+        'branch_name',
+        'received_from',
+        'cheque_no',
         'mode',
     ];
 
@@ -116,6 +125,7 @@ class AccountJournalItemModel extends Model
     {
         $timestamp = Carbon::now();
         $formattedItems = array_map(function ($item) use ($journal, $timestamp) {
+            $bankInfo = $item['bankInfo'] ?? [];
             $parent = AccountHeadModel::find($item['id']);
             return [
                 'account_journal_id'       => $journal->id,
@@ -127,6 +137,14 @@ class AccountJournalItemModel extends Model
                 'credit'                   => $item['credit'] ?? 0,
                 'mode'                     => $item['mode'] ?? 0,
                 'created_at'               => $timestamp,
+//                'cheque_date'              => $bankInfo['cheque_date'] ?? null,
+//                'cross_using'              => $bankInfo['cross_using'] ?? null,
+                'forwarding_name'          => $bankInfo['forwarding_name'] ?? null,
+//                'pay_mode'                 => $bankInfo['pay_mode'] ?? null,
+                'bank_id'                => $bankInfo['bank_id'] ?? null,
+                'branch_name'              => $bankInfo['branch_name'] ?? null,
+                'received_from'            => $bankInfo['received_from'] ?? null,
+//                'cheque_no'                => $bankInfo['cheque_no'] ?? null,
             ];
         }, $items);
 
