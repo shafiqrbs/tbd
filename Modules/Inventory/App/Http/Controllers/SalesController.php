@@ -317,7 +317,11 @@ class SalesController extends Controller
                         StockItemHistoryModel::openingStockQuantity($item,'sales',$this->domain);
                     }
                 }
+
+                // accounting journal entry
+                AccountJournalModel::insertSalesAccountJournal($this->domain,$getSales->id);
             }
+
             DB::commit();
             return response()->json(['status' => 200, 'success' => true]);
 
@@ -384,7 +388,10 @@ class SalesController extends Controller
                     StockItemHistoryModel::openingStockQuantity($item, 'sales', $this->domain);
                 }
             }
+
+            // accounting journal entry
             AccountJournalModel::insertSalesAccountJournal($this->domain,$entity->id);
+
             // Commit the transaction after all updates are successful
             DB::commit();
 

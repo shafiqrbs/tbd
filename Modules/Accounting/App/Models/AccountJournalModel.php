@@ -367,7 +367,7 @@ class AccountJournalModel extends Model
 
 
         $input['config_id'] = $config->id;
-        $input['voucher_id'] = $config->voucher_purchase_id;
+        $input['voucher_id'] = $config->voucher_sales_id;
         $input['amount'] = $subTotal;
         $input['created_by_id'] = $entity->created_by_id;
         $input['approved_by_id'] = $entity->approved_by_id;
