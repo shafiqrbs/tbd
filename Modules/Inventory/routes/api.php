@@ -20,6 +20,7 @@ use Modules\Inventory\App\Http\Controllers\RequisitionController;
 use Modules\Inventory\App\Http\Controllers\SalesController;
 use Modules\Inventory\App\Http\Controllers\SettingController;
 use Modules\Inventory\App\Http\Controllers\StockItemController;
+use Modules\Inventory\App\Http\Controllers\WarehouseIssueController;
 
 /*
     |--------------------------------------------------------------------------
@@ -116,6 +117,7 @@ Route::prefix('/inventory')->middleware([HeaderAuthenticationMiddleware::class])
   //  Route::post('/inventory/branch-management', [BranchManagementController::class,'branchManagement'])->name('branch_management_update');
 
     Route::apiResource('/requisition', RequisitionController::class)->middleware([HeaderAuthenticationMiddleware::class]);
+    Route::apiResource('/warehouse-issue', WarehouseIssueController::class)->middleware([HeaderAuthenticationMiddleware::class]);
     Route::prefix('/requisition')->middleware([HeaderAuthenticationMiddleware::class])->group(function() {
         Route::get('matrix/board', [RequisitionController::class,'matrixBoard'])->name('requisition_matrix_board');
         Route::post('matrix/board/quantity-update', [RequisitionController::class,'matrixBoardQuantityUpdate'])->name('requisition_matrix_board_quantity_update');
