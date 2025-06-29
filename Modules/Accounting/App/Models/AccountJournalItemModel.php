@@ -34,6 +34,8 @@ class AccountJournalItemModel extends Model
         'received_from',
         'cheque_no',
         'mode',
+        'opening_amount',
+        'closing_amount',
     ];
 
     public static function boot()
@@ -154,6 +156,17 @@ class AccountJournalItemModel extends Model
             \Log::error('Failed to insert journal items: ' . $th->getMessage());
             return false;
         }
+    }
+
+    public static function getLedgerWiseOpeningBalance( $ledgerId,$configId,$journalItemId )
+    {
+        $openingBalance = self::join('acc_journal', 'acc_journal.id', '=', 'acc_journal_item.account_journal_id')
+                            ->where('acc_journal.config_id', $configId)
+                            ->where('acc_journal_item.account_ledger_id', $ledgerId)
+                            ->where('acc_journal_item.id', '<>', $journalItemId)
+                            ->orderByDesc('acc_journal_item.created_at')
+                            ->value('acc_journal_item.closing_amount') ?? 0;
+        return $openingBalance;
     }
 
 }

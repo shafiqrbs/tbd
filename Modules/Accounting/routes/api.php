@@ -89,6 +89,7 @@ Route::prefix('/accounting')->middleware([HeaderAuthenticationMiddleware::class,
             'destroy' => 'accounting.setting.destroy'
         ]);
 
+    Route::get('/voucher-entry/approve/{id}', [AccountVoucherEntryController::class,'accountVoucherApprove'])->name('account_voucher_approve');
     Route::apiResource('/voucher-entry', AccountVoucherEntryController::class)
         ->middleware([HeaderAuthenticationMiddleware::class])
         ->parameters(['setting' => 'accounting.setting'])

@@ -4,6 +4,7 @@ namespace Modules\Accounting\App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use Exception;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -14,6 +15,7 @@ use Modules\Accounting\App\Models\AccountHeadModel;
 use Modules\Accounting\App\Models\AccountingModel;
 use Modules\Accounting\App\Models\AccountJournalItemModel;
 use Modules\Accounting\App\Models\AccountJournalModel;
+use Modules\Accounting\App\Models\AccountVoucherModel;
 use Modules\Accounting\App\Models\SettingModel;
 use Modules\Accounting\App\Models\TransactionModeModel;
 use Modules\AppsApi\App\Services\JsonRequestResponse;
@@ -25,6 +27,7 @@ use Modules\Inventory\App\Models\ConfigSalesModel;
 use Modules\Inventory\App\Models\SalesItemModel;
 use Modules\Inventory\App\Models\SalesModel;
 use Modules\Inventory\App\Models\StockItemHistoryModel;
+use Throwable;
 
 
 class AccountVoucherEntryController extends Controller
@@ -158,18 +161,74 @@ class AccountVoucherEntryController extends Controller
         return $data;
     }
 
+    public function accountVoucherApprove(Request $request,$id): JsonResponse
+    {
+        $journal = AccountJournalModel::with('journalItems')->find($id);
 
-    public function LocalStorage(Request $request){
-        $data = SettingModel::getRecordsForLocalStorage($request,$this->domain);
-        $response = new Response();
-        $response->headers->set('Content-Type','application/json');
-        $response->setContent(json_encode([
-            'message' => 'success',
-            'status' => Response::HTTP_OK,
-            'data' => $data
-        ]));
-        $response->setStatusCode(Response::HTTP_OK);
-        return $response;
+        if (! $journal) {
+            return response()->json([
+                'status'  => 404,
+                'success' => false,
+                'message' => 'Journal not found.',
+            ], 404);
+        }
+
+        if ($journal->journalItems->isEmpty()) {
+            return response()->json([
+                'status'  => 404,
+                'success' => false,
+                'message' => 'No journal entries found.',
+            ], 404);
+        }
+
+        DB::beginTransaction();
+
+        try {
+            foreach ($journal->journalItems as $journalItem) {
+                $opening = AccountJournalItemModel::getLedgerWiseOpeningBalance(
+                    ledgerId: $journalItem->account_ledger_id,
+                    configId: $journal->config_id,
+                    journalItemId: $journalItem->id
+                );
+
+                $closing = $journalItem->mode === 'debit'
+                    ? $opening + $journalItem->amount
+                    : ($journalItem->mode === 'credit' ? $opening - $journalItem->amount : 0);
+
+                $journalItem->update([
+                    'opening_amount' => $opening,
+                    'closing_amount' => $closing,
+                ]);
+            }
+
+            $journal->update([
+                'approved_by_id' => $this->domain['user_id'] ?? null,
+                'process'        => 'Approved',
+            ]);
+
+            DB::commit();
+
+            return response()->json([
+                'status'  => 200,
+                'success' => true,
+                'message' => 'Approved successfully.',
+            ]);
+        } catch (Throwable $e) {
+            DB::rollBack();
+
+            logger()->error('Account journal approval failed', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+
+            return response()->json([
+                'status'  => 500,
+                'success' => false,
+                'message' => 'An error occurred while processing approval.',
+                'error'   => $e->getMessage(),
+            ], 500);
+        }
     }
+
 
 }
