@@ -58,7 +58,7 @@ class AccountHeadController extends Controller
         $data['config_id'] = $this->domain['acc_config'];
         $entity = AccountHeadModel::create($data);
         AccountHeadDetailsModel::updateOrCreate([
-            'account_id' => $entity->id,
+            'account_head_id' => $entity->id,
             'config_id' => $this->domain['acc_config'],
         ]);
         return response()->json([

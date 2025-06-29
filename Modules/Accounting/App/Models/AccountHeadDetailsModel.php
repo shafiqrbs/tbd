@@ -17,7 +17,7 @@ class AccountHeadDetailsModel extends Model
     protected $guarded = ['id'];
     protected $fillable = [
         'config_id',
-        'account_id',
+        'account_head_id',
         'ifc_code',
         'swift_code',
         'is_cheque_book',
