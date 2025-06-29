@@ -3,6 +3,7 @@
 use App\Http\Middleware\HeaderAuthenticationMiddleware;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use Modules\Core\App\Http\Middleware\LogRequestResponse;
 use Modules\Domain\App\Http\Controllers\B2bController;
 use Modules\Domain\App\Http\Controllers\BranchController;
 use Modules\Domain\App\Http\Controllers\DomainConfigController;
@@ -20,7 +21,7 @@ use Modules\Domain\App\Http\Controllers\DomainController;
 */
 
 
-Route::prefix('/domain')->middleware(array(HeaderAuthenticationMiddleware::class))->group(function() {
+Route::prefix('/domain')->middleware(array(HeaderAuthenticationMiddleware::class,LogRequestResponse::class))->group(function() {
     Route::apiResource('/global', DomainController::class)->middleware([HeaderAuthenticationMiddleware::class]);
     Route::apiResource('/setting', DomainController::class)
         ->middleware([HeaderAuthenticationMiddleware::class])

@@ -2,6 +2,7 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use Modules\Core\App\Http\Middleware\LogRequestResponse;
 
 /*
     |--------------------------------------------------------------------------
@@ -14,6 +15,6 @@ use Illuminate\Support\Facades\Route;
     |
 */
 
-Route::middleware(['auth:sanctum'])->prefix('v1')->name('api.')->group(function () {
+Route::middleware(['auth:sanctum'])->middleware([LogRequestResponse::class])->prefix('v1')->name('api.')->group(function () {
     Route::get('coreinventory', fn (Request $request) => $request->user())->name('coreinventory');
 });

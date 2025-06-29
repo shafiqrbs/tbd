@@ -3,6 +3,7 @@
 use App\Http\Middleware\HeaderAuthenticationMiddleware;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use Modules\Core\App\Http\Middleware\LogRequestResponse;
 use Modules\Production\App\Http\Controllers\ConfigController;
 use Modules\Production\App\Http\Controllers\ProductionInhouseController;
 use Modules\Production\App\Http\Controllers\ProductionBatchController;
@@ -22,7 +23,7 @@ use Modules\Production\App\Http\Controllers\SettingController;
     |
 */
 
-Route::prefix('/production/select')->middleware([HeaderAuthenticationMiddleware::class])->group(function() {
+Route::prefix('/production/select')->middleware([HeaderAuthenticationMiddleware::class,LogRequestResponse::class])->group(function() {
     Route::get('/setting-type', [SettingController::class,'settingTypeDropdown'])->name('pro_setting_type_dropdown');
     Route::get('/config-dropdown', [ConfigController::class,'configDropdown'])->name('pro_config_dropdown');
     Route::get('/items-dropdown', [ProductionRecipeItemsController::class,'dropdown'])->name('pro_item_dropdown');
@@ -30,7 +31,7 @@ Route::prefix('/production/select')->middleware([HeaderAuthenticationMiddleware:
 
 });
 
-Route::prefix('/production')->middleware([HeaderAuthenticationMiddleware::class])->group(function() {
+Route::prefix('/production')->middleware([HeaderAuthenticationMiddleware::class,LogRequestResponse::class])->group(function() {
 
     Route::apiResource('issue', ProductionIssueController::class)
         ->middleware([HeaderAuthenticationMiddleware::class])
@@ -111,4 +112,4 @@ Route::prefix('/production')->middleware([HeaderAuthenticationMiddleware::class]
 
 });
 
-Route::get('finish-goods/download', [ProductionRecipeItemsController::class,'finishGoodsDownload'])->name('finish_goods_download');
+Route::get('finish-goods/download', [ProductionRecipeItemsController::class,'finishGoodsDownload'])->middleware([LogRequestResponse::class])->name('finish_goods_download');

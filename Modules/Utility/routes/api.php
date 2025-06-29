@@ -3,6 +3,7 @@
 use App\Http\Middleware\HeaderAuthenticationMiddleware;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use Modules\Core\App\Http\Middleware\LogRequestResponse;
 use Modules\Utility\App\Http\Controllers\SiteMapController;
 use Modules\Utility\App\Http\Controllers\UtilityController;
 
@@ -21,14 +22,14 @@ use Modules\Utility\App\Http\Controllers\UtilityController;
 
 
 
-Route::prefix('/utility/select')->middleware([HeaderAuthenticationMiddleware::class])->group(function() {
+Route::prefix('/utility/select')->middleware([HeaderAuthenticationMiddleware::class,LogRequestResponse::class])->group(function() {
     Route::get('/setting', [UtilityController::class,'settingDropdown'])->name('utility_setting_dropdown');
     Route::get('/product-unit', [UtilityController::class,'productUnitDropdown'])->name('utility_product_unit');
     Route::get('/currencies', [UtilityController::class,'currenciesDropdown'])->name('utility_currencies');
     Route::get('/banks', [UtilityController::class,'BanksDropdown'])->name('utility_banks');
 });
 
-Route::prefix('/utility')->middleware([HeaderAuthenticationMiddleware::class])->group(function() {
+Route::prefix('/utility')->middleware([HeaderAuthenticationMiddleware::class,LogRequestResponse::class])->group(function() {
     Route::apiResource('/sitemap', SiteMapController::class)->middleware([HeaderAuthenticationMiddleware::class]);
 
 });

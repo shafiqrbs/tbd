@@ -17,6 +17,7 @@ return [
     */
 
     'name' => env('APP_NAME', 'Laravel'),
+    'is_request_log' => env('IS_REQUEST_LOG', true),
 
     /*
     |--------------------------------------------------------------------------

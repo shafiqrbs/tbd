@@ -3,6 +3,7 @@
 use App\Http\Middleware\HeaderAuthenticationMiddleware;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use Modules\Core\App\Http\Middleware\LogRequestResponse;
 use Modules\Inventory\App\Http\Controllers\BusinessModelController;
 use Modules\Inventory\App\Http\Controllers\CategoryGroupController;
 use Modules\Inventory\App\Http\Controllers\ConfigController;
@@ -34,7 +35,7 @@ use Modules\Inventory\App\Http\Controllers\WarehouseIssueController;
 */
 
 
-Route::prefix('/inventory/select')->middleware([HeaderAuthenticationMiddleware::class])->group(function() {
+Route::prefix('/inventory/select')->middleware([HeaderAuthenticationMiddleware::class,LogRequestResponse::class])->group(function() {
     Route::get('/setting', [InventoryController::class,'settingDropdown'])->name('setting_dropdown');
     Route::get('/category', [InventoryController::class,'categoryDropdown'])->name('category_dropdown');
     Route::get('/group-category', [InventoryController::class,'categoryGroupDropdown'])->name('category_group_dropdown');
@@ -46,7 +47,7 @@ Route::prefix('/inventory/select')->middleware([HeaderAuthenticationMiddleware::
 
 });
 
-Route::prefix('/inventory')->middleware([HeaderAuthenticationMiddleware::class])->group(function() {
+Route::prefix('/inventory')->middleware([HeaderAuthenticationMiddleware::class,LogRequestResponse::class])->group(function() {
     Route::get('/config', [ConfigController::class,'getConfig'])->name('get_config');
     Route::get('/config/{id}', [ConfigController::class,'getConfigById'])->name('get_config_by_id');
     Route::post('/config-update/{id}', [ConfigController::class,'updateConfig'])->name('update_config');
@@ -133,4 +134,4 @@ Route::prefix('/inventory')->middleware([HeaderAuthenticationMiddleware::class])
 });
 
 
-Route::get('stock-item/download', [StockItemController::class,'stockItemDownload'])->name('stock_item_download');
+Route::get('stock-item/download', [StockItemController::class,'stockItemDownload'])->middleware([LogRequestResponse::class])->name('stock_item_download');

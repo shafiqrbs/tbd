@@ -29,49 +29,74 @@ class RequestLog
      */
     protected $id;
 
-
     /**
      * @var string
      *
-     * @ORM\Column(type="string", nullable=true)
-     */
-    private $controller;
-
-    /**
-     * @var string
-     *
-     * @ORM\Column(type="string", nullable=true)
-     */
-    private $action;
-
-    /**
-     * @var string
-     *
-     * @ORM\Column(type="string", nullable=true)
+     * @ORM\Column(type="string")
      */
     private $method;
 
     /**
      * @var string
      *
-     * @ORM\Column(type="string", nullable=true)
+     * @ORM\Column(type="string")
      */
     private $url;
 
     /**
      * @var string
      *
-     * @ORM\Column(type="string", nullable=true)
+     * @ORM\Column(type="json")
+     */
+    private $headers;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(type="json",nullable=true)
+     */
+    private $requestData;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(type="integer")
+     */
+    private $responseStatus;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(type="text",nullable=true)
+     */
+    private $responseData;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(type="string")
      */
     private $ipAddress;
 
-  /**
+    /**
      * @var string
      *
-     * @ORM\Column(type="string", nullable=true)
+     * @ORM\Column(type="string",nullable=true)
      */
     private $userAgent;
 
+    /**
+     * @var string
+     *
+     * @ORM\Column(type="float",nullable=true)
+     */
+    private $executionTime;
+
+    /**
+     * @ORM\ManyToOne(targetEntity="Modules\Core\App\Entities\User")
+     * @ORM\JoinColumn(name="user_id", referencedColumnName="id", nullable=true, onDelete="SET NULL")
+     **/
+    protected $userId;
 
     /**
      * @var \DateTime
@@ -87,6 +112,132 @@ class RequestLog
      */
     private $updatedAt;
 
+    public function getUpdatedAt(): \DateTime
+    {
+        return $this->updatedAt;
+    }
+
+    public function setUpdatedAt(\DateTime $updatedAt): void
+    {
+        $this->updatedAt = $updatedAt;
+    }
+
+    public function getCreatedAt(): \DateTime
+    {
+        return $this->createdAt;
+    }
+
+    public function setCreatedAt(\DateTime $createdAt): void
+    {
+        $this->createdAt = $createdAt;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getUserId()
+    {
+        return $this->userId;
+    }
+
+    /**
+     * @param mixed $userId
+     */
+    public function setUserId($userId): void
+    {
+        $this->userId = $userId;
+    }
+
+    public function getExecutionTime(): string
+    {
+        return $this->executionTime;
+    }
+
+    public function setExecutionTime(string $executionTime): void
+    {
+        $this->executionTime = $executionTime;
+    }
+
+    public function getUserAgent(): string
+    {
+        return $this->userAgent;
+    }
+
+    public function setUserAgent(string $userAgent): void
+    {
+        $this->userAgent = $userAgent;
+    }
+
+    public function getIpAddress(): string
+    {
+        return $this->ipAddress;
+    }
+
+    public function setIpAddress(string $ipAddress): void
+    {
+        $this->ipAddress = $ipAddress;
+    }
+
+    public function getResponseData(): string
+    {
+        return $this->responseData;
+    }
+
+    public function setResponseData(string $responseData): void
+    {
+        $this->responseData = $responseData;
+    }
+
+    public function getResponseStatus(): string
+    {
+        return $this->responseStatus;
+    }
+
+    public function setResponseStatus(string $responseStatus): void
+    {
+        $this->responseStatus = $responseStatus;
+    }
+
+    public function getRequestData(): string
+    {
+        return $this->requestData;
+    }
+
+    public function setRequestData(string $requestData): void
+    {
+        $this->requestData = $requestData;
+    }
+
+    public function getHeaders(): string
+    {
+        return $this->headers;
+    }
+
+    public function setHeaders(string $headers): void
+    {
+        $this->headers = $headers;
+    }
+
+    public function getUrl(): string
+    {
+        return $this->url;
+    }
+
+    public function setUrl(string $url): void
+    {
+        $this->url = $url;
+    }
+
+    public function getMethod(): string
+    {
+        return $this->method;
+    }
+
+    public function setMethod(string $method): void
+    {
+        $this->method = $method;
+    }
+
     /**
      * @return mixed
      */
@@ -98,138 +249,11 @@ class RequestLog
     /**
      * @param mixed $id
      */
-    public function setId($id)
+    public function setId($id): void
     {
         $this->id = $id;
     }
 
-    /**
-     * @return string
-     */
-    public function getController()
-    {
-        return $this->controller;
-    }
-
-    /**
-     * @param string $controller
-     */
-    public function setController($controller)
-    {
-        $this->controller = $controller;
-    }
-
-    /**
-     * @return string
-     */
-    public function getAction()
-    {
-        return $this->action;
-    }
-
-    /**
-     * @param string $action
-     */
-    public function setAction($action)
-    {
-        $this->action = $action;
-    }
-
-    /**
-     * @return string
-     */
-    public function getMethod()
-    {
-        return $this->method;
-    }
-
-    /**
-     * @param string $method
-     */
-    public function setMethod($method)
-    {
-        $this->method = $method;
-    }
-
-    /**
-     * @return string
-     */
-    public function getUrl()
-    {
-        return $this->url;
-    }
-
-    /**
-     * @param string $url
-     */
-    public function setUrl($url)
-    {
-        $this->url = $url;
-    }
-
-    /**
-     * @return string
-     */
-    public function getIpAddress()
-    {
-        return $this->ipAddress;
-    }
-
-    /**
-     * @param string $ipAddress
-     */
-    public function setIpAddress($ipAddress)
-    {
-        $this->ipAddress = $ipAddress;
-    }
-
-    /**
-     * @return string
-     */
-    public function getUserAgent()
-    {
-        return $this->userAgent;
-    }
-
-    /**
-     * @param string $userAgent
-     */
-    public function setUserAgent($userAgent)
-    {
-        $this->userAgent = $userAgent;
-    }
-
-    /**
-     * @return \DateTime
-     */
-    public function getCreatedAt()
-    {
-        return $this->createdAt;
-    }
-
-    /**
-     * @param \DateTime $createdAt
-     */
-    public function setCreatedAt($createdAt)
-    {
-        $this->createdAt = $createdAt;
-    }
-
-    /**
-     * @return \DateTime
-     */
-    public function getUpdatedAt()
-    {
-        return $this->updatedAt;
-    }
-
-    /**
-     * @param \DateTime $updatedAt
-     */
-    public function setUpdatedAt($updatedAt)
-    {
-        $this->updatedAt = $updatedAt;
-    }
 
 
 }
