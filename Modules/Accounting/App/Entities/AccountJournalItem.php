@@ -120,6 +120,20 @@ class AccountJournalItem
      */
     private $amount = 0;
 
+    /**
+     * @var float
+     *
+     * @ORM\Column(type="float", nullable=true)
+     */
+    private $openingAmount = 0;
+
+    /**
+     * @var float
+     *
+     * @ORM\Column(type="float", nullable=true)
+     */
+    private $closingAmount = 0;
+
      /**
      * @var float
      *
@@ -791,6 +805,24 @@ class AccountJournalItem
     {
         $this->updatedAt = $updatedAt;
     }
+
+    /**
+     * @return mixed
+     */
+    public function getStockItemReconciliation()
+    {
+        return $this->stockItemReconciliation;
+    }
+
+    /**
+     * @param mixed $stockItemReconciliation
+     */
+    public function setStockItemReconciliation($stockItemReconciliation)
+    {
+        $this->stockItemReconciliation = $stockItemReconciliation;
+    }
+
+
 
 
 

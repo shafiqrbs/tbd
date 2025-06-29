@@ -33,10 +33,11 @@ class AccountHeadDetails
     protected $config;
 
     /**
+     * @var AccountHead
      * @ORM\OneToOne(targetEntity="AccountHead" , inversedBy="headDetail", cascade={"detach","merge"})
-     * @ORM\JoinColumn(name="account_id", referencedColumnName="id", nullable=true, onDelete="CASCADE")
+     * @ORM\JoinColumn(name="account_head_id", referencedColumnName="id", nullable=true, onDelete="CASCADE")
      **/
-    private $account;
+    private $accountHead;
 
     /**
      * @var string
@@ -375,20 +376,22 @@ class AccountHeadDetails
     }
 
     /**
-     * @return mixed
+     * @return AccountHead
      */
-    public function getAccount()
+    public function getAccountHead()
     {
-        return $this->account;
+        return $this->accountHead;
     }
 
     /**
-     * @param mixed $account
+     * @param AccountHead $accountHead
      */
-    public function setAccount($account)
+    public function setAccountHead($accountHead)
     {
-        $this->account = $account;
+        $this->accountHead = $accountHead;
     }
+
+
 
 
 
