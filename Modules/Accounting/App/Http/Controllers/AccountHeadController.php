@@ -88,7 +88,7 @@ class AccountHeadController extends Controller
                 throw new \RuntimeException('Failed to update account head');
             }
             AccountHeadDetailsModel::updateOrCreate([
-                'account_id' => $entity->id,
+                'account_head_id' => $entity->id,
                 'config_id' => $this->domain['acc_config'],
             ]);
 

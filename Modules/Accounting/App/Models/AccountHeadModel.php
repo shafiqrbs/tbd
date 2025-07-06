@@ -85,7 +85,7 @@ class AccountHeadModel extends Model
 
     public function accountHeadDetails()
     {
-        return $this->hasOne(AccountHeadDetailsModel::class, 'account_id', 'id');
+        return $this->hasOne(AccountHeadDetailsModel::class, 'account_head_id', 'id');
     }
 
     public function parent_account_head(): BelongsTo
@@ -95,7 +95,7 @@ class AccountHeadModel extends Model
 
     public function headDetail()
     {
-        return $this->hasOne(AccountHeadDetailsModel::class, 'account_id', 'id'); // assuming you have this model
+        return $this->hasOne(AccountHeadDetailsModel::class, 'account_head_id', 'id'); // assuming you have this model
     }
 
     public function parent()
@@ -535,7 +535,7 @@ class AccountHeadModel extends Model
                             AccountHeadDetailsModel::updateOrCreate(
                                 [
                                     'config_id' => $config->id,
-                                    'account_id' => $ledger->id,
+                                    'account_head_id' => $ledger->id,
                                 ]
                             );
                         }
@@ -629,7 +629,7 @@ class AccountHeadModel extends Model
            AccountHeadDetailsModel::updateOrCreate(
                [
                    'config_id' => $head->config_id,
-                   'account_id' => $head->id,
+                   'account_head_id' => $head->id,
                ]
            );
        }
@@ -662,7 +662,7 @@ class AccountHeadModel extends Model
             AccountHeadDetailsModel::updateOrCreate(
                 [
                     'config_id'  => $head->config_id,
-                    'account_id' => $head->id,
+                    'account_head_id' => $head->id,
                 ]
             );
         }
@@ -692,7 +692,7 @@ class AccountHeadModel extends Model
             AccountHeadDetailsModel::updateOrCreate(
                 [
                     'config_id'  => $head->config_id,
-                    'account_id' => $head->id,
+                    'account_head_id' => $head->id,
                 ]
             );
         }
@@ -722,7 +722,7 @@ class AccountHeadModel extends Model
             AccountHeadDetailsModel::updateOrCreate(
                 [
                     'config_id'  => $head->config_id,
-                    'account_id' => $head->id,
+                    'account_head_id' => $head->id,
                 ]
             );
         }
@@ -752,7 +752,7 @@ class AccountHeadModel extends Model
             AccountHeadDetailsModel::updateOrCreate(
                 [
                     'config_id'  => $head->config_id,
-                    'account_id' => $head->id,
+                    'account_head_id' => $head->id,
                 ]
             );
         }
@@ -780,7 +780,7 @@ class AccountHeadModel extends Model
             AccountHeadDetailsModel::updateOrCreate(
                 [
                     'config_id'  => $head->config_id,
-                    'account_id' => $head->id,
+                    'account_head_id' => $head->id,
                 ]
             );
         }
