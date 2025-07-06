@@ -509,7 +509,7 @@ class AccountHeadModel extends Model
                         AccountHeadDetailsModel::updateOrCreate(
                             [
                                 'config_id' => $config->id,
-                                'account_id' => $subHead->id,
+                                'account_head_id' => $subHead->id,
                             ]
                         );
                     }
