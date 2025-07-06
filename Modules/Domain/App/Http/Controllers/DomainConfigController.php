@@ -197,13 +197,13 @@ class DomainConfigController extends Controller
 
     public function inventorySalesConfig(Request $request,$id)
     {
-
         $domain = UserModel::getDomainData($id);
 
         $config = $domain['config_id'];
         $entity = ConfigSalesModel::updateOrCreate([
             'config_id' => $config,
         ]);
+
         DB::beginTransaction();
         try {
             $entity->update($request->all());

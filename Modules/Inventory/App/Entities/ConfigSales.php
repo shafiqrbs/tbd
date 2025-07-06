@@ -44,6 +44,14 @@ class ConfigSales
      */
     private $searchByVendor;
 
+
+    /**
+     * @var array|null
+     * @ORM\Column(type="json", nullable=true)
+     */
+    private $salesProductNature = null;
+
+
     /**
      * @var boolean
      *

@@ -38,7 +38,8 @@ class ConfigSalesModel extends Model
         'discount_with_customer',
         'is_bonus_quantity',
         'is_barcode',
-        'default_customer_group_id'
+        'default_customer_group_id',
+        'sales_product_nature'
     ];
 
 

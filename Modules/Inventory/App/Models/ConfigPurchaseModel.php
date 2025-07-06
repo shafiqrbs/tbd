@@ -35,7 +35,8 @@ class ConfigPurchaseModel extends Model
         'is_warehouse',
         'is_bonus_quantity',
         'is_purchase_by_purchase_price',
-        'is_barcode'
+        'is_barcode',
+        'purchase_product_nature'
     ];
 
 

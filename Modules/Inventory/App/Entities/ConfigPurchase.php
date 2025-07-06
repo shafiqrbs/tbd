@@ -33,6 +33,13 @@ class ConfigPurchase
 
 
     /**
+     * @var array|null
+     * @ORM\Column(type="json", nullable=true)
+     */
+    private $purchaseProductNature = null;
+
+
+    /**
      * @var boolean
      *
      * @ORM\Column(type="boolean",options={"default"="false"})

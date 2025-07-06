@@ -109,9 +109,8 @@ class ProductModel extends Model
             ->leftjoin('inv_particular as grade', 'grade.id', '=', 'inv_stock.grade_id')
             ->leftjoin('inv_particular as size', 'size.id', '=', 'inv_stock.size_id')
             ->select([
-                'inv_product.id as id', // Change this to use product.id as the main ID
                 'inv_product.id as product_id',
-                'inv_stock.id as stock_id',
+                'inv_stock.id as id',
                 'inv_stock.name as product_name',
                 'inv_product.slug',
                 'inv_category.name as category_name',
