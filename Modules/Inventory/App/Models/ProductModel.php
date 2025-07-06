@@ -93,6 +93,7 @@ class ProductModel extends Model
 
     public static function getRecords($request, $domain)
     {
+
         $page = isset($request['page']) && $request['page'] > 0 ? ($request['page'] - 1) : 0;
         $perPage = isset($request['offset']) && $request['offset'] != '' ? (int)($request['offset']) : 0;
         $skip = isset($page) && $page != '' ? (int)$page * $perPage : 0;
@@ -154,13 +155,12 @@ class ProductModel extends Model
                 'inv_product.alternative_name',
                 'inv_stock.display_name',
                 'inv_stock.bangla_name',
-            ], 'LIKE', '%' . $request['term'] . '%');
+            ], 'LIKE', '%'.$request['term'].'%');
         }
 
         if (isset($request['name']) && !empty($request['name'])) {
             $products = $products->where('inv_product.name', $request['name']);
         }
-
         if (isset($request['alternative_name']) && !empty($request['alternative_name'])) {
             $products = $products->where('inv_product.alternative_name', $request['alternative_name']);
         }
@@ -173,15 +173,24 @@ class ProductModel extends Model
         if (isset($request['type']) && !empty($request['type']) && $request['type'] == 'product') {
             $products = $products->where('inv_stock.is_master', 1);
         }
-
         $total = $products->count();
         $entities = $products->skip($skip)
             ->take($perPage)
-            ->orderBy('inv_product.name', 'DESC')
+            ->orderBy('inv_product.name', 'ASC')
             ->get();
 
         $data = array('count' => $total, 'entities' => $entities);
         return $data;
+    }
+
+    public static function getRawSql($query)
+    {
+        $sql = $query->toSql();
+        foreach ($query->getBindings() as $binding) {
+            $binding = is_numeric($binding) ? $binding : "'" . addslashes($binding) . "'";
+            $sql = preg_replace('/\?/', $binding, $sql, 1);
+        }
+        return $sql;
     }
 
     public static function getStockDataFormDownload($domain)

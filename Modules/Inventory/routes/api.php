@@ -61,8 +61,8 @@ Route::prefix('/inventory')->middleware([HeaderAuthenticationMiddleware::class,L
     Route::apiResource('/product', ProductController::class)->middleware([HeaderAuthenticationMiddleware::class]);
 
     Route::prefix('/product')->middleware([HeaderAuthenticationMiddleware::class])->group(function() {
-        Route::get('/status/inline-update/{id}', [ProductController::class,'productStatusInlineUpdate'])->name('product_status_inline_update');
 
+        Route::get('/status/inline-update/{id}', [ProductController::class,'productStatusInlineUpdate'])->name('product_status_inline_update');
         Route::prefix('/measurement')->group(function() {
             Route::post('', [ProductController::class,'measurementAdded'])->name('product_measurement_added');
             Route::post('/sales-purchase/{product}', [ProductController::class,'measurementSalesPurchaseUpdate'])->name('product_measurement_sales_purchase_update');
@@ -78,6 +78,7 @@ Route::prefix('/inventory')->middleware([HeaderAuthenticationMiddleware::class,L
         Route::post('/stock/sku/inline-update/{stock_id}', [StockItemController::class,'stockSkuInlineUpdate'])->name('product_stock_sku_inline_update');
         Route::post('/gallery', [ProductController::class,'galleryAdded'])->name('product_gallery_added');
         Route::post('/gallery/delete', [ProductController::class,'galleryDelete'])->name('product_gallery_delete');
+
     });
 
     Route::prefix('/discount')->middleware([HeaderAuthenticationMiddleware::class])->group(function() {
