@@ -218,8 +218,8 @@ class SalesItemModel extends Model
 
     public static function getProductGroupPrice($entity)
     {
-        $items = self::where('sales_id', $entity)
-            ->join('inv_stock', 'inv_stock.id', '=', 'inv_purchase_item.stock_item_id')
+        $items = self::where('sale_id', $entity)
+            ->join('inv_stock', 'inv_stock.id', '=', 'inv_sales_item.stock_item_id')
             ->join('inv_product', 'inv_product.id', '=', 'inv_stock.product_id')
             ->join('inv_category', 'inv_category.id', '=', 'inv_product.category_id')
             ->join('inv_category as parent', 'parent.id', '=', 'inv_category.parent')

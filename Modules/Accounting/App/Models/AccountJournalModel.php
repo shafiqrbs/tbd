@@ -432,7 +432,7 @@ class AccountJournalModel extends Model
 
         $journalItem = self::salesGoodsEntry($config,$journal,$subTotal);
         if($journalItem){
-            self::goodsOutStock($config,$journal,$journalItem);
+            self::goodsOutStock($journal,$journalItem,$entity);
         }
 
     }
@@ -522,7 +522,7 @@ class AccountJournalModel extends Model
         }
     }
 
-    public static function salesGoodsEntry($journal,$config,$amount){
+    public static function salesGoodsEntry($config,$journal,$amount){
 
         $head = AccountHeadModel::getAccountHeadWithParent($config->account_sales_id);
         if($head){
@@ -540,7 +540,7 @@ class AccountJournalModel extends Model
 
     public static function goodsOutStock($journal,$journalItem,$entity){
 
-        $records = SalesItemModel::getProductGroupPrice($entity);
+        $records = SalesItemModel::getProductGroupPrice($entity->id);
         foreach ($records as $record){
             $head = AccountHeadModel::getAccountHeadWithParentPramValue('product_group_id',$record['product_group_id']);
             if($head and $record['amount'] > 0){
@@ -548,7 +548,7 @@ class AccountJournalModel extends Model
                 $accountDebit['account_journal_id'] = $journal->id;
                 $accountDebit['account_head_id'] = $head->parent_id;
                 $accountDebit['account_sub_head_id'] = $head->id;
-                $accountDebit['parent_id'] = $journalItem;
+                $accountDebit['parent_id'] = $journalItem->id;
                 $accountDebit['amount'] = "-{$amount}";
                 $accountDebit['credit'] = $amount;
                 $accountDebit['mode'] = 'credit';
