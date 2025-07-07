@@ -56,7 +56,7 @@ class CategoryModel extends Model
     {
         $patternCodeService = app(GeneratePatternCodeService::class);
         $params = [
-            'config' => $model->confog_id,
+            'config' => $model->config_id,
             'table' => 'inv_category'
         ];
         return $patternCodeService->categoryCode($params);

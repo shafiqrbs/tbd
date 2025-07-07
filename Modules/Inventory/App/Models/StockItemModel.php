@@ -69,15 +69,15 @@ class StockItemModel extends Model
     {
         $patternCodeService = app(GeneratePatternCodeService::class);
 
-        $category = DB::table('inv_product as inv_product')
+        $product = DB::table('inv_product as inv_product')
             ->where('inv_product.id', $model['product_id'])
             ->select('inv_product.barcode')
             ->first();
 
         $params = [
-            'config' => $model->config_id,
-            'table' => 'inv_product',
-            'barcode' => $category
+            'product' => $model['product_id'],
+            'table' => 'inv_stock',
+            'barcode' => $product->barcode,
         ];
         return $patternCodeService->productStockBarcodeCode($params);
     }

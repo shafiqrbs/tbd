@@ -131,14 +131,16 @@ class GeneratePatternCodeService
     public function productStockBarcodeCode($queryParams = [])
     {
 
-        $config     = $queryParams['config'];
+
         $table      = $queryParams['table'];
+        $product      = $queryParams['product'];
+        $barcode      = $queryParams['barcode'];
         $entity = DB::table("{$table} as e")
-            ->where('e.config_id', $config)
+            ->where('e.product_id', $product)
             ->count('id');
         $lastCode = $entity;
         $code = (int)$lastCode + 1;
-        $generateId = sprintf("%s", str_pad($code, 5, '0', STR_PAD_LEFT));
+        $generateId = sprintf("%s%s",$barcode, str_pad($code, 2, '0', STR_PAD_LEFT));
         $data = array('code' => $code,'generateId' => $generateId);
         return $data;
 
