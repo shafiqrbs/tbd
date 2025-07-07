@@ -93,4 +93,56 @@ class GeneratePatternCodeService
 
     }
 
+    public function categoryCode($queryParams = [])
+    {
+
+        $config     = $queryParams['config'];
+        $table      = $queryParams['table'];
+        $entity = DB::table("{$table} as e")
+            ->where('e.config_id', $config)
+            ->count('id');
+        $lastCode = $entity;
+        $code = (int)$lastCode + 1;
+        $generateId = sprintf("%s", str_pad($code, 3, '0', STR_PAD_LEFT));
+        $data = array('code' => $code,'generateId' => $generateId);
+        return $data;
+
+
+    }
+
+    public function productBarcodeCode($queryParams = [])
+    {
+
+        $config     = $queryParams['config'];
+        $category      = $queryParams['category'];
+        $table      = $queryParams['table'];
+        $entity = DB::table("{$table} as e")
+            ->where('e.config_id', $config)
+            ->count('id');
+        $lastCode = $entity;
+        $code = (int)$lastCode + 1;
+        $generateId = sprintf("%s%s", $category,str_pad($code, 5, '0', STR_PAD_LEFT));
+        $data = array('code' => $code,'generateId' => $generateId);
+        return $data;
+
+
+    }
+
+    public function productStockBarcodeCode($queryParams = [])
+    {
+
+        $config     = $queryParams['config'];
+        $table      = $queryParams['table'];
+        $entity = DB::table("{$table} as e")
+            ->where('e.config_id', $config)
+            ->count('id');
+        $lastCode = $entity;
+        $code = (int)$lastCode + 1;
+        $generateId = sprintf("%s", str_pad($code, 5, '0', STR_PAD_LEFT));
+        $data = array('code' => $code,'generateId' => $generateId);
+        return $data;
+
+
+    }
+
 }

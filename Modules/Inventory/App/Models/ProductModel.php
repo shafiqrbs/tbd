@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\DB;
+use Modules\AppsApi\App\Services\GeneratePatternCodeService;
 
 class ProductModel extends Model
 {
@@ -53,6 +54,8 @@ class ProductModel extends Model
         self::creating(function ($model) {
             $date =  new \DateTime("now");
             $model->created_at = $date;
+            $model->barcode = self::generatedEventListener($model)['generateId'];
+            $model->code = self::generatedEventListener($model)['code'];
             $model->status = true;
         });
 
@@ -61,6 +64,24 @@ class ProductModel extends Model
             $model->updated_at = $date;
         });
     }
+
+    public static function generatedEventListener($model)
+    {
+        $patternCodeService = app(GeneratePatternCodeService::class);
+
+        $category = DB::table('inv_category as inv_category')
+            ->where('inv_category.id', $model['category_id'])
+            ->select('inv_category.generate_id')
+            ->first();
+
+        $params = [
+            'config' => $model->config_id,
+            'table' => 'inv_product',
+            'category' => $category->generate_id
+        ];
+        return $patternCodeService->productBarcodeCode($params);
+    }
+
 
     public function category()
     {

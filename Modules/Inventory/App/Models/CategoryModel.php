@@ -5,6 +5,7 @@ namespace Modules\Inventory\App\Models;
 use Cviebrock\EloquentSluggable\Sluggable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Modules\AppsApi\App\Services\GeneratePatternCodeService;
 
 class CategoryModel extends Model
 {
@@ -41,12 +42,24 @@ class CategoryModel extends Model
         self::creating(function ($model) {
             $date =  new \DateTime("now");
             $model->created_at = $date;
+            $model->generate_id = self::generatedEventListener($model)['generateId'];
+            $model->code = self::generatedEventListener($model)['code'];
         });
 
         self::updating(function ($model) {
             $date =  new \DateTime("now");
             $model->updated_at = $date;
         });
+    }
+
+    public static function generatedEventListener($model)
+    {
+        $patternCodeService = app(GeneratePatternCodeService::class);
+        $params = [
+            'config' => $model->confog_id,
+            'table' => 'inv_category'
+        ];
+        return $patternCodeService->categoryCode($params);
     }
 
     public static function getCategoryGroupDropdown($domain)

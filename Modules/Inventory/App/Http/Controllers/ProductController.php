@@ -7,6 +7,7 @@ use App\Traits\HandlesFileUploads;
 use Doctrine\ORM\EntityManagerInterface;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
 use Modules\AppsApi\App\Services\JsonRequestResponse;
 use Modules\Core\App\Models\UserModel;
@@ -86,11 +87,62 @@ class ProductController extends Controller
         ];
 
         ProductMeasurementModel::updateOrCreate($unitDataConditions, $unitData);
-
-
-        $em->getRepository(StockItem::class)->insertStockItem($productId,$input);
+        $this->createMasterStockItem($productId,$input);
+      //  $em->getRepository(StockItem::class)->insertStockItem($productId,$input);
         $data = $service->returnJosnResponse($entity);
         return $data;
+    }
+
+    public static function createMasterStockItem($id, array $data)
+    {
+        // Start transaction (optional)
+        DB::beginTransaction();
+
+        try {
+            $product = ProductModel::find($id);
+
+            if (!$product) {
+                throw new \InvalidArgumentException("Product with ID {$id} not found.");
+            }
+
+            $exist = StockItemModel::where('product_id', $id)->where('is_master', 1)->first();
+
+            if (!$exist) {
+                $unitName = $product->unit->name ?? null;
+
+                $stockItem = new StockItemModel();
+                $stockItem->config_id       = $product->config_id;
+                $stockItem->product_id      = $product->id;
+
+                $stockItem->name            = $product->name;
+                $stockItem->display_name    = $product->name;
+                $stockItem->uom             = $unitName;
+
+                $stockItem->purchase_price  = $data['purchase_price'] ?? 0.0;
+                $stockItem->price           = $data['sales_price'] ?? 0.0;
+                $stockItem->sales_price     = $data['sales_price'] ?? 0.0;
+                $stockItem->sku             = $data['sku'] ?? null;
+
+                $stockItem->bangla_name     = $data['bangla_name'] ?? null;
+                $stockItem->min_quantity    = (!empty($data['min_quantity']) && $data['min_quantity'] > 1)
+                    ? $data['min_quantity'] : 0;
+                $stockItem->item_size       = $data['item_size'] ?? null;
+
+                // Optional foreign keys (Particulars)
+                $stockItem->color_id  = $data['color_id']  ?? null;
+                $stockItem->brand_id  = $data['brand_id']  ?? null;
+                $stockItem->size_id   = $data['size_id']   ?? null;
+                $stockItem->grade_id  = $data['grade_id']  ?? null;
+                $stockItem->model_id  = $data['model_id']  ?? null;
+                $stockItem->is_master = 1;
+                $stockItem->save();
+            }
+
+            DB::commit();
+        } catch (\Exception $e) {
+            DB::rollBack();
+            throw $e;
+        }
     }
 
     /**

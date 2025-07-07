@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\DB;
+use Modules\AppsApi\App\Services\GeneratePatternCodeService;
 use Modules\Domain\App\Models\B2BCategoryPriceMatrixModel;
 use Modules\Inventory\App\Entities\Product;
 use Modules\Inventory\App\Entities\StockItem;
@@ -53,6 +54,8 @@ class StockItemModel extends Model
         self::creating(function ($model) {
             $date =  new \DateTime("now");
             $model->created_at = $date;
+            $model->barcode = self::generatedEventListener($model)['generateId'];
+            $model->code = self::generatedEventListener($model)['code'];
             $model->status = true;
         });
 
@@ -60,6 +63,23 @@ class StockItemModel extends Model
             $date =  new \DateTime("now");
             $model->updated_at = $date;
         });
+    }
+
+    public static function generatedEventListener($model)
+    {
+        $patternCodeService = app(GeneratePatternCodeService::class);
+
+        $category = DB::table('inv_product as inv_product')
+            ->where('inv_product.id', $model['product_id'])
+            ->select('inv_product.barcode')
+            ->first();
+
+        $params = [
+            'config' => $model->config_id,
+            'table' => 'inv_product',
+            'barcode' => $category
+        ];
+        return $patternCodeService->productStockBarcodeCode($params);
     }
 
     public function brand()

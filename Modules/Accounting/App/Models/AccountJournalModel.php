@@ -174,7 +174,6 @@ class AccountJournalModel extends Model
         $accountDebit['is_parent'] = true;
         $debit = AccountJournalItemModel::create($accountDebit);
 
-
         $head1 = AccountHeadModel::getAccountHeadWithParent($config->capital_investment_id);
         $accountCredit['account_journal_id'] = $entity->id;
         $accountCredit['parent_id'] = $debit->id;
@@ -184,7 +183,47 @@ class AccountJournalModel extends Model
         $accountCredit['credit'] = $purchaseItem->sub_total;
         $accountCredit['mode'] = 'credit';
         AccountJournalItemModel::create($accountCredit);
+
+     //   self::openingGoodsEntry($journal,$config,$amount);
+
         return true;
+
+    }
+    public static function openingGoodsEntry($journal,$config,$amount){
+
+        $head = AccountHeadModel::getAccountHeadWithParent($config->account_purchase_id);
+        if($head){
+            $accountDebit['account_journal_id'] = $journal->id;
+            $accountDebit['account_head_id'] = $head->parent_id;
+            $accountDebit['account_sub_head_id'] = $head->id;
+            $accountDebit['amount'] = "-{$amount}";
+            $accountDebit['credit'] = $amount;
+            $accountDebit['mode'] = 'credit';
+            $accountDebit['is_parent'] = true;
+            $journalItem = AccountJournalItemModel::create($accountDebit);
+            return $journalItem;
+        }
+    }
+
+    public static function openingGoodsInStock($journal,$journalItem,$purchase){
+
+
+        $records = PurchaseItemModel::getProductGroupPrice($purchase);
+
+        foreach ($records as $record){
+            $head = AccountHeadModel::getAccountHeadWithParentPramValue('product_group_id',$record['product_group_id']);
+            if($head and $record['amount'] > 0){
+                $amount = $record['amount'];
+                $accountDebit['account_journal_id'] = $journal->id;
+                $accountDebit['account_head_id'] = $head->parent_id;
+                $accountDebit['account_sub_head_id'] = $head->id;
+                $accountDebit['parent_id'] = $journalItem;
+                $accountDebit['amount'] = "{$amount}";
+                $accountDebit['debit'] = $amount;
+                $accountDebit['mode'] = 'debit';
+                AccountJournalItemModel::create($accountDebit);
+            }
+        }
 
     }
 
@@ -389,7 +428,6 @@ class AccountJournalModel extends Model
             if($journalItem){
                 self::salesReceivableDebitEntry($journal, $entity , $journalItem);
             }
-            self::goodsOutStock();
         }
 
         $journalItem = self::salesGoodsEntry($config,$journal,$subTotal);
@@ -484,7 +522,6 @@ class AccountJournalModel extends Model
         }
     }
 
-
     public static function salesGoodsEntry($journal,$config,$amount){
 
         $head = AccountHeadModel::getAccountHeadWithParent($config->account_sales_id);
@@ -501,12 +538,9 @@ class AccountJournalModel extends Model
         }
     }
 
-
     public static function goodsOutStock($journal,$journalItem,$entity){
 
-
         $records = SalesItemModel::getProductGroupPrice($entity);
-
         foreach ($records as $record){
             $head = AccountHeadModel::getAccountHeadWithParentPramValue('product_group_id',$record['product_group_id']);
             if($head and $record['amount'] > 0){

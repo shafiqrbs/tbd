@@ -63,9 +63,16 @@ class Category
     /**
      * @var string
      *
-     * @ORM\Column(name="code", type="string", length=10, nullable=true)
+     * @ORM\Column(name="code", type="integer", length=3, nullable=true)
      */
     private $code;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="generate_id", type="string", length=10, nullable=true)
+     */
+    private $generateId;
 
     /**
      * @var int
@@ -302,6 +309,40 @@ class Category
     {
         $this->updatedAt = $updatedAt;
     }
+
+    /**
+     * @return mixed
+     */
+    public function getDiscount()
+    {
+        return $this->discount;
+    }
+
+    /**
+     * @param mixed $discount
+     */
+    public function setDiscount($discount)
+    {
+        $this->discount = $discount;
+    }
+
+    /**
+     * @return string
+     */
+    public function getGenerateId()
+    {
+        return $this->generateId;
+    }
+
+    /**
+     * @param string $generateId
+     */
+    public function setGenerateId($generateId)
+    {
+        $this->generateId = $generateId;
+    }
+
+
 
 
 
