@@ -389,7 +389,14 @@ class AccountJournalModel extends Model
             if($journalItem){
                 self::salesReceivableDebitEntry($journal, $entity , $journalItem);
             }
+            self::goodsOutStock();
         }
+
+        $journalItem = self::salesGoodsEntry($config,$journal,$subTotal);
+        if($journalItem){
+            self::goodsOutStock($config,$journal,$journalItem);
+        }
+
     }
 
     public static function salesEntry($config,$journal,$amount){
@@ -463,8 +470,8 @@ class AccountJournalModel extends Model
     public static function salesReceivableDebitEntry($journal,$entity,$journalItem){
 
         $amount = $entity->payment;
-        $value = $entity->transaction_mode_id;
-        $head = AccountHeadModel::getAccountHeadWithParentPramValue('account_id',$value);
+        $method = $entity->transaction_mode_id;
+        $head = AccountHeadModel::getAccountHeadWithParentPramValue('account_id',$method);
         if($head){
             $accountDebit['account_journal_id'] = $journal->id;
             $accountDebit['account_head_id'] = $head->parent_id;
@@ -475,6 +482,46 @@ class AccountJournalModel extends Model
             $accountDebit['mode'] = 'debit';
             AccountJournalItemModel::create($accountDebit);
         }
+    }
+
+
+    public static function salesGoodsEntry($journal,$config,$amount){
+
+        $head = AccountHeadModel::getAccountHeadWithParent($config->account_sales_id);
+        if($head){
+            $accountDebit['account_journal_id'] = $journal->id;
+            $accountDebit['account_head_id'] = $head->parent_id;
+            $accountDebit['account_sub_head_id'] = $head->id;
+            $accountDebit['amount'] = "{$amount}";
+            $accountDebit['debit'] = $amount;
+            $accountDebit['mode'] = 'debit';
+            $accountDebit['is_parent'] = true;
+            $journalItem = AccountJournalItemModel::create($accountDebit);
+            return $journalItem;
+        }
+    }
+
+
+    public static function goodsOutStock($journal,$journalItem,$entity){
+
+
+        $records = SalesItemModel::getProductGroupPrice($entity);
+
+        foreach ($records as $record){
+            $head = AccountHeadModel::getAccountHeadWithParentPramValue('product_group_id',$record['product_group_id']);
+            if($head and $record['amount'] > 0){
+                $amount = $record['amount'];
+                $accountDebit['account_journal_id'] = $journal->id;
+                $accountDebit['account_head_id'] = $head->parent_id;
+                $accountDebit['account_sub_head_id'] = $head->id;
+                $accountDebit['parent_id'] = $journalItem;
+                $accountDebit['amount'] = "-{$amount}";
+                $accountDebit['credit'] = $amount;
+                $accountDebit['mode'] = 'credit';
+                AccountJournalItemModel::create($accountDebit);
+            }
+        }
+
     }
 }
 

@@ -118,9 +118,9 @@ class PurchaseItemModel extends Model
 
     }
 
-    public static function getProductGroupPrice($purchase)
+    public static function getProductGroupPrice($entity)
     {
-        $purchaseItems = self::where('purchase_id', $purchase)
+        $purchaseItems = self::where('purchase_id', $entity)
             ->join('inv_stock', 'inv_stock.id', '=', 'inv_purchase_item.stock_item_id')
             ->join('inv_product', 'inv_product.id', '=', 'inv_stock.product_id')
             ->join('inv_category', 'inv_category.id', '=', 'inv_product.category_id')
