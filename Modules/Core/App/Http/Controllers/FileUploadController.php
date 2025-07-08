@@ -719,7 +719,8 @@ class FileUploadController extends Controller
                 $product = ProductModel::create($productData);
 
                 // Insert stock item for newly created product (new record)
-                $em->getRepository(StockItem::class)->insertStockItem($product->id, $productData);
+              //  $em->getRepository(StockItem::class)->insertStockItem($product->id, $productData);
+                $this->insertMasterStockItem($product->id, $productData);
             } else {
                 // Insert stock item for newly created product (new record)
                 $productData['product_id'] = $product->id;
@@ -731,6 +732,59 @@ class FileUploadController extends Controller
         }
 
         return $rowCount;
+    }
+
+
+    public static function insertMasterStockItem($id, array $data)
+    {
+        DB::beginTransaction();
+
+        try {
+            // 1. Find product
+            $product = ProductModel::with('unit')->find($id);
+            if (!$product) {
+                throw new \InvalidArgumentException("Product with ID {$id} not found.");
+            }
+
+            // 2. Check if master stock item exists
+            $exist = StockItemModel::where('product_id', $id)->where('is_master', 1)->first();
+
+            if (!$exist) {
+                // 3. Create new StockItem
+                $stockItem = new StockItemModel();
+
+                $stockItem->config_id      = $product->config_id;      // assuming `config_id` exists
+                $stockItem->product_id     = $product->id;
+                $stockItem->name           = $product->name;
+                $stockItem->display_name   = $product->name;
+                $stockItem->uom            = $product->unit->name ?? null;
+
+                $stockItem->purchase_price = $data['purchase_price'] ?? 0.0;
+                $stockItem->price          = $data['sales_price'] ?? 0.0;
+                $stockItem->sales_price    = $data['sales_price'] ?? 0.0;
+                $stockItem->sku            = $data['sku'] ?? null;
+                $stockItem->bangla_name    = $data['bangla_name'] ?? null;
+                $stockItem->min_quantity   = (!empty($data['min_quantity']) && $data['min_quantity'] > 1)
+                    ? $data['min_quantity'] : 0;
+                $stockItem->barcode        = $data['barcode'] ?? null;
+                $stockItem->item_size      = $data['item_size'] ?? null;
+
+                // Optional foreign keys (use IDs directly)
+                $stockItem->color_id       = $data['color_id'] ?? null;
+                $stockItem->brand_id       = $data['brand_id'] ?? null;
+                $stockItem->size_id        = $data['size_id'] ?? null;
+                $stockItem->grade_id       = $data['grade_id'] ?? null;
+                $stockItem->model_id       = $data['model_id'] ?? null;
+                $stockItem->is_master      = 1;
+                $stockItem->save();
+            }
+
+            DB::commit();
+            return true;
+        } catch (\Exception $e) {
+            DB::rollBack();
+            throw $e;
+        }
     }
 
 
