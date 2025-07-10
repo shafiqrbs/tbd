@@ -227,6 +227,7 @@ class StockItemModel extends Model
                     'average_price'    => ROUND($stock->average_price,2),
                     'barcode'           => $stock->barcode,
                     'product_nature'    => $product->setting->slug ?? null,
+                    'product_nature_id'    => $product->setting->id ?? null,
                     'feature_image'     => optional(optional($product)->images)->feature_image ?? null,
                     'multi_price' => optional(optional($stock)->multiplePrice)->map(function ($m) {
                         return [
