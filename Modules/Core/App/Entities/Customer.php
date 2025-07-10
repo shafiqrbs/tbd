@@ -108,7 +108,7 @@ class Customer
     /**
      * @var string
      *
-     * @ORM\Column(name="patientId", type="string",  nullable=true)
+     * @ORM\Column( type="string",  nullable=true)
      */
     private $patientId;
 
@@ -376,21 +376,21 @@ class Customer
 	/**
      * @var string
      *
-     * @ORM\Column(name="fatherDesignation", type="string",length=150, nullable = true)
+     * @ORM\Column( type="string",length=150, nullable = true)
      */
     private $fatherDesignation;
 
 	/**
      * @var string
      *
-     * @ORM\Column(name="motherDesignation", type="string",length=150, nullable = true)
+     * @ORM\Column( type="string",length=150, nullable = true)
      */
     private $motherDesignation;
 
 	/**
 	 * @var string
 	 *
-	 * @ORM\Column(name="bloodPressure", type="string",length=20, nullable = true)
+	 * @ORM\Column( type="string",length=20, nullable = true)
 	 */
 	private $bloodPressure;
 
@@ -411,7 +411,7 @@ class Customer
     /**
      * @var string
      *
-     * @ORM\Column(name="ageType", type="string", length=20, nullable = true)
+     * @ORM\Column( type="string", length=20, nullable = true)
      */
     private $ageType;
 
@@ -427,35 +427,35 @@ class Customer
     /**
      * @var string
      *
-     * @ORM\Column(name="higherEducation", type="string", nullable=true)
+     * @ORM\Column( type="string", nullable=true)
      */
     private $higherEducation;
 
     /**
      * @var string
      *
-     * @ORM\Column(name="spouseName", type="string", nullable=true)
+     * @ORM\Column( type="string", nullable=true)
      */
     private $spouseName;
 
     /**
      * @var string
      *
-     * @ORM\Column(name="spouseOccupation", type="string", nullable=true)
+     * @ORM\Column( type="string", nullable=true)
      */
     private $spouseOccupation;
 
     /**
      * @var string
      *
-     * @ORM\Column(name="spouseDesignation", type="string", nullable=true)
+     * @ORM\Column( type="string", nullable=true)
      */
     private $spouseDesignation;
 
     /**
      * @var string
      *
-     * @ORM\Column(name="memberDesignation", type="string", nullable=true)
+     * @ORM\Column( type="string", nullable=true)
      */
     private $memberDesignation;
 
@@ -478,7 +478,7 @@ class Customer
     /**
      * @var string
      *
-     * @ORM\Column(name="additionalPhone", type="string", nullable=true)
+     * @ORM\Column( type="string", nullable=true)
      */
     private $additionalPhone;
 
@@ -530,7 +530,7 @@ class Customer
     /**
      * @var boolean
      *
-     * @ORM\Column(name="isNew", type="boolean", nullable=true)
+     * @ORM\Column( type="boolean", nullable=true)
      */
     private $isNew = true;
 

@@ -35,6 +35,12 @@ class TransactionMode
      **/
     private $country;
 
+     /**
+     * @ORM\ManyToOne(targetEntity="Modules\Utility\App\Entities\Bank", cascade={"persist", "remove"})
+     * @ORM\JoinColumn(onDelete="SET NULL", nullable=true)
+     **/
+    private $bank;
+
     /**
      * @ORM\ManyToOne(targetEntity="Modules\Accounting\App\Entities\Setting", cascade={"persist", "remove"})
      * @ORM\JoinColumn(onDelete="SET NULL", nullable=true)
@@ -150,6 +156,12 @@ class TransactionMode
      **/
     private $accountTypeMode;
 
+    /**
+     * @var string
+     *
+     * @ORM\Column(type="string", length=50, nullable=true)
+     */
+    private $bankMode;
 
     /**
      * @var string
@@ -157,6 +169,13 @@ class TransactionMode
      * @ORM\Column(type="string", length=50, nullable=true)
      */
     private $accountType;
+
+     /**
+     * @var string
+     *
+     * @ORM\Column(type="string", length=100, nullable=true)
+     */
+    private $accountNumber;
 
     /**
      * @var boolean
@@ -498,6 +517,108 @@ class TransactionMode
     {
         $this->updatedAt = $updatedAt;
     }
+
+    /**
+     * @return mixed
+     */
+    public function getCountry()
+    {
+        return $this->country;
+    }
+
+    /**
+     * @param mixed $country
+     */
+    public function setCountry($country)
+    {
+        $this->country = $country;
+    }
+
+    /**
+     * @return string
+     */
+    public function getPinCode()
+    {
+        return $this->pinCode;
+    }
+
+    /**
+     * @param string $pinCode
+     */
+    public function setPinCode($pinCode)
+    {
+        $this->pinCode = $pinCode;
+    }
+
+    /**
+     * @return string
+     */
+    public function getBankMode()
+    {
+        return $this->bankMode;
+    }
+
+    /**
+     * @param string $bankMode
+     */
+    public function setBankMode($bankMode)
+    {
+        $this->bankMode = $bankMode;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isPrivate()
+    {
+        return $this->isPrivate;
+    }
+
+    /**
+     * @param bool $isPrivate
+     */
+    public function setIsPrivate($isPrivate)
+    {
+        $this->isPrivate = $isPrivate;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getBank()
+    {
+        return $this->bank;
+    }
+
+    /**
+     * @param mixed $bank
+     */
+    public function setBank($bank)
+    {
+        $this->bank = $bank;
+    }
+
+    /**
+     * @return string
+     */
+    public function getAccountNumber()
+    {
+        return $this->accountNumber;
+    }
+
+    /**
+     * @param string $accountNumber
+     */
+    public function setAccountNumber($accountNumber)
+    {
+        $this->accountNumber = $accountNumber;
+    }
+
+
+
+
+
+
 
 
 

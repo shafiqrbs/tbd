@@ -3,18 +3,23 @@
 namespace Modules\Accounting\App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use http\Exception;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Log;
 use Modules\Accounting\App\Http\Requests\TransactionModeRequest;
+use Modules\Accounting\App\Models\AccountHeadModel;
+use Modules\Accounting\App\Models\ConfigModel;
+use Modules\Accounting\App\Models\SettingModel;
 use Modules\Accounting\App\Models\TransactionModeModel;
 use Modules\AppsApi\App\Services\JsonRequestResponse;
 use Modules\Domain\App\Http\Requests\DomainRequest;
 use Modules\Core\App\Models\UserModel;
 use Modules\Domain\App\Models\DomainModel;
-use Modules\Utility\App\Models\SettingModel;
+
 
 
 class TransactionModeController extends Controller
@@ -56,19 +61,31 @@ class TransactionModeController extends Controller
     public function store(TransactionModeRequest $request)
     {
         $data = $request->validated();
-        $data['status'] = true;
-        $data['config_id'] = $this->domain['acc_config'];
-        $data['is_selected'] = $data['is_selected'] ?? false;
-        $data['authorised'] = $this->getSettingName($data['authorised_mode_id']);
-        $data['account_type'] = $this->getSettingName($data['account_mode_id']);
-        $data['path'] = $this->processFileUpload($request, 'uploads/accounting/transaction-mode/');
+        DB::beginTransaction();
+        try {
+            $data['status'] = true;
+            $data['config_id'] = $this->domain['acc_config'];
+            $data['is_selected'] = $data['is_selected'] ?? false;
+            $data['authorised'] = $this->getSettingName($data['authorised_mode_id']);
+            $data['account_type'] = $this->getSettingName($data['account_mode_id']);
+            $data['path'] = $this->processFileUpload($request, 'uploads/accounting/transaction-mode/');
 
-        $entity = TransactionModeModel::create($data);
-
-        if ($data['is_selected']) {
-            $this->updateIsSelected($entity->id);
+            $entity = TransactionModeModel::create($data);
+            $config = ConfigModel::findOrFail($this->domain['acc_config']);
+            AccountHeadModel::insertTransactionAccount($config, $entity);
+            DB::commit();
+        }catch (Exception $e) {
+            // Something went wrong, rollback the transaction
+            DB::rollBack();
+            // Optionally log the exception for debugging purposes
+            \Log::error('Error storing domain and related data: ' . $e->getMessage());
+            if ($data['is_selected']) {
+                $this->updateIsSelected($entity->id);
+            }
+            return (new JsonRequestResponse())->returnJosnResponse($entity);
         }
-        return (new JsonRequestResponse())->returnJosnResponse($entity);
+
+
     }
 
     private function getSettingName($id)
