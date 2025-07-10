@@ -13,6 +13,7 @@ use Modules\Accounting\App\Entities\AccountVoucher;
 use Modules\Accounting\App\Http\Requests\AccountHeadRequest;
 use Modules\Accounting\App\Models\AccountHeadDetailsModel;
 use Modules\Accounting\App\Models\AccountHeadModel;
+use Modules\Accounting\App\Models\AccountingModel;
 use Modules\Accounting\App\Models\LedgerDetailsModel;
 use Modules\Accounting\App\Models\TransactionModeModel;
 use Modules\AppsApi\App\Services\JsonRequestResponse;
@@ -126,6 +127,7 @@ class AccountHeadController extends Controller
     public function generateAccountHead(EntityManager $em)
     {
         $config_id = $this->domain['acc_config'];
+        AccountingModel::initiateConfig($this->domain);
         $entity = $em->getRepository(AccountHead::class)->generateAccountHead($config_id);
         $service = new JsonRequestResponse();
         return $service->returnJosnResponse($entity);
@@ -134,10 +136,25 @@ class AccountHeadController extends Controller
      /**
      * Store a newly created resource in storage.
      */
+    public function resetAccountLedgerHead(Request $request,EntityManager $em)
+    {
+        $config_id = $this->domain['acc_config'];
+        AccountingModel::initiateConfig($this->domain);
+        $em->getRepository(AccountHead::class)->resetAccountLedgerHead($config_id);
+        $service = new JsonRequestResponse();
+        $data = AccountHeadModel::getRecords($request,$this->domain);
+        return $service->returnJosnResponse($data);
+
+    }
+
+     /**
+     * Store a newly created resource in storage.
+     */
     public function resetAccountHead(EntityManager $em)
     {
         $config_id = $this->domain['acc_config'];
-        $entity = $em->getRepository(AccountHead::class)->resetAccountHead($config_id);
+        $entity = $em->getRepository(AccountHead::class)->generateAccountHead($config_id);
+        AccountingModel::initiateConfig($this->domain);
         $service = new JsonRequestResponse();
         return $service->returnJosnResponse($entity);
     }

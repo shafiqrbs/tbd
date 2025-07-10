@@ -195,21 +195,18 @@ class AccountHeadModel extends Model
     public static function insertVendorLedger($config, $entity)
     {
         $name = "{$entity['mobile']}-{$entity['company_name']}";
-        $accountHead = $config['account_vendor_id'];
-        if ($accountHead) {
-            self::create(
-                [
-                    'name' => $name,
-                    'display_name' => $entity['company_name'],
-                    'parent_id' => $accountHead,
-                    'level' => '3',
-                    'vendor_id' => $entity['id'],
-                    'head_group' => 'ledger',
-                    'source' => 'vendor',
-                    'config_id' => $config['id']
-                ]
-            );
-        }
+        self::create(
+            [
+                'name' => $name,
+                'display_name' => $entity['company_name'],
+                'parent_id'    => $config->account_vendor_id ?? null, // assuming this is an ID
+                'level' => '3',
+                'vendor_id' => $entity->id,
+                'head_group' => 'ledger',
+                'source' => 'vendor',
+                'config_id' => $config->id
+            ]
+        );
     }
 
     public static function insertCurrentAssetsLedger($config, $entity)

@@ -385,7 +385,9 @@ class B2bController extends Controller
 
     private function ensureVendorLedger(VendorModel $vendor)
     {
-        $childAccConfig = AccountingModel::find($this->domain['acc_config']);
+//        $childAccConfig = $vendor->getDomain()->getAccountConfig();
+        $childAccConfig = AccountingModel::where('domain_id',$vendor->domain_id)->first();
+     //   $childAccConfig = AccountingModel::find($this->domain['acc_config']);
         $ledgerExist = AccountHeadModel::where('vendor_id', $vendor->id)
             ->where('config_id', $childAccConfig)
             ->exists();

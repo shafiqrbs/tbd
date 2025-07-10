@@ -50,6 +50,7 @@ Route::prefix('/accounting')->middleware([HeaderAuthenticationMiddleware::class,
     Route::get('/account-voucher-reset', [AccountHeadController::class,'resetAccountVoucher'])->name('account_head_reset');
     Route::get('/account-sub-head', [AccountHeadController::class,'accountSubHead'])->name('account_sub_head');
     Route::get('/account-ledger', [AccountHeadController::class,'accountLedger'])->name('account_ledger');
+    Route::get('/account-ledger-reset', [AccountHeadController::class,'resetAccountLedgerHead'])->name('account_head_reset');
 
     Route::get('/voucher/wise-ledger-details', [AccountVoucherController::class,'accountVoucherWiseLedger'])->name('account_voucher_wise_ledger');
     Route::post('/voucher/update-heads', [AccountVoucherController::class, 'updateVoucherHeads'])->name('account_voucher_update_heads');

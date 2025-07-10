@@ -23,6 +23,7 @@ use Modules\Core\App\Entities\Customer;
 use Modules\Core\App\Entities\User;
 use Modules\Core\App\Entities\Vendor;
 use Modules\Inventory\App\Entities\Category;
+use function Doctrine\Common\Collections\andWhere;
 
 
 /**
@@ -253,17 +254,72 @@ class AccountHeadRepository extends EntityRepository
 
     }
 
+    public function resetAccountLedgerHead($configId)
+    {
+        $em = $this->_em;
+        /** @var  Config $config */
+
+        $qb = $this->getEntityManager()
+            ->getConnection()
+            ->createQueryBuilder()
+            ->delete('acc_head')
+            ->where('config_id =:config_id')->setParameter('config_id', $configId)
+            ->andWhere('head_group =:headGroup')->setParameter('headGroup', 'ledger')
+            ->andWhere('parent_id IS NULL');
+        $qb->execute();
+
+
+
+        $config = $em->getRepository(Config::class)->find($configId);
+
+
+
+
+        $currentAssets = $em->getRepository(TransactionMode::class)->findBy(['config' => $configId,'status'=>1]);
+        foreach ($currentAssets as $asset){
+            $this->insertTransactionAccount($asset);
+        }
+
+        $customers = $em->getRepository(Customer::class)->findBy(['domain' => $config->getDomain(),'status'=>1]);
+        foreach ($customers as $customer){
+            $this->insertCustomerAccount($config,$customer);
+        }
+
+        $vendors = $em->getRepository(Vendor::class)->findBy(['domain' => $config->getDomain(),'status'=>1]);
+        foreach ($vendors as $customer){
+            $this->insertVendorAccount($config,$customer);
+        }
+
+        $users = $em->getRepository(User::class)->findBy(['domain' => $config->getDomain(),'userGroup'=>'user','enabled'=>1]);
+        foreach ($users as $user){
+            $this->insertUserAccount($config,$user);
+        }
+
+        $investors = $em->getRepository(User::class)->findBy(['domain' => $config->getDomain(),'userGroup'=>'investor','enabled'=>1]);
+        foreach ($investors as $investor){
+            $this->insertCapitalInvestmentAccount($config,$investor);
+        }
+
+        $inv = $em->getRepository(\Modules\Inventory\App\Entities\Config::class)->findOneBy(['domain' => $config->getDomain()]);
+        $groups = $em->getRepository(Category::class)->findBy(['config' => $inv,'parent'=>null,'status'=>1]);
+        foreach ($groups as $group){
+            $this->insertCategoryGroupAccount($config,$group);
+        }
+
+        $config = $this->find($configId);
+        return $config;
+    }
 
     public function generateAccountHead($configId)
     {
         $em = $this->_em;
-       /* $qb = $this->getEntityManager()
+        $qb = $this->getEntityManager()
             ->getConnection()
             ->createQueryBuilder()
             ->delete('acc_head')
             ->where('config_id =:config_id')
             ->setParameter('config_id', $configId);
-        $qb->execute();*/
+        $qb->execute();
 
         /** @var  Config $config */
 
@@ -376,25 +432,18 @@ class AccountHeadRepository extends EntityRepository
     {
 
         $em = $this->_em;
-        $qb = $this->getEntityManager()
-            ->getConnection()
-            ->createQueryBuilder()
-            ->delete('acc_head')
-            ->where('config_id =:config_id')
-            ->setParameter('config_id', $configId);
-        $qb->execute();
         $config = $em->getRepository(Config::class)->find($configId);
         $parentHeads = $em->getRepository(AccountMasterHead::class)->findBy(['parent'=> NULL]);
 
         /** @var AccountMasterHead $head */
 
         foreach ($parentHeads as $head){
-
             $entity = new AccountHead();
             $entity->setConfig($config);
             $entity->setMotherAccount($head->getMotherAccount());
             $entity->setAccountMasterHead($head);
             $entity->setName($head->getName());
+            $entity->setDisplayName($head->getName());
             $entity->setSlug($head->getSlug());
             $entity->setHeadGroup('head');
             $entity->setIsPrivate(1);
@@ -409,6 +458,7 @@ class AccountHeadRepository extends EntityRepository
                     $subHead->setAccountMasterHead($child);
                     $subHead->setParent($entity);
                     $subHead->setName($child->getName());
+                    $subHead->setDisplayName($child->getName());
                     $subHead->setSlug($child->getSlug());
                     $subHead->setHeadGroup('sub-head');
                     $subHead->setLevel($child->getLevel());
@@ -431,7 +481,7 @@ class AccountHeadRepository extends EntityRepository
         if(empty($em->getRepository(AccountHeadDetails::class)->find($head))){
             $entity = new AccountHeadDetails();
             $entity->setConfig($head->getConfig());
-            $entity->setAccount($head);
+            $entity->setAccountHead($head);
             $em->persist($entity);
             $em->flush();
         }
@@ -442,7 +492,9 @@ class AccountHeadRepository extends EntityRepository
 
         $em = $this->_em;
         $exist = $this->findOneBy(array('transaction' => $entity));
+
         if (empty($exist)) {
+
             $parent = '';
             $head = new AccountHead();
 
@@ -456,7 +508,6 @@ class AccountHeadRepository extends EntityRepository
                 $parent = $config->getAccountMobile();
             }
             if(!empty($parent)){
-
                 $head->setConfig($entity->getConfig());
                 $head->setName($entity->getName());
                 $head->setDisplayName($entity->getName());
@@ -475,7 +526,6 @@ class AccountHeadRepository extends EntityRepository
             }
 
         }
-
     }
 
     public function insertCustomerAccount(Config $config , Customer $entity)
@@ -488,7 +538,6 @@ class AccountHeadRepository extends EntityRepository
         if(empty($exist)){
             $name = "{$entity->getMobile()}-{$entity->getName()}";
             $head = new AccountHead();
-
             $head->setConfig($config);
             if($config && $config->getAccountCustomer()) {
                 $head->setParent($config->getAccountCustomer());
@@ -505,6 +554,7 @@ class AccountHeadRepository extends EntityRepository
             if(empty($head->getHeadDetail())){
                 $this->insertUpdateHeadDetails($head);
             }
+
         }
     }
 
@@ -514,7 +564,7 @@ class AccountHeadRepository extends EntityRepository
         /* @var $entity Vendor */
 
         $em = $this->_em;
-        $exist = $this->findOneBy(array('vendor' => $entity));
+        $exist = $this->findOneBy(['config' => $config , 'vendor' => $entity]);
         if(empty($exist)){
             $name = "{$entity->getMobile()}-{$entity->getCompanyName()}";
             $head = new AccountHead();

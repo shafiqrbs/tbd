@@ -171,8 +171,6 @@ class AccountingModel extends Model
     }
 
     public static function initiateConfig($domain){
-
-
         self::updateOrCreate(
             ['id' =>$domain['acc_config']],
             [
@@ -203,7 +201,6 @@ class AccountingModel extends Model
             ]
         );
         self::setAccountHeadVoucher($domain);
-
     }
 
     public static function getHeadConfig($config,$id){

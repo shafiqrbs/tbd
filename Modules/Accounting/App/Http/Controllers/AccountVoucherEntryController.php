@@ -185,6 +185,8 @@ class AccountVoucherEntryController extends Controller
 
         try {
             foreach ($journal->journalItems as $journalItem) {
+
+
                 $opening = AccountJournalItemModel::getLedgerWiseOpeningBalance(
                     ledgerId: $journalItem->account_ledger_id,
                     configId: $journal->config_id,
@@ -198,6 +200,11 @@ class AccountVoucherEntryController extends Controller
                 $journalItem->update([
                     'opening_amount' => $opening,
                     'closing_amount' => $closing,
+                ]);
+
+                $findAccoundLegderHead = AccountHeadModel::find($journalItem->account_sub_head_id);
+                $findAccoundLegderHead->update([
+                    'amount' => $closing,
                 ]);
             }
 

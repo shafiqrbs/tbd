@@ -61,7 +61,7 @@ class AccountHead
     private $transaction;
 
      /**
-     * @ORM\OneToOne(targetEntity="AccountHeadDetails", mappedBy="account", cascade={"remove"})
+     * @ORM\OneToOne(targetEntity="AccountHeadDetails", mappedBy="accountHead", cascade={"remove"})
      **/
     private $headDetail;
 
@@ -892,6 +892,8 @@ class AccountHead
     {
         $this->parent = $parent;
     }
+
+
 
 
 
