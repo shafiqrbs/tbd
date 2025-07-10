@@ -40,6 +40,13 @@ class AccountVoucher
      **/
     private $masterVoucher;
 
+    /**
+     * @var AccountHead
+     * @ORM\ManyToOne(targetEntity="AccountHead")
+     * @ORM\JoinColumn(name="ledger_account_head_id", referencedColumnName="id", nullable=true, onDelete="CASCADE")
+     **/
+    private $accountHead;
+
 
 
     /**

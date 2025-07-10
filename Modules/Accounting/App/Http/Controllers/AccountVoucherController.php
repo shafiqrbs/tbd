@@ -52,6 +52,8 @@ class AccountVoucherController extends Controller
         $data = $request->validated();
         $data['status'] = true;
         $data['config_id'] = $this->domain['acc_config'];
+        $data['is_private'] = 0;
+        $data['status'] = 1;
         $entity = AccountVoucherModel::create($data);
         $service = new JsonRequestResponse();
         return $service->returnJosnResponse($entity);
@@ -90,7 +92,6 @@ class AccountVoucherController extends Controller
      */
     public function update(AccountVoucherRequest $request, $id)
     {
-
         $data = $request->validated();
         $entity = AccountVoucherModel::find($id);
         $entity->update($data);
@@ -133,6 +134,18 @@ class AccountVoucherController extends Controller
             'success' => true,
             'message' => 'Voucher Wise Ledger Details',
             'data' => $data??[],
+        ]);
+    }
+
+
+    public function statusUpdate($id)
+    {
+        $findVoucher = AccountVoucherModel::find($id);
+        $findVoucher->update(['status' => $findVoucher->status == 1 ? 0 : 1]);
+        return response()->json([
+            'status' => 200,
+            'success' => true,
+            'message' => 'Update Status Successfully',
         ]);
     }
 

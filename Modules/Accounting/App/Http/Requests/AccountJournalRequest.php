@@ -43,6 +43,7 @@ class AccountJournalRequest extends FormRequest
                 'items.*.debit' => 'nullable|numeric|min:0',
                 'items.*.credit' => 'nullable|numeric|min:0',
                 'items.*.bankInfo' => 'nullable',
+                'items.*.type' => 'required',
 
             ];
         }

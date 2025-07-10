@@ -123,39 +123,72 @@ class AccountJournalItemModel extends Model
      * @param array $items Incoming items to insert.
      * @return bool
      */
+
     public static function insertJournalItems(AccountJournalModel $journal, array $items): bool
     {
         $timestamp = Carbon::now();
-        $formattedItems = array_map(function ($item) use ($journal, $timestamp) {
-            $bankInfo = $item['bankInfo'] ?? [];
-            $parent = AccountHeadModel::find($item['id']);
-            return [
-                'account_journal_id'       => $journal->id,
-                'account_ledger_id'        => $item['id'],
-                'account_sub_head_id'      => $item['id'],
-                'account_head_id'          => $parent->parent_id,
-                'amount'                   => $item['mode']==='debit'?$item['debit']:$item['credit'],
-                'debit'                    => $item['debit'] ?? 0,
-                'credit'                   => $item['credit'] ?? 0,
-                'mode'                     => $item['mode'] ?? 0,
-                'created_at'               => $timestamp,
-//                'cheque_date'              => $bankInfo['cheque_date'] ?? null,
-//                'cross_using'              => $bankInfo['cross_using'] ?? null,
-                'forwarding_name'          => $bankInfo['forwarding_name'] ?? null,
-//                'pay_mode'                 => $bankInfo['pay_mode'] ?? null,
-                'bank_id'                => $bankInfo['bank_id'] ?? null,
-                'branch_name'              => $bankInfo['branch_name'] ?? null,
-                'received_from'            => $bankInfo['received_from'] ?? null,
-//                'cheque_no'                => $bankInfo['cheque_no'] ?? null,
-            ];
-        }, $items);
 
         try {
+            // First, find and insert the main-ledger item
+            $mainLedgerItem = collect($items)->firstWhere('type', 'main-ledger');
+
+            if (!$mainLedgerItem) {
+                \Log::error('No main-ledger item found in the data');
+                return false;
+            }
+
+            // Format and insert the main-ledger item
+            $mainItemFormatted = self::formatJournalItem($journal, $mainLedgerItem, $timestamp);
+            $mainItemId = self::insertGetId($mainItemFormatted);
+
+            if (!$mainItemId) {
+                \Log::error('Failed to insert main-ledger item');
+                return false;
+            }
+
+            // Get remaining items (non main-ledger)
+            $remainingItems = collect($items)->where('type', '!=', 'main-ledger')->toArray();
+
+            if (empty($remainingItems)) {
+                return true; // Only main-ledger item was present
+            }
+
+            // Format remaining items with parent_id set to main item ID
+            $formattedItems = array_map(function ($item) use ($journal, $timestamp, $mainItemId) {
+                $formatted = self::formatJournalItem($journal, $item, $timestamp);
+                $formatted['parent_id'] = $mainItemId;
+                return $formatted;
+            }, $remainingItems);
+
+            // Insert remaining items
             return self::insert($formattedItems);
+
         } catch (\Throwable $th) {
             \Log::error('Failed to insert journal items: ' . $th->getMessage());
             return false;
         }
+    }
+
+    private static function formatJournalItem(AccountJournalModel $journal, array $item, $timestamp): array
+    {
+        $bankInfo = $item['bankInfo'] ?? [];
+        $parent = AccountHeadModel::find($item['id']);
+
+        return [
+            'account_journal_id' => $journal->id,
+            'account_ledger_id' => $item['id'],
+            'account_sub_head_id' => $item['id'],
+            'account_head_id' => $parent->parent_id ?? null,
+            'amount' => $item['mode'] === 'debit' ? $item['debit'] : $item['credit'],
+            'debit' => $item['debit'] ?? 0,
+            'credit' => $item['credit'] ?? 0,
+            'mode' => $item['mode'] ?? 0,
+            'created_at' => $timestamp,
+            'forwarding_name' => $bankInfo['forwarding_name'] ?? null,
+            'bank_id' => $bankInfo['bank_id'] ?? null,
+            'branch_name' => $bankInfo['branch_name'] ?? null,
+            'received_from' => $bankInfo['received_from'] ?? null,
+        ];
     }
 
     public static function getLedgerWiseOpeningBalance( $ledgerId,$configId,$journalItemId )

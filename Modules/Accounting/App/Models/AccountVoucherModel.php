@@ -5,16 +5,14 @@ namespace Modules\Accounting\App\Models;
 
 use Cviebrock\EloquentSluggable\Sluggable;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\DB;
 
 
 class AccountVoucherModel extends Model
 {
-    use HasFactory,Sluggable;
+    use Sluggable;
 
     protected $table = 'acc_voucher';
     public $timestamps = true;
@@ -22,7 +20,7 @@ class AccountVoucherModel extends Model
     protected $fillable = [
         'config_id',
         'voucher_type_id',
-        'master_voucher_id',
+        'ledger_account_head_id',
         'name',
         'short_name',
         'short_code',
