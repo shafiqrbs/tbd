@@ -14,6 +14,7 @@ use Modules\Accounting\App\Http\Requests\AccountHeadRequest;
 use Modules\Accounting\App\Models\AccountHeadDetailsModel;
 use Modules\Accounting\App\Models\AccountHeadModel;
 use Modules\Accounting\App\Models\AccountingModel;
+use Modules\Accounting\App\Models\AccountJournalItemModel;
 use Modules\Accounting\App\Models\LedgerDetailsModel;
 use Modules\Accounting\App\Models\TransactionModeModel;
 use Modules\AppsApi\App\Services\JsonRequestResponse;
@@ -224,6 +225,17 @@ class AccountHeadController extends Controller
         ]));
         $response->setStatusCode(Response::HTTP_OK);
         return $response;
+    }
+
+    public function accountLedgerWiseJournal($id)
+    {
+        $getJournalItems = AccountJournalItemModel::getLedgerWiseJournalItems( ledgerId:$id,configId: $this->domain['acc_config'] );
+        return response()->json([
+            'status' => 200,
+            'success' => true,
+            'message' => 'Ledger wise journal items retrieved.',
+            'data' => $getJournalItems,
+        ]);
     }
 
 }

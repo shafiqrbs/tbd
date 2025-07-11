@@ -2,15 +2,13 @@
 
 namespace Modules\Accounting\App\Models;
 
-use Cviebrock\EloquentSluggable\Sluggable;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Support\Carbon;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Collection;
 
 class AccountJournalItemModel extends Model
 {
-    use HasFactory;
 
     protected $table = 'acc_journal_item';
     public $timestamps = true;
@@ -139,6 +137,7 @@ class AccountJournalItemModel extends Model
 
             // Format and insert the main-ledger item
             $mainItemFormatted = self::formatJournalItem($journal, $mainLedgerItem, $timestamp);
+            $mainItemFormatted['is_parent'] = 1;
             $mainItemId = self::insertGetId($mainItemFormatted);
 
             if (!$mainItemId) {
@@ -201,6 +200,110 @@ class AccountJournalItemModel extends Model
                             ->value('acc_journal_item.closing_amount') ?? 0;
         return $openingBalance;
     }
+
+    /*public static function getLedgerWiseJournalItems($ledgerId,$configId)
+    {
+        $journalParentItems = self::join('acc_journal','acc_journal.id','=','acc_journal_item.account_journal_id')
+            ->join('acc_head','acc_head.id','=','acc_journal_item.account_sub_head_id')
+            ->select('acc_journal_item.id','acc_journal_item.account_ledger_id','acc_journal_item.account_journal_id','acc_journal_item.account_head_id','acc_journal_item.account_sub_head_id','acc_journal_item.amount','acc_journal_item.debit','acc_journal_item.credit','acc_journal_item.mode','acc_journal_item.created_at',                DB::raw('DATE_FORMAT(acc_journal_item.created_at, "%d-%m-%Y") as created_date')
+                ,'acc_journal_item.opening_amount','acc_journal_item.closing_amount','acc_head.name as ledger_name')
+            ->where('acc_journal.config_id', $configId)
+            ->where('acc_journal_item.account_sub_head_id', $ledgerId)
+            ->where('acc_journal_item.is_parent', 1)
+            ->get()->toArray();
+
+
+        $ledgerDetails = [];
+        foreach ($journalParentItems as $journalParentItem) {
+            $getChildItems = self::where('acc_journal_item.parent_id',$journalParentItem['id'])
+                ->join('acc_head','acc_head.id','=','acc_journal_item.account_sub_head_id')
+                ->select('acc_journal_item.id','acc_journal_item.account_ledger_id','acc_journal_item.account_journal_id','acc_journal_item.account_head_id','acc_journal_item.account_sub_head_id','acc_journal_item.amount','acc_journal_item.debit','acc_journal_item.credit','acc_journal_item.mode','acc_journal_item.created_at',DB::raw('DATE_FORMAT(acc_journal_item.created_at, "%d-%m-%Y") as created_date')
+                ,'acc_journal_item.opening_amount','acc_journal_item.closing_amount','acc_head.name as ledger_name')->get()->toArray();
+
+            $journalParentItem['childItems'] = $getChildItems;
+            $ledgerDetails[] = $journalParentItem;
+        }
+
+
+        $getChildItems2 = self::join('acc_journal','acc_journal.id','=','acc_journal_item.account_journal_id')
+            ->join('acc_head','acc_head.id','=','acc_journal_item.account_sub_head_id')
+            ->select('acc_journal_item.id','acc_journal_item.account_ledger_id','acc_journal_item.account_journal_id','acc_journal_item.account_head_id','acc_journal_item.account_sub_head_id','acc_journal_item.amount','acc_journal_item.debit','acc_journal_item.credit','acc_journal_item.mode','acc_journal_item.created_at',                DB::raw('DATE_FORMAT(acc_journal_item.created_at, "%d-%m-%Y") as created_date')
+                ,'acc_journal_item.opening_amount','acc_journal_item.closing_amount','acc_head.name as ledger_name')
+            ->where('acc_journal.config_id', $configId)
+            ->where('acc_journal_item.account_sub_head_id', $ledgerId)
+            ->get()->toArray();
+
+        return ['ledgerDetails' => $ledgerDetails, 'ledgerItems' => $getChildItems2];
+    }*/
+    public static function getLedgerWiseJournalItems($ledgerId, $configId)
+    {
+        // Get all items for the ledger
+        $allItems = self::join('acc_journal', 'acc_journal.id', '=', 'acc_journal_item.account_journal_id')
+            ->join('acc_head', 'acc_head.id', '=', 'acc_journal_item.account_sub_head_id')
+            ->select([
+                'acc_journal_item.id',
+                'acc_journal_item.account_ledger_id',
+                'acc_journal_item.account_journal_id',
+                'acc_journal_item.account_head_id',
+                'acc_journal_item.account_sub_head_id',
+                'acc_journal_item.amount',
+                'acc_journal_item.debit',
+                'acc_journal_item.credit',
+                'acc_journal_item.mode',
+                'acc_journal_item.created_at',
+                'acc_journal_item.opening_amount',
+                'acc_journal_item.closing_amount',
+                'acc_journal_item.parent_id',
+                'acc_journal_item.is_parent',
+                'acc_head.name as ledger_name',
+                DB::raw('DATE_FORMAT(acc_journal_item.created_at, "%d-%m-%Y") as created_date')
+            ])
+            ->where('acc_journal.config_id', $configId)
+            ->where('acc_journal_item.account_sub_head_id', $ledgerId)
+            ->get()
+            ->toArray();
+
+        // Separate parent items (is_parent = 1)
+        $parentItems = collect($allItems)->where('is_parent', 1)->keyBy('id');
+
+        // Get child items by parent_id (these might be from different ledgers)
+        $parentIds = $parentItems->pluck('id')->toArray();
+
+        $childItems = self::join('acc_head', 'acc_head.id', '=', 'acc_journal_item.account_sub_head_id')
+            ->select([
+                'acc_journal_item.id',
+                'acc_journal_item.account_ledger_id',
+                'acc_journal_item.account_journal_id',
+                'acc_journal_item.account_head_id',
+                'acc_journal_item.account_sub_head_id',
+                'acc_journal_item.amount',
+                'acc_journal_item.debit',
+                'acc_journal_item.credit',
+                'acc_journal_item.mode',
+                'acc_journal_item.created_at',
+                'acc_journal_item.opening_amount',
+                'acc_journal_item.closing_amount',
+                'acc_journal_item.parent_id',
+                'acc_head.name as ledger_name',
+                DB::raw('DATE_FORMAT(acc_journal_item.created_at, "%d-%m-%Y") as created_date')
+            ])
+            ->whereIn('acc_journal_item.parent_id', $parentIds)
+            ->get()
+            ->groupBy('parent_id');
+
+        // Attach children to parents
+        $ledgerDetails = $parentItems->map(function ($parent) use ($childItems) {
+            $parent['childItems'] = $childItems->get($parent['id'], collect())->toArray();
+            return $parent;
+        })->values()->toArray();
+
+        return [
+            'ledgerDetails' => $ledgerDetails,
+            'ledgerItems' => $allItems
+        ];
+    }
+
+
 
 }
 
