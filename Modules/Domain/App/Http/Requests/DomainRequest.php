@@ -38,6 +38,7 @@ class DomainRequest extends FormRequest
                     'email' => 'required|email',
                     'company_name' => 'required|string',
                     'alternative_mobile' => 'string|nullable',
+                    'short_name' => 'string|nullable',
                     'username' => 'required|string',
                     'address' => 'string|nullable',
                     'business_model_id' => 'required',

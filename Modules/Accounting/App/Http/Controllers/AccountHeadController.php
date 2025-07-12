@@ -128,8 +128,9 @@ class AccountHeadController extends Controller
     public function generateAccountHead(EntityManager $em)
     {
         $config_id = $this->domain['acc_config'];
-        AccountingModel::initiateConfig($this->domain);
         $entity = $em->getRepository(AccountHead::class)->generateAccountHead($config_id);
+        AccountingModel::initiateConfig($this->domain);
+        $em->getRepository(AccountHead::class)->resetAccountLedgerHead($config_id);
         $service = new JsonRequestResponse();
         return $service->returnJosnResponse($entity);
     }

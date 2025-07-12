@@ -12,6 +12,7 @@ use Illuminate\Support\Str;
 use Modules\Accounting\App\Models\AccountHeadModel;
 use Modules\Accounting\App\Models\AccountingModel;
 use Modules\AppsApi\App\Services\GeneratePatternCodeService;
+use Modules\AppsApi\App\Services\JsonRequestResponse;
 use Modules\Core\App\Models\CustomerModel;
 use Modules\Core\App\Models\SettingModel;
 use Modules\Core\App\Models\SettingTypeModel;
@@ -385,13 +386,10 @@ class B2bController extends Controller
 
     private function ensureVendorLedger(VendorModel $vendor)
     {
-//        $childAccConfig = $vendor->getDomain()->getAccountConfig();
         $childAccConfig = AccountingModel::where('domain_id',$vendor->domain_id)->first();
-     //   $childAccConfig = AccountingModel::find($this->domain['acc_config']);
         $ledgerExist = AccountHeadModel::where('vendor_id', $vendor->id)
             ->where('config_id', $childAccConfig)
             ->exists();
-
         if (!$ledgerExist) {
             AccountHeadModel::insertVendorLedger($childAccConfig, $vendor);
         }
@@ -632,11 +630,16 @@ class B2bController extends Controller
         $modifier = ($findSubDomain->percent_mode == 'Increase')
             ? (100 + $findSubDomain->mrp_percent)
             : (100 - $findSubDomain->mrp_percent);
+        $purchaseModifier = ($findSubDomain->percent_mode == 'Increase')
+            ? (100 + $findSubDomain->purchase_percent)
+            : (100 - $findSubDomain->purchase_percent);
 
         $salesPrice = $parentStock->sales_price * ($modifier / 100);
+        $purchasePrice = $parentStock->sales_price * ($purchaseModifier / 100);
 
         $baseStockData = [
-            'purchase_price' => $findSubDomain->purchase_percent? $salesPrice * ((100 - $findSubDomain->purchase_percent) / 100) : 0.0,
+//            'purchase_price' => $findSubDomain->purchase_percent? $salesPrice * ((100 - $findSubDomain->purchase_percent) / 100) : 0.0,
+            'purchase_price' => $purchasePrice,
             'sales_price' => $salesPrice ?? 0.0,
             'min_quantity' => $parentStock->min_quantity ?? 0.0,
         ];
@@ -662,7 +665,6 @@ class B2bController extends Controller
             return $childParticular->id;
         }
     }
-
 
     private function generateUniqueSlug($slug) {
         // Generate a unique slug by appending random characters
@@ -706,6 +708,16 @@ class B2bController extends Controller
         return $currentCategory;
     }
 
+    public function b2bSubDomainDelete($id)
+    {
+        $subDomainModel = SubDomainModel::find($id);
+        $subDomainModel->update(['status' => 1]);
+        return response()->json([
+            'message' => 'success',
+            'status'  => ResponseAlias::HTTP_OK,
+            'data' => ''
+        ], ResponseAlias::HTTP_OK);
+    }
 
     public function b2bSubDomainSetting($id)
     {
@@ -758,13 +770,17 @@ class B2bController extends Controller
                     ? (100 + $findCategoryMatrix->mrp_percent)
                     : (100 - $findCategoryMatrix->mrp_percent);
 
+                $purchaseModifier = ($findCategoryMatrix->percent_mode == 'Increase')
+                    ? (100 + $findCategoryMatrix->purchase_percent)
+                    : (100 - $findCategoryMatrix->purchase_percent);
+
                 $salesPrice = $product->parentStock->sales_price * ($modifier / 100);
+                $purchasePrice = $product->parentStock->sales_price * ($purchaseModifier / 100);
+
 
                 $updates[] = [
                     'id' => $product->id,
-                    'purchase_price' => $findCategoryMatrix->purchase_percent
-                        ? $salesPrice * ((100 - $findCategoryMatrix->purchase_percent) / 100)
-                        : 0.0,
+                    'purchase_price' => $purchasePrice,
                     'sales_price' => $salesPrice
                 ];
             }
@@ -933,64 +949,5 @@ class B2bController extends Controller
 
     }
 
-    /*public function b2bSubDomainProduct(Request $request, $id)
-    {
-        try {
-            // Validate inputs and find required models
-            $findSubDomain = SubDomainModel::findOrFail($id);
-            $findCategoryMatrix = B2BCategoryPriceMatrixModel::where('sub_domain_id', $id)->firstOrFail();
-
-            // Get all products with their relationships in a single query
-            $products = StockItemModel::with([
-                'product.category',
-                'parentStock',
-                'b2bCategoryMatrix' => function($query) use ($id) {
-                    $query->where('sub_domain_id', $id);
-                }
-            ])
-                ->where('config_id', $findCategoryMatrix->config_id)
-                ->whereHas('product', function($query) use ($findSubDomain) {
-                    $query->where('vendor_id', $findSubDomain->vendor_id);
-                })
-                ->whereNotNull('parent_stock_item')
-                ->get();
-
-            // Prepare response data
-            $responseData = $products->map(function ($product) {
-                return [
-                    'id' => $product->id,
-                    'name' => $product->name,
-                    'category_name' => $product->product->category->name ?? null,
-                    'sub_domain_sales_price' => $product->sales_price,
-                    'sub_domain_purchase_price' => $product->purchase_price,
-                    'mrp_percent' => $product->b2bCategoryMatrix->mrp_percent ?? null,
-                    'purchase_percent' => $product->b2bCategoryMatrix->purchase_percent ?? null,
-                    'percent_mode' => $product->b2bCategoryMatrix->percent_mode ?? null,
-                    'center_stock' => $product->parentStock->quantity ?? null,
-                    'center_sales_price' => $product->parentStock->sales_price ?? null,
-                    'center_purchase_price' => $product->parentStock->purchase_price ?? null,
-                ];
-            });
-
-            return response()->json([
-                'status' => ResponseAlias::HTTP_OK,
-                'message' => 'Success',
-                'data' => $responseData
-            ]);
-
-        } catch (ModelNotFoundException $e) {
-            return response()->json([
-                'status' => ResponseAlias::HTTP_NOT_FOUND,
-                'message' => 'Subdomain or category matrix not found'
-            ], ResponseAlias::HTTP_NOT_FOUND);
-
-        } catch (\Exception $e) {
-            return response()->json([
-                'status' => ResponseAlias::HTTP_INTERNAL_SERVER_ERROR,
-                'message' => 'Failed to retrieve products',
-                'error' => $e->getMessage()
-            ], ResponseAlias::HTTP_INTERNAL_SERVER_ERROR);
-        }
-    }*/
 
 }

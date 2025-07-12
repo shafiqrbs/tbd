@@ -22,6 +22,7 @@ class DomainModel extends Model
         'name',
         'mobile',
         'email',
+        'short_name',
         'unique_code',
         'slug',
         'business_model_id',
@@ -86,16 +87,20 @@ class DomainModel extends Model
         $perPage = isset($request['offset']) && $request['offset']!=''? (int)($request['offset']):50;
         $skip = isset($page) && $page!=''? (int)$page * $perPage:0;
         $entities = self::select([
-            'id',
+            'dom_domain.id as id',
             'company_name',
-            'name',
+            'short_name',
+            'company_name',
+            'dom_domain.name',
             'email',
             'mobile',
             'unique_code',
-            'created_at'
-        ]);
+            'license_no',
+            'uti_settings.name as business_model',
+            'dom_domain.created_at'
+        ])->leftjoin('uti_settings','uti_settings.id','=','dom_domain.business_model_id');
 
-        $entities = $entities->where('id','!=',1);
+        $entities = $entities->where('dom_domain.id','!=',1);
         if (isset($request['term']) && !empty($request['term'])){
             $entities = $entities->whereAny(['name','email','mobile'],'LIKE','%'.$request['term'].'%');
         }
@@ -112,10 +117,10 @@ class DomainModel extends Model
             $entities = $entities->where('email',$request['email']);
         }
 
-        $total  = $entities->count();
+        $total  = $entities->count('dom_domain.id');
         $entities = $entities->skip($skip)
             ->take($perPage)
-            ->orderBy('id','DESC')
+            ->orderBy('dom_domain.id','DESC')
             ->get();
 
         $data = array('count'=>$total,'entities' => $entities);
@@ -179,9 +184,10 @@ class DomainModel extends Model
         $perPage = isset($request['offset']) && $request['offset']!=''? (int)($request['offset']):50;
         $skip = isset($page) && $page!=''? (int)$page * $perPage:0;
         $entities = self::select([
-            'dom_domain.id',
+            'dom_domain.id as id',
             'dom_domain.company_name',
             'dom_domain.name',
+            'dom_domain.short_name',
             'dom_domain.email',
             'dom_domain.mobile',
             'dom_domain.unique_code',
@@ -192,8 +198,10 @@ class DomainModel extends Model
             'dom_sub_domain.sales_target_amount',
             'dom_sub_domain.mrp_percent',
             'dom_sub_domain.purchase_percent',
+            'uti_settings.name as business_model',
             'dom_sub_domain.status',
-        ])->leftjoin('dom_sub_domain','dom_sub_domain.sub_domain_id','=','dom_domain.id');
+        ])->leftjoin('dom_sub_domain','dom_sub_domain.sub_domain_id','=','dom_domain.id')
+            ->leftjoin('uti_settings','uti_settings.id','=','dom_domain.business_model_id');
 
         $entities = $entities->where('dom_domain.id','!=',1);
         if (isset($request['term']) && !empty($request['term'])){

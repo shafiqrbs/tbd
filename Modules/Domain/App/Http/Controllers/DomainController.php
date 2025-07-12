@@ -223,12 +223,14 @@ class DomainController extends Controller
                 'financial_start_date' =>  now(),
                 'financial_end_date' =>  now(),
             ]);
-
-            $domain = UserModel::getDomainData($entity->id);
-            AccountHeadModel::generateAccountHead($domain);
-            AccountVoucherModel::resetVoucher($domain);
-            AccountingModel::initiateConfig($domain);
-
+            $accountConfig = $accountingConfig ? $accountingConfig->id:'';
+            if($accountConfig){
+                $domain = UserModel::getDomainData($entity->id);
+                AccountHeadModel::generateAccountHead($domain);
+                AccountingModel::initiateConfig($domain);
+                $em->getRepository(AccountHead::class)->resetAccountLedgerHead($accountConfig);
+                AccountVoucherModel::resetVoucher($domain);
+            }
             // Step 4: Create the accounting data
             NbrVatConfigModel::create([
                 'domain_id' => $entity->id,

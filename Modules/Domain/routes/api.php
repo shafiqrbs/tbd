@@ -80,5 +80,6 @@ Route::prefix('/domain')->middleware(array(HeaderAuthenticationMiddleware::class
         Route::get('sub-domain/category/{id}', [B2bController::class,'b2bSubDomainCategory'])->name('b2b_sub_domain_category');
         Route::get('category-wise/price-update/{id}', [B2bController::class,'b2bCategoryWisePriceUpdate'])->name('b2b_category_wise_price_update');
         Route::get('sub-domain/product/{id}', [B2bController::class,'b2bSubDomainProduct'])->name('b2b_sub_domain_product');
+        Route::delete('sub-domain/delete/{id}', [B2bController::class,'b2bSubDomainDelete'])->name('b2b_sub_domain_delete');
     });
 });

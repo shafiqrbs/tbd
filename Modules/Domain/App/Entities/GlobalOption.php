@@ -48,6 +48,13 @@ class GlobalOption
      /**
      * @var string
      *
+     * @ORM\Column(name="short_name", type="string", length=50, nullable = true )
+     */
+    private $shortName;
+
+     /**
+     * @var string
+     *
      * @ORM\Column(name="address", type="string", nullable = true )
      */
     private $address;
@@ -1183,6 +1190,24 @@ class GlobalOption
     {
         $this->path = $path;
     }
+
+    /**
+     * @return string
+     */
+    public function getShortName()
+    {
+        return $this->shortName;
+    }
+
+    /**
+     * @param string $shortName
+     */
+    public function setShortName($shortName)
+    {
+        $this->shortName = $shortName;
+    }
+
+
 
 
 
