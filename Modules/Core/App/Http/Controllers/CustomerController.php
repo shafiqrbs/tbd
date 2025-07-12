@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Doctrine\ORM\EntityManagerInterface;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\DB;
 use Modules\Accounting\App\Models\AccountHeadModel;
 use Modules\Accounting\App\Models\AccountingModel;
 use Modules\AppsApi\App\Services\GeneratePatternCodeService;
@@ -51,21 +52,43 @@ class CustomerController extends Controller
 
         $service = new JsonRequestResponse();
         $input = $request->validated();
-        $input['domain_id'] = $this->domain['global_id'];
-        $entity = CustomerModel::create($input);
+        DB::beginTransaction();
+        try {
+            $input['domain_id'] = $this->domain['global_id'];
+            $entity = CustomerModel::create($input);
 
-        $config = AccountingModel::where('id',$this->domain['acc_config'])->first();
-        $ledgerExist = AccountHeadModel::where('customer_id',$entity->id)->where('config_id',$this->domain['acc_config'])->where('parent_id',$config->account_customer_id)->first();
-        if (empty($ledgerExist)){
-            AccountHeadModel::insertCustomerLedger($config,$entity);
+            $config = AccountingModel::where('id', $this->domain['acc_config'])->first();
+            $ledgerExist = AccountHeadModel::where('customer_id', $entity->id)->where('config_id', $this->domain['acc_config'])->where('parent_id', $config->account_customer_id)->first();
+            if (empty($ledgerExist)) {
+               AccountHeadModel::insertCustomerLedger($config, $entity);
+            }
+            DB::commit();
+            $data = $service->returnJosnResponse($entity);
+            return $data;
+        } catch (\Exception $e) {
+            // Something went wrong, rollback the transaction
+            DB::rollBack();
+
+            // Optionally log the exception for debugging purposes
+            \Log::error('Error storing domain and related data: ' . $e->getMessage());
+
+            // Return an error response
+            $response = new Response();
+            $response->headers->set('Content-Type', 'application/json');
+            $response->setContent(json_encode([
+                'message' => 'An error occurred while saving the domain and related data.',
+                'error' => $e->getMessage(),
+                'status' => Response::HTTP_INTERNAL_SERVER_ERROR,
+            ]));
+            $response->setStatusCode(Response::HTTP_INTERNAL_SERVER_ERROR);
+            return $response;
         }
-        $data = $service->returnJosnResponse($entity);
-        return $data;
+
     }
 
     /**
      * Show the specified resource.
-     */
+     *//**/
     public function show($id)
     {
 

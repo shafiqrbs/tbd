@@ -268,12 +268,7 @@ class AccountHeadRepository extends EntityRepository
             ->andWhere('parent_id IS NULL');
         $qb->execute();
 
-
-
         $config = $em->getRepository(Config::class)->find($configId);
-
-
-
 
         $currentAssets = $em->getRepository(TransactionMode::class)->findBy(['config' => $configId,'status'=>1]);
         foreach ($currentAssets as $asset){

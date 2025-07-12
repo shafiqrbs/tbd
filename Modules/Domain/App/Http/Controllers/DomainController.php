@@ -105,8 +105,55 @@ class DomainController extends Controller
             $password = "@123456";
             $email = $data['email'] ?? "{$data['username']}@gmail.com"; // If email is not present, default to username@gmail.com
 
+            $employeeSettingTypeId = SettingTypeModel::where('slug', 'employee-group')->first();
+            $getUserGroupId = SettingModel::updateOrCreate(
+                [
+                    'domain_id' => $entity->id,
+                    'setting_type_id' => $employeeSettingTypeId->id,
+                    'name' => 'Investor',
+                    'slug' => 'investor',
+                    'is_private' => true,
+                ],
+                [
+                    'status' => true,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]
+            );
+
+            SettingModel::updateOrCreate(
+                [
+                    'domain_id' => $entity->id,
+                    'setting_type_id' => $employeeSettingTypeId->id,
+                    'name' => 'User',
+                    'slug' => 'user',
+                    'is_private' => true,
+                ],
+                [
+                    'status' => true,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]
+            );
+
+            SettingModel::updateOrCreate(
+                [
+                    'domain_id' => $entity->id,
+                    'setting_type_id' => $employeeSettingTypeId->id,
+                    'name' => 'Employee',
+                    'slug' => 'employee',
+                    'is_private' => true,
+                ],
+                [
+                    'status' => true,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]
+            );
+
             $user = UserModel::create([
                 'username' => $data['username'],
+                'employee_group_id' => $getUserGroupId->id,
                 'name' => $data['name'],
                 'email' => $email,
                 'password' => Hash::make($password),

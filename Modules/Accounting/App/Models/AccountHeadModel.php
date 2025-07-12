@@ -175,7 +175,7 @@ class AccountHeadModel extends Model
         $name = "{$entity['mobile']}-{$entity['name']}";
         $accountHead = $config['account_customer_id'];
         if ($accountHead) {
-            self::create(
+            $head = self::create(
                 [
                     'name' => $name,
                     'display_name' => $entity['name'],
@@ -188,6 +188,14 @@ class AccountHeadModel extends Model
                     'config_id' => $config->id
                 ]
             );
+
+            $exists = AccountHeadDetailsModel::where('account_head_id', $head->id)->first();
+            if (!$exists) {
+                AccountHeadDetailsModel::create([
+                    'config_id'       => $head->config_id,      // or $head->config->id if using relationships
+                    'account_head_id' => $head->id,
+                ]);
+            }
         }
 
     }
