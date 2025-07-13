@@ -40,7 +40,8 @@ class AccountVoucherRepository extends EntityRepository
             $qb = $this->getEntityManager()
                 ->getConnection()
                 ->createQueryBuilder()
-                ->delete('acc_voucher')
+                ->delete('acc_voucher','e')
+                ->join('e.acc_journal','m')
                 ->where('config_id =:config_id')
                 ->setParameter('config_id', $configId);
             $qb->execute();

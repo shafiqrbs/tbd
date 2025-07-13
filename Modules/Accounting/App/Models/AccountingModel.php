@@ -171,6 +171,8 @@ class AccountingModel extends Model
     }
 
     public static function initiateConfig($domain){
+
+
         self::updateOrCreate(
             ['id' =>$domain['acc_config']],
             [
@@ -214,6 +216,7 @@ class AccountingModel extends Model
 
     public static function getVoucherConfig($config,$id){
 
+
         $accountId = AccountVoucherModel::where('config_id', $config)
             ->where('master_voucher_id', $id)
             ->where('status', 1)
@@ -238,17 +241,17 @@ class AccountingModel extends Model
 
         VoucherAccountPrimaryModel::insertOrIgnore(
             [
-                ['account_voucher_id' => $customer, 'primary_account_head_id' => $cash],
-                ['account_voucher_id' => $customer, 'primary_account_head_id' => $bank],
-                ['account_voucher_id' => $customer, 'primary_account_head_id' => $mobile],
+              //  ['account_voucher_id' => $customer, 'primary_account_head_id' => $cash],
+              //  ['account_voucher_id' => $customer, 'primary_account_head_id' => $bank],
+              //  ['account_voucher_id' => $customer, 'primary_account_head_id' => $mobile],
                 ['account_voucher_id' => $customer, 'primary_account_head_id' => $customerHead],
-                ['account_voucher_id' => $vendor, 'primary_account_head_id' => $cash],
-                ['account_voucher_id' => $vendor, 'primary_account_head_id' => $bank],
-                ['account_voucher_id' => $vendor, 'primary_account_head_id' => $mobile],
+              //  ['account_voucher_id' => $vendor, 'primary_account_head_id' => $cash],
+              //  ['account_voucher_id' => $vendor, 'primary_account_head_id' => $bank],
+              //  ['account_voucher_id' => $vendor, 'primary_account_head_id' => $mobile],
                 ['account_voucher_id' => $vendor, 'primary_account_head_id' => $vendorHead],
-                ['account_voucher_id' => $user, 'primary_account_head_id' => $cash],
-                ['account_voucher_id' => $user, 'primary_account_head_id' => $bank],
-                ['account_voucher_id' => $user, 'primary_account_head_id' => $mobile],
+             //   ['account_voucher_id' => $user, 'primary_account_head_id' => $cash],
+             //   ['account_voucher_id' => $user, 'primary_account_head_id' => $bank],
+             //   ['account_voucher_id' => $user, 'primary_account_head_id' => $mobile],
                 ['account_voucher_id' => $user, 'primary_account_head_id' => $userHead],
             ],
             ['account_voucher_id', 'primary_account_head_id'], // Unique keys
@@ -260,15 +263,15 @@ class AccountingModel extends Model
                 ['account_voucher_id' => $customer, 'secondary_account_head_id' => $cash],
                 ['account_voucher_id' => $customer, 'secondary_account_head_id' => $bank],
                 ['account_voucher_id' => $customer, 'secondary_account_head_id' => $mobile],
-                ['account_voucher_id' => $customer, 'secondary_account_head_id' => $customerHead],
+           //     ['account_voucher_id' => $customer, 'secondary_account_head_id' => $customerHead],
                 ['account_voucher_id' => $vendor, 'secondary_account_head_id' => $cash],
                 ['account_voucher_id' => $vendor, 'secondary_account_head_id' => $bank],
                 ['account_voucher_id' => $vendor, 'secondary_account_head_id' => $mobile],
-                ['account_voucher_id' => $vendor, 'secondary_account_head_id' => $vendorHead],
+            //    ['account_voucher_id' => $vendor, 'secondary_account_head_id' => $vendorHead],
                 ['account_voucher_id' => $user, 'secondary_account_head_id' => $cash],
                 ['account_voucher_id' => $user, 'secondary_account_head_id' => $bank],
                 ['account_voucher_id' => $user, 'secondary_account_head_id' => $mobile],
-                ['account_voucher_id' => $user, 'secondary_account_head_id' => $userHead],
+           //     ['account_voucher_id' => $user, 'secondary_account_head_id' => $userHead],
             ],
             ['account_voucher_id', 'secondary_account_head_id'],
             []
