@@ -36,15 +36,16 @@ class UserModel extends Model
         $page =  isset($request['page']) && $request['page'] > 0?($request['page'] - 1 ) : 0;
         $perPage = isset($request['offset']) && $request['offset']!=''? (int)($request['offset']):50;
         $skip = isset($page) && $page!=''? (int)$page*$perPage:0;
-        $users = self::where('domain_id',$domain['global_id'])
+        $users = self::where('users.domain_id',$domain['global_id'])
         ->select([
-            'id',
-            'name',
+            'users.id as id',
+            'users.name as name',
             'username',
+            'cor_setting.name as user_group',
             'email',
             'mobile',
-            'created_at'
-        ]);
+            'users.created_at'
+        ])->leftjoin('cor_setting','cor_setting.id','=','users.employee_group_id');
 
         if (isset($request['term']) && !empty($request['term'])){
             $users = $users->whereAny(['name','email','username','mobile'],'LIKE','%'.$request['term'].'%');
@@ -62,10 +63,10 @@ class UserModel extends Model
             $users = $users->where('email',$request['email']);
         }
 
-        $total  = $users->count();
+        $total  = $users->count('users.id');
         $entities = $users->skip($skip)
             ->take($perPage)
-            ->orderBy('id','DESC')
+            ->orderBy('users.name','DESC')
             ->get();
 
         $data = array('count'=>$total,'entities' => $entities);

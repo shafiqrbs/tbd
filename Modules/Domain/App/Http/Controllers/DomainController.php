@@ -808,7 +808,7 @@ class DomainController extends Controller
                 'domain_id' => $entity->id,
             ]);
 
-            $getProductType = UtilitySettingModel::getEntityDropdown('product-type');
+            /*$getProductType = UtilitySettingModel::getEntityDropdown('product-type');
             if (count($getProductType) > 0) {
                 // If no inventory config found, return JSON response.
                 if (!$config) {
@@ -836,22 +836,22 @@ class DomainController extends Controller
                             ['post-production', 'mid-production', 'pre-production']) ? 1 : 0,
                     ]);
                 }
+            }*/
 
-                TransactionModeModel::updateOrCreate([
-                    'config_id' => $accountingConfig->id],[
-                    'account_owner' => 'Cash',
-                    'authorised' => 'Cash',
-                    'name' => 'Cash',
-                    'short_name' => 'Cash',
-                    'slug' => 'cash',
-                    'is_selected' => true,
-                    'path' => null,
-                    'account_type' => 'Current',
-                    'method_id' => 20,
-                    'is_private' => 1,
-                    'status' => true
-                ]);
-            }
+            TransactionModeModel::updateOrCreate([
+                'config_id' => $accountingConfig->id],[
+                'account_owner' => 'Cash',
+                'authorised' => 'Cash',
+                'name' => 'Cash',
+                'short_name' => 'Cash',
+                'slug' => 'cash',
+                'is_selected' => true,
+                'path' => null,
+                'account_type' => 'Current',
+                'method_id' => 20,
+                'is_private' => 1,
+                'status' => true
+            ]);
 
 
             // Commit all database operations

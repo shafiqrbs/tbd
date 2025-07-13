@@ -578,20 +578,20 @@ class AccountHeadModel extends Model
             self::insertVendorAccount($config,$vendor);
         }
 
-        $users = UserModel::where([
-            'domain_id'     => $domainId,
-            'user_group' => 'user',
-            'enabled'    => 1,
-        ])->get();
+        $users = UserModel::leftJoin('cor_setting', 'cor_setting.id', '=', 'users.employee_group_id')
+            ->where('users.domain_id', $domainId)
+            ->whereIn('cor_setting.name', ['User', 'Employee']) // ✅ this is the correct syntax
+            ->where('users.enabled', 1)
+            ->get();
         foreach ($users as $user) {
             self::insertUserAccount($config, $user);
         }
 
-        $investors = UserModel::where([
-            'domain_id'     => $config->domain,
-            'user_group' => 'investor',
-            'enabled'    => 1,
-        ])->get();
+        $investors = UserModel::leftJoin('cor_setting', 'cor_setting.id', '=', 'users.employee_group_id')
+            ->where('users.domain_id', $domainId)
+            ->whereIn('cor_setting.name', ['Investor']) // ✅ this is the correct syntax
+            ->where('users.enabled', 1)
+            ->get();
 
         foreach ($investors as $investor) {
             self::insertCapitalInvestmentAccount($config, $investor);
