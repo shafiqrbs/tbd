@@ -140,7 +140,6 @@ class DomainController extends Controller
             SettingModel::updateOrCreate(
                [
                    'domain_id' => $entity->id,
-                  // 'setting_type_id' => $employeeSettingTypeId['id'],
                    'name' => 'Employee',
                    'slug' => 'employee',
                    'is_private' => true,
