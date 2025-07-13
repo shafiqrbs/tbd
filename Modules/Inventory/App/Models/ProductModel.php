@@ -175,6 +175,7 @@ class ProductModel extends Model
                 'inv_product.alternative_name',
                 'inv_stock.display_name',
                 'inv_stock.bangla_name',
+                'inv_category.name'
             ], 'LIKE', '%'.$request['term'].'%');
         }
 
@@ -196,6 +197,8 @@ class ProductModel extends Model
         $total = $products->count();
         $entities = $products->skip($skip)
             ->take($perPage)
+            ->orderBy('inv_setting.name', 'ASC')
+            ->orderBy('inv_category.name', 'ASC')
             ->orderBy('inv_product.name', 'ASC')
             ->get();
 
