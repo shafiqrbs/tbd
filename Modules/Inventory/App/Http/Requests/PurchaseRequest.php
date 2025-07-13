@@ -34,6 +34,7 @@ class PurchaseRequest extends FormRequest
             'narration' => 'nullable|string',
             'invoice_date' => 'nullable|date',
             'bonus_quantity' => 'nullable',
+            'warehouse_id' => 'nullable',
         ];
     }
 

@@ -5,14 +5,12 @@ namespace Modules\Core\App\Models;
 
 use Cviebrock\EloquentSluggable\Sluggable;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Support\Facades\DB;
+use Modules\Accounting\App\Models\AccountJournalItemModel;
 use Modules\Inventory\App\Models\ConfigPurchaseModel;
-use Modules\Inventory\App\Models\ConfigSalesModel;
 
 class VendorModel extends Model
 {
-    use HasFactory;
     use Sluggable;
 
 
@@ -85,6 +83,7 @@ class VendorModel extends Model
     public static function getRecordsForLocalStorage($request,$domain)
     {
         $vendors = self::leftJoin('cor_setting', 'cor_setting.id', '=', 'cor_vendors.vendor_group_id')
+            ->leftJoin('acc_head', 'acc_head.vendor_id', '=', 'cor_vendors.id')
             ->where('cor_vendors.domain_id', $domain['global_id'])
             ->select([
                 'cor_vendors.id',
@@ -103,9 +102,34 @@ class VendorModel extends Model
                 'cor_vendors.customer_id',
                 DB::raw('DATE_FORMAT(cor_vendors.created_at, "%d-%m-%Y") as created_date'),
                 'cor_vendors.created_at',
+                'acc_head.name as ledger_name',
+                'acc_head.id as ledger_id',
+                'acc_head.opening_balance',
+                'acc_head.amount',
+                'acc_head.credit',
+                'acc_head.debit',
+                'acc_head.credit_limit',
+                'acc_head.credit_period',
+                'acc_head.earn_point',
+                'acc_head.balance_bill_by_bill',
+                'acc_head.is_credit_date_check_voucher_entry'
             ])
-            ->orderBy('cor_vendors.id', 'DESC')
+            ->orderByDesc('cor_vendors.id')
             ->get();
+
+        // Attach closing_balance to each vendor
+        foreach ($vendors as $vendor) {
+            if ($vendor->ledger_id) {
+                $latestJournal = AccountJournalItemModel::where('account_sub_head_id', $vendor->ledger_id)->select('closing_amount')
+                    ->latest()
+                    ->first();
+
+                $vendor->closing_balance = $latestJournal?->closing_amount ?? 0;
+            } else {
+                $vendor->closing_balance = 0;
+            }
+        }
+
         return $vendors;
     }
 

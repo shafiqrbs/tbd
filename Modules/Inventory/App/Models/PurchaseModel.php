@@ -64,16 +64,18 @@ class PurchaseModel extends Model
         return $this->hasMany(StockItemInventoryHistoryModel::class, 'purchase_id');
     }
 
-    public function insertPurchaseItems($purchase,$items)
+    public function insertPurchaseItems($purchase,$items,$warehouse = null)
     {
         $timestamp = Carbon::now();
 
-        $items = array_map(function($item) {
+        $items = array_map(function($item) use ($warehouse) {
             $item['stock_item_id'] = $item['product_id'];
+            $item['warehouse_id'] = $item['warehouse_id'] ?? $warehouse;
             $item['name'] = $item['name'];
             unset($item['product_id']);
             return $item;
         }, $items);
+
         foreach ($items as &$record) {
             $record['purchase_id'] = $purchase->id;
             $record['config_id'] = $purchase->config_id;
@@ -215,6 +217,7 @@ class PurchaseModel extends Model
                 'inv_purchase.discount_calculation as discount_calculation',
                 'inv_purchase.discount_type as discount_type',
                 'inv_purchase.process',
+                'inv_purchase.warehouse_id',
                 'inv_purchase.remark',
             ])->with(['purchaseItems' => function ($query){
                 $query->leftjoin('inv_stock','inv_stock.id','=','inv_purchase_item.stock_item_id');

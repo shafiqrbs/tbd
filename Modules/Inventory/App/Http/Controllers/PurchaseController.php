@@ -83,7 +83,9 @@ class PurchaseController extends Controller
         }
         $entity = PurchaseModel::create($input);
         $process = new PurchaseModel();
-        $process->insertPurchaseItems($entity,$input['items']);
+        $process->insertPurchaseItems($entity,$input['items'],$input['warehouse_id']);
+
+        // purchase auto approve
         $findInvConfig = ConfigPurchaseModel::where('config_id',$this->domain['inv_config'])->first();
         if ($findInvConfig->is_purchase_auto_approved == 1){
             if (sizeof($entity->purchaseItems)>0){
@@ -161,7 +163,7 @@ class PurchaseController extends Controller
                     $item['purchase_price'] = $item['purchase_price'] ?? 0;
                     $item['sub_total'] = $item['sub_total'] ?? 0;
                     $item['mode'] = 'purchase';
-                    $item['warehouse_id'] = $item['warehouse_id'];
+                    $item['warehouse_id'] = $item['warehouse_id'] ?? $data['warehouse_id'];
                     $item['bonus_quantity'] = $item['bonus_quantity'];
                     PurchaseItemModel::create($item);
                 }
