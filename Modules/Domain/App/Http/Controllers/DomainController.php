@@ -106,60 +106,62 @@ class DomainController extends Controller
             $email = $data['email'] ?? "{$data['username']}@gmail.com"; // If email is not present, default to username@gmail.com
 
             $employeeSettingTypeId = SettingTypeModel::where('slug', 'employee-group')->first();
+
             $getUserGroupId = SettingModel::updateOrCreate(
-                [
-                    'domain_id' => $entity->id,
-                    'setting_type_id' => $employeeSettingTypeId->id,
-                    'name' => 'Investor',
-                    'slug' => 'investor',
-                    'is_private' => true,
-                ],
-                [
-                    'status' => true,
-                    'created_at' => now(),
-                    'updated_at' => now(),
-                ]
+               [
+                   'domain_id' => $entity->id,
+                   'setting_type_id' => $employeeSettingTypeId['id'],
+                   'name' => 'Investor',
+                   'slug' => 'investor',
+                   'is_private' => true,
+               ],
+               [
+                   'status' => true,
+                   'created_at' => now(),
+                   'updated_at' => now(),
+               ]
             );
 
             SettingModel::updateOrCreate(
-                [
-                    'domain_id' => $entity->id,
-                    'setting_type_id' => $employeeSettingTypeId->id,
-                    'name' => 'User',
-                    'slug' => 'user',
-                    'is_private' => true,
-                ],
-                [
-                    'status' => true,
-                    'created_at' => now(),
-                    'updated_at' => now(),
-                ]
+               [
+                   'domain_id' => $entity->id,
+                   'setting_type_id' => $employeeSettingTypeId['id'],
+                   'name' => 'User',
+                   'slug' => 'user',
+                   'is_private' => true,
+               ],
+               [
+                   'status' => true,
+                   'created_at' => now(),
+                   'updated_at' => now(),
+               ]
             );
 
             SettingModel::updateOrCreate(
-                [
-                    'domain_id' => $entity->id,
-                    'setting_type_id' => $employeeSettingTypeId->id,
-                    'name' => 'Employee',
-                    'slug' => 'employee',
-                    'is_private' => true,
-                ],
-                [
-                    'status' => true,
-                    'created_at' => now(),
-                    'updated_at' => now(),
-                ]
+               [
+                   'domain_id' => $entity->id,
+                  // 'setting_type_id' => $employeeSettingTypeId['id'],
+                   'name' => 'Employee',
+                   'slug' => 'employee',
+                   'is_private' => true,
+               ],
+               [
+                   'status' => true,
+                   'created_at' => now(),
+                   'updated_at' => now(),
+               ]
             );
 
             $user = UserModel::create([
                 'username' => $data['username'],
-                'employee_group_id' => $getUserGroupId->id,
                 'name' => $data['name'],
+                'employee_group_id' => $getUserGroupId['id'],
                 'email' => $email,
                 'password' => Hash::make($password),
                 'domain_id' => $entity->id
 
             ]);
+
             UserModel::updateOrCreate(
                 [
                     'id' => $user->id,
@@ -270,14 +272,8 @@ class DomainController extends Controller
                 'financial_start_date' =>  now(),
                 'financial_end_date' =>  now(),
             ]);
-            $accountConfig = $accountingConfig ? $accountingConfig->id:'';
-            if($accountConfig){
-                $domain = UserModel::getDomainData($entity->id);
-                AccountHeadModel::generateAccountHead($domain);
-                AccountingModel::initiateConfig($domain);
-                $em->getRepository(AccountHead::class)->resetAccountLedgerHead($accountConfig);
-                AccountVoucherModel::resetVoucher($domain);
-            }
+
+
             // Step 4: Create the accounting data
             NbrVatConfigModel::create([
                 'domain_id' => $entity->id,
@@ -316,24 +312,29 @@ class DomainController extends Controller
                             ['post-production', 'mid-production', 'pre-production']) ? 1 : 0,
                     ]);
                 }
-
-                TransactionModeModel::create([
-                    'config_id' => $accountingConfig->id,
-                    'account_owner' => 'Cash',
-                    'authorised' => 'Cash',
-                    'name' => 'Cash',
-                    'short_name' => 'Cash',
-                    'slug' => 'cash',
-                    'is_selected' => true,
-                    'path' => null,
-                    'account_type' => 'Current',
-                    'is_private' => 1,
-                    'method_id' => 20,
-                    'status' => true
-                ]);
             }
-
-
+            TransactionModeModel::create([
+                'config_id' => $accountingConfig->id,
+                'account_owner' => 'Cash',
+                'authorised' => 'Cash',
+                'name' => 'Cash',
+                'short_name' => 'Cash',
+                'slug' => 'cash',
+                'is_selected' => true,
+                'path' => null,
+                'account_type' => 'Current',
+                'is_private' => 1,
+                'method_id' => 20,
+                'status' => true
+            ]);
+            $accountConfig = $accountingConfig ? $accountingConfig->id : '';
+            if($accountConfig){
+                $domain = UserModel::getDomainData($entity->id);
+                AccountHeadModel::generateAccountHead($domain);
+                AccountingModel::initiateConfig($domain);
+                AccountHeadModel::initialLedgerSetup($domain);
+                AccountVoucherModel::resetVoucher($domain);
+            }
             // Commit all database operations
             DB::commit();
             // Return the response

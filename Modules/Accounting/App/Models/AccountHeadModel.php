@@ -548,57 +548,63 @@ class AccountHeadModel extends Model
                 }
             }
 
-            $config = ConfigModel::findOrFail($configId);
-            $currentAssets = TransactionModeModel::where('config_id', $configId)
-                ->where('status', 1)
-                ->get();
-            foreach ($currentAssets as $asset) {
-                self::insertTransactionAccount($config,$asset);
-            }
-
-            $customers = CustomerModel::where('domain_id', $domainId)
-                ->where('status', 1)
-                ->get();
-            foreach ($customers as $customer) {
-                self::insertCustomerAccount($config,$customer);
-            }
-
-            $vendors = VendorModel::where('domain_id', $domainId)
-                ->where('status', 1)
-                ->get();
-            foreach ($vendors as $vendor) {
-                self::insertVendorAccount($config,$vendor);
-            }
-
-            $users = UserModel::where([
-                'domain_id'     => $domainId,
-                'user_group' => 'user',
-                'enabled'    => 1,
-            ])->get();
-            foreach ($users as $user) {
-                self::insertUserAccount($config, $user);
-            }
-
-            $investors = UserModel::where([
-                'domain_id'     => $config->domain,
-                'user_group' => 'investor',
-                'enabled'    => 1,
-            ])->get();
-
-            foreach ($investors as $investor) {
-                self::insertCapitalInvestmentAccount($config, $investor);
-            }
-
-            $groups = CategoryModel::where([
-                'config_id' => $domain['inv_config'],
-                'parent' => null,
-                'status'    => 1,
-            ])->get();
-            foreach ($groups as $group) {
-                self::insertCategoryGroupAccount($config, $group);
-            }
-
         });
+    }
+
+    public static function initialLedgerSetup($domain){
+
+        $domainId = $domain->id;
+        $configId = $domain['acc_config'];
+        $config = ConfigModel::findOrFail($configId);
+
+        $currentAssets = TransactionModeModel::where('config_id', $configId)
+            ->where('status', 1)
+            ->get();
+        foreach ($currentAssets as $asset) {
+            self::insertTransactionAccount($config,$asset);
+        }
+
+        $customers = CustomerModel::where('domain_id', $domainId)
+            ->where('status', 1)
+            ->get();
+        foreach ($customers as $customer) {
+            self::insertCustomerAccount($config,$customer);
+        }
+
+        $vendors = VendorModel::where('domain_id', $domainId)
+            ->where('status', 1)
+            ->get();
+        foreach ($vendors as $vendor) {
+            self::insertVendorAccount($config,$vendor);
+        }
+
+        $users = UserModel::where([
+            'domain_id'     => $domainId,
+            'user_group' => 'user',
+            'enabled'    => 1,
+        ])->get();
+        foreach ($users as $user) {
+            self::insertUserAccount($config, $user);
+        }
+
+        $investors = UserModel::where([
+            'domain_id'     => $config->domain,
+            'user_group' => 'investor',
+            'enabled'    => 1,
+        ])->get();
+
+        foreach ($investors as $investor) {
+            self::insertCapitalInvestmentAccount($config, $investor);
+        }
+
+        $groups = CategoryModel::where([
+            'config_id' => $domain['inv_config'],
+            'parent' => null,
+            'status'    => 1,
+        ])->get();
+        foreach ($groups as $group) {
+            self::insertCategoryGroupAccount($config, $group);
+        }
     }
 
     public static function insertTransactionAccount($config , $entity)
