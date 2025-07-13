@@ -303,6 +303,7 @@ class AccountHeadModel extends Model
             // Apply pagination and ordering
             $entities = $query->skip($skip)
                 ->take($perPage)
+                ->orderBy('parent.name', 'ASC')
                 ->orderBy('acc_head.name', 'ASC')
                 ->get();
 
@@ -709,7 +710,7 @@ class AccountHeadModel extends Model
         }
     }
 
-    public function insertUserAccount($config,$user)
+    public static function insertUserAccount($config,$user)
     {
 
         $head = AccountHeadModel::updateOrCreate(
@@ -739,7 +740,7 @@ class AccountHeadModel extends Model
         }
     }
 
-    public function insertCapitalInvestmentAccount($config, $user)
+    public static function insertCapitalInvestmentAccount($config, $user)
     {
 
         $head = AccountHeadModel::updateOrCreate(

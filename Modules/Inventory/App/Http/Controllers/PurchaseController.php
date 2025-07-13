@@ -138,6 +138,66 @@ class PurchaseController extends Controller
         return $data;
     }
 
+     /**
+     * Show the specified resource.
+     */
+    public function copy($id)
+    {
+
+        $entity = PurchaseModel::getEditData($id, $this->domain);
+        if (!$entity) {
+            $entity = 'Data not found';
+        }
+        DB::beginTransaction();
+        try {
+
+            $getPurchase = PurchaseModel::findOrFail($id);
+            $data['remark']=$request->narration;
+            $data['due'] = ($data['total'] ?? 0) - ($data['payment'] ?? 0);
+            $getPurchase->fill($data);
+            $getPurchase->save();
+
+            PurchaseItemModel::class::where('purchase_id', $id)->delete();
+            if (sizeof($data['items'])>0){
+                foreach ($data['items'] as $item){
+                    $item['stock_item_id'] = $item['product_id'];
+                    $item['config_id'] = $getPurchase->config_id;
+                    $item['purchase_id'] = $id;
+                    $item['quantity'] = $item['quantity'] ?? 0;
+                    $item['purchase_price'] = $item['purchase_price'] ?? 0;
+                    $item['sub_total'] = $item['sub_total'] ?? 0;
+                    $item['mode'] = 'purchase';
+                    $item['warehouse_id'] = $item['warehouse_id'];
+                    $item['bonus_quantity'] = $item['bonus_quantity'];
+                    PurchaseItemModel::create($item);
+                }
+            }
+            DB::commit();
+
+            $response = new Response();
+            $response->headers->set('Content-Type', 'application/json');
+            $response->setContent(json_encode([
+                'message' => 'success',
+                'status' => Response::HTTP_OK,
+//                'data' => $purchaseData ?? []
+            ]));
+            $response->setStatusCode(Response::HTTP_OK);
+
+        } catch (\Exception $e) {
+            DB::rollback();
+            $response = new Response();
+            $response->headers->set('Content-Type', 'application/json');
+            $response->setContent(json_encode([
+                'message' => 'error',
+                'status' => Response::HTTP_INTERNAL_SERVER_ERROR,
+                'error' => $e->getMessage(),
+            ]));
+            $response->setStatusCode(Response::HTTP_OK);
+        }
+
+        return $response;
+    }
+
     /**
      * Update the specified resource in storage.
      */
