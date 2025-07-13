@@ -78,7 +78,7 @@ Route::prefix('/domain')->middleware(array(HeaderAuthenticationMiddleware::class
         Route::post('sub-domain/category', [B2bController::class,'categoryWiseProductManage'])->name('category_wise_product_insert');
         Route::get('sub-domain/setting/{id}', [B2bController::class,'b2bSubDomainSetting'])->name('b2b_sub_domain_setting');
         Route::get('sub-domain/category/{id}', [B2bController::class,'b2bSubDomainCategory'])->name('b2b_sub_domain_category');
-        Route::get('category-wise/price-update/{id}', [B2bController::class,'b2bCategoryWisePriceUpdate'])->name('b2b_category_wise_price_update');
+        Route::post('category-wise/price-update/{id}', [B2bController::class,'b2bCategoryWisePriceUpdate'])->name('b2b_category_wise_price_update');
         Route::get('sub-domain/product/{id}', [B2bController::class,'b2bSubDomainProduct'])->name('b2b_sub_domain_product');
         Route::delete('sub-domain/delete/{id}', [B2bController::class,'b2bSubDomainDelete'])->name('b2b_sub_domain_delete');
     });

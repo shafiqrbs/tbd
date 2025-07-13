@@ -20,6 +20,7 @@ use Modules\Core\App\Models\UserModel;
 use Modules\Core\App\Models\UserWarehouseModel;
 use Modules\Core\App\Models\VendorModel;
 use Modules\Domain\App\Http\Requests\B2bCategoryWiseProductRequest;
+use Modules\Domain\App\Http\Requests\B2bDomainWiseCategoryRequest;
 use Modules\Domain\App\Models\B2BCategoryPriceMatrixModel;
 use Modules\Domain\App\Models\B2BStockPriceMatrixModel;
 use Modules\Domain\App\Models\DomainModel;
@@ -734,8 +735,11 @@ class B2bController extends Controller
         ], ResponseAlias::HTTP_OK);
     }
 
-    public function b2bCategoryWisePriceUpdate($id)
+    public function b2bCategoryWisePriceUpdate(B2bDomainWiseCategoryRequest $request,$id)
     {
+        $input = $request->validated();
+        $finaCategoryMatrix = B2BCategoryPriceMatrixModel::findOrFail($id);
+        $finaCategoryMatrix->update($input);
         DB::beginTransaction();
 
         try {
