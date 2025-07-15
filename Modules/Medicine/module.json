@@ -1,0 +1,11 @@
+{
+    "name": "Medicine",
+    "alias": "medicine",
+    "description": "",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\Medicine\\App\\Providers\\MedicineServiceProvider"
+    ],
+    "files": []
+}

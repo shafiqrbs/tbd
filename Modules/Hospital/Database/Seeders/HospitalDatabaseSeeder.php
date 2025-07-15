@@ -1,0 +1,16 @@
+<?php
+
+namespace Modules\Hospital\Database\Seeders;
+
+use Illuminate\Database\Seeder;
+
+class HospitalDatabaseSeeder extends Seeder
+{
+    /**
+     * Run the database seeds.
+     */
+    public function run(): void
+    {
+        // $this->call([]);
+    }
+}
