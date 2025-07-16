@@ -105,7 +105,7 @@ class VendorModel extends Model
                 'acc_head.name as ledger_name',
                 'acc_head.id as ledger_id',
                 'acc_head.opening_balance',
-                'acc_head.amount',
+                'acc_head.amount as closing_balance',
                 'acc_head.credit',
                 'acc_head.debit',
                 'acc_head.credit_limit',
@@ -116,19 +116,6 @@ class VendorModel extends Model
             ])
             ->orderByDesc('cor_vendors.id')
             ->get();
-
-        // Attach closing_balance to each vendor
-        foreach ($vendors as $vendor) {
-            if ($vendor->ledger_id) {
-                $latestJournal = AccountJournalItemModel::where('account_sub_head_id', $vendor->ledger_id)->select('closing_amount')
-                    ->latest()
-                    ->first();
-
-                $vendor->closing_balance = $latestJournal?->closing_amount ?? 0;
-            } else {
-                $vendor->closing_balance = 0;
-            }
-        }
 
         return $vendors;
     }
