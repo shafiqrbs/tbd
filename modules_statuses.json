@@ -9,5 +9,7 @@
     "Accounting": true,
     "VatTax": true,
     "NbrVatTax": true,
-    "Production": true
+    "Production": true,
+    "Hospital": true,
+    "Medicine": true
 }

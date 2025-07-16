@@ -15,6 +15,7 @@ use Modules\Accounting\App\Models\AccountHeadDetailsModel;
 use Modules\Accounting\App\Models\AccountHeadModel;
 use Modules\Accounting\App\Models\AccountingModel;
 use Modules\Accounting\App\Models\AccountJournalItemModel;
+use Modules\Accounting\App\Models\AccountVoucherModel;
 use Modules\Accounting\App\Models\LedgerDetailsModel;
 use Modules\Accounting\App\Models\TransactionModeModel;
 use Modules\AppsApi\App\Services\JsonRequestResponse;
@@ -166,10 +167,11 @@ class AccountHeadController extends Controller
      */
     public function resetAccountVoucher(EntityManager $em)
     {
-        $config_id = $this->domain['acc_config'];
-        $entity = $em->getRepository(AccountVoucher::class)->resetVoucher($config_id);
+
+        AccountVoucherModel::resetVoucher($this->domain);
+        AccountingModel::initiateConfig($this->domain);
         $service = new JsonRequestResponse();
-        return $service->returnJosnResponse($entity);
+        return $service->returnJosnResponse('success');
     }
 
     /**

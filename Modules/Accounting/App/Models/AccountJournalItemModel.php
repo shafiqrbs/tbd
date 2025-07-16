@@ -303,6 +303,28 @@ class AccountJournalItemModel extends Model
         ];
     }
 
+    public static function handleOpeningClosing($journal,$journalItem){
+
+        $opening = self::getLedgerWiseOpeningBalance(
+            ledgerId: $journalItem->account_ledger_id,
+                    configId: $journal->config_id,
+                    journalItemId: $journalItem->id
+                );
+                $closing = $journalItem->mode === 'debit'
+                    ? $opening + $journalItem->amount
+                    : ($journalItem->mode === 'credit' ? $opening - $journalItem->amount : 0);
+
+                $journalItem->update([
+                    'opening_amount' => $opening,
+                    'closing_amount' => $closing,
+                ]);
+
+                $findAccoundLegderHead = AccountHeadModel::find($journalItem->account_sub_head_id);
+                $findAccoundLegderHead->update([
+                    'amount' => $closing,
+                ]);
+    }
+
 
 
 }
