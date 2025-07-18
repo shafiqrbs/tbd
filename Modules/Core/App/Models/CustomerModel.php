@@ -146,6 +146,11 @@ class CustomerModel extends Model
         return $patternCodeService->customerCode($params);
     }
 
+    public function accountHead()
+    {
+        return $this->belongsTo(AccountHeadModel::class, 'vendor_id');
+    }
+
 
     public static function getRecords($domain,$request){
 
@@ -158,8 +163,11 @@ class CustomerModel extends Model
             ->leftJoin('users','users.id','=','cor_customers.marketing_id')
             ->leftJoin('cor_setting','cor_setting.id','=','cor_customers.customer_group_id')
             ->leftJoin('cor_locations','cor_locations.id','=','cor_customers.location_id')
+            ->join('acc_head', 'acc_head.customer_id', '=', 'cor_customers.id')
             ->select([
                 'cor_customers.id as id',
+                'acc_head.amount as outstanding',
+                'acc_head.id as account_id',
                 'cor_customers.name as name',
                 'cor_customers.mobile as mobile',
                 'cor_customers.credit_limit as credit_limit',

@@ -5,7 +5,9 @@ namespace Modules\Core\App\Models;
 
 use Cviebrock\EloquentSluggable\Sluggable;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Support\Facades\DB;
+use Modules\Accounting\App\Models\AccountHeadModel;
 use Modules\Accounting\App\Models\AccountJournalItemModel;
 use Modules\Inventory\App\Models\ConfigPurchaseModel;
 
@@ -35,15 +37,25 @@ class VendorModel extends Model
         'status'
     ];
 
+    public function accountHead(): HasOne
+    {
+        return $this->hasOne(AccountHeadModel::class,'customer_id');
+    }
+
     public static function getRecords($request,$domain)
     {
 
-        $page =  isset($request['page']) && $request['page'] > 0?($request['page'] - 1 ) : 0;
-        $perPage = isset($request['offset']) && $request['offset']!=''? (int)($request['offset']):0;
-        $skip = isset($page) && $page!=''? (int)$page * $perPage:0;
-        $vendors = self::leftJoin('cor_setting', 'cor_setting.id', '=', 'cor_vendors.vendor_group_id')->where('cor_vendors.domain_id', $domain['global_id'])
+        $page = max((int)($request['page'] ?? 1) - 1, 0);
+        $perPage = (int)($request['offset'] ?? 50);
+        $skip = $page * $perPage;
+
+        $vendors = self::leftJoin('cor_setting', 'cor_setting.id', '=', 'cor_vendors.vendor_group_id')
+            ->join('acc_head', 'acc_head.vendor_id', '=', 'cor_vendors.id')
+            ->where('cor_vendors.domain_id', $domain['global_id'])
             ->select([
                 'cor_vendors.id as id',
+                'acc_head.amount as outstanding',
+                'acc_head.id as account_id',
                 'cor_vendors.name as name',
                 'cor_vendors.company_name as company_name',
                 'email',
