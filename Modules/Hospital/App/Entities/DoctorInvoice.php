@@ -53,12 +53,10 @@ class DoctorInvoice
      **/
     private  $createdBy;
 
-
     /**
      * @ORM\ManyToOne(targetEntity="Modules\Core\App\Entities\User")
      **/
     private  $approvedBy;
-
 
     /**
      * @ORM\ManyToOne(targetEntity="Modules\Accounting\App\Entities\TransactionMode")

@@ -76,7 +76,6 @@ class InvoiceParticular
     private  $sampleCollectedBy;
 
 
-
     /**
      * @var integer
      *
