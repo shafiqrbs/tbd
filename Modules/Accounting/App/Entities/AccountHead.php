@@ -27,7 +27,7 @@ class AccountHead
 
 
     /**
-     * @ORM\ManyToOne(targetEntity="Config", inversedBy="children", cascade={"detach","merge"})
+     * @ORM\ManyToOne(targetEntity="Config",cascade={"detach","merge"})
      * @ORM\JoinColumn(name="config_id", referencedColumnName="id", onDelete="CASCADE")
      */
     protected $config;

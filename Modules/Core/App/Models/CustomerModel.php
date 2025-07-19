@@ -146,11 +146,6 @@ class CustomerModel extends Model
         return $patternCodeService->customerCode($params);
     }
 
-    public function accountHead()
-    {
-        return $this->belongsTo(AccountHeadModel::class, 'vendor_id');
-    }
-
 
     public static function getRecords($domain,$request){
 

@@ -39,7 +39,7 @@ class VendorModel extends Model
 
     public function accountHead(): HasOne
     {
-        return $this->hasOne(AccountHeadModel::class,'customer_id');
+        return $this->hasOne(AccountHeadModel::class,'vendor_id');
     }
 
     public static function getRecords($request,$domain)
