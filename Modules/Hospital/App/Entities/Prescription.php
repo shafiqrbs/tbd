@@ -1,16 +1,17 @@
 <?php
 
 namespace Modules\Hospital\App\Entities;
+
 use Doctrine\ORM\Mapping as ORM;
 use Gedmo\Mapping\Annotation as Gedmo;
 
 /**
- * Service
+ * HmsCommission
  *
- * @ORM\Table( name ="hms_particular_type")
+ * @ORM\Table( name ="hms_prescription")
  * @ORM\Entity()
  */
-class HmsParticularType
+class Prescription
 {
     /**
      * @var integer
@@ -21,6 +22,14 @@ class HmsParticularType
      */
     private $id;
 
+
+    /**
+     * @ORM\ManyToOne(targetEntity="Config", cascade={"detach","merge"})
+     * @ORM\JoinColumn(name="config_id", referencedColumnName="id", onDelete="CASCADE")
+     */
+    protected $config;
+
+
     /**
      * @var string
      *
@@ -28,19 +37,6 @@ class HmsParticularType
      */
     private $name;
 
-    /**
-     * @var string
-     *
-     * @ORM\Column(name="slug", type="string", length=50, nullable=true)
-     */
-    private $slug;
-
-    /**
-     * @var string
-     *
-     * @ORM\Column(name="code", type="string", length=10, nullable=true)
-     */
-    private $code;
 
     /**
      * @var boolean
@@ -62,6 +58,7 @@ class HmsParticularType
      * @ORM\Column(name="updated_at", type="datetime")
      */
     private $updatedAt;
+
 
     /**
      * Get id

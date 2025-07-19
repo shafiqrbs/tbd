@@ -60,12 +60,12 @@ class Invoice
     private  $marketingExecutive;
 
     /**
-     * @ORM\ManyToOne(targetEntity="Particular", inversedBy="hmsInvoice")
+     * @ORM\ManyToOne(targetEntity="Particular")
      **/
     private  $referredDoctor;
 
     /**
-     * @ORM\ManyToOne(targetEntity="Particular", inversedBy="assignDoctorInvoices")
+     * @ORM\ManyToOne(targetEntity="Particular")
      **/
     private  $assignDoctor;
 
