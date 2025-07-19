@@ -194,6 +194,12 @@ class ProductModel extends Model
         if (isset($request['type']) && !empty($request['type']) && $request['type'] == 'product') {
             $products = $products->where('inv_stock.is_master', 1);
         }
+        if (isset($request['category_id']) && !empty($request['category_id'])) {
+            $products = $products->where('inv_product.category_id', $request['category_id']);
+        }
+        if (isset($request['product_type_id']) && !empty($request['product_type_id'])) {
+            $products = $products->where('inv_product.product_type_id', $request['product_type_id']);
+        }
         $total = $products->count();
         $entities = $products->skip($skip)
             ->take($perPage)

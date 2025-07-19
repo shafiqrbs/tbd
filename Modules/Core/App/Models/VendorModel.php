@@ -4,6 +4,7 @@ namespace Modules\Core\App\Models;
 
 
 use Cviebrock\EloquentSluggable\Sluggable;
+use DateTime;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Support\Facades\DB;
@@ -39,10 +40,10 @@ class VendorModel extends Model
 
     public function accountHead(): HasOne
     {
-        return $this->hasOne(AccountHeadModel::class,'vendor_id');
+        return $this->hasOne(AccountHeadModel::class, 'vendor_id');
     }
 
-    public static function getRecords($request,$domain)
+    public static function getRecords($request, $domain)
     {
 
         $page = max((int)($request['page'] ?? 1) - 1, 0);
@@ -63,36 +64,36 @@ class VendorModel extends Model
                 'cor_setting.name as group_name',
                 'cor_setting.id as group_id',
                 'cor_vendors.created_at as created_at '
-        ]);
+            ]);
 
-        if (isset($request['term']) && !empty($request['term'])){
-            $vendors = $vendors->whereAny(['name','email','company_name','mobile'],'LIKE','%'.$request['term'].'%');
+        if (isset($request['term']) && !empty($request['term'])) {
+            $vendors = $vendors->whereAny(['name', 'email', 'company_name', 'mobile'], 'LIKE', '%' . $request['term'] . '%');
         }
 
-        if (isset($request['name']) && !empty($request['name'])){
-            $vendors = $vendors->where('name',$request['name']);
+        if (isset($request['name']) && !empty($request['name'])) {
+            $vendors = $vendors->where('name', $request['name']);
         }
 
-        if (isset($request['mobile']) && !empty($request['mobile'])){
-            $vendors = $vendors->where('mobile',$request['mobile']);
+        if (isset($request['mobile']) && !empty($request['mobile'])) {
+            $vendors = $vendors->where('mobile', $request['mobile']);
         }
 
-        if (isset($request['company_name']) && !empty($request['company_name'])){
-            $vendors = $vendors->where('company_name',$request['company_name']);
+        if (isset($request['company_name']) && !empty($request['company_name'])) {
+            $vendors = $vendors->where('company_name', $request['company_name']);
         }
 
-        $total  = $vendors->count();
+        $total = $vendors->count();
         $entities = $vendors->skip($skip)
-                        ->take($perPage)
-                        ->orderBy('id','DESC')
-                        ->get();
+            ->take($perPage)
+            ->orderBy('id', 'DESC')
+            ->get();
 
-        $data = array('count'=>$total,'entities'=>$entities);
+        $data = array('count' => $total, 'entities' => $entities);
         return $data;
     }
 
 
-    public static function getRecordsForLocalStorage($request,$domain)
+    public static function getRecordsForLocalStorage($request, $domain)
     {
         $vendors = self::leftJoin('cor_setting', 'cor_setting.id', '=', 'cor_vendors.vendor_group_id')
             ->leftJoin('acc_head', 'acc_head.vendor_id', '=', 'cor_vendors.id')
@@ -133,10 +134,11 @@ class VendorModel extends Model
     }
 
 
-    public static function boot() {
+    public static function boot()
+    {
         parent::boot();
         self::creating(function ($model) {
-            $date =  new \DateTime("now");
+            $date = new DateTime("now");
             $model->unique_id = self::quickRandom();
             $model->created_at = $date;
             $model->updated_at = $date;
@@ -144,7 +146,7 @@ class VendorModel extends Model
         });
 
         self::updating(function ($model) {
-            $date =  new \DateTime("now");
+            $date = new DateTime("now");
             $model->unique_id = self::quickRandom();
             $model->updated_at = $date;
         });
@@ -172,23 +174,25 @@ class VendorModel extends Model
     }
 
 
-    public static function insertPurchaseVendor($domain,$input)
+    public static function insertPurchaseVendor($domain, $input)
     {
-        $domainConfig = ConfigPurchaseModel::where('config_id',$domain['inv_config']);
-        if($domainConfig and $domainConfig->default_purchase_group_id){
+        $domainConfig = ConfigPurchaseModel::where('config_id', $domain['inv_config']);
+        if ($domainConfig and $domainConfig->default_purchase_group_id) {
             $customer['vendor_group_id'] = $domainConfig->default_purchase_group_id;
         }
-        $customer['domain_id'] =  $domain['domain_id'];
-        $customer['company_name'] = ($input['vendor_name']) ? $input['vendor_name'] :'';
-        $customer['name'] = ($input['vendor_name']) ? $input['vendor_name'] :'';
-        $customer['mobile'] = ($input['vendor_mobile']) ? $input['vendor_mobile'] :'';
-        $customer['email'] = ($input['vendor_email']) ? $input['vendor_email'] :'';
+        $customer['domain_id'] = $domain['domain_id'];
+        $customer['company_name'] = ($input['vendor_name']) ? $input['vendor_name'] : '';
+        $customer['name'] = ($input['vendor_name']) ? $input['vendor_name'] : '';
+        $customer['mobile'] = ($input['vendor_mobile']) ? $input['vendor_mobile'] : '';
+        $customer['email'] = ($input['vendor_email']) ? $input['vendor_email'] : '';
         return self::create($customer);
 
 
     }
-    public static function uniqueVendorCheck($domain,$mobile,$name){
-        return self::where([['company_name',$name],['mobile',$mobile],['domain_id',$domain]])->first();
+
+    public static function uniqueVendorCheck($domain, $mobile, $name)
+    {
+        return self::where([['company_name', $name], ['mobile', $mobile], ['domain_id', $domain]])->first();
     }
 
 }
