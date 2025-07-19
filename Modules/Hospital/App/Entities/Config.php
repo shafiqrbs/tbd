@@ -314,12 +314,6 @@ class Config
     protected $headerPath;
 
 
-    /**
-     * @Assert\File(maxSize="8388608")
-     */
-    protected $headerFile;
-
-
    /**
      * @ORM\Column(type="string", length=255, nullable=true)
      */
@@ -331,11 +325,6 @@ class Config
      */
     protected $cssContent;
 
-
-    /**
-     * @Assert\File(maxSize="8388608")
-     */
-    protected $footerFile;
 
     /**
      * @var \DateTime

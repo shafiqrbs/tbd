@@ -1,7 +1,6 @@
 <?php
 
 namespace Modules\Hospital\App\Entities;
-
 use Doctrine\ORM\Mapping as ORM;
 use Gedmo\Mapping\Annotation as Gedmo;
 
@@ -34,18 +33,13 @@ class PathologicalReport
      */
     protected $parent;
 
+
+
     /**
      * @ORM\OneToMany(targetEntity="PathologicalReport" , mappedBy="parent")
      * @ORM\OrderBy({"sorting" = "ASC"})
      **/
     private $children;
-
-
-    /**
-     * @ORM\ManyToOne(targetEntity="Particular", inversedBy="pathologicalReports")
-     * @ORM\JoinColumn(onDelete="CASCADE")
-     **/
-    private $particular;
 
 
     /**

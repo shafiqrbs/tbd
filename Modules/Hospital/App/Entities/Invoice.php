@@ -1,6 +1,6 @@
 <?php
 
-namespace Appstore\Bundle\HospitalBundle\Entity;
+namespace Modules\Hospital\App\Entities;
 use Doctrine\ORM\Mapping as ORM;
 use Gedmo\Mapping\Annotation as Gedmo;
 

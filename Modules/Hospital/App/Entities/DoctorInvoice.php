@@ -34,13 +34,13 @@ class DoctorInvoice
      * @ORM\JoinColumn(onDelete="CASCADE")
      * @ORM\OrderBy({"updated" = "DESC"})
      **/
-    private $hmsInvoice;
+    private $invoice;
 
     /**
-     * @ORM\ManyToOne(targetEntity="HmsCommission")
+     * @ORM\ManyToOne(targetEntity="Commission")
      * @ORM\OrderBy({"name" = "ASC"})
      **/
-    private $hmsCommission;
+    private $commission;
 
     /**
      * @ORM\ManyToOne(targetEntity="Particular")

@@ -9,8 +9,9 @@ use Gedmo\Mapping\Annotation as Gedmo;
  * HmsCommission
  *
  * @ORM\Table( name ="hms_commission")
+ * @ORM\Entity()
  */
-class HmsCommission
+class Commission
 {
     /**
      * @var integer
@@ -21,13 +22,12 @@ class HmsCommission
      */
     private $id;
 
+
     /**
      * @ORM\ManyToOne(targetEntity="Config", cascade={"detach","merge"})
      * @ORM\JoinColumn(name="config_id", referencedColumnName="id", onDelete="CASCADE")
      */
     protected $config;
-
-
 
     /**
      * @var string
@@ -57,6 +57,7 @@ class HmsCommission
      * @ORM\Column(name="updated_at", type="datetime")
      */
     private $updatedAt;
+
 
     /**
      * Get id

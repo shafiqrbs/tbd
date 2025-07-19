@@ -1,7 +1,6 @@
 <?php
 
 namespace Modules\Hospital\App\Entities;
-
 use Doctrine\ORM\Mapping as ORM;
 use Gedmo\Mapping\Annotation as Gedmo;
 
@@ -24,59 +23,59 @@ class InvoiceParticular
 
 
     /**
-     * @ORM\ManyToOne(targetEntity="Invoice", inversedBy="invoiceParticulars")
+     * @ORM\ManyToOne(targetEntity="Invoice")
      * @ORM\JoinColumn(onDelete="CASCADE")
      **/
     private $hmsInvoice;
 
     /**
-     * @ORM\ManyToOne(targetEntity="Appstore\Bundle\HospitalBundle\Entity\InvoicePathologicalGroup", inversedBy="invoiceParticulars")
+     * @ORM\ManyToOne(targetEntity="InvoicePathologicalGroup")
      * @ORM\JoinColumn(nullable=true,onDelete="SET NULL")
      **/
     private $invoicePathologicalGroup;
 
      /**
-     * @ORM\ManyToOne(targetEntity="Appstore\Bundle\HospitalBundle\Entity\AdmissionPatientParticular",inversedBy="invoiceParticular")
+     * @ORM\ManyToOne(targetEntity="AdmissionPatientParticular")
      * @ORM\JoinColumn(onDelete="CASCADE")
      **/
     private $admissionPatientParticular;
 
 
     /**
-     * @ORM\ManyToOne(targetEntity="Appstore\Bundle\HospitalBundle\Entity\Particular", inversedBy="invoiceParticular")
+     * @ORM\ManyToOne(targetEntity="Particular", inversedBy="invoiceParticular")
      * @ORM\JoinColumn(name="particular_id", referencedColumnName="id", nullable=true, onDelete="cascade")
      **/
     private $particular;
 
     /**
-     * @ORM\ManyToOne(targetEntity="Appstore\Bundle\HospitalBundle\Entity\Particular", inversedBy="invoiceParticularDoctor")
+     * @ORM\ManyToOne(targetEntity="Particular")
      **/
     private $assignDoctor;
 
     /**
-     * @ORM\ManyToOne(targetEntity="Appstore\Bundle\HospitalBundle\Entity\Particular")
+     * @ORM\ManyToOne(targetEntity="Particular")
      **/
     private $assignLabuser;
 
     /**
-     * @ORM\OneToMany(targetEntity="Appstore\Bundle\HospitalBundle\Entity\InvoicePathologicalReport", mappedBy="invoiceParticular" , cascade={"remove"})
-     **/
-    private $invoicePathologicalReports;
-
-    /**
-     * @ORM\ManyToOne(targetEntity="Core\UserBundle\Entity\User")
+     * @ORM\ManyToOne(targetEntity="Modules\Core\App\Entities\User")
+     * @ORM\JoinColumn(name="particular_delivered_by_id", referencedColumnName="id", nullable=true)
      **/
     private  $particularDeliveredBy;
 
-    /**
-     * @ORM\ManyToOne(targetEntity="Core\UserBundle\Entity\User")
+     /**
+     * @ORM\ManyToOne(targetEntity="Modules\Core\App\Entities\User")
+     * @ORM\JoinColumn(name="particular_prepared_by_id", referencedColumnName="id", nullable=true)
      **/
     private  $particularPreparedBy;
 
-    /**
-     * @ORM\ManyToOne(targetEntity="Core\UserBundle\Entity\User")
+     /**
+     * @ORM\ManyToOne(targetEntity="Modules\Core\App\Entities\User")
+     * @ORM\JoinColumn(name="sample_collected_by_id", referencedColumnName="id", nullable=true)
      **/
     private  $sampleCollectedBy;
+
+
 
     /**
      * @var integer
@@ -192,10 +191,6 @@ class InvoiceParticular
 	 */
 	protected $path;
 
-	/**
-	 * @Assert\File(maxSize="8388608")
-	 */
-	protected $file;
 
 	/**
      * Get id

@@ -1,21 +1,13 @@
 <?php
 
-namespace Appstore\Bundle\HospitalBundle\Entity;
-
-
-use Core\UserBundle\Entity\User;
+namespace Modules\Hospital\App\Entities;
 use Doctrine\ORM\Mapping as ORM;
 use Gedmo\Mapping\Annotation as Gedmo;
-use Setting\Bundle\LocationBundle\Entity\Location;
-use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
-use Symfony\Component\HttpFoundation\File\UploadedFile;
-use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * Particular
  *
- * @ORM\Table( name = "hms_particular")
- * @UniqueEntity(fields={"assignOperator"},message="Doctor already existing,Please try again.")
+ * @ORM\Table( name ="hms_particular")
  * @ORM\Entity()
  */
 class Particular
@@ -34,13 +26,6 @@ class Particular
      * @ORM\JoinColumn(onDelete="CASCADE")
      **/
     private $hospitalConfig;
-
-
-    /**
-     * @ORM\ManyToOne(targetEntity="Appstore\Bundle\HospitalBundle\Entity\Service", inversedBy="particulars" )
-     * @ORM\OrderBy({"sorting" = "ASC"})
-     **/
-    private $service;
 
 
     /**

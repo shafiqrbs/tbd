@@ -1,7 +1,6 @@
 <?php
 
 namespace Modules\Hospital\App\Entities;
-
 use Doctrine\ORM\Mapping as ORM;
 use Gedmo\Mapping\Annotation as Gedmo;
 
@@ -11,7 +10,7 @@ use Gedmo\Mapping\Annotation as Gedmo;
  * @ORM\Table( name ="hms_particular_type")
  * @ORM\Entity()
  */
-class ParticularType
+class HmsParticularType
 {
     /**
      * @var integer

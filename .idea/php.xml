@@ -215,6 +215,7 @@
       <path value="$PROJECT_DIR$/vendor/_laravel_idea" />
       <path value="$PROJECT_DIR$/vendor/symfony/polyfill-php72" />
       <path value="$PROJECT_DIR$/vendor/symfony/polyfill-php84" />
+      <path value="$PROJECT_DIR$/vendor/laravel/telescope" />
     </include_path>
   </component>
   <component name="PhpStanOptionsConfiguration">
