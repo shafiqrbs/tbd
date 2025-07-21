@@ -101,9 +101,11 @@ Route::prefix('/production')->middleware([HeaderAuthenticationMiddleware::class,
     ;
     Route::post('/batch/create-batch-item', [ProductionBatchController::class,'insertBatchItem'])->name('production_insert_batch_item');
     Route::post('/batch/item/inline-quantity-update', [ProductionBatchController::class,'batchItemQuantityInlineUpdate'])->name('production_batch_item_quantity_update');
+    Route::post('/batch/raw-item/inline-quantity-update', [ProductionBatchController::class,'batchRawItemQuantityInlineUpdate'])->name('production_batch_raw_item_quantity_update');
     Route::post('/batch/approve/{id}', [ProductionBatchController::class,'batchApproved'])->name('production_batch_approve');
     Route::post('/batch/confirm-receive/{id}', [ProductionBatchController::class,'batchConfirmReceive'])->name('production_batch_receive_confirm');
     Route::get('/batch/recipe/{id}', [ProductionBatchController::class,'getBatchRecipe'])->name('production_batch_wise_recipe');;
+    Route::delete('/batch/item-delete/{id}', [ProductionBatchController::class,'batchItemDelete'])->name('production_batch_item_delete');;
 
 
     Route::prefix('restore')->middleware([HeaderAuthenticationMiddleware::class])->group(function() {

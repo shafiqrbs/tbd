@@ -14,6 +14,7 @@ use Modules\Inventory\App\Models\StockItemHistoryModel;
 use Modules\Inventory\App\Models\StockItemModel;
 use Modules\Production\App\Http\Requests\BatchItemQuantityInlineUpdateRequest;
 use Modules\Production\App\Http\Requests\BatchItemRequest;
+use Modules\Production\App\Http\Requests\BatchRawItemInlineUpdateRequest;
 use Modules\Production\App\Http\Requests\BatchRequest;
 use Modules\Production\App\Models\ProductionBatchItemModel;
 use Modules\Production\App\Models\ProductionBatchModel;
@@ -114,6 +115,7 @@ class ProductionBatchController extends Controller
                         'purchase_price' => $item->item_purchase_price,
                         'sales_price' => $item->item_sale_price,
                         'quantity' => $input['issue_quantity'] * $item->quantity,
+                        'issue_quantity' => $input['issue_quantity'] * $item->quantity,
                         'created_at' => now()
                     ];
                 }
@@ -184,6 +186,7 @@ class ProductionBatchController extends Controller
                             'purchase_price' => $item->item_purchase_price,
                             'sales_price' => $item->item_sale_price,
                             'quantity' => $input['quantity'] * $item->quantity,
+                            'issue_quantity' => $input['quantity'] * $item->quantity,
                             'created_at' => now(),
                         ];
 
@@ -204,6 +207,48 @@ class ProductionBatchController extends Controller
                 'success' => true,
                 'message' => 'Production batch item successfully updated.',
                 'data' => $productionBatchItem,
+            ], 200);
+
+        } catch (\Exception $e) {
+            // Rollback on error
+            DB::rollBack();
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function batchRawItemQuantityInlineUpdate(BatchRawItemInlineUpdateRequest $request)
+    {
+        try {
+            // Validate input
+            $input = $request->validated();
+
+            $productionExpense = ProductionExpense::find($input['expense_id']);
+            if (!$productionExpense) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Production expense item not found.',
+                ], 404);
+            }
+
+            // Start database transaction
+            DB::beginTransaction();
+
+            if ($input['type'] === 'raw_issue_quantity') {
+                $productionExpense->update([
+                    'quantity' => $input['value']
+                ]);
+            }
+
+            DB::commit(); // Commit transaction
+
+            // Return success response
+            return response()->json([
+                'success' => true,
+                'message' => 'Production batch item successfully updated.',
+                'data' => $productionExpense,
             ], 200);
 
         } catch (\Exception $e) {

@@ -68,7 +68,13 @@ class ProductionExpense
 
     /**
      * @var float
-     *
+     * @ORM\Column(name="issue_quantity", type="float", nullable= true)
+     */
+    private $issueQuantity;
+
+
+    /**
+     * @var float
      * @ORM\Column(name="quantity", type="float", nullable= true)
      */
     private $quantity;

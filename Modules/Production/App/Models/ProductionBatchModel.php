@@ -4,8 +4,12 @@ namespace Modules\Production\App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Modules\Core\App\Models\WarehouseModel;
 
 
 class ProductionBatchModel extends Model
@@ -48,6 +52,23 @@ class ProductionBatchModel extends Model
     {
         return $this->hasMany(ProductionBatchItemModel::class, 'batch_id');
     }
+
+    public function productionConfig(): BelongsTo
+    {
+        return $this->belongsTo(ProductionConfig::class, 'config_id', 'id');
+    }
+
+    public function getDomainWarehouseAttribute(): Collection
+    {
+        // Safely access the domain ID using null-safe operator
+        $domainId = $this->productionConfig?->domain_id;
+
+        return $domainId
+            ? WarehouseModel::where('domain_id', $domainId)->get()
+            : collect(); // Safe fallback when productionConfig is null
+    }
+
+
     public static function getRecords($request,$domain){
         $page =  isset($request['page']) && $request['page'] > 0?($request['page'] - 1 ) : 0;
         $perPage = isset($request['offset']) && $request['offset']!=''? (int)($request['offset']):0;
@@ -122,10 +143,13 @@ class ProductionBatchModel extends Model
                             'pro_expense.production_batch_item_id',
                             'pro_expense.production_item_id',
                             'pro_expense.quantity as needed_quantity',
+                            'pro_expense.issue_quantity as raw_issue_quantity',
                             'pro_element.material_id',
                             'pro_element.quantity',
                             'inv_stock.quantity as stock_quantity',
+                            'inv_stock.opening_quantity as opening_quantity',
                             'inv_stock.name as name',
+                            'inv_stock.uom',
                         ])
                             ->join('pro_element','pro_element.id','=','pro_expense.production_element_id')
                             ->join('inv_stock','inv_stock.id','=','pro_element.material_id')
@@ -146,7 +170,7 @@ class ProductionBatchModel extends Model
                 }
             }
         }
-
+//        $entity['ware'] = $entity->domain_warehouse;
         return $entity;
     }
 

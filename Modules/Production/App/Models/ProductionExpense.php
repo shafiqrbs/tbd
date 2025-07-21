@@ -24,6 +24,7 @@ class ProductionExpense extends Model
         'return_quantity',
         'issue_date',
         'purchase_price',
+        'issue_quantity',
         'sales_price'
     ];
 
