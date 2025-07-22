@@ -41,6 +41,21 @@ class Bank
 	private $name;
 
 
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="slug", type="string", length=255)
+     */
+    private $slug;
+
+    /**
+     * @var boolean
+     *
+     * @ORM\Column(name="status", type="boolean", nullable=true)
+     */
+    private $status=true;
+
+
 
 	/**
 	 * Set name
