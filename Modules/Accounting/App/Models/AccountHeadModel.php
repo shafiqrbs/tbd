@@ -28,6 +28,7 @@ class AccountHeadModel extends Model
         'parent_id',
         'customer_id',
         'vendor_id',
+        'user_id',
         'product_group_id',
         'category_id',
         'group',
@@ -720,6 +721,7 @@ class AccountHeadModel extends Model
             [
                 'config_id'    => $config->id,
                 'parent_id'    => $config->account_user_id ?? null, // Assumes this is an ID field
+                'user_id'      => $user->id,
                 'name'         => $user->name,
                 'display_name' => $user->name,
                 'slug'         => \Str::slug($user->name), // Optional: Convert name to slug format

@@ -669,6 +669,18 @@ class FileUploadController extends Controller
             }
             // Ensure valid data
             if ($productType && $values[5]) {
+
+                $productSize = ParticularModel::where('name', 'like', '%' . Str::slug(trim($values[8])) . '%')->where('config_id',$this->domain['config_id'])->first('id');
+                if (!$productSize) {
+                    $productSize = ParticularModel::create([
+                        'config_id' => $this->domain['config_id'],
+                        'particular_type_id' => 4,
+                        'name' => trim($values[8]),
+                        'slug' => Str::slug(trim($values[8])),
+                        'status' => true
+                    ]);
+                }
+
                 $productData = [
                     'code' => !empty($values[0]) ? str_replace("#", "", trim($values[0])) : null,
                     'barcode' => !empty($values[1]) ? str_replace("#", "", trim($values[1])) : null,
@@ -677,6 +689,7 @@ class FileUploadController extends Controller
                     'unit_id' => $productUnit->id ?? null,
                     'name' => trim($values[5]),
                     'item_size' => trim($values[8] ?? null),
+                    'size_id' => $productSize->id ?? null,
                     'alternative_name' => !empty(trim($values[6])) ? trim($values[6]) : null,
                     'bangla_name' => !empty(trim($values[7])) ? trim($values[7]) : null,
                     'purchase_price' => is_numeric(trim($values[10])) ? (float) trim($values[10]) : 0,

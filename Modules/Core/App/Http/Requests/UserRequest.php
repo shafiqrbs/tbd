@@ -42,6 +42,7 @@ class UserRequest extends FormRequest
                         'required',
                         Rule::unique('Modules\Core\App\Entities\User', 'mobile')  // Ensure using `users` table
                     ],
+
                     'email' => [
                         'required',
                         'email',

@@ -31,6 +31,11 @@ class UserModel extends Model
         return $this->hasOne(UserTransactionModel::class,'user_id','id');
     }
 
+    public function userGroup()
+    {
+        return $this->hasOne(SettingModel::class,'id','employee_group_id');
+    }
+
     public static function getRecords($request,$domain){
 
         $page =  isset($request['page']) && $request['page'] > 0?($request['page'] - 1 ) : 0;

@@ -6,8 +6,11 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Hash;
+use Modules\Accounting\App\Models\AccountHeadModel;
+use Modules\Accounting\App\Models\AccountingModel;
 use Modules\AppsApi\App\Services\JsonRequestResponse;
 use Modules\Core\App\Entities\UserRole;
 use Modules\Core\App\Http\Requests\UserLoginRequest;
@@ -55,17 +58,44 @@ class UserController extends Controller
     public function store(UserRequest $request)
     {
         $data = $request->validated();
+        DB::beginTransaction();
+        try {
+            $data['domain_id'] = $this->domain['global_id'];
+            $data['email_verified_at'] = now();
+            $data['password'] = Hash::make($data['password']);
+            $data['is_delete'] = 0;
+            $entity = UserModel::create($data);
+            $data['user_id'] = $entity->id;
+            UserProfileModel::create($data);
+            $config = AccountingModel::where('id', $this->domain['acc_config'])->first();
+            $userGroup = $entity->userGroup;
 
-        $data['domain_id'] = $this->domain['global_id'];
-        $data['email_verified_at']= now();
-        $data['password']= Hash::make($data['password']);
-        $data['is_delete']= 0;
-        $user = UserModel::create($data);
-        $data['user_id'] = $user->id;
-        UserProfileModel::create($data);
-        $service = new JsonRequestResponse();
-        return $service->returnJosnResponse($user);
+            if($userGroup->name =='Investor') {
+                $ledgerExist = AccountHeadModel::where('user_id', $entity->id)->where('config_id', $this->domain['acc_config'])->where('parent_id', $config->capital_investment_id)->first();
+                if (empty($ledgerExist)){
+                    AccountHeadModel::insertCapitalInvestmentAccount($config, $entity);
+                }
+            }else{
+                $ledgerExist = AccountHeadModel::where('user_id', $entity->id)->where('config_id', $this->domain['acc_config'])->where('parent_id', $config->account_customer_id)->first();
+                if(empty($ledgerExist))
+                AccountHeadModel::insertUserAccount($config, $entity);
+            }
+            DB::commit();
+            $service = new JsonRequestResponse();
+            return $service->returnJosnResponse($entity);
+        } catch (\Exception $e) {
+            // Something went wrong, rollback the transaction
+            DB::rollBack();
+
+            // Optionally log the exception for debugging purposes
+            \Log::error('Error storing domain and related data: ' . $e->getMessage());
+            $service = new JsonRequestResponse();
+            return $service->returnJosnResponse(Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+
+
     }
+
 
     /**
      * Show the specified resource.
