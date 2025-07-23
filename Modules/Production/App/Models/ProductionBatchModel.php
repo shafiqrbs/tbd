@@ -179,6 +179,68 @@ class ProductionBatchModel extends Model
         return self::where([['pro_batch.config_id',$domain['pro_config']],['pro_batch.status',1]])->select(['pro_batch.id','pro_batch.invoice','mode','issue_date',DB::raw('DATE_FORMAT(pro_batch.created_at, "%d-%M-%Y") as created_date')])->get();
     }
 
+    public static function issueReportData(array $params, int $domain_id, int $production_config_id) {
+        $data = self::query()
+            ->where('pro_batch.config_id', '=', $production_config_id)
+//            ->whereBetween('pro_batch.created_at', [$params['start_date'], $params['end_date']])
+            ->select([
+                'pro_batch.id',
+                DB::raw('DATE_FORMAT(pro_batch.created_at, "%d-%m-%Y") as created_date'),
+                'pro_batch.invoice',
+                'pro_batch.code',
+                'pro_batch.mode',
+                'pro_batch.process',
+                'pro_batch.status',
+                'pro_batch.issue_date',
+                'pro_batch.receive_date',
+                'pro_batch.remark',
+            ])
+            ->with(['batchItems' => function ($query) {
+                $query->select([
+                    'pro_batch_item.id',
+                    'pro_batch_item.batch_id',
+                    'pro_batch_item.production_item_id',
+                    'pro_batch_item.issue_quantity',
+                    'pro_batch_item.receive_quantity',
+                    'pro_batch_item.damage_quantity',
+                    'inv_stock.name',
+                    DB::raw('DATE_FORMAT(pro_batch_item.created_at, "%d-%m-%Y") as created_date'),
+                ])
+                    ->join('pro_item', 'pro_item.id', '=', 'pro_batch_item.production_item_id')
+                    ->join('inv_stock', 'inv_stock.id', '=', 'pro_item.item_id')
+                    ->with(['productionExpenses' => function ($expenseQuery) {
+                        $expenseQuery->select([
+                            'pro_expense.id',
+                            'pro_expense.production_batch_item_id',
+                            'pro_expense.production_item_id',
+                            'pro_expense.quantity as needed_quantity',
+                            'pro_expense.issue_quantity as raw_issue_quantity',
+                            'pro_element.material_id',
+                            'pro_element.quantity',
+                            'inv_stock.quantity as stock_quantity',
+                            'inv_stock.opening_quantity',
+                            'inv_stock.name',
+                            'inv_stock.uom',
+                        ])
+                            ->join('pro_element', 'pro_element.id', '=', 'pro_expense.production_element_id')
+                            ->join('inv_stock', 'inv_stock.id', '=', 'pro_element.material_id');
+                    }]);
+            }])
+            ->get()
+            ->each(function ($batch) {
+                foreach ($batch->batchItems as $batchItem) {
+                    foreach ($batchItem->productionExpenses as $expense) {
+                        $needed = (float) $expense->needed_quantity;
+                        $available = (float) $expense->stock_quantity;
 
+                        $expense->less_quantity = $needed > $available ? $needed - $available : null;
+                        $expense->more_quantity = $needed < $available ? $available - $needed : null;
+                    }
+                }
+            });
+//        $entity['ware'] = $entity->domain_warehouse;
+        return $data;
+//        dump($data);
+    }
 
 }

@@ -10,6 +10,7 @@ use Modules\Production\App\Http\Controllers\ProductionBatchController;
 use Modules\Production\App\Http\Controllers\ProductionIssueController;
 use Modules\Production\App\Http\Controllers\ProductionRecipeController;
 use Modules\Production\App\Http\Controllers\ProductionRecipeItemsController;
+use Modules\Production\App\Http\Controllers\ProductionReportController;
 use Modules\Production\App\Http\Controllers\SettingController;
 
 /*
@@ -110,6 +111,10 @@ Route::prefix('/production')->middleware([HeaderAuthenticationMiddleware::class,
 
     Route::prefix('restore')->middleware([HeaderAuthenticationMiddleware::class])->group(function() {
         Route::get('/item', [ProductionRecipeItemsController::class,'restore'])->name('pro_item_restore');
+    });
+
+    Route::prefix('report')->middleware([HeaderAuthenticationMiddleware::class])->group(function() {
+        Route::get('issue', [ProductionReportController::class,'issueReport'])->name('issue_report');
     });
 
 });
