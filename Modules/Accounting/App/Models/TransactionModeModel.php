@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Facades\DB;
+use Modules\Utility\App\Models\BanksModel;
 
 class TransactionModeModel extends Model
 {
@@ -68,6 +69,15 @@ class TransactionModeModel extends Model
         return $this->belongsTo(\Modules\Utility\App\Models\SettingModel::class);
     }
 
+    public function bank(): BelongsTo
+    {
+        return $this->belongsTo(BanksModel::class);
+    }
+
+    public function mobileService(): BelongsTo
+    {
+        return $this->belongsTo(\Modules\Utility\App\Models\SettingModel::class);
+    }
 
     public static function getRecords($request,$domain)
     {
@@ -79,16 +89,19 @@ class TransactionModeModel extends Model
             ->leftjoin('acc_setting as method','method.id','=','acc_transaction_mode.method_id')
             ->leftjoin('uti_settings as authorized','authorized.id','=','acc_transaction_mode.authorised_mode_id')
             ->leftjoin('uti_settings as account_type','account_type.id','=','acc_transaction_mode.account_mode_id')
+            ->leftjoin('uti_banks as bank','bank.id','=','acc_transaction_mode.bank_id')
             ->select([
                 'acc_transaction_mode.id',
                 'acc_transaction_mode.name',
+                DB::raw("CONCAT(bank.name,'<br/>Acc No.', acc_transaction_mode.account_number) AS bank_name"),
                 'acc_transaction_mode.slug',
                 'acc_transaction_mode.service_charge',
                 'acc_transaction_mode.account_owner',
                 'acc_transaction_mode.short_name',
+                'acc_transaction_mode.short_name',
                 'acc_transaction_mode.is_private as is_private',
                 'method.name as method_name',
-                'authorized.name as authorized_name',
+                DB::raw("CONCAT(authorized.name,'<br/>Mob No.', acc_transaction_mode.mobile) AS authorized_name"),
                 'account_type.name as account_type_name',
                 DB::raw("CONCAT('".url('')."/uploads/accounting/transaction-mode/', acc_transaction_mode.path) AS path")
             ]);

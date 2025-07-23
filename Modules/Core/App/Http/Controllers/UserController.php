@@ -70,7 +70,7 @@ class UserController extends Controller
             $config = AccountingModel::where('id', $this->domain['acc_config'])->first();
             $userGroup = $entity->userGroup;
 
-            if($userGroup->name =='Investor') {
+            if($userGroup->name =='Director') {
                 $ledgerExist = AccountHeadModel::where('user_id', $entity->id)->where('config_id', $this->domain['acc_config'])->where('parent_id', $config->capital_investment_id)->first();
                 if (empty($ledgerExist)){
                     AccountHeadModel::insertCapitalInvestmentAccount($config, $entity);

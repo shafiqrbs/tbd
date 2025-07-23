@@ -111,8 +111,8 @@ class DomainController extends Controller
                [
                    'domain_id' => $entity->id,
                    'setting_type_id' => $employeeSettingTypeId['id'],
-                   'name' => 'Investor',
-                   'slug' => 'investor',
+                   'name' => 'Director',
+                   'slug' => 'director',
                    'is_private' => true,
                ],
                [

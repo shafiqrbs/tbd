@@ -143,7 +143,7 @@ class AccountHeadController extends Controller
     {
         $config_id = $this->domain['acc_config'];
         AccountingModel::initiateConfig($this->domain);
-        $em->getRepository(AccountHead::class)->resetAccountLedgerHead($config_id);
+        AccountHeadModel::initialLedgerSetup($this->domain);
         $service = new JsonRequestResponse();
         $data = AccountHeadModel::getRecords($request,$this->domain);
         return $service->returnJosnResponse($data);

@@ -36,7 +36,7 @@ class TransactionModeRequest extends FormRequest
                     'authorised_mode_id' => 'nullable|integer',
                     'account_mode_id' => 'nullable|integer',
                     'account_type_mode_id' => 'nullable|integer',
-                    'mobile' => 'nullable|integer',
+                    'mobile' => 'nullable|string',
                     'bank_id' => 'nullable|integer',
                     'service_charge' => 'nullable|string',
                     'short_name' => 'required|string',

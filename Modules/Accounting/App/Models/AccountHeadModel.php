@@ -591,7 +591,7 @@ class AccountHeadModel extends Model
 
         $investors = UserModel::leftJoin('cor_setting', 'cor_setting.id', '=', 'users.employee_group_id')
             ->where('users.domain_id', $domainId)
-            ->whereIn('cor_setting.name', ['Investor']) // ✅ this is the correct syntax
+            ->whereIn('cor_setting.name', ['Director']) // ✅ this is the correct syntax
             ->where('users.enabled', 1)
             ->get();
 
@@ -622,6 +622,8 @@ class AccountHeadModel extends Model
         };
 
        $head = AccountHeadModel::updateOrCreate(
+
+
            [
                'account_id' => $entity->id,
                'config_id' => $config->id,

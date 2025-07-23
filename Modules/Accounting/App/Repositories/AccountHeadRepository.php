@@ -290,7 +290,7 @@ class AccountHeadRepository extends EntityRepository
             $this->insertUserAccount($config,$user);
         }
 
-        $investors = $em->getRepository(User::class)->findBy(['domain' => $config->getDomain(),'userGroup'=>'investor','enabled'=>1]);
+        $investors = $em->getRepository(User::class)->findBy(['domain' => $config->getDomain(),'userGroup'=>'Director','enabled'=>1]);
         foreach ($investors as $investor){
             $this->insertCapitalInvestmentAccount($config,$investor);
         }
