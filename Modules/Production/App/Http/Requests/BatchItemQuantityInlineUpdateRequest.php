@@ -28,7 +28,7 @@ class BatchItemQuantityInlineUpdateRequest extends FormRequest
             case 'POST':
             {
                 return [
-                    'quantity' => 'required|integer',
+                    'quantity' => 'required',
                     'type' => 'required|string|in:issue_quantity,receive_quantity,damage_quantity',
                     'batch_id' => 'required|integer',
                     'batch_item_id' => 'integer|required',

@@ -115,8 +115,12 @@ Route::prefix('/production')->middleware([HeaderAuthenticationMiddleware::class,
 
     Route::prefix('report')->middleware([HeaderAuthenticationMiddleware::class])->group(function() {
         Route::get('issue', [ProductionReportController::class,'issueReport'])->name('issue_report');
+        Route::get('issue-xlsx', [ProductionReportController::class,'issueGenerateXlsx'])->name('issue_generate_xlsx');
+        Route::get('issue-pdf', [ProductionReportController::class,'issueGeneratePdf'])->name('issue_generate_pdf');
     });
 
 });
 
 Route::get('finish-goods/download', [ProductionRecipeItemsController::class,'finishGoodsDownload'])->middleware([LogRequestResponse::class])->name('finish_goods_download');
+Route::get('issue-xlsx/download/{type}', [ProductionReportController::class,'issueReportDownload'])->name('issue_report_download');
+

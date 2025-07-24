@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -182,7 +183,17 @@ class ProductionBatchModel extends Model
     public static function issueReportData(array $params, int $domain_id, int $production_config_id) {
         $data = self::query()
             ->where('pro_batch.config_id', '=', $production_config_id)
-//            ->whereBetween('pro_batch.created_at', [$params['start_date'], $params['end_date']])
+            ->where('pro_batch.status', '=', 1)
+//            ->where('pro_batch.process', '=', '')
+            ->when(!empty($params['start_date']), function ($query) use ($params) {
+                $start = Carbon::parse($params['start_date'])->startOfDay();
+                $query->where('pro_batch.created_at', '>=', $start);
+            })
+            ->when(!empty($params['end_date']), function ($query) use ($params) {
+                $end = Carbon::parse($params['end_date'])->endOfDay();
+                $query->where('pro_batch.created_at', '<=', $end);
+            })
+
             ->select([
                 'pro_batch.id',
                 DB::raw('DATE_FORMAT(pro_batch.created_at, "%d-%m-%Y") as created_date'),
