@@ -467,6 +467,7 @@ class Customer
      */
     private $openingBalance;
 
+
     /**
      * @var float
      *

@@ -353,6 +353,13 @@ class Invoice
     private $appointmentDate;
 
     /**
+     * @var \DateTime
+     *
+     * @ORM\Column(type="datetime", nullable=true)
+     */
+    private $followUpDate;
+
+    /**
      * @var integer
      *
      * @ORM\Column(name="sorting", type="integer", length=10, nullable=true)

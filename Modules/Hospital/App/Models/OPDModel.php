@@ -1,6 +1,6 @@
 <?php
 
-namespace Modules\Inventory\App\Models;
+namespace Modules\Hospital\App\Models;
 
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
@@ -10,7 +10,7 @@ use Modules\AppsApi\App\Services\GeneratePatternCodeService;
 use Modules\Core\App\Models\CustomerModel;
 use Ramsey\Collection\Collection;
 
-class SalesModel extends Model
+class OPDModel extends Model
 {
     use HasFactory;
 
@@ -18,29 +18,7 @@ class SalesModel extends Model
     public $timestamps = true;
     protected $guarded = ['id'];
 
-    protected $fillable = [
-        'customer_id',
-        'config_id',
-        'invoice_batch_id',
-        'created_by_id',
-        'sales_by_id',
-        'module',
-        'sub_total',
-        'total',
-        'is_domain_sales_completed',
-        'approved_by_id',
-        'discount',
-        'discount_calculation',
-        'discount_type',
-        'payment',
-        'invoice_date',
-        'narration',
-        'process',
-        'transaction_mode_id',
-        'sales_form'
-    ];
-
-
+    protected $fillable = [];
 
     public static function boot() {
         parent::boot();
@@ -57,11 +35,6 @@ class SalesModel extends Model
         });
     }
 
-    public static function quickRandom($length = 12)
-    {
-        $pool = '0123456789';
-        return substr(str_shuffle(str_repeat($pool, $length)), 0, $length);
-    }
 
     public static function salesEventListener($model)
     {
@@ -69,7 +42,7 @@ class SalesModel extends Model
         $params = [
             'config' => $model->config_id,
             'table' => 'inv_sales',
-            'prefix' => 'INV-',
+            'prefix' => 'OPD-',
         ];
         return $patternCodeService->invoiceNo($params);
     }
@@ -81,6 +54,34 @@ class SalesModel extends Model
 
     public function customerDomain(){
         return $this->belongsTo(CustomerModel::class , 'customer_id');
+    }
+
+    public static function insertHmsInvoice($invConfig,$hmsConfig,$entity,$data)
+    {
+
+        $sales = self::create(
+            [
+                'customer_id' => $entity->id,
+                'config_id' => $invConfig
+            ]
+        );
+
+        InvoiceModel::updateOrCreate(
+            ['sales_id' => $sales->id],
+            [
+                'config_id' => $hmsConfig,
+                'referred_doctor_id' => $data['referred_doctor_id'] ?? null,
+                'assign_doctor_id' => $data['assign_doctor_id'] ?? null,
+                'specialization_id' => $data['specialization_id'] ?? null,
+                'disease_id' => $data['disease_id'] ?? null,
+                'disease' => $data['disease'] ?? null,
+                'room_id' => $data['room_id'] ?? null,
+                'follow_up_date' => $data['follow_up_date'] ?? null,
+                'remark' => $data['remark'] ?? null,
+            ]
+        );
+
+
     }
 
     public function insertSalesItems($sales,$items)

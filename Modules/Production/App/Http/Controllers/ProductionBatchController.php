@@ -433,7 +433,7 @@ class ProductionBatchController extends Controller
             ->first();
 
         // calculate closing quantity & stock
-        $quantity = $batchItem['issue_quantity'] ?? 0;
+        $quantity = $batchItem['receive_quantity'] ?? 0;
         $subTotal = $quantity * $stockItem->sales_price ?? 0;
 
         $closing_quantity = ($existingStockHistory->closing_quantity ?? 0) + $quantity;

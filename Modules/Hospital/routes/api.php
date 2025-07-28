@@ -1,7 +1,10 @@
 <?php
 
+use App\Http\Middleware\HeaderAuthenticationMiddleware;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use Modules\Hospital\App\Http\Controllers\OpdController;
+
 
 /*
     |--------------------------------------------------------------------------
@@ -14,6 +17,12 @@ use Illuminate\Support\Facades\Route;
     |
 */
 
-Route::middleware(['auth:sanctum'])->prefix('v1')->name('api.')->group(function () {
-    Route::get('hospital', fn (Request $request) => $request->user())->name('hospital');
+
+
+Route::prefix('/hospital')->middleware([HeaderAuthenticationMiddleware::class])->group(function() {
+ //   Route::get('/particular', [AccountingController::class,'settingDropdown'])->name('setting_accounting_dropdown');
+ //   Route::get('/setting', [AccountingController::class,'settingDropdown'])->name('setting_accounting_dropdown');
+ //   Route::get('/setting-type', [AccountingController::class,'settingTypeDropdown'])->name('setting_accounting_dropdown_type');
+    Route::apiResource('opd', OPDController::class)->middleware([HeaderAuthenticationMiddleware::class]);
+
 });

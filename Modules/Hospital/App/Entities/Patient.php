@@ -6,12 +6,12 @@ use Doctrine\ORM\Mapping as ORM;
 use Gedmo\Mapping\Annotation as Gedmo;
 
 /**
- * HmsCommission
+ * Patient
  *
- * @ORM\Table( name ="hms_prescription")
+ * @ORM\Table( name ="hms_patient")
  * @ORM\Entity()
  */
-class Prescription
+class Patient
 {
     /**
      * @var integer

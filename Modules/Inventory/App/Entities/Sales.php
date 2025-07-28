@@ -78,6 +78,13 @@ class Sales
     /**
      * @var string
      *
+     * @ORM\Column(type="string", length=50, nullable=true , options={"default"="inventory"})
+     */
+    private $module;
+
+    /**
+     * @var string
+     *
      * @ORM\Column(type="string", length=50, nullable=true)
      */
     private $paymentMobile;
@@ -133,7 +140,7 @@ class Sales
     /**
      * @var string
      *
-     * @ORM\Column(type="string", length=50, nullable=true)
+     * @ORM\Column(type="string", length=50, nullable=true,options={"default"="Pending"})
      */
     private $paymentStatus = "Pending";
 
