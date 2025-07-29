@@ -105,13 +105,12 @@ class Sales
      */
     private $paymentInWord;
 
-
     /**
      * @var string
      *
-     * @ORM\Column(name="process", type="string", length=50, nullable=true)
+     * @ORM\Column(name="process", type="string", length=50, nullable=true,options={"default"="Created"})
      */
-    private $process ='Created';
+    private $process;
 
     /**
      * @var string

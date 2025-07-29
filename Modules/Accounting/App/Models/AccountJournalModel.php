@@ -107,6 +107,7 @@ class AccountJournalModel extends Model
                 'acc_journal.voucher_id',
                 'acc_journal.created_by_id',
                 'acc_journal.process',
+                'acc_journal.amount as amount',
                 'acc_journal.debit',
                 'acc_journal.credit',
                 'acc_journal.description',
@@ -148,6 +149,29 @@ class AccountJournalModel extends Model
         return $data;
     }
 
+    public static function journalOpeningClosing($journal,$journalItem)
+    {
+        $opening = AccountJournalItemModel::getLedgerWiseOpeningBalance(
+
+            ledgerId: $journalItem->account_sub_head_id,
+                    configId: $journal->config_id,
+                    journalItemId: $journalItem->id
+                );
+
+                $closing = $journalItem->mode === 'debit'
+                    ? $opening + $journalItem->amount
+                    : ($journalItem->mode === 'credit' ? $opening - $journalItem->amount : 0);
+
+                $journalItem->update([
+                    'opening_amount' => $opening,
+                    'closing_amount' => $closing,
+                ]);
+
+                $findAccoundLegderHead = AccountHeadModel::find($journalItem->account_sub_head_id);
+                $findAccoundLegderHead->update([
+                    'amount' => $closing,
+                ]);
+    }
     public static function insertOpeningStockAccountJournal($domain,$openingId){
 
         $config = ConfigModel::find($domain['acc_config']);
@@ -156,13 +180,17 @@ class AccountJournalModel extends Model
         $input['config_id'] = $domain['acc_config'];
         $input['voucher_id'] = $config->voucher_stock_opening_id;
         $input['amount'] = $purchaseItem->sub_total;
+        $input['debit'] = $purchaseItem->sub_total;
         $input['created_by_id'] = $purchaseItem->created_by_id;
         $input['approved_by_id'] = $purchaseItem->approved_by_id;
         $input['purchase_item_id'] = $purchaseItem->id;
+        $input['issue_date'] = $purchaseItem->created;
         $input['module'] = 'opening-stock';
         $input['process'] = 'Approved';
         $input['waiting_process'] = 'Approved';
         $entity = self::create($input);
+
+
 
         $head = AccountHeadModel::getAccountHeadWithParent($config->account_stock_opening_id);
         $accountDebit['account_journal_id'] = $entity->id;
@@ -174,6 +202,8 @@ class AccountJournalModel extends Model
         $accountDebit['is_parent'] = true;
         $debit = AccountJournalItemModel::create($accountDebit);
 
+        self::journalOpeningClosing($entity,$debit);
+
         $head1 = AccountHeadModel::getAccountHeadWithParent($config->capital_investment_id);
         $accountCredit['account_journal_id'] = $entity->id;
         $accountCredit['parent_id'] = $debit->id;
@@ -182,7 +212,8 @@ class AccountJournalModel extends Model
         $accountCredit['amount'] = "-".$purchaseItem->sub_total;
         $accountCredit['credit'] = $purchaseItem->sub_total;
         $accountCredit['mode'] = 'credit';
-        AccountJournalItemModel::create($accountCredit);
+        $credit = AccountJournalItemModel::create($accountCredit);
+        self::journalOpeningClosing($entity,$credit);
 
      //   self::openingGoodsEntry($journal,$config,$amount);
 
@@ -241,9 +272,11 @@ class AccountJournalModel extends Model
         $input['config_id'] = $config->id;
         $input['voucher_id'] = $config->voucher_purchase_id;
         $input['amount'] = $subTotal;
+        $input['debit'] = $subTotal;
         $input['created_by_id'] = $entity->created_by_id;
         $input['approved_by_id'] = $entity->approved_by_id;
         $input['purchase_id'] = $entity->id;
+        $input['issue_date'] = $entity->created;
         $input['module'] = 'purchase';
         $input['process'] = 'Approved';
         $input['waiting_process'] = 'Approved';
@@ -282,6 +315,7 @@ class AccountJournalModel extends Model
             $accountDebit['mode'] = 'debit';
             $accountDebit['is_parent'] = true;
             $journalItem = AccountJournalItemModel::create($accountDebit);
+            self::journalOpeningClosing($journal,$journalItem);
             return $journalItem->id;
         }
 
@@ -298,7 +332,8 @@ class AccountJournalModel extends Model
             $accountDebit['amount'] = "-{$amount}";
             $accountDebit['credit'] = $amount;
             $accountDebit['mode'] = 'credit';
-            AccountJournalItemModel::create($accountDebit);
+            $entity = AccountJournalItemModel::create($accountDebit);
+            self::journalOpeningClosing($journal,$entity);
         }
     }
 
@@ -315,7 +350,8 @@ class AccountJournalModel extends Model
             $accountDebit['amount'] = "-{$amount}";
             $accountDebit['credit'] = $amount;
             $accountDebit['mode'] = 'credit';
-            AccountJournalItemModel::create($accountDebit);
+            $journalItem = AccountJournalItemModel::create($accountDebit);
+            self::journalOpeningClosing($journal,$journalItem);
         }
     }
 
@@ -331,6 +367,7 @@ class AccountJournalModel extends Model
             $accountDebit['mode'] = 'credit';
             $accountDebit['is_parent'] = true;
             $journalItem = AccountJournalItemModel::create($accountDebit);
+            self::journalOpeningClosing($journal,$journalItem);
             return $journalItem;
         }
     }
@@ -351,7 +388,8 @@ class AccountJournalModel extends Model
                 $accountDebit['amount'] = "{$amount}";
                 $accountDebit['debit'] = $amount;
                 $accountDebit['mode'] = 'debit';
-                AccountJournalItemModel::create($accountDebit);
+                $journalItem = AccountJournalItemModel::create($accountDebit);
+                self::journalOpeningClosing($journal,$journalItem);
             }
         }
 
@@ -371,6 +409,7 @@ class AccountJournalModel extends Model
             $accountDebit['mode'] = 'debit';
             $accountDebit['is_parent'] = true;
             $journalItem = AccountJournalItemModel::create($accountDebit);
+            self::journalOpeningClosing($journal,$journalItem);
             return $journalItem->id;
         }
         return false;
@@ -389,7 +428,8 @@ class AccountJournalModel extends Model
             $accountDebit['amount'] = "-{$amount}";
             $accountDebit['credit'] = $amount;
             $accountDebit['mode'] = 'credit';
-            AccountJournalItemModel::create($accountDebit);
+            $journalItem  = AccountJournalItemModel::create($accountDebit);
+            self::journalOpeningClosing($journal,$journalItem);
         }
 
     }
@@ -408,9 +448,11 @@ class AccountJournalModel extends Model
         $input['config_id'] = $config->id;
         $input['voucher_id'] = $config->voucher_sales_id;
         $input['amount'] = $subTotal;
+        $input['debit'] = $subTotal;
         $input['created_by_id'] = $entity->created_by_id;
         $input['approved_by_id'] = $entity->approved_by_id;
         $input['sales_id'] = $entity->id;
+        $input['issue_date'] = $entity->created;
         $input['module'] = 'sales';
         $input['process'] = 'Approved';
         $input['waiting_process'] = 'Approved';
@@ -449,6 +491,7 @@ class AccountJournalModel extends Model
             $accountDebit['mode'] = 'credit';
             $accountDebit['is_parent'] = true;
             $journalItem = AccountJournalItemModel::create($accountDebit);
+            self::journalOpeningClosing($journal,$journalItem);
             return $journalItem->id;
         }
 
@@ -465,7 +508,8 @@ class AccountJournalModel extends Model
             $accountDebit['amount'] = "{$amount}";
             $accountDebit['debit'] = $amount;
             $accountDebit['mode'] = 'debit';
-            AccountJournalItemModel::create($accountDebit);
+            $journalItem = AccountJournalItemModel::create($accountDebit);
+            self::journalOpeningClosing($journal,$journalItem);
         }
     }
 
@@ -482,7 +526,8 @@ class AccountJournalModel extends Model
             $accountDebit['amount'] = "{$amount}";
             $accountDebit['debit'] = $amount;
             $accountDebit['mode'] = 'debit';
-            AccountJournalItemModel::create($accountDebit);
+            $journalItem = AccountJournalItemModel::create($accountDebit);
+            self::journalOpeningClosing($journal,$journalItem);
         }
     }
 
@@ -500,6 +545,7 @@ class AccountJournalModel extends Model
             $accountDebit['mode'] = 'credit';
             $accountDebit['is_parent'] = true;
             $journalItem = AccountJournalItemModel::create($accountDebit);
+            self::journalOpeningClosing($journal,$journalItem);
             return $journalItem->id;
         }
         return false;
@@ -518,7 +564,8 @@ class AccountJournalModel extends Model
             $accountDebit['amount'] = "{$amount}";
             $accountDebit['debit'] = $amount;
             $accountDebit['mode'] = 'debit';
-            AccountJournalItemModel::create($accountDebit);
+            $journalItem = AccountJournalItemModel::create($accountDebit);
+            self::journalOpeningClosing($journal,$journalItem);
         }
     }
 
@@ -534,6 +581,7 @@ class AccountJournalModel extends Model
             $accountDebit['mode'] = 'debit';
             $accountDebit['is_parent'] = true;
             $journalItem = AccountJournalItemModel::create($accountDebit);
+            self::journalOpeningClosing($journal,$journalItem);
             return $journalItem;
         }
     }
@@ -552,7 +600,8 @@ class AccountJournalModel extends Model
                 $accountDebit['amount'] = "-{$amount}";
                 $accountDebit['credit'] = $amount;
                 $accountDebit['mode'] = 'credit';
-                AccountJournalItemModel::create($accountDebit);
+                $journalItem = AccountJournalItemModel::create($accountDebit);
+                self::journalOpeningClosing($journal,$journalItem);
             }
         }
 

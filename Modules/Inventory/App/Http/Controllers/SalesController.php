@@ -76,6 +76,8 @@ class SalesController extends Controller
         $input = $request->validated();
         $input['config_id'] = $this->domain['config_id'];
         $input['sales_form'] = 'inventory';
+        $input['process'] = 'Created';
+
         // Start Database Transaction to Ensure Data Consistency
         DB::beginTransaction();
 
@@ -122,7 +124,7 @@ class SalesController extends Controller
             $sales->update(['customer_id' => $findCustomer->id]);
             $findInvConfig = ConfigSalesModel::where('config_id',$this->domain['inv_config'])->first();
             if ($findInvConfig->is_sales_auto_approved) {
-                $sales->update(['approved_by_id' => $this->domain['user_id']]);
+                $sales->update(['approved_by_id' => $this->domain['user_id'], 'process' => 'Approved']);
                 if ($sales->salesItems->count() > 0) {
                     foreach ($sales->salesItems as $item) {
                         StockItemHistoryModel::openingStockQuantity($item, 'sales', $this->domain);
@@ -237,6 +239,7 @@ class SalesController extends Controller
         DB::beginTransaction();
         try {
             $getSales = SalesModel::findOrFail($id);
+
             $getSalesItems = $getSales->salesItems;
 
             // get customer domain
@@ -262,6 +265,8 @@ class SalesController extends Controller
                     'transaction_mode_id' => $getTransactionMode ?? null,
                     'process' => 'created'
                 ]);
+
+
 
                 if ($purchase){
                     if (sizeof($getSalesItems)>0){
@@ -319,7 +324,7 @@ class SalesController extends Controller
                 }
 
                 // accounting journal entry
-                AccountJournalModel::insertSalesAccountJournal($this->domain,$getSales->id);
+               // AccountJournalModel::insertSalesAccountJournal($this->domain,$getSales->id);
             }
 
             DB::commit();

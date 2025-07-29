@@ -77,6 +77,7 @@ class AccountVoucherEntryController extends Controller
         DB::beginTransaction();
 
         try {
+
             // Create journal Record
             $journal = AccountJournalModel::create($input);
             $journal->refresh();
@@ -185,29 +186,8 @@ class AccountVoucherEntryController extends Controller
 
         try {
             foreach ($journal->journalItems as $journalItem) {
-
-
-                $opening = AccountJournalItemModel::getLedgerWiseOpeningBalance(
-                    ledgerId: $journalItem->account_ledger_id,
-                    configId: $journal->config_id,
-                    journalItemId: $journalItem->id
-                );
-
-                $closing = $journalItem->mode === 'debit'
-                    ? $opening + $journalItem->amount
-                    : ($journalItem->mode === 'credit' ? $opening - $journalItem->amount : 0);
-
-                $journalItem->update([
-                    'opening_amount' => $opening,
-                    'closing_amount' => $closing,
-                ]);
-
-                $findAccoundLegderHead = AccountHeadModel::find($journalItem->account_sub_head_id);
-                $findAccoundLegderHead->update([
-                    'amount' => $closing,
-                ]);
+                AccountJournalModel::journalOpeningClosing($journal,$journalItem);
             }
-
             $journal->update([
                 'approved_by_id' => $this->domain['user_id'] ?? null,
                 'process'        => 'Approved',
