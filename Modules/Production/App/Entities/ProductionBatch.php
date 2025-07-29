@@ -144,6 +144,13 @@ class ProductionBatch
     private $issuePerson;
 
     /**
+     *
+     * @ORM\ManyToOne(targetEntity="Modules\Core\App\Entities\Warehouse")
+     * @ORM\JoinColumn(onDelete="CASCADE")
+     **/
+    private  $warehouse;
+
+    /**
      * @var string
      *
      * @ORM\Column(type="string", nullable=true)

@@ -65,9 +65,11 @@ class ProductionReportController extends Controller
             // Use the reusable method
             $processedData = $this->processProductionBatchData($params, $domainConfigId, $productionConfigId);
 
+
             $materials = $processedData['materials'];
             $productionMap = $processedData['productionMap'];
             $productionTotals = $processedData['productionTotals'];
+            $batches = $processedData['batches'];
 
             // Create spreadsheet
             $spreadsheet = new Spreadsheet();
@@ -101,7 +103,7 @@ class ProductionReportController extends Controller
                 ]
             ];
 
-            $materialCols = ['Material Item', 'Unit', 'Opening', 'Narayangonj', 'Total Stock'];
+            $materialCols = ['Material Item', 'Unit'];
             $productionCount = count($productionMap);
             $totalExpenseCols = ['Issue', 'Expense', 'Less', 'More'];
             $currentStockCols = ['Stock', 'Remaining'];
@@ -111,16 +113,16 @@ class ProductionReportController extends Controller
             $row3 = 3;
             $row4 = 4;
 
-            $prodStartCol = 6;
+            $prodStartCol = 3; // Change to column C instead of F due to removed CDE columns
             $prodEndCol = $prodStartCol + ($productionCount * 2) - 1;
             $expenseStartCol = $prodEndCol + 1;
             $expenseEndCol = $expenseStartCol + count($totalExpenseCols) - 1;
             $stockStartCol = $expenseEndCol + 1;
             $stockEndCol = $stockStartCol + count($currentStockCols) - 1;
 
-            // Merge Basic Information across 3 rows (rows 1, 2, 3)
-            $sheet->mergeCells("A{$row1}:E{$row3}")->setCellValue("A{$row1}", 'Basic Information');
-            $sheet->getStyle("A{$row1}:E{$row3}")->applyFromArray($defaultStyle)->getFill()
+// Merge Basic Information across 3 rows
+            $sheet->mergeCells("A{$row1}:B{$row3}")->setCellValue("A{$row1}", 'Basic Information');
+            $sheet->getStyle("A{$row1}:B{$row3}")->applyFromArray($defaultStyle)->getFill()
                 ->setFillType(Fill::FILL_SOLID)->getStartColor()->setRGB($colors['basic_info']);
 
             if ($productionCount > 0) {
@@ -139,11 +141,16 @@ class ProductionReportController extends Controller
 
             $stockStart = Coordinate::stringFromColumnIndex($stockStartCol) . $row1;
             $stockEnd = Coordinate::stringFromColumnIndex($stockEndCol) . $row1;
-            $sheet->mergeCells("{$stockStart}:{$stockEnd}")->setCellValue($stockStart, 'Current Stock Status');
+            $warehouseName = isset($batches[0]->warehouse_name) ? $batches[0]->warehouse_name : '';
+            $headerText = $warehouseName ? "Current Stock ({$warehouseName})" : "Current Stock";
+
+// Merge cells and set value
+            $sheet->mergeCells("{$stockStart}:{$stockEnd}")
+                ->setCellValue($stockStart, $headerText);
             $sheet->getStyle("{$stockStart}:{$stockEnd}")->applyFromArray($defaultStyle)->getFill()
                 ->setFillType(Fill::FILL_SOLID)->getStartColor()->setRGB($colors['current_stock']);
 
-            // Row 2 - Issue + Receive sub-columns
+// Row 2 - Issue + Receive sub-columns
             $ci = $prodStartCol;
             foreach ($productionMap as $prodId => $prodName) {
                 $cell1 = Coordinate::stringFromColumnIndex($ci++) . $row2;
@@ -154,7 +161,7 @@ class ProductionReportController extends Controller
                     ->setFillType(Fill::FILL_SOLID)->getStartColor()->setRGB($colors['warning']);
             }
 
-            // Merge expense columns across 3 rows (rows 2, 3, 4)
+// Merge expense columns
             foreach ($totalExpenseCols as $i => $label) {
                 $colIndex = $expenseStartCol + $i;
                 $cellRange = Coordinate::stringFromColumnIndex($colIndex) . "{$row2}:" . Coordinate::stringFromColumnIndex($colIndex) . "{$row4}";
@@ -163,22 +170,18 @@ class ProductionReportController extends Controller
                     ->setFillType(Fill::FILL_SOLID)->getStartColor()->setRGB($colors['highlighted']);
             }
 
-            // Merge stock columns across 3 rows (rows 2, 3, 4)
+// Merge stock columns
             foreach ($currentStockCols as $i => $label) {
                 $colIndex = $stockStartCol + $i;
                 $cellRange = Coordinate::stringFromColumnIndex($colIndex) . "{$row2}:" . Coordinate::stringFromColumnIndex($colIndex) . "{$row4}";
                 $sheet->mergeCells($cellRange)->setCellValue(Coordinate::stringFromColumnIndex($colIndex) . $row2, $label);
 
-                if ($label === 'Stock') {
-                    $sheet->getStyle($cellRange)->applyFromArray($defaultStyle)->getFill()
-                        ->setFillType(Fill::FILL_SOLID)->getStartColor()->setRGB($colors['error']);
-                } else {
-                    $sheet->getStyle($cellRange)->applyFromArray($defaultStyle)->getFill()
-                        ->setFillType(Fill::FILL_SOLID)->getStartColor()->setRGB($colors['warning_dark']);
-                }
+                $colorType = $label === 'Stock' ? 'error' : 'warning_dark';
+                $sheet->getStyle($cellRange)->applyFromArray($defaultStyle)->getFill()
+                    ->setFillType(Fill::FILL_SOLID)->getStartColor()->setRGB($colors[$colorType]);
             }
 
-            // Row 3 - Production totals (Issue and Receive values)
+// Row 3 - Production Totals
             $ci = $prodStartCol;
             foreach ($productionMap as $prodId => $prodName) {
                 $issueCell = Coordinate::stringFromColumnIndex($ci++) . $row3;
@@ -196,14 +199,14 @@ class ProductionReportController extends Controller
                     ->setFillType(Fill::FILL_SOLID)->getStartColor()->setRGB($colors['warning']);
             }
 
-            // Row 4 - Basic info headers
+// Row 4 - Basic Info
             foreach ($materialCols as $i => $label) {
                 $cell = Coordinate::stringFromColumnIndex($i + 1) . $row4;
                 $sheet->setCellValue($cell, $label)->getStyle($cell)->applyFromArray($defaultStyle)->getFill()
                     ->setFillType(Fill::FILL_SOLID)->getStartColor()->setRGB($colors['highlighted']);
             }
 
-            // Row 4 - Production Items merged headers
+// Row 4 - Production headers
             $ci = $prodStartCol;
             foreach ($productionMap as $prodName) {
                 $startCell = Coordinate::stringFromColumnIndex($ci) . $row4;
@@ -214,20 +217,16 @@ class ProductionReportController extends Controller
                 $ci += 2;
             }
 
-            // Data rows start from Row 5
+// Data rows
             $row = 5;
             foreach ($materials as $mat) {
                 $line = [
                     $mat['name'],
                     $mat['uom'],
-                    $mat['opening'],
-                    $mat['branch_stock'],
-                    $mat['total_stock'],
                 ];
 
                 $totalIssue = $totalNeeded = $totalLess = $totalMore = 0.0;
 
-                // Add production data
                 $productionData = [];
                 foreach ($productionMap as $prodId => $_) {
                     $prod = $mat['productions'][$prodId] ?? [
@@ -253,27 +252,29 @@ class ProductionReportController extends Controller
 
                 $line = array_merge($line, $productionData);
 
-                // Add summary data
                 $line[] = $totalIssue ?: '-';
                 $line[] = $totalNeeded ?: '-';
                 $line[] = $totalLess ?: '-';
                 $line[] = $totalMore ?: '-';
-                $line[] = $mat['total_stock'];
 
+                $line[] = $mat['total_stock'];
                 $remainingStock = $mat['total_stock'] - $totalNeeded;
                 $line[] = $remainingStock < 0 ? '-' . abs($remainingStock) : $remainingStock;
 
-                $sheet->fromArray($line, null, "A{$row}");
+                // Insert cell-by-cell
+                $colIndex = 1;
+                foreach ($line as $value) {
+                    $cell = Coordinate::stringFromColumnIndex($colIndex++) . $row;
+                    $sheet->setCellValue($cell, $value);
+                }
 
-                // Apply colors to data rows
-                $col = 1;
-                // Basic info columns
-                for ($i = 0; $i < 5; $i++) {
-                    $cell = Coordinate::stringFromColumnIndex($col++) . $row;
+                // Style basic info
+                for ($i = 0; $i < 2; $i++) {
+                    $cell = Coordinate::stringFromColumnIndex($i + 1) . $row;
                     $sheet->getStyle($cell)->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
                 }
 
-                // Production columns with alternating colors
+                // Style production cells
                 $prodCol = $prodStartCol;
                 foreach ($productionMap as $prodId => $_) {
                     $issueCell = Coordinate::stringFromColumnIndex($prodCol++) . $row;
@@ -288,7 +289,7 @@ class ProductionReportController extends Controller
                     $sheet->getStyle($receiveCell)->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
                 }
 
-                // Summary columns
+                // Style expense
                 for ($i = 0; $i < 4; $i++) {
                     $cell = Coordinate::stringFromColumnIndex($expenseStartCol + $i) . $row;
                     $sheet->getStyle($cell)->getFill()
@@ -296,7 +297,7 @@ class ProductionReportController extends Controller
                     $sheet->getStyle($cell)->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
                 }
 
-                // Stock columns
+                // Style stock status
                 $stockCell = Coordinate::stringFromColumnIndex($stockStartCol) . $row;
                 $remainingCell = Coordinate::stringFromColumnIndex($stockStartCol + 1) . $row;
 
@@ -311,12 +312,11 @@ class ProductionReportController extends Controller
                 $row++;
             }
 
-            // Auto-size columns
+// Auto-size columns
             foreach (range('A', $sheet->getHighestColumn()) as $col) {
                 $sheet->getColumnDimension($col)->setAutoSize(true);
             }
 
-            // Set row heights for better visibility
             $sheet->getRowDimension(1)->setRowHeight(25);
             $sheet->getRowDimension(2)->setRowHeight(20);
             $sheet->getRowDimension(3)->setRowHeight(20);
@@ -362,8 +362,7 @@ class ProductionReportController extends Controller
             $materials = $processedData['materials'];
             $productionMap = $processedData['productionMap'];
             $productionTotals = $processedData['productionTotals'];
-
-            //Generate pdf
+            $batches = $processedData['batches'];
 
             // TCPDF setup
             $pdf = new \TCPDF('L', 'mm', 'A3', true, 'UTF-8', false);
@@ -377,43 +376,26 @@ class ProductionReportController extends Controller
             $pdf->Cell(0, 10, 'Production Issue Report', 0, 1, 'C');
             $pdf->Ln(5);
 
-            // Layout config
+// Setup variables
             $productionCount = count($productionMap);
             $headerHeight = 8;
 
-            // Define base widths for fixed columns
-            // Increased widths to better accommodate content, especially numbers and longer names.
             $materialWidth = 60;
             $unitWidth = 12;
-            $numWidth = 20;
             $sumWidth = 20;
 
-            // Calculate total width of fixed columns
-            $totalBasicFixed = $materialWidth + $unitWidth + ($numWidth * 3); // Material, Unit, Opening, Narayangonj, Total Stock
-            $totalSummaryFixed = $sumWidth * 4; // Issue, Expense, Less, More
-            $totalStockFixed = $sumWidth * 2;   // Stock, Remaining
+            $totalBasicFixed = $materialWidth + $unitWidth;
+            $totalSummaryFixed = $sumWidth * 4;
+            $totalStockFixed = $sumWidth * 2;
 
-            // Total usable page width (A3 Landscape: 420mm, margins 5mm each side)
-            $pageUsableWidth = 420 - (5 * 2); // 410mm
+            $pageUsableWidth = 410;
 
-            // Calculate remaining width for dynamic product columns
             $remainingWidthForProducts = $pageUsableWidth - ($totalBasicFixed + $totalSummaryFixed + $totalStockFixed);
-
-            // Determine dynamic product column width
-            // Ensure a minimum width for each product column for readability (10mm per sub-column for issue/receive)
             $minProdWidth = 20;
-            $prodWidth = $minProdWidth; // Default to minimum
-
-            if ($productionCount > 0) {
-                $calculatedProdWidth = floor($remainingWidthForProducts / $productionCount);
-                // Use the calculated width if it's greater than the minimum, otherwise use the minimum
-                $prodWidth = max($minProdWidth, $calculatedProdWidth);
-            }
-
-            // Recalculate total product width based on determined prodWidth
-            // This will be the actual width used for the product section, potentially exceeding page width if many products
+            $prodWidth = max($minProdWidth, floor($remainingWidthForProducts / max(1, $productionCount)));
             $totalProdWidth = $prodWidth * $productionCount;
 
+// COLORS
             $colors = [
                 'basic' => [169, 208, 142],
                 'prod_header' => [217, 225, 242],
@@ -422,15 +404,19 @@ class ProductionReportController extends Controller
                 'issue' => [198, 224, 180],
                 'receive' => [255, 242, 204],
                 'red' => [248, 215, 218],
-                'white' => [255, 255, 255]
+                'white' => [255, 255, 255],
             ];
 
+// DYNAMIC WAREHOUSE NAME
+            $warehouseName = isset($batches[0]->warehouse_name) ? $batches[0]->warehouse_name : '';
+            $stockHeader = $warehouseName ? "Current Stock ({$warehouseName})" : "Current Stock";
+
+// Starting Y
             $startY = $pdf->GetY();
 
-            // ========== Row 1: Section Headers ==========
+// ========= Row 1: Section Headers =========
             $pdf->SetFont('helvetica', 'B', 8);
             $pdf->SetXY(5, $startY);
-            // Use the new calculated fixed widths
             $pdf->SetFillColor(...$colors['basic']);
             $pdf->MultiCell($totalBasicFixed, $headerHeight * 3, 'Basic Information', 1, 'C', true, 0);
             $pdf->SetFillColor(...$colors['prod_header']);
@@ -438,9 +424,9 @@ class ProductionReportController extends Controller
             $pdf->SetFillColor(...$colors['expense']);
             $pdf->MultiCell($totalSummaryFixed, $headerHeight, 'Total Expense Material', 1, 'C', true, 0);
             $pdf->SetFillColor(...$colors['stock']);
-            $pdf->MultiCell($totalStockFixed, $headerHeight, 'Current Stock Status', 1, 'C', true, 1);
+            $pdf->MultiCell($totalStockFixed, $headerHeight, $stockHeader, 1, 'C', true, 1);
 
-            // ========== Row 2: Issue/Receive Labels ==========
+// ========= Row 2: Issue / Receive =========
             $currentX = 5 + $totalBasicFixed;
             $pdf->SetY($startY + $headerHeight);
             foreach ($productionMap as $prodId => $_) {
@@ -452,7 +438,7 @@ class ProductionReportController extends Controller
                 $currentX += $prodWidth;
             }
 
-            // ROW 2 - Vertical merged headers for summary + stock
+// Vertical headers: Expense + Stock
             $currentX = 5 + $totalBasicFixed + $totalProdWidth;
             $pdf->SetY($startY + $headerHeight);
             foreach (['Issue', 'Expense', 'Less', 'More'] as $label) {
@@ -469,7 +455,7 @@ class ProductionReportController extends Controller
             }
             $pdf->Ln();
 
-            // ========== Row 3: Issue/Receive Totals ==========
+// ========= Row 3: Production Totals (Issue / Receive) =========
             $currentX = 5 + $totalBasicFixed;
             $pdf->SetY($startY + $headerHeight * 2);
             foreach ($productionMap as $prodId => $_) {
@@ -484,38 +470,33 @@ class ProductionReportController extends Controller
             }
             $pdf->Ln();
 
-            // ========== Row 4: Product Names per production ==========
-            $pdf->SetY($startY + ($headerHeight * 3));
+// ========= Row 4: Column Headers =========
+            $pdf->SetY($startY + $headerHeight * 3);
             $pdf->SetX(5);
-            $basicHeaders = ['Material Item', 'Unit', 'Opening', 'Narayangonj', 'Total Stock'];
-            $basicWidths = [$materialWidth, $unitWidth, $numWidth, $numWidth, $numWidth];
+            $basicHeaders = ['Material Item', 'Unit'];
+            $basicWidths = [$materialWidth, $unitWidth];
             foreach ($basicHeaders as $i => $label) {
                 $pdf->SetFillColor(...$colors['basic']);
                 $pdf->Cell($basicWidths[$i], $headerHeight, $label, 1, 0, 'C', true);
             }
             foreach ($productionMap as $prodName) {
-                // Adjust truncation based on dynamic prodWidth for the full product name cell
-                $maxCharsForProdName = floor($prodWidth); // Roughly 1 char per mm for font size 8
-                $name = strlen($prodName) > $maxCharsForProdName ? substr($prodName, 0, $maxCharsForProdName - 3) . '...' : $prodName;
+                $maxChars = floor($prodWidth / 1.5);
+                $name = strlen($prodName) > $maxChars ? substr($prodName, 0, $maxChars - 3) . '...' : $prodName;
                 $pdf->SetFillColor(...$colors['prod_header']);
                 $pdf->Cell($prodWidth, $headerHeight, $name, 1, 0, 'C', true);
             }
             $pdf->Ln();
 
-            // ========== Data Rows ==========
+// ========= Data Rows =========
             $pdf->SetFont('helvetica', '', 7);
             foreach ($materials as $mat) {
                 $pdf->SetX(5);
                 $pdf->SetFillColor(...$colors['white']);
-                // Material Name: Adjust truncation based on materialWidth
-                $maxMaterialChars = floor($materialWidth * 1.5); // Font size 7, allows more characters per mm
-                $pdf->Cell($materialWidth, 8, substr($mat['name'], 0, $maxMaterialChars), 1, 0, 'L', true);
+                $pdf->Cell($materialWidth, 8, substr($mat['name'], 0, 100), 1, 0, 'L', true);
                 $pdf->Cell($unitWidth, 8, $mat['uom'], 1, 0, 'C', true);
-                $pdf->Cell($numWidth, 8, number_format($mat['opening']), 1, 0, 'R', true);
-                $pdf->Cell($numWidth, 8, number_format($mat['branch_stock']), 1, 0, 'R', true);
-                $pdf->Cell($numWidth, 8, number_format($mat['total_stock']), 1, 0, 'R', true);
 
                 $totalIssue = $totalNeed = $totalLess = $totalMore = 0;
+
                 foreach ($productionMap as $prodId => $_) {
                     $prod = $mat['productions'][$prodId] ?? [
                         'raw_issue_quantity' => 0,
@@ -529,19 +510,22 @@ class ProductionReportController extends Controller
                     $totalNeed += $n;
                     $totalLess += $prod['less_quantity'] ?? 0;
                     $totalMore += $prod['more_quantity'] ?? 0;
+
                     $pdf->SetFillColor(...$colors['issue']);
                     $pdf->Cell($prodWidth / 2, 8, $i ? number_format($i, 2) : '-', 1, 0, 'R', true);
                     $pdf->SetFillColor(...$colors['receive']);
                     $pdf->Cell($prodWidth / 2, 8, $n ? number_format($n, 2) : '-', 1, 0, 'R', true);
                 }
 
-                // Summary Columns
+                // Expense + Stock columns
                 $pdf->SetFillColor(...$colors['white']);
                 $pdf->Cell($sumWidth, 8, number_format($totalIssue, 2), 1, 0, 'R', true);
                 $pdf->Cell($sumWidth, 8, number_format($totalNeed, 2), 1, 0, 'R', true);
                 $pdf->Cell($sumWidth, 8, number_format($totalLess, 2), 1, 0, 'R', true);
                 $pdf->Cell($sumWidth, 8, number_format($totalMore, 2), 1, 0, 'R', true);
+
                 $pdf->Cell($sumWidth, 8, number_format($mat['total_stock'], 2), 1, 0, 'R', true);
+
                 $remaining = $mat['total_stock'] - $totalNeed;
                 if ($remaining < 0) {
                     $pdf->SetFillColor(...$colors['red']);
@@ -550,6 +534,7 @@ class ProductionReportController extends Controller
                 }
                 $pdf->Cell($sumWidth, 8, number_format($remaining, 2), 1, 1, 'R', true);
             }
+
 
             // Save
             $dir = storage_path('exports');
@@ -621,7 +606,7 @@ class ProductionReportController extends Controller
                             'uom' => $exp->uom ?? 'KG',
                             'opening' => $exp->opening_quantity ?? 0,
                             'branch_stock' => $exp->narayangonj_stock ?? 0,
-                            'total_stock' => ($exp->opening_quantity ?? 0) + ($exp->narayangonj_stock ?? 0),
+                            'total_stock' => ($exp->stock_quantity ?? 0),
                             'productions' => []
                         ];
                     }

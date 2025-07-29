@@ -11,6 +11,7 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Modules\Core\App\Models\WarehouseModel;
+use Modules\Inventory\App\Models\StockItemHistoryModel;
 
 
 class ProductionBatchModel extends Model
@@ -30,6 +31,7 @@ class ProductionBatchModel extends Model
         'invoice',
         'created_by_id',
         'approved_by_id',
+        'warehouse_id',
         'status',
         'code'
     ];
@@ -74,7 +76,6 @@ class ProductionBatchModel extends Model
         $page =  isset($request['page']) && $request['page'] > 0?($request['page'] - 1 ) : 0;
         $perPage = isset($request['offset']) && $request['offset']!=''? (int)($request['offset']):0;
         $skip = isset($page) && $page!=''? (int)$page*$perPage:0;
-//        dump($domain['pro_config']);
 
         $entity = self::where('pro_batch.config_id',$domain['pro_config'])
             ->join('users','users.id','=','pro_batch.created_by_id')
@@ -113,6 +114,7 @@ class ProductionBatchModel extends Model
             ['pro_batch.config_id', '=', $domain['pro_config']],
             ['pro_batch.id', '=', $id]
         ])
+            ->leftjoin('cor_warehouses','cor_warehouses.id','=','pro_batch.warehouse_id')
             ->select([
                 'pro_batch.id',
                 DB::raw('DATE_FORMAT(pro_batch.created_at, "%d-%m-%Y") as created_date'),
@@ -124,6 +126,8 @@ class ProductionBatchModel extends Model
                 'pro_batch.issue_date',
                 'pro_batch.receive_date',
                 'pro_batch.remark',
+                'pro_batch.warehouse_id',
+                'cor_warehouses.name as warehouse_name',
             ])
             ->with(['batchItems' => function ($query) {
                 $query->select([
@@ -159,19 +163,43 @@ class ProductionBatchModel extends Model
             }])
             ->first();
 
-        foreach($entity->batchItems as $batchItem) {
-            foreach($batchItem->productionExpenses as $expense) {
-                $expense->needed_quantity = $expense->needed_quantity;
-                if ($expense->needed_quantity>$expense->stock_quantity){
-                    $expense->less_quantity = $expense->needed_quantity - $expense->stock_quantity;
-                    $expense->more_quantity = null;
-                }else{
-                    $expense->more_quantity = $expense->stock_quantity-$expense->needed_quantity;
-                    $expense->less_quantity = null;
-                }
+        // Collect unique material IDs once
+        $materialIds = $entity->batchItems
+            ->flatMap(fn ($item) => $item->productionExpenses->pluck('material_id'))
+            ->unique()
+            ->values();
+
+        // Determine stock history source
+        $isWarehouse = !empty($entity?->warehouse_id);
+
+        $stockHistories = StockItemHistoryModel::select([
+            'stock_item_id',
+            $isWarehouse ? 'warehouse_closing_quantity' : 'closing_quantity',
+        ])
+            ->whereIn('stock_item_id', $materialIds)
+            ->when($isWarehouse, fn ($q) => $q->where('warehouse_id', $entity->warehouse_id))
+            ->orderByDesc('id')
+            ->get()
+            ->unique('stock_item_id')
+            ->keyBy('stock_item_id');
+
+        // Assign quantity values
+        foreach ($entity->batchItems as $batchItem) {
+            foreach ($batchItem->productionExpenses as $expense) {
+                $materialId = $expense->material_id;
+
+                $expense->stock_quantity = (float) (
+                    $stockHistories[$materialId]->{ $isWarehouse ? 'warehouse_closing_quantity' : 'closing_quantity' }
+                    ?? 0.0
+                );
+
+                $expense->needed_quantity = (float) $expense->needed_quantity;
+
+                [$expense->less_quantity, $expense->more_quantity] = $expense->needed_quantity > $expense->stock_quantity
+                    ? [$expense->needed_quantity - $expense->stock_quantity, null]
+                    : [null, $expense->stock_quantity - $expense->needed_quantity];
             }
         }
-//        $entity['ware'] = $entity->domain_warehouse;
         return $entity;
     }
 
@@ -182,9 +210,9 @@ class ProductionBatchModel extends Model
 
     public static function issueReportData(array $params, int $domain_id, int $production_config_id) {
         $data = self::query()
+            ->leftjoin('cor_warehouses','cor_warehouses.id','=','pro_batch.warehouse_id')
             ->where('pro_batch.config_id', '=', $production_config_id)
             ->where('pro_batch.status', '=', 1)
-//            ->where('pro_batch.process', '=', '')
             ->when(!empty($params['start_date']), function ($query) use ($params) {
                 $start = Carbon::parse($params['start_date'])->startOfDay();
                 $query->where('pro_batch.created_at', '>=', $start);
@@ -205,6 +233,8 @@ class ProductionBatchModel extends Model
                 'pro_batch.issue_date',
                 'pro_batch.receive_date',
                 'pro_batch.remark',
+                'pro_batch.warehouse_id',
+                'cor_warehouses.name as warehouse_name',
             ])
             ->with(['batchItems' => function ($query) {
                 $query->select([
@@ -239,19 +269,45 @@ class ProductionBatchModel extends Model
             }])
             ->get()
             ->each(function ($batch) {
+                // Collect unique material IDs once
+                $materialIds = $batch->batchItems
+                    ->flatMap(fn ($item) => $item->productionExpenses->pluck('material_id'))
+                    ->unique()
+                    ->values();
+
+                // Determine stock history source
+                $isWarehouse = !empty($batch?->warehouse_id);
+
+                $stockHistories = StockItemHistoryModel::select([
+                    'stock_item_id',
+                    $isWarehouse ? 'warehouse_closing_quantity' : 'closing_quantity',
+                ])
+                    ->whereIn('stock_item_id', $materialIds)
+                    ->when($isWarehouse, fn ($q) => $q->where('warehouse_id', $batch->warehouse_id))
+                    ->orderByDesc('id')
+                    ->get()
+                    ->unique('stock_item_id')
+                    ->keyBy('stock_item_id');
+
+                // Assign quantity values
                 foreach ($batch->batchItems as $batchItem) {
                     foreach ($batchItem->productionExpenses as $expense) {
-                        $needed = (float) $expense->needed_quantity;
-                        $available = (float) $expense->stock_quantity;
+                        $materialId = $expense->material_id;
 
-                        $expense->less_quantity = $needed > $available ? $needed - $available : null;
-                        $expense->more_quantity = $needed < $available ? $available - $needed : null;
+                        $expense->stock_quantity = (float) (
+                            $stockHistories[$materialId]->{ $isWarehouse ? 'warehouse_closing_quantity' : 'closing_quantity' }
+                            ?? 0.0
+                        );
+
+                        $expense->needed_quantity = (float) $expense->needed_quantity;
+
+                        [$expense->less_quantity, $expense->more_quantity] = $expense->needed_quantity > $expense->stock_quantity
+                            ? [$expense->needed_quantity - $expense->stock_quantity, null]
+                            : [null, $expense->stock_quantity - $expense->needed_quantity];
                     }
                 }
             });
-//        $entity['ware'] = $entity->domain_warehouse;
         return $data;
-//        dump($data);
     }
 
 }

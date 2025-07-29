@@ -33,6 +33,7 @@ class BatchRequest extends FormRequest
                     'issue_date' => 'nullable|date',
                     'receive_date' => 'nullable|date',
                     'process' => 'nullable|string',
+                    'warehouse_id' => 'nullable',
                 ];
             }
             case 'PUT':
@@ -41,6 +42,7 @@ class BatchRequest extends FormRequest
                 return [
                     'config_id' => 'integer',
                     'mode' => 'required|string|nullable',
+                    'warehouse_id' => 'nullable',
                 ];
             }
 
