@@ -8,6 +8,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Storage;
 use Modules\Core\App\Models\UserModel;
 use Modules\Inventory\App\Entities\StockItem;
 use Modules\Inventory\App\Models\StockItemModel;
@@ -24,6 +25,7 @@ use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use PhpOffice\PhpSpreadsheet\Style\Border;
 use PhpOffice\PhpSpreadsheet\Style\Fill;
+use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use Symfony\Component\HttpFoundation\Response as ResponseAlias;
 
@@ -647,4 +649,542 @@ class ProductionReportController extends Controller
         $filePath = storage_path('exports/'.$fileName);
         return response()->download($filePath, $fileName)->deleteFileAfterSend(true);
     }
+
+
+    public function matrixWarehouse(Request $request)
+    {
+        $params = $request->only('start_date', 'end_date','warehouse_id');
+        $productionConfigId = $this->domain['pro_config'];
+        $domainConfigId = $this->domain['domain_id'];
+
+        $entity = ProductionBatchModel::warehouseMatrixReportData($params, $domainConfigId,$productionConfigId);
+        return response()->json([
+            'message' => 'success',
+            'status' => ResponseAlias::HTTP_OK,
+            'data' => $entity
+        ],ResponseAlias::HTTP_OK);
+    }
+
+    public function matrixWarehouseXlsx(Request $request){
+        $params = $request->only('start_date', 'end_date','warehouse_id');
+        $productionConfigId = $this->domain['pro_config'];
+        $domainConfigId = $this->domain['domain_id'];
+
+        try {
+            // Use the reusable method
+            $processedData = ProductionBatchModel::warehouseMatrixReportData($params, $domainConfigId,$productionConfigId);
+
+            // Extract and convert the required variables from processedData
+            $productionItems = $processedData['production_items'] ?? [];
+            $productionItemsArray = [];
+
+            // Convert stdClass objects to arrays
+            foreach ($productionItems as $key => $item) {
+                $productionItemsArray[] = [
+                    'production_item_id' => $key,
+                    'item_name' => $item->item_name ?? 'Unknown Item'
+                ];
+            }
+
+            $warehouseName = $processedData['warehouse_name'] ?? 'Warehouse';
+
+            // Create spreadsheet
+            $spreadsheet = new Spreadsheet();
+
+            // Define colors matching frontend
+            $colors = [
+                'header_bg' => 'E3F2FD',           // Light blue for headers
+                'success_bg' => 'D5EDDA',          // Light green for production qty
+                'warning_bg' => 'FFF3CD',          // Light yellow for production amount
+                'error_bg' => 'F8D7DA',            // Light red for closing stock
+                'warning_dark_bg' => 'E2B51F',     // Dark yellow for closing amount
+                'basic_info' => 'F8F9FA',          // Light gray for basic info
+                'date_header' => '1976D2'          // Blue for date headers
+            ];
+
+            $defaultStyle = [
+                'font' => ['bold' => true, 'size' => 10],
+                'alignment' => [
+                    'horizontal' => Alignment::HORIZONTAL_CENTER,
+                    'vertical' => Alignment::VERTICAL_CENTER,
+                    'wrapText' => true,
+                ],
+                'borders' => [
+                    'allBorders' => [
+                        'borderStyle' => Border::BORDER_THIN,
+                        'color' => ['rgb' => '000000']
+                    ]
+                ]
+            ];
+
+            $dataStyle = [
+                'font' => ['bold' => false, 'size' => 9],
+                'alignment' => [
+                    'horizontal' => Alignment::HORIZONTAL_CENTER,
+                    'vertical' => Alignment::VERTICAL_CENTER,
+                ],
+                'borders' => [
+                    'allBorders' => [
+                        'borderStyle' => Border::BORDER_THIN,
+                        'color' => ['rgb' => '000000']
+                    ]
+                ]
+            ];
+
+            // Remove default sheet
+            $spreadsheet->removeSheetByIndex(0);
+
+            $dateWiseData = $processedData['date_wise_data'] ?? [];
+            $sheetIndex = 0;
+
+            foreach ($dateWiseData as $dateKey => $dateData) {
+                $date = $dateData['date'];
+                $materials = $dateData['data'] ?? [];
+                // $summary = $dateData['summary'] ?? []; // Summary row removed, so no need for this
+
+                // Create new worksheet for each date
+                $sheet = new Worksheet($spreadsheet, "Date_{$date}");
+                $spreadsheet->addSheet($sheet, $sheetIndex);
+                $sheetIndex++;
+
+                // Calculate column positions exactly like frontend
+                $productionUsageCols = count($productionItemsArray) > 0 ? count($productionItemsArray) * 2 : 2;
+
+                // Row 1: First header row (matching frontend structure)
+                $row1 = 1;
+                $row2 = 2;
+
+                // Headers with rowSpan=2 (these span both header rows)
+                $singleRowHeaders = [
+                    'A' => 'S.L',
+                    'B' => 'Date',
+                    'C' => 'Product Name (English)',
+                    'D' => 'Unit',
+                    'E' => 'Present Day Rate',
+                    'F' => 'Opening Stock',
+                    'G' => "In {$warehouseName}",
+                    'H' => 'Total In',
+                    'I' => 'IN Amount (TK)'
+                ];
+
+                // Set single row headers (rowSpan=2)
+                foreach ($singleRowHeaders as $col => $value) {
+                    $sheet->setCellValue($col . $row1, $value);
+                    $sheet->mergeCells($col . $row1 . ':' . $col . $row2);
+                    $sheet->getStyle($col . $row1 . ':' . $col . $row2)->applyFromArray($defaultStyle);
+                    $sheet->getStyle($col . $row1 . ':' . $col . $row2)->getFill()
+                        ->setFillType(Fill::FILL_SOLID)->getStartColor()->setRGB($colors['header_bg']);
+                }
+
+                // Production Usage header (colSpan across all production columns)
+                $prodStartCol = 'J';
+                $prodEndColIndex = 9 + $productionUsageCols; // J is column 10, so 9 + productionUsageCols
+                $prodEndCol = Coordinate::stringFromColumnIndex($prodEndColIndex);
+
+                $sheet->setCellValue($prodStartCol . $row1, 'Production Usage');
+                $sheet->mergeCells($prodStartCol . $row1 . ':' . $prodEndCol . $row1);
+                $sheet->getStyle($prodStartCol . $row1 . ':' . $prodEndCol . $row1)->applyFromArray($defaultStyle);
+                $sheet->getStyle($prodStartCol . $row1 . ':' . $prodEndCol . $row1)->getFill()
+                    ->setFillType(Fill::FILL_SOLID)->getStartColor()->setRGB($colors['success_bg']);
+
+                // Remaining single headers (rowSpan=2)
+                $remainingStartColIndex = $prodEndColIndex + 1;
+                $remainingHeaders = ['Out', 'Out Amount', 'Closing Stock', 'Closing Amount'];
+
+                for ($i = 0; $i < count($remainingHeaders); $i++) {
+                    $colIndex = $remainingStartColIndex + $i;
+                    $col = Coordinate::stringFromColumnIndex($colIndex);
+
+                    $sheet->setCellValue($col . $row1, $remainingHeaders[$i]);
+                    $sheet->mergeCells($col . $row1 . ':' . $col . $row2);
+                    $sheet->getStyle($col . $row1 . ':' . $col . $row2)->applyFromArray($defaultStyle);
+
+                    // Apply specific colors for closing columns
+                    $bgColor = $colors['header_bg'];
+                    if ($remainingHeaders[$i] === 'Closing Stock') {
+                        $bgColor = $colors['error_bg'];
+                    } elseif ($remainingHeaders[$i] === 'Closing Amount') {
+                        $bgColor = $colors['warning_dark_bg'];
+                    }
+
+                    $sheet->getStyle($col . $row1 . ':' . $col . $row2)->getFill()
+                        ->setFillType(Fill::FILL_SOLID)->getStartColor()->setRGB($bgColor);
+                }
+
+                // Row 2: Second header row for production items
+                $colIndex = 10; // Start from column J
+
+                if (count($productionItemsArray) > 0) {
+                    foreach ($productionItemsArray as $item) {
+                        $qtyCol = Coordinate::stringFromColumnIndex($colIndex);
+                        $amountCol = Coordinate::stringFromColumnIndex($colIndex + 1);
+
+                        $itemName = $item['item_name'] ?? 'Production Item';
+
+                        // Quantity column
+                        $sheet->setCellValue($qtyCol . $row2, $itemName . ' Qty');
+                        $sheet->getStyle($qtyCol . $row2)->applyFromArray($defaultStyle);
+                        $sheet->getStyle($qtyCol . $row2)->getFill()
+                            ->setFillType(Fill::FILL_SOLID)->getStartColor()->setRGB($colors['success_bg']);
+
+                        // Amount column
+                        $sheet->setCellValue($amountCol . $row2, $itemName . ' Amount');
+                        $sheet->getStyle($amountCol . $row2)->applyFromArray($defaultStyle);
+                        $sheet->getStyle($amountCol . $row2)->getFill()
+                            ->setFillType(Fill::FILL_SOLID)->getStartColor()->setRGB($colors['warning_bg']);
+
+                        $colIndex += 2;
+                    }
+                } else {
+                    // Default production columns when no production items
+                    $sheet->setCellValue('J' . $row2, 'Production Qty');
+                    $sheet->getStyle('J' . $row2)->applyFromArray($defaultStyle);
+                    $sheet->getStyle('J' . $row2)->getFill()
+                        ->setFillType(Fill::FILL_SOLID)->getStartColor()->setRGB($colors['success_bg']);
+
+                    $sheet->setCellValue('K' . $row2, 'Production Amount');
+                    $sheet->getStyle('K' . $row2)->applyFromArray($defaultStyle);
+                    $sheet->getStyle('K' . $row2)->getFill()
+                        ->setFillType(Fill::FILL_SOLID)->getStartColor()->setRGB($colors['warning_bg']);
+                }
+
+                // Data rows
+                $dataRow = 3;
+                foreach ($materials as $index => $material) {
+                    $colIndex = 1;
+
+                    // Basic info columns (A to I)
+                    $basicData = [
+                        $material['sl'] ?? ($index + 1),                    // A: S.L
+                        $date,                                              // B: Date
+                        $material['product_name_english'] ?? '',           // C: Product Name
+                        $material['unit'] ?? '',                           // D: Unit
+                        $material['present_day_rate'] ?? 0,               // E: Present Day Rate
+                        $material['opening_stock'] ?? 0,                  // F: Opening Stock
+                        $material['in_warehouse'] ?? 0,                   // G: In Warehouse
+                        $material['total_in'] ?? 0,                       // H: Total In
+                        $material['in_amount'] ?? 0                       // I: IN Amount
+                    ];
+
+                    foreach ($basicData as $value) {
+                        $cell = Coordinate::stringFromColumnIndex($colIndex) . $dataRow;
+                        $sheet->setCellValue($cell, $value);
+                        $sheet->getStyle($cell)->applyFromArray($dataStyle);
+
+                        // Special formatting for text columns
+                        if ($colIndex == 2 || $colIndex == 3) { // Date and Product Name
+                            $sheet->getStyle($cell)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_LEFT);
+                        }
+
+                        $colIndex++;
+                    }
+
+                    // Production usage columns (J onwards)
+                    if (count($productionItemsArray) > 0) {
+                        foreach ($productionItemsArray as $item) {
+                            $productionItemId = $item['production_item_id'];
+                            $usage = $material['production_usage'][$productionItemId] ?? null;
+
+                            // Quantity column
+                            $qtyCell = Coordinate::stringFromColumnIndex($colIndex) . $dataRow;
+                            $qtyValue = $usage ? ($usage['quantity'] ?? 0) : '-';
+                            $sheet->setCellValue($qtyCell, $qtyValue);
+                            $sheet->getStyle($qtyCell)->applyFromArray($dataStyle);
+                            $sheet->getStyle($qtyCell)->getFill()
+                                ->setFillType(Fill::FILL_SOLID)->getStartColor()->setRGB($colors['success_bg']);
+                            $colIndex++;
+
+                            // Amount column
+                            $amountCell = Coordinate::stringFromColumnIndex($colIndex) . $dataRow;
+                            $amountValue = $usage ? ($usage['amount'] ?? 0) : '-';
+                            $sheet->setCellValue($amountCell, $amountValue);
+                            $sheet->getStyle($amountCell)->applyFromArray($dataStyle);
+                            $sheet->getStyle($amountCell)->getFill()
+                                ->setFillType(Fill::FILL_SOLID)->getStartColor()->setRGB($colors['warning_bg']);
+                            $colIndex++;
+                        }
+                    } else {
+                        // Default production columns
+                        $sheet->setCellValue(Coordinate::stringFromColumnIndex($colIndex) . $dataRow, '-');
+                        $sheet->getStyle(Coordinate::stringFromColumnIndex($colIndex) . $dataRow)->applyFromArray($dataStyle);
+                        $sheet->getStyle(Coordinate::stringFromColumnIndex($colIndex) . $dataRow)->getFill()
+                            ->setFillType(Fill::FILL_SOLID)->getStartColor()->setRGB($colors['success_bg']);
+                        $colIndex++;
+
+                        $sheet->setCellValue(Coordinate::stringFromColumnIndex($colIndex) . $dataRow, '-');
+                        $sheet->getStyle(Coordinate::stringFromColumnIndex($colIndex) . $dataRow)->applyFromArray($dataStyle);
+                        $sheet->getStyle(Coordinate::stringFromColumnIndex($colIndex) . $dataRow)->getFill()
+                            ->setFillType(Fill::FILL_SOLID)->getStartColor()->setRGB($colors['warning_bg']);
+                        $colIndex++;
+                    }
+
+                    // Remaining columns (Out, Out Amount, Closing Stock, Closing Amount)
+                    $remainingData = [
+                        $material['out'] ?? 0,                    // Out
+                        $material['out_amount'] ?? 0,            // Out Amount
+                        $material['closing_stock'] ?? 0,         // Closing Stock
+                        $material['closing_stock_amount'] ?? 0   // Closing Amount
+                    ];
+
+                    for ($i = 0; $i < count($remainingData); $i++) {
+                        $cell = Coordinate::stringFromColumnIndex($colIndex) . $dataRow;
+                        $value = $remainingData[$i];
+                        $sheet->setCellValue($cell, $value);
+                        $sheet->getStyle($cell)->applyFromArray($dataStyle);
+
+                        // Special styling for closing stock and amount
+                        if ($i == 2) { // Closing Stock
+                            $sheet->getStyle($cell)->getFill()
+                                ->setFillType(Fill::FILL_SOLID)->getStartColor()->setRGB($colors['error_bg']);
+
+                            // Red text for negative values
+                            if ($value < 0) {
+                                $sheet->getStyle($cell)->getFont()->getColor()->setRGB('FF0000');
+                                $sheet->getStyle($cell)->getFont()->setBold(true);
+                            }
+                        } elseif ($i == 3) { // Closing Amount
+                            $sheet->getStyle($cell)->getFill()
+                                ->setFillType(Fill::FILL_SOLID)->getStartColor()->setRGB($colors['warning_dark_bg']);
+
+                            // Red text for negative values
+                            if ($value < 0) {
+                                $sheet->getStyle($cell)->getFont()->getColor()->setRGB('FF0000');
+                                $sheet->getStyle($cell)->getFont()->setBold(true);
+                            }
+                        }
+
+                        $colIndex++;
+                    }
+
+                    $dataRow++;
+                }
+
+                // Auto-size columns
+                foreach (range('A', $sheet->getHighestColumn()) as $col) {
+                    $sheet->getColumnDimension($col)->setAutoSize(true);
+                }
+
+                // Set row heights
+                $sheet->getRowDimension(1)->setRowHeight(25);
+                $sheet->getRowDimension(2)->setRowHeight(20);
+
+                // Freeze panes (freeze first 2 rows and up to column E - Present Day Rate)
+                // 'F3' means freeze everything to the left of column F and above row 3.
+                $sheet->freezePane('F3');
+            }
+
+            // Set active sheet to first one
+            if ($spreadsheet->getSheetCount() > 0) {
+                $spreadsheet->setActiveSheetIndex(0);
+            }
+
+            // Save File
+            $dir = storage_path('exports');
+            if (!File::exists($dir)) {
+                File::makeDirectory($dir, 0755, true);
+            }
+
+            $filename = 'production-matrix-report' . '.xlsx';
+            $path = "{$dir}/{$filename}";
+            (new Xlsx($spreadsheet))->save($path);
+
+            return response()->json([
+                'filename' => $filename,
+                'file_url' => url("storage/exports/{$filename}"),
+                'status' => 200,
+                'result' => true,
+            ]);
+
+        } catch (\Exception $e) {
+            // Handle errors gracefully
+            return response([
+                'error' => $e->getMessage(),
+                'result' => false,
+                'status' => 500,
+            ]);
+        }
+    }
+
+    public function matrixWarehousePdf(Request $request)
+    {
+        $params = $request->only(['start_date', 'end_date', 'warehouse_id']);
+        $productionConfigId = $this->domain['pro_config'];
+        $domainConfigId = $this->domain['domain_id'];
+
+        try {
+            $processedData = ProductionBatchModel::warehouseMatrixReportData($params, $domainConfigId, $productionConfigId);
+            $productionItems = $processedData['production_items'] ?? [];
+            $productionItemsArray = [];
+
+            foreach ($productionItems as $key => $item) {
+                $productionItemsArray[] = [
+                    'production_item_id' => $key,
+                    'item_name' => $item->item_name ?? 'Item',
+                ];
+            }
+
+            $warehouseName = $processedData['warehouse_name'] ?? 'Warehouse';
+            $dateWiseData = $processedData['date_wise_data'] ?? [];
+
+            $pdf = new \TCPDF('L', 'mm', 'A3', true, 'UTF-8', false);
+            $pdf->SetTitle('Warehouse Matrix Report');
+            $pdf->SetMargins(10, 10, 10);
+            $pdf->SetHeaderMargin(5);
+            $pdf->SetFooterMargin(5);
+            $pdf->SetAutoPageBreak(true, 15);
+
+            foreach ($dateWiseData as $dateData) {
+                $pdf->AddPage();
+                $pdf->SetFont('helvetica', 'B', 10);
+                $pdf->Cell(0, 10, "Matrix Report — {$dateData['date']} — {$warehouseName}", 0, 1, 'C');
+
+                $materials = $dateData['data'] ?? [];
+
+                // Build headers
+                $headers = ['S.L', 'Date', 'Product Name', 'Unit', 'Rate', 'Opening', 'In', 'Total In', 'In Amt'];
+                foreach ($productionItemsArray as $item) {
+                    $headers[] = $item['item_name'] . ' Qty';
+                    $headers[] = $item['item_name'] . ' Amt';
+                }
+                $headers = array_merge($headers, ['Out', 'Out Amt', 'Closing', 'Closing Amt']);
+
+                $totalColumns = count($headers);
+                $pageWidth = 420 - $pdf->getMargins()['left'] - $pdf->getMargins()['right'];
+                $colWidth = floor($pageWidth / $totalColumns);
+                $colWidths = array_fill(0, $totalColumns, $colWidth);
+                $cellHeight = 14;
+                $fontSize = 7;
+
+                // === Render Header with vertical center ===
+                $pdf->SetFont('helvetica', 'B', $fontSize);
+                $pdf->SetFillColor(227, 242, 253);
+                $xStart = $pdf->GetX();
+                $yStart = $pdf->GetY();
+
+                for ($i = 0; $i < $totalColumns; $i++) {
+                    $cellW = $colWidths[$i];
+                    $title = $headers[$i];
+
+                    $lineCount = $pdf->getNumLines($title, $cellW);
+                    $lineHeight = $pdf->getCellHeightRatio() * $fontSize * 0.3528;
+                    $contentHeight = $lineCount * $lineHeight;
+                    $offsetY = $yStart + (($cellHeight - $contentHeight) / 2);
+
+                    $pdf->Rect($xStart, $yStart, $cellW, $cellHeight, 'DF');
+                    $pdf->SetXY($xStart, $offsetY);
+                    $pdf->MultiCell($cellW, $cellHeight, $title, 0, 'C', false, 0);
+                    $xStart += $cellW;
+                }
+
+                $currentY = $yStart + $cellHeight;
+                $pdf->SetY($currentY);
+
+                // === Render Data Rows ===
+                $pdf->SetFont('helvetica', '', $fontSize);
+                $rowNo = 1;
+
+                foreach ($materials as $material) {
+                    $row = [];
+
+                    // Basic data
+                    $row[] = $rowNo++;
+                    $row[] = $dateData['date'];
+                    $row[] = $material['product_name_english'] ?? '-';
+                    $row[] = $material['unit'] ?? '-';
+                    $row[] = $material['present_day_rate'] ?? 0;
+                    $row[] = $material['opening_stock'] ?? 0;
+                    $row[] = $material['in_warehouse'] ?? 0;
+                    $row[] = $material['total_in'] ?? 0;
+                    $row[] = $material['in_amount'] ?? 0;
+
+                    foreach ($productionItemsArray as $item) {
+                        $id = $item['production_item_id'];
+                        $usage = $material['production_usage'][$id] ?? ['quantity' => '-', 'amount' => '-'];
+                        $row[] = $usage['quantity'] ?? '-';
+                        $row[] = $usage['amount'] ?? '-';
+                    }
+
+                    $row[] = $material['out'] ?? 0;
+                    $row[] = $material['out_amount'] ?? 0;
+                    $row[] = $material['closing_stock'] ?? 0;
+                    $row[] = $material['closing_stock_amount'] ?? 0;
+
+                    // Draw Row
+                    $x = $pdf->GetX();
+                    $y = $pdf->GetY();
+
+                    for ($i = 0; $i < count($row); $i++) {
+                        $value = $row[$i];
+                        $cellW = $colWidths[$i];
+                        $isSL = $headers[$i] === 'S.L';
+                        $align = is_numeric($value) ? 'R' : 'L';
+
+                        $pdf->SetXY($x, $y);
+
+                        $display = $isSL ? (int) $value : (is_numeric($value) ? number_format($value, 2) : (string) $value);
+
+                        $lineCount = $pdf->getNumLines($display, $cellW);
+                        $lineHeight = $pdf->getCellHeightRatio() * $fontSize * 0.3528;
+                        $contentHeight = $lineCount * $lineHeight;
+                        $offsetY = $y + (($cellHeight - $contentHeight) / 2);
+
+                        // Background color for closing values
+                        if (in_array($headers[$i], ['Closing', 'Closing Amt']) && is_numeric($value) && floatval($value) < 0) {
+                            $pdf->SetFillColor(248, 215, 218);
+                        } else {
+                            $pdf->SetFillColor(255);
+                        }
+
+                        $pdf->Rect($x, $y, $cellW, $cellHeight, 'DF');
+                        $pdf->SetXY($x, $offsetY);
+                        $pdf->MultiCell($cellW, $cellHeight, $display, 0, $align, false, 0);
+
+                        $x += $cellW;
+                    }
+
+                    // Move to next row
+                    $pdf->SetY($y + $cellHeight);
+                }
+            }
+
+            // Save PDF
+            $dir = storage_path('exports');
+            if (!\File::exists($dir)) {
+                \File::makeDirectory($dir, 0755, true);
+            }
+
+            $fileName = 'production-matrix-report.pdf';
+            $filePath = "{$dir}/{$fileName}";
+
+            $pdf->Output($filePath, 'F');
+
+            return response()->json([
+                'filename'  => $fileName,
+                'file_url'  => url("storage/exports/{$fileName}"),
+                'status'    => 200,
+                'result'    => true,
+            ]);
+
+        } catch (\Throwable $e) {
+            return response()->json([
+                'error'   => $e->getMessage(),
+                'status'  => 500,
+                'result'  => false,
+            ]);
+        }
+    }
+    public function matrixReportDownload($type)
+    {
+        $fileName = '';
+        if ($type == 'xlsx') {
+            $fileName = 'production-matrix-report.xlsx';
+        }elseif ($type == 'pdf') {
+            $fileName = 'production-matrix-report.pdf';
+        }
+        $filePath = storage_path('exports/'.$fileName);
+        return response()->download($filePath, $fileName)->deleteFileAfterSend(true);
+    }
+
+
+
 }

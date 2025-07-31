@@ -117,10 +117,14 @@ Route::prefix('/production')->middleware([HeaderAuthenticationMiddleware::class,
         Route::get('issue', [ProductionReportController::class,'issueReport'])->name('issue_report');
         Route::get('issue-xlsx', [ProductionReportController::class,'issueGenerateXlsx'])->name('issue_generate_xlsx');
         Route::get('issue-pdf', [ProductionReportController::class,'issueGeneratePdf'])->name('issue_generate_pdf');
+        Route::get('matrix/warehouse', [ProductionReportController::class,'matrixWarehouse'])->name('matrix_warehouse');
+        Route::get('matrix/warehouse-xlsx', [ProductionReportController::class,'matrixWarehouseXlsx'])->name('matrix_warehouse_xlsx');
+        Route::get('matrix/warehouse-pdf', [ProductionReportController::class,'matrixWarehousePdf'])->name('matrix_warehouse_pdf');
     });
 
 });
 
 Route::get('finish-goods/download', [ProductionRecipeItemsController::class,'finishGoodsDownload'])->middleware([LogRequestResponse::class])->name('finish_goods_download');
 Route::get('issue-xlsx/download/{type}', [ProductionReportController::class,'issueReportDownload'])->name('issue_report_download');
+Route::get('matrix-report/download/{type}', [ProductionReportController::class,'matrixReportDownload'])->name('matrix_report_download');
 
