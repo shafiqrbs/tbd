@@ -20,7 +20,8 @@ class ProductionBatchItemModel extends Model
         'production_item_id',
         'receive_quantity',
         'issue_quantity',
-        'damage_quantity'
+        'damage_quantity',
+        'warehouse_id'
     ];
 
 

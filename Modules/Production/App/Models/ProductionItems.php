@@ -5,7 +5,6 @@ namespace Modules\Production\App\Models;
 
 use Cviebrock\EloquentSluggable\Sluggable;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Support\Facades\DB;
 use Modules\Inventory\App\Entities\Product;
 use Modules\Inventory\App\Models\ProductModel;
@@ -13,7 +12,7 @@ use Modules\Inventory\App\Models\ProductModel;
 
 class ProductionItems extends Model
 {
-    use HasFactory,Sluggable;
+    use Sluggable;
 
     protected $table = 'pro_item';
     public $timestamps = true;

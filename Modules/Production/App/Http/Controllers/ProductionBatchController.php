@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\DB;
 use Modules\AppsApi\App\Services\GeneratePatternCodeService;
 use Modules\AppsApi\App\Services\JsonRequestResponse;
 use Modules\Core\App\Models\UserModel;
+use Modules\Inventory\App\Models\DailyStockModel;
 use Modules\Inventory\App\Models\ProductModel;
 use Modules\Inventory\App\Models\StockItemHistoryModel;
 use Modules\Inventory\App\Models\StockItemModel;
@@ -82,6 +83,8 @@ class ProductionBatchController extends Controller
             // Validate input
             $input = $request->validated();
             $input['config_id'] = $this->domain['pro_config'];
+            $batch = ProductionBatchModel::find($input['batch_id']);
+            $input['warehouse_id'] = $batch->warehouse_id ?? null;
 
             // Check if production item exists
             $productionItem = ProductionItems::find($input['production_item_id']);
@@ -391,9 +394,22 @@ class ProductionBatchController extends Controller
             foreach ($batch->batchItems as $batchItem) {
                     // batch item quantity process into stock
                     $this->processProductionReceiveConfirm($batchItem, $batch);
+
+                    // for inventory daily stock
+                    /*$productionItem = ProductionItems::find($batchItem->production_item_id);
+                    $dailyStock = DailyStockModel::maintainDailyStock(
+                        date('Y-m-d'),
+                        'production_quantity',
+                        $this->domain['config_id'],
+                        $batch->warehouse_id,
+                        $productionItem->item_id,
+                        $batchItem->receive_quantity
+                    );
+
+                    return response()->json(['success' => true,'data' => $dailyStock]);*/
             }
 
-            // approve batch
+            /*// approve batch
             $batch->update([
                 'process' => 'Received'
             ]);
@@ -403,7 +419,7 @@ class ProductionBatchController extends Controller
             return response()->json([
                 'message' => 'success',
                 'status' => ResponseAlias::HTTP_OK
-            ], ResponseAlias::HTTP_OK);
+            ], ResponseAlias::HTTP_OK);*/
         } catch (\Exception $e) {
             DB::rollBack();
 
@@ -432,6 +448,15 @@ class ProductionBatchController extends Controller
             ->latest()
             ->first();
 
+        $existingStockHistoryWithWarehouse = null;
+        if ($batch->warehouse_id) {
+            $existingStockHistoryWithWarehouse = StockItemHistoryModel::where('stock_item_id', $getStockItemId)
+                ->where('config_id', $stockItem->config_id)
+                ->where('warehouse_id', $batch->warehouse_id)
+                ->latest()
+                ->first();
+        }
+
         // calculate closing quantity & stock
         $quantity = $batchItem['receive_quantity'] ?? 0;
         $subTotal = $quantity * $stockItem->sales_price ?? 0;
@@ -439,10 +464,14 @@ class ProductionBatchController extends Controller
         $closing_quantity = ($existingStockHistory->closing_quantity ?? 0) + $quantity;
         $closing_balance = ($existingStockHistory->closing_balance ?? 0) + $subTotal;
 
+        $warehouse_closing_quantity = ($existingStockHistoryWithWarehouse->warehouse_closing_quantity ?? 0) + $quantity;
+        $warehouse_closing_balance = ($existingStockHistoryWithWarehouse->warehouse_closing_balance ?? 0) + $subTotal;
+
         // prepare data for stock item history
         $data = [
             'stock_item_id' => $getStockItemId,
             'config_id' => $stockItem->config_id,
+            'item_name' => $stockItem->item_name,
             'quantity' => $quantity,
             'purchase_price' => $stockItem->purchase_price ?? 0,
             'sales_price' => $stockItem->sales_price ?? 0,
@@ -450,7 +479,11 @@ class ProductionBatchController extends Controller
             'opening_balance' => $existingStockHistory->closing_balance ?? 0,
             'closing_quantity' => $closing_quantity,
             'closing_balance' => $closing_balance,
-            'wearhouse_id' => $batchItem->wearhouse_id ?? null,
+            'warehouse_opening_quantity' => $existingStockHistoryWithWarehouse->warehouse_closing_quantity ?? 0,
+            'warehouse_opening_balance' => $existingStockHistoryWithWarehouse->warehouse_closing_balance ?? 0,
+            'warehouse_closing_quantity' => $warehouse_closing_quantity,
+            'warehouse_closing_balance' => $warehouse_closing_balance,
+            'warehouse_id' => $batchItem->warehouse_id ?? null,
             'mode' => 'production',
             'process' => 'approved',
             'created_by' => $this->domain['user_id']
@@ -510,27 +543,44 @@ class ProductionBatchController extends Controller
             ->latest()
             ->first();
 
+        $existingStockHistoryWithWarehouse = null;
+        if ($batch->warehouse_id) {
+            $existingStockHistoryWithWarehouse = StockItemHistoryModel::where('stock_item_id', $findElement->material_id)
+                ->where('config_id', $findStockItem->config_id)
+                ->where('warehouse_id', $batch->warehouse_id)
+                ->latest()
+                ->first();
+        }
+
         // calculate closing quantity & stock
         $quantity = $expenseItem->quantity ?? 0;
         $subTotal = $quantity * $expenseItem->sales_price ?? 0;
 
         $closing_quantity = ($existingStockHistory->closing_quantity ?? 0) - $quantity;
         $closing_balance = ($existingStockHistory->closing_balance ?? 0) - $subTotal;
+
+        $warehouse_closing_quantity = ($existingStockHistoryWithWarehouse->warehouse_closing_quantity ?? 0) - $quantity;
+        $warehouse_closing_balance = ($existingStockHistoryWithWarehouse->warehouse_closing_balance ?? 0) - $subTotal;
         $quantity = -$quantity;
 
         // prepare data for stock item history
         $data = [
             'stock_item_id' => $findElement->material_id,
             'config_id' => $findStockItem->config_id,
+            'item_name' => $findStockItem->name,
             'quantity' => $quantity,
             'purchase_price' => $expenseItem->purchase_price ?? 0,
             'sales_price' => $expenseItem->sales_price ?? 0,
             'opening_quantity' => $existingStockHistory->closing_quantity ?? 0,
             'opening_balance' => $existingStockHistory->closing_balance ?? 0,
+            'warehouse_opening_quantity' => $existingStockHistoryWithWarehouse->warehouse_closing_quantity ?? 0,
+            'warehouse_opening_balance' => $existingStockHistoryWithWarehouse->warehouse_closing_balance ?? 0,
+            'warehouse_closing_quantity' => $warehouse_closing_quantity ?? 0,
+            'warehouse_closing_balance' => $warehouse_closing_balance ?? 0,
             'closing_quantity' => $closing_quantity,
             'closing_balance' => $closing_balance,
-            'wearhouse_id' => $batchItem->wearhouse_id ?? null,
-            'mode' => 'production',
+            'warehouse_id' => $batchItem->warehouse_id ?? null,
+            'mode' => 'production-expense',
             'process' => 'approved',
             'created_by' => $this->domain['user_id']
         ];
