@@ -7,10 +7,10 @@ use Gedmo\Mapping\Annotation as Gedmo;
 /**
  * Service
  *
- * @ORM\Table( name ="hms_particular_type")
+ * @ORM\Table( name ="hms_particular_module")
  * @ORM\Entity()
  */
-class ParticularType
+class ParticularModule
 {
     /**
      * @var integer
@@ -22,21 +22,9 @@ class ParticularType
     private $id;
 
     /**
-     * @ORM\ManyToOne(targetEntity="Config", cascade={"detach","merge"})
-     * @ORM\JoinColumn(name="config_id", referencedColumnName="id", onDelete="CASCADE")
-     */
-    protected $config;
-
-    /**
-     * @ORM\ManyToOne(targetEntity="ParticularMasterType", cascade={"detach","merge"})
-     * @ORM\JoinColumn(name="particular_master_type_id", referencedColumnName="id", onDelete="CASCADE")
-     */
-    protected $particularMasterType;
-
-    /**
      * @var string
      *
-     * @ORM\Column(name="name", type="string", length=50, nullable=true)
+     * @ORM\Column(name="name", type="string",  nullable=true)
      */
     private $name;
 
@@ -50,7 +38,7 @@ class ParticularType
     /**
      * @var string
      *
-     * @ORM\Column(name="slug", type="string", length=50, nullable=true)
+     * @ORM\Column(name="slug", type="string",nullable=true)
      */
     private $slug;
 

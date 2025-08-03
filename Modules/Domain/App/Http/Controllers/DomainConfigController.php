@@ -16,6 +16,7 @@ use Modules\Core\App\Models\SettingModel;
 use Modules\Core\App\Models\SettingTypeModel;
 use Modules\Core\App\Models\UserModel;
 use Modules\Domain\App\Models\DomainModel;
+use Modules\Hospital\App\Models\HospitalConfigModel;
 use Modules\Inventory\App\Entities\Config;
 use Modules\Inventory\App\Models\ConfigDiscountModel;
 use Modules\Inventory\App\Models\ConfigModel;
@@ -421,6 +422,36 @@ class DomainConfigController extends Controller
         $entity = NbrVatConfigModel::updateOrCreate([
             'domain_id' => $id,
         ]);
+        DB::beginTransaction();
+        try {
+            $entity->update($request->all());
+            DB::commit();
+            $service = new JsonRequestResponse();
+            $return = $service->returnJosnResponse($this->domainConfigById($id));
+            return $return;
+
+        } catch (ModelNotFoundException $e) {
+            DB::rollBack();
+            return response()->json([
+                'message' => 'Resource not found',
+                'status'  => ResponseAlias::HTTP_NOT_FOUND
+            ], ResponseAlias::HTTP_NOT_FOUND);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'message' => 'Operation failed: ' . $e->getMessage(),
+                'error'   => $e->getMessage(),
+                'status'  => ResponseAlias::HTTP_INTERNAL_SERVER_ERROR
+            ], ResponseAlias::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    public function hospitalConfig(Request $request,$id)
+    {
+        $entity = HospitalConfigModel::updateOrCreate([
+            'domain_id' => $id,
+        ]);
+
         DB::beginTransaction();
         try {
             $entity->update($request->all());
