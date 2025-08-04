@@ -47,7 +47,7 @@ class DomainConfigController extends Controller
         $entity = DomainModel::with('accountConfig',
             'accountConfig.capital_investment','accountConfig.account_cash','accountConfig.account_bank','accountConfig.account_mobile','accountConfig.account_user','accountConfig.account_vendor','accountConfig.account_customer','accountConfig.account_product_group','accountConfig.account_category',
             'accountConfig.voucher_stock_opening','accountConfig.voucher_purchase','accountConfig.voucher_sales','accountConfig.voucher_purchase_return','accountConfig.voucher_stock_reconciliation',
-            'productionConfig','gstConfig','inventoryConfig','inventoryConfig.configPurchase','inventoryConfig.configSales','inventoryConfig.configProduct','inventoryConfig.configDiscount','inventoryConfig.configVat','inventoryConfig.businessModel','inventoryConfig.currency')->find($this
+            'productionConfig','gstConfig','inventoryConfig','hospitalConfig','inventoryConfig.configPurchase','inventoryConfig.configSales','inventoryConfig.configProduct','inventoryConfig.configDiscount','inventoryConfig.configVat','inventoryConfig.businessModel','inventoryConfig.currency')->find($this
             ->domain['global_id']);
         $service = new JsonRequestResponse();
         return $service->returnJosnResponse($entity);
@@ -60,7 +60,7 @@ class DomainConfigController extends Controller
         $entity = DomainModel::with('accountConfig',
             'accountConfig.capital_investment','accountConfig.account_cash','accountConfig.account_bank','accountConfig.account_mobile','accountConfig.account_user','accountConfig.account_vendor','accountConfig.account_customer','accountConfig.account_product_group','accountConfig.account_category',
             'accountConfig.voucher_stock_opening','accountConfig.voucher_purchase','accountConfig.voucher_sales','accountConfig.voucher_purchase_return','accountConfig.voucher_stock_reconciliation',
-            'productionConfig','gstConfig','inventoryConfig','inventoryConfig.configPurchase','inventoryConfig.configSales','inventoryConfig.configProduct','inventoryConfig.configDiscount','inventoryConfig.configVat','inventoryConfig.businessModel','inventoryConfig.currency')->find($id);
+            'productionConfig','gstConfig','inventoryConfig','hospitalConfig','inventoryConfig.configPurchase','inventoryConfig.configSales','inventoryConfig.configProduct','inventoryConfig.configDiscount','inventoryConfig.configVat','inventoryConfig.businessModel','inventoryConfig.currency')->find($id);
         return $entity;
     }
 
@@ -454,20 +454,25 @@ class DomainConfigController extends Controller
 
         DB::beginTransaction();
         try {
+
             $entity->update($request->all());
             DB::commit();
+
             $service = new JsonRequestResponse();
             $return = $service->returnJosnResponse($this->domainConfigById($id));
             return $return;
 
         } catch (ModelNotFoundException $e) {
             DB::rollBack();
+
             return response()->json([
                 'message' => 'Resource not found',
                 'status'  => ResponseAlias::HTTP_NOT_FOUND
             ], ResponseAlias::HTTP_NOT_FOUND);
+
         } catch (\Exception $e) {
             DB::rollBack();
+
             return response()->json([
                 'message' => 'Operation failed: ' . $e->getMessage(),
                 'error'   => $e->getMessage(),

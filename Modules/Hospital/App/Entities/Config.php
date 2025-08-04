@@ -323,7 +323,7 @@ class Config
      *
      * @ORM\Column(type="boolean",nullable=true,options={"default"="false"})
      */
-    private $prescriptionShowSimilar;
+    private $prescriptionShowSimilarProduct;
 
     /**
      * @var boolean

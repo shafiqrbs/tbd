@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Modules\Accounting\App\Models\AccountingModel;
+use Modules\Hospital\App\Models\HospitalConfigModel;
 use Modules\Inventory\App\Models\ConfigModel;
 use Modules\NbrVatTax\App\Models\NbrVatConfigModel;
 use Modules\Production\App\Models\ProductionConfig;
@@ -41,6 +42,11 @@ class DomainModel extends Model
     public function inventoryConfig()
     {
         return $this->hasOne(ConfigModel::class,'domain_id','id');
+    }
+
+     public function hospitalConfig()
+    {
+        return $this->hasOne(HospitalConfigModel::class,'domain_id','id');
     }
 
     public function productionConfig()
