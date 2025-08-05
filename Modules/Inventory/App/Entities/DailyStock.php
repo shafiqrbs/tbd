@@ -60,20 +60,20 @@ class DailyStock
 
     /**
      * @var float
-     * @ORM\Column(name="price", type="float", nullable = true)
+     * @ORM\Column(name="price", type="float", nullable = true,options={"default":0})
      */
     private $price = 0;
 
     /**
      * @var float
-     * @ORM\Column(type="float", nullable = true)
+     * @ORM\Column(type="float", nullable = true,options={"default":0})
      */
     private $purchasePrice = 0;
 
 
     /**
      * @var float
-     * @ORM\Column(type="float", nullable = true)
+     * @ORM\Column(type="float", nullable = true,options={"default":0})
      */
     private $salesPrice = 0;
 
@@ -81,103 +81,103 @@ class DailyStock
     /**
      * @var float
      *
-     * @ORM\Column(type="float", nullable = true)
+     * @ORM\Column(type="float", nullable = true,options={"default":0})
      */
     private $actualPrice = 0;
 
     /**
      * @var float
-     * @ORM\Column(type="float", nullable = true)
+     * @ORM\Column(type="float", nullable = true,options={"default":0})
      */
     private $discountPrice = 0;
 
     /**
      * @var float
-     * @ORM\Column(type="float", nullable = true)
+     * @ORM\Column(type="float", nullable = true,options={"default":0})
      */
     private $openingQuantity= 0.00;
 
     /**
      * @var float
-     * @ORM\Column(type="float", nullable = true)
+     * @ORM\Column(type="float", nullable = true,options={"default":0})
      */
     private $openingBalance= 0.00;
 
     /**
      * @var float
-     * @ORM\Column(type="float", nullable = true)
+     * @ORM\Column(type="float", nullable = true,options={"default":0})
      */
     private $productionQuantity = 0.00;
 
     /**
      * @var float
-     * @ORM\Column(type="float", nullable = true)
+     * @ORM\Column(type="float", nullable = true,options={"default":0})
      */
     private $purchaseQuantity = 0.00;
 
     /**
      * @var float
-     * @ORM\Column(type="float", nullable = true)
+     * @ORM\Column(type="float", nullable = true,options={"default":0})
      */
     private $salesReturnQuantity = 0.00;
 
     /**
      * @var float
-     * @ORM\Column(type="float", nullable = true)
+     * @ORM\Column(type="float", nullable = true,options={"default":0})
      */
     private $assetInQuantity= 0.00;
 
     /**
      * @var float
-     * @ORM\Column(type="float", nullable = true)
+     * @ORM\Column(type="float", nullable = true,options={"default":0})
      */
     private $totalInQuantity = 0.00;
 
     /**
      * @var float
-     * @ORM\Column(type="float", nullable = true)
+     * @ORM\Column(type="float", nullable = true,options={"default":0})
      */
     private $salesQuantity = 0.00;
 
     /**
      * @var float
-     * @ORM\Column(type="float", nullable = true)
+     * @ORM\Column(type="float", nullable = true,options={"default":0})
      */
     private $damageQuantity = 0.00;
 
     /**
      * @var float
-     * @ORM\Column(type="float", nullable = true)
+     * @ORM\Column(type="float", nullable = true,options={"default":0})
      */
     private $purchaseReturnQuantity = 0.00;
 
     /**
      * @var float
-     * @ORM\Column(type="float", nullable = true)
+     * @ORM\Column(type="float", nullable = true,options={"default":0})
      */
     private $productionExpenseQuantity = 0.00;
 
     /**
      * @var float
-     * @ORM\Column(type="float", nullable = true)
+     * @ORM\Column(type="float", nullable = true,options={"default":0})
      */
     private $assetOutQuantity= 0.00;
 
     /**
      * @var float
-     * @ORM\Column(type="float", nullable = true)
+     * @ORM\Column(type="float", nullable = true,options={"default":0})
      */
     private $totalOutQuantity = 0.00;
 
     /**
      * @var float
-     * @ORM\Column(type="float", nullable = true)
+     * @ORM\Column(type="float", nullable = true,options={"default":0})
      */
     private $closingQuantity= 0.00;
 
     /**
      * @var float
-     * @ORM\Column(type="float", nullable = true)
+     * @ORM\Column(type="float", nullable = true,options={"default":0})
      */
     private $closingBalance= 0.00;
 

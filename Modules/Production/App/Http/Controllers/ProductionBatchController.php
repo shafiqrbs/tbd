@@ -3,6 +3,7 @@
 namespace Modules\Production\App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Services\DailyStockService;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
@@ -352,6 +353,17 @@ class ProductionBatchController extends Controller
                 foreach ($batchItem->productionExpenses as $expenseItem) {
                     // recipe item quantity process into stock
                     $this->processProductionExpense($expenseItem, $batchItem, $batch);
+
+                    // for maintain inventory daily stock
+                    $productionElement = ProductionElements::find($expenseItem->production_element_id);
+                    DailyStockService::maintainDailyStock(
+                        date: date('Y-m-d'),
+                        field: 'production_expense_quantity',
+                        configId: $this->domain['config_id'],
+                        warehouseId: $batch->warehouse_id,
+                        stockItemId: $productionElement->material_id,
+                        quantity: $expenseItem->quantity
+                    );
                 }
             }
 
@@ -395,21 +407,19 @@ class ProductionBatchController extends Controller
                     // batch item quantity process into stock
                     $this->processProductionReceiveConfirm($batchItem, $batch);
 
-                    // for inventory daily stock
-                    /*$productionItem = ProductionItems::find($batchItem->production_item_id);
-                    $dailyStock = DailyStockModel::maintainDailyStock(
-                        date('Y-m-d'),
-                        'production_quantity',
-                        $this->domain['config_id'],
-                        $batch->warehouse_id,
-                        $productionItem->item_id,
-                        $batchItem->receive_quantity
+                    // for maintain inventory daily stock
+                    $productionItem = ProductionItems::find($batchItem->production_item_id);
+                    DailyStockService::maintainDailyStock(
+                        date: date('Y-m-d'),
+                        field: 'production_quantity',
+                        configId: $this->domain['config_id'],
+                        warehouseId: $batch->warehouse_id,
+                        stockItemId: $productionItem->item_id,
+                        quantity: $batchItem->receive_quantity
                     );
-
-                    return response()->json(['success' => true,'data' => $dailyStock]);*/
             }
 
-            /*// approve batch
+            // approve batch
             $batch->update([
                 'process' => 'Received'
             ]);
@@ -419,7 +429,7 @@ class ProductionBatchController extends Controller
             return response()->json([
                 'message' => 'success',
                 'status' => ResponseAlias::HTTP_OK
-            ], ResponseAlias::HTTP_OK);*/
+            ], ResponseAlias::HTTP_OK);
         } catch (\Exception $e) {
             DB::rollBack();
 

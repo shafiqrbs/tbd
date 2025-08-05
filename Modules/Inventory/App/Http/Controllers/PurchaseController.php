@@ -3,6 +3,7 @@
 namespace Modules\Inventory\App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Services\DailyStockService;
 use Doctrine\ORM\EntityManager;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -25,6 +26,7 @@ use Modules\Inventory\App\Models\SalesItemModel;
 use Modules\Inventory\App\Models\SalesModel;
 use Modules\Inventory\App\Models\StockItemHistoryModel;
 use Modules\Inventory\App\Models\StockItemModel;
+use Modules\Production\App\Models\ProductionElements;
 use function Symfony\Component\HttpFoundation\Session\Storage\Handler\getInsertStatement;
 
 class PurchaseController extends Controller
@@ -96,6 +98,16 @@ class PurchaseController extends Controller
                     StockItemModel::where('id', $item->stock_item_id)->where('config_id',$item->config_id)->update(['average_price' => $itemAveragePrice,'purchase_price' => $item['purchase_price'],'price' => $item['sales_price'],'sales_price' => $item['sales_price']]);
                     $item->update(['approved_by_id' => $this->domain['user_id']]);
                     StockItemHistoryModel::openingStockQuantity($item,'purchase',$this->domain);
+
+                    // for maintain inventory daily stock
+                    DailyStockService::maintainDailyStock(
+                        date: date('Y-m-d'),
+                        field: 'purchase_quantity',
+                        configId: $this->domain['config_id'],
+                        warehouseId: $entity->warehouse_id,
+                        stockItemId: $item->stock_item_id,
+                        quantity: $item->quantity
+                    );
                 }
             }
             $entity->update([
@@ -297,6 +309,16 @@ class PurchaseController extends Controller
 
                     $item->update(['approved_by_id' => $this->domain['user_id']]);
                     StockItemHistoryModel::openingStockQuantity($item,'purchase',$this->domain);
+
+                    // for maintain inventory daily stock
+                    DailyStockService::maintainDailyStock(
+                        date: date('Y-m-d'),
+                        field: 'purchase_quantity',
+                        configId: $this->domain['config_id'],
+                        warehouseId: $purchase->warehouse_id,
+                        stockItemId: $item->stock_item_id,
+                        quantity: $item->quantity
+                    );
                 }
                 AccountJournalModel::insertPurchaseAccountJournal($this->domain,$purchase->id);
             }
