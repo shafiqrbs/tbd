@@ -100,6 +100,7 @@ class PurchaseController extends Controller
                     StockItemHistoryModel::openingStockQuantity($item,'purchase',$this->domain);
 
                     // for maintain inventory daily stock
+                    date_default_timezone_set('Asia/Dhaka');
                     DailyStockService::maintainDailyStock(
                         date: date('Y-m-d'),
                         field: 'purchase_quantity',
@@ -311,6 +312,7 @@ class PurchaseController extends Controller
                     StockItemHistoryModel::openingStockQuantity($item,'purchase',$this->domain);
 
                     // for maintain inventory daily stock
+                    date_default_timezone_set('Asia/Dhaka');
                     DailyStockService::maintainDailyStock(
                         date: date('Y-m-d'),
                         field: 'purchase_quantity',

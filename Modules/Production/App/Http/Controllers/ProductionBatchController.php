@@ -305,12 +305,25 @@ class ProductionBatchController extends Controller
         if ($input['process'] == 'Approved') {
             $input['approved_by_id'] = $this->domain['user_id'];
             $input['process'] = 'Approved';
+            $input['approve_date'] = date('Y-m-d');
 
             foreach ($batch->batchItems as $batchItem) {
                 // get batch expense data
                 foreach ($batchItem->productionExpenses as $expenseItem) {
                     // recipe item quantity process into stock
                     $this->processProductionExpense($expenseItem, $batchItem, $batch);
+
+                    // for maintain inventory daily stock
+                    date_default_timezone_set('Asia/Dhaka');
+                    $productionElement = ProductionElements::find($expenseItem->production_element_id);
+                    DailyStockService::maintainDailyStock(
+                        date: date('Y-m-d'),
+                        field: 'production_expense_quantity',
+                        configId: $this->domain['config_id'],
+                        warehouseId: $batch->warehouse_id,
+                        stockItemId: $productionElement->material_id,
+                        quantity: $expenseItem->quantity
+                    );
                 }
             }
         }
@@ -355,6 +368,7 @@ class ProductionBatchController extends Controller
                     $this->processProductionExpense($expenseItem, $batchItem, $batch);
 
                     // for maintain inventory daily stock
+                    date_default_timezone_set('Asia/Dhaka');
                     $productionElement = ProductionElements::find($expenseItem->production_element_id);
                     DailyStockService::maintainDailyStock(
                         date: date('Y-m-d'),
@@ -370,7 +384,8 @@ class ProductionBatchController extends Controller
             // approve batch
             $batch->update([
                 'approved_by_id' => $this->domain['user_id'],
-                'process' => 'Approved'
+                'process' => 'Approved',
+                'approve_date' => date('Y-m-d')
             ]);
 
             DB::commit();
@@ -408,6 +423,7 @@ class ProductionBatchController extends Controller
                     $this->processProductionReceiveConfirm($batchItem, $batch);
 
                     // for maintain inventory daily stock
+                    date_default_timezone_set('Asia/Dhaka');
                     $productionItem = ProductionItems::find($batchItem->production_item_id);
                     DailyStockService::maintainDailyStock(
                         date: date('Y-m-d'),
@@ -421,7 +437,9 @@ class ProductionBatchController extends Controller
 
             // approve batch
             $batch->update([
-                'process' => 'Received'
+                'process' => 'Received',
+                'receive_date' => date('Y-m-d')
+
             ]);
 
             DB::commit();

@@ -3,6 +3,7 @@
 namespace Modules\Inventory\App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Services\DailyStockService;
 use Doctrine\ORM\EntityManager;
 use Exception;
 use Illuminate\Http\Request;
@@ -127,7 +128,19 @@ class SalesController extends Controller
                 $sales->update(['approved_by_id' => $this->domain['user_id'], 'process' => 'Approved']);
                 if ($sales->salesItems->count() > 0) {
                     foreach ($sales->salesItems as $item) {
+                        // for stock history
                         StockItemHistoryModel::openingStockQuantity($item, 'sales', $this->domain);
+
+                        // for maintain inventory daily stock
+                        date_default_timezone_set('Asia/Dhaka');
+                        DailyStockService::maintainDailyStock(
+                            date: date('Y-m-d'),
+                            field: 'sales_quantity',
+                            configId: $this->domain['config_id'],
+                            warehouseId: $item->warehouse_id,
+                            stockItemId: $item->stock_item_id,
+                            quantity: $item->quantity
+                        );
                     }
                 }
                 AccountJournalModel::insertSalesAccountJournal($this->domain,$sales->id);
@@ -320,6 +333,17 @@ class SalesController extends Controller
                 if (sizeof($getSales->salesItems)>0){
                     foreach ($getSales->salesItems as $item){
                         StockItemHistoryModel::openingStockQuantity($item,'sales',$this->domain);
+
+                        // for maintain inventory daily stock
+                        date_default_timezone_set('Asia/Dhaka');
+                        DailyStockService::maintainDailyStock(
+                            date: date('Y-m-d'),
+                            field: 'sales_quantity',
+                            configId: $this->domain['config_id'],
+                            warehouseId: $item->warehouse_id,
+                            stockItemId: $item->stock_item_id,
+                            quantity: $item->quantity
+                        );
                     }
                 }
 
@@ -347,6 +371,17 @@ class SalesController extends Controller
             if (sizeof($getSales->salesItems)>0){
                 foreach ($getSales->salesItems as $item){
                     StockItemHistoryModel::openingStockQuantity($item,'sales',$this->domain);
+
+                    // for maintain inventory daily stock
+                    date_default_timezone_set('Asia/Dhaka');
+                    DailyStockService::maintainDailyStock(
+                        date: date('Y-m-d'),
+                        field: 'sales_quantity',
+                        configId: $this->domain['config_id'],
+                        warehouseId: $item->warehouse_id,
+                        stockItemId: $item->stock_item_id,
+                        quantity: $item->quantity
+                    );
                 }
             }
 
@@ -391,6 +426,17 @@ class SalesController extends Controller
             if ($entity->salesItems->count() > 0) {
                 foreach ($entity->salesItems as $item) {
                     StockItemHistoryModel::openingStockQuantity($item, 'sales', $this->domain);
+
+                    // for maintain inventory daily stock
+                    date_default_timezone_set('Asia/Dhaka');
+                    DailyStockService::maintainDailyStock(
+                        date: date('Y-m-d'),
+                        field: 'sales_quantity',
+                        configId: $this->domain['config_id'],
+                        warehouseId: $item->warehouse_id,
+                        stockItemId: $item->stock_item_id,
+                        quantity: $item->quantity
+                    );
                 }
             }
 

@@ -175,10 +175,15 @@ class ProductionBatch
 
     /**
      * @var \DateTime
-     * @Gedmo\Timestampable(on="create")
-     * @ORM\Column(type="datetime")
+     * @ORM\Column(type="date",nullable=true)
      */
     private $receiveDate;
+
+    /**
+     * @var \DateTime
+     * @ORM\Column(type="date",nullable=true)
+     */
+    private $approveDate;
 
 
     /**

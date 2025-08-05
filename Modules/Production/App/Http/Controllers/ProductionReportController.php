@@ -8,6 +8,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Modules\Core\App\Models\UserModel;
 use Modules\Inventory\App\Entities\StockItem;
@@ -664,27 +665,15 @@ class ProductionReportController extends Controller
             'data' => $entity
         ],ResponseAlias::HTTP_OK);
     }
-
-    public function matrixWarehouseXlsx(Request $request){
-        $params = $request->only('start_date', 'end_date','warehouse_id');
+    public function matrixWarehouseXlsx(Request $request)
+    {
+        $params = $request->only('start_date', 'end_date', 'warehouse_id');
         $productionConfigId = $this->domain['pro_config'];
         $domainConfigId = $this->domain['domain_id'];
 
         try {
-            // Use the reusable method
-            $processedData = ProductionBatchModel::warehouseMatrixReportData($params, $domainConfigId,$productionConfigId);
-
-            // Extract and convert the required variables from processedData
-            $productionItems = $processedData['production_items'] ?? [];
-            $productionItemsArray = [];
-
-            // Convert stdClass objects to arrays
-            foreach ($productionItems as $key => $item) {
-                $productionItemsArray[] = [
-                    'production_item_id' => $key,
-                    'item_name' => $item->item_name ?? 'Unknown Item'
-                ];
-            }
+            // Use the reusable method to get processed data
+            $processedData = ProductionBatchModel::warehouseMatrixReportData($params, $domainConfigId, $productionConfigId);
 
             $warehouseName = $processedData['warehouse_name'] ?? 'Warehouse';
 
@@ -735,20 +724,40 @@ class ProductionReportController extends Controller
             $spreadsheet->removeSheetByIndex(0);
 
             $dateWiseData = $processedData['date_wise_data'] ?? [];
+
+            // --- Debugging additions ---
+//            Log::info('XLSX Generation: Count of date_wise_data: ' . count($dateWiseData));
+//            Log::info('XLSX Generation: Keys of date_wise_data: ' . json_encode(array_keys($dateWiseData)));
+            // --- End debugging additions ---
+
             $sheetIndex = 0;
 
             foreach ($dateWiseData as $dateKey => $dateData) {
-                $date = $dateData['date'];
+                $date = $dateData['date']; // DD-MM-YYYY format
                 $materials = $dateData['data'] ?? [];
-                // $summary = $dateData['summary'] ?? []; // Summary row removed, so no need for this
+                $productionItemsOnDate = $dateData['production_items_on_date'] ?? [];
+
+                // Convert date-specific production items to an indexed array for iteration
+                $productionItemsForCurrentDateArray = [];
+                foreach ($productionItemsOnDate as $key => $item) {
+                    // Ensure $item is treated as an object or array based on how JSON is decoded
+                    $productionItemsForCurrentDateArray[] = [
+                        'production_item_id' => $key,
+                        'item_name' => is_object($item) ? ($item->item_name ?? 'Unknown Item') : ($item['item_name'] ?? 'Unknown Item')
+                    ];
+                }
 
                 // Create new worksheet for each date
-                $sheet = new Worksheet($spreadsheet, "Date_{$date}");
+                // Changed sheet name to use $dateKey (YYYY-MM-DD) for guaranteed uniqueness
+                $sheetName = "Report - {$dateKey}";
+                Log::info("XLSX Generation: Attempting to create sheet: {$sheetName}"); // Log each sheet creation attempt
+
+                $sheet = new Worksheet($spreadsheet, $sheetName);
                 $spreadsheet->addSheet($sheet, $sheetIndex);
                 $sheetIndex++;
 
-                // Calculate column positions exactly like frontend
-                $productionUsageCols = count($productionItemsArray) > 0 ? count($productionItemsArray) * 2 : 2;
+                // Calculate column positions dynamically for THIS sheet
+                $productionUsageCols = count($productionItemsForCurrentDateArray) > 0 ? count($productionItemsForCurrentDateArray) * 2 : 2;
 
                 // Row 1: First header row (matching frontend structure)
                 $row1 = 1;
@@ -757,8 +766,8 @@ class ProductionReportController extends Controller
                 // Headers with rowSpan=2 (these span both header rows)
                 $singleRowHeaders = [
                     'A' => 'S.L',
-                    'B' => 'Date',
-                    'C' => 'Product Name (English)',
+                    'B' => 'Date', // Keep Date column in the sheet
+                    'C' => 'Product Name',
                     'D' => 'Unit',
                     'E' => 'Present Day Rate',
                     'F' => 'Opening Stock',
@@ -780,7 +789,6 @@ class ProductionReportController extends Controller
                 $prodStartCol = 'J';
                 $prodEndColIndex = 9 + $productionUsageCols; // J is column 10, so 9 + productionUsageCols
                 $prodEndCol = Coordinate::stringFromColumnIndex($prodEndColIndex);
-
                 $sheet->setCellValue($prodStartCol . $row1, 'Production Usage');
                 $sheet->mergeCells($prodStartCol . $row1 . ':' . $prodEndCol . $row1);
                 $sheet->getStyle($prodStartCol . $row1 . ':' . $prodEndCol . $row1)->applyFromArray($defaultStyle);
@@ -790,15 +798,12 @@ class ProductionReportController extends Controller
                 // Remaining single headers (rowSpan=2)
                 $remainingStartColIndex = $prodEndColIndex + 1;
                 $remainingHeaders = ['Out', 'Out Amount', 'Closing Stock', 'Closing Amount'];
-
                 for ($i = 0; $i < count($remainingHeaders); $i++) {
                     $colIndex = $remainingStartColIndex + $i;
                     $col = Coordinate::stringFromColumnIndex($colIndex);
-
                     $sheet->setCellValue($col . $row1, $remainingHeaders[$i]);
                     $sheet->mergeCells($col . $row1 . ':' . $col . $row2);
                     $sheet->getStyle($col . $row1 . ':' . $col . $row2)->applyFromArray($defaultStyle);
-
                     // Apply specific colors for closing columns
                     $bgColor = $colors['header_bg'];
                     if ($remainingHeaders[$i] === 'Closing Stock') {
@@ -806,19 +811,16 @@ class ProductionReportController extends Controller
                     } elseif ($remainingHeaders[$i] === 'Closing Amount') {
                         $bgColor = $colors['warning_dark_bg'];
                     }
-
                     $sheet->getStyle($col . $row1 . ':' . $col . $row2)->getFill()
                         ->setFillType(Fill::FILL_SOLID)->getStartColor()->setRGB($bgColor);
                 }
 
-                // Row 2: Second header row for production items
+                // Row 2: Second header row for production items (dynamic based on productionItemsForCurrentDateArray)
                 $colIndex = 10; // Start from column J
-
-                if (count($productionItemsArray) > 0) {
-                    foreach ($productionItemsArray as $item) {
+                if (count($productionItemsForCurrentDateArray) > 0) {
+                    foreach ($productionItemsForCurrentDateArray as $item) {
                         $qtyCol = Coordinate::stringFromColumnIndex($colIndex);
                         $amountCol = Coordinate::stringFromColumnIndex($colIndex + 1);
-
                         $itemName = $item['item_name'] ?? 'Production Item';
 
                         // Quantity column
@@ -832,16 +834,14 @@ class ProductionReportController extends Controller
                         $sheet->getStyle($amountCol . $row2)->applyFromArray($defaultStyle);
                         $sheet->getStyle($amountCol . $row2)->getFill()
                             ->setFillType(Fill::FILL_SOLID)->getStartColor()->setRGB($colors['warning_bg']);
-
                         $colIndex += 2;
                     }
                 } else {
-                    // Default production columns when no production items
+                    // Default production columns when no production items for this date
                     $sheet->setCellValue('J' . $row2, 'Production Qty');
                     $sheet->getStyle('J' . $row2)->applyFromArray($defaultStyle);
                     $sheet->getStyle('J' . $row2)->getFill()
                         ->setFillType(Fill::FILL_SOLID)->getStartColor()->setRGB($colors['success_bg']);
-
                     $sheet->setCellValue('K' . $row2, 'Production Amount');
                     $sheet->getStyle('K' . $row2)->applyFromArray($defaultStyle);
                     $sheet->getStyle('K' . $row2)->getFill()
@@ -855,39 +855,37 @@ class ProductionReportController extends Controller
 
                     // Basic info columns (A to I)
                     $basicData = [
-                        $material['sl'] ?? ($index + 1),                    // A: S.L
-                        $date,                                              // B: Date
-                        $material['product_name_english'] ?? '',           // C: Product Name
-                        $material['unit'] ?? '',                           // D: Unit
-                        $material['present_day_rate'] ?? 0,               // E: Present Day Rate
-                        $material['opening_stock'] ?? 0,                  // F: Opening Stock
-                        $material['in_warehouse'] ?? 0,                   // G: In Warehouse
-                        $material['total_in'] ?? 0,                       // H: Total In
-                        $material['in_amount'] ?? 0                       // I: IN Amount
+                        $material['sl'] ?? ($index + 1),          // A: S.L
+                        $date,                                     // B: Date
+                        $material['product_name_english'] ?? '',   // C: Product Name
+                        $material['unit'] ?? '',                   // D: Unit
+                        $material['present_day_rate'] ?? 0,        // E: Present Day Rate
+                        $material['opening_stock'] ?? 0,           // F: Opening Stock
+                        $material['in_warehouse'] ?? 0,            // G: In Warehouse
+                        $material['total_in'] ?? 0,                // H: Total In
+                        $material['in_amount'] ?? 0                // I: IN Amount
                     ];
 
                     foreach ($basicData as $value) {
                         $cell = Coordinate::stringFromColumnIndex($colIndex) . $dataRow;
                         $sheet->setCellValue($cell, $value);
                         $sheet->getStyle($cell)->applyFromArray($dataStyle);
-
                         // Special formatting for text columns
                         if ($colIndex == 2 || $colIndex == 3) { // Date and Product Name
                             $sheet->getStyle($cell)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_LEFT);
                         }
-
                         $colIndex++;
                     }
 
-                    // Production usage columns (J onwards)
-                    if (count($productionItemsArray) > 0) {
-                        foreach ($productionItemsArray as $item) {
+                    // Production usage columns (J onwards) (dynamic based on productionItemsForCurrentDateArray)
+                    if (count($productionItemsForCurrentDateArray) > 0) {
+                        foreach ($productionItemsForCurrentDateArray as $item) {
                             $productionItemId = $item['production_item_id'];
                             $usage = $material['production_usage'][$productionItemId] ?? null;
 
                             // Quantity column
                             $qtyCell = Coordinate::stringFromColumnIndex($colIndex) . $dataRow;
-                            $qtyValue = $usage ? ($usage['quantity'] ?? 0) : '-';
+                            $qtyValue = $usage ? ($usage['quantity'] ?? '-') : '-';
                             $sheet->setCellValue($qtyCell, $qtyValue);
                             $sheet->getStyle($qtyCell)->applyFromArray($dataStyle);
                             $sheet->getStyle($qtyCell)->getFill()
@@ -896,7 +894,7 @@ class ProductionReportController extends Controller
 
                             // Amount column
                             $amountCell = Coordinate::stringFromColumnIndex($colIndex) . $dataRow;
-                            $amountValue = $usage ? ($usage['amount'] ?? 0) : '-';
+                            $amountValue = $usage ? ($usage['amount'] ?? '-') : '-';
                             $sheet->setCellValue($amountCell, $amountValue);
                             $sheet->getStyle($amountCell)->applyFromArray($dataStyle);
                             $sheet->getStyle($amountCell)->getFill()
@@ -904,13 +902,12 @@ class ProductionReportController extends Controller
                             $colIndex++;
                         }
                     } else {
-                        // Default production columns
+                        // Default production columns when no production items for this date
                         $sheet->setCellValue(Coordinate::stringFromColumnIndex($colIndex) . $dataRow, '-');
                         $sheet->getStyle(Coordinate::stringFromColumnIndex($colIndex) . $dataRow)->applyFromArray($dataStyle);
                         $sheet->getStyle(Coordinate::stringFromColumnIndex($colIndex) . $dataRow)->getFill()
                             ->setFillType(Fill::FILL_SOLID)->getStartColor()->setRGB($colors['success_bg']);
                         $colIndex++;
-
                         $sheet->setCellValue(Coordinate::stringFromColumnIndex($colIndex) . $dataRow, '-');
                         $sheet->getStyle(Coordinate::stringFromColumnIndex($colIndex) . $dataRow)->applyFromArray($dataStyle);
                         $sheet->getStyle(Coordinate::stringFromColumnIndex($colIndex) . $dataRow)->getFill()
@@ -936,7 +933,6 @@ class ProductionReportController extends Controller
                         if ($i == 2) { // Closing Stock
                             $sheet->getStyle($cell)->getFill()
                                 ->setFillType(Fill::FILL_SOLID)->getStartColor()->setRGB($colors['error_bg']);
-
                             // Red text for negative values
                             if ($value < 0) {
                                 $sheet->getStyle($cell)->getFont()->getColor()->setRGB('FF0000');
@@ -945,17 +941,14 @@ class ProductionReportController extends Controller
                         } elseif ($i == 3) { // Closing Amount
                             $sheet->getStyle($cell)->getFill()
                                 ->setFillType(Fill::FILL_SOLID)->getStartColor()->setRGB($colors['warning_dark_bg']);
-
                             // Red text for negative values
                             if ($value < 0) {
                                 $sheet->getStyle($cell)->getFont()->getColor()->setRGB('FF0000');
                                 $sheet->getStyle($cell)->getFont()->setBold(true);
                             }
                         }
-
                         $colIndex++;
                     }
-
                     $dataRow++;
                 }
 
@@ -969,7 +962,6 @@ class ProductionReportController extends Controller
                 $sheet->getRowDimension(2)->setRowHeight(20);
 
                 // Freeze panes (freeze first 2 rows and up to column E - Present Day Rate)
-                // 'F3' means freeze everything to the left of column F and above row 3.
                 $sheet->freezePane('F3');
             }
 
@@ -983,7 +975,6 @@ class ProductionReportController extends Controller
             if (!File::exists($dir)) {
                 File::makeDirectory($dir, 0755, true);
             }
-
             $filename = 'production-matrix-report' . '.xlsx';
             $path = "{$dir}/{$filename}";
             (new Xlsx($spreadsheet))->save($path);
@@ -994,9 +985,9 @@ class ProductionReportController extends Controller
                 'status' => 200,
                 'result' => true,
             ]);
-
         } catch (\Exception $e) {
             // Handle errors gracefully
+            Log::error("XLSX Generation Error: " . $e->getMessage(), ['trace' => $e->getTraceAsString()]);
             return response([
                 'error' => $e->getMessage(),
                 'result' => false,
@@ -1004,7 +995,6 @@ class ProductionReportController extends Controller
             ]);
         }
     }
-
     public function matrixWarehousePdf(Request $request)
     {
         $params = $request->only(['start_date', 'end_date', 'warehouse_id']);
@@ -1013,82 +1003,112 @@ class ProductionReportController extends Controller
 
         try {
             $processedData = ProductionBatchModel::warehouseMatrixReportData($params, $domainConfigId, $productionConfigId);
-            $productionItems = $processedData['production_items'] ?? [];
-            $productionItemsArray = [];
-
-            foreach ($productionItems as $key => $item) {
-                $productionItemsArray[] = [
-                    'production_item_id' => $key,
-                    'item_name' => $item->item_name ?? 'Item',
-                ];
-            }
 
             $warehouseName = $processedData['warehouse_name'] ?? 'Warehouse';
             $dateWiseData = $processedData['date_wise_data'] ?? [];
 
             $pdf = new \TCPDF('L', 'mm', 'A3', true, 'UTF-8', false);
+
+
             $pdf->SetTitle('Warehouse Matrix Report');
             $pdf->SetMargins(10, 10, 10);
             $pdf->SetHeaderMargin(5);
             $pdf->SetFooterMargin(5);
             $pdf->SetAutoPageBreak(true, 15);
 
-            foreach ($dateWiseData as $dateData) {
+            foreach ($dateWiseData as $dateKey => $dateData) { // Use $dateKey for sheet naming consistency
                 $pdf->AddPage();
                 $pdf->SetFont('helvetica', 'B', 10);
-                $pdf->Cell(0, 10, "Matrix Report — {$dateData['date']} — {$warehouseName}", 0, 1, 'C');
+                $pdf->Cell(0, 10, "Matrix Report — {$dateData['date_formatted']} — {$warehouseName}", 0, 1, 'C'); // Use formatted date for title
 
                 $materials = $dateData['data'] ?? [];
+                $productionItemsOnDate = $dateData['production_items_on_date'] ?? [];
 
-                // Build headers
-                $headers = ['S.L', 'Date', 'Product Name', 'Unit', 'Rate', 'Opening', 'In', 'Total In', 'In Amt'];
-                foreach ($productionItemsArray as $item) {
-                    $headers[] = $item['item_name'] . ' Qty';
-                    $headers[] = $item['item_name'] . ' Amt';
+                // Dynamically build productionItemsArray for the current date
+                $productionItemsForCurrentDateArray = [];
+                foreach ($productionItemsOnDate as $key => $item) {
+                    $productionItemsForCurrentDateArray[] = [
+                        'production_item_id' => $key,
+                        'item_name' => is_object($item) ? ($item->item_name ?? 'Item') : ($item['item_name'] ?? 'Item'),
+                    ];
                 }
-                $headers = array_merge($headers, ['Out', 'Out Amt', 'Closing', 'Closing Amt']);
+
+                // Build headers dynamically for the current date
+                $headers = ['S.L', 'Date', 'Product Name', 'Unit', 'Rate', 'Opening', 'In', 'Total In', 'In Amount'];
+                foreach ($productionItemsForCurrentDateArray as $item) {
+                    $headers[] = $item['item_name'] . ' Qty';
+                    $headers[] = $item['item_name'] . ' Amount';
+                }
+                $headers = array_merge($headers, ['Out', 'Out Amount', 'Closing', 'Closing Amount']);
 
                 $totalColumns = count($headers);
                 $pageWidth = 420 - $pdf->getMargins()['left'] - $pdf->getMargins()['right'];
                 $colWidth = floor($pageWidth / $totalColumns);
-                $colWidths = array_fill(0, $totalColumns, $colWidth);
+                $colWidths = array_fill(0, $totalColumns, $colWidth); // Initialize with equal widths
+
+                // Adjust specific column widths if needed (e.g., for Product Name)
+                // Example: if 'Product Name' is at index 2 (0-indexed)
+                $productNameColIndex = array_search('Product Name', $headers);
+                if ($productNameColIndex !== false) {
+                    $colWidths[$productNameColIndex] = $colWidth * 1.5; // Make Product Name column wider
+                    // Recalculate other widths or adjust remaining columns
+                    $remainingWidth = $pageWidth - $colWidths[$productNameColIndex];
+                    $remainingCols = $totalColumns - 1;
+                    $newColWidth = floor($remainingWidth / $remainingCols);
+                    for ($i = 0; $i < $totalColumns; $i++) {
+                        if ($i !== $productNameColIndex) {
+                            $colWidths[$i] = $newColWidth;
+                        }
+                    }
+                }
+
+
                 $cellHeight = 14;
                 $fontSize = 7;
 
                 // === Render Header with vertical center ===
                 $pdf->SetFont('helvetica', 'B', $fontSize);
-                $pdf->SetFillColor(227, 242, 253);
+                $pdf->SetFillColor(227, 242, 253); // header_bg color
                 $xStart = $pdf->GetX();
                 $yStart = $pdf->GetY();
 
                 for ($i = 0; $i < $totalColumns; $i++) {
                     $cellW = $colWidths[$i];
                     $title = $headers[$i];
-
                     $lineCount = $pdf->getNumLines($title, $cellW);
                     $lineHeight = $pdf->getCellHeightRatio() * $fontSize * 0.3528;
                     $contentHeight = $lineCount * $lineHeight;
                     $offsetY = $yStart + (($cellHeight - $contentHeight) / 2);
+
+                    // Apply specific header colors
+                    $fillColor = [227, 242, 253]; // Default header_bg
+                    if (strpos($title, 'Qty') !== false) {
+                        $fillColor = [213, 237, 218]; // success_bg
+                    } elseif (strpos($title, 'Amount') !== false) {
+                        $fillColor = [255, 243, 205]; // warning_bg
+                    } elseif ($title === 'Closing') {
+                        $fillColor = [248, 215, 218]; // error_bg
+                    } elseif ($title === 'Closing Amount') {
+                        $fillColor = [226, 181, 31]; // warning_dark_bg
+                    }
+                    $pdf->SetFillColor($fillColor[0], $fillColor[1], $fillColor[2]);
 
                     $pdf->Rect($xStart, $yStart, $cellW, $cellHeight, 'DF');
                     $pdf->SetXY($xStart, $offsetY);
                     $pdf->MultiCell($cellW, $cellHeight, $title, 0, 'C', false, 0);
                     $xStart += $cellW;
                 }
-
                 $currentY = $yStart + $cellHeight;
                 $pdf->SetY($currentY);
 
                 // === Render Data Rows ===
                 $pdf->SetFont('helvetica', '', $fontSize);
                 $rowNo = 1;
-
                 foreach ($materials as $material) {
                     $row = [];
-
                     // Basic data
                     $row[] = $rowNo++;
-                    $row[] = $dateData['date'];
+                    $row[] = $dateData['date']; // Use DD-MM-YYYY date for data row
                     $row[] = $material['product_name_english'] ?? '-';
                     $row[] = $material['unit'] ?? '-';
                     $row[] = $material['present_day_rate'] ?? 0;
@@ -1097,7 +1117,8 @@ class ProductionReportController extends Controller
                     $row[] = $material['total_in'] ?? 0;
                     $row[] = $material['in_amount'] ?? 0;
 
-                    foreach ($productionItemsArray as $item) {
+                    // Production usage data (dynamic based on productionItemsForCurrentDateArray)
+                    foreach ($productionItemsForCurrentDateArray as $item) {
                         $id = $item['production_item_id'];
                         $usage = $material['production_usage'][$id] ?? ['quantity' => '-', 'amount' => '-'];
                         $row[] = $usage['quantity'] ?? '-';
@@ -1112,15 +1133,15 @@ class ProductionReportController extends Controller
                     // Draw Row
                     $x = $pdf->GetX();
                     $y = $pdf->GetY();
-
                     for ($i = 0; $i < count($row); $i++) {
                         $value = $row[$i];
                         $cellW = $colWidths[$i];
-                        $isSL = $headers[$i] === 'S.L';
-                        $align = is_numeric($value) ? 'R' : 'L';
+                        $headerText = $headers[$i]; // Get header text for current column
+
+                        $isSL = $headerText === 'S.L';
+                        $align = is_numeric($value) && !$isSL ? 'R' : 'L'; // Align numbers right, others left
 
                         $pdf->SetXY($x, $y);
-
                         $display = $isSL ? (int) $value : (is_numeric($value) ? number_format($value, 2) : (string) $value);
 
                         $lineCount = $pdf->getNumLines($display, $cellW);
@@ -1128,19 +1149,41 @@ class ProductionReportController extends Controller
                         $contentHeight = $lineCount * $lineHeight;
                         $offsetY = $y + (($cellHeight - $contentHeight) / 2);
 
-                        // Background color for closing values
-                        if (in_array($headers[$i], ['Closing', 'Closing Amt']) && is_numeric($value) && floatval($value) < 0) {
-                            $pdf->SetFillColor(248, 215, 218);
-                        } else {
-                            $pdf->SetFillColor(255);
+                        // Background color for closing values and production usage
+                        $fillColor = [255, 255, 255]; // Default white
+                        $textColor = [0, 0, 0]; // Default black
+                        $isBold = false;
+
+                        if (strpos($headerText, 'Qty') !== false) {
+                            $fillColor = [213, 237, 218]; // success_bg
+                        } elseif (strpos($headerText, 'Amount') !== false) {
+                            $fillColor = [255, 243, 205]; // warning_bg
+                        } elseif ($headerText === 'Closing') {
+                            $fillColor = [248, 215, 218]; // error_bg
+                            if (is_numeric($value) && floatval($value) < 0) {
+                                $textColor = [255, 0, 0]; // Red for negative
+                                $isBold = true;
+                            }
+                        } elseif ($headerText === 'Closing Amount') {
+                            $fillColor = [226, 181, 31]; // warning_dark_bg
+                            if (is_numeric($value) && floatval($value) < 0) {
+                                $textColor = [255, 0, 0]; // Red for negative
+                                $isBold = true;
+                            }
                         }
+
+                        $pdf->SetFillColor($fillColor[0], $fillColor[1], $fillColor[2]);
+                        $pdf->SetTextColor($textColor[0], $textColor[1], $textColor[2]);
+                        $pdf->SetFont('helvetica', $isBold ? 'B' : '', $fontSize);
 
                         $pdf->Rect($x, $y, $cellW, $cellHeight, 'DF');
                         $pdf->SetXY($x, $offsetY);
                         $pdf->MultiCell($cellW, $cellHeight, $display, 0, $align, false, 0);
-
                         $x += $cellW;
                     }
+                    // Reset font and text color for next row
+                    $pdf->SetFont('helvetica', '', $fontSize);
+                    $pdf->SetTextColor(0, 0, 0);
 
                     // Move to next row
                     $pdf->SetY($y + $cellHeight);
@@ -1149,13 +1192,11 @@ class ProductionReportController extends Controller
 
             // Save PDF
             $dir = storage_path('exports');
-            if (!\File::exists($dir)) {
-                \File::makeDirectory($dir, 0755, true);
+            if (!File::exists($dir)) {
+                File::makeDirectory($dir, 0755, true);
             }
-
             $fileName = 'production-matrix-report.pdf';
             $filePath = "{$dir}/{$fileName}";
-
             $pdf->Output($filePath, 'F');
 
             return response()->json([
@@ -1164,7 +1205,6 @@ class ProductionReportController extends Controller
                 'status'    => 200,
                 'result'    => true,
             ]);
-
         } catch (\Throwable $e) {
             return response()->json([
                 'error'   => $e->getMessage(),
@@ -1173,6 +1213,7 @@ class ProductionReportController extends Controller
             ]);
         }
     }
+
     public function matrixReportDownload($type)
     {
         $fileName = '';
