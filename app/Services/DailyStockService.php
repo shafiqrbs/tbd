@@ -7,6 +7,7 @@ use Modules\Inventory\App\Models\DailyStockModel;
 use Modules\Inventory\App\Models\StockItemModel;
 use RuntimeException;
 use InvalidArgumentException;
+use Carbon\Carbon;
 
 class DailyStockService
 {
@@ -66,6 +67,11 @@ class DailyStockService
             throw new RuntimeException("Stock item not found for ID: {$stockItemId}");
         }
 
+        // --- NEW CODE BLOCK ---
+        // Get the previous day's closing stock to use as the opening stock for the current day.
+        $previousDayClosing = self::getPreviousDayClosingStock($date, $configId, $stockItemId, $warehouseId);
+        // --- END OF NEW CODE BLOCK ---
+
         // Define the attributes to search for
         $searchAttributes = [
             'config_id' => $configId,
@@ -79,13 +85,17 @@ class DailyStockService
 
         // Define the attributes to set if a new record is created
         $createAttributes = [
-            'warehouse_id' => $warehouseId, // Ensure warehouse_id is set on creation
+            'warehouse_id' => $warehouseId,
             'item_name' => $stockItem->name,
             'uom' => $stockItem->uom,
             'sales_price' => $stockItem->sales_price,
             'purchase_price' => $stockItem->purchase_price,
-            // Initialize all quantity and balance fields to 0 for new records
-            'opening_quantity' => 0,
+            'price' => $stockItem->$priceType, // Set price on creation
+            // --- UPDATED LOGIC FOR OPENING QUANTITY/BALANCE ---
+            'opening_quantity' => $previousDayClosing['quantity'],
+            'opening_balance' => $previousDayClosing['balance'],
+            // --- END OF UPDATED LOGIC ---
+            // Initialize all other quantity fields to 0 for new records
             'production_quantity' => 0,
             'purchase_quantity' => 0,
             'sales_return_quantity' => 0,
@@ -95,12 +105,10 @@ class DailyStockService
             'purchase_return_quantity' => 0,
             'production_expense_quantity' => 0,
             'asset_out_quantity' => 0,
-            'opening_balance' => 0,
-            'total_in_quantity' => 0,
+            'total_in_quantity' => $previousDayClosing['quantity'], // start total_in with opening quantity
             'total_out_quantity' => 0,
-            'closing_quantity' => 0,
-            'closing_balance' => 0,
-            'price' => 0, // Initialize 'price' as well
+            'closing_quantity' => $previousDayClosing['quantity'], // start closing with opening quantity
+            'closing_balance' => $previousDayClosing['balance'], // start closing balance with opening balance
         ];
 
         // Find or create the daily stock record using firstOrCreate
@@ -112,9 +120,7 @@ class DailyStockService
         // Refresh the model to get the latest quantities from the database
         $dailyStock->refresh();
 
-        // Now that the model is refreshed with the latest quantities,
-        $dailyStock->price = $dailyStock->$priceType;
-
+        // Recalculate all totals and balances based on the refreshed data
         $dailyStock->total_in_quantity = $dailyStock->opening_quantity +
             $dailyStock->production_quantity +
             $dailyStock->purchase_quantity +
@@ -135,5 +141,43 @@ class DailyStockService
         $dailyStock->save();
 
         return $dailyStock;
+    }
+
+    /**
+     * Gets the closing stock and balance from the previous day.
+     *
+     * @param string $currentDate
+     * @param int $configId
+     * @param int $stockItemId
+     * @param int|null $warehouseId
+     * @return array An array containing the closing quantity and balance.
+     */
+    protected static function getPreviousDayClosingStock(string $currentDate, int $configId, int $stockItemId, ?int $warehouseId): array
+    {
+        // Start with the base query
+        $query = DailyStockModel::where('config_id', $configId)
+            ->where('stock_item_id', $stockItemId)
+            ->where('inv_date', '<', $currentDate);
+
+        if (!is_null($warehouseId)) {
+            $query->where('warehouse_id', $warehouseId);
+        }
+
+        // Retrieve the last record based on the date
+        $previousDayStock = $query->latest('inv_date')->first();
+
+        // If a record for a previous day is found, return its closing quantity and balance.
+        // Otherwise, return 0 for both.
+        if ($previousDayStock) {
+            return [
+                'quantity' => $previousDayStock->closing_quantity,
+                'balance' => $previousDayStock->closing_balance,
+            ];
+        }
+
+        return [
+            'quantity' => 0,
+            'balance' => 0,
+        ];
     }
 }

@@ -2,6 +2,8 @@
 
 namespace Modules\Production\App\Models;
 
+use App\Helpers\DateHelper;
+use DateTime;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Carbon;
@@ -32,17 +34,18 @@ class ProductionBatchModel extends Model
         'code'
     ];
 
-    public static function boot() {
+    public static function boot()
+    {
         parent::boot();
         self::creating(function ($model) {
-            $date =  new \DateTime("now");
+            $date = new DateTime("now");
             $model->status = 1;
             $model->created_at = $date;
             $model->issue_date = $date;
             $model->receive_date = $date;
         });
         self::updating(function ($model) {
-            $date =  new \DateTime("now");
+            $date = new DateTime("now");
             $model->updated_at = $date;
         });
     }
@@ -68,13 +71,14 @@ class ProductionBatchModel extends Model
     }
 
 
-    public static function getRecords($request,$domain){
-        $page =  isset($request['page']) && $request['page'] > 0?($request['page'] - 1 ) : 0;
-        $perPage = isset($request['offset']) && $request['offset']!=''? (int)($request['offset']):0;
-        $skip = isset($page) && $page!=''? (int)$page*$perPage:0;
+    public static function getRecords($request, $domain)
+    {
+        $page = isset($request['page']) && $request['page'] > 0 ? ($request['page'] - 1) : 0;
+        $perPage = isset($request['offset']) && $request['offset'] != '' ? (int)($request['offset']) : 0;
+        $skip = isset($page) && $page != '' ? (int)$page * $perPage : 0;
 
-        $entity = self::where('pro_batch.config_id',$domain['pro_config'])
-            ->join('users','users.id','=','pro_batch.created_by_id')
+        $entity = self::where('pro_batch.config_id', $domain['pro_config'])
+            ->join('users', 'users.id', '=', 'pro_batch.created_by_id')
             ->select([
                 'pro_batch.id',
                 'pro_batch.invoice',
@@ -87,30 +91,30 @@ class ProductionBatchModel extends Model
                 DB::raw('DATE_FORMAT(pro_batch.issue_date, "%d-%M-%Y") as issue_date'),
             ]);
 
-        if (isset($request['term']) && !empty($request['term'])){
-            $entity = $entity->whereAny(['pro_batch.invoice','pro_batch.process','users.name'],'LIKE','%'.trim($request['term']).'%');
+        if (isset($request['term']) && !empty($request['term'])) {
+            $entity = $entity->whereAny(['pro_batch.invoice', 'pro_batch.process', 'users.name'], 'LIKE', '%' . trim($request['term']) . '%');
         }
         if (isset($request['created_at']) && !empty($request['created_at'])) {
             $entity = $entity->whereDate('pro_batch.created_at', trim($request['created_at']));
         }
 
-        $total  = $entity->count();
+        $total = $entity->count();
         $entities = $entity->skip($skip)
             ->take($perPage)
-            ->orderBy('id','DESC')
+            ->orderBy('id', 'DESC')
             ->get();
 
-        $data = array('count'=>$total,'entities' => $entities);
+        $data = array('count' => $total, 'entities' => $entities);
         return $data;
     }
 
-    public static function getShow($id,$domain)
+    public static function getShow($id, $domain)
     {
         $entity = self::where([
             ['pro_batch.config_id', '=', $domain['pro_config']],
             ['pro_batch.id', '=', $id]
         ])
-            ->leftjoin('cor_warehouses','cor_warehouses.id','=','pro_batch.warehouse_id')
+            ->leftjoin('cor_warehouses', 'cor_warehouses.id', '=', 'pro_batch.warehouse_id')
             ->select([
                 'pro_batch.id',
                 DB::raw('DATE_FORMAT(pro_batch.created_at, "%d-%m-%Y") as created_date'),
@@ -136,8 +140,8 @@ class ProductionBatchModel extends Model
                     'inv_stock.name',
                     DB::raw('DATE_FORMAT(pro_batch_item.created_at, "%d-%m-%Y") as created_date')
                 ])
-                    ->join('pro_item','pro_item.id','=','pro_batch_item.production_item_id')
-                    ->join('inv_stock','inv_stock.id','=','pro_item.item_id')
+                    ->join('pro_item', 'pro_item.id', '=', 'pro_batch_item.production_item_id')
+                    ->join('inv_stock', 'inv_stock.id', '=', 'pro_item.item_id')
                     ->with(['productionExpenses' => function ($query) {
                         $query->select([
                             'pro_expense.id',
@@ -152,16 +156,15 @@ class ProductionBatchModel extends Model
                             'inv_stock.name as name',
                             'inv_stock.uom',
                         ])
-                            ->join('pro_element','pro_element.id','=','pro_expense.production_element_id')
-                            ->join('inv_stock','inv_stock.id','=','pro_element.material_id')
-                        ;
+                            ->join('pro_element', 'pro_element.id', '=', 'pro_expense.production_element_id')
+                            ->join('inv_stock', 'inv_stock.id', '=', 'pro_element.material_id');
                     }]);
             }])
             ->first();
 
         // Collect unique material IDs once
         $materialIds = $entity->batchItems
-            ->flatMap(fn ($item) => $item->productionExpenses->pluck('material_id'))
+            ->flatMap(fn($item) => $item->productionExpenses->pluck('material_id'))
             ->unique()
             ->values();
 
@@ -173,7 +176,7 @@ class ProductionBatchModel extends Model
             $isWarehouse ? 'warehouse_closing_quantity' : 'closing_quantity',
         ])
             ->whereIn('stock_item_id', $materialIds)
-            ->when($isWarehouse, fn ($q) => $q->where('warehouse_id', $entity->warehouse_id))
+            ->when($isWarehouse, fn($q) => $q->where('warehouse_id', $entity->warehouse_id))
             ->orderByDesc('id')
             ->get()
             ->unique('stock_item_id')
@@ -184,12 +187,12 @@ class ProductionBatchModel extends Model
             foreach ($batchItem->productionExpenses as $expense) {
                 $materialId = $expense->material_id;
 
-                $expense->stock_quantity = (float) (
-                    $stockHistories[$materialId]->{ $isWarehouse ? 'warehouse_closing_quantity' : 'closing_quantity' }
+                $expense->stock_quantity = (float)(
+                    $stockHistories[$materialId]->{$isWarehouse ? 'warehouse_closing_quantity' : 'closing_quantity'}
                     ?? 0.0
                 );
 
-                $expense->needed_quantity = (float) $expense->needed_quantity;
+                $expense->needed_quantity = (float)$expense->needed_quantity;
 
                 [$expense->less_quantity, $expense->more_quantity] = $expense->needed_quantity > $expense->stock_quantity
                     ? [$expense->needed_quantity - $expense->stock_quantity, null]
@@ -201,12 +204,13 @@ class ProductionBatchModel extends Model
 
     public static function getBatchDropdown($domain)
     {
-        return self::where([['pro_batch.config_id',$domain['pro_config']],['pro_batch.status',1]])->select(['pro_batch.id','pro_batch.invoice','mode','issue_date',DB::raw('DATE_FORMAT(pro_batch.created_at, "%d-%M-%Y") as created_date')])->get();
+        return self::where([['pro_batch.config_id', $domain['pro_config']], ['pro_batch.status', 1]])->select(['pro_batch.id', 'pro_batch.invoice', 'mode', 'issue_date', DB::raw('DATE_FORMAT(pro_batch.created_at, "%d-%M-%Y") as created_date')])->get();
     }
 
-    public static function issueReportData(array $params, int $domain_id, int $production_config_id) {
+    public static function issueReportData(array $params, int $domain_id, int $production_config_id)
+    {
         $data = self::query()
-            ->leftjoin('cor_warehouses','cor_warehouses.id','=','pro_batch.warehouse_id')
+            ->leftjoin('cor_warehouses', 'cor_warehouses.id', '=', 'pro_batch.warehouse_id')
             ->where('pro_batch.config_id', '=', $production_config_id)
             ->where('pro_batch.status', '=', 1)
             ->when(!empty($params['start_date']), function ($query) use ($params) {
@@ -217,7 +221,6 @@ class ProductionBatchModel extends Model
                 $end = Carbon::parse($params['end_date'])->endOfDay();
                 $query->where('pro_batch.created_at', '<=', $end);
             })
-
             ->select([
                 'pro_batch.id',
                 DB::raw('DATE_FORMAT(pro_batch.created_at, "%d-%m-%Y") as created_date'),
@@ -267,7 +270,7 @@ class ProductionBatchModel extends Model
             ->each(function ($batch) {
                 // Collect unique material IDs once
                 $materialIds = $batch->batchItems
-                    ->flatMap(fn ($item) => $item->productionExpenses->pluck('material_id'))
+                    ->flatMap(fn($item) => $item->productionExpenses->pluck('material_id'))
                     ->unique()
                     ->values();
 
@@ -279,7 +282,7 @@ class ProductionBatchModel extends Model
                     $isWarehouse ? 'warehouse_closing_quantity' : 'closing_quantity',
                 ])
                     ->whereIn('stock_item_id', $materialIds)
-                    ->when($isWarehouse, fn ($q) => $q->where('warehouse_id', $batch->warehouse_id))
+                    ->when($isWarehouse, fn($q) => $q->where('warehouse_id', $batch->warehouse_id))
                     ->orderByDesc('id')
                     ->get()
                     ->unique('stock_item_id')
@@ -290,12 +293,12 @@ class ProductionBatchModel extends Model
                     foreach ($batchItem->productionExpenses as $expense) {
                         $materialId = $expense->material_id;
 
-                        $expense->stock_quantity = (float) (
-                            $stockHistories[$materialId]->{ $isWarehouse ? 'warehouse_closing_quantity' : 'closing_quantity' }
+                        $expense->stock_quantity = (float)(
+                            $stockHistories[$materialId]->{$isWarehouse ? 'warehouse_closing_quantity' : 'closing_quantity'}
                             ?? 0.0
                         );
 
-                        $expense->needed_quantity = (float) $expense->needed_quantity;
+                        $expense->needed_quantity = (float)$expense->needed_quantity;
 
                         [$expense->less_quantity, $expense->more_quantity] = $expense->needed_quantity > $expense->stock_quantity
                             ? [$expense->needed_quantity - $expense->stock_quantity, null]
@@ -306,12 +309,14 @@ class ProductionBatchModel extends Model
         return $data;
     }
 
-
     public static function warehouseMatrixReportData(array $params, int $domain_id, int $production_config_id)
     {
         // Get date range for calculations
-        $startDate = !empty($params['start_date']) ? Carbon::parse($params['start_date'])->startOfDay() : null;
-        $endDate = !empty($params['end_date']) ? Carbon::parse($params['end_date'])->endOfDay() : null;
+        $dates = !empty($params['month']) && !empty($params['year'])
+            ? DateHelper::getFirstAndLastDate((int)$params['year'], (int)$params['month'])
+            : null;
+        $startDate = $dates['first_date'] ?? null;
+        $endDate = $dates['last_date'] ?? null;
         $warehouseId = $params['warehouse_id'] ?? null;
 
         // First, get batches in the specified date range and warehouse with date grouping
@@ -342,8 +347,8 @@ class ProductionBatchModel extends Model
                 'production_items' => [],
                 'warehouse_name' => $warehouseId ? (DB::table('cor_warehouses')->where('id', $warehouseId)->value('name') ?? 'Unknown') : 'All Warehouses',
                 'meta' => [
-                    'start_date' => $startDate?->format('d-m-Y'),
-                    'end_date' => $endDate?->format('d-m-Y'),
+                    'start_date' => $startDate,
+                    'end_date' => $endDate,
                     'warehouse_id' => $warehouseId,
                     'message' => 'No batches found in the specified date range and warehouse'
                 ]
@@ -394,7 +399,7 @@ class ProductionBatchModel extends Model
                     'material_id' => $first->material_id,
                     'material_name' => $first->material_name,
                     'uom' => $first->uom,
-                    'price' => (float) $first->price
+                    'price' => (float)$first->price
                 ];
             });
 
@@ -490,8 +495,8 @@ class ProductionBatchModel extends Model
                 if (!$material) continue; // Skip if material not found
 
                 $closingQuantityField = $warehouseId ? 'warehouse_closing_quantity' : 'closing_quantity';
-                $openingStock = (float) ($openingStockData->get($materialId)?->{$closingQuantityField} ?? 0);
-                $inQuantity = (float) ($inData->get($materialId)?->total_in_quantity ?? 0);
+                $openingStock = (float)($openingStockData->get($materialId)?->{$closingQuantityField} ?? 0);
+                $inQuantity = (float)($inData->get($materialId)?->total_in_quantity ?? 0);
                 $totalIn = $openingStock + $inQuantity;
                 $price = $material['price'];
                 $inAmount = $totalIn * $price;
@@ -501,7 +506,7 @@ class ProductionBatchModel extends Model
                 $totalOut = 0;
                 // Iterate over production items *relevant to this date*
                 foreach ($productionItemsOnCurrentDate as $prodId => $prodItem) {
-                    $usage = (float) ($productionUsage->get($prodId) ?? 0);
+                    $usage = (float)($productionUsage->get($prodId) ?? 0);
                     $amount = $usage * $price;
                     $productionUsageFormatted[$prodId] = [
                         'quantity' => $usage,
@@ -535,7 +540,7 @@ class ProductionBatchModel extends Model
 
             $dateWiseData[$currentDate] = [
                 'date' => $carbonDate->format('d-m-Y'),
-                'date_formatted' => $carbonDate->format('l, F j, Y'), // Monday, July 21, 2025
+                'date_formatted' => $carbonDate->format('d'), // Monday, July 21, 2025
                 'data' => $reportData,
                 'production_items_on_date' => $productionItemsOnCurrentDate->toArray(), // Added date-specific production items
                 'summary' => [
@@ -559,97 +564,14 @@ class ProductionBatchModel extends Model
             'production_items' => $productionItemsData->toArray(), // Kept for overall list of all production items
             'warehouse_name' => $warehouseName,
             'meta' => [
-                'start_date' => $startDate?->format('d-m-Y'),
-                'end_date' => $endDate?->format('d-m-Y'),
+                'start_date' => $startDate,
+                'end_date' => $endDate,
                 'warehouse_id' => $warehouseId,
                 'total_dates' => count($dateWiseData),
                 'total_production_items' => count($productionItemsData), // This is for the global count
                 'date_range' => $dateRange->toArray(),
             ]
         ];
-    }
-
-// Helper method to format date-wise data for display
-    public static function formatDateWiseMatrixReportForDisplay($reportData) {
-        $dateWiseData = $reportData['date_wise_data'];
-        $productionItems = $reportData['production_items'];
-        $warehouseName = $reportData['warehouse_name'];
-
-        $formattedData = [];
-
-        foreach ($dateWiseData as $date => $dateData) {
-            $dayData = [];
-
-            foreach ($dateData['data'] as $row) {
-                $formattedRow = [
-                    'S.L.' => $row['sl'],
-                    'পণ্যের নাম (বাংলায়)' => $row['product_name_bangla'],
-                    'Product Name (English)' => $row['product_name_english'],
-                    'Unit' => $row['unit'],
-                    'Present Day Rate' => number_format($row['present_day_rate'], 2),
-                    'Opening Stock' => number_format($row['opening_stock'], 2),
-                    "IN {$warehouseName}" => number_format($row['in_warehouse'], 2),
-                    'Total In' => number_format($row['total_in'], 2),
-                    'IN Amount (TK)' => number_format($row['in_amount'], 2),
-                ];
-
-                // Add dynamic production item columns
-                foreach ($productionItems as $prodId => $prodItem) {
-                    $usage = $row['production_usage'][$prodId] ?? ['quantity' => 0, 'amount' => 0];
-                    $formattedRow[$prodItem['item_name']] = number_format($usage['quantity'], 2);
-                    $formattedRow[$prodItem['item_name'] . ' Out Amount'] = number_format($usage['amount'], 2);
-                }
-
-                $formattedRow['Out'] = number_format($row['out'], 2);
-                $formattedRow['Out Amount (TK)'] = number_format($row['out_amount'], 2);
-                $formattedRow['Closing Stock'] = number_format($row['closing_stock'], 2);
-                $formattedRow['Closing Stock Amount (TK)'] = number_format($row['closing_stock_amount'], 2);
-
-                $dayData[] = $formattedRow;
-            }
-
-            $formattedData[$date] = [
-                'date' => $dateData['date'],
-                'date_formatted' => $dateData['date_formatted'],
-                'data' => $dayData,
-                'summary' => $dateData['summary']
-            ];
-        }
-
-        return $formattedData;
-    }
-
-// Helper method to get consolidated summary across all dates
-    public static function getConsolidatedSummary($reportData) {
-        $dateWiseData = $reportData['date_wise_data'];
-        $consolidatedData = [];
-
-        // Consolidate all materials across all dates
-        foreach ($dateWiseData as $date => $dateData) {
-            foreach ($dateData['data'] as $row) {
-                $materialId = $row['material_id'];
-
-                if (!isset($consolidatedData[$materialId])) {
-                    $consolidatedData[$materialId] = $row;
-                    $consolidatedData[$materialId]['dates_used'] = [$date];
-                } else {
-                    // Accumulate quantities
-                    $consolidatedData[$materialId]['in_warehouse'] += $row['in_warehouse'];
-                    $consolidatedData[$materialId]['out'] += $row['out'];
-                    $consolidatedData[$materialId]['in_amount'] += $row['in_amount'];
-                    $consolidatedData[$materialId]['out_amount'] += $row['out_amount'];
-                    $consolidatedData[$materialId]['dates_used'][] = $date;
-
-                    // Accumulate production usage
-                    foreach ($row['production_usage'] as $prodId => $usage) {
-                        $consolidatedData[$materialId]['production_usage'][$prodId]['quantity'] += $usage['quantity'];
-                        $consolidatedData[$materialId]['production_usage'][$prodId]['amount'] += $usage['amount'];
-                    }
-                }
-            }
-        }
-
-        return array_values($consolidatedData);
     }
 
 }

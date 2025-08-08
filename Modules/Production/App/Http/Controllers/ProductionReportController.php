@@ -4,6 +4,7 @@ namespace Modules\Production\App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use Doctrine\ORM\EntityManager;
+use Exception;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -29,11 +30,14 @@ use PhpOffice\PhpSpreadsheet\Style\Fill;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use Symfony\Component\HttpFoundation\Response as ResponseAlias;
+use TCPDF;
+use Throwable;
 
 
 class ProductionReportController extends Controller
 {
     protected $domain;
+
     public function __construct(Request $request)
     {
         $userId = $request->header('X-Api-User');
@@ -42,6 +46,7 @@ class ProductionReportController extends Controller
             $this->domain = $userData;
         }
     }
+
     /**
      * Display a listing of the resource.
      */
@@ -50,12 +55,12 @@ class ProductionReportController extends Controller
         $params = $request->all();
         $productionConfigId = $this->domain['pro_config'];
         $domainConfigId = $this->domain['domain_id'];
-        $entity = ProductionBatchModel::issueReportData($params, $domainConfigId,$productionConfigId);
+        $entity = ProductionBatchModel::issueReportData($params, $domainConfigId, $productionConfigId);
         return response()->json([
             'message' => 'success',
             'status' => ResponseAlias::HTTP_OK,
             'data' => $entity
-        ],ResponseAlias::HTTP_OK);
+        ], ResponseAlias::HTTP_OK);
     }
 
     public function issueGenerateXlsx(Request $request)
@@ -342,7 +347,7 @@ class ProductionReportController extends Controller
                 'result' => true,
             ]);
 
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             // Handle errors gracefully
             return response([
                 'error' => $e->getMessage(),
@@ -368,7 +373,7 @@ class ProductionReportController extends Controller
             $batches = $processedData['batches'];
 
             // TCPDF setup
-            $pdf = new \TCPDF('L', 'mm', 'A3', true, 'UTF-8', false);
+            $pdf = new TCPDF('L', 'mm', 'A3', true, 'UTF-8', false);
             $pdf->SetTitle('Production Issue Report');
             $pdf->SetMargins(5, 10, 5);
             $pdf->SetHeaderMargin(5);
@@ -551,7 +556,7 @@ class ProductionReportController extends Controller
                 'status' => 200,
                 'result' => true
             ]);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return response([
                 'error' => $e->getMessage(),
                 'result' => false,
@@ -568,14 +573,14 @@ class ProductionReportController extends Controller
      * @param int $domainConfigId Domain configuration ID
      * @param int $productionConfigId Production configuration ID
      * @return array Returns structured data with materials, productionMap, and productionTotals
-     * @throws \Exception When no data is found or processing fails
+     * @throws Exception When no data is found or processing fails
      */
     private function processProductionBatchData($params, $domainConfigId, $productionConfigId)
     {
         $batches = ProductionBatchModel::issueReportData($params, $domainConfigId, $productionConfigId);
 
         if ($batches->isEmpty()) {
-            throw new \Exception('No data to export.');
+            throw new Exception('No data to export.');
         }
 
         // Build data structure
@@ -644,30 +649,31 @@ class ProductionReportController extends Controller
         $fileName = '';
         if ($type == 'xlsx') {
             $fileName = 'production-issue-report.xlsx';
-        }elseif ($type == 'pdf') {
+        } elseif ($type == 'pdf') {
             $fileName = 'production-issue-report.pdf';
         }
-        $filePath = storage_path('exports/'.$fileName);
+        $filePath = storage_path('exports/' . $fileName);
         return response()->download($filePath, $fileName)->deleteFileAfterSend(true);
     }
 
 
     public function matrixWarehouse(Request $request)
     {
-        $params = $request->only('start_date', 'end_date','warehouse_id');
+        $params = $request->only('start_date', 'end_date', 'warehouse_id', 'year', 'month');
         $productionConfigId = $this->domain['pro_config'];
         $domainConfigId = $this->domain['domain_id'];
 
-        $entity = ProductionBatchModel::warehouseMatrixReportData($params, $domainConfigId,$productionConfigId);
+        $entity = ProductionBatchModel::warehouseMatrixReportData($params, $domainConfigId, $productionConfigId);
         return response()->json([
             'message' => 'success',
             'status' => ResponseAlias::HTTP_OK,
             'data' => $entity
-        ],ResponseAlias::HTTP_OK);
+        ], ResponseAlias::HTTP_OK);
     }
+
     public function matrixWarehouseXlsx(Request $request)
     {
-        $params = $request->only('start_date', 'end_date', 'warehouse_id');
+        $params = $request->only('warehouse_id', 'month', 'year');
         $productionConfigId = $this->domain['pro_config'];
         $domainConfigId = $this->domain['domain_id'];
 
@@ -724,11 +730,6 @@ class ProductionReportController extends Controller
             $spreadsheet->removeSheetByIndex(0);
 
             $dateWiseData = $processedData['date_wise_data'] ?? [];
-
-            // --- Debugging additions ---
-//            Log::info('XLSX Generation: Count of date_wise_data: ' . count($dateWiseData));
-//            Log::info('XLSX Generation: Keys of date_wise_data: ' . json_encode(array_keys($dateWiseData)));
-            // --- End debugging additions ---
 
             $sheetIndex = 0;
 
@@ -985,7 +986,7 @@ class ProductionReportController extends Controller
                 'status' => 200,
                 'result' => true,
             ]);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             // Handle errors gracefully
             Log::error("XLSX Generation Error: " . $e->getMessage(), ['trace' => $e->getTraceAsString()]);
             return response([
@@ -995,9 +996,10 @@ class ProductionReportController extends Controller
             ]);
         }
     }
+
     public function matrixWarehousePdf(Request $request)
     {
-        $params = $request->only(['start_date', 'end_date', 'warehouse_id']);
+        $params = $request->only('warehouse_id', 'month', 'year');
         $productionConfigId = $this->domain['pro_config'];
         $domainConfigId = $this->domain['domain_id'];
 
@@ -1007,7 +1009,7 @@ class ProductionReportController extends Controller
             $warehouseName = $processedData['warehouse_name'] ?? 'Warehouse';
             $dateWiseData = $processedData['date_wise_data'] ?? [];
 
-            $pdf = new \TCPDF('L', 'mm', 'A3', true, 'UTF-8', false);
+            $pdf = new TCPDF('L', 'mm', 'A3', true, 'UTF-8', false);
 
 
             $pdf->SetTitle('Warehouse Matrix Report');
@@ -1142,7 +1144,7 @@ class ProductionReportController extends Controller
                         $align = is_numeric($value) && !$isSL ? 'R' : 'L'; // Align numbers right, others left
 
                         $pdf->SetXY($x, $y);
-                        $display = $isSL ? (int) $value : (is_numeric($value) ? number_format($value, 2) : (string) $value);
+                        $display = $isSL ? (int)$value : (is_numeric($value) ? number_format($value, 2) : (string)$value);
 
                         $lineCount = $pdf->getNumLines($display, $cellW);
                         $lineHeight = $pdf->getCellHeightRatio() * $fontSize * 0.3528;
@@ -1200,16 +1202,16 @@ class ProductionReportController extends Controller
             $pdf->Output($filePath, 'F');
 
             return response()->json([
-                'filename'  => $fileName,
-                'file_url'  => url("storage/exports/{$fileName}"),
-                'status'    => 200,
-                'result'    => true,
+                'filename' => $fileName,
+                'file_url' => url("storage/exports/{$fileName}"),
+                'status' => 200,
+                'result' => true,
             ]);
-        } catch (\Throwable $e) {
+        } catch (Throwable $e) {
             return response()->json([
-                'error'   => $e->getMessage(),
-                'status'  => 500,
-                'result'  => false,
+                'error' => $e->getMessage(),
+                'status' => 500,
+                'result' => false,
             ]);
         }
     }
@@ -1219,13 +1221,12 @@ class ProductionReportController extends Controller
         $fileName = '';
         if ($type == 'xlsx') {
             $fileName = 'production-matrix-report.xlsx';
-        }elseif ($type == 'pdf') {
+        } elseif ($type == 'pdf') {
             $fileName = 'production-matrix-report.pdf';
         }
-        $filePath = storage_path('exports/'.$fileName);
+        $filePath = storage_path('exports/' . $fileName);
         return response()->download($filePath, $fileName)->deleteFileAfterSend(true);
     }
-
 
 
 }
