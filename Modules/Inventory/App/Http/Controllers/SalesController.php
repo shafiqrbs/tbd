@@ -37,6 +37,7 @@ use Modules\Inventory\App\Models\SalesModel;
 use Modules\Inventory\App\Models\SettingModel;
 use Modules\Inventory\App\Models\StockItemHistoryModel;
 use Modules\Inventory\App\Models\StockItemModel;
+use Modules\Production\App\Models\ProductionBatchModel;
 use Symfony\Component\HttpFoundation\Response as ResponseAlias;
 use function Symfony\Component\HttpFoundation\Session\Storage\Handler\getInsertStatement;
 
@@ -463,6 +464,23 @@ class SalesController extends Controller
         }
 
         return $response;
+    }
+
+
+    public function dailySalesReport(Request $request)
+    {
+        $params = $request->only('year', 'month','warehouse_id');
+        $inventoryConfigId = $this->domain['inv_config'];
+        $domainConfigId = $this->domain['domain_id'];
+//        dump($params,$inventoryConfigId,$domainConfigId);
+
+        $entity = SalesModel::dailySalesReport($params, $domainConfigId, $inventoryConfigId);
+//        dump($entity);
+        return response()->json([
+            'message' => 'success',
+            'status' => ResponseAlias::HTTP_OK,
+            'data' => $entity
+        ], ResponseAlias::HTTP_OK);
     }
 
 }

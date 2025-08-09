@@ -133,6 +133,12 @@ Route::prefix('/inventory')->middleware([HeaderAuthenticationMiddleware::class,L
         Route::get('invoice-details', [PosController::class,'invoiceDetails'])->name('pos_invoice_details');
         Route::get('sales-complete/{id}', [PosController::class,'posSalesComplete'])->name('pos_sales_complete');
     });
+
+    Route::prefix('report')->middleware([HeaderAuthenticationMiddleware::class])->group(function() {
+        Route::get('daily/sales', [SalesController::class,'dailySalesReport'])->name('daily_sales_report');
+//        Route::get('matrix/warehouse-xlsx', [ProductionReportController::class,'matrixWarehouseXlsx'])->name('matrix_warehouse_xlsx');
+//        Route::get('matrix/warehouse-pdf', [ProductionReportController::class,'matrixWarehousePdf'])->name('matrix_warehouse_pdf');
+    });
 });
 
 

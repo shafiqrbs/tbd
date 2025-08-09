@@ -2,6 +2,7 @@
 
 namespace Modules\Inventory\App\Models;
 
+use App\Helpers\DateHelper;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -302,6 +303,242 @@ class SalesModel extends Model
         return $entity;
     }
 
+    /*public static function dailySalesReport(array $params, int $domain_id, int $inventoryConfigId){
+        // Get date range for calculations
+        $dates = !empty($params['month']) && !empty($params['year'])
+            ? DateHelper::getFirstAndLastDate((int)$params['year'], (int)$params['month'])
+            : null;
+
+        $startDate = $dates['first_date'] ?? null;
+        $endDate = $dates['last_date'] ?? null;
+        $customerId = $params['customer_id'] ?? null;
+        $warehouseId = $params['warehouse_id'] ?? null;
+        $customerGroup = $params['customer_group'] ?? null;
+
+        $sales = DB::table('inv_sales as s')
+            ->join('inv_sales_item as si', 's.id', '=', 'si.sale_id')
+            ->join('cor_customers as c', 's.customer_id', '=', 'c.id')
+            ->join('inv_stock as stock', 'si.stock_item_id', '=', 'stock.id')
+            ->selectRaw('
+                    DATE(s.created_at) as date,
+                    si.stock_item_id,
+                    si.warehouse_id,
+                    stock.name as product_name,
+                    c.name as customer_name,
+                    SUM(si.quantity) as total_quantity,
+                    SUM(si.sub_total) as total_amount
+                ')
+            ->when($startDate && $endDate, fn($q) => $q->whereBetween('s.created_at', [$startDate, $endDate]))
+            ->when($customerId, fn($q) => $q->where('s.customer_id', $customerId))
+            ->when($warehouseId, fn($q) => $q->where('si.warehouse_id', $warehouseId))
+            ->when($customerGroup, fn($q) => $q->where('c.customer_group', $customerGroup))
+            ->where('s.config_id', $inventoryConfigId)
+            ->groupBy('date', 'si.stock_item_id', 'si.warehouse_id', 'stock.name', 'c.name')
+            ->orderBy('date')
+            ->get();
+
+// Step 1: Build key list for (date_stock_warehouse)
+        $dailyKeys = $sales->map(fn($row) => [
+            'inv_date' => $row->date,
+            'stock_item_id' => $row->stock_item_id,
+            'warehouse_id' => $row->warehouse_id,
+        ])->unique();
+
+// Step 2: Fetch opening & receive (stock) values
+        $stockOpenings = DB::table('inv_daily_stock')
+            ->select('inv_date', 'stock_item_id', 'warehouse_id', 'opening_quantity', 'total_in_quantity','closing_quantity')
+            ->where('config_id', $inventoryConfigId)
+            ->where(function ($query) use ($dailyKeys) {
+                foreach ($dailyKeys as $key) {
+                    $query->orWhere(function ($q) use ($key) {
+                        $q->whereDate('inv_date', $key['inv_date'])
+                            ->where('stock_item_id', $key['stock_item_id'])
+                            ->where('warehouse_id', $key['warehouse_id']);
+                    });
+                }
+            })
+            ->get()
+            ->keyBy(fn($row) => $row->inv_date . '_' . $row->stock_item_id . '_' . $row->warehouse_id);
+
+        // Step 3: Prepare final report
+        $report = [];
+
+        foreach ($sales as $row) {
+            $date = $row->date;
+            $product = $row->product_name;
+            $customer = $row->customer_name;
+            $warehouseId = $row->warehouse_id;
+
+            $stockKey = $row->date . '_' . $row->stock_item_id . '_' . $warehouseId;
+
+            $openingQty = $stockOpenings[$stockKey]->opening_quantity ?? 0;
+            $totalInQty = $stockOpenings[$stockKey]->total_in_quantity ?? 0;
+            $closingQty = $stockOpenings[$stockKey]->closing_quantity ?? 0;
+            $receiveQty = $totalInQty-$openingQty ?? 0;
+
+            if (!isset($report[$date])) {
+                $report[$date] = [];
+            }
+
+            if (!isset($report[$date][$product])) {
+                $report[$date][$product] = [
+                    'opening' => $openingQty,
+                    'receive' => $receiveQty,
+                    'total_in_qty' => $totalInQty,
+                    'total_out_qty' => 0,
+                    'total_amount' => 0,
+                    'closing' => $closingQty,
+                    'customers' => [],
+                ];
+            }
+
+            $report[$date][$product]['customers'][$customer] = [
+                'qty' => $row->total_quantity,
+                'amount' => $row->total_amount,
+            ];
+
+            $report[$date][$product]['total_out_qty'] += $row->total_quantity;
+            $report[$date][$product]['total_amount'] += $row->total_amount;
+        }
+        return $report;
+    }*/
+
+    public static function dailySalesReport(array $params, int $domain_id, int $inventoryConfigId)
+    {
+        // 1. Get Date Range
+        $dates = !empty($params['month']) && !empty($params['year'])
+            ? DateHelper::getFirstAndLastDate((int)$params['year'], (int)$params['month'])
+            : null;
+
+        $startDate = $dates['first_date'] ?? null;
+        $endDate = $dates['last_date'] ?? null;
+        $customerId = $params['customer_id'] ?? null;
+        $warehouseId = $params['warehouse_id'] ?? null;
+        $customerGroup = $params['customer_group'] ?? null;
+
+        $groupByWarehouse = !empty($warehouseId);
+
+        // 2. Fetch Sales Data Grouped By Date, Product, Customer (and optional Warehouse)
+        $sales = DB::table('inv_sales as s')
+            ->join('inv_sales_item as si', 's.id', '=', 'si.sale_id')
+            ->join('cor_customers as c', 's.customer_id', '=', 'c.id')
+            ->join('inv_stock as stock', 'si.stock_item_id', '=', 'stock.id')
+            ->selectRaw('
+            DATE(s.created_at) as date,
+            si.stock_item_id,
+            stock.name as product_name,
+            c.name as customer_name' .
+                ($groupByWarehouse ? ', si.warehouse_id' : '') . ',
+            SUM(si.quantity) as total_quantity,
+            SUM(si.sub_total) as total_amount
+        ')
+            ->when($startDate && $endDate, fn($q) => $q->whereBetween('s.created_at', [$startDate, $endDate]))
+            ->when($customerId, fn($q) => $q->where('s.customer_id', $customerId))
+            ->when($warehouseId, fn($q) => $q->where('si.warehouse_id', $warehouseId))
+            ->when($customerGroup, fn($q) => $q->where('c.customer_group', $customerGroup))
+            ->where('s.config_id', $inventoryConfigId)
+            ->groupBy(
+                'date',
+                'si.stock_item_id',
+                'stock.name',
+                'c.name',
+                ...($groupByWarehouse ? ['si.warehouse_id'] : [])
+            )
+            ->orderBy('date')
+            ->get();
+
+        // 3. Build keys for stock filtering
+        $dailyKeys = $sales->map(fn($row) => [
+            'inv_date' => $row->date,
+            'stock_item_id' => $row->stock_item_id,
+            'warehouse_id' => $groupByWarehouse ? $row->warehouse_id : null,
+        ])->unique();
+
+        // 4. Fetch Stock Openings
+        $rawStock = DB::table('inv_daily_stock')
+            ->select('inv_date', 'stock_item_id', 'warehouse_id', 'opening_quantity', 'total_in_quantity', 'closing_quantity')
+            ->where('config_id', $inventoryConfigId)
+            ->where(function ($query) use ($dailyKeys, $groupByWarehouse) {
+                foreach ($dailyKeys as $key) {
+                    $query->orWhere(function ($q) use ($key, $groupByWarehouse) {
+                        $q->whereDate('inv_date', $key['inv_date'])
+                            ->where('stock_item_id', $key['stock_item_id']);
+
+                        if ($groupByWarehouse) {
+                            $q->where('warehouse_id', $key['warehouse_id']);
+                        }
+                    });
+                }
+            })
+            ->get();
+
+        // 5. Sum Stock Data into Indexable Keys
+        $stockOpenings = [];
+
+        foreach ($rawStock as $row) {
+            $key = $row->inv_date . '_' . $row->stock_item_id;
+            if ($groupByWarehouse) {
+                $key .= '_' . $row->warehouse_id;
+            }
+
+            if (!isset($stockOpenings[$key])) {
+                $stockOpenings[$key] = [
+                    'opening' => 0,
+                    'receive' => 0,
+                    'closing' => 0,
+                ];
+            }
+
+            $stockOpenings[$key]['opening'] += $row->opening_quantity ?? 0;
+            $stockOpenings[$key]['receive'] += $row->total_in_quantity ?? 0;
+            $stockOpenings[$key]['closing'] += $row->closing_quantity ?? 0;
+        }
+
+        // 6. Final Report Build
+        $report = [];
+
+        foreach ($sales as $row) {
+            $date = $row->date;
+            $product = $row->product_name;
+            $customer = $row->customer_name;
+            $whId = $groupByWarehouse ? $row->warehouse_id : null;
+
+            $stockKey = $date . '_' . $row->stock_item_id . ($groupByWarehouse ? '_' . $whId : '');
+
+            $stockData = $stockOpenings[$stockKey] ?? ['opening' => 0, 'receive' => 0, 'closing' => 0];
+
+            $openingQty = $stockData['opening'];
+            $totalInQty = $stockData['receive'];
+            $closingQty = $stockData['closing'];
+            $receiveQty = $totalInQty - $openingQty;
+
+            if (!isset($report[$date])) {
+                $report[$date] = [];
+            }
+
+            if (!isset($report[$date][$product])) {
+                $report[$date][$product] = [
+                    'opening' => $openingQty,
+                    'receive' => $receiveQty,
+                    'total_in_qty' => $totalInQty,
+                    'total_out_qty' => 0,
+                    'total_amount' => 0,
+                    'closing' => $closingQty,
+                    'customers' => [],
+                ];
+            }
+
+            $report[$date][$product]['customers'][$customer] = [
+                'qty' => $row->total_quantity,
+                'amount' => $row->total_amount,
+            ];
+
+            $report[$date][$product]['total_out_qty'] += $row->total_quantity;
+            $report[$date][$product]['total_amount'] += $row->total_amount;
+        }
+
+        return $report;
+    }
 
 
 }
