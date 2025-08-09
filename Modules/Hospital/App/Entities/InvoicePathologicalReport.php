@@ -11,7 +11,7 @@ use Gedmo\Mapping\Annotation as Gedmo;
  * @ORM\Table( name = "hms_invoice_pathological_report")
  * @ORM\Entity()
  */
-class InvoicePathologicalReport
+class PathologicalReport
 {
     /**
      * @var integer
@@ -22,71 +22,93 @@ class InvoicePathologicalReport
      */
     private $id;
 
+    /**
+     * @ORM\ManyToOne(targetEntity="PathologicalReport", inversedBy="children", cascade={"detach","merge"})
+     * @ORM\JoinColumn(name="parent", referencedColumnName="id", onDelete="SET NULL")
+     */
+    protected $parent;
 
     /**
-     * @ORM\ManyToOne(targetEntity="InvoiceParticular")
+     * @ORM\OneToMany(targetEntity="PathologicalReport" , mappedBy="parent")
+     * @ORM\OrderBy({"sorting" = "ASC"})
+     **/
+    private $children;
+
+    /**
+     * @ORM\ManyToOne(targetEntity="Config")
      * @ORM\JoinColumn(onDelete="CASCADE")
      **/
-    private $invoiceParticular;
+    private $config;
 
-     /**
-     * @ORM\ManyToOne(targetEntity="PathologicalReport")
+
+    /**
+     * @ORM\ManyToOne(targetEntity="InvestigationMasterReportFormat")
+     * @ORM\JoinColumn(name="master_report_format_id", referencedColumnName="id")
+     **/
+    private $masterReportFormat;
+
+    /**
+     * @ORM\ManyToOne(targetEntity="Particular")
      * @ORM\JoinColumn(onDelete="CASCADE")
      **/
-    private $pathologicalReport;
+    private $particular;
+
 
     /**
      * @var string
      *
-     * @ORM\Column(name="result", type="string", length=100, nullable=true)
+     * @ORM\Column(name="name", type="string", length=200, nullable=true)
      */
-    private $result;
+    private $name;
 
     /**
      * @var string
      *
-     * @ORM\Column(name="meta_key", type="string", length=255, nullable=true)
+     * @ORM\Column(name="parentName", type="string", length=200, nullable=true)
      */
-    private $metaKey;
+    private $parentName;
 
     /**
      * @var string
      *
-     * @ORM\Column(name="meta_value", type="text", nullable=true)
+     * @ORM\Column(name="code", type="string", length=10, nullable=true)
      */
-    private $metaValue;
+    private $code;
 
     /**
-     * @var text
+     * @var int
      *
-     * @ORM\Column(name="remark", type="text", nullable=true)
+     * @ORM\Column(name="sorting", type="smallint", length=2, nullable=true)
      */
-    private $remark;
+    private $sorting;
 
     /**
-     * @var \DateTime
-     * @Gedmo\Timestampable(on="create")
-     * @ORM\Column(name="created_at", type="datetime")
-     */
-    private $createdAt;
-
-    /**
-     * @var \DateTime
-     * @Gedmo\Timestampable(on="create")
-     * @ORM\Column(name="updated_at", type="datetime")
-     */
-    private $updatedAt;
-
-
-    /**
-     * Get id
+     * @var string
      *
-     * @return integer
+     * @ORM\Column(name="referenceValue", type="text", nullable=true)
      */
-    public function getId()
-    {
-        return $this->id;
-    }
+    private $referenceValue;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="sampleValue", type="text", nullable=true)
+     */
+    private $sampleValue;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="unit", type="string", length=50, nullable=true)
+     */
+    private $unit;
+
+    /**
+     * @var boolean
+     *
+     * @ORM\Column(name="status", type="boolean" )
+     */
+    private $status= true;
 
 
 }

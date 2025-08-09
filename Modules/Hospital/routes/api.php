@@ -3,6 +3,7 @@
 use App\Http\Middleware\HeaderAuthenticationMiddleware;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use Modules\Hospital\App\Http\Controllers\HospitalController;
 use Modules\Hospital\App\Http\Controllers\OpdController;
 use Modules\Hospital\App\Http\Controllers\SettingController;
 
@@ -18,12 +19,15 @@ use Modules\Hospital\App\Http\Controllers\SettingController;
     |
 */
 
+Route::prefix('/hospital/select')->middleware([HeaderAuthenticationMiddleware::class])->group(function() {
+    Route::get('/module', [HospitalController::class,'particularModuleDropdown'])->name('particular_module_dropdown');
+    Route::get('/particular', [HospitalController::class,'particularModuleDropdown'])->name('particular_particular_dropdown');
 
+});
 
 Route::prefix('/hospital')->middleware([HeaderAuthenticationMiddleware::class])->group(function() {
-       Route::get('/setting', [SettingController::class,'particularModuleDropdown'])->name('particular_module_dropdown');
-    //   Route::get('/particular', [AccountingController::class,'settingDropdown'])->name('setting_accounting_dropdown');
- //   Route::get('/setting-type', [AccountingController::class,'settingTypeDropdown'])->name('setting_accounting_dropdown_type');
+    Route::get('/setting', [SettingController::class,'particularModuleDropdown'])->name('particular_module_dropdown');
+    Route::get('/setting', [SettingController::class,'particularModuleDropdown'])->name('particular_module_dropdown');
     Route::apiResource('opd', OPDController::class)->middleware([HeaderAuthenticationMiddleware::class]);
 
 });

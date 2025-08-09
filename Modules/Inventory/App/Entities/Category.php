@@ -31,6 +31,13 @@ class Category
     private  $config;
 
     /**
+     * @ORM\ManyToOne(targetEntity="Setting")
+     * @ORM\JoinColumn(name="category_nature_id", referencedColumnName="id", nullable=true, onDelete="SET NULL")
+     */
+    private  $categoryNature;
+
+
+    /**
      * @Gedmo\TreeParent
      * @ORM\ManyToOne(targetEntity="Category", inversedBy="children" , cascade={"persist", "remove"}  )
      * @ORM\JoinColumns({

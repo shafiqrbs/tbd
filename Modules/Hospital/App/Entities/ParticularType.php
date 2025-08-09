@@ -43,7 +43,7 @@ class ParticularType
     /**
      * @var string
      *
-     * @ORM\Column(name="short_code", type="string", length=10, nullable=true)
+     * @ORM\Column(name="short_code", type="string", length=50, nullable=true)
      */
     private $shortCode;
 
@@ -67,6 +67,13 @@ class ParticularType
      * @ORM\Column(type="boolean",options={"default"="true"})
      */
     private $status;
+
+    /**
+     * @var boolean
+     *
+     * @ORM\Column(type="boolean",options={"default"="true"})
+     */
+    private $isPrivate;
 
     /**
      * @var \DateTime

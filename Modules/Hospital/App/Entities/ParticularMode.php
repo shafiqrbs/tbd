@@ -56,6 +56,13 @@ class ParticularMode
     private $code;
 
     /**
+     * @var integer
+     *
+     * @ORM\Column(name="ordering", type="smallint", length=10, nullable=true)
+     */
+    private $ordering;
+
+    /**
      * @var boolean
      *
      * @ORM\Column(type="boolean",options={"default"="true"})
