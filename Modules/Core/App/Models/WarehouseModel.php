@@ -19,7 +19,8 @@ class WarehouseModel extends Model
         'domain_id',
         'setting_id',
         'is_delete',
-        'status'
+        'status',
+        'is_default'
     ];
 
     public function userWarehouses()
