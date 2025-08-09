@@ -10,6 +10,7 @@ use Modules\Accounting\App\Http\Controllers\AccountHeadController;
 use Modules\Accounting\App\Http\Controllers\AccountSettingController;
 use Modules\Accounting\App\Http\Controllers\AccountVoucherController;
 use Modules\Accounting\App\Http\Controllers\AccountVoucherEntryController;
+use Modules\Accounting\App\Http\Controllers\ReportController;
 use Modules\Accounting\App\Http\Controllers\TransactionModeController;
 use Modules\Core\App\Http\Middleware\LogRequestResponse;
 
@@ -106,3 +107,6 @@ Route::prefix('/accounting')->middleware([HeaderAuthenticationMiddleware::class,
 
 });
 
+Route::prefix('/accounting/report')->middleware([HeaderAuthenticationMiddleware::class,LogRequestResponse::class])->group(function() {
+    Route::get('/dashboard', [ReportController::class,'dashboard'])->name('dashboard');
+});
