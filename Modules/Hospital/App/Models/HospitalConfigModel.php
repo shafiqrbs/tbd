@@ -7,6 +7,8 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Support\Facades\DB;
 use Modules\Core\App\Models\CustomerModel;
+use Modules\Hospital\App\Entities\ParticularModule;
+use Modules\Inventory\App\Models\CategoryModel;
 use Ramsey\Collection\Collection;
 
 class HospitalConfigModel extends Model
@@ -69,6 +71,116 @@ class HospitalConfigModel extends Model
         // Execute raw query with properly formatted SET statements
         DB::statement("UPDATE `$table` SET " . implode(', ', $setStatements) . " WHERE id = ?", [$id]);
 
+    }
+
+    public static function resetMasterData($domain)
+    {
+
+        DB::transaction(function () use ($domain) {
+
+            $configId = $domain['hms_config'];
+
+            $parentHeads = ParticularMasterModel::all();
+            foreach ($parentHeads as $head) {
+                ParticularModel::updateOrCreate(
+                    [
+                        'config_id' => $configId,
+                        'particular_master_type_id' => $head->id,
+                    ],
+                    [
+                        'name' => $head->name,
+                        'slug' => $head->slug,
+                        'short_code' => $head->slug,
+                        'is_private' => true,
+                        'parent_id' => null,
+                    ]
+                );
+            }
+
+        });
+
+    }
+
+    public static function investigationMasterReport($domain)
+    {
+          $configId = $domain['hms_config'];
+        DB::transaction(function () use ($domain) {
+
+            $configId = $domain['hms_config'];
+            $invConfig = $domain['inv_config'];
+
+            $parentHeads = InvestigationReportModel::all();
+
+            foreach ($parentHeads as $entity) {
+
+                $category = self::setGetCategory($invConfig,$entity->category_id);
+
+
+
+                $investigation = ParticularModel::updateOrCreate(
+                    [
+                        'config_id' => $configId,
+                        'investigation_report_id' => $entity->id
+                    ],
+                    [
+
+                        'code'           => $entity->code,
+                        'name'          => $entity->name,
+                        'category_id'    => $category>id ?? null,
+                    //    'department_id'  => $entity->department_id ?? null,
+                        'status'         => 1,
+                        'price'          => $entity->price,
+                        'service'        => $entity->service,
+                        'sepcimen'       => $entity->sepcimen,
+                        'instruction'    => $entity->instruction,
+
+
+                    ]
+                );
+                self::investigationMasterReportFormat($entity,$investigation);
+            }
+
+        });
+
+    }
+
+    public static function setGetCategory($invConfig,$id)
+    {
+
+        $masterCategory = HmsCategoryModel::findOrFail($id);
+        $category = CategoryModel::updateOrCreate(
+            [
+                'config_id' => $invConfig,
+                'name' => $masterCategory->name
+            ],
+            [
+                'code'           => $masterCategory->code,
+                'slug'           => $masterCategory->slug,
+                'status'         => 1,
+            ]
+        );
+        return $category;
+
+    }
+
+    public static function investigationMasterReportFormat($entity,$investigation){
+
+        $formats = InvestigationMasterReportFormatModel::where('diagnostic_report_id', $entity->id)->get();
+        foreach ($formats as $report) {
+            $format =InvestigationReportFormatModel::updateOrCreate(
+                [
+                    'particular_id' => $investigation->id,
+                    'master_report_format_id'=> $report->id, // Use unique field(s) for matching
+                ],
+                [
+                    'parent_id'       => $report->parent_id,
+                    'reference_value' => $report->reference_value,
+                    'unit'            => $report->unit,
+                    'sorting'         => $report->sorting,
+                    'status'          => 1,
+                ]
+            );
+        }
     }
 
 

@@ -7,10 +7,10 @@ use Gedmo\Mapping\Annotation as Gedmo;
 /**
  * PathologicalReport
  *
- * @ORM\Table( name ="hms_pathological_report")
+ * @ORM\Table( name ="hms_investigation_report_format")
  * @ORM\Entity()
  */
-class PathologicalReport
+class InvestigationReportFormat
 {
     /**
      * @var integer
@@ -28,7 +28,7 @@ class PathologicalReport
     protected $config;
 
     /**
-     * @ORM\ManyToOne(targetEntity="PathologicalReport", inversedBy="children", cascade={"detach","merge"})
+     * @ORM\ManyToOne(targetEntity="InvestigationReportFormat", inversedBy="children", cascade={"detach","merge"})
      * @ORM\JoinColumn(name="parent", referencedColumnName="id", onDelete="SET NULL")
      */
     protected $parent;
@@ -36,10 +36,22 @@ class PathologicalReport
 
 
     /**
-     * @ORM\OneToMany(targetEntity="PathologicalReport" , mappedBy="parent")
+     * @ORM\OneToMany(targetEntity="InvestigationReportFormat" , mappedBy="parent")
      * @ORM\OrderBy({"sorting" = "ASC"})
      **/
     private $children;
+
+
+
+    /**
+     * @ORM\ManyToOne(targetEntity="InvestigationMasterReportFormat")
+     **/
+    private $masterReportFormat;
+
+    /**
+     * @ORM\ManyToOne(targetEntity="Particular")
+     **/
+    private $particular;
 
 
     /**

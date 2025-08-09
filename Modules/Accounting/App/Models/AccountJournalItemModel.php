@@ -240,10 +240,13 @@ class AccountJournalItemModel extends Model
         // Get all items for the ledger
         $allItems = self::join('acc_journal', 'acc_journal.id', '=', 'acc_journal_item.account_journal_id')
             ->join('acc_head', 'acc_head.id', '=', 'acc_journal_item.account_sub_head_id')
+            ->join('acc_voucher', 'acc_voucher.id', '=', 'acc_journal.voucher_id')
             ->select([
                 'acc_journal_item.id',
                 'acc_journal_item.account_ledger_id',
                 'acc_journal_item.account_journal_id',
+                'acc_journal.invoice_no',
+                'acc_voucher.short_name as voucher_name',
                 'acc_journal_item.account_head_id',
                 'acc_journal_item.account_sub_head_id',
                 'acc_journal_item.amount',

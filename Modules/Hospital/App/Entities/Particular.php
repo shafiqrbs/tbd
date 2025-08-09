@@ -22,14 +22,20 @@ class Particular
     private $id;
 
     /**
-     * @ORM\ManyToOne(targetEntity="Config", inversedBy="particulars"  , cascade={"detach","merge"})
+     * @ORM\ManyToOne(targetEntity="Config" , cascade={"detach","merge"})
      * @ORM\JoinColumn(onDelete="CASCADE")
      **/
-    private $hospitalConfig;
+    private $config;
 
 
     /**
-     * @ORM\ManyToOne(targetEntity="Modules\Inventory\App\Entities\Category", inversedBy="particulars")
+     * @ORM\ManyToOne(targetEntity="InvestigationMasterReport")
+     * @ORM\JoinColumn(name="investigation_report_id", referencedColumnName="id", nullable=true, onDelete="cascade")
+     **/
+    private $investigation;
+
+    /**
+     * @ORM\ManyToOne(targetEntity="Modules\Inventory\App\Entities\Category")
      **/
     private $category;
 
@@ -64,7 +70,7 @@ class Particular
     /**
      * @var string
      *
-     * @ORM\Column(name="reportMachineName", type="string", length=255, nullable=true)
+     * @ORM\Column(type="string", length=255, nullable=true)
      */
     private $reportMachineName;
 
@@ -76,24 +82,18 @@ class Particular
      */
     private $quantity = 1;
 
-    /**
-     * @var integer
-     *
-     * @ORM\Column(name="oldReportId", type="smallint", length=5, nullable=true)
-     */
-    private $oldReportId;
 
     /**
      * @var integer
      *
-     * @ORM\Column(name="openingQuantity", type="integer", nullable=true)
+     * @ORM\Column( type="integer", nullable=true)
      */
     private $openingQuantity;
 
     /**
      * @var integer
      *
-     * @ORM\Column(name="minQuantity", type="integer", nullable=true)
+     * @ORM\Column( type="integer", nullable=true)
      */
     private $minQuantity;
 
@@ -101,28 +101,28 @@ class Particular
     /**
      * @var integer
      *
-     * @ORM\Column(name="purchaseQuantity", type="integer", nullable=true)
+     * @ORM\Column( type="integer", nullable=true)
      */
     private $purchaseQuantity;
 
     /**
      * @var integer
      *
-     * @ORM\Column(name="salesQuantity", type="integer", nullable=true)
+     * @ORM\Column( type="integer", nullable=true)
      */
     private $salesQuantity;
 
     /**
      * @var string
      *
-     * @ORM\Column(name="purchaseAverage", type="decimal", nullable=true)
+     * @ORM\Column(type="decimal", nullable=true)
      */
     private $purchaseAverage;
 
     /**
      * @var string
      *
-     * @ORM\Column(name="purchasePrice", type="decimal", nullable=true)
+     * @ORM\Column( type="decimal", nullable=true)
      */
     private $purchasePrice;
 
@@ -130,7 +130,7 @@ class Particular
      /**
      * @var string
      *
-     * @ORM\Column(name="ipdVisitCharge", type="decimal", nullable=true)
+     * @ORM\Column(type="decimal", nullable=true)
      */
     private $ipdVisitCharge;
 
@@ -161,7 +161,7 @@ class Particular
     /**
      * @var string
      *
-     * @ORM\Column(name="reportContent", type="text", nullable=true)
+     * @ORM\Column( type="text", nullable=true)
      */
     private $reportContent;
 
@@ -176,7 +176,7 @@ class Particular
     /**
      * @var string
      *
-     * @ORM\Column(name="overHeadCost", type="decimal", nullable=true)
+     * @ORM\Column(type="decimal", nullable=true)
      */
     private $overHeadCost;
 
@@ -191,7 +191,7 @@ class Particular
     /**
      * @var \string
      *
-     * @ORM\Column(name="minimumPrice", type="decimal", nullable=true)
+     * @ORM\Column(type="decimal", nullable=true)
      */
     private $minimumPrice;
 
@@ -205,28 +205,28 @@ class Particular
     /**
      * @var string
      *
-     * @ORM\Column(name="phoneNo", type="string", length=128, nullable=true)
+     * @ORM\Column(type="string", length=128, nullable=true)
      */
     private $phoneNo;
 
     /**
      * @var string
      *
-     * @ORM\Column(name="startHour", type="string", length=10, nullable=true)
+     * @ORM\Column( type="string", length=10, nullable=true)
      */
     private $startHour;
 
     /**
      * @var string
      *
-     * @ORM\Column(name="endHour", type="string", length=10, nullable=true)
+     * @ORM\Column( type="string", length=10, nullable=true)
      */
     private $endHour;
 
     /**
      * @var array
      *
-     * @ORM\Column(name="weeklyOffDay", type="array", nullable=true)
+     * @ORM\Column( type="array", nullable=true)
      */
     private $weeklyOffDay;
 
@@ -247,35 +247,35 @@ class Particular
     /**
      * @var string
      *
-     * @ORM\Column(name="educationalDegree", type="string", length=255, nullable=true)
+     * @ORM\Column( type="string", length=255, nullable=true)
      */
     private $educationalDegree;
 
     /**
      * @var string
      *
-     * @ORM\Column(name="doctorSignature", type="string", length=255, nullable=true)
+     * @ORM\Column( type="string", length=255, nullable=true)
      */
     private $doctorSignature;
 
      /**
      * @var string
      *
-     * @ORM\Column(name="doctorSignatureBangla", type="string", length=255, nullable=true)
+     * @ORM\Column(type="string", length=255, nullable=true)
      */
     private $doctorSignatureBangla;
 
     /**
      * @var string
      *
-     * @ORM\Column(name="pathologistSignature", type="string", length=255, nullable=true)
+     * @ORM\Column( type="string", length=255, nullable=true)
      */
     private $pathologistSignature;
 
     /**
      * @var string
      *
-     * @ORM\Column(name="currentJob", type="string", length=256, nullable=true)
+     * @ORM\Column( type="string", length=256, nullable=true)
      */
     private $currentJob;
 

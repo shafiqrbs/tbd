@@ -455,9 +455,49 @@ class DomainConfigController extends Controller
         DB::beginTransaction();
         try {
 
+            $domain = UserModel::getDomainData($id);
+       //     HospitalConfigModel::resetMasterData($domain);
+            HospitalConfigModel::investigationMasterReport($domain);
+
             $entity->update($request->all());
             DB::commit();
 
+            $service = new JsonRequestResponse();
+            $return = $service->returnJosnResponse($this->domainConfigById($id));
+            return $return;
+
+        } catch (ModelNotFoundException $e) {
+            DB::rollBack();
+
+            return response()->json([
+                'message' => 'Resource not found',
+                'status'  => ResponseAlias::HTTP_NOT_FOUND
+            ], ResponseAlias::HTTP_NOT_FOUND);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            return response()->json([
+                'message' => 'Operation failed: ' . $e->getMessage(),
+                'error'   => $e->getMessage(),
+                'status'  => ResponseAlias::HTTP_INTERNAL_SERVER_ERROR
+            ], ResponseAlias::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
+
+
+    public function hospitalResetConfig(Request $request,$id)
+    {
+
+        echo $id;
+        exit;
+        DB::beginTransaction();
+        try {
+
+            $domain = UserModel::getDomainData($id);
+         //   HospitalConfigModel::resetMasterData($domain);
+            HospitalConfigModel::importInvestigationMasterData($domain);
+            DB::commit();
             $service = new JsonRequestResponse();
             $return = $service->returnJosnResponse($this->domainConfigById($id));
             return $return;
