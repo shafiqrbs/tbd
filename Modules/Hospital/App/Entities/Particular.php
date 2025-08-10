@@ -29,6 +29,12 @@ class Particular
 
 
     /**
+     * @ORM\ManyToOne(targetEntity="ParticularType")
+     * @ORM\JoinColumn(name="particular_type_id", referencedColumnName="id", nullable=true, onDelete="cascade")
+     **/
+    private $ParticularType;
+
+     /**
      * @ORM\ManyToOne(targetEntity="InvestigationMasterReport")
      * @ORM\JoinColumn(name="investigation_report_id", referencedColumnName="id", nullable=true, onDelete="cascade")
      **/

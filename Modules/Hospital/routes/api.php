@@ -21,7 +21,11 @@ use Modules\Hospital\App\Http\Controllers\SettingController;
 
 Route::prefix('/hospital/select')->middleware([HeaderAuthenticationMiddleware::class])->group(function() {
     Route::get('/module', [HospitalController::class,'particularModuleDropdown'])->name('particular_module_dropdown');
-    Route::get('/particular', [HospitalController::class,'particularModuleDropdown'])->name('particular_particular_dropdown');
+    Route::get('/modules', [HospitalController::class,'particularModuleChildDropdown'])->name('particular_module_dropdown');
+    Route::get('/mode', [HospitalController::class,'particularModeDropdown'])->name('particular_module_dropdown');
+    Route::get('/particular-type', [HospitalController::class,'particularTypeDropdown'])->name('particular_particular_dropdown');
+    Route::get('/particulars', [HospitalController::class,'particularTypeChildDropdown'])->name('particular_particular_dropdown');
+    Route::get('/particular', [HospitalController::class,'particularDropdown'])->name('particular_particular_dropdown');
 
 });
 

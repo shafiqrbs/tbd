@@ -20,21 +20,21 @@ class ParticularModel extends Model
 
     protected $fillable = [];
 
-    public static function getParticularDropdown($dropdownType)
+    public static function getParticularDropdown($domain,$dropdownType)
     {
-
-        return DB::table('hms_particular_mode')
-            ->join('hms_particular_module','hms_particular_module.id','=','hms_particular_mode.particular_module_id')
+        $config = $domain['hms_config'];
+        return DB::table('hms_particular')
+            ->join('hms_particular_type','hms_particular_type.id','=','hms_particular.particular_type_id')
             ->select([
-                'hms_particular_mode.id',
-                'hms_particular_mode.name',
-                'hms_particular_mode.slug',
+                'hms_particular.id',
+                'hms_particular.name'
             ])
             ->where([
-                ['hms_particular_module.slug',$dropdownType],
-                ['hms_particular_mode.status',1]
+                ['hms_particular.config_id',$config],
+                ['hms_particular_type.slug',$dropdownType],
+                ['hms_particular.status',1]
             ])
-            ->orderBy('hms_particular_mode.ordering')
+            ->orderBy('hms_particular.name')
             ->get();
     }
 

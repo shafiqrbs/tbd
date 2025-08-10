@@ -11,7 +11,7 @@ use Gedmo\Mapping\Annotation as Gedmo;
  * @ORM\Table( name = "hms_invoice_pathological_report")
  * @ORM\Entity()
  */
-class PathologicalReport
+class InvoicePathologicalReport
 {
     /**
      * @var integer
@@ -22,17 +22,7 @@ class PathologicalReport
      */
     private $id;
 
-    /**
-     * @ORM\ManyToOne(targetEntity="PathologicalReport", inversedBy="children", cascade={"detach","merge"})
-     * @ORM\JoinColumn(name="parent", referencedColumnName="id", onDelete="SET NULL")
-     */
-    protected $parent;
 
-    /**
-     * @ORM\OneToMany(targetEntity="PathologicalReport" , mappedBy="parent")
-     * @ORM\OrderBy({"sorting" = "ASC"})
-     **/
-    private $children;
 
     /**
      * @ORM\ManyToOne(targetEntity="Config")
@@ -42,10 +32,23 @@ class PathologicalReport
 
 
     /**
-     * @ORM\ManyToOne(targetEntity="InvestigationMasterReportFormat")
+     * @ORM\ManyToOne(targetEntity="InvestigationReportFormat")
      * @ORM\JoinColumn(name="master_report_format_id", referencedColumnName="id")
      **/
     private $masterReportFormat;
+
+    /**
+     * @ORM\ManyToOne(targetEntity="InvoicePathologicalReport", inversedBy="children", cascade={"detach","merge"})
+     * @ORM\JoinColumn(name="parent", referencedColumnName="id", onDelete="SET NULL")
+     */
+    protected $parent;
+
+    /**
+     * @ORM\OneToMany(targetEntity="InvoicePathologicalReport" , mappedBy="parent")
+     * @ORM\OrderBy({"sorting" = "ASC"})
+     **/
+    private $children;
+
 
     /**
      * @ORM\ManyToOne(targetEntity="Particular")

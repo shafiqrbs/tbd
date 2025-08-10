@@ -7,10 +7,10 @@ use Gedmo\Mapping\Annotation as Gedmo;
 /**
  * Service
  *
- * @ORM\Table( name ="hms_particular_type")
+ * @ORM\Table( name ="hms_particular_mode_matrix")
  * @ORM\Entity()
  */
-class ParticularType
+class ParticularModeMatrix
 {
     /**
      * @var integer
@@ -28,17 +28,28 @@ class ParticularType
     protected $config;
 
     /**
-     * @ORM\ManyToOne(targetEntity="ParticularMasterType", cascade={"detach","merge"})
-     * @ORM\JoinColumn(name="particular_master_type_id", referencedColumnName="id", onDelete="CASCADE")
-     */
-    protected $particularMasterType;
+     * @ORM\ManyToOne(targetEntity="Modules\Core\App\Entities\User")
+     * @ORM\JoinColumn(name="created_by_id", referencedColumnName="id", nullable=true)
+     **/
+    private  $createdBy;
 
     /**
-     * @var string
-     *
-     * @ORM\Column(name="name", type="string", length=100, nullable=true)
+     * @ORM\ManyToOne(targetEntity="ParticularModule", cascade={"detach","merge"})
+     * @ORM\JoinColumn(name="particular_module_id", referencedColumnName="id", onDelete="CASCADE")
      */
-    private $name;
+    protected $particularModule;
+
+    /**
+     * @ORM\ManyToOne(targetEntity="ParticularMode", cascade={"detach","merge"})
+     * @ORM\JoinColumn(name="particular_mode_id", referencedColumnName="id", onDelete="CASCADE")
+     */
+    protected $particularMode;
+
+    /**
+     * @ORM\ManyToOne(targetEntity="ParticularType", cascade={"detach","merge"})
+     * @ORM\JoinColumn(name="particular_type_id", referencedColumnName="id", onDelete="CASCADE")
+     */
+    protected $particularType;
 
     /**
      * @var string
@@ -47,19 +58,27 @@ class ParticularType
      */
     private $dataType;
 
-    /**
-     * @var string
-     *
-     * @ORM\Column(name="short_code", type="string", length=50, nullable=true)
-     */
-    private $shortCode;
 
     /**
      * @var string
      *
-     * @ORM\Column(name="slug", type="string", length=50, nullable=true)
+     * @ORM\Column(name="name", type="string",  nullable=true)
+     */
+    private $name;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="slug", type="string",nullable=true)
      */
     private $slug;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="short_code", type="string", length=10, nullable=true)
+     */
+    private $shortCode;
 
     /**
      * @var string
@@ -74,13 +93,6 @@ class ParticularType
      * @ORM\Column(type="boolean",options={"default"="true"})
      */
     private $status;
-
-    /**
-     * @var boolean
-     *
-     * @ORM\Column(type="boolean",options={"default"="true"})
-     */
-    private $isPrivate;
 
     /**
      * @var \DateTime
