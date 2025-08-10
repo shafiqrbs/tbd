@@ -813,7 +813,8 @@ class AccountHeadModel extends Model
     public static function getAccountHeadLedger($head , $limit = 10)
     {
         $investors = self::leftJoin('acc_transaction_mode', 'acc_transaction_mode.id', '=', 'acc_head.account_id')
-            ->select('acc_head.id as id', 'acc_head.name as name', 'acc_head.amount as amount')
+            ->select('acc_head.id as id', 'acc_head.name as name', 'acc_head.amount as amount','parent.name as parent_name')
+            ->join('acc_head as parent','parent.id','=','acc_head.parent_id')
             ->leftJoin('cor_vendors', 'cor_vendors.id', '=', 'acc_head.vendor_id')
             ->leftJoin('cor_customers', 'cor_customers.id', '=', 'acc_head.customer_id')
             ->leftJoin('acc_head_details', 'acc_head_details.account_head_id', '=', 'acc_head.id')
