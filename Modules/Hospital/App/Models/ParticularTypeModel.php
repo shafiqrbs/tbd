@@ -20,5 +20,23 @@ class ParticularTypeModel extends Model
 
     protected $fillable = [];
 
+    public function particulars()
+    {
+        return $this->hasMany(ParticularModel::class, 'particular_type_id');
+    }
+
+
+    public static function getRecords($domain)
+    {
+        $config = $domain['hms_config'];
+        $entities = self::select(['*'])->with(['particulars' => function ($query) use($config) {
+                $query->select(['*'])->where([['hms_particular.config_id',$config]]);
+            }]);
+        $total  = $entities->count();
+        $entities = $entities->get();
+        $data = array('count'=>$total,'entities'=>$entities);
+        return $data;
+    }
+
 
 }

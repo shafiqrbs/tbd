@@ -67,13 +67,14 @@ class HospitalController extends Controller
     public function particularTypeChildDropdown(Request $request)
     {
         $domain = $this->domain;
+        $types = ParticularTypeModel::getRecords($domain);
         $types = ParticularTypeModel::all();
         $dropdown = [];
         foreach ($types as $type):
             $dropdown[$this->convertCamelCase($type['slug'])] = ParticularModel::getParticularDropdown($domain,$type['slug']);
         endforeach;
         $service = new JsonRequestResponse();
-        return $service->returnJosnResponse($dropdown);
+        return $service->returnJosnResponse($types);
     }
 
     public static function convertCamelCase($str){

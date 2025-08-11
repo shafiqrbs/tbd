@@ -464,12 +464,11 @@ class Particular
      */
     protected $path;
 
-
-
     /**
      * @ORM\Column(type="string", length=255, nullable=true)
      */
     protected $signaturePath;
+
 
 
     /**
