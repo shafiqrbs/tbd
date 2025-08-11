@@ -24,13 +24,6 @@ class AccountJournalItem
      */
     private $id;
 
-
-    /**
-     * @ORM\ManyToOne(targetEntity="AccountHead")
-     * @ORM\JoinColumn(onDelete="CASCADE")
-     **/
-    protected $accountLedger;
-
     /**
      * @ORM\ManyToOne(targetEntity="AccountJournal")
      * @ORM\JoinColumn(name="account_journal_id", referencedColumnName="id", nullable=true, onDelete="cascade")

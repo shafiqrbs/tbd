@@ -175,7 +175,6 @@ class AccountJournalItemModel extends Model
 
         return [
             'account_journal_id' => $journal->id,
-            'account_ledger_id' => $item['id'],
             'account_sub_head_id' => $item['id'],
             'account_head_id' => $parent->parent_id ?? null,
             'amount' => $item['mode'] === 'debit' ? $item['debit'] : $item['credit'],
@@ -194,47 +193,14 @@ class AccountJournalItemModel extends Model
     {
         $openingBalance = self::join('acc_journal', 'acc_journal.id', '=', 'acc_journal_item.account_journal_id')
                             ->where('acc_journal.config_id', $configId)
-                            ->where('acc_journal_item.account_ledger_id', $ledgerId)
+                            ->where('acc_journal_item.account_sub_head_id', $ledgerId)
                             ->where('acc_journal_item.id', '<>', $journalItemId)
                             ->orderByDesc('acc_journal_item.created_at')
                             ->value('acc_journal_item.closing_amount') ?? 0;
         return $openingBalance;
     }
 
-    /*public static function getLedgerWiseJournalItems($ledgerId,$configId)
-    {
-        $journalParentItems = self::join('acc_journal','acc_journal.id','=','acc_journal_item.account_journal_id')
-            ->join('acc_head','acc_head.id','=','acc_journal_item.account_sub_head_id')
-            ->select('acc_journal_item.id','acc_journal_item.account_ledger_id','acc_journal_item.account_journal_id','acc_journal_item.account_head_id','acc_journal_item.account_sub_head_id','acc_journal_item.amount','acc_journal_item.debit','acc_journal_item.credit','acc_journal_item.mode','acc_journal_item.created_at',                DB::raw('DATE_FORMAT(acc_journal_item.created_at, "%d-%m-%Y") as created_date')
-                ,'acc_journal_item.opening_amount','acc_journal_item.closing_amount','acc_head.name as ledger_name')
-            ->where('acc_journal.config_id', $configId)
-            ->where('acc_journal_item.account_sub_head_id', $ledgerId)
-            ->where('acc_journal_item.is_parent', 1)
-            ->get()->toArray();
 
-
-        $ledgerDetails = [];
-        foreach ($journalParentItems as $journalParentItem) {
-            $getChildItems = self::where('acc_journal_item.parent_id',$journalParentItem['id'])
-                ->join('acc_head','acc_head.id','=','acc_journal_item.account_sub_head_id')
-                ->select('acc_journal_item.id','acc_journal_item.account_ledger_id','acc_journal_item.account_journal_id','acc_journal_item.account_head_id','acc_journal_item.account_sub_head_id','acc_journal_item.amount','acc_journal_item.debit','acc_journal_item.credit','acc_journal_item.mode','acc_journal_item.created_at',DB::raw('DATE_FORMAT(acc_journal_item.created_at, "%d-%m-%Y") as created_date')
-                ,'acc_journal_item.opening_amount','acc_journal_item.closing_amount','acc_head.name as ledger_name')->get()->toArray();
-
-            $journalParentItem['childItems'] = $getChildItems;
-            $ledgerDetails[] = $journalParentItem;
-        }
-
-
-        $getChildItems2 = self::join('acc_journal','acc_journal.id','=','acc_journal_item.account_journal_id')
-            ->join('acc_head','acc_head.id','=','acc_journal_item.account_sub_head_id')
-            ->select('acc_journal_item.id','acc_journal_item.account_ledger_id','acc_journal_item.account_journal_id','acc_journal_item.account_head_id','acc_journal_item.account_sub_head_id','acc_journal_item.amount','acc_journal_item.debit','acc_journal_item.credit','acc_journal_item.mode','acc_journal_item.created_at',                DB::raw('DATE_FORMAT(acc_journal_item.created_at, "%d-%m-%Y") as created_date')
-                ,'acc_journal_item.opening_amount','acc_journal_item.closing_amount','acc_head.name as ledger_name')
-            ->where('acc_journal.config_id', $configId)
-            ->where('acc_journal_item.account_sub_head_id', $ledgerId)
-            ->get()->toArray();
-
-        return ['ledgerDetails' => $ledgerDetails, 'ledgerItems' => $getChildItems2];
-    }*/
     public static function getLedgerWiseJournalItems($ledgerId, $configId)
     {
         // Get all items for the ledger
@@ -243,7 +209,6 @@ class AccountJournalItemModel extends Model
             ->join('acc_voucher', 'acc_voucher.id', '=', 'acc_journal.voucher_id')
             ->select([
                 'acc_journal_item.id',
-                'acc_journal_item.account_ledger_id',
                 'acc_journal_item.account_journal_id',
                 'acc_journal.invoice_no',
                 'acc_voucher.short_name as voucher_name',
@@ -275,7 +240,6 @@ class AccountJournalItemModel extends Model
         $childItems = self::join('acc_head', 'acc_head.id', '=', 'acc_journal_item.account_sub_head_id')
             ->select([
                 'acc_journal_item.id',
-                'acc_journal_item.account_ledger_id',
                 'acc_journal_item.account_journal_id',
                 'acc_journal_item.account_head_id',
                 'acc_journal_item.account_sub_head_id',
@@ -370,7 +334,7 @@ class AccountJournalItemModel extends Model
     public static function handleOpeningClosing($journal,$journalItem){
 
         $opening = self::getLedgerWiseOpeningBalance(
-            ledgerId: $journalItem->account_ledger_id,
+            ledgerId: $journalItem->account_sub_head_id,
                     configId: $journal->config_id,
                     journalItemId: $journalItem->id
                 );
