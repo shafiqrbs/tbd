@@ -201,7 +201,7 @@ class AccountJournalItemModel extends Model
     }
 
 
-    public static function getLedgerWiseJournalItems($ledgerId, $configId)
+    public static function getLedgerWiseJournalItemsbk($ledgerId, $configId)
     {
         // Get all items for the ledger
         $allItems = self::join('acc_journal', 'acc_journal.id', '=', 'acc_journal_item.account_journal_id')
@@ -264,42 +264,46 @@ class AccountJournalItemModel extends Model
             return $parent;
         })->values()->toArray();
 
-        $newDataSets = self::getLedgersForAccounting($allItems);
-
-        return [
-            'ledgerDetails' => $ledgerDetails,
-            'ledgerItems' => $allItems,
-            'ledgerItems2' => $newDataSets
-        ];
-    }
-
-    public static function getLedgersForAccounting($items)
-    {
         $newDataset = [];
-        if (count($items) > 0) {
-            foreach ($items as $item) {
+        if (count($allItems) > 0) {
+            foreach ($allItems as $item) {
                 if ($item['is_parent'] == 1 && empty($item['parent_id'])){
                     $getChildLedgers = self::join('acc_head as ledger','ledger.id','=','acc_journal_item.account_sub_head_id')
-                                            ->join('acc_head as motherLedger','motherLedger.id','=','acc_journal_item.account_sub_head_id')
-                                            ->join('acc_journal', 'acc_journal.id', '=', 'acc_journal_item.account_journal_id')
-                                            ->join('acc_voucher', 'acc_voucher.id', '=', 'acc_journal.voucher_id')
-                                            ->select([
-                                                'acc_journal_item.id','ledger.name as ledger_name','motherLedger.name as mother_ledger_name','acc_journal_item.amount','acc_journal_item.debit','acc_journal_item.credit','acc_journal_item.mode',DB::raw('DATE_FORMAT(acc_journal_item.created_at, "%d-%m-%Y") as created_date','acc_voucher.short_name as voucher_name')
-                                            ])
-                                            ->where('acc_journal_item.parent_id', $item['id'])
-                                            ->get();
+                        ->join('acc_head as motherLedger','motherLedger.id','=','acc_journal_item.account_sub_head_id')
+                        ->join('acc_journal', 'acc_journal.id', '=', 'acc_journal_item.account_journal_id')
+                        ->join('acc_voucher', 'acc_voucher.id', '=', 'acc_journal.voucher_id')
+                        ->select([
+                            'acc_journal_item.id',
+                            'ledger.name as ledger_name',
+                            'motherLedger.name as mother_ledger_name',
+                            'acc_journal_item.amount',
+                            'acc_journal_item.debit',
+                            'acc_journal_item.credit',
+                            'acc_journal_item.mode',
+                            DB::raw('DATE_FORMAT(acc_journal_item.created_at, "%d-%m-%Y") as created_date'),
+                            'acc_voucher.short_name as voucher_name',
+                            'acc_journal.invoice_no',
+                            'acc_journal_item.opening_amount',
+                            'acc_journal_item.closing_amount'
+                        ])
+                        ->where('acc_journal_item.parent_id', $item['id'])
+                        ->get();
                     if (count($getChildLedgers) > 0) {
                         foreach ($getChildLedgers as $getChildLedger) {
                             $newDataset[] = [
-                                'id' => $getChildLedger->id.' ( parent --> all data f C )',
+                                'id' => $getChildLedger->id,
+                                'for_test' => $getChildLedger->id.' ( this is parent --> all data form child ledger )',
+                                'invoice_no' => $getChildLedger->invoice_no,
                                 'ledger_name' => $getChildLedger->ledger_name,
                                 'mother_ledger_name' => $getChildLedger->mother_ledger_name,
-                                'amount' => $getChildLedger->amount,
-                                'debit' => $getChildLedger->debit,
-                                'credit' => $getChildLedger->credit,
+                                'amount' => $getChildLedger->mode == 'debit' ? $getChildLedger->debit : $getChildLedger->credit,
+//                                'debit' => $getChildLedger->debit,
+//                                'credit' => $getChildLedger->credit,
                                 'mode' => $getChildLedger->mode == 'debit' ? 'Credit' : 'Debit',
                                 'created_date' => $getChildLedger->created_date,
-                                'voucher_name' => $getChildLedger->voucher_name
+                                'voucher_name' => $getChildLedger->voucher_name,
+                                'opening_amount' => $getChildLedger->opening_amount,
+                                'closing_amount' => $getChildLedger->closing_amount
                             ];
                         }
                     }
@@ -314,21 +318,268 @@ class AccountJournalItemModel extends Model
 
                     if ($getParentLedger) {
                         $newDataset[] = [
-                            'id' => $item['id'].' ( child --> ladger name f p & all data f c )',
+                            'id' => $item['id'],
+                            'for_test' => $item['id'].' ( this is child --> ladger name & mode form parent & all data form child ledger )',
+                            'invoice_no' => $item['invoice_no'],
                             'ledger_name' => $getParentLedger->ledger_name,
                             'mother_ledger_name' => $getParentLedger->mother_ledger_name,
-                            'amount' => $item['amount'],
-                            'debit' => $item['debit'],
-                            'credit' => $item['credit'],
+//                            'amount' => $item['amount'],
+//                            'debit' => $item['debit'],
+//                            'credit' => $item['credit'],
+                            'amount' => $item['mode'] == 'debit' ? $item['debit'] : $item['credit'],
                             'mode' => $getParentLedger->mode == 'debit' ? 'Credit' : 'Debit',
                             'created_date' => $item['created_date'],
-                            'voucher_name' => $item['voucher_name']
+                            'voucher_name' => $item['voucher_name'],
+                            'opening_amount' => $item['opening_amount'],
+                            'closing_amount' => $item['closing_amount']
                         ];
                     }
                 }
             }
         }
-        return $newDataset;
+
+        return [
+            'ledgerDetails' => $ledgerDetails,
+            'ledgerItems' => $newDataset
+        ];
+    }
+    /*public static function getLedgerWiseJournalItems($ledgerId, $configId)
+    {
+        // Get all items for the ledger
+        $allItems = self::join('acc_journal', 'acc_journal.id', '=', 'acc_journal_item.account_journal_id')
+            ->join('acc_head', 'acc_head.id', '=', 'acc_journal_item.account_sub_head_id')
+            ->join('acc_voucher', 'acc_voucher.id', '=', 'acc_journal.voucher_id')
+            ->select([
+                'acc_journal_item.id',
+                'acc_journal_item.account_journal_id',
+                'acc_journal.invoice_no',
+                'acc_voucher.short_name as voucher_name',
+                'acc_journal_item.account_head_id',
+                'acc_journal_item.account_sub_head_id',
+                'acc_journal_item.amount',
+                'acc_journal_item.debit',
+                'acc_journal_item.credit',
+                'acc_journal_item.mode',
+                'acc_journal_item.created_at',
+                'acc_journal_item.opening_amount',
+                'acc_journal_item.closing_amount',
+                'acc_journal_item.parent_id',
+                'acc_journal_item.is_parent',
+                'acc_head.name as ledger_name',
+                DB::raw('DATE_FORMAT(acc_journal_item.created_at, "%d-%m-%Y") as created_date')
+            ])
+            ->where('acc_journal.config_id', $configId)
+            ->where('acc_journal_item.account_sub_head_id', $ledgerId)
+            ->get()
+            ->toArray();
+
+        $newDataset = [];
+        if (count($allItems) > 0) {
+            foreach ($allItems as $item) {
+                if ($item['is_parent'] == 1 && empty($item['parent_id'])){
+                    $getChildLedgers = self::join('acc_head as ledger','ledger.id','=','acc_journal_item.account_sub_head_id')
+                        ->join('acc_head as motherLedger','motherLedger.id','=','acc_journal_item.account_sub_head_id')
+                        ->join('acc_journal', 'acc_journal.id', '=', 'acc_journal_item.account_journal_id')
+                        ->join('acc_voucher', 'acc_voucher.id', '=', 'acc_journal.voucher_id')
+                        ->select([
+                            'acc_journal_item.id',
+                            'ledger.name as ledger_name',
+                            'motherLedger.name as mother_ledger_name',
+                            'acc_journal_item.amount',
+                            'acc_journal_item.debit',
+                            'acc_journal_item.credit',
+                            'acc_journal_item.mode',
+                            DB::raw('DATE_FORMAT(acc_journal_item.created_at, "%d-%m-%Y") as created_date'),
+                            'acc_voucher.short_name as voucher_name',
+                            'acc_journal.invoice_no',
+                            'acc_journal_item.opening_amount',
+                            'acc_journal_item.closing_amount'
+                        ])
+                        ->where('acc_journal_item.parent_id', $item['id'])
+                        ->get();
+                    if (count($getChildLedgers) > 0) {
+                        foreach ($getChildLedgers as $getChildLedger) {
+                            $newDataset[] = [
+                                'id' => $getChildLedger->id,
+                                'for_test' => $getChildLedger->id.' ( this is parent --> all data form child ledger )',
+                                'invoice_no' => $getChildLedger->invoice_no,
+                                'ledger_name' => $getChildLedger->ledger_name,
+                                'mother_ledger_name' => $getChildLedger->mother_ledger_name,
+                                'amount' => $getChildLedger->mode == 'debit' ? $getChildLedger->debit : $getChildLedger->credit,
+//                                'debit' => $getChildLedger->debit,
+//                                'credit' => $getChildLedger->credit,
+                                'mode' => $getChildLedger->mode == 'debit' ? 'Credit' : 'Debit',
+                                'created_date' => $getChildLedger->created_date,
+                                'voucher_name' => $getChildLedger->voucher_name,
+                                'opening_amount' => $getChildLedger->opening_amount,
+                                'closing_amount' => $getChildLedger->closing_amount
+                            ];
+                        }
+                    }
+                }elseif ($item['is_parent'] != 1 && !empty($item['parent_id'])){
+                    $getParentLedger = self::join('acc_head as ledger','ledger.id','=','acc_journal_item.account_sub_head_id')
+                        ->join('acc_head as motherLedger','motherLedger.id','=','acc_journal_item.account_sub_head_id')
+                        ->select([
+                            'acc_journal_item.id','ledger.name as ledger_name','motherLedger.name as mother_ledger_name','acc_journal_item.mode'
+                        ])
+                        ->where('acc_journal_item.id', $item['parent_id'])
+                        ->first();
+
+                    if ($getParentLedger) {
+                        $newDataset[] = [
+                            'id' => $item['id'],
+                            'for_test' => $item['id'].' ( this is child --> ladger name & mode form parent & all data form child ledger )',
+                            'invoice_no' => $item['invoice_no'],
+                            'ledger_name' => $getParentLedger->ledger_name,
+                            'mother_ledger_name' => $getParentLedger->mother_ledger_name,
+//                            'amount' => $item['amount'],
+//                            'debit' => $item['debit'],
+//                            'credit' => $item['credit'],
+                            'amount' => $item['mode'] == 'debit' ? $item['debit'] : $item['credit'],
+                            'mode' => $getParentLedger->mode == 'debit' ? 'Credit' : 'Debit',
+                            'created_date' => $item['created_date'],
+                            'voucher_name' => $item['voucher_name'],
+                            'opening_amount' => $item['opening_amount'],
+                            'closing_amount' => $item['closing_amount']
+                        ];
+                    }
+                }
+            }
+        }
+
+        return [
+            'ledgerItems' => $newDataset
+        ];
+    }*/
+
+    /**
+     * Get ledger-wise journal entries with child-parent resolution.
+     *
+     * @param  int  $ledgerId
+     * @param  int  $configId
+     * @return array{ledgerItems: array<int, array<string, mixed>>}
+     */
+    public static function getLedgerWiseJournalItems(int $ledgerId, int $configId): array
+    {
+        // Fetch primary items
+        $items = self::query()
+            ->join('acc_journal', 'acc_journal.id', '=', 'acc_journal_item.account_journal_id')
+            ->join('acc_head', 'acc_head.id', '=', 'acc_journal_item.account_sub_head_id')
+            ->join('acc_voucher', 'acc_voucher.id', '=', 'acc_journal.voucher_id')
+            ->select([
+                'acc_journal_item.id',
+                'acc_journal.invoice_no',
+                'acc_voucher.short_name as voucher_name',
+                'acc_journal_item.amount',
+                'acc_journal_item.debit',
+                'acc_journal_item.credit',
+                'acc_journal_item.mode',
+                'acc_journal_item.created_at',
+                'acc_journal_item.opening_amount',
+                'acc_journal_item.closing_amount',
+                'acc_journal_item.parent_id',
+                'acc_journal_item.is_parent',
+                'acc_head.name as ledger_name',
+                DB::raw('DATE_FORMAT(acc_journal_item.created_at, "%d-%m-%Y") as created_date')
+            ])
+            ->where('acc_journal.config_id', $configId)
+            ->where('acc_journal_item.account_sub_head_id', $ledgerId)
+            ->get()
+            ->toArray();
+
+        $result = [];
+
+        foreach ($items as $item) {
+            if ((int) $item['is_parent'] === 1 && empty($item['parent_id'])) {
+                // Pull children of this parent
+                $children = self::query()
+                    ->join('acc_journal', 'acc_journal.id', '=', 'acc_journal_item.account_journal_id')
+                    ->join('acc_voucher', 'acc_voucher.id', '=', 'acc_journal.voucher_id')
+                    ->join('acc_head as ledger', 'ledger.id', '=', 'acc_journal_item.account_sub_head_id')
+                    ->select([
+                        'acc_journal_item.id',
+                        'acc_journal_item.amount',
+                        'acc_journal_item.debit',
+                        'acc_journal_item.credit',
+                        'acc_journal_item.mode',
+                        'acc_journal_item.created_at',
+                        'acc_journal_item.opening_amount',
+                        'acc_journal_item.closing_amount',
+                        'acc_voucher.short_name as voucher_name',
+                        'acc_journal.invoice_no',
+                        'ledger.name as ledger_name',
+                        DB::raw('DATE_FORMAT(acc_journal_item.created_at, "%d-%m-%Y") as created_date'),
+                    ])
+                    ->where('acc_journal_item.parent_id', $item['id'])
+                    ->get();
+
+                foreach ($children as $child) {
+                    $result[] = [
+                        'id'              => $child->id,
+                        'invoice_no'      => $child->invoice_no,
+                        'ledger_name'     => $child->ledger_name,
+                        'amount'          => self::resolveAmount($child->mode, $child->debit, $child->credit),
+                        'mode'            => self::invertMode($child->mode),
+                        'created_date'    => $child->created_date,
+                        'voucher_name'    => $child->voucher_name,
+                        'opening_amount'  => $child->opening_amount,
+                        'closing_amount'  => $child->closing_amount,
+                        'for_test'        => $child->id.' ( this is parent --> all data form child ledger )',
+                    ];
+                }
+            } elseif ((int) $item['is_parent'] !== 1 && !empty($item['parent_id'])) {
+                // Fetch parent info for this child item
+                $parent = self::query()
+                    ->join('acc_head as ledger', 'ledger.id', '=', 'acc_journal_item.account_sub_head_id')
+                    ->select([
+                        'acc_journal_item.id',
+                        'ledger.name as ledger_name',
+                        'acc_journal_item.mode',
+                    ])
+                    ->where('acc_journal_item.id', $item['parent_id'])
+                    ->first();
+
+                if ($parent) {
+                    $result[] = [
+                        'id'              => $item['id'],
+                        'invoice_no'      => $item['invoice_no'],
+                        'ledger_name'     => $parent->ledger_name,
+                        'amount'          => self::resolveAmount($item['mode'], $item['debit'], $item['credit']),
+                        'mode'            => self::invertMode($parent->mode),
+                        'created_date'    => $item['created_date'],
+                        'voucher_name'    => $item['voucher_name'],
+                        'opening_amount'  => $item['opening_amount'],
+                        'closing_amount'  => $item['closing_amount'],
+                        'for_test'        => $item['id'].' ( this is child --> ladger name & mode form parent & all data form child ledger )',
+                    ];
+                }
+            }
+        }
+
+        return [
+            'ledgerItems' => $result,
+        ];
+    }
+
+    /**
+     * Resolve amount based on mode.
+     *
+     * @param  string  $mode
+     */
+    private static function resolveAmount(string $mode, $debit, $credit)
+    {
+        return $mode === 'debit' ? $debit : $credit;
+    }
+
+    /**
+     * Invert the debit/credit string.
+     *
+     * @param  string  $mode
+     * @return string
+     */
+    private static function invertMode(string $mode): string
+    {
+        return $mode === 'debit' ? 'Credit' : 'Debit';
     }
 
     public static function handleOpeningClosing($journal,$journalItem){

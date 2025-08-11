@@ -4,7 +4,6 @@ use App\Http\Middleware\HeaderAuthenticationMiddleware;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Modules\Hospital\App\Http\Controllers\HospitalController;
-use Modules\Hospital\App\Http\Controllers\OpdController;
 use Modules\Hospital\App\Http\Controllers\SettingController;
 
 
@@ -32,6 +31,6 @@ Route::prefix('/hospital/select')->middleware([HeaderAuthenticationMiddleware::c
 Route::prefix('/hospital')->middleware([HeaderAuthenticationMiddleware::class])->group(function() {
     Route::get('/setting', [SettingController::class,'particularModuleDropdown'])->name('particular_module_dropdown');
     Route::get('/setting', [SettingController::class,'particularModuleDropdown'])->name('particular_module_dropdown');
-    Route::apiResource('opd', OPDController::class)->middleware([HeaderAuthenticationMiddleware::class]);
+//    Route::apiResource('opd', OPDController::class)->middleware([HeaderAuthenticationMiddleware::class]);
 
 });
