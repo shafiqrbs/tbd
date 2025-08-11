@@ -300,10 +300,71 @@ class AccountJournalItemModel extends Model
             return $parent;
         })->values()->toArray();
 
+        $newDataSets = self::getLedgersForAccounting($allItems);
+
         return [
             'ledgerDetails' => $ledgerDetails,
-            'ledgerItems' => $allItems
+            'ledgerItems' => $allItems,
+            'ledgerItems2' => $newDataSets
         ];
+    }
+
+    public static function getLedgersForAccounting($items)
+    {
+        $newDataset = [];
+        if (count($items) > 0) {
+            foreach ($items as $item) {
+                if ($item['is_parent'] == 1 && empty($item['parent_id'])){
+                    $getChildLedgers = self::join('acc_head as ledger','ledger.id','=','acc_journal_item.account_sub_head_id')
+                                            ->join('acc_head as motherLedger','motherLedger.id','=','acc_journal_item.account_sub_head_id')
+                                            ->join('acc_journal', 'acc_journal.id', '=', 'acc_journal_item.account_journal_id')
+                                            ->join('acc_voucher', 'acc_voucher.id', '=', 'acc_journal.voucher_id')
+                                            ->select([
+                                                'acc_journal_item.id','ledger.name as ledger_name','motherLedger.name as mother_ledger_name','acc_journal_item.amount','acc_journal_item.debit','acc_journal_item.credit','acc_journal_item.mode',DB::raw('DATE_FORMAT(acc_journal_item.created_at, "%d-%m-%Y") as created_date','acc_voucher.short_name as voucher_name')
+                                            ])
+                                            ->where('acc_journal_item.parent_id', $item['id'])
+                                            ->get();
+                    if (count($getChildLedgers) > 0) {
+                        foreach ($getChildLedgers as $getChildLedger) {
+                            $newDataset[] = [
+                                'id' => $getChildLedger->id.' ( parent --> all data f C )',
+                                'ledger_name' => $getChildLedger->ledger_name,
+                                'mother_ledger_name' => $getChildLedger->mother_ledger_name,
+                                'amount' => $getChildLedger->amount,
+                                'debit' => $getChildLedger->debit,
+                                'credit' => $getChildLedger->credit,
+                                'mode' => $getChildLedger->mode == 'debit' ? 'Credit' : 'Debit',
+                                'created_date' => $getChildLedger->created_date,
+                                'voucher_name' => $getChildLedger->voucher_name
+                            ];
+                        }
+                    }
+                }elseif ($item['is_parent'] != 1 && !empty($item['parent_id'])){
+                    $getParentLedger = self::join('acc_head as ledger','ledger.id','=','acc_journal_item.account_sub_head_id')
+                        ->join('acc_head as motherLedger','motherLedger.id','=','acc_journal_item.account_sub_head_id')
+                        ->select([
+                            'acc_journal_item.id','ledger.name as ledger_name','motherLedger.name as mother_ledger_name','acc_journal_item.mode'
+                        ])
+                        ->where('acc_journal_item.id', $item['parent_id'])
+                        ->first();
+
+                    if ($getParentLedger) {
+                        $newDataset[] = [
+                            'id' => $item['id'].' ( child --> ladger name f p & all data f c )',
+                            'ledger_name' => $getParentLedger->ledger_name,
+                            'mother_ledger_name' => $getParentLedger->mother_ledger_name,
+                            'amount' => $item['amount'],
+                            'debit' => $item['debit'],
+                            'credit' => $item['credit'],
+                            'mode' => $getParentLedger->mode == 'debit' ? 'Credit' : 'Debit',
+                            'created_date' => $item['created_date'],
+                            'voucher_name' => $item['voucher_name']
+                        ];
+                    }
+                }
+            }
+        }
+        return $newDataset;
     }
 
     public static function handleOpeningClosing($journal,$journalItem){
