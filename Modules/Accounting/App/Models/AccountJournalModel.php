@@ -152,10 +152,8 @@ class AccountJournalModel extends Model
     public static function journalOpeningClosing($journal,$journalItem)
     {
         $opening = AccountJournalItemModel::getLedgerWiseOpeningBalance(
-
-            ledgerId: $journalItem->account_sub_head_id,
+                    ledgerId: $journalItem->account_sub_head_id,
                     configId: $journal->config_id,
-                    journalItemId: $journalItem->id
                 );
 
                 $closing = $journalItem->mode === 'debit'

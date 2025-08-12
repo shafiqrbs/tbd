@@ -3,12 +3,14 @@
 namespace Modules\Accounting\App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Services\ReportExportService;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityRepository;
 use Exception;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Log;
 use Modules\Accounting\App\Entities\AccountHead;
@@ -241,9 +243,10 @@ class AccountHeadController extends Controller
         return $response;
     }
 
-    public function accountLedgerWiseJournal($id)
+    public function accountLedgerWiseJournal(Request $request,$id)
     {
-        $getJournalItems = AccountJournalItemModel::getLedgerWiseJournalItems( ledgerId:$id,configId: $this->domain['acc_config'] );
+        $params = $request->only('start_date','end_date');
+        $getJournalItems = AccountJournalItemModel::getLedgerWiseJournalItems( ledgerId:$id, configId: $this->domain['acc_config'], params: $params );
         return response()->json([
             'status' => 200,
             'success' => true,
@@ -252,275 +255,75 @@ class AccountHeadController extends Controller
         ]);
     }
 
-    public function accountLedgerWiseJournalGenerateXlsx($id)
+    public function ledgerPdfXlsxFileGenerate(Request $request,ReportExportService $generate, int $ledgerId, string $format)
     {
+        $params = $request->only('start_date','end_date');
+        $processed = AccountJournalItemModel::getLedgerWiseJournalItems( ledgerId:$ledgerId, configId: $this->domain['acc_config'], params: $params );
 
-        try {
-            // Use the reusable method to get processed data
-            $processedData = AccountJournalItemModel::getLedgerWiseJournalItems( ledgerId:$id,configId: $this->domain['acc_config'] );
+        // get domain data
+        $domainInfo = DomainModel::query()
+            ->select('mobile','address','company_name')
+            ->find($this->domain['domain_id']);
 
-            $spreadsheet = new Spreadsheet();
+        // find ledger
+        $ledger = AccountHeadModel::query()->select('name')->find($ledgerId);
 
-            // Remove the default worksheet first
-            $defaultSheetIndex = $spreadsheet->getIndex(
-                $spreadsheet->getSheetByName('Worksheet')
-            );
-            $spreadsheet->removeSheetByIndex($defaultSheetIndex);
+        $data = $processed['ledgerItems'] ?? [];
 
-            // Create custom-named worksheet
-            $sheet = new Worksheet($spreadsheet, 'Ledger Report');
-            $spreadsheet->addSheet($sheet, 0);
-            $spreadsheet->setActiveSheetIndex(0);
+        $headers = ['#', 'Date','Issue Date', 'JV No', 'Ref. Number', 'Voucher Type', 'Ledger Name', 'Particulars', 'Opening', 'Debit', 'Credit', 'Closing'];
 
-            // Header labels
-            $headers = [
-                'S/N', 'Date', 'JV No', 'Voucher Type',
-                'Ledger Name', 'Opening', 'Debit', 'Credit', 'Closing',
+        // format data rows
+        $rows = collect($data)->map(function ($item, $index) {
+            return [
+                '#'             => $index + 1,
+                'Date'          => $item['created_date'] ?? '',
+                'Issue Date'    => $item['issue_date'] ?? '',
+                'JV No'         => $item['invoice_no'] ?? '',
+                'Ref. Number'   => $item['ref_no'] ?? '',
+                'Voucher Type'  => $item['voucher_name'] ?? '',
+                'Ledger Name'   => $item['ledger_name'] ?? '',
+                'Particulars'   => $item['description'] ?? '',
+                'Opening'       => $item['opening_amount'] ?? 0,
+                'Debit'         => $item['mode'] === 'Debit' ? $item['amount'] : 0,
+                'Credit'        => $item['mode'] === 'Credit' ? $item['amount'] : 0,
+                'Closing'       => $item['closing_amount'] ?? 0
             ];
+        })->toArray();
 
-            // Define styles
-            $headerStyle = [
-                'font' => ['bold' => true, 'size' => 11],
-                'alignment' => [
-                    'horizontal' => Alignment::HORIZONTAL_CENTER,
-                    'vertical' => Alignment::VERTICAL_CENTER,
-                ],
-                'borders' => [
-                    'allBorders' => [
-                        'borderStyle' => Border::BORDER_THIN,
-                        'color' => ['rgb' => '000000']
-                    ]
-                ],
-                'fill' => [
-                    'fillType' => Fill::FILL_SOLID,
-                    'startColor' => ['rgb' => 'E3F2FD']
-                ]
+        $startDate = !empty($params['start_date']) ? Carbon::parse($params['start_date'])->format('d-m-Y') : null;
+        $endDate = !empty($params['end_date']) ? Carbon::parse($params['end_date'])->format('d-m-Y') : null;
+
+
+        $titles = [
+            ['text' => $domainInfo->company_name ?? null, 'align' => 'C', 'font_size' => 12, 'bold' => true],
+            ['text' => $domainInfo->address ?? null, 'align' => 'C'],
+            ['text' => $domainInfo->mobile ?? null, 'align' => 'C'],
+            ['text' => 'Ledger Report', 'align' => 'C', 'font_size' => 12, 'bold' => true],
+            ['text' => $ledger->name ?? null, 'align' => 'L', 'fill' => [227, 242, 253]],
+        ];
+
+        // Conditionally add date row if both dates exist
+        if ($startDate && $endDate) {
+            $titles[] = [
+                'text' => 'Date : ' . $startDate . ' To ' . $endDate,
+                'align' => 'R',
+                'fill' => [227, 242, 253],
             ];
-
-            $dataStyle = [
-                'font' => ['size' => 10],
-                'alignment' => [
-                    'horizontal' => Alignment::HORIZONTAL_CENTER,
-                    'vertical' => Alignment::VERTICAL_CENTER,
-                ],
-                'borders' => [
-                    'allBorders' => [
-                        'borderStyle' => Border::BORDER_THIN,
-                        'color' => ['rgb' => '000000']
-                    ]
-                ]
-            ];
-
-            // Set headers
-            foreach ($headers as $col => $label) {
-                $columnLetter = chr(65 + $col); // A, B, C, ...
-                $cell = $columnLetter . '1';
-                $sheet->setCellValue($cell, $label);
-                $sheet->getStyle($cell)->applyFromArray($headerStyle);
-            }
-
-            // Set data rows
-            if (!isset($processedData['ledgerItems']) || !is_array($processedData['ledgerItems'])) {
-                throw new \RuntimeException('No valid ledger data found.');
-            }
-
-            $rowIndex = 2;
-            foreach ($processedData['ledgerItems'] as $index => $item) {
-                $mode = strtolower($item['mode'] ?? '');
-                $amount = is_numeric($item['amount'] ?? null) ? (float) $item['amount'] : 0;
-                $opening = is_numeric($item['opening_amount'] ?? null) ? (float) $item['opening_amount'] : 0;
-                $closing = is_numeric($item['closing_amount'] ?? null) ? (float) $item['closing_amount'] : 0;
-
-                $debit = $mode === 'debit' ? $amount : 0;
-                $credit = $mode === 'credit' ? $amount : 0;
-
-                $rowData = [
-                    $index + 1,
-                    $item['created_date'] ?? '',
-                    $item['invoice_no'] ?? '',
-                    $item['voucher_name'] ?? '',
-                    $item['ledger_name'] ?? '',
-                    $opening,
-                    $debit,
-                    $credit,
-                    $closing,
-                ];
-
-                foreach ($rowData as $col => $value) {
-                    $columnLetter = chr(65 + $col);
-                    $sheet->setCellValue($columnLetter . $rowIndex, $value);
-                    $sheet->getStyle($columnLetter . $rowIndex)->applyFromArray($dataStyle);
-                }
-
-                $rowIndex++;
-            }
-
-
-            // Autosize columns
-            foreach (range('A', 'I') as $col) {
-                $sheet->getColumnDimension($col)->setAutoSize(true);
-            }
-
-            // File path
-            $diskPath = storage_path('app/public/exports');
-            $filename = 'ledger-report' . '.xlsx';
-            $filepath = $diskPath . '/' . $filename;
-
-            // Ensure directory
-            if (!File::exists($diskPath)) {
-                File::makeDirectory($diskPath, 0755, true);
-            }
-
-            $writer = new Xlsx($spreadsheet);
-            $writer->save($filepath);
-
-            return response()->json([
-                'filename' => $filename,
-                'file_url' => asset('storage/exports/' . $filename),
-                'status' => 200,
-                'result' => true,
-            ]);
-
-        } catch (Exception $e) {
-            // Handle errors gracefully
-            Log::error("XLSX Generation Error: " . $e->getMessage(), ['trace' => $e->getTraceAsString()]);
-            return response([
-                'error' => $e->getMessage(),
-                'result' => false,
-                'status' => 500,
-            ]);
         }
+
+        $output = $generate->generateReport('ledger', $format, $rows, [
+            'filename' => "ledger-report.{$format}",
+            'headers' => $headers,
+            'titles' => $titles,
+        ]);
+
+        return response()->json($output);
     }
 
-    public function accountLedgerWiseJournalGeneratePdf($id)
+    public function generateFileDownload(ReportExportService $download, string $filename)
     {
-
-        try {
-            // Use the reusable method to get processed data
-            $processedData = AccountJournalItemModel::getLedgerWiseJournalItems( ledgerId:$id,configId: $this->domain['acc_config'] );
-
-            $ledgerItems = $processedData['ledgerItems'] ?? [];
-
-            // Create TCPDF PDF (Landscape, A3)
-            $pdf = new \TCPDF('L', 'mm', 'A3', true, 'UTF-8', false);
-            $pdf->SetTitle('Ledger Report');
-            $pdf->SetMargins(10, 10, 10);
-            $pdf->SetAutoPageBreak(true, 15);
-            $pdf->SetPrintHeader(false);
-            $pdf->SetPrintFooter(false);
-            $pdf->AddPage();
-
-            $pdf->SetFont('helvetica', 'B', 11);
-            $pdf->Cell(0, 10, 'Ledger Report', 0, 1, 'C');
-
-            $headers = ['S/N', 'Date', 'JV No', 'Voucher Type', 'Ledger Name', 'Opening', 'Debit', 'Credit', 'Closing'];
-            $colWidths = [12, 30, 35, 30, 60, 30, 30, 30, 30];   // Adjusted widths
-            $cellHeight = 10;
-            $fontSize = 9;
-
-// 🔹 Calculate total table width
-            $totalWidth = array_sum($colWidths);
-
-// 🔹 Get usable page width
-            $pageWidth = $pdf->getPageWidth();
-            $leftMargin = $pdf->getMargins()['left'];
-            $rightMargin = $pdf->getMargins()['right'];
-
-            $printableWidth = $pageWidth - $leftMargin - $rightMargin;
-
-// 🔹 Compute X offset to center table
-            $xOffset = $leftMargin + ($printableWidth - $totalWidth) / 2;
-
-// 🔸 Optional: move to start of new Y position (before table)
-            $pdf->Ln(5);
-
-// 🔹 Set font and background for header
-            $pdf->SetFont('helvetica', 'B', $fontSize);
-            $pdf->SetFillColor(227, 242, 253); // Light blue bg
-            $pdf->SetTextColor(0, 0, 0);
-
-// 🔹 Set cursor X to center position
-            $pdf->SetX($xOffset);
-
-// 🔹 Render Headers (center aligned)
-            foreach ($headers as $i => $label) {
-                $pdf->Cell($colWidths[$i], $cellHeight, $label, 1, 0, 'C', true);
-            }
-            $pdf->Ln();
-
-// 🔹 Data Rows Settings
-            $pdf->SetFont('helvetica', '', 8);
-            $rowIndex = 1;
-
-            foreach ($ledgerItems as $item) {
-                $mode = strtolower($item['mode'] ?? '');
-                $amount = is_numeric($item['amount'] ?? null) ? (float)$item['amount'] : 0;
-                $debit = $mode === 'debit' ? $amount : 0;
-                $credit = $mode === 'credit' ? $amount : 0;
-
-                $row = [
-                    $rowIndex++,
-                    $item['created_date'] ?? '-',
-                    $item['invoice_no'] ?? '-',
-                    $item['voucher_name'] ?? '-',
-                    $item['ledger_name'] ?? '-',
-                    number_format((float)($item['opening_amount'] ?? 0), 2),
-                    number_format($debit, 2),
-                    number_format($credit, 2),
-                    number_format((float)($item['closing_amount'] ?? 0), 2),
-                ];
-
-                // 🔹 Reset X on each line
-                $pdf->SetX($xOffset);
-
-                foreach ($row as $i => $value) {
-                    $align = ($i > 4) ? 'R' : 'L';  // numbers right-aligned, left others
-                    $pdf->Cell($colWidths[$i], $cellHeight, $value, 1, 0, $align, false);
-                }
-
-                $pdf->Ln();
-            }
-
-            // Save PDF
-            $filename = 'ledger-report.pdf';
-            $diskPath = storage_path('app/public/exports'); // ✅ correct publicly served path
-            if (!File::exists($diskPath)) {
-                File::makeDirectory($diskPath, 0755, true);
-            }
-
-            $pdf->Output($diskPath . '/' . $filename, 'F'); // now saves to public folder
-
-            return response()->json([
-                'filename' => $filename,
-                'file_url' => asset("storage/exports/" . $filename),
-                'status' => 200,
-                'result' => true,
-            ]);
-
-
-
-        } catch (Exception $e) {
-            // Handle errors gracefully
-            Log::error("XLSX Generation Error: " . $e->getMessage(), ['trace' => $e->getTraceAsString()]);
-            return response([
-                'error' => $e->getMessage(),
-                'result' => false,
-                'status' => 500,
-            ]);
-        }
+        return $download->download($filename);
     }
 
-
-    public function accountLedgerWiseJournalDownload($type)
-    {
-        $fileName = '';
-        if ($type == 'xlsx') {
-            $fileName = 'ledger-report.xlsx';
-        } elseif ($type == 'pdf') {
-            $fileName = 'ledger-report.pdf';
-        }
-        $filePath = storage_path('exports/' . $fileName);
-        return response()->download($filePath, $fileName)->deleteFileAfterSend(true);
-    }
 
 }

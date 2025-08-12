@@ -31,8 +31,8 @@ class AccountJournalRequest extends FormRequest
             case 'PATCH':
         {
             return [
-                'ref_no' => 'required|string',
-                'issue_date' => 'required|date',
+                'ref_no' => 'nullable|string',
+                'issue_date' => 'nullable|date',
                 'description' => 'string|nullable',
                 'debit' => 'required|integer',
                 'credit' => 'required|integer',

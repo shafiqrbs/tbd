@@ -189,14 +189,9 @@ class AccountJournalItemModel extends Model
         ];
     }
 
-    public static function getLedgerWiseOpeningBalance( $ledgerId,$configId,$journalItemId )
+    public static function getLedgerWiseOpeningBalance( $ledgerId , $configId )
     {
-        $openingBalance = self::join('acc_journal', 'acc_journal.id', '=', 'acc_journal_item.account_journal_id')
-                            ->where('acc_journal.config_id', $configId)
-                            ->where('acc_journal_item.account_sub_head_id', $ledgerId)
-                            ->where('acc_journal_item.id', '<>', $journalItemId)
-                            ->orderByDesc('acc_journal_item.created_at')
-                            ->value('acc_journal_item.closing_amount') ?? 0;
+        $openingBalance = AccountHeadModel::where([['config_id',$configId],['id',$ledgerId]])->value('amount') ?? 0;
         return $openingBalance;
     }
 
@@ -459,7 +454,7 @@ class AccountJournalItemModel extends Model
      * @param  int  $configId
      * @return array{ledgerItems: array<int, array<string, mixed>>}
      */
-    public static function getLedgerWiseJournalItems(int $ledgerId, int $configId): array
+    public static function getLedgerWiseJournalItems(int $ledgerId, int $configId, array $params): array
     {
         // Fetch primary items
         $items = self::query()
@@ -480,10 +475,23 @@ class AccountJournalItemModel extends Model
                 'acc_journal_item.parent_id',
                 'acc_journal_item.is_parent',
                 'acc_head.name as ledger_name',
-                DB::raw('DATE_FORMAT(acc_journal_item.created_at, "%d-%m-%Y") as created_date')
+                DB::raw('DATE_FORMAT(acc_journal.created_at, "%d-%m-%Y") as created_date'),
+                DB::raw('DATE_FORMAT(acc_journal.issue_date, "%d-%m-%Y") as issue_date'),
+                'acc_journal.ref_no as ref_no',
+                'acc_journal.description as description',
             ])
             ->where('acc_journal.config_id', $configId)
             ->where('acc_journal_item.account_sub_head_id', $ledgerId)
+            ->whereNotNull('approved_by_id')
+            ->when(
+                !empty($params['start_date']) && !empty($params['end_date']),
+                function ($query) use ($params) {
+                    $query->whereBetween('acc_journal.created_at', [
+                        Carbon::parse($params['start_date'])->startOfDay(),
+                        Carbon::parse($params['end_date'])->endOfDay(),
+                    ]);
+                }
+            )
             ->get()
             ->toArray();
 
@@ -507,6 +515,9 @@ class AccountJournalItemModel extends Model
                         'acc_journal_item.closing_amount',
                         'acc_voucher.short_name as voucher_name',
                         'acc_journal.invoice_no',
+                        DB::raw('DATE_FORMAT(acc_journal.issue_date, "%d-%m-%Y") as issue_date'),
+                        'acc_journal.ref_no as ref_no',
+                        'acc_journal.description as description',
                         'ledger.name as ledger_name',
                         DB::raw('DATE_FORMAT(acc_journal_item.created_at, "%d-%m-%Y") as created_date'),
                     ])
@@ -524,6 +535,9 @@ class AccountJournalItemModel extends Model
                         'voucher_name'    => $child->voucher_name,
                         'opening_amount'  => $child->opening_amount,
                         'closing_amount'  => $child->closing_amount,
+                        'description'     => $child->description,
+                        'ref_no'          => $child->ref_no,
+                        'issue_date'      => $child->issue_date,
                         'for_test'        => $child->id.' ( this is parent --> all data form child ledger )',
                     ];
                 }
@@ -550,6 +564,9 @@ class AccountJournalItemModel extends Model
                         'voucher_name'    => $item['voucher_name'],
                         'opening_amount'  => $item['opening_amount'],
                         'closing_amount'  => $item['closing_amount'],
+                        'description'     => $item['description'],
+                        'ref_no'          => $item['ref_no'],
+                        'issue_date'      => $item['issue_date'],
                         'for_test'        => $item['id'].' ( this is child --> ladger name & mode form parent & all data form child ledger )',
                     ];
                 }
@@ -583,12 +600,7 @@ class AccountJournalItemModel extends Model
     }
 
     public static function handleOpeningClosing($journal,$journalItem){
-
-        $opening = self::getLedgerWiseOpeningBalance(
-            ledgerId: $journalItem->account_sub_head_id,
-                    configId: $journal->config_id,
-                    journalItemId: $journalItem->id
-                );
+        $opening = self::getLedgerWiseOpeningBalance(ledgerId: $journalItem->account_sub_head_id, configId: $journal->config_id);
                 $closing = $journalItem->mode === 'debit'
                     ? $opening + $journalItem->amount
                     : ($journalItem->mode === 'credit' ? $opening - $journalItem->amount : 0);

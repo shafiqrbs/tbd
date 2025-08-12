@@ -54,8 +54,7 @@ Route::prefix('/accounting')->middleware([HeaderAuthenticationMiddleware::class,
 
     Route::prefix('/account-ledger-wise/journal')->group(function() {
         Route::get('{id}', [AccountHeadController::class,'accountLedgerWiseJournal'])->name('account_ledger_wise_journal');
-        Route::get('generate/xlsx/{id}', [AccountHeadController::class,'accountLedgerWiseJournalGenerateXlsx']);
-        Route::get('generate/pdf/{id}', [AccountHeadController::class,'accountLedgerWiseJournalGeneratePdf']);
+        Route::get('generate/file/{id}/{type}', [AccountHeadController::class,'ledgerPdfXlsxFileGenerate']);
     });
 
     Route::get('/account-ledger-reset', [AccountHeadController::class,'resetAccountLedgerHead'])->name('account_head_reset');
@@ -117,5 +116,5 @@ Route::prefix('/accounting/report')->middleware([HeaderAuthenticationMiddleware:
     Route::get('/dashboard', [ReportController::class,'dashboard'])->name('dashboard');
 });
 
-Route::get('/account-ledger-wise/journal/ledger/file/download/{type}', [AccountHeadController::class,'accountLedgerWiseJournalDownload']);
+Route::get('ledger-report/download/{type}', [AccountHeadController::class,'generateFileDownload']);
 
