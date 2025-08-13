@@ -272,9 +272,29 @@ class AccountHeadController extends Controller
 
         $headers = ['#', 'Date','Issue Date', 'JV No', 'Ref. Number', 'Voucher Type', 'Ledger Name', 'Particulars', 'Opening', 'Debit', 'Credit', 'Closing'];
 
-        // format data rows
-        $rows = collect($data)->map(function ($item, $index) {
-            return [
+        //  Process the cumulative amounts manually
+        $cumulativeRows = [];
+        $previousClosing = null;
+
+        foreach ($data as $index => $item) {
+            $amount = floatval($item['amount'] ?? 0);
+            $mode = $item['mode'] ?? null;
+
+            // First row: use original opening_amount; others: use previous closing
+            $opening = $index === 0
+                ? floatval($item['opening_amount'] ?? 0)
+                : $previousClosing;
+
+            // Calculate closing
+            $closing = $mode === 'Debit'
+                ? $opening + $amount
+                : ($mode === 'Credit' ? $opening - $amount : $opening);
+
+            // Save the current closing to use for the next row
+            $previousClosing = $closing;
+
+            // Format row
+            $cumulativeRows[] = [
                 '#'             => $index + 1,
                 'Date'          => $item['created_date'] ?? '',
                 'Issue Date'    => $item['issue_date'] ?? '',
@@ -283,12 +303,23 @@ class AccountHeadController extends Controller
                 'Voucher Type'  => $item['voucher_name'] ?? '',
                 'Ledger Name'   => $item['ledger_name'] ?? '',
                 'Particulars'   => $item['description'] ?? '',
-                'Opening'       => $item['opening_amount'] ?? 0,
-                'Debit'         => $item['mode'] === 'Debit' ? $item['amount'] : 0,
-                'Credit'        => $item['mode'] === 'Credit' ? $item['amount'] : 0,
-                'Closing'       => $item['closing_amount'] ?? 0
+                'Opening'       => number_format($opening, 2),
+                'Debit'         => $mode === 'Debit' ? number_format($amount, 2) : '',
+                'Credit'        => $mode === 'Credit' ? number_format($amount, 2) : '',
+                'Closing'       => number_format($closing, 2),
             ];
-        })->toArray();
+        }
+        // total debit & credit
+        /*$totalDebit = array_sum(
+            array_column(array_filter($data, fn($x) => $x['mode'] === 'Debit'), 'amount')
+        );
+
+        $totalCredit = array_sum(
+            array_column(array_filter($data, fn($x) => $x['mode'] === 'Credit'), 'amount')
+        );*/
+
+        // $rows can now be passed to your PDF / Excel export function
+        $rows = $cumulativeRows;
 
         $startDate = !empty($params['start_date']) ? Carbon::parse($params['start_date'])->format('d-m-Y') : null;
         $endDate = !empty($params['end_date']) ? Carbon::parse($params['end_date'])->format('d-m-Y') : null;
@@ -323,6 +354,19 @@ class AccountHeadController extends Controller
     public function generateFileDownload(ReportExportService $download, string $filename)
     {
         return $download->download($filename);
+    }
+
+    public function accountHeadOutstanding(Request $request)
+    {
+        $params = $request->only('type','customer_id');
+        $getOutstanding = AccountHeadModel::getAccountHeadOutstanding(configId: $this->domain['acc_config'], params: $params);
+
+        return response()->json([
+            'status' => 200,
+            'success' => true,
+            'message' => 'Outstanding data retrieved.',
+            'data' => $getOutstanding,
+        ]);
     }
 
 

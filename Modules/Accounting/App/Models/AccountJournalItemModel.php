@@ -457,6 +457,7 @@ class AccountJournalItemModel extends Model
      */
     public static function getLedgerWiseJournalItems(int $ledgerId, int $configId, array $params): array
     {
+        $findLedger = AccountHeadModel::find($ledgerId)?->amount;
         // Fetch primary items
         $items = self::query()
             ->join('acc_journal', 'acc_journal.id', '=', 'acc_journal_item.account_journal_id')
@@ -493,6 +494,7 @@ class AccountJournalItemModel extends Model
                     ]);
                 }
             )
+            ->orderBy('acc_journal.id','ASC')
             ->get()
             ->toArray();
 
@@ -507,7 +509,6 @@ class AccountJournalItemModel extends Model
                     ->join('acc_head as ledger', 'ledger.id', '=', 'acc_journal_item.account_sub_head_id')
                     ->select([
                         'acc_journal_item.id',
-                        'acc_journal_item.amount',
                         'acc_journal_item.debit',
                         'acc_journal_item.credit',
                         'acc_journal_item.mode',
@@ -576,6 +577,7 @@ class AccountJournalItemModel extends Model
 
         return [
             'ledgerItems' => $result,
+            'ledger_amount' => $findLedger
         ];
     }
 

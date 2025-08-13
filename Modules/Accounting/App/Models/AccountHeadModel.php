@@ -825,5 +825,26 @@ class AccountHeadModel extends Model
         return $investors;
     }
 
+    public static function getAccountHeadOutstanding(int $configId, array $params): ?object
+    {
+        $query = self::where('config_id', $configId);
+
+        // Apply conditionally if type is customer_id
+        if (!empty($params['type']) && $params['type'] === 'customer') {
+            $query->where('customer_id', $params['customer_id']);
+        }
+
+        // Select specific fields
+        $query->select([
+            'acc_head.id as id',
+            'acc_head.name',
+            'acc_head.display_name',
+            'acc_head.amount as outstanding_amount',
+        ]);
+
+        return $query->first();
+    }
+
+
 }
 
