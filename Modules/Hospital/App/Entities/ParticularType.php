@@ -43,7 +43,7 @@ class ParticularType
     /**
      * @var string
      * 'Select','MultiSelect','Input','CheckBox','RadioButton','AutoComplete','SelectSearchable'
-     * @ORM\Column(name="dataType", type="string", length=50, nullable=true)
+     * @ORM\Column(name="data_type", type="string", length=50, nullable=true)
      */
     private $dataType;
 

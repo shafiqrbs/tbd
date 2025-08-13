@@ -10,11 +10,11 @@ use Modules\AppsApi\App\Services\GeneratePatternCodeService;
 use Modules\Core\App\Models\CustomerModel;
 use Ramsey\Collection\Collection;
 
-class ParticularMasterModel extends Model
+class ParticularTypeMasterModel extends Model
 {
     use HasFactory;
 
-    protected $table = 'hms_master_diagnostic_report';
+    protected $table = 'hms_particular_master_type';
     public $timestamps = true;
     protected $guarded = ['id'];
 

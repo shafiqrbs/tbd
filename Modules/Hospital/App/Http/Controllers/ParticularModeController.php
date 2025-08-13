@@ -9,12 +9,13 @@ use Modules\AppsApi\App\Services\JsonRequestResponse;
 
 use Modules\Core\App\Models\UserModel;
 use Modules\Hospital\App\Models\ParticularModel;
+use Modules\Hospital\App\Models\ParticularModeModel;
 use Modules\Production\App\Http\Requests\SettingRequest;
 use Modules\Inventory\App\Models\SettingModel;
 use Modules\Inventory\App\Models\SettingTypeModel;
 
 
-class ParticularController extends Controller
+class ParticularModeController extends Controller
 {
     protected $domain;
 
@@ -29,7 +30,7 @@ class ParticularController extends Controller
 
     public function index(Request $request)
     {
-        $data = ParticularModel::getRecords($request, $this->domain);
+        $data = ParticularModeModel::getRecords($request, $this->domain);
         $response = new Response();
         $response->headers->set('Content-Type', 'application/json');
         $response->setContent(json_encode([

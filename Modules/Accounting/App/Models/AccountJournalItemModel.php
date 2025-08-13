@@ -189,6 +189,7 @@ class AccountJournalItemModel extends Model
         ];
     }
 
+
     public static function getLedgerWiseOpeningBalance( $ledgerId , $configId )
     {
         $openingBalance = AccountHeadModel::where([['config_id',$configId],['id',$ledgerId]])->value('amount') ?? 0;

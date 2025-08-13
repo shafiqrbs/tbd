@@ -34,37 +34,27 @@ class ParticularModeMatrix
     private  $createdBy;
 
     /**
-     * @ORM\ManyToOne(targetEntity="ParticularModule", cascade={"detach","merge"})
-     * @ORM\JoinColumn(name="particular_module_id", referencedColumnName="id", onDelete="CASCADE")
+     * @var string
+     *
+     * @ORM\Column(name="module", type="string",length=100,  nullable=true)
      */
-    protected $particularModule;
-
-    /**
-     * @ORM\ManyToOne(targetEntity="ParticularMode", cascade={"detach","merge"})
-     * @ORM\JoinColumn(name="particular_mode_id", referencedColumnName="id", onDelete="CASCADE")
-     */
-    protected $particularMode;
-
-    /**
-     * @ORM\ManyToOne(targetEntity="ParticularType", cascade={"detach","merge"})
-     * @ORM\JoinColumn(name="particular_type_id", referencedColumnName="id", onDelete="CASCADE")
-     */
-    protected $particularType;
+    private $module;
 
     /**
      * @var string
-     * 'Select','MultiSelect','Input','CheckBox','RadioButton','AutoComplete','SelectSearchable'
-     * @ORM\Column(name="dataType", type="string", length=50, nullable=true)
+     *
+     * @ORM\Column(name="module_mode", type="string", length=100, nullable=true)
      */
-    private $dataType;
+    private $moduleMode;
 
 
     /**
      * @var string
      *
-     * @ORM\Column(name="name", type="string",  nullable=true)
+     * @ORM\Column(name="particular_types", type="string",  nullable=true)
      */
-    private $name;
+    private $particularTypes;
+
 
     /**
      * @var string

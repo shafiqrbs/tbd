@@ -58,6 +58,7 @@ Route::prefix('/domain')->middleware(array(HeaderAuthenticationMiddleware::class
         Route::post('production/{id}', [DomainConfigController::class,'productionConfig'])->name('domain_config');
         Route::post('gst-vat/{id}', [DomainConfigController::class,'vatConfig'])->name('domain_config');
         Route::post('hospital/{id}', [DomainConfigController::class,'hospitalConfig'])->name('domain_hospital_config');
+        Route::get('hospital-reset/{id}', [DomainConfigController::class,'hospitalResetConfig'])->name('domain_hospital_config');
         Route::get('reset/{id}', [DomainConfigController::class,'resetConfig'])->name('domain_config');
     });
 

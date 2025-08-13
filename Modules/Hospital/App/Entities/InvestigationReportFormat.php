@@ -34,7 +34,6 @@ class InvestigationReportFormat
     protected $parent;
 
 
-
     /**
      * @ORM\OneToMany(targetEntity="InvestigationReportFormat" , mappedBy="parent")
      * @ORM\OrderBy({"sorting" = "ASC"})
@@ -50,6 +49,7 @@ class InvestigationReportFormat
 
     /**
      * @ORM\ManyToOne(targetEntity="Particular")
+     * @ORM\JoinColumn(name="particular_id", referencedColumnName="id", onDelete="CASCADE")
      **/
     private $particular;
 

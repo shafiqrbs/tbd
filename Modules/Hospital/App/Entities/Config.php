@@ -31,24 +31,38 @@ class Config
 
     /**
      *
-     * @ORM\ManyToOne(targetEntity="Modules\Inventory\App\Entities\StockItem", cascade={"persist", "remove"})
+     * @ORM\OneToOne(targetEntity="Particular", cascade={"persist", "remove"})
      * @ORM\JoinColumn(onDelete="SET NULL")
      **/
     private $admissionFee;
 
     /**
      *
-     * @ORM\ManyToOne(targetEntity="Modules\Inventory\App\Entities\StockItem", cascade={"persist", "remove"})
+     * @ORM\OneToOne(targetEntity="Particular", cascade={"persist", "remove"})
      * @ORM\JoinColumn(onDelete="SET NULL")
      **/
     private $emergencyFee;
 
     /**
      *
-     * @ORM\ManyToOne(targetEntity="Modules\Inventory\App\Entities\StockItem", cascade={"persist", "remove"})
+     * @ORM\OneToOne(targetEntity="Particular", cascade={"persist", "remove"})
      * @ORM\JoinColumn(onDelete="SET NULL")
      **/
     private $opdTicketFee;
+
+    /**
+     *
+     * @ORM\OneToOne(targetEntity="Particular", cascade={"persist", "remove"})
+     * @ORM\JoinColumn(onDelete="SET NULL")
+     **/
+    private $otFee;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column( type="string", length=50,nullable = true)
+     */
+    private $prescriptionTemplate;
 
     /**
      * @var string

@@ -44,10 +44,15 @@ class DomainConfigController extends Controller
 
     public function domainConfig()
     {
-        $entity = DomainModel::with('accountConfig',
+        $entity = DomainModel::with(['accountConfig',
             'accountConfig.capital_investment','accountConfig.account_cash','accountConfig.account_bank','accountConfig.account_mobile','accountConfig.account_user','accountConfig.account_vendor','accountConfig.account_customer','accountConfig.account_product_group','accountConfig.account_category',
             'accountConfig.voucher_stock_opening','accountConfig.voucher_purchase','accountConfig.voucher_sales','accountConfig.voucher_purchase_return','accountConfig.voucher_stock_reconciliation',
-            'productionConfig','gstConfig','inventoryConfig','hospitalConfig','inventoryConfig.configPurchase','inventoryConfig.configSales','inventoryConfig.configProduct','inventoryConfig.configDiscount','inventoryConfig.configVat','inventoryConfig.businessModel','inventoryConfig.currency')->find($this
+            'productionConfig','gstConfig','inventoryConfig','hospitalConfig','inventoryConfig.configPurchase','inventoryConfig.configSales','inventoryConfig.configProduct','inventoryConfig.configDiscount','inventoryConfig.configVat','inventoryConfig.businessModel','inventoryConfig.currency',
+            'hospitalConfig.admission_fee:id,name as admission_fee_name,price as admission_fee_price',
+            'hospitalConfig.opd_ticket_fee:id,name as opd_ticket_fee_name,price as opd_ticket_fee_price',
+            'hospitalConfig.emergency_fee:id,name as emergency_fee_name,price as emergency_fee_price',
+            'hospitalConfig.ot_fee:id,name as ot_fee_name,price as ot_fee_price',
+        ])->find($this
             ->domain['global_id']);
         $service = new JsonRequestResponse();
         return $service->returnJosnResponse($entity);
@@ -56,11 +61,16 @@ class DomainConfigController extends Controller
 
     public function domainConfigById($id)
     {
-
-        $entity = DomainModel::with('accountConfig',
+        $entity = DomainModel::with(['accountConfig',
             'accountConfig.capital_investment','accountConfig.account_cash','accountConfig.account_bank','accountConfig.account_mobile','accountConfig.account_user','accountConfig.account_vendor','accountConfig.account_customer','accountConfig.account_product_group','accountConfig.account_category',
             'accountConfig.voucher_stock_opening','accountConfig.voucher_purchase','accountConfig.voucher_sales','accountConfig.voucher_purchase_return','accountConfig.voucher_stock_reconciliation',
-            'productionConfig','gstConfig','inventoryConfig','hospitalConfig','inventoryConfig.configPurchase','inventoryConfig.configSales','inventoryConfig.configProduct','inventoryConfig.configDiscount','inventoryConfig.configVat','inventoryConfig.businessModel','inventoryConfig.currency')->find($id);
+            'productionConfig','gstConfig','inventoryConfig','hospitalConfig','inventoryConfig.configPurchase','inventoryConfig.configSales','inventoryConfig.configProduct','inventoryConfig.configDiscount','inventoryConfig.configVat','inventoryConfig.businessModel',
+            'inventoryConfig.currency',
+            'hospitalConfig.admission_fee:id,name as admission_fee_name,price as admission_fee_price',
+            'hospitalConfig.opd_ticket_fee:id,name as opd_ticket_fee_name,price as opd_ticket_fee_price',
+            'hospitalConfig.emergency_fee:id,name as emergency_fee_name,price as emergency_fee_price',
+            'hospitalConfig.ot_fee:id,name as ot_fee_name,price as ot_fee_price',
+        ])->find($id);
         return $entity;
     }
 
@@ -448,6 +458,7 @@ class DomainConfigController extends Controller
 
     public function hospitalConfig(Request $request,$id)
     {
+
         $entity = HospitalConfigModel::updateOrCreate([
             'domain_id' => $id,
         ]);
@@ -456,7 +467,6 @@ class DomainConfigController extends Controller
         try {
 
             $domain = UserModel::getDomainData($id);
-       //     HospitalConfigModel::resetMasterData($domain);
             HospitalConfigModel::investigationMasterReport($domain);
 
             $entity->update($request->all());
@@ -470,7 +480,7 @@ class DomainConfigController extends Controller
             DB::rollBack();
 
             return response()->json([
-                'message' => 'Resource not found',
+                'message' => $e->getMessage(),
                 'status'  => ResponseAlias::HTTP_NOT_FOUND
             ], ResponseAlias::HTTP_NOT_FOUND);
 
@@ -485,18 +495,18 @@ class DomainConfigController extends Controller
         }
     }
 
-
     public function hospitalResetConfig(Request $request,$id)
     {
 
-        echo $id;
-        exit;
+        $entity = HospitalConfigModel::updateOrCreate([
+            'domain_id' => $id,
+        ]);
         DB::beginTransaction();
         try {
 
             $domain = UserModel::getDomainData($id);
-         //   HospitalConfigModel::resetMasterData($domain);
-            HospitalConfigModel::importInvestigationMasterData($domain);
+            HospitalConfigModel::resetMasterData($domain);
+            HospitalConfigModel::investigationMasterReport($domain);
             DB::commit();
             $service = new JsonRequestResponse();
             $return = $service->returnJosnResponse($this->domainConfigById($id));

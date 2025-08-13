@@ -34,7 +34,7 @@ class ParticularTypeModel extends Model
             }]);
         $total  = $entities->count();
         $entities = $entities->get();
-        $data = array('count'=>$total,'entities'=>$entities);
+        $data = array('count'=>$total,'entities' => $entities);
         return $data;
     }
 

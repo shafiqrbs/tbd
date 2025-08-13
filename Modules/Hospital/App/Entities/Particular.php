@@ -32,7 +32,7 @@ class Particular
      * @ORM\ManyToOne(targetEntity="ParticularType")
      * @ORM\JoinColumn(name="particular_type_id", referencedColumnName="id", nullable=true, onDelete="cascade")
      **/
-    private $ParticularType;
+    private $particularType;
 
      /**
      * @ORM\ManyToOne(targetEntity="InvestigationMasterReport")
@@ -42,6 +42,7 @@ class Particular
 
     /**
      * @ORM\ManyToOne(targetEntity="Modules\Inventory\App\Entities\Category")
+     * @ORM\JoinColumn(name="category_id", referencedColumnName="id", nullable=true, onDelete="cascade")
      **/
     private $category;
 
@@ -53,16 +54,9 @@ class Particular
     /**
      * @Gedmo\Blameable(on="create")
      * @ORM\ManyToOne(targetEntity="Modules\Core\App\Entities\User")
-     * @ORM\JoinColumn(name="assign_operator_id", referencedColumnName="id", nullable=true, onDelete="cascade")
-
+     * @ORM\JoinColumn(name="employee_id", referencedColumnName="id", nullable=true, onDelete="cascade")
      **/
-    private  $assignOperator;
-
-    /**
-     * @ORM\ManyToOne(targetEntity="Modules\Core\App\Entities\User")
-     * @ORM\JoinColumn(name="marketing_executive_id", referencedColumnName="id", nullable=true, onDelete="cascade")
-     **/
-    private  $marketingExecutive;
+     private  $employee;
 
 
     /**
@@ -72,119 +66,12 @@ class Particular
      */
     private $name;
 
-
     /**
      * @var string
      *
-     * @ORM\Column(type="string", length=255, nullable=true)
+     * @ORM\Column(name="slug", type="string", length=255, nullable=true)
      */
-    private $reportMachineName;
-
-
-    /**
-     * @var integer
-     *
-     * @ORM\Column(name="quantity", type="smallint", length=3, nullable=true)
-     */
-    private $quantity = 1;
-
-
-    /**
-     * @var integer
-     *
-     * @ORM\Column( type="integer", nullable=true)
-     */
-    private $openingQuantity;
-
-    /**
-     * @var integer
-     *
-     * @ORM\Column( type="integer", nullable=true)
-     */
-    private $minQuantity;
-
-
-    /**
-     * @var integer
-     *
-     * @ORM\Column( type="integer", nullable=true)
-     */
-    private $purchaseQuantity;
-
-    /**
-     * @var integer
-     *
-     * @ORM\Column( type="integer", nullable=true)
-     */
-    private $salesQuantity;
-
-    /**
-     * @var string
-     *
-     * @ORM\Column(type="decimal", nullable=true)
-     */
-    private $purchaseAverage;
-
-    /**
-     * @var string
-     *
-     * @ORM\Column( type="decimal", nullable=true)
-     */
-    private $purchasePrice;
-
-
-     /**
-     * @var string
-     *
-     * @ORM\Column(type="decimal", nullable=true)
-     */
-    private $ipdVisitCharge;
-
-
-    /**
-     * @var string
-     *
-     * @ORM\Column(name="room", type="string", length=10, nullable=true)
-     */
-    private $room;
-
-
-    /**
-     * @var string
-     *
-     * @ORM\Column(name="sepcimen", type="string", length=255, nullable=true)
-     */
-    private $sepcimen;
-
-
-    /**
-     * @var string
-     *
-     * @ORM\Column(name="content", type="text", nullable=true)
-     */
-    private $content;
-
-    /**
-     * @var string
-     *
-     * @ORM\Column( type="text", nullable=true)
-     */
-    private $reportContent;
-
-    /**
-     * @var string
-     *
-     * @ORM\Column(name="instruction", type="text", nullable=true)
-     */
-    private $instruction;
-
-
-    /**
-     * @var string
-     *
-     * @ORM\Column(type="decimal", nullable=true)
-     */
-    private $overHeadCost;
+    private $slug;
 
     /**
      * @var string
@@ -193,157 +80,19 @@ class Particular
      */
     private $price;
 
-
     /**
-     * @var \string
+     * @var string
      *
-     * @ORM\Column(type="decimal", nullable=true)
+     * @ORM\Column(name="instruction", type="text", nullable=true)
      */
-    private $minimumPrice;
+    private $instruction;
 
     /**
      * @var string
      *
-     * @ORM\Column(name="commission", type="decimal" , nullable=true)
+     * @ORM\Column(name="content", type="text", nullable=true)
      */
-    private $commission;
-
-    /**
-     * @var string
-     *
-     * @ORM\Column(type="string", length=128, nullable=true)
-     */
-    private $phoneNo;
-
-    /**
-     * @var string
-     *
-     * @ORM\Column( type="string", length=10, nullable=true)
-     */
-    private $startHour;
-
-    /**
-     * @var string
-     *
-     * @ORM\Column( type="string", length=10, nullable=true)
-     */
-    private $endHour;
-
-    /**
-     * @var array
-     *
-     * @ORM\Column( type="array", nullable=true)
-     */
-    private $weeklyOffDay;
-
-    /**
-     * @var string
-     *
-     * @ORM\Column(name="email", type="string", length=100, nullable=true)
-     */
-    private $email;
-
-    /**
-     * @var string
-     *
-     * @ORM\Column(name="specialist", type="string", length=255, nullable=true)
-     */
-    private $specialist;
-
-    /**
-     * @var string
-     *
-     * @ORM\Column( type="string", length=255, nullable=true)
-     */
-    private $educationalDegree;
-
-    /**
-     * @var string
-     *
-     * @ORM\Column( type="string", length=255, nullable=true)
-     */
-    private $doctorSignature;
-
-     /**
-     * @var string
-     *
-     * @ORM\Column(type="string", length=255, nullable=true)
-     */
-    private $doctorSignatureBangla;
-
-    /**
-     * @var string
-     *
-     * @ORM\Column( type="string", length=255, nullable=true)
-     */
-    private $pathologistSignature;
-
-    /**
-     * @var string
-     *
-     * @ORM\Column( type="string", length=256, nullable=true)
-     */
-    private $currentJob;
-
-     /**
-     * @var string
-     *
-     * @ORM\Column(name="remark", type="string", length=256, nullable=true)
-     */
-    private $remark;
-
-     /**
-     * @var string
-     *
-     * @ORM\Column(name="visitTime", type="string", length=256, nullable=true)
-     */
-    private $visitTime;
-
-    /**
-     * @var string
-     *
-     * @ORM\Column(name="designation", type="string", length=256, nullable=true)
-     */
-    private $designation;
-
-
-    /**
-     * @var integer
-     *
-     * @ORM\Column(name="code", type="integer",  nullable=true)
-     */
-    private $code;
-
-    /**
-     * @var integer
-     *
-     * @ORM\Column( type="integer",  nullable=true)
-     */
-    private $reportHeight = 8;
-
-    /**
-     * @var string
-     *
-     * @ORM\Column( type="string", length=10, nullable=true)
-     */
-    private $particularCode;
-
-
-    /**
-     * @var string
-     *
-     * @ORM\Column(name="address", type="string", length=255, nullable=true)
-     */
-    private $address;
-
-    /**
-     * @var string
-     *
-     * @ORM\Column(name="mobile", type="string", length=15, nullable=true)
-     */
-    private $mobile;
-
-
+    private $content;
 
     /**
      * @var \DateTime
@@ -362,52 +111,6 @@ class Particular
     /**
      * @var boolean
      *
-     * @ORM\Column(type="boolean",options={"default"="false"})
-     */
-    private $testDuration;
-
-    /**
-     * @var boolean
-     *
-     * @ORM\Column(type="boolean",options={"default"="false"})
-     */
-    private $reportFormat;
-
-
-    /**
-     * @var boolean
-     *
-     * @ORM\Column(type="boolean",options={"default"="false"})
-     */
-    private $discountValid;
-
-    /**
-     * @var boolean
-     *
-     * @ORM\Column(type="boolean",options={"default"="false"})
-     */
-    private $isDoctor;
-
-
-    /**
-     * @var boolean
-     *
-     * @ORM\Column(type="boolean",options={"default"="false"})
-     */
-    private $admissionDefault;
-
-
-    /**
-     * @var boolean
-     *
-     * @ORM\Column(type="boolean",options={"default"="false"})
-     */
-    private $reportUnitHide;
-
-
-    /**
-     * @var boolean
-     *
      * @ORM\Column(type="boolean",options={"default"="true"})
      */
     private $status;
@@ -418,57 +121,6 @@ class Particular
      * @ORM\Column(type="boolean",options={"default"="false"})
      */
     private $isDelete;
-
-
-    /**
-     * @var boolean
-     *
-     * @ORM\Column(type="boolean",options={"default"="true"})
-     */
-    private $isReportContent;
-
-    /**
-     * @var boolean
-     *
-     * @ORM\Column(type="boolean",options={"default"="true"})
-     */
-    private $isMachineFormat;
-
-
-    /**
-     * @var boolean
-     *
-     * @ORM\Column(type="boolean",options={"default"="true"})
-     */
-    private $sendToAccount;
-
-
-    /**
-     * @var boolean
-     *
-     * @ORM\Column(type="boolean",options={"default"="false"})
-     */
-    private $additionalField;
-
-
-    /**
-     * @var boolean
-     *
-     * @ORM\Column(type="boolean",options={"default"="false"})
-     */
-    private $isAttachment;
-
-
-    /**
-     * @ORM\Column(type="string", length=255, nullable=true)
-     */
-    protected $path;
-
-    /**
-     * @ORM\Column(type="string", length=255, nullable=true)
-     */
-    protected $signaturePath;
-
 
 
     /**

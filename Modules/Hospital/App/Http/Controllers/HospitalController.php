@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Modules\AppsApi\App\Services\JsonRequestResponse;
 use Modules\Core\App\Models\UserModel;
+use Modules\Domain\App\Models\DomainModel;
 use Modules\Hospital\App\Models\ParticularModel;
 use Modules\Hospital\App\Models\ParticularModeModel;
 use Modules\Hospital\App\Models\ParticularModuleModel;
@@ -32,12 +33,37 @@ class HospitalController extends Controller
      * Display a listing of the resource.
      */
 
-    public static function index()
+    public function domainHospitalConfig()
     {
+        $entity = DomainModel::with(['accountConfig',
+            'accountConfig.capital_investment','accountConfig.account_cash','accountConfig.account_bank','accountConfig.account_mobile','accountConfig.account_user','accountConfig.account_vendor','accountConfig.account_customer','accountConfig.account_product_group','accountConfig.account_category',
+            'accountConfig.voucher_stock_opening','accountConfig.voucher_purchase','accountConfig.voucher_sales','accountConfig.voucher_purchase_return','accountConfig.voucher_stock_reconciliation',
+            'inventoryConfig','hospitalConfig','inventoryConfig.currency',
+            'hospitalConfig.admission_fee:id,name as admission_fee_name,price as admission_fee_price',
+            'hospitalConfig.opd_ticket_fee:id,name as ticket_fee_name,price as ticket_fee_price',
+            'hospitalConfig.emergency_fee:id,name as emergency_fee_name,price as emergency_fee_price',
+            'hospitalConfig.ot_fee:id,name as ot_fee_name,price as ot_fee_price',
+        ])->find($this
+            ->domain['global_id']);
+        $service = new JsonRequestResponse();
+        return $service->returnJosnResponse($entity);
 
     }
 
     /**
+     * Show the form for editing the specified resource.
+     */
+    public function settingMatrix(Request $request)
+    {
+        $domain = $this->domain;
+        dd($request->request->all());
+        $data = 'success';
+        $service = new JsonRequestResponse();
+        return $service->returnJosnResponse($data);
+    }
+
+
+     /**
      * Show the form for editing the specified resource.
      */
     public function particularDropdown(Request $request)
@@ -56,7 +82,7 @@ class HospitalController extends Controller
     public function particularTypeDropdown(Request $request)
     {
         $domain = $this->domain;
-        $types = ParticularTypeModel::all();
+        $types = ParticularTypeModel::where('config_id',$domain['hms_config'])->orderBy('id','DESC')->get();
         $service = new JsonRequestResponse();
         return $service->returnJosnResponse($types);
     }
@@ -68,11 +94,6 @@ class HospitalController extends Controller
     {
         $domain = $this->domain;
         $types = ParticularTypeModel::getRecords($domain);
-        $types = ParticularTypeModel::all();
-        $dropdown = [];
-        foreach ($types as $type):
-            $dropdown[$this->convertCamelCase($type['slug'])] = ParticularModel::getParticularDropdown($domain,$type['slug']);
-        endforeach;
         $service = new JsonRequestResponse();
         return $service->returnJosnResponse($types);
     }
@@ -85,7 +106,7 @@ class HospitalController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function particularModule(Request $request)
+    public function particularModuleDropdown(Request $request)
     {
         $types = ParticularModuleModel::all();
         $service = new JsonRequestResponse();

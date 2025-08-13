@@ -253,7 +253,6 @@ class SalesController extends Controller
         DB::beginTransaction();
         try {
             $getSales = SalesModel::findOrFail($id);
-
             $getSalesItems = $getSales->salesItems;
 
             // get customer domain
