@@ -8,6 +8,7 @@ use Illuminate\Http\Response;
 use Modules\AppsApi\App\Services\JsonRequestResponse;
 
 use Modules\Core\App\Models\UserModel;
+use Modules\Hospital\App\Http\Requests\ParticularRequest;
 use Modules\Hospital\App\Models\ParticularModel;
 use Modules\Production\App\Http\Requests\SettingRequest;
 use Modules\Inventory\App\Models\SettingModel;
@@ -46,13 +47,13 @@ class ParticularController extends Controller
      /**
      * Store a newly created resource in storage.
      */
-    public function store(SettingRequest $request)
+    public function store(ParticularRequest $request)
     {
-        $service = new JsonRequestResponse();
+        $config = $this->domain['hms_config'];
         $input = $request->validated();
-        $getConfigId = SettingModel::getConfigId($this->domain['global_id']);
-        $input['config_id'] = $getConfigId;
-        $entity = SettingModel::create($input);
+        $input['config_id'] = $config;
+        $entity = ParticularModel::create($input);
+        $service = new JsonRequestResponse();
         $data = $service->returnJosnResponse($entity);
         return $data;
     }
