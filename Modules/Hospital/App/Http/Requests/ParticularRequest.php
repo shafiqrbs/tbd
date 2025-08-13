@@ -32,8 +32,9 @@ class ParticularRequest extends FormRequest
             {
                 return [
                     'name' => 'required|string|nullable',
-                    'setting_type_id' => 'integer|nullable',
-                    'slug' => 'string|nullable',
+                    'particular_type_id' => 'integer|nullable',
+                    'category_id' => 'integer|nullable',
+                    'employee_id' => 'integer|nullable',
                     'status' => 'boolean',
                 ];
             }
