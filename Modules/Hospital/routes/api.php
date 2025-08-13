@@ -4,13 +4,11 @@ use App\Http\Middleware\HeaderAuthenticationMiddleware;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Modules\Hospital\App\Http\Controllers\HospitalController;
-<<<<<<< HEAD
-=======
+
 use Modules\Hospital\App\Http\Controllers\OpdController;
 use Modules\Hospital\App\Http\Controllers\ParticularController;
 use Modules\Hospital\App\Http\Controllers\ParticularModeController;
 use Modules\Hospital\App\Http\Controllers\ParticularTypeController;
->>>>>>> c439138 (Hospital Module Update.)
 use Modules\Hospital\App\Http\Controllers\SettingController;
 
 
