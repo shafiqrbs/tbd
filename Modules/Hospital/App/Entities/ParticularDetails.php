@@ -34,6 +34,30 @@ class ParticularDetails
      **/
     private $particular;
 
+    /**
+     * @ORM\ManyToOne(targetEntity="ParticularMode")
+     * @ORM\JoinColumn(name="particular_unit_id", referencedColumnName="id", nullable=true, onDelete="cascade")
+     **/
+    private $unit;
+
+    /**
+     * @ORM\ManyToOne(targetEntity="ParticularMode")
+     * @ORM\JoinColumn(name="particular_gender_id", referencedColumnName="id", nullable=true, onDelete="cascade")
+     **/
+    private $roomGender;
+
+    /**
+     * @ORM\ManyToOne(targetEntity="ParticularMode")
+     * @ORM\JoinColumn(name="particular_paying_id", referencedColumnName="id", nullable=true, onDelete="cascade")
+     **/
+    private $payingType;
+
+    /**
+     * @ORM\ManyToOne(targetEntity="Particular")
+     * @ORM\JoinColumn(name="particular_ward_id", referencedColumnName="id", nullable=true, onDelete="cascade")
+     **/
+    private $particularWard;
+
 
     /**
      * @var string
