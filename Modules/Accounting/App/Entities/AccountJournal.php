@@ -252,6 +252,12 @@ class AccountJournal
     private $updatedAt;
 
     /**
+     * @var \DateTime
+     * @ORM\Column(name="approved_date", type="date", nullable=true)
+     */
+    private $approvedDate;
+
+    /**
      * @return int
      */
     public function getId()

@@ -2,12 +2,8 @@
 
 namespace Modules\Accounting\App\Models;
 
-use Cviebrock\EloquentSluggable\Sluggable;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
-use Modules\Accounting\App\Entities\AccountHead;
 use Modules\AppsApi\App\Services\GeneratePatternCodeService;
 use Modules\Inventory\App\Models\PurchaseItemModel;
 use Modules\Inventory\App\Models\PurchaseModel;
@@ -16,7 +12,6 @@ use Modules\Inventory\App\Models\SalesModel;
 
 class AccountJournalModel extends Model
 {
-    use HasFactory;
 
     protected $table = 'acc_journal';
     public $timestamps = true;

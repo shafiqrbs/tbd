@@ -177,7 +177,9 @@ class AccountJournalItemModel extends Model
             'account_journal_id' => $journal->id,
             'account_sub_head_id' => $item['id'],
             'account_head_id' => $parent->parent_id ?? null,
-            'amount' => $item['mode'] === 'debit' ? $item['debit'] : $item['credit'],
+            'amount' => $item['mode'] === 'debit'
+                ? $item['debit']
+                : ($item['credit'] > 0 ? -$item['credit'] : $item['credit']),
             'debit' => $item['debit'] ?? 0,
             'credit' => $item['credit'] ?? 0,
             'mode' => $item['mode'] ?? 0,

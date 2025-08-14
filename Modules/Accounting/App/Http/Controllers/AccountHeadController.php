@@ -255,45 +255,89 @@ class AccountHeadController extends Controller
         ]);
     }
 
-    public function ledgerPdfXlsxFileGenerate(Request $request,ReportExportService $generate, int $ledgerId, string $format)
+    public function ledgerPdfXlsxFileGenerate(Request $request, ReportExportService $generate, int $ledgerId, string $format)
     {
         $params = $request->only('start_date','end_date');
-        $processed = AccountJournalItemModel::getLedgerWiseJournalItems( ledgerId:$ledgerId, configId: $this->domain['acc_config'], params: $params );
 
-        // get domain data
+        // Fetch processed journal data
+        $processed = AccountJournalItemModel::getLedgerWiseJournalItems(
+            ledgerId: $ledgerId,
+            configId: $this->domain['acc_config'],
+            params: $params
+        );
+
+        // Get domain info
         $domainInfo = DomainModel::query()
             ->select('mobile','address','company_name')
             ->find($this->domain['domain_id']);
 
-        // find ledger
-        $ledger = AccountHeadModel::query()->select('name')->find($ledgerId);
+        // Get ledger name
+        $ledger = AccountHeadModel::query()
+            ->select('name')
+            ->find($ledgerId);
 
         $data = $processed['ledgerItems'] ?? [];
 
-        $headers = ['#', 'Date','Issue Date', 'JV No', 'Ref. Number', 'Voucher Type', 'Ledger Name', 'Particulars', 'Opening', 'Debit', 'Credit', 'Closing'];
+        // Report headers
+        $headers = [
+            '#', 'Date','Issue Date', 'JV No', 'Ref. Number',
+            'Voucher Type', 'Ledger Name', 'Particulars', 'Debit', 'Credit', 'Closing'
+        ];
 
-        //  Process the cumulative amounts manually
         $cumulativeRows = [];
         $previousClosing = null;
 
+        // ✅ Insert Opening Balance row BEFORE any entries
+        if (!empty($data)) {
+            $firstOpening = floatval($data[0]['opening_amount'] ?? 0);
+
+            $cumulativeRows[] = [
+                // Empty values for data cells since we’ll custom render it
+                '#'            => '',
+                'Date'         => '',
+                'Issue Date'   => '',
+                'JV No'        => '',
+                'Ref. Number'  => '',
+                'Voucher Type' => '',
+                'Ledger Name'  => '',
+                'Particulars'  => '',
+
+                // Text for left-side cell
+                'Debit'   => 'Previous Opening Balance',
+
+                // Display value on right in "Closing"
+                'Credit'  => '',
+                'Closing' => number_format($firstOpening, 2),
+
+                // 👇 Meta fields
+                '__colspan' => 10,                           // left cell colspan
+                '__style'   => [
+                    'bold' => true,
+                    'background' => [255, 249, 196],         // light yellow
+                    'align' => 'L'
+                ]
+            ];
+
+
+
+            $previousClosing = $firstOpening;
+        }
+
+        // ➕ Cumulative items
         foreach ($data as $index => $item) {
             $amount = floatval($item['amount'] ?? 0);
             $mode = $item['mode'] ?? null;
 
-            // First row: use original opening_amount; others: use previous closing
-            $opening = $index === 0
-                ? floatval($item['opening_amount'] ?? 0)
-                : $previousClosing;
+            $opening = $index === 0 && $previousClosing !== null
+                ? $previousClosing
+                : ($previousClosing ?? floatval($item['opening_amount'] ?? 0));
 
-            // Calculate closing
             $closing = $mode === 'Debit'
                 ? $opening + $amount
                 : ($mode === 'Credit' ? $opening - $amount : $opening);
 
-            // Save the current closing to use for the next row
             $previousClosing = $closing;
 
-            // Format row
             $cumulativeRows[] = [
                 '#'             => $index + 1,
                 'Date'          => $item['created_date'] ?? '',
@@ -303,27 +347,18 @@ class AccountHeadController extends Controller
                 'Voucher Type'  => $item['voucher_name'] ?? '',
                 'Ledger Name'   => $item['ledger_name'] ?? '',
                 'Particulars'   => $item['description'] ?? '',
-                'Opening'       => number_format($opening, 2),
                 'Debit'         => $mode === 'Debit' ? number_format($amount, 2) : '',
                 'Credit'        => $mode === 'Credit' ? number_format($amount, 2) : '',
                 'Closing'       => number_format($closing, 2),
             ];
         }
-        // total debit & credit
-        /*$totalDebit = array_sum(
-            array_column(array_filter($data, fn($x) => $x['mode'] === 'Debit'), 'amount')
-        );
 
-        $totalCredit = array_sum(
-            array_column(array_filter($data, fn($x) => $x['mode'] === 'Credit'), 'amount')
-        );*/
-
-        // $rows can now be passed to your PDF / Excel export function
+        // Final report rows
         $rows = $cumulativeRows;
 
-        $startDate = !empty($params['start_date']) ? Carbon::parse($params['start_date'])->format('d-m-Y') : null;
-        $endDate = !empty($params['end_date']) ? Carbon::parse($params['end_date'])->format('d-m-Y') : null;
-
+        // Title/header customization
+        $startDate = !empty($params['start_date']) ? \Carbon\Carbon::parse($params['start_date'])->format('d-m-Y') : null;
+        $endDate = !empty($params['end_date']) ? \Carbon\Carbon::parse($params['end_date'])->format('d-m-Y') : null;
 
         $titles = [
             ['text' => $domainInfo->company_name ?? null, 'align' => 'C', 'font_size' => 12, 'bold' => true],
@@ -333,7 +368,6 @@ class AccountHeadController extends Controller
             ['text' => $ledger->name ?? null, 'align' => 'L', 'fill' => [227, 242, 253]],
         ];
 
-        // Conditionally add date row if both dates exist
         if ($startDate && $endDate) {
             $titles[] = [
                 'text' => 'Date : ' . $startDate . ' To ' . $endDate,
@@ -342,6 +376,7 @@ class AccountHeadController extends Controller
             ];
         }
 
+        // ✅ Generate PDF or Excel
         $output = $generate->generateReport('ledger', $format, $rows, [
             'filename' => "ledger-report.{$format}",
             'headers' => $headers,
@@ -350,6 +385,7 @@ class AccountHeadController extends Controller
 
         return response()->json($output);
     }
+
 
     public function generateFileDownload(ReportExportService $download, string $filename)
     {

@@ -79,6 +79,128 @@ class ReportExportService
         $titleLines = $options['titles'] ?? [];
 
         $pdf = new \TCPDF('L', 'mm', 'A3', true, 'UTF-8', false);
+        $pdf->SetTitle('Ledger Report');
+        $pdf->SetMargins(10, 10, 10);
+        $pdf->SetAutoPageBreak(true, 15);
+        $pdf->SetPrintHeader(false);
+        $pdf->SetPrintFooter(false);
+        $pdf->AddPage();
+
+        // Render title lines
+        foreach ($titleLines as $line) {
+            $text = $line['text'] ?? '';
+            $align = strtoupper($line['align'] ?? 'C');
+            $fontSize = $line['font_size'] ?? 10;
+            $style = ($line['bold'] ?? false) ? 'B' : '';
+
+            if (!empty($line['fill']) && is_array($line['fill'])) {
+                $pdf->SetFillColor(...$line['fill']);
+                $pdf->SetTextColor(0, 0, 0);
+                $pdf->SetFont('helvetica', $style, $fontSize);
+                $pdf->Cell(0, 8, $text, 0, 1, $align, true);
+            } else {
+                $pdf->SetFont('helvetica', $style, $fontSize);
+                $pdf->Cell(0, 8, $text, 0, 1, $align);
+            }
+        }
+
+        $pdf->Ln(2);
+
+        // Define column widths
+        $pageWidth = $pdf->getPageWidth();
+        $margins = $pdf->getMargins();
+        $usableWidth = $pageWidth - $margins['left'] - $margins['right'];
+        $numCols = count($headers);
+        $columnWidths = [];
+
+        foreach ($headers as $header) {
+            $colKey = strtolower(trim($header));
+            $columnWidths[] = ($colKey === 'ledger name') ? 40 : ($usableWidth - 40) / ($numCols - 1);
+        }
+
+        // Table header
+        $pdf->SetFont('helvetica', 'B', 10);
+        $pdf->SetFillColor(227, 242, 253);
+        foreach ($headers as $i => $header) {
+            $pdf->Cell($columnWidths[$i], 8, $header, 1, 0, 'C', true);
+        }
+        $pdf->Ln();
+
+        $pdf->SetFont('helvetica', '', 9);
+
+        foreach ($data as $row) {
+            // 🔶 Handle special styled rows (Previous Opening Balance row)
+            if (isset($row['__colspan']) && isset($row['__style'])) {
+                $style = $row['__style'];
+                $label = $row['Debit'] ?? 'Previous Opening Balance';
+                $value = $row['Closing'] ?? '';
+                $colspan = intval($row['__colspan']);
+
+                $labelWidth = array_sum(array_slice($columnWidths, 0, $colspan));
+                $valueWidth = $columnWidths[$colspan];
+
+                $pdf->SetFillColor(...($style['background'] ?? [255, 255, 153]));
+                $pdf->SetTextColor(0, 0, 0);
+                $pdf->SetFont('helvetica', $style['bold'] ? 'B' : '', 10);
+
+                $pdf->Cell($labelWidth, 10, $label, 1, 0, 'L', true);
+                $pdf->Cell($valueWidth, 10, $value, 1, 1, 'R', true);
+                continue;
+            }
+
+            // 🔁 MULTICELL ROW WITH WRAPPING
+            $xStart = $pdf->GetX();
+            $yStart = $pdf->GetY();
+            $rowHeight = 0;
+
+            // First pass: calculate individual heights
+            $cellHeights = [];
+            foreach ($headers as $i => $key) {
+                $text = (string) ($row[$key] ?? '-');
+                $cellHeight = $pdf->getStringHeight($columnWidths[$i], $text, false, true, '', 1);
+                $cellHeights[] = $cellHeight;
+            }
+
+            $rowHeight = max($cellHeights);
+
+            // Second pass: render cells properly
+            $pdf->SetXY($margins['left'], $yStart);
+
+            foreach ($headers as $i => $key) {
+                $text = (string) ($row[$key] ?? '-');
+                $align = $this->detectCellAlignment($key);
+
+                $pdf->MultiCell(
+                    $columnWidths[$i],
+                    $rowHeight,
+                    $text,
+                    1,
+                    $align,
+                    false,
+                    0,
+                    '',
+                    '',
+                    true,
+                    0,
+                    false,
+                    true,
+                    $rowHeight,
+                    'M'
+                );
+            }
+
+            $pdf->Ln($rowHeight);
+        }
+
+        $pdf->Output($filePath, 'F');
+    }
+    // without opening balance pdf generate , normal all column & row show
+    /*private function generatePdf(array $data, string $filePath, array $options = []): void
+    {
+        $headers = $options['headers'] ?? array_keys($data[0] ?? []);
+        $titleLines = $options['titles'] ?? [];
+
+        $pdf = new \TCPDF('L', 'mm', 'A3', true, 'UTF-8', false);
         $pdf->SetTitle('Export Report');
         $pdf->SetMargins(10, 10, 10);
         $pdf->SetAutoPageBreak(true, 15);
@@ -127,6 +249,30 @@ class ReportExportService
         foreach ($data as $row) {
             $pdf->SetX($margins['left']);
 
+            // Special styled row? (First: prev opening)
+            if (isset($row['__colspan']) && isset($row['__style'])) {
+                $style = $row['__style'];
+                $label = $row['Debit'] ?? 'Previous Opening Balance';
+                $value = $row['Closing'] ?? '';
+
+                $pdf->SetFillColor(...($style['background'] ?? [240, 240, 240]));
+                $pdf->SetFont('helvetica', $style['bold'] ? 'B' : '', 10);
+                $pdf->SetTextColor(0, 0, 0);
+
+                $labelWidth = $colWidth * intval($row['__colspan']);
+                $valueWidth = $colWidth;
+
+                // Left cell with label
+                $pdf->Cell($labelWidth, 8, $label, 1, 0, $style['align'] ?? 'L', true);
+
+                // Right cell with value
+                $pdf->Cell($valueWidth, 8, $value, 1, 0, 'R', true);
+
+                $pdf->Ln();
+                continue;
+            }
+
+            // for others row
             foreach ($headers as $key) {
                 $text = (string) ($row[$key] ?? '-');
 
@@ -138,11 +284,12 @@ class ReportExportService
                 $pdf->Cell($colWidth, 8, $text, 1, 0, $align);
             }
 
+
             $pdf->Ln();
         }
 
         $pdf->Output($filePath, 'F');
-    }
+    }*/
 
 
     /**
@@ -270,6 +417,58 @@ class ReportExportService
         $currentRow++;
 
         foreach ($data as $row) {
+//            for opening balance row
+            if (isset($row['__colspan']) && isset($row['__style'])) {
+                $colspan = intval($row['__colspan']);
+                $style = $row['__style'];
+                $label = $row['Debit'] ?? 'Previous Opening Balance';
+                $value = $row['Closing'] ?? '';
+
+                $labelCell = "{$columnLetters[0]}{$currentRow}";
+                $valueCell = "{$columnLetters[$colspan]}{$currentRow}";
+
+                // Merge merged label
+                $sheet->mergeCells("{$labelCell}:{$columnLetters[$colspan - 1]}{$currentRow}");
+                $sheet->setCellValue($labelCell, $label);
+                $sheet->setCellValue($valueCell, $value);
+
+                $sheet->getStyle($labelCell)->applyFromArray([
+                    'font' => ['size' => 10, 'bold' => $style['bold']],
+                    'alignment' => [
+                        'horizontal' => match ($style['align'] ?? 'L') {
+                            'R' => Alignment::HORIZONTAL_RIGHT,
+                            'C' => Alignment::HORIZONTAL_CENTER,
+                            default => Alignment::HORIZONTAL_LEFT,
+                        },
+                        'vertical' => Alignment::VERTICAL_CENTER,
+                    ],
+                    'fill' => [
+                        'fillType' => Fill::FILL_SOLID,
+                        'startColor' => ['rgb' => sprintf('%02X%02X%02X', ...$style['background'])],
+                    ],
+                    'borders' => [
+                        'allBorders' => [
+                            'borderStyle' => Border::BORDER_THIN,
+                            'color' => ['rgb' => '000000'],
+                        ]
+                    ]
+                ]);
+
+                $sheet->getStyle($valueCell)->applyFromArray([
+                    'alignment' => ['horizontal' => Alignment::HORIZONTAL_RIGHT],
+                    'borders' => [
+                        'allBorders' => [
+                            'borderStyle' => Border::BORDER_THIN,
+                            'color' => ['rgb' => '000000'],
+                        ]
+                    ]
+                ]);
+
+                $currentRow++;
+                continue;
+            }
+
+            // for others row
             foreach ($headers as $index => $key) {
                 $cell = "{$columnLetters[$index]}{$currentRow}";
                 $value = $row[$key] ?? '';
@@ -296,6 +495,7 @@ class ReportExportService
                     ]
                 ]);
             }
+
             $currentRow++;
         }
 

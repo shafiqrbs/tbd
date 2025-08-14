@@ -16,6 +16,7 @@ use Modules\Accounting\App\Models\AccountingModel;
 use Modules\Accounting\App\Models\AccountJournalItemModel;
 use Modules\Accounting\App\Models\AccountJournalModel;
 use Modules\Accounting\App\Models\AccountVoucherModel;
+use Modules\Accounting\App\Models\DailyLedger;
 use Modules\Accounting\App\Models\SettingModel;
 use Modules\Accounting\App\Models\TransactionModeModel;
 use Modules\AppsApi\App\Services\JsonRequestResponse;
@@ -186,11 +187,23 @@ class AccountVoucherEntryController extends Controller
 
         try {
             foreach ($journal->journalItems as $journalItem) {
+                // manage journal opening & closing quantity
                 AccountJournalModel::journalOpeningClosing($journal,$journalItem);
+
+                // for daily ledger maintain
+                DailyLedger::dailyLedgerManage(
+                    configId: $journal->config_id,
+                    accountHeadId: $journalItem->account_head_id,
+                    accountSubHeadId: $journalItem->account_sub_head_id,
+                    debit: $journalItem->debit,
+                    credit: $journalItem->credit,
+                    openingAmount: $journalItem->opening_amount
+                );
             }
             $journal->update([
                 'approved_by_id' => $this->domain['user_id'] ?? null,
                 'process'        => 'Approved',
+                'approved_date'  => now()
             ]);
 
             DB::commit();
