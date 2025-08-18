@@ -147,4 +147,24 @@ class GeneratePatternCodeService
 
     }
 
+    public function bedDisplayName($queryParams = [],$model)
+    {
+
+        dd($model);
+        $config     = $queryParams['config'];
+        $category   = $queryParams['category'];
+        $table      = $queryParams['table'];
+
+        $entity = DB::table("{$table} as e")
+            ->where('e.config_id', $config)
+            ->count('id');
+        $lastCode = $entity;
+        $code = (int)$lastCode + 1;
+        $generateId = sprintf("%s%s", $category,str_pad($code, 5, '0', STR_PAD_LEFT));
+        $data = array('code' => $code,'generateId' => $generateId);
+        return $data;
+
+
+    }
+
 }

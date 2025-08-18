@@ -19,22 +19,39 @@ class ParticularModel extends Model
     protected $guarded = ['id'];
 
 
+    public function particularDetails()
+    {
+        return $this->hasOne(ParticularDetailsModel::class, 'id', 'particular_id');
+    }
+
     public static function getRecords($request,$domain){
 
         $config =  $domain['hms_config'];
         $page =  isset($request['page']) && $request['page'] > 0?($request['page'] - 1 ) : 0;
         $perPage = isset($request['offset']) && $request['offset']!=''? (int)($request['offset']):0;
         $skip = isset($page) && $page!=''? (int)$page*$perPage:0;
+
         $entity = self::where('hms_particular.config_id',$config)
+            ->join('hms_particular_details','hms_particular_details.particular_id','=','hms_particular.id')
             ->join('hms_particular_type','hms_particular_type.id','=','hms_particular.particular_type_id')
+            ->join('hms_particular_master_type','hms_particular_master_type.id','=','hms_particular_type.particular_master_type_id')
             ->leftJoin('inv_category','inv_category.id','=','hms_particular.category_id')
+            ->leftJoin('hms_particular_mode as room','room.id','=','hms_particular_details.room_id')
+            ->leftJoin('hms_particular_mode as patientMode','patientMode.id','=','hms_particular_details.patient_mode_id')
+            ->leftJoin('hms_particular_mode as genderMode','genderMode.id','=','hms_particular_details.gender_mode_id')
+            ->leftJoin('hms_particular_mode as paymentMode','paymentMode.id','=','hms_particular_details.payment_mode_id')
             ->select([
                 'hms_particular.id',
                 'hms_particular.name',
+                'hms_particular.display_name',
                 'hms_particular.slug',
                 'hms_particular.price',
                 'hms_particular.status',
                 'inv_category.name as category',
+                'room.name as room_name',
+                'patientMode.name as patient_mode_name',
+                'paymentMode.name as payment_mode_name',
+                'genderMode.name as gender_mode_name',
                 DB::raw('DATE_FORMAT(hms_particular.created_at, "%d-%M-%Y") as created'),
                 'hms_particular_type.name as particular_type_name',
                 'hms_particular_type.slug as particular_type_slug',
@@ -46,6 +63,10 @@ class ParticularModel extends Model
 
         if (isset($request['name']) && !empty($request['name'])){
             $entity = $entity->where('hms_particular.name','LIKE','%'.trim($request['name']));
+        }
+
+        if (isset($request['particular_type']) && !empty($request['particular_type'])){
+            $entity = $entity->where('hms_particular_master_type.slug',$request['particular_type']);
         }
 
         if (isset($request['particular_type_id']) && !empty($request['particular_type_id'])){

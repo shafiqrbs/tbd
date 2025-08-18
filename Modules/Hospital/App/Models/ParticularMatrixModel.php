@@ -10,31 +10,26 @@ use Modules\AppsApi\App\Services\GeneratePatternCodeService;
 use Modules\Core\App\Models\CustomerModel;
 use Ramsey\Collection\Collection;
 
-class ParticularModuleModel extends Model
+class ParticularMatrixModel extends Model
 {
     use HasFactory;
 
-    protected $table = 'hms_particular_module';
+    protected $table = 'hms_particular_mode_matrix';
     public $timestamps = true;
     protected $guarded = ['id'];
 
     protected $fillable = [];
 
-    public function modes()
+
+
+    public static function getRecords($domain)
     {
-        return $this->hasMany(ParticularModeModel::class, 'particular_module_id');
-    }
-
-
-    public static function getRecords()
-    {
-
-        $entities = self::select(['*'])->with(['modes' => function ($query){
-            $query->select(['*']);
-        }]);
+        $config = $domain['hms_config'];
+        $entities = self::select(['*'])->where([['hms_particular_mode_matrix.config_id',$config]]);
         $total  = $entities->count();
         $entities = $entities->get();
-        return $entities;
+        $data = array('count'=>$total,'entities' => $entities);
+        return $data;
     }
 
 

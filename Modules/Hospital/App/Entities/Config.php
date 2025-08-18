@@ -211,6 +211,13 @@ class Config
     private $printMarginReportLeft = 0;
 
     /**
+     * @var smallint
+     *
+     * @ORM\Column( type="smallint",  nullable=true)
+     */
+    private $minimumAdmissionDays = 0;
+
+    /**
      * @var boolean
      *
      * @ORM\Column(type="boolean",  nullable=true)

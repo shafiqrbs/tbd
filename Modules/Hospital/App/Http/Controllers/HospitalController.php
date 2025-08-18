@@ -9,6 +9,7 @@ use Illuminate\Http\Response;
 use Modules\AppsApi\App\Services\JsonRequestResponse;
 use Modules\Core\App\Models\UserModel;
 use Modules\Domain\App\Models\DomainModel;
+use Modules\Hospital\App\Models\ParticularMatrixModel;
 use Modules\Hospital\App\Models\ParticularModel;
 use Modules\Hospital\App\Models\ParticularModeModel;
 use Modules\Hospital\App\Models\ParticularModuleModel;
@@ -56,14 +57,41 @@ class HospitalController extends Controller
     public function settingMatrix(Request $request)
     {
         $domain = $this->domain;
-        dd($request->request->all());
-        $data = 'success';
+        $data = ParticularMatrixModel::getRecords($domain);
         $service = new JsonRequestResponse();
         return $service->returnJosnResponse($data);
     }
 
 
      /**
+     * Show the form for editing the specified resource.
+     */
+    public function settingMatrixCreate(Request $request)
+    {
+        $userId = $request->header('X-Api-User');
+        $domain = $this->domain;
+        $config = $domain['hms_config'];
+        $data = $request->request->all();
+        ParticularMatrixModel::updateOrCreate(
+            [
+                'config_id' => $config,
+                'module' => $data['module'],
+                'module_mode' => $data['module_mode']
+            ],
+            [
+                'created_by_id' => $userId,
+                'particular_types' => json_encode($data['particular_types'])
+            ]
+        );
+        $data = ParticularMatrixModel::getRecords($domain);
+        $service = new JsonRequestResponse();
+        return $service->returnJosnResponse($data);
+
+    }
+
+
+
+    /**
      * Show the form for editing the specified resource.
      */
     public function particularDropdown(Request $request)
@@ -82,7 +110,7 @@ class HospitalController extends Controller
     public function particularTypeDropdown(Request $request)
     {
         $domain = $this->domain;
-        $types = ParticularTypeModel::where('config_id',$domain['hms_config'])->orderBy('id','DESC')->get();
+        $types = ParticularTypeModel::where('config_id',$domain['hms_config'])->orderBy('name','ASC')->get();
         $service = new JsonRequestResponse();
         return $service->returnJosnResponse($types);
     }
@@ -127,15 +155,11 @@ class HospitalController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function particularModuleChildDropdown(Request $request)
+    public function particularModuleChildDropdown()
     {
-        $types = ParticularModuleModel::all();
-        $dropdown = [];
-        foreach ($types as $type):
-            $dropdown[$this->convertCamelCase($type['slug'])] = ParticularModeModel::getParticularModuleDropdown($type['slug']);
-        endforeach;
+        $data = ParticularModuleModel::getRecords();
         $service = new JsonRequestResponse();
-        return $service->returnJosnResponse($dropdown);
+        return $service->returnJosnResponse($data);
     }
 
 
