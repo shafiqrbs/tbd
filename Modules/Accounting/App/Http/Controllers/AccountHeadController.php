@@ -307,7 +307,7 @@ class AccountHeadController extends Controller
 
                 // Display value on right in "Closing"
                 'Credit'  => '',
-                'Closing' => number_format($firstOpening, 2),
+                'Closing' => number_format(abs($firstOpening), 2),
 
                 // 👇 Meta fields
                 '__colspan' => 10,                           // left cell colspan
@@ -347,9 +347,9 @@ class AccountHeadController extends Controller
                 'Voucher Type'  => $item['voucher_name'] ?? '',
                 'Ledger Name'   => $item['ledger_name'] ?? '',
                 'Particulars'   => $item['description'] ?? '',
-                'Debit'         => $mode === 'Debit' ? number_format($amount, 2) : '',
-                'Credit'        => $mode === 'Credit' ? number_format($amount, 2) : '',
-                'Closing'       => number_format($closing, 2),
+                'Debit'         => $mode === 'Debit' ? number_format(abs($amount), 2) : '',
+                'Credit'        => $mode === 'Credit' ? number_format(abs($amount), 2) : '',
+                'Closing'       => number_format(abs($closing), 2),
             ];
         }
 

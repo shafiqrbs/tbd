@@ -459,7 +459,7 @@ class AccountJournalItemModel extends Model
      */
     public static function getLedgerWiseJournalItems(int $ledgerId, int $configId, array $params): array
     {
-        $findLedger = AccountHeadModel::find($ledgerId)?->amount;
+        $findLedger = AccountHeadModel::find($ledgerId);
         // Fetch primary items
         $items = self::query()
             ->join('acc_journal', 'acc_journal.id', '=', 'acc_journal_item.account_journal_id')
@@ -579,7 +579,8 @@ class AccountJournalItemModel extends Model
 
         return [
             'ledgerItems' => $result,
-            'ledger_amount' => $findLedger
+            'ledger_amount' => $findLedger->amount,
+            'mode' => $findLedger->mode
         ];
     }
 

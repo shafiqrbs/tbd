@@ -102,6 +102,7 @@ Route::prefix('/inventory')->middleware([HeaderAuthenticationMiddleware::class,L
 
     Route::apiResource('/sales', SalesController::class)->middleware([HeaderAuthenticationMiddleware::class]);
     Route::get('/sales/edit/{id}', [SalesController::class,'edit'])->name('get_edit_sales');
+    Route::get('/sales/copy/{id}', [SalesController::class,'salesCopy'])->name('get_sales_copy');
     Route::get('/sales/domain-customer/{id}', [SalesController::class,'domainCustomerSales'])->name('get_domain_customer_sales');
     Route::get('/sales/not-domain-customer/{id}', [SalesController::class,'notDomainCustomerSales'])->name('get_not_domain_customer_sales');
     Route::apiResource('/invoice-batch', InvoiceBatchController::class)->middleware([HeaderAuthenticationMiddleware::class]);
@@ -110,7 +111,7 @@ Route::prefix('/inventory')->middleware([HeaderAuthenticationMiddleware::class,L
 
     Route::apiResource('/purchase', PurchaseController::class)->middleware([HeaderAuthenticationMiddleware::class]);
     Route::get('/purchase/edit/{id}', [PurchaseController::class,'edit'])->name('get_edit_purchase');
-    Route::get('/purchase/copy/{id}', [PurchaseController::class,'copy'])->name('get_purchase_copy');
+    Route::get('/purchase/copy/{id}', [PurchaseController::class,'purchaseCopy'])->name('get_purchase_copy');
     Route::get('/purchase/approve/{id}', [PurchaseController::class,'approve'])->name('approve_purchase');
 
     Route::apiResource('/purchase-item', PurchaseItemController::class)->middleware([HeaderAuthenticationMiddleware::class]);

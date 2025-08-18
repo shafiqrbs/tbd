@@ -482,4 +482,46 @@ class SalesController extends Controller
         ], ResponseAlias::HTTP_OK);
     }
 
+    public function salesCopy($id)
+    {
+        try {
+            DB::beginTransaction();
+
+            $original = SalesModel::with('salesItems')->findOrFail($id);
+
+            $newSale = $original->replicate([
+                'approved_by_id','process','invoice_date'
+            ]);
+            $newSale->approved_by_id = null;
+            $newSale->process = 'Created';
+            $newSale->invoice_date = now();
+            $newSale->save();
+
+            foreach ($original->salesItems as $item) {
+                $newItem = $item->replicate(['sale_id']);
+                $newItem->sale_id = $newSale->id;
+                $newItem->save();
+            }
+
+            DB::commit();
+
+            return response()->json([
+                'status' => 200,
+                'success' => true,
+                'message' => 'Sale duplicated successfully!',
+                'new_sale_id' => $newSale->id,
+            ]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            return response()->json([
+                'status' => 500,
+                'success' => false,
+                'message' => 'Duplication failed.',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
+
 }

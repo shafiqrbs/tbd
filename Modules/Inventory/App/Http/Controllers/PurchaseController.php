@@ -345,4 +345,47 @@ class PurchaseController extends Controller
         return $response;
     }
 
+    public function purchaseCopy($id)
+    {
+        try {
+            DB::beginTransaction();
+
+            $original = PurchaseModel::with('purchaseItems')->findOrFail($id);
+
+            $newPurchase = $original->replicate([
+                'approved_by_id','process','invoice_date'
+            ]);
+            $newPurchase->approved_by_id = null;
+            $newPurchase->invoice_date = now();
+            $newPurchase->process = 'Created';
+            $newPurchase->save();
+
+            foreach ($original->purchaseItems as $item) {
+                $newItem = $item->replicate(['purchase_id','approved_by_id']);
+                $newItem->purchase_id = $newPurchase->id;
+                $newItem->approved_by_id = null;
+                $newItem->save();
+            }
+
+            DB::commit();
+
+            return response()->json([
+                'status' => 200,
+                'success' => true,
+                'message' => 'Purchase duplicated successfully!',
+                'new_purchase_id' => $newPurchase->id,
+            ]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            return response()->json([
+                'status' => 500,
+                'success' => false,
+                'message' => 'Duplication failed.',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
+
 }
