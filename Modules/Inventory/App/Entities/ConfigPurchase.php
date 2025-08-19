@@ -128,6 +128,12 @@ class ConfigPurchase
      */
     private $isPurchaseByPurchasePrice;
 
+    /**
+     * @var boolean
+     * @ORM\Column(type="string",options={"default"="purchase-price"})
+     */
+    private $purchaseMode;
+
 
     /**
      * @var \DateTime

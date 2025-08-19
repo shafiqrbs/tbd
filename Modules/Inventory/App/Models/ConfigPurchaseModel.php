@@ -36,7 +36,8 @@ class ConfigPurchaseModel extends Model
         'is_bonus_quantity',
         'is_purchase_by_purchase_price',
         'is_barcode',
-        'purchase_product_nature'
+        'purchase_product_nature',
+        'purchase_mode'
     ];
 
 
