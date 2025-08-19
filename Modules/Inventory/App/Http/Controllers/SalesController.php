@@ -4,6 +4,7 @@ namespace Modules\Inventory\App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Services\DailyStockService;
+use App\Services\Notification\SmsService;
 use Doctrine\ORM\EntityManager;
 use Exception;
 use Illuminate\Http\Request;
@@ -56,6 +57,9 @@ class SalesController extends Controller
 
     public function index(Request $request)
     {
+        // send sms
+//        $sms = (new SmsService())->send("Hlw Raju", "8801729762344");
+
         $data = SalesModel::getRecords($request, $this->domain);
         $response = new Response();
         $response->headers->set('Content-Type', 'application/json');
