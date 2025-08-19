@@ -9,10 +9,11 @@ use Modules\AppsApi\App\Services\JsonRequestResponse;
 
 use Modules\Core\App\Models\UserModel;
 use Modules\Hospital\App\Http\Requests\ParticularRequest;
+use Modules\Hospital\App\Models\ParticularDetailsModel;
 use Modules\Hospital\App\Models\ParticularModel;
-use Modules\Production\App\Http\Requests\SettingRequest;
-use Modules\Inventory\App\Models\SettingModel;
-use Modules\Inventory\App\Models\SettingTypeModel;
+use Modules\Hospital\App\Models\ParticularTypeMasterModel;
+use Modules\Hospital\App\Models\ParticularTypeModel;
+
 
 
 class ParticularController extends Controller
@@ -52,7 +53,24 @@ class ParticularController extends Controller
         $config = $this->domain['hms_config'];
         $input = $request->validated();
         $input['config_id'] = $config;
+        $input['display_name'] = $input['name'];
+        $masterId = (isset($input['particular_type_master_id']) and $input['particular_type_master_id']) ? $input['particular_type_master_id']:'';
+        $masterType = ParticularTypeMasterModel::find($masterId);
+        $type = ParticularTypeModel::where([
+            ['config_id', $config],
+            ['particular_master_type_id', $masterId],
+        ])->first();
+        $input['particular_type_id'] = $type->id;
         $entity = ParticularModel::create($input);
+        if($masterType->slug == 'bed'){
+             ParticularDetailsModel::insertBed($entity,$input);
+        }
+        if($masterType->slug == 'doctor'){
+            ParticularDetailsModel::insertDoctor($entity,$input);
+        }
+        if($masterType->slug == 'cabin'){
+            ParticularDetailsModel::insertCabin($entity,$input);
+        }
         $service = new JsonRequestResponse();
         $data = $service->returnJosnResponse($entity);
         return $data;
@@ -63,11 +81,12 @@ class ParticularController extends Controller
      */
     public function show($id)
     {
-        $service = new JsonRequestResponse();
-        $entity = SettingModel::find($id);
+
+        $entity = ParticularModel::with(['particularDetails','particularDetails.patientMode','particularDetails.paymentMode','particularDetails.genderMode','particularDetails.roomNo','particularDetails.cabinMode'])->find($id);
         if (!$entity) {
             $entity = 'Data not found';
         }
+        $service = new JsonRequestResponse();
         $data = $service->returnJosnResponse($entity);
         return $data;
     }
@@ -77,7 +96,7 @@ class ParticularController extends Controller
      */
     public function edit($id)
     {
-        $entity = SettingModel::find($id);
+        $entity = ParticularModel::find($id);
         $status = $entity ? Response::HTTP_OK : Response::HTTP_NOT_FOUND;
         return response()->json([
             'message' => 'success',
@@ -87,21 +106,37 @@ class ParticularController extends Controller
 
     }
 
-
     /**
      * Update the specified resource in storage.
      */
-    public function update(SettingRequest $request, $id)
+    public function update(ParticularRequest $request, $id)
     {
-        $data = $request->validated();
-        $entity = SettingModel::find($id);
-        $getConfigId = SettingModel::getConfigId($this->domain['global_id']);
-        $data['config_id'] = $getConfigId;
-        $entity->update($data);
+        $config = $this->domain['hms_config'];
+        $input = $request->validated();
+        $entity = ParticularModel::find($id);
+        $input['display_name'] = $input['name'];
+        $masterId = (isset($input['particular_type_master_id']) and $input['particular_type_master_id']) ? $input['particular_type_master_id']:'';
+        $masterType = ParticularTypeMasterModel::find($masterId);
+        $type = ParticularTypeModel::where([
+            ['config_id', $config],
+            ['particular_master_type_id', $masterId],
+        ])->first();
+        $input['particular_type_id'] = $type->id;
+        $entity->update($input);
+        if($masterType->slug == 'bed'){
+            ParticularDetailsModel::insertBed($entity,$input);
+        }
+        if($masterType->slug == 'doctor'){
+            ParticularDetailsModel::insertDoctor($entity,$input);
+        }
+        if($masterType->slug == 'cabin'){
+            ParticularDetailsModel::insertCabin($entity,$input);
+        }
 
         $service = new JsonRequestResponse();
         return $service->returnJosnResponse($entity);
     }
+
 
     /**
      * Remove the specified resource from storage.
@@ -109,38 +144,9 @@ class ParticularController extends Controller
     public function destroy($id)
     {
         $service = new JsonRequestResponse();
-        SettingModel::find($id)->delete();
+        ParticularModel::find($id)->delete();
         $entity = ['message' => 'delete'];
         return $service->returnJosnResponse($entity);
-    }
-
-
-    public function settingTypeDropdown()
-    {
-        $data = SettingTypeModel::getDropdown($this->domain);
-        $response = new Response();
-        $response->headers->set('Content-Type', 'application/json');
-        $response->setContent(json_encode([
-            'message' => 'success',
-            'status' => Response::HTTP_OK,
-            'data' => sizeof($data)>0 ? $data : []
-        ]));
-        $response->setStatusCode(Response::HTTP_OK);
-        return $response;
-    }
-
-    public function measurementInput()
-    {
-        $data = SettingModel::getMeasurementInputGenerate($this->domain['global_id']);
-        $response = new Response();
-        $response->headers->set('Content-Type', 'application/json');
-        $response->setContent(json_encode([
-            'message' => 'success',
-            'status' => Response::HTTP_OK,
-            'data' => sizeof($data)>0 ? $data : []
-        ]));
-        $response->setStatusCode(Response::HTTP_OK);
-        return $response;
     }
 
 }

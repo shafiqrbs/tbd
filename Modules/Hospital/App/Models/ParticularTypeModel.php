@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Support\Facades\DB;
 use Modules\AppsApi\App\Services\GeneratePatternCodeService;
 use Modules\Core\App\Models\CustomerModel;
+use Modules\Hospital\App\Entities\ParticularMasterType;
 use Ramsey\Collection\Collection;
 
 class ParticularTypeModel extends Model
@@ -25,13 +26,18 @@ class ParticularTypeModel extends Model
         return $this->hasMany(ParticularModel::class, 'particular_type_id');
     }
 
+    public function particularMaster()
+    {
+        return $this->hasOne(ParticularTypeMasterModel::class, 'id', 'particular_master_type_id');
+    }
+
 
     public static function getRecords($domain)
     {
         $config = $domain['hms_config'];
         $entities = self::select(['*'])->with(['particulars' => function ($query) use($config) {
-                $query->select(['*'])->where([['hms_particular.config_id',$config]]);
-            }]);
+            $query->select(['*'])->where([['hms_particular.config_id',$config]]);
+        }])->whereNotNull('particular_master_type_id')->orderBy('hms_particular_type.name',"ASC");
         $total  = $entities->count();
         $entities = $entities->get();
         $data = array('count'=>$total,'entities' => $entities);

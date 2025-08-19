@@ -43,6 +43,8 @@ class TransactionModeRequest extends FormRequest
                     'account_owner' => 'nullable|string',
                     'service_name' => 'nullable|string',
                     'account_number' => 'nullable|string',
+                    'branch_name' => 'nullable|string',
+                    'routing_number' => 'nullable|string',
                     'method_id' => 'required|integer',
                     'path' => 'nullable|image|mimes:jpeg,png,jpg,gif',
                 ];

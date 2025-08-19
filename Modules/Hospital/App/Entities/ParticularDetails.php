@@ -36,27 +36,47 @@ class ParticularDetails
 
     /**
      * @ORM\ManyToOne(targetEntity="ParticularMode")
-     * @ORM\JoinColumn(name="particular_unit_id", referencedColumnName="id", nullable=true, onDelete="cascade")
+     * @ORM\JoinColumn(name="unit_id", referencedColumnName="id", nullable=true, onDelete="cascade")
      **/
     private $unit;
 
     /**
      * @ORM\ManyToOne(targetEntity="ParticularMode")
-     * @ORM\JoinColumn(name="particular_gender_id", referencedColumnName="id", nullable=true, onDelete="cascade")
+     * @ORM\JoinColumn(name="patient_mode_id", referencedColumnName="id", nullable=true, onDelete="cascade")
      **/
-    private $roomGender;
+    private $patientMode;
 
     /**
      * @ORM\ManyToOne(targetEntity="ParticularMode")
-     * @ORM\JoinColumn(name="particular_paying_id", referencedColumnName="id", nullable=true, onDelete="cascade")
+     * @ORM\JoinColumn(name="gender_mode_id", referencedColumnName="id", nullable=true, onDelete="cascade")
      **/
-    private $payingType;
+    private $genderMode;
+
+    /**
+     * @ORM\ManyToOne(targetEntity="ParticularMode")
+     * @ORM\JoinColumn(name="payment_mode_id", referencedColumnName="id", nullable=true, onDelete="cascade")
+     **/
+    private $paymentMode;
 
     /**
      * @ORM\ManyToOne(targetEntity="Particular")
-     * @ORM\JoinColumn(name="particular_ward_id", referencedColumnName="id", nullable=true, onDelete="cascade")
+     * @ORM\JoinColumn(name="room_id", referencedColumnName="id", nullable=true, onDelete="cascade")
      **/
-    private $particularWard;
+    private $roomId;
+
+      /**
+     * @ORM\ManyToOne(targetEntity="ParticularMode")
+     * @ORM\JoinColumn(name="cabin_mode_id", referencedColumnName="id", nullable=true, onDelete="cascade")
+     **/
+    private $cabinMode;
+
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="display_name", type="string", length=255, nullable=true)
+     */
+    private $displayName;
 
 
     /**
@@ -281,7 +301,7 @@ class ParticularDetails
      /**
      * @var string
      *
-     * @ORM\Column(name="visitTime", type="string", length=256, nullable=true)
+     * @ORM\Column( type="string", length=50, nullable=true)
      */
     private $visitTime;
 
@@ -313,6 +333,14 @@ class ParticularDetails
      * @ORM\Column( type="string", length=10, nullable=true)
      */
     private $particularCode;
+
+
+    /**
+     * @var string
+     *
+     * @ORM\Column( type="string", length=50, nullable=true)
+     */
+    private $identityCardNo;
 
 
     /**

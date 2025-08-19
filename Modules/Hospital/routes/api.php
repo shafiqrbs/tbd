@@ -37,13 +37,23 @@ Route::prefix('/hospital')->middleware([HeaderAuthenticationMiddleware::class])-
     Route::get('/config', [HospitalController::class,'domainHospitalConfig'])->name('domain_hospital_config');
     Route::get('/particular', [SettingController::class,'particularModuleDropdown'])->name('particular_module_dropdown');
     Route::get('/setting', [SettingController::class,'particularModuleDropdown'])->name('particular_module_dropdown');
-    Route::post('/setting/matrix', [HospitalController::class,'settingMatrix'])->name('particular_module_dropdown');
+    Route::get('/setting/matrix', [HospitalController::class,'settingMatrix'])->name('particular_module_dropdown');
     Route::get('/setting', [SettingController::class,'particularModuleDropdown'])->name('particular_module_dropdown');
     Route::apiResource('opd', OPDController::class)->middleware([HeaderAuthenticationMiddleware::class]);
-    Route::prefix('/core')->middleware([HeaderAuthenticationMiddleware::class])->group(function() {
-        Route::apiResource('/particular', ParticularController::class)->middleware([HeaderAuthenticationMiddleware::class]);
+    Route::prefix('core')->middleware([HeaderAuthenticationMiddleware::class])->group(function() {
+        Route::apiResource('particular', ParticularController::class)
+            ->middleware([HeaderAuthenticationMiddleware::class])
+            ->names([
+                'index' => 'particular.index',
+                'store' => 'particular.store',
+                'show' => 'particular.show',
+                'update' => 'particular.update',
+                'destroy' => 'particular.destroy',
+            ]);
         Route::apiResource('/particular-mode', ParticularModeController::class)->middleware([HeaderAuthenticationMiddleware::class]);
         Route::apiResource('/particular-type', ParticularTypeController::class)->middleware([HeaderAuthenticationMiddleware::class]);
     });
+    Route::post('/setting-matrix/create', [HospitalController::class,'settingMatrixCreate'])->name('particular_module_dropdown');
+
 
 });

@@ -152,7 +152,7 @@ class AccountHeadController extends Controller
      /**
      * Store a newly created resource in storage.
      */
-    public function resetAccountLedgerHead(Request $request,EntityManager $em)
+    public function resetAccountLedgerHead(Request $request)
     {
         $config_id = $this->domain['acc_config'];
         AccountingModel::initiateConfig($this->domain);

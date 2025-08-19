@@ -66,6 +66,15 @@ class Particular
      */
     private $name;
 
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="display_name", type="string", length=255, nullable=true)
+     */
+    private $displayName;
+
+
     /**
      * @var string
      *

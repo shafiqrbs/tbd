@@ -55,28 +55,6 @@ class ParticularModeMatrix
      */
     private $particularTypes;
 
-
-    /**
-     * @var string
-     *
-     * @ORM\Column(name="slug", type="string",nullable=true)
-     */
-    private $slug;
-
-    /**
-     * @var string
-     *
-     * @ORM\Column(name="short_code", type="string", length=10, nullable=true)
-     */
-    private $shortCode;
-
-    /**
-     * @var string
-     *
-     * @ORM\Column(name="code", type="string", length=10, nullable=true)
-     */
-    private $code;
-
     /**
      * @var boolean
      *
