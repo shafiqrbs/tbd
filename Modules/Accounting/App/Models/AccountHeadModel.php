@@ -164,6 +164,7 @@ class AccountHeadModel extends Model
                     'level' => '3',
                     'source' => 'category',
                     'head_group' => 'ledger',
+                    'is_private' => 1,
                     'config_id' => $config
                 ]
             );
@@ -186,6 +187,7 @@ class AccountHeadModel extends Model
                     'credit_limit' => $entity['credit_limit'],
                     'source' => 'customer',
                     'head_group' => 'ledger',
+                    'is_private' => 1,
                     'config_id' => $config->id
                 ]
             );
@@ -213,6 +215,7 @@ class AccountHeadModel extends Model
                 'vendor_id' => $entity->id,
                 'head_group' => 'ledger',
                 'source' => 'vendor',
+                'is_private' => 1,
                 'config_id' => $config->id
             ]
         );
@@ -229,6 +232,7 @@ class AccountHeadModel extends Model
             'level' => '3',
             'vendor_id' => $entity['id'],
             'head_group' => 'ledger',
+            'is_private' => 1,
             'config_id' => $config
         ];
         $entity = self::create($array);
@@ -259,6 +263,7 @@ class AccountHeadModel extends Model
 
     public static function getRecords($request, $domain)
     {
+
         try {
             // Pagination setup
             $perPage = max(1, (int)($request['offset'] ?? 50));  // Ensure at least 1 item per page
@@ -558,12 +563,15 @@ class AccountHeadModel extends Model
         $domainId = $domain->id;
         $configId = $domain['acc_config'];
         $config = ConfigModel::findOrFail($configId);
-
         $currentAssets = TransactionModeModel::where('config_id', $configId)
             ->where('status', 1)
             ->get();
         foreach ($currentAssets as $asset) {
-            self::insertTransactionAccount($config,$asset);
+            if($asset->method->slug == 'bank'){
+                self::insertTransactionBankAccount($config,$asset);
+            }else{
+                self::insertTransactionAccount($config,$asset);
+            }
         }
 
         $customers = CustomerModel::where('domain_id', $domainId)
@@ -584,19 +592,24 @@ class AccountHeadModel extends Model
             ->where('users.domain_id', $domainId)
             ->whereIn('cor_setting.name', ['User', 'Employee']) // ✅ this is the correct syntax
             ->where('users.enabled', 1)
+            ->select('users.id','users.name')
             ->get();
-        foreach ($users as $user) {
-            self::insertUserAccount($config, $user);
+        if($users){
+            foreach ($users as $user) {
+                self::insertUserAccount($config, $user);
+            }
         }
 
         $investors = UserModel::leftJoin('cor_setting', 'cor_setting.id', '=', 'users.employee_group_id')
             ->where('users.domain_id', $domainId)
             ->whereIn('cor_setting.name', ['Director']) // ✅ this is the correct syntax
             ->where('users.enabled', 1)
+            ->select('users.id','users.name')
             ->get();
-
-        foreach ($investors as $investor) {
-            self::insertCapitalInvestmentAccount($config, $investor);
+        if($investors){
+            foreach ($investors as $investor) {
+                self::insertCapitalInvestmentAccount($config, $investor);
+            }
         }
 
         $groups = CategoryModel::where([
@@ -604,9 +617,55 @@ class AccountHeadModel extends Model
             'parent' => null,
             'status'    => 1,
         ])->get();
-        foreach ($groups as $group) {
-            self::insertCategoryGroupAccount($config, $group);
+        if($groups){
+            foreach ($groups as $group) {
+                self::insertCategoryGroupAccount($config, $group);
+            }
         }
+
+    }
+
+    public static function insertTransactionBankAccount($config , $entity)
+    {
+
+        $parent = null;
+
+        $parts = [];
+        if ($entity->bank->name) { $parts[] = $entity->bank->name; }
+        if ($entity) { $parts[] = $entity->name; }
+        if ($entity->account_number) { $parts[] = $entity->account_number; }
+        if ($entity->branch_name) { $parts[] = $entity->branch_name; }
+        $implode = implode(' ', $parts);
+        $displayName = "{$implode}";
+
+
+        $head = AccountHeadModel::updateOrCreate(
+           [
+               'account_id' => $entity->id,
+               'config_id' => $config->id,
+           ],
+           [
+               'name' => $displayName,
+               'display_name' => $displayName,
+               'slug' => $entity->slug,
+               'parent_id' =>  $config->account_bank_id ??null, // Assuming $parent is a model
+               'head_group' => 'ledger',
+               'level' => 3,
+               'mode' => 'debit',
+               'is_private' => true,
+           ]
+       );
+
+       if (!$head->headDetail) {
+           AccountHeadDetailsModel::updateOrCreate(
+               [
+                   'config_id' => $head->config_id,
+                   'account_head_id' => $head->id,
+               ]
+           );
+       }
+       return $displayName;
+
     }
 
     public static function insertTransactionAccount($config , $entity)
@@ -617,20 +676,32 @@ class AccountHeadModel extends Model
         $parent = match($methodSlug){
                 'cash' => $config->account_cash_id,
                 'bank' => $config->account_bank_id,
-                'mobile' => $config->account_mobile_id,
+                'mobile-banking' => $config->account_mobile_id,
                 default => null,
         };
+        $parts = [];
+        if($methodSlug == 'bank'){
+            if ($entity->bank->name) { $parts[] = $entity->bank->name; }
+            if ($entity) { $parts[] = $entity->name; }
+            if ($entity->account_number) { $parts[] = $entity->account_number; }
+            if ($entity->branch_name) { $parts[] = $entity->branch_name; }
+        }elseif($methodSlug == 'mobile-banking'){
+            if ($entity->mobile) { $parts[] = $entity->mobile; }
+            if ($entity) { $parts[] = $entity->name; }
+        }else{
+            if ($entity) { $parts[] = $entity->name; }
+        }
+        $implode = implode(' ', $parts);
+        $displayName = "{$implode}";
 
        $head = AccountHeadModel::updateOrCreate(
-
-
            [
                'account_id' => $entity->id,
                'config_id' => $config->id,
            ],
            [
-               'name' => $entity->name,
-               'display_name' => $entity->name,
+               'name' => $displayName,
+               'display_name' => $displayName,
                'slug' => $entity->slug,
                'parent_id' => $parent??null, // Assuming $parent is a model
                'head_group' => 'ledger',
@@ -648,6 +719,7 @@ class AccountHeadModel extends Model
                ]
            );
        }
+       return $displayName;
 
     }
 
@@ -715,7 +787,6 @@ class AccountHeadModel extends Model
 
     public static function insertUserAccount($config,$user)
     {
-
         $head = AccountHeadModel::updateOrCreate(
             [
                 'user_id' => $user->id,
@@ -723,7 +794,6 @@ class AccountHeadModel extends Model
             [
                 'config_id'    => $config->id,
                 'parent_id'    => $config->account_user_id ?? null, // Assumes this is an ID field
-                'user_id'      => $user->id,
                 'name'         => $user->name,
                 'display_name' => $user->name,
                 'slug'         => \Str::slug($user->name), // Optional: Convert name to slug format

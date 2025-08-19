@@ -68,6 +68,12 @@ class TransactionMode
      */
     private $serviceName;
 
+    /**
+     * @var string
+     *
+     * @ORM\Column( type="string", length=255, nullable=true)
+     */
+    private $display_name;
 
     /**
      * @var string
@@ -176,6 +182,20 @@ class TransactionMode
      * @ORM\Column(type="string", length=100, nullable=true)
      */
     private $accountNumber;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(type="string",nullable=true)
+     */
+    private $branchName;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(type="string", length=100, nullable=true)
+     */
+    private $routingNumber;
 
     /**
      * @var boolean

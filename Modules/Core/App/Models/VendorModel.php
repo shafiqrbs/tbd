@@ -51,7 +51,7 @@ class VendorModel extends Model
         $skip = $page * $perPage;
 
         $vendors = self::leftJoin('cor_setting', 'cor_setting.id', '=', 'cor_vendors.vendor_group_id')
-            ->join('acc_head', 'acc_head.vendor_id', '=', 'cor_vendors.id')
+            ->leftJoin('acc_head', 'acc_head.vendor_id', '=', 'cor_vendors.id')
             ->where('cor_vendors.domain_id', $domain['global_id'])
             ->select([
                 'cor_vendors.id as id',

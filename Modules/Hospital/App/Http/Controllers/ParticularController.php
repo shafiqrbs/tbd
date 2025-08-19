@@ -11,9 +11,9 @@ use Modules\Core\App\Models\UserModel;
 use Modules\Hospital\App\Http\Requests\ParticularRequest;
 use Modules\Hospital\App\Models\ParticularDetailsModel;
 use Modules\Hospital\App\Models\ParticularModel;
+use Modules\Hospital\App\Models\ParticularTypeMasterModel;
 use Modules\Hospital\App\Models\ParticularTypeModel;
-use Modules\Production\App\Http\Requests\SettingRequest;
-use Modules\Inventory\App\Models\SettingTypeModel;
+
 
 
 class ParticularController extends Controller
@@ -54,8 +54,14 @@ class ParticularController extends Controller
         $input = $request->validated();
         $input['config_id'] = $config;
         $input['display_name'] = $input['name'];
+        $masterId = (isset($input['particular_type_master_id']) and $input['particular_type_master_id']) ? $input['particular_type_master_id']:'';
+        $masterType = ParticularTypeMasterModel::find($masterId);
+        $type = ParticularTypeModel::where([
+            ['config_id', $config],
+            ['particular_master_type_id', $masterId],
+        ])->first();
+        $input['particular_type_id'] = $type->id;
         $entity = ParticularModel::create($input);
-        $masterType = ParticularTypeModel::find($entity->particular_type_id)->particularMaster;
         if($masterType->slug == 'bed'){
              ParticularDetailsModel::insertBed($entity,$input);
         }
@@ -75,11 +81,12 @@ class ParticularController extends Controller
      */
     public function show($id)
     {
-        $service = new JsonRequestResponse();
-        $entity = ParticularModel::find($id);
+
+        $entity = ParticularModel::with(['particularDetails','particularDetails.patientMode','particularDetails.paymentMode','particularDetails.genderMode','particularDetails.roomNo','particularDetails.cabinMode'])->find($id);
         if (!$entity) {
             $entity = 'Data not found';
         }
+        $service = new JsonRequestResponse();
         $data = $service->returnJosnResponse($entity);
         return $data;
     }
@@ -104,9 +111,28 @@ class ParticularController extends Controller
      */
     public function update(ParticularRequest $request, $id)
     {
-        $data = $request->validated();
+        $config = $this->domain['hms_config'];
+        $input = $request->validated();
         $entity = ParticularModel::find($id);
-        $entity->update($data);
+        $input['display_name'] = $input['name'];
+        $masterId = (isset($input['particular_type_master_id']) and $input['particular_type_master_id']) ? $input['particular_type_master_id']:'';
+        $masterType = ParticularTypeMasterModel::find($masterId);
+        $type = ParticularTypeModel::where([
+            ['config_id', $config],
+            ['particular_master_type_id', $masterId],
+        ])->first();
+        $input['particular_type_id'] = $type->id;
+        $entity->update($input);
+        if($masterType->slug == 'bed'){
+            ParticularDetailsModel::insertBed($entity,$input);
+        }
+        if($masterType->slug == 'doctor'){
+            ParticularDetailsModel::insertDoctor($entity,$input);
+        }
+        if($masterType->slug == 'cabin'){
+            ParticularDetailsModel::insertCabin($entity,$input);
+        }
+
         $service = new JsonRequestResponse();
         return $service->returnJosnResponse($entity);
     }

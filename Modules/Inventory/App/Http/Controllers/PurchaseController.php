@@ -89,6 +89,7 @@ class PurchaseController extends Controller
 
         // purchase auto approve
         $findInvConfig = ConfigPurchaseModel::where('config_id',$this->domain['inv_config'])->first();
+
         if ($findInvConfig->is_purchase_auto_approved == 1){
             if (sizeof($entity->purchaseItems)>0){
                 foreach ($entity->purchaseItems as $item){

@@ -15,20 +15,7 @@ class AccountHeadDetailsModel extends Model
     protected $table = 'acc_head_details';
     public $timestamps = true;
     protected $guarded = ['id'];
-    protected $fillable = [
-        'config_id',
-        'account_head_id',
-        'ifc_code',
-        'swift_code',
-        'is_cheque_book',
-        'is_cheque_print',
-        'code',
-        'name',
-        'amount',
-        'sorting',
-        'bank_method',
-        'pan_it_no'
-    ];
+    protected $fillable = [];
 
 
 }

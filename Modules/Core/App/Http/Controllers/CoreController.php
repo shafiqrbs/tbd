@@ -39,7 +39,6 @@ class CoreController extends Controller
      */
     public function user(Request $request,EntityManagerInterface $em)
     {
-
         $term = $request['term'];
         $service = new JsonRequestResponse();
         $go = $this->domain['global_id'];

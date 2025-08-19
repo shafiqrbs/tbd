@@ -27,6 +27,8 @@ class TransactionModeModel extends Model
         'bank_id',
         'account_number',
         'account_owner',
+        'branch_name',
+        'routing_number',
         'mobile',
         'method_id',
         'path',

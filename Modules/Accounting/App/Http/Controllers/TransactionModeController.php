@@ -63,6 +63,7 @@ class TransactionModeController extends Controller
         $data = $request->validated();
         DB::beginTransaction();
         try {
+
             $data['status'] = true;
             $data['config_id'] = $this->domain['acc_config'];
             $data['is_selected'] = $data['is_selected'] ?? false;
@@ -72,7 +73,12 @@ class TransactionModeController extends Controller
 
             $entity = TransactionModeModel::create($data);
             $config = ConfigModel::findOrFail($this->domain['acc_config']);
-            AccountHeadModel::insertTransactionAccount($config, $entity);
+            if($entity->method->slug == 'bank'){
+                $displayName = AccountHeadModel::insertTransactionBankAccount($config, $entity);
+            }else{
+                $displayName = AccountHeadModel::insertTransactionAccount($config, $entity);
+            }
+            $entity->update(['display_name' => $displayName]);
             DB::commit();
         }catch (Exception $e) {
             // Something went wrong, rollback the transaction

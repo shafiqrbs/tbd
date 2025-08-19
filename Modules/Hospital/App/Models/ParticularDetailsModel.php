@@ -24,13 +24,36 @@ class ParticularDetailsModel extends Model
     {
         parent::boot();
     }
+
+
+    public function patientMode()
+    {
+        return $this->hasOne(ParticularModeModel::class, 'id', 'patient_mode_id');
+    }
+    public function paymentMode()
+    {
+        return $this->hasOne(ParticularModeModel::class, 'id', 'payment_mode_id');
+    }
+    public function genderMode()
+    {
+        return $this->hasOne(ParticularModeModel::class, 'id', 'gender_mode_id');
+    }
+     public function cabinMode()
+    {
+        return $this->hasOne(ParticularModeModel::class, 'id', 'cabin_mode_id');
+    }
+    public function RoomNo()
+    {
+        return $this->hasOne(ParticularModel::class, 'id', 'room_id');
+    }
+
     public static function insertBed($particular,$data){
 
         $room_id = (isset($data['room_id']) and $data['room_id']) ? $data['room_id']:null;
         $gender_mode_id = (isset($data['gender_mode_id']) and $data['gender_mode_id']) ? $data['gender_mode_id']:null;
         $payment_mode_id = (isset($data['payment_mode_id']) and $data['payment_mode_id']) ? $data['payment_mode_id']:null;
         $patient_mode_id = (isset($data['patient_mode_id']) and $data['patient_mode_id']) ? $data['patient_mode_id']:null;
-        $room = ParticularModeModel::find($room_id);
+        $room = ParticularModel::find($room_id);
         $gender = ParticularModeModel::find($gender_mode_id);
         $payment = ParticularModeModel::find($payment_mode_id);
         $patient = ParticularModeModel::find($patient_mode_id);
@@ -42,14 +65,20 @@ class ParticularDetailsModel extends Model
         if ($room) { $parts[] = $room->name;}
         $implode = implode(' ', $parts);
         $displayName = "{$implode} - {$particular->name}";
-        self::create([
-            'particular_id'     => $particular->id,
-            'room_id'           => $room_id,
-            'display_name'      => $displayName,
-            'patient_mode_id'   => $patient_mode_id,
-            'gender_mode_id'    => $gender_mode_id,
-            'payment_mode_id'   => $payment_mode_id,
-        ]);
+        self::updateOrCreate(
+            [
+                'id' => $particular->id,
+            ],
+            [
+                'room_id'           => $room_id,
+                'display_name'      => $displayName,
+                'patient_mode_id'   => $patient_mode_id,
+                'gender_mode_id'    => $gender_mode_id,
+                'payment_mode_id'   => $payment_mode_id,
+            ]
+        );
+
+
         ParticularModel::updateOrCreate(
             [
                 'id' => $particular->id,
@@ -65,15 +94,16 @@ class ParticularDetailsModel extends Model
         $gender_mode_id = (isset($data['gender_mode_id']) and $data['gender_mode_id']) ? $data['gender_mode_id']:null;
         $payment_mode_id = (isset($data['payment_mode_id']) and $data['payment_mode_id']) ? $data['payment_mode_id']:null;
         $patient_mode_id = (isset($data['patient_mode_id']) and $data['patient_mode_id']) ? $data['patient_mode_id']:null;
+        $cabin_mode_id = (isset($data['cabin_mode_id']) and $data['cabin_mode_id']) ? $data['cabin_mode_id']:null;
 
-        $gender = ParticularModeModel::find($gender_mode_id);
         $payment = ParticularModeModel::find($payment_mode_id);
         $patient = ParticularModeModel::find($patient_mode_id);
+        $cabin = ParticularModeModel::find($cabin_mode_id);
 
         $parts = [];
         if ($payment) { $parts[] = $payment->name; }
         if ($patient) { $parts[] = $patient->name; }
-        if ($gender) { $parts[] = $gender->name; }
+        if ($cabin) { $parts[] = $cabin->name; }
         $implode = implode(' ', $parts);
         $displayName = "{$implode} - {$particular->name}";
         self::create([
@@ -82,6 +112,7 @@ class ParticularDetailsModel extends Model
             'patient_mode_id'   => $patient_mode_id,
             'gender_mode_id'    => $gender_mode_id,
             'payment_mode_id'   => $payment_mode_id,
+            'cabin_mode_id'   => $cabin_mode_id,
         ]);
         ParticularModel::updateOrCreate(
             [

@@ -64,6 +64,13 @@ class ParticularDetails
      **/
     private $roomId;
 
+      /**
+     * @ORM\ManyToOne(targetEntity="ParticularMode")
+     * @ORM\JoinColumn(name="cabin_mode_id", referencedColumnName="id", nullable=true, onDelete="cascade")
+     **/
+    private $cabinMode;
+
+
     /**
      * @var string
      *
