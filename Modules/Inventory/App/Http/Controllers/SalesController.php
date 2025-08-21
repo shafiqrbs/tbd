@@ -58,7 +58,7 @@ class SalesController extends Controller
     public function index(Request $request)
     {
         // send sms
-//        $sms = (new SmsService())->send("Hlw Raju", "8801729762344");
+      //  $sms = (new SmsService())->send("Hlw Raju", "8801828148148");
 
         $data = SalesModel::getRecords($request, $this->domain);
         $response = new Response();
