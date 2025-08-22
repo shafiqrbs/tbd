@@ -172,6 +172,13 @@ class Customer
     /**
      * @var string
      *
+     * @ORM\Column(name="identity_mode", type="string", length=100, nullable =true)
+     */
+    private $identityMode;
+
+      /**
+     * @var string
+     *
      * @ORM\Column(name="nid", type="string", length=100, nullable =true)
      */
     private $nid;

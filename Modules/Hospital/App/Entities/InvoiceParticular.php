@@ -101,16 +101,16 @@ class InvoiceParticular
     /**
      * @var float
      *
-     * @ORM\Column(name="salesPrice", type="float")
+     * @ORM\Column(name="price", type="float")
      */
-    private $salesPrice;
+    private $price;
 
      /**
      * @var float
      *
-     * @ORM\Column(name="salesDiscountPrice", type="float", nullable=true)
+     * @ORM\Column(type="float", nullable=true)
      */
-    private $salesDiscountPrice;
+    private $discountPrice;
 
     /**
      * @var float
@@ -122,7 +122,7 @@ class InvoiceParticular
     /**
      * @var string
      *
-     * @ORM\Column(name="estimatePrice", type="decimal", nullable=true)
+     * @ORM\Column( type="decimal", nullable=true)
      */
     private $estimatePrice;
 
@@ -130,7 +130,7 @@ class InvoiceParticular
     /**
      * @var boolean
      *
-     * @ORM\Column(name="customPrice", type="boolean")
+     * @ORM\Column(type="boolean",nullable=true)
      */
     private $customPrice = false;
 
@@ -138,7 +138,7 @@ class InvoiceParticular
     /**
      * @var float
      *
-     * @ORM\Column(name="subTotal", type="float", nullable=true)
+     * @ORM\Column(type="float", nullable=true)
      */
     private $subTotal;
 
@@ -174,14 +174,14 @@ class InvoiceParticular
      /**
      * @var \DateTime
      * @Gedmo\Timestampable(on="create")
-     * @ORM\Column(name="created", type="datetime")
+     * @ORM\Column(name="created_at", type="datetime")
      */
     private $created;
 
     /**
      * @var \DateTime
      * @Gedmo\Timestampable(on="update")
-     * @ORM\Column(name="updated", type="datetime")
+     * @ORM\Column(name="updated_at", type="datetime")
      */
     private $updated;
 

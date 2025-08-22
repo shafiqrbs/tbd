@@ -27,44 +27,7 @@ class PatientModel extends Model
     protected $table = 'cor_customers';
     public $timestamps = true;
     protected $guarded = ['id'];
-    protected $fillable = [
-        'name',
-        'mobile',
-        'location_id',
-        'address',
-        'customer_group_id',
-        'email',
-        'alternative_mobile',
-        'reference_id',
-        'code',
-        'customer_id',
-        'blood_group',
-        'dob',
-        'nid',
-        'age',
-        'age_type',
-        'age_group',
-        'gender',
-        'permanent_address',
-        'father_name',
-        'mother_name',
-        'marital_status',
-        'alternative_contact_person',
-        'alternative_contact_mobile',
-        'alternative_relation',
-        'weight',
-        'blood_pressure',
-        'diabetes',
-        'first_name',
-        'last_name',
-        'customer_id',
-        'customer_unique_name',
-        'unique_id',
-        'status',
-        'domain_id',
-        'api_patient_content',
-        'monthly_target_amount'
-    ];
+    protected $fillable = [];
 
     public static function getAllCustomers()
     {

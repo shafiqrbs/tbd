@@ -6,11 +6,11 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 
-class InvoiceModel extends Model
+class PrescriptionModel extends Model
 {
     use HasFactory;
 
-    protected $table = 'hms_invoice';
+    protected $table = 'hms_prescription';
     public $timestamps = true;
     protected $guarded = ['id'];
 

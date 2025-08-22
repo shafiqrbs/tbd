@@ -32,7 +32,20 @@ class Prescription
      * @ORM\ManyToOne(targetEntity="Invoice")
      * @ORM\JoinColumn(onDelete="CASCADE")
      **/
-    private $invoice;
+    private $hmsInvoice;
+
+    /**
+     * @ORM\ManyToOne(targetEntity="Modules\Core\App\Entities\User")
+     * @ORM\JoinColumn(onDelete="CASCADE")
+     **/
+     private $createdBy;
+
+    /**
+     * @ORM\ManyToOne(targetEntity="Particular")
+     * @ORM\JoinColumn(onDelete="CASCADE")
+     **/
+    private $doctor;
+
 
     /**
      * @var \DateTime

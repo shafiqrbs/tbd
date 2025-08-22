@@ -30,7 +30,7 @@ class Invoice
 
 
     /**
-     * @ORM\OneToOne(targetEntity="Modules\Inventory\App\Entities\Sales", cascade={"detach","merge"})
+     * @ORM\ManyToOne(targetEntity="Modules\Inventory\App\Entities\Sales", cascade={"detach","merge"})
      * @ORM\JoinColumn(name="sales_id", referencedColumnName="id", onDelete="CASCADE")
      */
     private $sales;
@@ -41,10 +41,22 @@ class Invoice
      **/
     private $patientMode;
 
+    /**
+     * @ORM\ManyToOne(targetEntity="ParticularMode")
+     * @ORM\JoinColumn(name="patient_payment_mode_id", referencedColumnName="id", onDelete="SET NULL", nullable=true)
+     **/
+    private $patientPaymentMode;
+
+
      /**
      * @ORM\ManyToOne(targetEntity="Particular")
      **/
     private $diseasesProfile;
+
+     /**
+     * @ORM\ManyToOne(targetEntity="Modules\Core\App\Entities\Customer")
+     **/
+    private $customer;
 
     /**
      * @ORM\ManyToOne(targetEntity="Invoice", inversedBy="children")
@@ -153,24 +165,27 @@ class Invoice
     private $discountRequestedComment;
 
 
-    /**
-     * @ORM\ManyToOne(targetEntity="Particular")
-     **/
-    private  $visitType;
+     /**
+     * @var string
+     *
+     * @ORM\Column(type="string", nullable=true)
+     */
+    private $guardianName;
 
     /**
      * @var string
      *
-     * @ORM\Column(type="string", length=50, nullable=true)
+     * @ORM\Column(type="string", nullable=true)
      */
-    private $patientPaymentMode = "Paid";
+    private $guardianMobile;
+
 
     /**
      * @var string
      *
-     * @ORM\Column(type="string", length=100, nullable=true)
+     * @ORM\Column(type="string", length=255, nullable=true)
      */
-    private $serviceId;
+    private $freeIdentification;
 
     /**
      * @var string
@@ -306,6 +321,20 @@ class Invoice
      */
     private $due;
 
+    /**
+     * @var float
+     *
+     * @ORM\Column(type="decimal", nullable=true)
+     */
+    private $subTotal;
+
+    /**
+     * @var float
+     *
+     * @ORM\Column(type="decimal", nullable=true)
+     */
+    private $total;
+
 
     /**
      * @var boolean
@@ -365,18 +394,32 @@ class Invoice
     private $appointmentDate;
 
     /**
-     * @var \DateTime
-     *
-     * @ORM\Column(type="datetime", nullable=true)
-     */
-    private $followUpDate;
-
-    /**
      * @var integer
      *
      * @ORM\Column(name="sorting", type="integer", length=10, nullable=true)
      */
     private $sorting = 0;
+
+    /**
+     * @var integer
+     *
+     * @ORM\Column(type="integer", length=3, nullable=true)
+     */
+    private $day = 0;
+
+    /**
+     * @var integer
+     *
+     * @ORM\Column(type="integer", length=3, nullable=true)
+     */
+    private $month = 0;
+
+    /**
+     * @var integer
+     *
+     * @ORM\Column(type="integer", length=4, nullable=true)
+     */
+    private $year = 0;
 
     /**
      * @var string

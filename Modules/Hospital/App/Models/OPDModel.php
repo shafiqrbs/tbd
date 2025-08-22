@@ -59,33 +59,74 @@ class OPDModel extends Model
     public static function insertHmsInvoice($invConfig,$hmsConfig,$entity,$data)
     {
 
-        dd($data);
+        $paymentMode = $data['patient_payment_mode_id'];
+        $patientMod= $data['patient_mode']?? 'opd';
+        $patientPaymentMode = ParticularModeModel::firstWhere([
+            ['id', $paymentMode],
+            ['particular_module_id', 11],
+        ])->slug;
+        $patient_mode_id = ParticularModeModel::firstWhere([
+            ['slug', $patientMod],
+            ['particular_module_id', 3],
+        ])->id;
+        $amount = 0;
+        if($data['patient_mode'] == "opd" and $patientPaymentMode === 'general' ){
+            $particular = ParticularModel::find($hmsConfig['opd_ticket_fee_id']);
+            $amount = $particular->price;
+        }elseif ($data['patient_mode'] == "ipd" and $patientPaymentMode === 'general' ){
+            $particular = ParticularModel::find($hmsConfig['admission_fee_id']);
+            $amount = $particular->price;
+        }elseif ($data['patient_mode'] == "emergency" and $patientPaymentMode === 'general' ){
+            $particular = ParticularModel::find($hmsConfig['emergency_fee_id']);
+            $amount = $particular->price;
+        }elseif ($data['patient_mode'] == "ot" and $patientPaymentMode === 'general' ){
+            $particular = ParticularModel::find($hmsConfig['ot_fee_id']);
+            $amount = $particular->price;
+        }
 
         $sales = self::create(
             [
                 'customer_id' => $entity->id,
-                'config_id' => $invConfig
+                'config_id' => $invConfig,
+                'sub_total' => $amount,
             ]
         );
 
-
-
-        InvoiceModel::updateOrCreate(
+        $invoice = InvoiceModel::updateOrCreate(
             ['sales_id' => $sales->id],
             [
-                'config_id' => $hmsConfig,
+                'config_id' => $hmsConfig->id,
+                'customer_id' => $entity->id,
                 'referred_doctor_id' => $data['referred_doctor_id'] ?? null,
                 'assign_doctor_id' => $data['assign_doctor_id'] ?? null,
                 'specialization_id' => $data['specialization_id'] ?? null,
                 'disease_id' => $data['disease_id'] ?? null,
                 'disease' => $data['disease'] ?? null,
                 'room_id' => $data['room_id'] ?? null,
-                'service_id' => $data['service_id'] ?? null,
-                'patient_payment_mode' => $data['patient_payment_mode'] ?? null,
+                'patient_mode_id' => $patient_mode_id ?? null,
+                'patient_payment_mode_id' => $paymentMode ?? null,
+                'free_identification' => $data['free_identification'] ?? null,
                 'remark' => $data['remark'] ?? null,
+                'appointment_date' => $data['appointment_date'] ?? null,
+                'day' => $data['day'] ?? null,
+                'month' => $data['month'] ?? null,
+                'year' => $data['year'] ?? null,
+                'guardian_name' => $data['guardian_name'] ?? null,
+                'guardian_mobile' => $data['guardian_mobile'] ?? null,
+                'sub_total' => $amount,
+                'total' => $amount,
             ]
         );
 
+        InvoiceParticularModel::create(
+            [
+                'hms_invoice_id' => $invoice->id,
+                'particular_id' => $particular->id ?? null,
+                'quantity' => 1,
+                'price' => $amount,
+                'sub_total' => $amount,
+            ]
+        );
 
     }
 
