@@ -50,6 +50,12 @@ class UserRequest extends FormRequest
                     ],
                     'password' => 'required|min:6',
                     'employee_group_id' => 'required',
+                    'employee_id' => 'required',
+                    'designation_id' => 'integer|nullable',
+                    'department_id' => 'integer|nullable',
+                    'dob' => 'string|nullable',
+                    'gender' => 'string|nullable',
+                    'address' => 'string|nullable',
                     'confirm_password' => 'required|same:password',
                 ];
             }
@@ -81,6 +87,9 @@ class UserRequest extends FormRequest
                     'address' => 'nullable|string',
                     'about_me' => 'nullable|string',
                     'enabled' => 'required',
+                    'dob' => 'string|nullable',
+                    'gender' => 'string|nullable',
+                    'employee_id' => 'required',
                     'employee_group_id' => 'required',
                     'access_control_role' => 'nullable|array',
                     'android_control_role' => 'nullable|array',

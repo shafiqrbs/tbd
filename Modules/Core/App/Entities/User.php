@@ -98,6 +98,14 @@ class User
 	/**
 	 * @var string
 	 *
+	 * @ORM\Column(name="employee_id", type="string",nullable=true)
+	 */
+	private $employeeId = "";
+
+
+	/**
+	 * @var string
+	 *
 	 * @ORM\Column(name="mobile", type="string", nullable=true)
 	 */
 	private $mobile = "";
@@ -136,11 +144,15 @@ class User
 
 
 	/**
-     * @var GlobalOption
+     * @var Setting
 	 * @ORM\ManyToOne(targetEntity="Modules\Core\App\Entities\Setting")
-	 * @ORM\JoinColumn(onDelete="CASCADE")
-	 **/
+     * @ORM\JoinColumns({
+     *   @ORM\JoinColumn(name="employee_group_id", referencedColumnName="id", nullable=true)
+     * })
+     **/
 	protected $employeeGroup;
+
+
 
 
     /**

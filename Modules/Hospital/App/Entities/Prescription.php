@@ -22,21 +22,24 @@ class Prescription
      */
     private $id;
 
-
     /**
      * @ORM\ManyToOne(targetEntity="Config", cascade={"detach","merge"})
      * @ORM\JoinColumn(name="config_id", referencedColumnName="id", onDelete="CASCADE")
      */
     protected $config;
 
+    /**
+     * @ORM\ManyToOne(targetEntity="Invoice")
+     * @ORM\JoinColumn(onDelete="CASCADE")
+     **/
+    private $invoice;
 
     /**
-     * @var string
+     * @var \DateTime
      *
-     * @ORM\Column(name="name", type="string", length=50, nullable=true)
+     * @ORM\Column(type="datetime", nullable=true)
      */
-    private $name;
-
+    private $followUpId;
 
     /**
      * @var string
@@ -55,76 +58,9 @@ class Prescription
     /**
      * @var string
      *
-     * @ORM\Column(name="height", type="string",length=20, nullable = true)
-     */
-    private $height;
-
-    /**
-     * @var string
-     *
-     * @ORM\Column( type="string", length=20, nullable = true)
-     */
-    private $ageType;
-
-
-    /**
-     * @var string
-     *
-     * @ORM\Column(name="gender", type="string", length=10 , nullable = true)
-     */
-    private $gender;
-
-    /**
-     * @var string
-     *
-     * @ORM\Column(type="string", length=20, nullable =true)
-     */
-    private $bloodGroup;
-
-    /**
-     * @var \DateTime
-     *
-     * @ORM\Column(name="dob", type="datetime", nullable=true)
-     */
-    private $dob;
-
-    /**
-     * @var string
-     *
      * @ORM\Column(type="string",length=10 , nullable = true)
      */
     private $ageGroup;
-
-
-    /**
-     * @var string
-     *
-     * @ORM\Column( type="string",length=30 , nullable = true)
-     */
-    private $maritalStatus;
-
-    /**
-     * @var string
-     *
-     * @ORM\Column(type="string",length=200 , nullable = true)
-     */
-    private $alternativeContactPerson;
-
-    /**
-     * @var string
-     *
-     * @ORM\Column(type="string",length=50 , nullable = true)
-     */
-    private $alternativeContactMobile;
-
-
-    /**
-     * @var string
-     *
-     * @ORM\Column(type="string",length=100 , nullable = true)
-     */
-    private $alternativeRelation;
-
 
     /**
      * @var integer
@@ -143,23 +79,9 @@ class Prescription
     /**
      * @var string
      *
-     * @ORM\Column(type="text",  nullable =true)
+     * @ORM\Column(name="height", type="string",length=50, nullable = true)
      */
-    private $permanentAddress;
-
-    /**
-     * @var string
-     *
-     * @ORM\Column(type="string", length=100, nullable =true)
-     */
-    private $fatherName;
-
-    /**
-     * @var string
-     *
-     * @ORM\Column(type="string", length=100, nullable =true)
-     */
-    private $motherName;
+    private $height;
 
     /**
      * @var boolean

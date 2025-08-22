@@ -50,22 +50,27 @@ class Profile
 
 
     /**
-     * @ORM\ManyToOne(targetEntity="Setting")
+     * @var Setting
+     * @ORM\ManyToOne(targetEntity="Modules\Core\App\Entities\Setting")
+     * @ORM\JoinColumns({
+     *   @ORM\JoinColumn(name="designation_id", referencedColumnName="id", nullable=true)
+     * })
      **/
     protected $designation;
 
-
-     /**
-     * @ORM\ManyToOne(targetEntity="Setting")
+    /**
+     * @var Setting
+     * @ORM\ManyToOne(targetEntity="Modules\Core\App\Entities\Setting")
+     * @ORM\JoinColumns({
+     *   @ORM\JoinColumn(name="department_id", referencedColumnName="id", nullable=true)
+     * })
      **/
-    protected $employeeGroup;
-
+    protected $department;
 
     /**
      * @ORM\ManyToOne(targetEntity="Setting")
-     * @ORM\JoinColumn(name="department_id", referencedColumnName="id", nullable=true, onDelete="cascade")
-     */
-    protected $department;
+     **/
+    protected $employeeGroup;
 
     /**
      * @ORM\ManyToOne(targetEntity="Modules\Utility\App\Entities\Bank")

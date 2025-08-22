@@ -14,7 +14,9 @@ use Modules\Core\App\Http\Requests\CustomerRequest;
 use Modules\Core\App\Models\CustomerModel;
 use Modules\Core\App\Models\UserModel;
 use Modules\Hospital\App\Http\Requests\OPDRequest;
+use Modules\Hospital\App\Models\HospitalConfigModel;
 use Modules\Hospital\App\Models\OPDModel;
+use Modules\Hospital\App\Models\PatientModel;
 
 
 class OPDController extends Controller
@@ -58,17 +60,17 @@ class OPDController extends Controller
         try {
 
             $input['domain_id'] = $this->domain['global_id'];
-            $entity = CustomerModel::create($input);
+            $entity = PatientModel::create($input);
             $invConfig = $this->domain['inv_config'];
             $hmsConfig = $this->domain['hms_config'];
-
+            $config = HospitalConfigModel::find($hmsConfig);
             if($entity){
-                OPDModel::insertHmsInvoice($invConfig,$hmsConfig, $entity,$input);
+                OPDModel::insertHmsInvoice($invConfig,$config, $entity,$input);
             }
-            $config = AccountingModel::where('id', $this->domain['acc_config'])->first();
+            $accountingConfig = AccountingModel::where('id', $this->domain['acc_config'])->first();
             $ledgerExist = AccountHeadModel::where('customer_id', $entity->id)->where('config_id', $this->domain['acc_config'])->where('parent_id', $config->account_customer_id)->first();
             if (empty($ledgerExist)) {
-               AccountHeadModel::insertCustomerLedger($config, $entity);
+               AccountHeadModel::insertCustomerLedger($accountingConfig, $entity);
             }
             DB::commit();
             $data = $service->returnJosnResponse($entity);

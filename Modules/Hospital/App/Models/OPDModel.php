@@ -59,12 +59,16 @@ class OPDModel extends Model
     public static function insertHmsInvoice($invConfig,$hmsConfig,$entity,$data)
     {
 
+        dd($data);
+
         $sales = self::create(
             [
                 'customer_id' => $entity->id,
                 'config_id' => $invConfig
             ]
         );
+
+
 
         InvoiceModel::updateOrCreate(
             ['sales_id' => $sales->id],
@@ -76,7 +80,8 @@ class OPDModel extends Model
                 'disease_id' => $data['disease_id'] ?? null,
                 'disease' => $data['disease'] ?? null,
                 'room_id' => $data['room_id'] ?? null,
-                'follow_up_date' => $data['follow_up_date'] ?? null,
+                'service_id' => $data['service_id'] ?? null,
+                'patient_payment_mode' => $data['patient_payment_mode'] ?? null,
                 'remark' => $data['remark'] ?? null,
             ]
         );

@@ -8,6 +8,7 @@ use Illuminate\Http\Response;
 use Modules\AppsApi\App\Services\JsonRequestResponse;
 
 use Modules\Core\App\Models\UserModel;
+use Modules\Hospital\App\Http\Requests\ParticularTypeRequest;
 use Modules\Hospital\App\Models\ParticularMatrixModel;
 use Modules\Hospital\App\Models\ParticularModel;
 use Modules\Hospital\App\Models\ParticularModeModel;
@@ -42,13 +43,16 @@ class ParticularTypeController extends Controller
      /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(ParticularTypeRequest $request)
     {
-        $input = $_REQUEST;
+
+        $domain = $this->domain;
+        dd($domain);
+        $input = $request->validated();
         $entity = ParticularTypeModel::find($input['particular_type_id']);
         $data['data_type'] = $input['data_type'];
         $entity->update($data);
-        $operations = $input['operation_modes'] ?? [];
+        /*$operations = $input['operation_modes'] ?? [];
         if (is_string($operations)) {
             $operations = json_decode($operations, true) ?? [];
         }
@@ -60,9 +64,10 @@ class ParticularTypeController extends Controller
                     'particular_mode_id' => $operation
                 ]
             );
-        }
+        }*/
+        $types = ParticularTypeModel::getParticularType($domain);
         $service = new JsonRequestResponse();
-        $data = $service->returnJosnResponse($entity);
+        $data = $service->returnJosnResponse($types);
         return $data;
     }
 

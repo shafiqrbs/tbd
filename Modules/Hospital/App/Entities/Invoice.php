@@ -30,10 +30,16 @@ class Invoice
 
 
     /**
-     * @ORM\ManyToOne(targetEntity="Modules\Inventory\App\Entities\Sales", cascade={"detach","merge"})
+     * @ORM\OneToOne(targetEntity="Modules\Inventory\App\Entities\Sales", cascade={"detach","merge"})
      * @ORM\JoinColumn(name="sales_id", referencedColumnName="id", onDelete="CASCADE")
      */
     private $sales;
+
+    /**
+     * @ORM\ManyToOne(targetEntity="ParticularMode")
+     * @ORM\JoinColumn(name="patient_mode_id", referencedColumnName="id", onDelete="SET NULL", nullable=true)
+     **/
+    private $patientMode;
 
      /**
      * @ORM\ManyToOne(targetEntity="Particular")
@@ -152,18 +158,24 @@ class Invoice
      **/
     private  $visitType;
 
-
     /**
      * @var string
      *
-     * @ORM\Column(name="followUpId", type="string", nullable=true)
+     * @ORM\Column(type="string", length=50, nullable=true)
      */
-    private $followUpId;
+    private $patientPaymentMode = "Paid";
 
     /**
      * @var string
      *
-     * @ORM\Column(name="prescriptionMode", type="string", length=50, nullable=true)
+     * @ORM\Column(type="string", length=100, nullable=true)
+     */
+    private $serviceId;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(type="string", length=50, nullable=true)
      */
     private $prescriptionMode = "new";
 

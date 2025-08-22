@@ -1,6 +1,6 @@
 <?php
 
-namespace Modules\Core\App\Models;
+namespace Modules\Hospital\App\Models;
 
 use Cviebrock\EloquentSluggable\Sluggable;
 use DateTime;
@@ -19,7 +19,7 @@ use Modules\Domain\App\Models\DomainModel;
 use Modules\Inventory\App\Models\ConfigSalesModel;
 
 
-class CustomerModel extends Model
+class PatientModel extends Model
 {
     use HasFactory;
     use Sluggable;
@@ -35,21 +35,34 @@ class CustomerModel extends Model
         'customer_group_id',
         'email',
         'alternative_mobile',
-        'credit_limit',
         'reference_id',
-        'opening_balance',
-        'marketing_id',
         'code',
         'customer_id',
+        'blood_group',
+        'dob',
+        'nid',
+        'age',
+        'age_type',
+        'age_group',
+        'gender',
+        'permanent_address',
+        'father_name',
+        'mother_name',
+        'marital_status',
+        'alternative_contact_person',
+        'alternative_contact_mobile',
+        'alternative_relation',
+        'weight',
+        'blood_pressure',
+        'diabetes',
+        'first_name',
+        'last_name',
         'customer_id',
         'customer_unique_name',
         'unique_id',
         'status',
-        'sub_domain_id',
         'domain_id',
-        'discount_percent',
-        'bonus_percent',
-        'is_default_customer',
+        'api_patient_content',
         'monthly_target_amount'
     ];
 

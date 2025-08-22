@@ -115,6 +115,13 @@ class Customer
     /**
      * @var string
      *
+     * @ORM\Column( type="string",  nullable=true)
+     */
+    private $healthId;
+
+    /**
+     * @var string
+     *
      * @ORM\Column( type="string", length=30, nullable =true)
      */
     private $postalCode;
@@ -139,6 +146,14 @@ class Customer
      * @ORM\Column(name="proprietor_name", type="string", length=100, nullable =true)
      */
     private $proprietorName;
+
+    /**
+     * @var text
+     *
+     * @ORM\Column(name="api_patient_content", type="text",  nullable =true)
+     */
+    private $apiPatientContent;
+
 
     /**
      * @Gedmo\Slug(fields={"name"})
