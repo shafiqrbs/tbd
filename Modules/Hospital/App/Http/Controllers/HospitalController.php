@@ -110,7 +110,7 @@ class HospitalController extends Controller
     public function particularTypeDropdown(Request $request)
     {
         $domain = $this->domain;
-        $types = ParticularTypeModel::where('config_id',$domain['hms_config'])->orderBy('name','ASC')->get();
+        $types = ParticularTypeModel::getParticularType($domain);
         $service = new JsonRequestResponse();
         return $service->returnJosnResponse($types);
     }
@@ -166,12 +166,23 @@ class HospitalController extends Controller
     /**
      * dropdown the specified resource from storage.
      */
+    public function operationParticularType(Request $request,$id)
+    {
+        $dropdown = ParticularMatrixModel::getOperationParticularType($this->domain,$id);
+        $service = new JsonRequestResponse();
+        return $service->returnJosnResponse($dropdown);
+    }
+
+    /**
+     * dropdown the specified resource from storage.
+     */
     public function brandDropdown(Request $request)
     {
         $dropdown = ProductBrandModel::getEntityDropdown($this->domain);
         $service = new JsonRequestResponse();
         return $service->returnJosnResponse($dropdown);
     }
+
 
 
 

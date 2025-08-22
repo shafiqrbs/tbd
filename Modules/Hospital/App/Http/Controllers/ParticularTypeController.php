@@ -8,6 +8,7 @@ use Illuminate\Http\Response;
 use Modules\AppsApi\App\Services\JsonRequestResponse;
 
 use Modules\Core\App\Models\UserModel;
+use Modules\Hospital\App\Models\ParticularMatrixModel;
 use Modules\Hospital\App\Models\ParticularModel;
 use Modules\Hospital\App\Models\ParticularModeModel;
 use Modules\Hospital\App\Models\ParticularTypeModel;
@@ -32,7 +33,7 @@ class ParticularTypeController extends Controller
     public function index(Request $request)
     {
         $domain = $this->domain;
-        $types = ParticularTypeModel::where('config_id',$domain['hms_config'])->orderBy('id','DESC')->get();
+        $types = ParticularTypeModel::getParticularType($domain);
         $service = new JsonRequestResponse();
         return $service->returnJosnResponse($types);
     }
@@ -41,13 +42,26 @@ class ParticularTypeController extends Controller
      /**
      * Store a newly created resource in storage.
      */
-    public function store(SettingRequest $request)
+    public function store(Request $request)
     {
+        $input = $_REQUEST;
+        $entity = ParticularTypeModel::find($input['particular_type_id']);
+        $data['data_type'] = $input['data_type'];
+        $entity->update($data);
+        $operations = $input['operation_modes'] ?? [];
+        if (is_string($operations)) {
+            $operations = json_decode($operations, true) ?? [];
+        }
+        foreach ($operations as $operation){
+            ParticularMatrixModel::updateOrCreate(
+                [
+                    'config_id' => $entity->config_id,
+                    'particular_type_id' => $entity->id,
+                    'particular_mode_id' => $operation
+                ]
+            );
+        }
         $service = new JsonRequestResponse();
-        $input = $request->validated();
-        $getConfigId = SettingModel::getConfigId($this->domain['global_id']);
-        $input['config_id'] = $getConfigId;
-        $entity = SettingModel::create($input);
         $data = $service->returnJosnResponse($entity);
         return $data;
     }

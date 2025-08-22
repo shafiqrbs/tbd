@@ -50,8 +50,16 @@ Route::prefix('/hospital')->middleware([HeaderAuthenticationMiddleware::class])-
                 'update' => 'particular.update',
                 'destroy' => 'particular.destroy',
             ]);
+        Route::apiResource('particular-type', ParticularTypeController::class)
+            ->middleware([HeaderAuthenticationMiddleware::class])
+            ->names([
+                'index' => 'particular-type.index',
+                'store' => 'particular-type.store',
+                'show' => 'particular-type.show',
+                'update' => 'particular-type.update',
+                'destroy' => 'particular-type.destroy',
+            ]);
         Route::apiResource('/particular-mode', ParticularModeController::class)->middleware([HeaderAuthenticationMiddleware::class]);
-        Route::apiResource('/particular-type', ParticularTypeController::class)->middleware([HeaderAuthenticationMiddleware::class]);
     });
     Route::post('/setting-matrix/create', [HospitalController::class,'settingMatrixCreate'])->name('particular_module_dropdown');
 

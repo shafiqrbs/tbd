@@ -27,33 +27,26 @@ class ParticularModeMatrix
      */
     protected $config;
 
+
     /**
-     * @ORM\ManyToOne(targetEntity="Modules\Core\App\Entities\User")
-     * @ORM\JoinColumn(name="created_by_id", referencedColumnName="id", nullable=true)
-     **/
-    private  $createdBy;
+     * @ORM\ManyToOne(targetEntity="ParticularType", cascade={"detach","merge"})
+     * @ORM\JoinColumn(name="particular_type_id", referencedColumnName="id", onDelete="CASCADE")
+     */
+    protected $particularType;
+
+   /**
+     * @ORM\ManyToOne(targetEntity="ParticularMode", cascade={"detach","merge"})
+     * @ORM\JoinColumn(name="particular_mode_id", referencedColumnName="id", onDelete="CASCADE")
+     */
+    protected $operationModeId;
 
     /**
      * @var string
      *
-     * @ORM\Column(name="module", type="string",length=100,  nullable=true)
+     * @ORM\Column(name="operation_mode", type="string",  nullable=true)
      */
-    private $module;
+    private $operationMode;
 
-    /**
-     * @var string
-     *
-     * @ORM\Column(name="module_mode", type="string", length=100, nullable=true)
-     */
-    private $moduleMode;
-
-
-    /**
-     * @var string
-     *
-     * @ORM\Column(name="particular_types", type="string",  nullable=true)
-     */
-    private $particularTypes;
 
     /**
      * @var boolean
