@@ -100,14 +100,23 @@ class UserController extends Controller
     /**
      * Show the specified resource.
      */
-    public function show($id)
+    public function show(Request $request,$id)
     {
+        $application = $request->query('application') ?? 'pos';
         $service = new JsonRequestResponse();
         $entity = UserModel::showUserDetails($id);
-        $accessControlRole = UserModel::getAccessControlRoles($id,'access_control_role');
-        $androidControlRole = UserModel::getAccessControlRoles($id,'android_control_role');
-        $entity['access_control_roles'] = $accessControlRole;
-        $entity['android_control_role'] = $androidControlRole;
+
+        if ($application == 'pos' || $application == 'hospital') {
+            $accessControlRole = UserModel::getAccessControlRoles($id, 'access_control_role', $application);
+            $entity['access_control_roles'] = $accessControlRole;
+        }
+
+        if ($application == 'pos') {
+            $androidControlRole = UserModel::getAccessControlRoles($id, 'android_control_role', $application);
+            $entity['android_control_role'] = $androidControlRole;
+        }
+
+
         if (!$entity){
             $entity = 'Data not found';
         }

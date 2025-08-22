@@ -317,10 +317,22 @@ class UserModel extends Model
 
     }
 
-    public static function getAccessControlRoles($userId, $type)
+    public static function getAccessControlRoles($userId, $type,$application = 'pos')
     {
-        // Set the base group based on the provided type
-        $baseGroup = ($type == 'access_control_role') ? ['Accounting', 'Sales & Purchase', 'Procurement','Production','Inventory & Product','Core & Master Data'] : ['Android Apps'];
+        // Define role groups for different applications and role types
+        $roleGroups = [
+            'hospital' => [
+                'access_control_role' => ['Operator', 'Doctor', 'Nurse', 'Medicine', 'Billing', 'Reports', 'Admin', 'Accounting'],
+                'android_control_role' => [], // add if any exist
+            ],
+            'pos' => [
+                'access_control_role' => ['Accounting', 'Sales & Purchase', 'Procurement', 'Production', 'Inventory & Product', 'Core & Master Data'],
+                'android_control_role' => ['Android Apps'],
+            ]
+        ];
+
+        // Fallback in case roleGroups[$application][$type] is not defined
+        $baseGroup = $roleGroups[$application][$type] ?? [];
 
         // Fetch user roles from the database
         $roles = DB::table('cor_user_role_group')

@@ -43,33 +43,54 @@ class ParticularTypeController extends Controller
      /**
      * Store a newly created resource in storage.
      */
-    public function store(ParticularTypeRequest $request)
+    public function store(ParticularTypeRequest $request): \Illuminate\Contracts\Foundation\Application|\Illuminate\Contracts\Routing\ResponseFactory|\Illuminate\Foundation\Application|Response
     {
-
         $domain = $this->domain;
-        dd($domain);
         $input = $request->validated();
-        $entity = ParticularTypeModel::find($input['particular_type_id']);
-        $data['data_type'] = $input['data_type'];
-        $entity->update($data);
-        /*$operations = $input['operation_modes'] ?? [];
+
+        $particularType = ParticularTypeModel::findOrFail($input['particular_type_id']);
+
+        // Update the data_type
+        $dataType = $input['data_type'] ?? null;
+        $particularType->update(['data_type' => $dataType]);
+
+        // Decode operations if passed as JSON string
+        $operations = $input['operation_modes'] ?? [];
         if (is_string($operations)) {
             $operations = json_decode($operations, true) ?? [];
         }
-        foreach ($operations as $operation){
-            ParticularMatrixModel::updateOrCreate(
-                [
-                    'config_id' => $entity->config_id,
-                    'particular_type_id' => $entity->id,
-                    'particular_mode_id' => $operation
-                ]
-            );
-        }*/
+
+        // Sanitize operation ids to integers
+        $operations = array_map('intval', $operations);
+        $existingMatrixIds = $particularType->particularMatrix()->pluck('particular_mode_id')->toArray();
+
+        // Determine which to delete and which to add
+        $toDelete = array_diff($existingMatrixIds, $operations);
+        $toInsert = array_diff($operations, $existingMatrixIds);
+
+        // Delete unselected operation mappings
+        if (!empty($toDelete)) {
+            ParticularMatrixModel::where('particular_type_id', $particularType->id)
+                ->whereIn('particular_mode_id', $toDelete)
+                ->delete();
+        }
+
+        // Insert new operations (if any)
+        foreach ($toInsert as $operationId) {
+            ParticularMatrixModel::create([
+                'config_id'          => $particularType->config_id,
+                'particular_type_id' => $particularType->id,
+                'particular_mode_id' => $operationId,
+            ]);
+        }
+
+        // Fetch updated data
         $types = ParticularTypeModel::getParticularType($domain);
-        $service = new JsonRequestResponse();
-        $data = $service->returnJosnResponse($types);
-        return $data;
+
+        $response = new JsonRequestResponse();
+        return $response->returnJosnResponse($types);
     }
+
 
     /**
      * Show the specified resource.
