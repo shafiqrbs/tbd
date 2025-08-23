@@ -3,19 +3,27 @@
 namespace Modules\Hospital\App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use Doctrine\ORM\EntityManagerInterface;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Modules\AppsApi\App\Services\JsonRequestResponse;
+use Modules\Core\App\Models\FileUploadModel;
 use Modules\Core\App\Models\UserModel;
 use Modules\Domain\App\Models\DomainModel;
+use Modules\Hospital\App\Models\MedicineModel;
 use Modules\Hospital\App\Models\ParticularMatrixModel;
 use Modules\Hospital\App\Models\ParticularModel;
 use Modules\Hospital\App\Models\ParticularModeModel;
 use Modules\Hospital\App\Models\ParticularModuleModel;
 use Modules\Hospital\App\Models\ParticularTypeModel;
 use Modules\Inventory\App\Models\ProductBrandModel;
+use Modules\Inventory\App\Models\PurchaseItemModel;
 use Modules\Inventory\App\Models\SettingModel;
+use Modules\Medicine\App\Models\MedicineGenericModel;
+use Modules\Production\App\Models\ProductionItems;
+use PhpOffice\PhpSpreadsheet\Exception;
+use PhpOffice\PhpSpreadsheet\Reader\Xlsx;
 
 class HospitalController extends Controller
 {
@@ -107,6 +115,31 @@ class HospitalController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
+    public function medicineDropdown(Request $request)
+    {
+        $domain = $this->domain;
+        $term = $request->get('term');
+        $dropdown = MedicineModel::getMedicineDropdown($domain,$term);
+        $service = new JsonRequestResponse();
+        return $service->returnJosnResponse($dropdown);
+    }
+
+
+    /**
+     * Show the form for editing the specified resource.
+     */
+    public function medicineGenericDropdown(Request $request)
+    {
+        $term = $request->get('term');
+        $dropdown = MedicineGenericModel::getMedicineGenericDropdown($term);
+        $service = new JsonRequestResponse();
+        return $service->returnJosnResponse($dropdown);
+    }
+
+
+    /**
+     * Show the form for editing the specified resource.
+     */
     public function particularTypeDropdown(Request $request)
     {
         $domain = $this->domain;
@@ -181,6 +214,79 @@ class HospitalController extends Controller
         $dropdown = ProductBrandModel::getEntityDropdown($this->domain);
         $service = new JsonRequestResponse();
         return $service->returnJosnResponse($dropdown);
+    }
+
+
+
+    // process finish goods product
+
+    public  function insertMedicineStock()
+    {
+        set_time_limit(0);
+        $domain = $this->domain;
+        $filePath = public_path('/uploads/medicine/medicine.xlsx');
+
+        // Load file based on extension
+        $reader = match (pathinfo($filePath, PATHINFO_EXTENSION)) {
+        'xlsx' => new Xlsx(),
+            'csv' => new \PhpOffice\PhpSpreadsheet\Reader\Csv(),
+            default => throw new Exception('Unsupported file format.')
+        };
+
+        $allData = $reader->load($filePath)->getActiveSheet()->toArray();
+
+        // for process data with header
+        $spreadsheet = $reader->load($filePath);
+        $data = $spreadsheet->getActiveSheet()->toArray(null, true, true, true);
+
+        // Use the first row as headers
+        $headers = array_shift($data);
+
+        // Map rows to headers
+        $dataWithHeaders = [];
+        foreach ($data as $row) {
+            $mappedRow = [];
+            foreach ($headers as $column => $headerName) {
+                $mappedRow[$headerName] = $row[$column] ?? null; // Use header name as key
+            }
+            $dataWithHeaders[] = $mappedRow;
+        }
+
+        // Remove headers
+        $keys = array_map('trim', array_shift($allData));
+        // Only proceed if it's 'Product' and structure is correct
+
+        foreach ($dataWithHeaders as $index => $values) {
+
+         //   $values = array_map(fn($item) => is_string($item) ? trim($item) : $item, $data);
+
+            $name = $values['name'] ?? null;
+            $generic_id = $values['generic_id'] ?? 0;
+            $dose_details = trim($values['dose_details']) ?? null;
+            $by_meal = trim($values['by_meal']) ?? null;
+            $duration_month = trim($values['duration_month']) ?? null;
+            $duration_day = trim($values['duration_day']) ?? 0;
+            $generic = trim($values['generic']) ?? null;
+            $company = trim($values['company']) ?? null;
+            $formulation = trim($values['formulation']) ?? null;
+            $batch = [
+                'config_id' => $this->domain['hms_config'],
+                'name' => $name,
+                'display_name' => $name,
+                'generic_id' => $generic_id,
+                'dose_details' => $dose_details,
+                'by_meal' => $by_meal,
+                'duration_month' => $duration_month,
+                'duration_day' => $duration_day,
+                'generic' => $generic,
+                'company' => $company,
+                'formulation' => $formulation,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ];
+            MedicineModel::insert($batch);
+
+        }
     }
 
 

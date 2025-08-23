@@ -30,11 +30,14 @@ Route::prefix('/hospital/select')->middleware([HeaderAuthenticationMiddleware::c
     Route::get('/particular-type', [HospitalController::class,'particularTypeDropdown'])->name('particular_particular_dropdown');
     Route::get('/particulars', [HospitalController::class,'particularTypeChildDropdown'])->name('particular_particular_dropdown');
     Route::get('/particular', [HospitalController::class,'particularDropdown'])->name('particular_particular_dropdown');
+    Route::get('/medicine', [HospitalController::class,'medicineDropdown'])->name('medicine_dropdown');
+    Route::get('/medicine-generic', [HospitalController::class,'medicineGenericDropdown'])->name('medicine_generic_dropdown');
 
 });
 
 Route::prefix('/hospital')->middleware([HeaderAuthenticationMiddleware::class])->group(function() {
     Route::get('/config', [HospitalController::class,'domainHospitalConfig'])->name('domain_hospital_config');
+    Route::get('/medicine-import', [HospitalController::class,'insertMedicineStock'])->name('insert_medicine_stock');
     Route::get('/particular', [SettingController::class,'particularModuleDropdown'])->name('particular_module_dropdown');
     Route::get('/setting', [SettingController::class,'particularModuleDropdown'])->name('particular_module_dropdown');
     Route::get('/setting/matrix', [HospitalController::class,'settingMatrix'])->name('particular_module_dropdown');
