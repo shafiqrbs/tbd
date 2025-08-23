@@ -7,7 +7,7 @@ use Gedmo\Mapping\Annotation as Gedmo;
 /**
  * BrandCompany
  *
- * @ORM\Table("medi_generic")
+ * @ORM\Table("medicine_generic")
  * @ORM\Entity()
  */
 class Generic
