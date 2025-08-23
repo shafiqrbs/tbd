@@ -33,6 +33,12 @@ class PrescriptionMedicine
      **/
     private $medicine;
 
+    /**
+     * @ORM\ManyToOne(targetEntity="Modules\Hospital\App\Entities\Medicine")
+     * @ORM\JoinColumn(name="hms_medicine_id", referencedColumnName="id", nullable=true, onDelete="cascade")
+     **/
+    private $hms_medicine;
+
 
      /**
      * @var string

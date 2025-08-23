@@ -42,8 +42,6 @@ class Medicine
      */
     private $name;
 
-
-
     /**
      * @var string
      *

@@ -25,9 +25,105 @@ class Medicine
     /**
      * @var string
      *
-     * @ORM\Column(name="name", type="string", length=255), nullable=true
+     * @ORM\Column(name="name", type="string", length=255, nullable=true)
      */
     private $name;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="generic", type="string", length=255, nullable=true)
+     */
+    private $generic;
+
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="display_name", type="string", length=255, nullable=true)
+     */
+    private $displayName;
+
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="company", type="string", length=255, nullable=true)
+     */
+    private $company;
+
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="formulation", type="string", length=100, nullable=true)
+     */
+    private $formulation;
+
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="dose_details", type="string", length=100, nullable=true)
+     */
+    private $doseDetails;
+
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="slug", type="string", length=255, nullable=true)
+     */
+    private $slug;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(type="string", length=20, nullable=true)
+     */
+    private $genericId;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(type="string", length=20, nullable=true)
+     */
+    private $dosesForm;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(type="string", length=100, nullable=true)
+     */
+    private $dosesDetails;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(type="string", length=100, nullable=true)
+     */
+    private $byMeal;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(type="string", length=100, nullable=true)
+     */
+    private $durationMonth;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(type="string", length=100, nullable=true)
+     */
+    private $durationDay;
+
+    /**
+     * @var int
+     *
+     * @ORM\Column(type="integer", length=5, nullable=true)
+     */
+    private $priority;
 
     /**
      * @var string
@@ -49,13 +145,6 @@ class Medicine
      * @ORM\Column(name="brand_id", type="string", length=255, nullable=true)
      */
     private $brandId;
-
-    /**
-     * @var string
-     *
-     * @ORM\Column(name="generic_id", type="string", length=255, nullable=true)
-     */
-    private $genericId;
 
     /**
      * @var string
