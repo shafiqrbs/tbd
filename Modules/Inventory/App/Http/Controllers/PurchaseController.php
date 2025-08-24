@@ -27,6 +27,7 @@ use Modules\Inventory\App\Models\SalesModel;
 use Modules\Inventory\App\Models\StockItemHistoryModel;
 use Modules\Inventory\App\Models\StockItemModel;
 use Modules\Production\App\Models\ProductionElements;
+use Symfony\Component\HttpFoundation\Response as ResponseAlias;
 use function Symfony\Component\HttpFoundation\Session\Storage\Handler\getInsertStatement;
 
 class PurchaseController extends Controller
@@ -67,6 +68,7 @@ class PurchaseController extends Controller
 
         $input['config_id'] = $this->domain['config_id'];
         $input['created_by_id'] = $this->domain['user_id'];
+        $input['process'] = "Created";
 
         if(empty($input['vendor_id']) and isset($input['vendor_name']) and isset($input['vendor_mobile'])) {
             $find = VendorModel::uniqueVendorCheck($this->domain['domain_id'], $input['vendor_mobile'], $input['vendor_name']);
@@ -152,66 +154,6 @@ class PurchaseController extends Controller
         return $data;
     }
 
-     /**
-     * Show the specified resource.
-     */
-    public function copy($id)
-    {
-
-        $entity = PurchaseModel::getEditData($id, $this->domain);
-        if (!$entity) {
-            $entity = 'Data not found';
-        }
-        DB::beginTransaction();
-        try {
-
-            $getPurchase = PurchaseModel::findOrFail($id);
-            $data['remark']=$request->narration;
-            $data['due'] = ($data['total'] ?? 0) - ($data['payment'] ?? 0);
-            $getPurchase->fill($data);
-            $getPurchase->save();
-
-            PurchaseItemModel::class::where('purchase_id', $id)->delete();
-            if (sizeof($data['items'])>0){
-                foreach ($data['items'] as $item){
-                    $item['stock_item_id'] = $item['product_id'];
-                    $item['config_id'] = $getPurchase->config_id;
-                    $item['purchase_id'] = $id;
-                    $item['quantity'] = $item['quantity'] ?? 0;
-                    $item['purchase_price'] = $item['purchase_price'] ?? 0;
-                    $item['sub_total'] = $item['sub_total'] ?? 0;
-                    $item['mode'] = 'purchase';
-                    $item['warehouse_id'] = $item['warehouse_id'];
-                    $item['bonus_quantity'] = $item['bonus_quantity'];
-                    PurchaseItemModel::create($item);
-                }
-            }
-            DB::commit();
-
-            $response = new Response();
-            $response->headers->set('Content-Type', 'application/json');
-            $response->setContent(json_encode([
-                'message' => 'success',
-                'status' => Response::HTTP_OK,
-//                'data' => $purchaseData ?? []
-            ]));
-            $response->setStatusCode(Response::HTTP_OK);
-
-        } catch (\Exception $e) {
-            DB::rollback();
-            $response = new Response();
-            $response->headers->set('Content-Type', 'application/json');
-            $response->setContent(json_encode([
-                'message' => 'error',
-                'status' => Response::HTTP_INTERNAL_SERVER_ERROR,
-                'error' => $e->getMessage(),
-            ]));
-            $response->setStatusCode(Response::HTTP_OK);
-        }
-
-        return $response;
-    }
-
     /**
      * Update the specified resource in storage.
      */
@@ -224,6 +166,7 @@ class PurchaseController extends Controller
             $getPurchase = PurchaseModel::findOrFail($id);
             $data['remark']=$request->narration;
             $data['due'] = ($data['total'] ?? 0) - ($data['payment'] ?? 0);
+            $data['process'] = 'Created';
             $getPurchase->fill($data);
             $getPurchase->save();
 
@@ -248,10 +191,9 @@ class PurchaseController extends Controller
             $response->headers->set('Content-Type', 'application/json');
             $response->setContent(json_encode([
                 'message' => 'success',
-                'status' => Response::HTTP_OK,
-//                'data' => $purchaseData ?? []
+                'status' => ResponseAlias::HTTP_OK,
             ]));
-            $response->setStatusCode(Response::HTTP_OK);
+            $response->setStatusCode(ResponseAlias::HTTP_OK);
 
         } catch (\Exception $e) {
             DB::rollback();
@@ -259,10 +201,10 @@ class PurchaseController extends Controller
             $response->headers->set('Content-Type', 'application/json');
             $response->setContent(json_encode([
                 'message' => 'error',
-                'status' => Response::HTTP_INTERNAL_SERVER_ERROR,
+                'status' => ResponseAlias::HTTP_INTERNAL_SERVER_ERROR,
                 'error' => $e->getMessage(),
             ]));
-            $response->setStatusCode(Response::HTTP_OK);
+            $response->setStatusCode(ResponseAlias::HTTP_OK);
         }
 
         return $response;
@@ -328,10 +270,10 @@ class PurchaseController extends Controller
             // Commit the transaction after all updates are successful
             DB::commit();
             $response->setContent(json_encode([
-                'status' => Response::HTTP_OK,
+                'status' => ResponseAlias::HTTP_OK,
                 'message' => 'Approved successfully',
             ]));
-            $response->setStatusCode(Response::HTTP_OK);
+            $response->setStatusCode(ResponseAlias::HTTP_OK);
         } catch (\Exception $e) {
             // Rollback the transaction in case of an error
             DB::rollBack();

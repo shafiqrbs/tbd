@@ -28,6 +28,7 @@ use Modules\Inventory\App\Models\SalesModel;
 use Modules\Inventory\App\Models\StockItemHistoryModel;
 use Modules\Inventory\App\Models\StockItemModel;
 use Symfony\Component\HttpFoundation\Response as ResponseAlias;
+use Throwable;
 
 class RequisitionController extends Controller
 {
@@ -279,174 +280,37 @@ class RequisitionController extends Controller
 
     /**
      * Approve the specified resource from storage.
+     * @throws \Throwable
      */
-    public function approve($id)
+    public function approve(int $id): \Illuminate\Http\JsonResponse
     {
-        $response = new Response();
-        $response->headers->set('Content-Type', 'application/json');
-
-        // Start the database transaction
         DB::beginTransaction();
 
         try {
-            $purchase = PurchaseModel::find($id);
-            $purchase->update(['approved_by_id' => $this->domain['user_id']]);
-            if (sizeof($purchase->purchaseItems)>0){
-                foreach ($purchase->purchaseItems as $item){
-                    // get average price
-                    $itemAveragePrice = StockItemModel::calculateStockItemAveragePrice($item->stock_item_id,$item->config_id,$item);
-                    //set average price
-                    StockItemModel::where('id', $item->stock_item_id)->where('config_id',$item->config_id)->update(['average_price' => $itemAveragePrice]);
+            $requisition = RequisitionModel::findOrFail($id);
 
-                    $item->update(['approved_by_id' => $this->domain['user_id']]);
-                    StockItemHistoryModel::openingStockQuantity($item,'purchase',$this->domain);
-                }
-            }
-            // Commit the transaction after all updates are successful
+            $requisition->update([
+                'approved_by_id' => $this->domain['user_id'] ?? null,
+                'process'        => 'Approved',
+                'approved_date'  => now(),
+            ]);
+
             DB::commit();
 
-            $response->setContent(json_encode([
-                'status' => Response::HTTP_OK,
-                'message' => 'Approved successfully',
-            ]));
-            $response->setStatusCode(Response::HTTP_OK);
-        } catch (\Exception $e) {
-            // Rollback the transaction in case of an error
+            return response()->json([
+                'status'  => ResponseAlias::HTTP_OK,
+                'message' => 'Approved successfully.',
+            ], ResponseAlias::HTTP_OK);
+        } catch (Throwable $e) {
             DB::rollBack();
 
-            $response->setContent(json_encode([
-                'status' => Response::HTTP_INTERNAL_SERVER_ERROR,
-                'message' => 'An error occurred: ' . $e->getMessage(),
-            ]));
-            $response->setStatusCode(Response::HTTP_INTERNAL_SERVER_ERROR);
+            return response()->json([
+                'status'  => ResponseAlias::HTTP_INTERNAL_SERVER_ERROR,
+                'message' => 'Failed to approve the requisition.',
+                'error'   => $e->getMessage(),
+            ], ResponseAlias::HTTP_INTERNAL_SERVER_ERROR);
         }
-
-        return $response;
     }
-
-
-    /*public function matrixBoard(Request $request)
-    {
-        $expectedDate = $request->query('expected_date');
-        $vendorConfigId = $this->domain['config_id'];
-
-        $getItems = RequisitionItemModel::where([
-            ['inv_requisition_item.vendor_config_id', $vendorConfigId],
-            ['inv_requisition.expected_date','<=', $expectedDate]
-        ])
-            ->whereIn('inv_requisition.process',['New','Generated'])
-            ->select([
-                'inv_requisition_item.id',
-                'inv_requisition_item.vendor_config_id',
-                'inv_requisition_item.customer_config_id',
-                'inv_requisition_item.vendor_stock_item_id',
-                'inv_requisition_item.customer_stock_item_id',
-                'inv_requisition_item.quantity',
-                'inv_requisition_item.barcode',
-                'inv_requisition_item.purchase_price',
-                'inv_requisition_item.sales_price',
-                'inv_requisition_item.sub_total',
-                'inv_requisition_item.display_name',
-                'inv_requisition_item.unit_name',
-                'inv_requisition_item.unit_id',
-                'inv_requisition.customer_id',
-                'cor_customers.name as customer_name',
-                'cor_customers.mobile as customer_mobile',
-                'inv_requisition.expected_date',
-                'vendor_stock_item.quantity as remaining_quantity',
-                'vendor_stock_item.quantity as vendor_stock_quantity',
-                'inv_requisition.id as requisition_id',
-            ])
-            ->join('inv_requisition', 'inv_requisition.id', '=', 'inv_requisition_item.requisition_id')
-            ->join('inv_stock as vendor_stock_item', 'vendor_stock_item.id', '=', 'inv_requisition_item.vendor_stock_item_id')
-            ->join('cor_customers', 'cor_customers.id', '=', 'inv_requisition.customer_id')
-            ->get()
-            ->toArray();
-
-        foreach ($getItems as $item){
-            $findRequisition = RequisitionModel::find($item['requisition_id']);
-            $findRequisition->update(['process' => 'Generated','matrix_generate_date'=>$expectedDate]);
-        }
-
-        $groupedItems = $this->groupByCustomerStockItemIdAndConfigId($getItems);
-
-        $matrixExists = true;
-
-        if (!empty($groupedItems)) {
-            $itemsToInsert = [];
-
-            foreach ($groupedItems as $val) {
-                // Check if a record already exists
-                $exists = RequisitionMatrixBoardModel::where([
-                    ['generate_date', $expectedDate],
-                    ['process','Confirmed'],
-                    ['vendor_config_id', $val['vendor_config_id']]
-                ])->exists();
-
-                if (!$exists) {
-                    $matrixExists = false;
-                    $itemsToInsert[] = [
-                        'customer_stock_item_id' => $val['customer_stock_item_id'],
-                        'vendor_stock_item_id' => $val['vendor_stock_item_id'],
-                        'customer_config_id' => $val['customer_config_id'],
-                        'vendor_config_id' => $val['vendor_config_id'],
-                        'unit_id' => $val['unit_id'],
-                        'barcode' => $val['barcode'],
-                        'purchase_price' => $val['purchase_price'],
-                        'sales_price' => $val['sales_price'],
-                        'quantity' => $val['quantity'],
-                        'requested_quantity' => $val['quantity'],
-                        'approved_quantity' => $val['quantity'],
-                        'sub_total' => $val['sub_total'],
-                        'display_name' => $val['display_name'],
-                        'unit_name' => $val['unit_name'],
-                        'customer_id' => $val['customer_id'],
-                        'customer_name' => $val['customer_name'],
-                        'expected_date' => $val['expected_date'],
-                        'generate_date' => $expectedDate,
-                        'vendor_stock_quantity' => $val['vendor_stock_quantity'],
-                        'status' => true,
-                        'process' => 'Generated',
-                        'created_at' => now(),
-                    ];
-                }
-            }
-
-            if (!empty($itemsToInsert)) {
-                $generateMatrixExists = RequisitionMatrixBoardModel::where([
-                    ['generate_date', $expectedDate],
-                    ['process','Generated'],
-                    ['vendor_config_id', $val['vendor_config_id']]
-                ])->get();
-
-                foreach ($generateMatrixExists as $generateMatrixExist) {
-                    $findMatrix = RequisitionMatrixBoardModel::find($generateMatrixExist['id']);
-                    $findMatrix->delete();
-                }
-                RequisitionMatrixBoardModel::insert($itemsToInsert);
-            }
-        }
-
-        // Fetch the latest data after insertion
-        $getItemWiseProduct = RequisitionMatrixBoardModel::where([
-//            ['process', 'Generated'],
-            ['vendor_config_id', $vendorConfigId],
-            ['generate_date', $expectedDate]
-        ])->get()->toArray();
-
-        $shops = $this->getCustomerNames($getItemWiseProduct);
-
-        $transformedData = $this->formatMatrixBoardData($getItemWiseProduct, $shops);
-
-        return response()->json([
-            'status' => ResponseAlias::HTTP_OK,
-            'message' => $matrixExists?'Already generated':'Insert successfully',
-            'data' => $transformedData,
-            'customers' => $shops,
-        ], ResponseAlias::HTTP_OK);
-    }*/
-
-
     public function matrixBoard(Request $request)
     {
         DB::beginTransaction(); // Start Database Transaction

@@ -52,15 +52,15 @@ Route::prefix('/inventory')->middleware([HeaderAuthenticationMiddleware::class,L
     Route::get('/config/{id}', [ConfigController::class,'getConfigById'])->name('get_config_by_id');
     Route::post('/config-update/{id}', [ConfigController::class,'updateConfig'])->name('update_config');
 
-    Route::apiResource('/setting', SettingController::class)->middleware([HeaderAuthenticationMiddleware::class]);
+    Route::apiResource('/setting', SettingController::class);
     Route::get('/setting/setting-type', [SettingController::class,'settingTypeDropdown'])->name('get_setting_type');
 
-    Route::apiResource('/particular', ParticularController::class)->middleware([HeaderAuthenticationMiddleware::class]);
+    Route::apiResource('/particular', ParticularController::class);
 
-    Route::apiResource('/category-group', CategoryGroupController::class)->middleware([HeaderAuthenticationMiddleware::class]);
-    Route::apiResource('/product', ProductController::class)->middleware([HeaderAuthenticationMiddleware::class]);
+    Route::apiResource('/category-group', CategoryGroupController::class);
+    Route::apiResource('/product', ProductController::class);
 
-    Route::prefix('/product')->middleware([HeaderAuthenticationMiddleware::class])->group(function() {
+    Route::prefix('/product')->group(function() {
 
         Route::get('/status/inline-update/{id}', [ProductController::class,'productStatusInlineUpdate'])->name('product_status_inline_update');
         Route::prefix('/measurement')->group(function() {
@@ -81,14 +81,13 @@ Route::prefix('/inventory')->middleware([HeaderAuthenticationMiddleware::class,L
 
     });
 
-    Route::prefix('/discount')->middleware([HeaderAuthenticationMiddleware::class])->group(function() {
+    Route::prefix('/discount')->group(function() {
         Route::get('config', [DiscountConfigController::class,'index'])->name('discount_config');
         Route::get('users', [DiscountConfigController::class,'userDiscount'])->name('discount_config');
         Route::POST('user-update/{id}', [DiscountConfigController::class,'userDiscountUpdate'])->name('discount_config');
     });
 
     Route::apiResource('/discount', DiscountConfigController::class)
-        ->middleware([HeaderAuthenticationMiddleware::class])
         ->names([
             'index' => 'discount.config.index',
             'store' => 'discount.config.store',
@@ -96,46 +95,49 @@ Route::prefix('/inventory')->middleware([HeaderAuthenticationMiddleware::class,L
             'update' => 'domain.setting.update',
             'destroy' => 'domain.setting.destroy',
         ]);
-    Route::apiResource('/stock', StockItemController::class)->middleware([HeaderAuthenticationMiddleware::class]);
+    Route::apiResource('/stock', StockItemController::class);
     Route::get('/stock-item', [StockItemController::class,'stockItem'])->name('get_stock_item');
     Route::get('generate/stock-item/xlsx', [StockItemController::class,'stockItemXlsxGenerate'])->name('get_stock_item_xlsx_generate');
 
-    Route::apiResource('/sales', SalesController::class)->middleware([HeaderAuthenticationMiddleware::class]);
+    Route::apiResource('/sales', SalesController::class);
     Route::get('/sales/edit/{id}', [SalesController::class,'edit'])->name('get_edit_sales');
     Route::get('/sales/copy/{id}', [SalesController::class,'salesCopy'])->name('get_sales_copy');
     Route::get('/sales/domain-customer/{id}', [SalesController::class,'domainCustomerSales'])->name('get_domain_customer_sales');
     Route::get('/sales/not-domain-customer/{id}', [SalesController::class,'notDomainCustomerSales'])->name('get_not_domain_customer_sales');
-    Route::apiResource('/invoice-batch', InvoiceBatchController::class)->middleware([HeaderAuthenticationMiddleware::class]);
-    Route::apiResource('/invoice-batch-transaction', InvoiceBatchTransactionControllerAlias::class)->middleware([HeaderAuthenticationMiddleware::class]);
+    Route::apiResource('/invoice-batch', InvoiceBatchController::class);
+    Route::apiResource('/invoice-batch-transaction', InvoiceBatchTransactionControllerAlias::class);
 
 
-    Route::apiResource('/purchase', PurchaseController::class)->middleware([HeaderAuthenticationMiddleware::class]);
+    Route::apiResource('/purchase', PurchaseController::class);
     Route::get('/purchase/edit/{id}', [PurchaseController::class,'edit'])->name('get_edit_purchase');
     Route::get('/purchase/copy/{id}', [PurchaseController::class,'purchaseCopy'])->name('get_purchase_copy');
     Route::get('/purchase/approve/{id}', [PurchaseController::class,'approve'])->name('approve_purchase');
 
-    Route::apiResource('/purchase-item', PurchaseItemController::class)->middleware([HeaderAuthenticationMiddleware::class]);
+    Route::apiResource('/purchase-item', PurchaseItemController::class);
 
-    Route::apiResource('/opening-stock', OpeningStockController::class)->middleware([HeaderAuthenticationMiddleware::class]);
+    Route::apiResource('/opening-stock', OpeningStockController::class);
     Route::post('/opening-stock/inline-update', [OpeningStockController::class,'inlineUpdate'])->name('opening_stock_inline_update');
   //  Route::post('/inventory/branch-management', [BranchManagementController::class,'branchManagement'])->name('branch_management_update');
 
-    Route::apiResource('/requisition', RequisitionController::class)->middleware([HeaderAuthenticationMiddleware::class]);
-    Route::apiResource('/warehouse-issue', WarehouseIssueController::class)->middleware([HeaderAuthenticationMiddleware::class]);
-    Route::prefix('/requisition')->middleware([HeaderAuthenticationMiddleware::class])->group(function() {
-        Route::get('matrix/board', [RequisitionController::class,'matrixBoard'])->name('requisition_matrix_board');
-        Route::post('matrix/board/quantity-update', [RequisitionController::class,'matrixBoardQuantityUpdate'])->name('requisition_matrix_board_quantity_update');
-        Route::post('matrix/board/batch-generate', [RequisitionController::class,'matrixBoardBatchGenerate'])->name('requisition_matrix_board_batch_generate');
+    Route::apiResource('/requisition', RequisitionController::class);
+    Route::apiResource('/warehouse-issue', WarehouseIssueController::class);
+    Route::prefix('/requisition')->group(function() {
+        Route::get('approve/{id}', [RequisitionController::class,'approve'])->name('requisition_approve');
+        Route::prefix('matrix/board')->group(function() {
+            Route::get('', [RequisitionController::class,'matrixBoard'])->name('requisition_matrix_board');
+            Route::post('quantity-update', [RequisitionController::class,'matrixBoardQuantityUpdate'])->name('requisition_matrix_board_quantity_update');
+            Route::post('batch-generate', [RequisitionController::class,'matrixBoardBatchGenerate'])->name('requisition_matrix_board_batch_generate');
+        });
     });
 
-    Route::prefix('/pos')->middleware([HeaderAuthenticationMiddleware::class])->group(function() {
+    Route::prefix('/pos')->group(function() {
         Route::get('check/invoice-mode', [PosController::class,'checkInvoiceMode'])->name('pos_check_invoice_mode');
         Route::post('inline-update', [PosController::class,'invoiceUpdate'])->name('pos_inline_update');
         Route::get('invoice-details', [PosController::class,'invoiceDetails'])->name('pos_invoice_details');
         Route::get('sales-complete/{id}', [PosController::class,'posSalesComplete'])->name('pos_sales_complete');
     });
 
-    Route::prefix('report')->middleware([HeaderAuthenticationMiddleware::class])->group(function() {
+    Route::prefix('report')->group(function() {
         Route::get('daily/sales', [SalesController::class,'dailySalesReport'])->name('daily_sales_report');
 //        Route::get('matrix/warehouse-xlsx', [ProductionReportController::class,'matrixWarehouseXlsx'])->name('matrix_warehouse_xlsx');
 //        Route::get('matrix/warehouse-pdf', [ProductionReportController::class,'matrixWarehousePdf'])->name('matrix_warehouse_pdf');

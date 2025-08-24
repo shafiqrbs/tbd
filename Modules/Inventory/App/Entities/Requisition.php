@@ -3,6 +3,7 @@
 namespace Modules\Inventory\App\Entities;
 
 
+use Doctrine\DBAL\Schema\Schema;
 use Doctrine\ORM\Mapping as ORM;
 use Gedmo\Mapping\Annotation as Gedmo;
 
@@ -85,6 +86,11 @@ class Requisition
      */
     private $expectedDate;
 
+    /**
+     * @var \Date
+     * @ORM\Column(type="date", nullable=true)
+     */
+    private $approvedDate;
 
     /**
      * @var float
