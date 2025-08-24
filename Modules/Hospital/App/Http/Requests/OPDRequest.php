@@ -35,7 +35,7 @@ class OPDRequest extends FormRequest
                     'mobile' => 'string|nullable',
                     'district_id' => 'string|nullable',
                     'alternative_mobile' => 'nullable',
-                    'age' => 'string|nullable',
+                    'age' => 'integer|nullable',
                     'day' => 'integer|nullable',
                     'month' => 'integer|nullable',
                     'year' => 'integer|nullable',
@@ -56,6 +56,8 @@ class OPDRequest extends FormRequest
                     'identity_mode' => 'string|nullable',
                     'unit_id' => 'integer|nullable',
                     'free_identification' => 'string|nullable',
+                    'created_by_id' => 'integer|nullable',
+                    'process' => 'string|nullable',
                 ];
             }
 
@@ -82,7 +84,7 @@ class OPDRequest extends FormRequest
     public function messages()
     {
         return [
-            'name.required' => 'Name Required.',
+            'name.required' => 'Name field Required.',
             'mobile.required' => 'Mobile Required .',
             'customer_unique_id.unique' => 'Customer already exists.',
         ];

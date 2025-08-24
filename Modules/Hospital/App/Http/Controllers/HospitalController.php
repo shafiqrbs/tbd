@@ -16,6 +16,7 @@ use Modules\Hospital\App\Models\ParticularMatrixModel;
 use Modules\Hospital\App\Models\ParticularModel;
 use Modules\Hospital\App\Models\ParticularModeModel;
 use Modules\Hospital\App\Models\ParticularModuleModel;
+use Modules\Hospital\App\Models\ParticularTypeMasterModel;
 use Modules\Hospital\App\Models\ParticularTypeModel;
 use Modules\Inventory\App\Models\ProductBrandModel;
 use Modules\Inventory\App\Models\PurchaseItemModel;
@@ -144,6 +145,17 @@ class HospitalController extends Controller
     {
         $domain = $this->domain;
         $types = ParticularTypeModel::getParticularType($domain);
+        $service = new JsonRequestResponse();
+        return $service->returnJosnResponse($types);
+    }
+
+     /**
+     * Show the form for editing the specified resource.
+     */
+    public function particularMasterTypeDropdown()
+    {
+
+        $types = ParticularTypeMasterModel::all();
         $service = new JsonRequestResponse();
         return $service->returnJosnResponse($types);
     }

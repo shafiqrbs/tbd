@@ -25,6 +25,7 @@ class OPDModel extends Model
         self::creating(function ($model) {
             $model->invoice = self::salesEventListener($model)['generateId'];
             $model->code = self::salesEventListener($model)['code'];
+            $model->process = 'New';
             $date =  new \DateTime("now");
             $model->created_at = $date;
         });
@@ -89,6 +90,7 @@ class OPDModel extends Model
                 'customer_id' => $entity->id,
                 'config_id' => $invConfig,
                 'sub_total' => $amount,
+                'created_by_id' => $data['created_by_id'],
             ]
         );
 
@@ -113,8 +115,10 @@ class OPDModel extends Model
                 'year' => $data['year'] ?? null,
                 'guardian_name' => $data['guardian_name'] ?? null,
                 'guardian_mobile' => $data['guardian_mobile'] ?? null,
+                'process' => 'New',
                 'sub_total' => $amount,
                 'total' => $amount,
+                'created_by_id' => $data['created_by_id'] ?? null,
             ]
         );
 
@@ -158,28 +162,6 @@ class OPDModel extends Model
                 DB::raw('DATE_FORMAT(inv_sales.created_at, "%d-%m-%Y") as created'),
                 'inv_sales.invoice as invoice',
                 'inv_sales.sub_total as sub_total',
-                'inv_sales.total as total',
-                'inv_sales.approved_by_id',
-                'inv_sales.payment as payment',
-                'inv_sales.discount as discount',
-                'inv_sales.is_domain_sales_completed',
-                'inv_sales.discount_calculation as discount_calculation',
-                'inv_sales.discount_type as discount_type',
-                'inv_sales.invoice_batch_id',
-                'cor_customers.id as customerId',
-                'cor_customers.name as customerName',
-                'cor_customers.mobile as customerMobile',
-                'createdBy.username as createdByUser',
-                'createdBy.name as createdByName',
-                'createdBy.id as createdById',
-                'salesBy.id as salesById',
-                'salesBy.username as salesByUser',
-                'salesBy.name as salesByName',
-                'inv_sales.process as process',
-                'acc_transaction_mode.name as mode_name',
-                'cor_customers.address as customer_address',
-                'cor_setting.name as customer_group',
-                'cor_customers.balance as balance',
             ])->with(['salesItems' => function ($query) {
                 $query->select([
                     'inv_sales_item.id',

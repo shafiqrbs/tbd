@@ -37,11 +37,15 @@ class OPDController extends Controller
             $this->domain = $userData;
         }
     }
+
+
     /**
      * Display a listing of the resource.
      */
-    public function index(Request $request,EntityManagerInterface $em){
-        $data = CustomerModel::getRecords($this->domain,$request);
+    public function index(Request $request){
+       // $data = CustomerModel::getRecords($this->domain,$request);
+        $domain = $this->domain;
+        $data = InvoiceModel::getRecords($request,$domain);
         $response = new Response();
         $response->headers->set('Content-Type','application/json');
         $response->setContent(json_encode([
@@ -53,6 +57,19 @@ class OPDController extends Controller
         $response->setStatusCode(Response::HTTP_OK);
         return $response;
     }
+
+
+    /**
+     * Display a listing of the resource.
+     */
+    public function getVisitingRooms(Request $request){
+        $domain = $this->domain;
+        $data = InvoiceModel::getVisitingRooms($domain);
+        $service = new JsonRequestResponse();
+        $data = $service->returnJosnResponse($data);
+        return $data;
+    }
+
 
     /**
      * Store a newly created resource in storage.
@@ -107,12 +124,11 @@ class OPDController extends Controller
      *//**/
     public function show($id)
     {
-
-        $service = new JsonRequestResponse();
         $entity = CustomerModel::find($id);
         if (!$entity){
             $entity = 'Data not found';
         }
+        $service = new JsonRequestResponse();
         $data = $service->returnJosnResponse($entity);
         return $data;
     }
