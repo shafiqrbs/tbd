@@ -28,6 +28,7 @@ Route::prefix('/hospital/select')->middleware([HeaderAuthenticationMiddleware::c
     Route::get('/modules', [HospitalController::class,'particularModuleChildDropdown'])->name('particular_module_dropdown');
     Route::get('/mode', [HospitalController::class,'particularModeDropdown'])->name('particular_module_dropdown');
     Route::get('/particular-type', [HospitalController::class,'particularTypeDropdown'])->name('particular_particular_dropdown');
+    Route::get('/particular-master-type', [HospitalController::class,'particularMasterTypeDropdown'])->name('particular_particular_dropdown');
     Route::get('/particulars', [HospitalController::class,'particularTypeChildDropdown'])->name('particular_particular_dropdown');
     Route::get('/particular', [HospitalController::class,'particularDropdown'])->name('particular_particular_dropdown');
     Route::get('/medicine', [HospitalController::class,'medicineDropdown'])->name('medicine_dropdown');
@@ -43,6 +44,7 @@ Route::prefix('/hospital')->middleware([HeaderAuthenticationMiddleware::class])-
     Route::get('/setting/matrix', [HospitalController::class,'settingMatrix'])->name('particular_module_dropdown');
     Route::get('/setting', [SettingController::class,'particularModuleDropdown'])->name('particular_module_dropdown');
     Route::apiResource('opd', OPDController::class)->middleware([HeaderAuthenticationMiddleware::class]);
+    Route::get('visiting-room', [OPDController::class,'getVisitingRooms'])->name('send_prescription');
     Route::get('send-to-prescription/{id}', [OPDController::class,'sendPrescription'])->name('send_prescription');
     Route::prefix('core')->middleware([HeaderAuthenticationMiddleware::class])->group(function() {
         Route::apiResource('particular', ParticularController::class)

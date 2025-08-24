@@ -4,6 +4,7 @@ namespace Modules\Hospital\App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Support\Facades\DB;
 
 
 class InvoiceModel extends Model
@@ -28,5 +29,203 @@ class InvoiceModel extends Model
             $model->updated_at = $date;
         });
     }
+
+
+    public static function getRecords($request,$domain)
+    {
+        $page =  isset($request['page']) && $request['page'] > 0?($request['page'] - 1 ) : 0;
+        $perPage = isset($request['offset']) && $request['offset']!=''? (int)($request['offset']):50;
+        $skip = isset($page) && $page!=''? (int)$page * $perPage:0;
+        $entities = self::where([['hms_invoice.config_id',$domain['hms_config']]])
+            ->join('inv_sales as inv_sales','inv_sales.id','=','hms_invoice.sales_id')
+            ->leftjoin('hms_particular as vr','vr.id','=','hms_invoice.room_id')
+            ->leftjoin('users as createdBy','createdBy.id','=','inv_sales.created_by_id')
+            ->join('cor_customers as customer','customer.id','=','inv_sales.customer_id')
+            ->join('hms_particular_mode as patient_mode','patient_mode.id','=','hms_invoice.patient_mode_id')
+            ->join('hms_particular_mode as patient_payment_mode','patient_payment_mode.id','=','hms_invoice.patient_payment_mode_id')
+            ->select([
+                'hms_invoice.id',
+                'customer.name',
+                'customer.mobile',
+                'customer.customer_id as patient_id',
+                'customer.health_id',
+                'customer.gender',
+                DB::raw('DATE_FORMAT(hms_invoice.created_at, "%d-%m-%Y") as created'),
+                'hms_invoice.process as process',
+                'vr.name as visiting_room',
+                'inv_sales.invoice as invoice',
+                'patient_mode.name as patient_mode_name',
+                'patient_payment_mode.name as patient_payment_mode_name',
+                'createdBy.name as created_by',
+                'hms_invoice.sub_total as sub_total',
+            ]);
+
+        if (isset($request['term']) && !empty($request['term'])){
+            $entities = $entities->whereAny(['hms_invoice.invoice','cor_customers.name','cor_customers.mobile','salesBy.username','createdBy.username','acc_transaction_mode.name','hms_invoice.total'],'LIKE','%'.$request['term'].'%');
+        }
+
+        if (isset($request['customer_id']) && !empty($request['customer_id'])){
+            $entities = $entities->where('hms_invoice.customer_id',$request['customer_id']);
+        }
+        if (isset($request['start_date']) && !empty($request['start_date']) && empty($request['end_date'])){
+            $start_date = $request['start_date'].' 00:00:00';
+            $end_date = $request['start_date'].' 23:59:59';
+            $entities = $entities->whereBetween('hms_invoice.created_at',[$start_date, $end_date]);
+        }
+        if (isset($request['start_date']) && !empty($request['start_date']) && isset($request['end_date']) && !empty($request['end_date'])){
+            $start_date = $request['start_date'].' 00:00:00';
+            $end_date = $request['end_date'].' 23:59:59';
+            $entities = $entities->whereBetween('hms_invoice.created_at',[$start_date, $end_date]);
+        }
+
+        $total  = $entities->count();
+        $entities = $entities->skip($skip)
+            ->take($perPage)
+            ->orderBy('hms_invoice.updated_at','DESC')
+            ->get();
+
+        $data = array('count'=>$total,'entities'=>$entities);
+        return $data;
+    }
+
+    public static function getShow($id,$domain)
+    {
+        $entity = self::where([
+            ['hms_invoice.config_id', '=', $domain['config_id']],
+            ['hms_invoice.id', '=', $id]
+        ])
+            ->leftjoin('cor_customers','cor_customers.id','=','hms_invoice.customer_id')
+            ->leftjoin('users as createdBy','createdBy.id','=','hms_invoice.created_by_id')
+            ->leftjoin('users as salesBy','salesBy.id','=','hms_invoice.sales_by_id')
+            ->leftjoin('acc_transaction_mode as transactionMode','transactionMode.id','=','hms_invoice.transaction_mode_id')
+//            ->leftjoin('uti_transaction_method as method','method.id','=','acc_transaction_mode.method_id')
+            ->select([
+                'hms_invoice.id',
+                DB::raw('DATE_FORMAT(hms_invoice.updated_at, "%d-%m-%Y") as created'),
+                'hms_invoice.invoice as invoice',
+                'hms_invoice.sub_total as sub_total',
+                'hms_invoice.total as total',
+                'hms_invoice.payment as payment',
+                'hms_invoice.discount as discount',
+                'hms_invoice.discount_calculation as discount_calculation',
+                'hms_invoice.discount_type as discount_type',
+                'cor_customers.id as customer_id',
+                'cor_customers.name as customer_name',
+                'cor_customers.mobile as customer_mobile',
+                'createdBy.username as created_by_user_name',
+                'createdBy.name as created_by_name',
+                'createdBy.id as created_by_id',
+                'salesBy.id as sales_by_id',
+                'salesBy.username as sales_by_username',
+                'salesBy.name as sales_by_name',
+                'transactionMode.name as mode_name',
+                'hms_invoice.transaction_mode_id as transaction_mode_id',
+                'hms_invoice.process as process_id',
+            ])
+            ->with(['salesItems' => function ($query) {
+                $query->select([
+                    'inv_sales_item.id',
+                    'inv_sales_item.sale_id',
+                    'inv_sales_item.stock_item_id as product_id',
+                    'inv_sales_item.uom',
+                    'inv_sales_item.name as item_name',
+                    'inv_sales_item.quantity',
+                    'inv_sales_item.sales_price',
+                    'inv_sales_item.purchase_price',
+                    'inv_sales_item.price',
+                    'inv_sales_item.sub_total',
+                ]);
+            }])
+            ->first();
+
+        return $entity;
+    }
+
+    public static function getEditData($id,$domain)
+    {
+        $entity = self::where([
+            ['hms_invoice.config_id', '=', $domain['config_id']],
+            ['hms_invoice.id', '=', $id]
+        ])
+            ->leftjoin('cor_customers','cor_customers.id','=','hms_invoice.customer_id')
+            ->leftjoin('users as createdBy','createdBy.id','=','hms_invoice.created_by_id')
+            ->leftjoin('users as salesBy','salesBy.id','=','hms_invoice.sales_by_id')
+            ->leftjoin('acc_transaction_mode as transactionMode','transactionMode.id','=','hms_invoice.transaction_mode_id')
+            ->leftjoin('uti_settings','uti_settings.id','=','hms_invoice.process')
+            ->select([
+                'hms_invoice.id',
+                DB::raw('DATE_FORMAT(hms_invoice.updated_at, "%d-%m-%Y") as created'),
+                DB::raw('DATE_FORMAT(hms_invoice.updated_at, "%d-%M-%Y") as created_date'),
+                'hms_invoice.invoice as invoice',
+                'hms_invoice.sub_total as sub_total',
+                'hms_invoice.total as total',
+                'hms_invoice.narration',
+                'hms_invoice.payment as payment',
+                'hms_invoice.discount as discount',
+                'hms_invoice.discount_calculation as discount_calculation',
+                'hms_invoice.discount_type as discount_type',
+                'cor_customers.id as customer_id',
+                'cor_customers.name as customer_name',
+                'cor_customers.mobile as customer_mobile',
+                'createdBy.username as created_by_user_name',
+                'createdBy.name as created_by_name',
+                'createdBy.id as created_by_id',
+                'salesBy.id as sales_by_id',
+                'salesBy.username as sales_by_username',
+                'salesBy.name as sales_by_name',
+                'transactionMode.name as mode_name',
+                'hms_invoice.transaction_mode_id as transaction_mode_id',
+                'hms_invoice.process as process_id',
+                'uti_settings.name as process_name',
+                'cor_customers.address as customer_address',
+            ])
+            ->with(['salesItems' => function ($query) {
+                $query->select([
+                    'inv_sales_item.id',
+                    'inv_sales_item.sale_id',
+                    'inv_sales_item.stock_item_id as product_id',
+                    'inv_sales_item.unit_id',
+                    'inv_sales_item.name as item_name',
+                    'inv_sales_item.name as name',
+                    'inv_sales_item.uom as uom',
+                    'inv_sales_item.quantity',
+                    'inv_sales_item.sales_price',
+                    'inv_sales_item.purchase_price',
+                    'inv_sales_item.price',
+                    'inv_sales_item.sub_total',
+                    'inv_sales_item.bonus_quantity',
+                    DB::raw("CONCAT(cor_warehouses.name, ' (', cor_warehouses.location, ')') as warehouse_name"),
+                    'cor_warehouses.name as warehouse',
+                    'cor_warehouses.location as warehouse_location',
+                    'cor_warehouses.id as warehouse_id'
+                ])->leftjoin('cor_warehouses','cor_warehouses.id','=','inv_sales_item.warehouse_id');
+            }])
+            ->first();
+
+        return $entity;
+    }
+
+    public static function getVisitingRooms($domain)
+    {
+        $entities = self::where([
+            ['hms_invoice.config_id', $domain['hms_config']],
+            ['hms_particular_master_type.slug', 'visiting-room']])
+            ->leftJoin('hms_particular as vr', 'vr.id', '=', 'hms_invoice.room_id')
+            ->leftJoin('hms_particular_type', 'hms_particular_type.id', '=', 'vr.particular_type_id')
+            ->leftJoin('hms_particular_master_type', 'hms_particular_master_type.id', '=', 'hms_particular_type.particular_master_type_id')
+            ->select([
+                'vr.id as particular_id',
+                'vr.name',
+                'hms_invoice.process',
+                DB::raw('COUNT(hms_invoice.id) as invoice_count')
+            ])
+            ->groupBy('vr.id', 'vr.name','hms_invoice.process')
+            ->get();
+
+        return $entities;
+    }
+
+
+
 
 }

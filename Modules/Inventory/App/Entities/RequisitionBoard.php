@@ -62,7 +62,7 @@ class RequisitionBoard
 	 * @var boolean
 	 * @ORM\Column(name="status", type="boolean", nullable=true)
 	 */
-	private $status=false;
+	private $status = false;
 
     /**
      * @var string

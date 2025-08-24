@@ -43,6 +43,13 @@ class Config
      **/
     private $emergencyFee;
 
+     /**
+     *
+     * @ORM\OneToOne(targetEntity="Particular", cascade={"persist", "remove"})
+     * @ORM\JoinColumn(onDelete="SET NULL")
+     **/
+    private $emergencyRoom;
+
     /**
      *
      * @ORM\OneToOne(targetEntity="Particular", cascade={"persist", "remove"})
@@ -63,6 +70,28 @@ class Config
      * @ORM\Column( type="string", length=50,nullable = true)
      */
     private $prescriptionTemplate;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column( type="string",nullable = true)
+     */
+    private $healthShareUrl;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column( type="string",nullable = true)
+     */
+    private $healthShareEmail;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column( type="string",nullable = true)
+     */
+    private $healthSharePassword;
+
 
     /**
      * @var string
@@ -99,6 +128,20 @@ class Config
      * @ORM\Column(type="string",  nullable = true)
      */
     private $vatRegNo;
+
+    /**
+     * @var boolean
+     *
+     * @ORM\Column( type="boolean",  nullable = true)
+     */
+    private $healthShare = false;
+
+    /**
+     * @var boolean
+     *
+     * @ORM\Column( type="boolean",  nullable = true)
+     */
+    private $isMultiPayment = false;
 
 
      /**

@@ -82,6 +82,11 @@ class Invoice
      **/
     private  $referredDoctor;
 
+     /**
+     * @ORM\ManyToOne(targetEntity="Particular")
+     **/
+    private  $room;
+
     /**
      * @ORM\ManyToOne(targetEntity="Particular")
      **/
@@ -111,6 +116,12 @@ class Invoice
      * @ORM\ManyToOne(targetEntity="Particular", inversedBy="hmsInvoices")
      **/
     private  $department;
+
+    /**
+     * @ORM\ManyToOne(targetEntity="Modules\Core\App\Entities\User")
+     * @ORM\JoinColumn(name="created_by_id", referencedColumnName="id", nullable=true)
+     **/
+    private  $createdBy;
 
     /**
      * @ORM\ManyToOne(targetEntity="Modules\Core\App\Entities\User")
@@ -434,21 +445,6 @@ class Invoice
      * @ORM\Column(type="datetime", nullable=true)
      */
     private $deliveryDateTime;
-
-    /**
-     * @var string
-     *
-     * @ORM\Column(type="string",  length=100, nullable=true)
-     */
-    private $printFor ='pathological';
-
-
-    /**
-     * @var string
-     *
-     * @ORM\Column(type="string", length=50, nullable=true)
-     */
-    private $invoiceMode = 'pathological';
 
 
 
