@@ -73,15 +73,21 @@ Route::prefix('/domain')->middleware(array(HeaderAuthenticationMiddleware::class
         Route::get('users', [DomainController::class,'users'])->name('domain_users');
         Route::get('sub-domain-users', [DomainController::class,'subDomainUsers'])->name('domain_users');
         Route::get('impersonate/{domain}/{user}', [B2bController::class, 'impersonate'])->name('auth');
-        Route::post('inline-update/domain', [B2bController::class,'domainInlineUpdate'])->name('domain_inline_update');
-        Route::post('inline-update/category', [B2bController::class,'domainInlineUpdateCategory'])->name('domain_inline_update_category');
-        Route::post('inline-update/product', [B2bController::class,'domainInlineUpdateProduct'])->name('domain_inline_update_product');
-        Route::get('sub-domain', [B2bController::class,'b2bSubDomain'])->name('b2b_sub_domain');
-        Route::post('sub-domain/category', [B2bController::class,'categoryWiseProductManage'])->name('category_wise_product_insert');
-        Route::get('sub-domain/setting/{id}', [B2bController::class,'b2bSubDomainSetting'])->name('b2b_sub_domain_setting');
-        Route::get('sub-domain/category/{id}', [B2bController::class,'b2bSubDomainCategory'])->name('b2b_sub_domain_category');
+        Route::prefix('inline-update')->group(function() {
+            Route::post('domain', [B2bController::class,'domainInlineUpdate'])->name('domain_inline_update');
+            Route::post('category', [B2bController::class,'domainInlineUpdateCategory'])->name('domain_inline_update_category');
+            Route::post('product', [B2bController::class,'domainInlineUpdateProduct'])->name('domain_inline_update_product');
+        });
+
+        Route::prefix('sub-domain')->group(function() {
+            Route::get('', [B2bController::class,'b2bSubDomain'])->name('b2b_sub_domain');
+            Route::post('category', [B2bController::class,'categoryWiseProductManage'])->name('category_wise_product_insert');
+            Route::get('setting/{id}', [B2bController::class,'b2bSubDomainSetting'])->name('b2b_sub_domain_setting');
+            Route::get('category/{id}', [B2bController::class,'b2bSubDomainCategory'])->name('b2b_sub_domain_category');
+            Route::get('product/{id}', [B2bController::class,'b2bSubDomainProduct'])->name('b2b_sub_domain_product');
+            Route::delete('delete/{id}', [B2bController::class,'b2bSubDomainDelete'])->name('b2b_sub_domain_delete');
+        });
         Route::post('category-wise/price-update/{id}', [B2bController::class,'b2bCategoryWisePriceUpdate'])->name('b2b_category_wise_price_update');
-        Route::get('sub-domain/product/{id}', [B2bController::class,'b2bSubDomainProduct'])->name('b2b_sub_domain_product');
-        Route::delete('sub-domain/delete/{id}', [B2bController::class,'b2bSubDomainDelete'])->name('b2b_sub_domain_delete');
+        Route::get('domain-wise/product-update', [B2bController::class,'b2bDomainWiseProductUpdate'])->name('b2b_domain_wise_product_update');
     });
 });

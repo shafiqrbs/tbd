@@ -958,5 +958,152 @@ class B2bController extends Controller
 
     }
 
+    /**
+     * Update B2B products' sales and purchase prices based on domain-wise category price matrix.
+     * Each product update is transactional: failure of one product does not affect others.
+     *
+     * @param Request $request
+     * @return JsonResponse
+     */
+    public function b2bDomainWiseProductUpdate(Request $request)
+    {
+        $childDomainId = $request->domain_id;
+
+        try {
+            // Fetch all sub-domains
+            $subDomains = SubDomainModel::where('domain_id', $this->domain['domain_id'])
+                ->when($childDomainId, fn($q) => $q->where('sub_domain_id', $childDomainId))
+                ->get();
+
+            if ($subDomains->isEmpty()) {
+                return response()->json([
+                    'message' => 'No sub-domains found for the selected domain(s).',
+                    'status' => ResponseAlias::HTTP_NOT_FOUND
+                ], ResponseAlias::HTTP_NOT_FOUND);
+            }
+
+            // Map sub_domain_id => vendor_id
+            $subDomainVendors = $subDomains->pluck('vendor_id', 'id');
+
+            // Fetch all relevant category price matrices
+            $categoriesMatrix = B2BCategoryPriceMatrixModel::whereIn('sub_domain_id', $subDomains->pluck('id'))->get();
+
+            if ($categoriesMatrix->isEmpty()) {
+                return response()->json([
+                    'message' => 'No price matrices found for the selected domain(s).',
+                    'status' => ResponseAlias::HTTP_NOT_FOUND
+                ], ResponseAlias::HTTP_NOT_FOUND);
+            }
+
+            // Fetch all stock items and parent stock in bulk
+            $matrixConfigIds = $categoriesMatrix->pluck('config_id')->unique();
+            $matrixCategoryIds = $categoriesMatrix->pluck('sub_domain_category_id')->unique();
+
+            $products = StockItemModel::with(['parentStock' => fn($q) => $q->select('id','sales_price','name','display_name','bangla_name')])
+                ->join('inv_product', 'inv_product.id', '=', 'inv_stock.product_id')
+                ->whereIn('inv_stock.config_id', $matrixConfigIds)
+                ->whereIn('inv_product.category_id', $matrixCategoryIds)
+                ->whereIn('inv_product.vendor_id', $subDomainVendors->values())
+                ->whereNotNull('inv_stock.parent_stock_item')
+                ->select('inv_stock.*', 'inv_product.category_id', 'inv_product.vendor_id')
+                ->get();
+
+            if ($products->isEmpty()) {
+                return response()->json([
+                    'message' => 'No products found to update.',
+                    'status' => ResponseAlias::HTTP_NOT_FOUND
+                ], ResponseAlias::HTTP_NOT_FOUND);
+            }
+
+            // Map matrices for easy lookup: vendor_id + category_id => matrix
+            $matrixMap = $categoriesMatrix->keyBy(fn($matrix) => $subDomainVendors[$matrix->sub_domain_id] . '_' . $matrix->sub_domain_category_id);
+
+            $successCount = 0;
+            $failedProducts = [];
+
+            // Per-product transactional update
+            foreach ($products as $product) {
+                try {
+                    DB::transaction(function () use ($product, $matrixMap) {
+
+                        $matrixKey = $product->vendor_id . '_' . $product->category_id;
+
+                        if (!isset($matrixMap[$matrixKey])) {
+                            throw new \Exception("No price matrix found for product ID: {$product->id}");
+                        }
+
+                        $matrix = $matrixMap[$matrixKey];
+
+                        // Validate percentages
+                        if ($matrix->mrp_percent < 0 || $matrix->mrp_percent > 100) {
+                            throw new \InvalidArgumentException('Invalid MRP percentage for matrix ID: ' . $matrix->id);
+                        }
+
+                        if ($matrix->purchase_percent && ($matrix->purchase_percent < 0 || $matrix->purchase_percent > 100)) {
+                            throw new \InvalidArgumentException('Invalid purchase percentage for matrix ID: ' . $matrix->id);
+                        }
+
+                        if (!$product->parentStock) {
+                            throw new \Exception("Parent stock not found for stock item ID: {$product->id}");
+                        }
+
+                        $modifier = $matrix->percent_mode === 'Increase'
+                            ? (100 + $matrix->mrp_percent)
+                            : (100 - $matrix->mrp_percent);
+
+                        $purchaseModifier = $matrix->percent_mode === 'Increase'
+                            ? (100 + $matrix->purchase_percent)
+                            : (100 - $matrix->purchase_percent);
+
+                        $salesPrice = $product->parentStock->sales_price * ($modifier / 100);
+                        $purchasePrice = $product->parentStock->sales_price * ($purchaseModifier / 100);
+
+                        // Upsert single product
+                        StockItemModel::upsert([
+                            [
+                                'id' => $product->id,
+                                'sales_price' => $salesPrice,
+                                'purchase_price' => $purchasePrice,
+                                'name' => $product->parentStock->name,
+                                'display_name' => $product->parentStock->display_name,
+                                'bangla_name' => $product->parentStock->bangla_name,
+                            ]
+                        ], ['id'], ['sales_price', 'purchase_price', 'name', 'display_name', 'bangla_name']);
+                    });
+
+                    $successCount++;
+
+                } catch (\Exception $e) {
+//                    \Log::error("Failed to update product ID {$product->id}: " . $e->getMessage());
+                    $failedProducts[] = [
+                        'product_id' => $product->id,
+                        'product_name' => $product->parentStock->name ?? null,
+                        'category_id' => $product->category_id,
+                    ];
+                    continue; // skip this product, continue with others
+                }
+            }
+
+            return response()->json([
+                'message' => "Successfully updated {$successCount} products.",
+                'failed_products' => $failedProducts,
+                'status' => ResponseAlias::HTTP_OK
+            ]);
+
+        } catch (\Exception $e) {
+            /*\Log::error('B2B domain-wise product update failed: ' . $e->getMessage(), [
+                'exception' => $e,
+                'request' => $request->all()
+            ]);*/
+
+            return response()->json([
+                'message' => 'Failed to process price updates',
+                'status' => ResponseAlias::HTTP_INTERNAL_SERVER_ERROR
+            ], ResponseAlias::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
+
+
+
 
 }
