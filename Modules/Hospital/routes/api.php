@@ -33,8 +33,8 @@ Route::prefix('/hospital/select')->middleware([HeaderAuthenticationMiddleware::c
     Route::get('/particular', [HospitalController::class,'particularDropdown'])->name('particular_particular_dropdown');
     Route::get('/medicine', [HospitalController::class,'medicineDropdown'])->name('medicine_dropdown');
     Route::get('/medicine-generic', [HospitalController::class,'medicineGenericDropdown'])->name('medicine_generic_dropdown');
-    Route::get('/bymeal', [HospitalController::class,'byMealDropdown'])->name('byMealDropdown');
-    Route::get('/dosage', [HospitalController::class,'byDosageDropdown'])->name('byDosageDropdown');
+    Route::get('/bymeal', [HospitalController::class,'byMealDropdown'])->name('by_meal_dropdown');
+    Route::get('/dosage', [HospitalController::class,'byDosageDropdown'])->name('by_dosage_dropdown');
 
 });
 
