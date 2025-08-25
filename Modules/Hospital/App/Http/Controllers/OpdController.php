@@ -140,8 +140,6 @@ class OpdController extends Controller
     {
         $service = new JsonRequestResponse();
         $userId = $request->header('X-Api-User');
-
-
         $patientPaymentMode = ParticularModel::getDoctorNurseLabUser($userId,'doctor');
         $doctorId = $patientPaymentMode ? $patientPaymentMode->id : null;
         $entity = PrescriptionModel::updateOrCreate(

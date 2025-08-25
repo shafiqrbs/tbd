@@ -29,7 +29,7 @@ class Prescription
     protected $config;
 
     /**
-     * @ORM\ManyToOne(targetEntity="Invoice")
+     * @ORM\OneToOne(targetEntity="Invoice")
      * @ORM\JoinColumn(onDelete="CASCADE")
      **/
     private $hmsInvoice;
@@ -60,6 +60,13 @@ class Prescription
      * @ORM\Column( type="string",length=20, nullable = true)
      */
     private $bloodPressure;
+
+     /**
+     * @var string
+     *
+     * @ORM\Column( type="text",nullable = true)
+     */
+    private $jsonContent;
 
     /**
      * @var string

@@ -9,6 +9,7 @@ use Modules\Hospital\App\Http\Controllers\OpdController;
 use Modules\Hospital\App\Http\Controllers\ParticularController;
 use Modules\Hospital\App\Http\Controllers\ParticularModeController;
 use Modules\Hospital\App\Http\Controllers\ParticularTypeController;
+use Modules\Hospital\App\Http\Controllers\PrescriptionController;
 use Modules\Hospital\App\Http\Controllers\SettingController;
 
 
@@ -70,6 +71,15 @@ Route::prefix('/hospital')->middleware([HeaderAuthenticationMiddleware::class])-
         Route::apiResource('/particular-mode', ParticularModeController::class)->middleware([HeaderAuthenticationMiddleware::class]);
     });
     Route::post('/setting-matrix/create', [HospitalController::class,'settingMatrixCreate'])->name('particular_module_dropdown');
+    Route::apiResource('prescription', PrescriptionController::class)
+        ->middleware([HeaderAuthenticationMiddleware::class])
+        ->names([
+            'index' => 'prescription.index',
+            'store' => 'prescription.store',
+            'show' => 'prescription.show',
+            'update' => 'prescription.update',
+            'destroy' => 'prescription.destroy',
+        ]);
 
 
 });
