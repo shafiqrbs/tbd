@@ -47,17 +47,19 @@ class InvoiceModel extends Model
                 'hms_invoice.id',
                 'customer.name',
                 'customer.mobile',
+                'customer.gender',
                 'customer.customer_id as patient_id',
                 'customer.health_id',
-                'customer.gender',
-                DB::raw('DATE_FORMAT(hms_invoice.created_at, "%d-%m-%Y") as created'),
+                DB::raw("CONCAT(UCASE(LEFT(customer.gender, 1)), LCASE(SUBSTRING(customer.gender, 2))) as gender"),
+                DB::raw('DATE_FORMAT(hms_invoice.created_at, "%d-%m-%Y") as created_at'),
+                DB::raw('DATE_FORMAT(hms_invoice.appointment_date, "%d-%M-%Y") as appointment'),
                 'hms_invoice.process as process',
                 'vr.name as visiting_room',
                 'inv_sales.invoice as invoice',
                 'patient_mode.name as patient_mode_name',
                 'patient_payment_mode.name as patient_payment_mode_name',
                 'createdBy.name as created_by',
-                'hms_invoice.sub_total as sub_total',
+                'hms_invoice.sub_total as total',
             ]);
 
         if (isset($request['term']) && !empty($request['term'])){
@@ -155,7 +157,7 @@ class InvoiceModel extends Model
             ->select([
                 'hms_invoice.id',
                 DB::raw('DATE_FORMAT(hms_invoice.updated_at, "%d-%m-%Y") as created'),
-                DB::raw('DATE_FORMAT(hms_invoice.updated_at, "%d-%M-%Y") as created_date'),
+                DB::raw('DATE_FORMAT(hms_invoice.appointment, "%d-%M-%Y") as created_date'),
                 'hms_invoice.invoice as invoice',
                 'hms_invoice.sub_total as sub_total',
                 'hms_invoice.total as total',

@@ -47,4 +47,30 @@ class MedicineModel extends Model
 
     }
 
+
+    public static function getMealDropdown($domain)
+    {
+        $entities = self::where([
+            ['hms_medicine.config_id', $domain['hms_config']]])
+           ->select([
+                'hms_medicine.by_meal as name',
+            ])
+            ->groupBy('hms_medicine.by_meal')
+            ->get();
+
+        return $entities;
+    }
+    public static function getDosageDropdown($domain)
+    {
+        $entities = self::where([
+            ['hms_medicine.config_id', $domain['hms_config']]])
+            ->select([
+                'hms_medicine.dose_details as name',
+            ])
+            ->groupBy('hms_medicine.dose_details')
+            ->get();
+
+        return $entities;
+    }
+
 }
