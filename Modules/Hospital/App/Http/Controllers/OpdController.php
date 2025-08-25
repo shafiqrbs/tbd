@@ -25,7 +25,7 @@ use Modules\Hospital\App\Models\PrescriptionModel;
 
 
 
-class OPDController extends Controller
+class OpdController extends Controller
 {
     protected $domain;
 

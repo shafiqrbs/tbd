@@ -43,9 +43,9 @@ Route::prefix('/hospital')->middleware([HeaderAuthenticationMiddleware::class])-
     Route::get('/setting', [SettingController::class,'particularModuleDropdown'])->name('particular_module_dropdown');
     Route::get('/setting/matrix', [HospitalController::class,'settingMatrix'])->name('particular_module_dropdown');
     Route::get('/setting', [SettingController::class,'particularModuleDropdown'])->name('particular_module_dropdown');
-    Route::apiResource('opd', OPDController::class)->middleware([HeaderAuthenticationMiddleware::class]);
-    Route::get('visiting-room', [OPDController::class,'getVisitingRooms'])->name('send_prescription');
-    Route::get('send-to-prescription/{id}', [OPDController::class,'sendPrescription'])->name('send_prescription');
+    Route::apiResource('opd', OpdController::class)->middleware([HeaderAuthenticationMiddleware::class]);
+    Route::get('visiting-room', [OpdController::class,'getVisitingRooms'])->name('send_prescription');
+    Route::get('send-to-prescription/{id}', [OpdController::class,'sendPrescription'])->name('send_prescription');
     Route::prefix('core')->middleware([HeaderAuthenticationMiddleware::class])->group(function() {
         Route::apiResource('particular', ParticularController::class)
             ->middleware([HeaderAuthenticationMiddleware::class])
