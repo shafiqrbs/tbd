@@ -304,7 +304,7 @@ class HospitalController extends Controller
     /**
      * dropdown the specified resource from storage.
      */
-    public function byMealDropdown()
+    public function mealDropdown()
     {
         $dropdown = MedicineModel::getMealDropdown($this->domain);
         $service = new JsonRequestResponse();
@@ -314,7 +314,7 @@ class HospitalController extends Controller
     /**
      * dropdown the specified resource from storage.
      */
-    public function byDosageDropdown()
+    public function dosageDropdown()
     {
         $dropdown = MedicineModel::getDosageDropdown($this->domain);
         $service = new JsonRequestResponse();

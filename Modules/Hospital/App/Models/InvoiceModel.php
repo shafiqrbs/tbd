@@ -5,6 +5,7 @@ namespace Modules\Hospital\App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Support\Facades\DB;
+use Modules\Core\App\Models\CustomerModel;
 
 
 class InvoiceModel extends Model
@@ -28,6 +29,11 @@ class InvoiceModel extends Model
             $date =  new \DateTime("now");
             $model->updated_at = $date;
         });
+    }
+
+    public function customer_details()
+    {
+        return $this->hasOne(CustomerModel::class, 'id', 'customer_id');
     }
 
 
