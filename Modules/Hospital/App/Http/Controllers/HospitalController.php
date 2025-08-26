@@ -7,6 +7,8 @@ use Doctrine\ORM\EntityManagerInterface;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Modules\AppsApi\App\Services\JsonRequestResponse;
 use Modules\Core\App\Models\FileUploadModel;
 use Modules\Core\App\Models\UserModel;
@@ -29,6 +31,8 @@ use PhpOffice\PhpSpreadsheet\Reader\Xlsx;
 class HospitalController extends Controller
 {
     protected $domain;
+    private const BATCH_SIZE = 1000; // Process 1000 records at a time
+    private const MEMORY_LIMIT = '2G'; // Increase memory limit for large files
 
     public function __construct(Request $request)
     {
@@ -229,75 +233,166 @@ class HospitalController extends Controller
     }
 
 
-
-    // process finish goods product
-
-    public  function insertMedicineStock()
+    /**
+     * @throws \Throwable
+     */
+    public function insertMedicineStock()
     {
         set_time_limit(0);
-        $domain = $this->domain;
+        ini_set('memory_limit', '2G');
+
         $filePath = public_path('/uploads/medicine/medicine.xlsx');
 
-        // Load file based on extension
-        $reader = match (pathinfo($filePath, PATHINFO_EXTENSION)) {
-        'xlsx' => new Xlsx(),
-            'csv' => new \PhpOffice\PhpSpreadsheet\Reader\Csv(),
-            default => throw new Exception('Unsupported file format.')
-        };
+        try {
+            // Load file with minimal memory usage
+            $reader = match (pathinfo($filePath, PATHINFO_EXTENSION)) {
+                'xlsx' => new Xlsx(),
+                'csv' => new \PhpOffice\PhpSpreadsheet\Reader\Csv(),
+                default => throw new Exception('Unsupported file format.')
+            };
 
-        $allData = $reader->load($filePath)->getActiveSheet()->toArray();
+            $reader->setReadDataOnly(true);
+            $reader->setReadEmptyCells(false);
 
-        // for process data with header
-        $spreadsheet = $reader->load($filePath);
-        $data = $spreadsheet->getActiveSheet()->toArray(null, true, true, true);
+            $spreadsheet = $reader->load($filePath);
+            $worksheet = $spreadsheet->getActiveSheet();
 
-        // Use the first row as headers
-        $headers = array_shift($data);
-
-        // Map rows to headers
-        $dataWithHeaders = [];
-        foreach ($data as $row) {
-            $mappedRow = [];
-            foreach ($headers as $column => $headerName) {
-                $mappedRow[$headerName] = $row[$column] ?? null; // Use header name as key
+            // Get headers from first row
+            $headers = [];
+            $headerRow = $worksheet->getRowIterator(1, 1)->current();
+            foreach ($headerRow->getCellIterator() as $cell) {
+                $headers[] = trim($cell->getValue());
             }
-            $dataWithHeaders[] = $mappedRow;
-        }
 
-        // Remove headers
-        $keys = array_map('trim', array_shift($allData));
-        // Only proceed if it's 'Product' and structure is correct
+            // Optimize MySQL settings for bulk insert
+            DB::statement('SET SESSION sql_mode = ""');
+            DB::statement('SET SESSION unique_checks = 0');
+            DB::statement('SET SESSION foreign_key_checks = 0');
+            DB::statement('SET SESSION autocommit = 0');
+            DB::disableQueryLog();
 
-        foreach ($dataWithHeaders as $index => $values) {
+            $batchSize = 2500; // Larger batch for raw SQL
+            $totalProcessed = 0;
+            $errorCount = 0;
+            $batch = [];
 
-         //   $values = array_map(fn($item) => is_string($item) ? trim($item) : $item, $data);
+            // Cache timestamp and config_id
+            $currentTimestamp = now()->format('Y-m-d H:i:s');
+            $configId = $this->domain['hms_config'];
 
-            $name = $values['name'] ?? null;
-            $generic_id = $values['generic_id'] ?? 0;
-            $dose_details = trim($values['dose_details']) ?? null;
-            $by_meal = trim($values['by_meal']) ?? null;
-            $duration_month = trim($values['duration_month']) ?? null;
-            $duration_day = trim($values['duration_day']) ?? 0;
-            $generic = trim($values['generic']) ?? null;
-            $company = trim($values['company']) ?? null;
-            $formulation = trim($values['formulation']) ?? null;
-            $batch = [
-                'config_id' => $this->domain['hms_config'],
-                'name' => $name,
-                'display_name' => $name,
-                'generic_id' => $generic_id,
-                'dose_details' => $dose_details,
-                'by_meal' => $by_meal,
-                'duration_month' => $duration_month,
-                'duration_day' => $duration_day,
-                'generic' => $generic,
-                'company' => $company,
-                'formulation' => $formulation,
-                'created_at' => now(),
-                'updated_at' => now(),
+            // Get table name
+            $tableName = (new MedicineModel())->getTable();
+
+            foreach ($worksheet->getRowIterator(2) as $row) {
+                $values = [];
+                $columnIndex = 0;
+
+                foreach ($row->getCellIterator() as $cell) {
+                    if (isset($headers[$columnIndex])) {
+                        $values[$headers[$columnIndex]] = $cell->getCalculatedValue();
+                    }
+                    $columnIndex++;
+                }
+
+                // Skip empty rows
+                if (empty(array_filter($values, fn($v) => !is_null($v) && $v !== ''))) {
+                    continue;
+                }
+
+                // Prepare values for raw SQL (escape strings)
+                $name = isset($values['name']) ? DB::connection()->getPdo()->quote(trim($values['name'])) : "''";
+                $genericId = isset($values['generic_id']) ? (int) $values['generic_id'] : 0;
+                $doseDetails = isset($values['dose_details']) ? DB::connection()->getPdo()->quote(trim($values['dose_details'])) : "''";
+                $byMeal = isset($values['by_meal']) ? DB::connection()->getPdo()->quote(trim($values['by_meal'])) : "''";
+                $durationMonth = isset($values['duration_month']) ? DB::connection()->getPdo()->quote(trim($values['duration_month'])) : "''";
+                $durationDay = isset($values['duration_day']) ? (int) $values['duration_day'] : 0;
+                $generic = isset($values['generic']) ? DB::connection()->getPdo()->quote(trim($values['generic'])) : "''";
+                $company = isset($values['company']) ? DB::connection()->getPdo()->quote(trim($values['company'])) : "''";
+                $formulation = isset($values['formulation']) ? DB::connection()->getPdo()->quote(trim($values['formulation'])) : "''";
+
+                $batch[] = "({$configId}, {$name}, {$name}, {$genericId}, {$doseDetails}, {$byMeal}, {$durationMonth}, {$durationDay}, {$generic}, {$company}, {$formulation}, '{$currentTimestamp}', '{$currentTimestamp}')";
+
+                // Execute batch when size is reached
+                if (count($batch) >= $batchSize) {
+                    try {
+                        $sql = "INSERT INTO {$tableName}
+                           (config_id, name, display_name, generic_id, dose_details, by_meal, duration_month, duration_day, generic, company, formulation, created_at, updated_at)
+                           VALUES " . implode(',', $batch);
+
+                        DB::statement($sql);
+                        $totalProcessed += count($batch);
+
+                    } catch (Exception $e) {
+                        $errorCount += count($batch);
+                        \Log::error("SQL batch insert failed: " . $e->getMessage());
+                    }
+
+                    $batch = [];
+
+                    // Memory management
+                    if ($totalProcessed % 2500 === 0) {
+                        gc_collect_cycles();
+                    }
+                }
+            }
+
+            // Insert remaining records
+            if (!empty($batch)) {
+                try {
+                    $sql = "INSERT INTO {$tableName}
+                       (config_id, name, display_name, generic_id, dose_details, by_meal, duration_month, duration_day, generic, company, formulation, created_at, updated_at)
+                       VALUES " . implode(',', $batch);
+
+                    DB::statement($sql);
+                    $totalProcessed += count($batch);
+
+                } catch (Exception $e) {
+                    $errorCount += count($batch);
+                    \Log::error("Final SQL batch failed: " . $e->getMessage());
+                }
+            }
+
+            // Commit all changes
+            DB::statement('COMMIT');
+
+            // Reset MySQL settings
+            DB::statement('SET SESSION unique_checks = 1');
+            DB::statement('SET SESSION foreign_key_checks = 1');
+            DB::statement('SET SESSION autocommit = 1');
+            DB::enableQueryLog();
+
+            // Clean up memory
+            $spreadsheet->disconnectWorksheets();
+            unset($spreadsheet, $worksheet, $batch, $values);
+            gc_collect_cycles();
+
+            $message = "Import completed! Processed: {$totalProcessed} records, Errors: {$errorCount}";
+            \Log::info($message);
+
+            return [
+                'success' => true,
+                'message' => $message,
+                'data' => [
+                    'total_processed' => $totalProcessed,
+                    'total_errors' => $errorCount
+                ]
             ];
-            MedicineModel::insert($batch);
 
+        } catch (Exception $e) {
+            // Reset MySQL settings on error
+            DB::statement('ROLLBACK');
+            DB::statement('SET SESSION unique_checks = 1');
+            DB::statement('SET SESSION foreign_key_checks = 1');
+            DB::statement('SET SESSION autocommit = 1');
+            DB::enableQueryLog();
+
+            \Log::error("Medicine import failed: " . $e->getMessage());
+
+            return [
+                'success' => false,
+                'message' => 'Import failed: ' . $e->getMessage(),
+                'data' => null
+            ];
         }
     }
 
