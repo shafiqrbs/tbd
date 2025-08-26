@@ -27,6 +27,7 @@ use Modules\Medicine\App\Models\MedicineGenericModel;
 use Modules\Production\App\Models\ProductionItems;
 use PhpOffice\PhpSpreadsheet\Exception;
 use PhpOffice\PhpSpreadsheet\Reader\Xlsx;
+use Throwable;
 
 class HospitalController extends Controller
 {
@@ -234,7 +235,7 @@ class HospitalController extends Controller
 
 
     /**
-     * @throws \Throwable
+     * @throws Throwable
      */
     public function insertMedicineStock()
     {
