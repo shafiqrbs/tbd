@@ -3,6 +3,7 @@
 namespace Modules\Hospital\App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use Carbon\Carbon;
 use Doctrine\ORM\EntityManagerInterface;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -49,10 +50,10 @@ class OpdController extends Controller
         $response = new Response();
         $response->headers->set('Content-Type','application/json');
         $response->setContent(json_encode([
-            'message' => 'success',
-            'status' => Response::HTTP_OK,
-            'total' => $data['count'],
-            'data' => $data['entities']
+            'message'   => 'success',
+            'status'    => Response::HTTP_OK,
+            'total'     => $data['count'],
+            'data'      => $data['entities']
         ]));
         $response->setStatusCode(Response::HTTP_OK);
         return $response;

@@ -104,7 +104,7 @@ class PrescriptionController extends Controller
         $service = new JsonRequestResponse();
         CustomerModel::find($id)->delete();
 
-        $entity = ['message'=>'delete'];
+        $entity = ['message' => 'delete'];
         return $service->returnJosnResponse($entity);
     }
 
@@ -112,6 +112,7 @@ class PrescriptionController extends Controller
     /**
      * Display a listing of the resource.
      */
+
     public function localStorage(Request $request,EntityManagerInterface $em){
         $data = CustomerModel::getRecordsForLocalStorage($this->domain,$request);
         $response = new Response();

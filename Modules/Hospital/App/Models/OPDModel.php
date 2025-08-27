@@ -109,7 +109,7 @@ class OPDModel extends Model
                 'patient_payment_mode_id' => $paymentMode ?? null,
                 'free_identification' => $data['free_identification'] ?? null,
                 'remark' => $data['remark'] ?? null,
-                'appointment_date' => $data['appointment_date'] ?? null,
+                'appointment_date' =>  new \DateTime("now") ?? null,
                 'day' => $data['day'] ?? null,
                 'month' => $data['month'] ?? null,
                 'year' => $data['year'] ?? null,
