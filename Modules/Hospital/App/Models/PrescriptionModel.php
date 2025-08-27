@@ -43,7 +43,7 @@ class PrescriptionModel extends Model
         $skip = isset($page) && $page!=''? (int)$page * $perPage:0;
         $entities = InvoiceModel::where([['hms_invoice.config_id',$domain['hms_config']]])
             ->join('inv_sales as inv_sales','inv_sales.id','=','hms_invoice.sales_id')
-            ->leftjoin('hms_prescription','hms_prescription.hms_invoice_id','=','hms_invoice.id')
+            ->join('hms_prescription','hms_prescription.hms_invoice_id','=','hms_invoice.id')
             ->leftjoin('hms_particular as vr','vr.id','=','hms_invoice.room_id')
             ->leftjoin('users as createdBy','createdBy.id','=','inv_sales.created_by_id')
             ->join('cor_customers as customer','customer.id','=','inv_sales.customer_id')
