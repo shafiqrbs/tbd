@@ -100,16 +100,24 @@ class Category
     /**
      * @var boolean
      *
-     * @ORM\Column(type="boolean",nullable=true )
+     * @ORM\Column(type="boolean",nullable=true, nullable=true)
      */
     private $hasQuantity = false;
 
     /**
      * @var boolean
      *
-     * @ORM\Column(name="status", type="boolean" )
+     * @ORM\Column(name="status", type="boolean",nullable=true )
      */
     private $status= true;
+
+    /**
+     * @var boolean
+     *
+     * @ORM\Column(name="is_private", type="boolean", nullable=true )
+     */
+    private $isPrivate= false;
+
 
     /**
      * @var \DateTime

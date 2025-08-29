@@ -65,9 +65,10 @@ class ParticularDetailsModel extends Model
         if ($room) { $parts[] = $room->name;}
         $implode = implode(' ', $parts);
         $displayName = "{$implode} - {$particular->name}";
+
         self::updateOrCreate(
             [
-                'id' => $particular->id,
+                'particular_id' => $particular->id,
             ],
             [
                 'room_id'           => $room_id,
@@ -77,8 +78,6 @@ class ParticularDetailsModel extends Model
                 'payment_mode_id'   => $payment_mode_id,
             ]
         );
-
-
         ParticularModel::updateOrCreate(
             [
                 'id' => $particular->id,
@@ -106,14 +105,19 @@ class ParticularDetailsModel extends Model
         if ($cabin) { $parts[] = $cabin->name; }
         $implode = implode(' ', $parts);
         $displayName = "{$implode} - {$particular->name}";
-        self::create([
-            'particular_id'     => $particular->id,
-            'display_name'      => $displayName,
-            'patient_mode_id'   => $patient_mode_id,
-            'gender_mode_id'    => $gender_mode_id,
-            'payment_mode_id'   => $payment_mode_id,
-            'cabin_mode_id'   => $cabin_mode_id,
-        ]);
+
+        self::updateOrCreate(
+            [
+                'particular_id' => $particular->id,
+            ],
+            [
+                'display_name'      => $displayName,
+                'patient_mode_id'   => $patient_mode_id,
+                'gender_mode_id'    => $gender_mode_id,
+                'payment_mode_id'   => $payment_mode_id,
+                'cabin_mode_id'   => $cabin_mode_id,
+            ]
+        );
         ParticularModel::updateOrCreate(
             [
                 'id' => $particular->id,

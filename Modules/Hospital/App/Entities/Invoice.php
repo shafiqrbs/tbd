@@ -281,6 +281,12 @@ class Invoice
      */
     private $commissionApproved;
 
+    /**
+     * @var boolean
+     *
+     * @ORM\Column(type="boolean",options={"default"="false"})
+     */
+    private $isAdmission;
 
     /**
      * @var boolean
@@ -288,7 +294,6 @@ class Invoice
      * @ORM\Column(type="boolean",options={"default"="false"})
      */
     private $isDelete;
-
 
     /**
      * @var string

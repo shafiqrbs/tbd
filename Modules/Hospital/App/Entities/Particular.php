@@ -129,6 +129,14 @@ class Particular
      *
      * @ORM\Column(type="boolean",options={"default"="false"})
      */
+    private $isHold;
+
+
+    /**
+     * @var boolean
+     *
+     * @ORM\Column(type="boolean",options={"default"="false"})
+     */
     private $isDelete;
 
 

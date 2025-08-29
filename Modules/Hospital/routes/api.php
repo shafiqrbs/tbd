@@ -3,6 +3,7 @@
 use App\Http\Middleware\HeaderAuthenticationMiddleware;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use Modules\Hospital\App\Http\Controllers\CategoryController;
 use Modules\Hospital\App\Http\Controllers\HospitalController;
 
 use Modules\Hospital\App\Http\Controllers\OpdController;
@@ -67,6 +68,15 @@ Route::prefix('/hospital')->middleware([HeaderAuthenticationMiddleware::class])-
                 'show' => 'particular-type.show',
                 'update' => 'particular-type.update',
                 'destroy' => 'particular-type.destroy',
+            ]);
+        Route::apiResource('category', CategoryController::class)
+            ->middleware([HeaderAuthenticationMiddleware::class])
+            ->names([
+                'index' => 'category.index',
+                'store' => 'category.store',
+                'show' => 'category.show',
+                'update' => 'category.update',
+                'destroy' => 'category.destroy',
             ]);
         Route::apiResource('/particular-mode', ParticularModeController::class)->middleware([HeaderAuthenticationMiddleware::class]);
     });

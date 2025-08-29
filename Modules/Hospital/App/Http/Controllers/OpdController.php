@@ -63,6 +63,7 @@ class OpdController extends Controller
     /**
      * Display a listing of the resource.
      */
+
     public function getVisitingRooms(Request $request){
         $domain = $this->domain;
         $data = InvoiceModel::getVisitingRooms($domain);

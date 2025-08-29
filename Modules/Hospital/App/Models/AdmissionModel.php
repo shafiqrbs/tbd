@@ -7,11 +7,11 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Support\Facades\DB;
 
 
-class PrescriptionModel extends Model
+class AdmissionModel extends Model
 {
     use HasFactory;
 
-    protected $table = 'hms_prescription';
+    protected $table = 'hms_invoice';
     public $timestamps = true;
     protected $guarded = ['id'];
 
@@ -43,7 +43,7 @@ class PrescriptionModel extends Model
         $skip = isset($page) && $page!=''? (int)$page * $perPage:0;
         $entities = InvoiceModel::where([['hms_invoice.config_id',$domain['hms_config']]])
             ->join('inv_sales as inv_sales','inv_sales.id','=','hms_invoice.sales_id')
-            ->leftjoin('hms_prescription','hms_prescription.hms_invoice_id','=','hms_invoice.id')
+            ->join('hms_prescription','hms_prescription.hms_invoice_id','=','hms_invoice.id')
             ->leftjoin('hms_particular as vr','vr.id','=','hms_invoice.room_id')
             ->leftjoin('users as createdBy','createdBy.id','=','inv_sales.created_by_id')
             ->join('cor_customers as customer','customer.id','=','inv_sales.customer_id')
@@ -62,7 +62,6 @@ class PrescriptionModel extends Model
                 DB::raw('DATE_FORMAT(hms_invoice.appointment_date, "%d-%M-%Y") as appointment'),
                 'hms_invoice.process as process',
                 'vr.name as visiting_room',
-                'vr.id as visiting_room_id',
                 'inv_sales.invoice as invoice',
                 'patient_mode.name as patient_mode_name',
                 'patient_payment_mode.name as patient_payment_mode_name',
@@ -96,41 +95,6 @@ class PrescriptionModel extends Model
 
         $data = array('count'=>$total,'entities'=>$entities);
         return $data;
-    }
-
-    public static function getVisitingRooms($domain)
-    {
-        $entities = ParticularModel::where([
-            ['hms_particular.config_id', $domain['hms_config']],
-            ['hms_particular_master_type.slug', 'visiting-room'],
-            ])
-            ->join('hms_invoice', 'hms_invoice.room_id', '=', 'hms_particular.id')
-            ->join('hms_particular_type', 'hms_particular_type.id', '=', 'hms_particular.particular_type_id')
-            ->join('hms_particular_master_type', 'hms_particular_master_type.id', '=', 'hms_particular_type.particular_master_type_id')
-            ->select([
-                'hms_particular.id as id',
-                'hms_particular.name',
-                DB::raw('COUNT(hms_invoice.id) as invoice_count')
-            ])
-            ->groupBy('hms_particular.id')
-            ->get();
-
-        $selected = ParticularModel::where([
-            ['hms_particular.config_id', $domain['hms_config']],
-            ['hms_particular_master_type.slug', 'visiting-room'],
-            ['hms_particular.is_hold',0]])
-            ->leftJoin('hms_invoice', 'hms_invoice.room_id', '=', 'hms_particular.id')
-            ->join('hms_particular_type', 'hms_particular_type.id', '=', 'hms_particular.particular_type_id')
-            ->join('hms_particular_master_type', 'hms_particular_master_type.id', '=', 'hms_particular_type.particular_master_type_id')
-            ->select([
-                'hms_particular.id as id',
-            ])
-            ->groupBy('hms_particular.id')
-            ->orderBy(DB::raw('COUNT(hms_invoice.id)'), 'DESC')
-            ->limit(1)
-            ->get();
-
-        return array('entities' => $entities ,'selected' => $selected);
     }
 
 

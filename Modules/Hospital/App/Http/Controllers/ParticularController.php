@@ -132,7 +132,6 @@ class ParticularController extends Controller
         if($masterType->slug == 'cabin'){
             ParticularDetailsModel::insertCabin($entity,$input);
         }
-
         $service = new JsonRequestResponse();
         return $service->returnJosnResponse($entity);
     }

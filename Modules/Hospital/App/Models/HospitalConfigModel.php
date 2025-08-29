@@ -161,10 +161,11 @@ class HospitalConfigModel extends Model
     {
         $categories = [
             [
-                'name' => 'IPD',
+                'name' => 'IPD Fee',
                 'subcategories' => [
                     [
-                        'name' => 'IPD Fee',
+                        'name' => 'IPD',
+                        'is_private' => 1,
                         'products' => [
                             [
                                 'name' => 'Admission Fee',
@@ -176,10 +177,11 @@ class HospitalConfigModel extends Model
                 ]
             ],
             [
-                'name' => 'OPD',
+                'name' => 'OPD Fee',
                 'subcategories' => [
                     [
-                        'name' => 'OPD Fee',
+                        'name' => 'OPD',
+                        'is_private' => 1,
                         'products' => [
                             [
                                 'name' => 'OPD Ticket Fee',
@@ -191,10 +193,11 @@ class HospitalConfigModel extends Model
                 ]
             ],
             [
-                'name' => 'Emergency',
+                'name' => 'Emergency Fee',
                 'subcategories' => [
                     [
-                        'name' => 'Emergency Fee',
+                        'name' => 'Emergency',
+                        'is_private' => 1,
                         'products' => [
                             [
                                 'name' => 'Emergency Fee',
@@ -206,10 +209,11 @@ class HospitalConfigModel extends Model
                 ]
             ],
             [
-                'name' => 'OT',
+                'name' => 'OT Fee',
                 'subcategories' => [
                     [
-                        'name' => 'OT Fee',
+                        'name' => 'OT',
+                        'is_private' => 1,
                         'products' => [
                             [
                                 'name' => 'OT Fee',
@@ -219,6 +223,46 @@ class HospitalConfigModel extends Model
                         ]
                     ],
                 ]
+            ],
+            [
+                'name' => 'ICU Fee',
+                    'subcategories' => [
+                        [
+                            'name' => 'ICU',
+                            'is_private' => 1,
+                            'products' => []
+                        ],
+                    ],
+            ],
+            [
+            'name' => 'Doctor Fee',
+                'subcategories' => [
+                    [
+                        'name' => 'Doctor',
+                        'is_private' => 1,
+                        'products' => []
+                    ],
+                ],
+            ],
+            [
+                'name' => 'Cabin Fee',
+                'subcategories' => [
+                    [
+                        'name' => 'Cabin',
+                        'is_private' => 1,
+                        'products' => []
+                    ],
+                ],
+            ],
+            [
+                'name' => 'Bed Fee',
+                'subcategories' => [
+                    [
+                        'name' => 'Bed',
+                        'is_private' => 1,
+                        'products' => []
+                    ],
+                ],
             ]
         ];
         self::insertCategoryTreeWithProducts($domain,$categories);
@@ -237,7 +281,6 @@ class HospitalConfigModel extends Model
                     ],
                     [
                         'code'           => $masterCategory->code,
-                        'slug'           => $masterCategory->slug,
                         'status'         => 1,
                     ]
                 );
@@ -262,7 +305,6 @@ class HospitalConfigModel extends Model
             ],
             [
                 'name'           => $group->name,
-                'slug'           => "cat-{$group->slug}",
                 'status'         => 1,
             ]
         );
@@ -273,7 +315,7 @@ class HospitalConfigModel extends Model
     public static function investigationMasterReportFormat($entity,$investigation){
 
 
-        $formats = InvestigationMasterReportFormatModel::where('diagnostic_report_id', $entity->id)->get();
+        /*$formats = InvestigationMasterReportFormatModel::where('diagnostic_report_id', $entity->id)->get();
         foreach ($formats as $report) {
             $format = InvestigationReportFormatModel::updateOrCreate(
                 [
@@ -288,7 +330,7 @@ class HospitalConfigModel extends Model
                     'status'          => 1,
                 ]
             );
-        }
+        }*/
     }
 
     public static function insertCategoryTreeWithProducts($domain,$categories, $parentId = null)
@@ -305,6 +347,7 @@ class HospitalConfigModel extends Model
                 ],
                 [
                     'parent' => $parentId,
+                    'is_private'     => 1,
                     'status' => 1,
                 ]
             );

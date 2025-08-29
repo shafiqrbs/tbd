@@ -102,7 +102,7 @@ class PatientModel extends Model
         $params = [
             'domain' => $model->domain_id,
             'table' => 'cor_customers',
-            'prefix' => 'CUS-',
+            'prefix' => 'PID-',
         ];
         return $patternCodeService->customerCode($params);
     }

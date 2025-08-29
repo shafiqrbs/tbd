@@ -87,7 +87,8 @@ class SettingModel extends Model
         $counts  = $entities->count();
         $entities = $entities->skip($skip)
             ->take($perPage)
-            ->orderBy('id','DESC')
+            ->orderBy('cst.name','ASC')
+            ->orderBy('name','ASC')
             ->get();
         $data = array('count' => $counts,'entities' => $entities);
         return $data;

@@ -236,20 +236,35 @@ class InvoiceModel extends Model
     {
         $entities = ParticularModel::where([
             ['hms_particular.config_id', $domain['hms_config']],
-            ['hms_particular_master_type.slug', 'visiting-room']])
+            ['hms_particular_master_type.slug', 'visiting-room'],
+            ['hms_particular.is_hold',0]])
             ->leftJoin('hms_invoice', 'hms_invoice.room_id', '=', 'hms_particular.id')
             ->join('hms_particular_type', 'hms_particular_type.id', '=', 'hms_particular.particular_type_id')
             ->join('hms_particular_master_type', 'hms_particular_master_type.id', '=', 'hms_particular_type.particular_master_type_id')
             ->select([
                 'hms_particular.id as id',
-                'hms_particular_type.id as hms_particular_type_id',
                 'hms_particular.name',
                 DB::raw('COUNT(hms_invoice.id) as invoice_count')
             ])
             ->groupBy('hms_particular.id')
             ->get();
 
-        return $entities;
+        $selected = ParticularModel::where([
+            ['hms_particular.config_id', $domain['hms_config']],
+            ['hms_particular_master_type.slug', 'visiting-room'],
+            ['hms_particular.is_hold',0]])
+            ->leftJoin('hms_invoice', 'hms_invoice.room_id', '=', 'hms_particular.id')
+            ->join('hms_particular_type', 'hms_particular_type.id', '=', 'hms_particular.particular_type_id')
+            ->join('hms_particular_master_type', 'hms_particular_master_type.id', '=', 'hms_particular_type.particular_master_type_id')
+            ->select([
+                'hms_particular.id as id',
+            ])
+            ->groupBy('hms_particular.id')
+            ->orderBy(DB::raw('COUNT(hms_invoice.id)'), 'DESC')
+            ->limit(1)
+            ->get();
+
+        return array('entities' => $entities ,'selected' => $selected);
     }
 
 

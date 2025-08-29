@@ -47,6 +47,7 @@ class SettingRequest extends FormRequest
             {
                 return [
                     'name' => 'required|string',
+                    'setting_type_id' => 'required|integer|nullable',
                 ];
             }
             default:break;
