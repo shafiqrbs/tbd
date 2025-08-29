@@ -26,6 +26,7 @@ use Modules\Hospital\App\Http\Controllers\SettingController;
 */
 
 Route::prefix('/hospital/select')->middleware([HeaderAuthenticationMiddleware::class])->group(function() {
+    Route::get('/category', [HospitalController::class,'categoryDropdown'])->name('category_dropdown');
     Route::get('/bymeal', [HospitalController::class,'mealDropdown'])->name('meal_dropdown');
     Route::get('/dosage', [HospitalController::class,'dosageDropdown'])->name('dosage_dropdown');
     Route::get('/module', [HospitalController::class,'particularModuleDropdown'])->name('particular_module_dropdown');

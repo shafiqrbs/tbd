@@ -13,6 +13,7 @@ use Modules\AppsApi\App\Services\JsonRequestResponse;
 use Modules\Core\App\Models\FileUploadModel;
 use Modules\Core\App\Models\UserModel;
 use Modules\Domain\App\Models\DomainModel;
+use Modules\Hospital\App\Models\CategoryModel;
 use Modules\Hospital\App\Models\MedicineModel;
 use Modules\Hospital\App\Models\ParticularMatrixModel;
 use Modules\Hospital\App\Models\ParticularModel;
@@ -416,6 +417,18 @@ class HospitalController extends Controller
         $service = new JsonRequestResponse();
         return $service->returnJosnResponse($dropdown);
     }
+
+    /**
+     * dropdown the specified resource from storage.
+     */
+    public function categoryDropdown(Request $request)
+    {
+        $type = $request->get('type');
+        $dropdown = CategoryModel::getCategoryDropdown($this->domain,$type);
+        $service = new JsonRequestResponse();
+        return $service->returnJosnResponse($dropdown);
+    }
+
 
 
 

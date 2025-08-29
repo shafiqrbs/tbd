@@ -11,8 +11,9 @@ use Modules\AppsApi\App\Services\JsonRequestResponse;
 use Modules\Core\App\Models\UserModel;
 use Modules\Core\App\Models\VendorModel;
 use Modules\Hospital\App\Http\Requests\CategoryRequest;
+use Modules\Hospital\App\Models\CategoryModel;
 use Modules\Inventory\App\Http\Requests\CategoryGroupRequest;
-use Modules\Inventory\App\Models\CategoryModel;
+
 
 class CategoryController extends Controller
 {

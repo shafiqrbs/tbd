@@ -88,6 +88,14 @@ class ParticularDetails
 
 
     /**
+     * @var string
+     *
+     * @ORM\Column(type="string", length=50, nullable=true)
+     */
+    private $investigationRoom;
+
+
+    /**
      * @var integer
      *
      * @ORM\Column(name="quantity", type="smallint", length=3, nullable=true)

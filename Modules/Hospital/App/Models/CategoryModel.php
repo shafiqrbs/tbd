@@ -1,6 +1,6 @@
 <?php
 
-namespace Modules\Inventory\App\Models;
+namespace Modules\Hospital\App\Models;
 
 use Cviebrock\EloquentSluggable\Sluggable;
 use Illuminate\Database\Eloquent\Model;
@@ -19,6 +19,7 @@ class CategoryModel extends Model
         'name',
         'slug',
         'status',
+        'is_private',
         'parent'
     ];
 
@@ -73,14 +74,7 @@ class CategoryModel extends Model
     public static function getCategoryDropdown($domain,$type='all')
     {
         $query = self::select(['name', 'slug', 'id'])
-            ->where([['status', 1],['config_id', $domain['config_id']]]);
-        if ($type == 'parent'){
-            $query->whereNotNull('parent');
-        }
-        if ($type == 'child'){
-            $query->whereNull('parent');
-        }
-
+            ->where([['status', 1],['config_id', $domain['config_id']]])->whereNull('inv_category.is_private')->whereNotNull('parent');
         return $query->get();
     }
 
@@ -91,7 +85,7 @@ class CategoryModel extends Model
         $perPage = isset($request['offset']) && $request['offset']!=''? (int)($request['offset']):0;
         $skip = isset($page) && $page!=''? (int)$page * $perPage:0;
 
-        $categories = self::where('inv_category.config_id',$domain['config_id'])
+        $categories = self::where('inv_category.config_id',$domain['config_id'])->whereNull('inv_category.is_private')
             ->leftjoin('inv_category as p','p.id','=','inv_category.parent')
             ->select([
                 'inv_category.id',
