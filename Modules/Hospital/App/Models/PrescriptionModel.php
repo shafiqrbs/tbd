@@ -55,7 +55,7 @@ class PrescriptionModel extends Model
             ->join('hms_particular_mode as patient_mode','patient_mode.id','=','hms_invoice.patient_mode_id')
             ->join('hms_particular_mode as patient_payment_mode','patient_payment_mode.id','=','hms_invoice.patient_payment_mode_id')
             ->select([
-                'hms_invoice.id',
+                'hms_invoice.id as invoice_id',
                 'hms_prescription.id as prescription_id',
                 'customer.name',
                 'customer.mobile',
