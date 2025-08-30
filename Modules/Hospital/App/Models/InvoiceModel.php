@@ -36,6 +36,11 @@ class InvoiceModel extends Model
         return $this->hasOne(CustomerModel::class, 'id', 'customer_id');
     }
 
+    public function sales_details()
+    {
+        return $this->hasOne(OpdModel::class, 'id', 'sales_id');
+    }
+
 
     public static function getRecords($request,$domain)
     {
@@ -258,7 +263,7 @@ class InvoiceModel extends Model
                 'hms_particular.id as id',
             ])
             ->groupBy('hms_particular.id')
-            ->orderBy(DB::raw('COUNT(hms_invoice.id)'), 'DESC')
+            ->orderBy(DB::raw('COUNT(hms_invoice.id)'), 'ASC')
             ->limit(1)
             ->get();
 

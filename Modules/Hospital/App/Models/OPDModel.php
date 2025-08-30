@@ -132,6 +132,8 @@ class OPDModel extends Model
             ]
         );
 
+        return $invoice->id;
+
     }
 
     public function insertSalesItems($sales,$items)

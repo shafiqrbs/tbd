@@ -90,7 +90,7 @@ class OpdController extends Controller
             $hmsConfig = $this->domain['hms_config'];
             $config = HospitalConfigModel::find($hmsConfig);
             if($entity){
-                OPDModel::insertHmsInvoice($invConfig,$config, $entity,$input);
+                $invoice = OPDModel::insertHmsInvoice($invConfig,$config, $entity,$input);
             }
             $accountingConfig = AccountingModel::where('id', $this->domain['acc_config'])->first();
             $ledgerExist = AccountHeadModel::where('customer_id', $entity->id)->where('config_id', $this->domain['acc_config'])->where('parent_id', $config->account_customer_id)->first();
@@ -98,8 +98,9 @@ class OpdController extends Controller
                AccountHeadModel::insertCustomerLedger($accountingConfig, $entity);
             }
             DB::commit();
-            $data = $service->returnJosnResponse($entity);
-            return $data;
+            $invoice = InvoiceModel::with(['customer_details:id,name,mobile,address,identity_mode,nid,dob,customer_id','sales_details:id,invoice'])->find($invoice);
+            $service = new JsonRequestResponse();
+            return $service->returnJosnResponse($invoice);
         } catch (\Exception $e) {
             // Something went wrong, rollback the transaction
             DB::rollBack();
