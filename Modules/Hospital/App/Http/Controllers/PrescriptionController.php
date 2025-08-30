@@ -79,7 +79,7 @@ class PrescriptionController extends Controller
     public function edit($id)
     {
         $service = new JsonRequestResponse();
-        $entity = PrescriptionModel::find($id);
+        $entity = PrescriptionModel::getShow($id);
         $data = $service->returnJosnResponse($entity);
         return $data;
     }
@@ -91,13 +91,13 @@ class PrescriptionController extends Controller
     {
         $data = $request->all();
         $entity = PrescriptionModel::find($id);
-        $entity['json_content'] = $data;
+        $data['json_content'] = $data;
         $userId = $request->header('X-Api-User');
-        $entity['prescribe_doctor_id'] = $userId;
+        $data['prescribe_doctor_id'] = $userId;
         $entity->update($data);
-        $entity = PrescriptionModel::with(['invoice_details','invoice_details.customer_details'])->find($entity->id);
+        $return = PrescriptionModel::getShow($entity->id);
         $service = new JsonRequestResponse();
-        return $service->returnJosnResponse($entity);
+        return $service->returnJosnResponse($return);
 
     }
 
@@ -108,7 +108,6 @@ class PrescriptionController extends Controller
     {
         $service = new JsonRequestResponse();
         CustomerModel::find($id)->delete();
-
         $entity = ['message' => 'delete'];
         return $service->returnJosnResponse($entity);
     }
