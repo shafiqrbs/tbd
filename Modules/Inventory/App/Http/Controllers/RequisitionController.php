@@ -69,6 +69,7 @@ class RequisitionController extends Controller
             $input = $request->validated();
             $input['config_id'] = $this->domain['config_id'];
             $input['status'] = true;
+            $input['process'] = "Created";
 
             $findVendor = VendorModel::find($input['vendor_id']);
             if (!$findVendor) {

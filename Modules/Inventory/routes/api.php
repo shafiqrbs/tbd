@@ -125,7 +125,8 @@ Route::prefix('/inventory')->middleware([HeaderAuthenticationMiddleware::class,L
     Route::prefix('/requisition')->group(function() {
         Route::get('approve/{id}', [RequisitionController::class,'approve'])->name('requisition_approve');
         Route::prefix('matrix/board')->group(function() {
-            Route::get('{id}', [RequisitionMatrixBoardController::class,'matrixBoard'])->name('requisition_matrix_board');
+            Route::get('', [RequisitionMatrixBoardController::class,'index'])->name('requisition_matrix_board_index');
+            Route::get('{id}', [RequisitionMatrixBoardController::class,'matrixBoardDetails'])->name('requisition_matrix_board_details');
             Route::post('create', [RequisitionMatrixBoardController::class,'store'])->name('requisition_matrix_board_create');
             Route::post('quantity-update', [RequisitionMatrixBoardController::class,'matrixBoardQuantityUpdate'])->name('requisition_matrix_board_quantity_update');
             Route::post('batch-generate/{id}', [RequisitionMatrixBoardController::class,'matrixBoardBatchGenerate'])->name('requisition_matrix_board_batch_generate');

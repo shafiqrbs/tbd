@@ -20,7 +20,7 @@ class RequisitionRequest extends FormRequest
         // Common validation rules for 'POST', 'PUT', and 'PATCH' methods
         return [
             'vendor_id' => 'required|integer|regex:/^\d+(\.\d{1,2})?$/',
-            'process' => 'required|string',
+            'process' => 'nullable|string',
             'invoice_date' => 'required|date',
             'expected_date' => 'required|date',
             'remark' => 'nullable|string',

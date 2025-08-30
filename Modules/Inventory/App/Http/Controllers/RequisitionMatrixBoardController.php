@@ -4,6 +4,7 @@ namespace Modules\Inventory\App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -29,6 +30,21 @@ class RequisitionMatrixBoardController extends Controller
             $userData = UserModel::getUserData($userId);
             $this->domain = $userData;
         }
+    }
+
+    public function index(Request $request)
+    {
+        $data = RequisitionBoardModel::getRecords($request, $this->domain);
+        $response = new Response();
+        $response->headers->set('Content-Type', 'application/json');
+        $response->setContent(json_encode([
+            'message' => 'success',
+            'status' => Response::HTTP_OK,
+            'total' => $data['count'],
+            'data' => $data['entities']
+        ]));
+        $response->setStatusCode(Response::HTTP_OK);
+        return $response;
     }
 
     public function store(Request $request)
@@ -58,22 +74,13 @@ class RequisitionMatrixBoardController extends Controller
                 ], ResponseAlias::HTTP_CONFLICT);
             }
 
-            $board = RequisitionBoardModel::create([
-                'config_id' => $vendorConfigId,
-                'created_by_id' => $this->domain['user_id'],
-                'batch_no' => $request->batch_no,
-                'total' => 0,
-                'status' => 1,
-                'process' => 'Created',
-                'generate_date' => $expectedDate,
-            ]);
-
             // Fetch Requisition Items
             $getItems = RequisitionItemModel::where([
                 ['inv_requisition_item.vendor_config_id', $vendorConfigId],
                 ['inv_requisition.expected_date','<=', $expectedDate]
             ])
-                ->whereIn('inv_requisition.process', ['Approved', 'Generated'])
+                ->whereIn('inv_requisition.process', ['Approved'])
+                ->whereNotNull('inv_requisition.approved_by_id')
                 ->select([
                     'inv_requisition_item.id',
                     'inv_requisition_item.vendor_config_id',
@@ -101,6 +108,23 @@ class RequisitionMatrixBoardController extends Controller
                 ->join('cor_customers', 'cor_customers.id', '=', 'inv_requisition.customer_id')
                 ->get()
                 ->toArray();
+
+            if (count($getItems) > 0) {
+                $board = RequisitionBoardModel::create([
+                    'config_id' => $vendorConfigId,
+                    'created_by_id' => $this->domain['user_id'],
+                    'batch_no' => $request->batch_no,
+                    'total' => 0,
+                    'status' => 1,
+                    'process' => 'Created',
+                    'generate_date' => $expectedDate,
+                ]);
+            }else{
+                return response()->json([
+                    'status' => ResponseAlias::HTTP_CONFLICT,
+                    'message' => 'No available data for create board.',
+                ], ResponseAlias::HTTP_CONFLICT);
+            }
 
             // Update process for fetched requisition items
             $requisitionIds = array_unique(array_column($getItems, 'requisition_id'));
@@ -174,7 +198,7 @@ class RequisitionMatrixBoardController extends Controller
     }
 
 
-    public function matrixBoard(Request $request , $id)
+    public function matrixBoardDetails(Request $request , $id)
     {
         DB::beginTransaction(); // Start Database Transaction
 
