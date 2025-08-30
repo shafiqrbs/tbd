@@ -92,6 +92,8 @@ class PrescriptionController extends Controller
         $data = $request->all();
         $entity = PrescriptionModel::find($id);
         $entity['json_content'] = $data;
+        $userId = $request->header('X-Api-User');
+        $entity['prescribe_doctor_id'] = $userId;
         $entity->update($data);
         $entity = PrescriptionModel::with(['invoice_details','invoice_details.customer_details'])->find($entity->id);
         $service = new JsonRequestResponse();
