@@ -98,7 +98,7 @@ class OpdController extends Controller
                AccountHeadModel::insertCustomerLedger($accountingConfig, $entity);
             }
             DB::commit();
-            $invoice = InvoiceModel::with(['customer_details:id,name,mobile,address,identity_mode,nid,dob,customer_id','sales_details:id,invoice'])->find($invoice);
+            $invoice = InvoiceModel::with(['customer_details:id,name,mobile,address,identity_mode,nid,dob,customer_id,health_id','sales_details:id,invoice'])->find($invoice);
             $service = new JsonRequestResponse();
             return $service->returnJosnResponse($invoice);
         } catch (\Exception $e) {
@@ -127,7 +127,8 @@ class OpdController extends Controller
      *//**/
     public function show($id)
     {
-        $entity = CustomerModel::find($id);
+
+        $entity = InvoiceModel::with(['customer_details:id,name,mobile,address,identity_mode,nid,dob,customer_id,health_id','sales_details:id,invoice'])->find($id);
         if (!$entity){
             $entity = 'Data not found';
         }
