@@ -31,14 +31,32 @@ class InvoiceModel extends Model
         });
     }
 
-    public function customer_details()
+    public function customer()
     {
         return $this->hasOne(CustomerModel::class, 'id', 'customer_id');
     }
 
-    public function sales_details()
+    public function invoice()
     {
         return $this->hasOne(OpdModel::class, 'id', 'sales_id');
+    }
+
+     public function invoice_particular()
+    {
+        return $this->hasMany(InvoiceParticularModel::class, 'hms_invoice_id');
+    }
+
+    public function room()
+    {
+        return $this->hasOne(ParticularModel::class, 'id', 'room_id');
+    }
+    public function patient_payment_mode()
+    {
+        return $this->hasOne(OpdModel::class, 'id', 'patient_payment_mode_id');
+    }
+    public function patient_mode()
+    {
+        return $this->hasOne(OpdModel::class, 'id', 'patient_mode_id');
     }
 
 
@@ -101,52 +119,53 @@ class InvoiceModel extends Model
         return $data;
     }
 
-    public static function getShow($id,$domain)
+    public static function getShow($id)
     {
         $entity = self::where([
-            ['hms_invoice.config_id', '=', $domain['config_id']],
             ['hms_invoice.id', '=', $id]
         ])
             ->leftjoin('cor_customers','cor_customers.id','=','hms_invoice.customer_id')
+            ->leftjoin('inv_sales','inv_sales.id','=','hms_invoice.sales_id')
             ->leftjoin('users as createdBy','createdBy.id','=','hms_invoice.created_by_id')
-            ->leftjoin('users as salesBy','salesBy.id','=','hms_invoice.sales_by_id')
-            ->leftjoin('acc_transaction_mode as transactionMode','transactionMode.id','=','hms_invoice.transaction_mode_id')
-//            ->leftjoin('uti_transaction_method as method','method.id','=','acc_transaction_mode.method_id')
+            ->leftjoin('hms_particular as room','room.id','=','hms_invoice.room_id')
+            ->leftjoin('hms_particular_mode as patient_mode','patient_mode.id','=','hms_invoice.patient_mode_id')
+            ->leftjoin('hms_particular_mode as particular_payment_mode','particular_payment_mode.id','=','hms_invoice.patient_payment_mode_id')
             ->select([
                 'hms_invoice.id',
-                DB::raw('DATE_FORMAT(hms_invoice.updated_at, "%d-%m-%Y") as created'),
-                'hms_invoice.invoice as invoice',
-                'hms_invoice.sub_total as sub_total',
+                DB::raw('DATE_FORMAT(hms_invoice.updated_at, "%d-%m-%y") as created'),
+                DB::raw('DATE_FORMAT(hms_invoice.appointment_date, "%d-%m-%y") as appointment'),
+                'inv_sales.invoice as invoice',
                 'hms_invoice.total as total',
-                'hms_invoice.payment as payment',
-                'hms_invoice.discount as discount',
-                'hms_invoice.discount_calculation as discount_calculation',
-                'hms_invoice.discount_type as discount_type',
-                'cor_customers.id as customer_id',
-                'cor_customers.name as customer_name',
-                'cor_customers.mobile as customer_mobile',
+                'hms_invoice.comment',
+                'cor_customers.name as name',
+                'cor_customers.mobile as mobile',
+                'hms_invoice.guardian_name as guardian_name',
+                'hms_invoice.guardian_mobile as guardian_mobile',
+                'cor_customers.customer_id as patient_id',
+                'cor_customers.health_id as health_id',
+                'cor_customers.gender as gender',
+                'hms_invoice.year as year',
+                'hms_invoice.month as month',
+                'hms_invoice.day as day',
+                DB::raw('DATE_FORMAT(cor_customers.dob, "%d-%m-%y") as dob'),
+                'cor_customers.identity_mode as identity_mode',
+                'cor_customers.nid as nid',
+                'cor_customers.address as address',
                 'createdBy.username as created_by_user_name',
                 'createdBy.name as created_by_name',
                 'createdBy.id as created_by_id',
-                'salesBy.id as sales_by_id',
-                'salesBy.username as sales_by_username',
-                'salesBy.name as sales_by_name',
-                'transactionMode.name as mode_name',
-                'hms_invoice.transaction_mode_id as transaction_mode_id',
-                'hms_invoice.process as process_id',
+                'room.name as room_name',
+                'patient_mode.name as mode_name',
+                'particular_payment_mode.name as payment_mode_name',
+                'hms_invoice.process as process',
             ])
-            ->with(['salesItems' => function ($query) {
+            ->with(['invoice_particular' => function ($query) {
                 $query->select([
-                    'inv_sales_item.id',
-                    'inv_sales_item.sale_id',
-                    'inv_sales_item.stock_item_id as product_id',
-                    'inv_sales_item.uom',
-                    'inv_sales_item.name as item_name',
-                    'inv_sales_item.quantity',
-                    'inv_sales_item.sales_price',
-                    'inv_sales_item.purchase_price',
-                    'inv_sales_item.price',
-                    'inv_sales_item.sub_total',
+                    'hms_invoice_particular.id',
+                    'hms_invoice_particular.hms_invoice_id',
+                    'hms_invoice_particular.name as item_name',
+                    'hms_invoice_particular.quantity',
+                    'hms_invoice_particular.price',
                 ]);
             }])
             ->first();
@@ -161,36 +180,31 @@ class InvoiceModel extends Model
             ['hms_invoice.id', '=', $id]
         ])
             ->leftjoin('cor_customers','cor_customers.id','=','hms_invoice.customer_id')
+            ->leftjoin('inv_sales','inv_sales.id','=','hms_invoice.sales_id')
             ->leftjoin('users as createdBy','createdBy.id','=','hms_invoice.created_by_id')
-            ->leftjoin('users as salesBy','salesBy.id','=','hms_invoice.sales_by_id')
-            ->leftjoin('acc_transaction_mode as transactionMode','transactionMode.id','=','hms_invoice.transaction_mode_id')
-            ->leftjoin('uti_settings','uti_settings.id','=','hms_invoice.process')
+            ->leftjoin('particular as room','room.id','=','hms_invoice.room_id')
+            ->leftjoin('particular_mode as patient_mode','patient_mode.id','=','hms_invoice.patient_mode_id')
+            ->leftjoin('particular_payment_mode as patient_mode','particular_payment_mode.id','=','hms_invoice.particular_payment_mode_id')
             ->select([
                 'hms_invoice.id',
                 DB::raw('DATE_FORMAT(hms_invoice.updated_at, "%d-%m-%Y") as created'),
                 DB::raw('DATE_FORMAT(hms_invoice.appointment, "%d-%M-%Y") as created_date'),
-                'hms_invoice.invoice as invoice',
-                'hms_invoice.sub_total as sub_total',
+                'inv_sales.invoice as invoice',
                 'hms_invoice.total as total',
-                'hms_invoice.narration',
-                'hms_invoice.payment as payment',
-                'hms_invoice.discount as discount',
-                'hms_invoice.discount_calculation as discount_calculation',
-                'hms_invoice.discount_type as discount_type',
-                'cor_customers.id as customer_id',
-                'cor_customers.name as customer_name',
-                'cor_customers.mobile as customer_mobile',
+                'hms_invoice.guardian_name as guardian_name',
+                'hms_invoice.guardian_mobile as guardian_mobile',
+                'hms_invoice.comment',
+                'cor_customers.name as name',
+                'cor_customers.mobile as mobile',
+                'cor_customers.customer_id as patient_id',
+                'cor_customers.health_id as health_id',
+                DB::raw('DATE_FORMAT(cor_customers.dob, "%d-%M-%Y") as dob'),
+                'cor_customers.identity_mode as identity_mode',
+                'cor_customers.address as address',
                 'createdBy.username as created_by_user_name',
                 'createdBy.name as created_by_name',
                 'createdBy.id as created_by_id',
-                'salesBy.id as sales_by_id',
-                'salesBy.username as sales_by_username',
-                'salesBy.name as sales_by_name',
-                'transactionMode.name as mode_name',
-                'hms_invoice.transaction_mode_id as transaction_mode_id',
                 'hms_invoice.process as process_id',
-                'uti_settings.name as process_name',
-                'cor_customers.address as customer_address',
             ])
             ->with(['salesItems' => function ($query) {
                 $query->select([

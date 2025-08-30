@@ -90,7 +90,7 @@ class OpdController extends Controller
             $hmsConfig = $this->domain['hms_config'];
             $config = HospitalConfigModel::find($hmsConfig);
             if($entity){
-                $invoice = OPDModel::insertHmsInvoice($invConfig,$config, $entity,$input);
+                $invoiceId = OPDModel::insertHmsInvoice($invConfig,$config, $entity,$input);
             }
             $accountingConfig = AccountingModel::where('id', $this->domain['acc_config'])->first();
             $ledgerExist = AccountHeadModel::where('customer_id', $entity->id)->where('config_id', $this->domain['acc_config'])->where('parent_id', $config->account_customer_id)->first();
@@ -98,7 +98,7 @@ class OpdController extends Controller
                AccountHeadModel::insertCustomerLedger($accountingConfig, $entity);
             }
             DB::commit();
-            $invoice = InvoiceModel::with(['customer_details:id,name,mobile,address,identity_mode,nid,dob,customer_id,health_id','sales_details:id,invoice'])->find($invoice);
+            $invoice = InvoiceModel::getShow($invoiceId);
             $service = new JsonRequestResponse();
             return $service->returnJosnResponse($invoice);
         } catch (\Exception $e) {
@@ -127,8 +127,7 @@ class OpdController extends Controller
      *//**/
     public function show($id)
     {
-
-        $entity = InvoiceModel::with(['customer_details:id,name,mobile,address,identity_mode,nid,dob,customer_id,health_id','sales_details:id,invoice'])->find($id);
+        $entity = InvoiceModel::getShow($id);
         if (!$entity){
             $entity = 'Data not found';
         }

@@ -75,6 +75,12 @@ class InvoiceParticular
      **/
     private  $sampleCollectedBy;
 
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="name", type="string", length=50, nullable=true)
+     */
+    private $name;
 
     /**
      * @var integer
