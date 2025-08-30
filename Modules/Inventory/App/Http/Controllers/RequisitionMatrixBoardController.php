@@ -399,7 +399,12 @@ class RequisitionMatrixBoardController extends Controller
                         'total'           => $group->sum('sub_total'),
                         'invoice_date'    => now(),
                     ];
-                })->values()->first(); // 🚫 NOTE: Only the first invoice batch group will be used
+                })->values()->first();
+
+            $findBoard->update([
+                'total' => $batchInputs['total'],
+                'approved_by_id' => $this->domain['user_id']
+            ]);
 
             $batch = InvoiceBatchModel::create($batchInputs);
 
