@@ -40,6 +40,12 @@ class Prescription
      **/
      private $createdBy;
 
+     /**
+     * @ORM\ManyToOne(targetEntity="Modules\Core\App\Entities\User")
+     * @ORM\JoinColumn(onDelete="CASCADE")
+     **/
+     private $prescribeDoctor;
+
     /**
      * @ORM\ManyToOne(targetEntity="Particular")
      * @ORM\JoinColumn(onDelete="CASCADE")

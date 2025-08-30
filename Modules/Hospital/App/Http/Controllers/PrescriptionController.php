@@ -52,6 +52,8 @@ class PrescriptionController extends Controller
         $response->setContent(json_encode([
             'message' => 'success',
             'status' => Response::HTTP_OK,
+            'ipdRooms' => $data['ipdRooms'],
+            'selectedRoom' => $data['selectedRoom'],
             'total' => $data['count'],
             'data' => $data['entities']
         ]));
@@ -65,7 +67,8 @@ class PrescriptionController extends Controller
     public function show($id)
     {
         $service = new JsonRequestResponse();
-        $entity = PrescriptionModel::with(['invoice_details','invoice_details.customer_details'])->find($id);
+        $entity = PrescriptionModel::getShow($id);
+        //$entity = PrescriptionModel::with(['invoice_details','invoice_details.customer_details'])->find($id);
         $data = $service->returnJosnResponse($entity);
         return $data;
     }
