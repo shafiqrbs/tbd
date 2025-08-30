@@ -132,7 +132,7 @@ class PrescriptionModel extends Model
             ->groupBy('hms_particular.id')
             ->orderBy(DB::raw('COUNT(hms_invoice.id)'), 'ASC')
             ->limit(1)
-            ->get();
+            ->get()->first()->id;
 
         return array('entities' => $entities ,'selected' => $selected);
     }
