@@ -23,7 +23,7 @@ use Modules\Hospital\App\Models\ParticularModel;
 use Modules\Hospital\App\Models\ParticularModeModel;
 use Modules\Hospital\App\Models\PatientModel;
 use Modules\Hospital\App\Models\PrescriptionModel;
-
+use function Symfony\Component\TypeInfo\null;
 
 
 class OpdController extends Controller
@@ -85,7 +85,12 @@ class OpdController extends Controller
         try {
 
             $input['domain_id'] = $this->domain['global_id'];
-            $dob = (isset($input['dob']) and $input['dob']) ? new \DateTime($input['dob']) : null;
+            $dob = (isset($input['dob']) and $input['dob']) ? $input['dob'] : null;
+            if($dob =="invalid" || $dob == null){
+                $dob = null;
+            }else{
+                $dob = new \DateTime($input['dob']);
+            }
             $input['dob'] = $dob;
             $entity = PatientModel::create($input);
             $invConfig = $this->domain['inv_config'];
