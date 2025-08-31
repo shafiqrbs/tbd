@@ -85,6 +85,8 @@ class OpdController extends Controller
         try {
 
             $input['domain_id'] = $this->domain['global_id'];
+            $dob = ($input['dob']) ? new \DateTime($input['dob']) : null;
+            $input['dob'] = $dob;
             $entity = PatientModel::create($input);
             $invConfig = $this->domain['inv_config'];
             $hmsConfig = $this->domain['hms_config'];
@@ -205,42 +207,13 @@ class OpdController extends Controller
     }
 
 
-
-    /**
-     * Show the specified resource.
-     */
-    public function details($id)
-    {
-        $service = new JsonRequestResponse();
-        $entity = CustomerModel::find($id);
-        if (!$entity){
-            $entity = 'Data not found';
-        }
-        $data = $service->returnJosnResponse($entity);
-        return $data;
-    }
-
-    /**
-     * Show the specified resource.
-     */
-    public function ledger($id)
-    {
-        $service = new JsonRequestResponse();
-        $entity = CustomerModel::find($id);
-        if (!$entity){
-            $entity = 'Data not found';
-        }
-        $data = $service->returnJosnResponse($entity);
-        return $data;
-    }
-
     /**
      * Show the form for editing the specified resource.
      */
     public function edit($id)
     {
         $service = new JsonRequestResponse();
-        $entity = CustomerModel::find($id);
+        $entity = OPDModel::find($id);
 
         if (!$entity){
             $entity = 'Data not found';
@@ -258,8 +231,7 @@ class OpdController extends Controller
 
 
         $data = $request->validated();
-        $entity = CustomerModel::find($id);
-        $data['customer_unique_id'] = "{$entity['domain_id']}@{$data['mobile']}-{$data['name']}";
+        $entity = OPDModel::find($id);
         $entity->update($data);
         $service = new JsonRequestResponse();
         return $service->returnJosnResponse($entity);
@@ -271,27 +243,9 @@ class OpdController extends Controller
     public function destroy($id)
     {
         $service = new JsonRequestResponse();
-        CustomerModel::find($id)->delete();
-
+        OPDModel::find($id)->delete();
         $entity = ['message'=>'delete'];
         return $service->returnJosnResponse($entity);
-    }
-
-
-    /**
-     * Display a listing of the resource.
-     */
-    public function localStorage(Request $request,EntityManagerInterface $em){
-        $data = CustomerModel::getRecordsForLocalStorage($this->domain,$request);
-        $response = new Response();
-        $response->headers->set('Content-Type','application/json');
-        $response->setContent(json_encode([
-            'message' => 'success',
-            'status' => Response::HTTP_OK,
-            'data' => $data['entities']
-        ]));
-        $response->setStatusCode(Response::HTTP_OK);
-        return $response;
     }
 
 

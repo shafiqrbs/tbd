@@ -18,6 +18,7 @@ use Modules\Hospital\App\Http\Requests\OPDRequest;
 use Modules\Hospital\App\Http\Requests\PrescriptionRequest;
 use Modules\Hospital\App\Models\HospitalConfigModel;
 use Modules\Hospital\App\Models\InvoiceModel;
+use Modules\Hospital\App\Models\InvoiceParticularModel;
 use Modules\Hospital\App\Models\OPDModel;
 use Modules\Hospital\App\Models\ParticularModel;
 use Modules\Hospital\App\Models\ParticularModeModel;
@@ -95,6 +96,7 @@ class PrescriptionController extends Controller
         $userId = $request->header('X-Api-User');
         $data['prescribe_doctor_id'] = $userId;
         $entity->update($data);
+        InvoiceParticularModel::insertUpdate($entity,$data);
         $return = PrescriptionModel::getShow($entity->id);
         $service = new JsonRequestResponse();
         return $service->returnJosnResponse($return);
@@ -111,24 +113,5 @@ class PrescriptionController extends Controller
         $entity = ['message' => 'delete'];
         return $service->returnJosnResponse($entity);
     }
-
-
-    /**
-     * Display a listing of the resource.
-     */
-
-    public function localStorage(Request $request,EntityManagerInterface $em){
-        $data = CustomerModel::getRecordsForLocalStorage($this->domain,$request);
-        $response = new Response();
-        $response->headers->set('Content-Type','application/json');
-        $response->setContent(json_encode([
-            'message' => 'success',
-            'status' => Response::HTTP_OK,
-            'data' => $data['entities']
-        ]));
-        $response->setStatusCode(Response::HTTP_OK);
-        return $response;
-    }
-
 
 }

@@ -33,4 +33,9 @@ class InvoiceParticularModel extends Model
         });
     }
 
+    public static function insertUpdate($prescription,$data)
+    {
+
+    }
+
 }
