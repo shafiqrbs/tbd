@@ -82,6 +82,13 @@ class Category
     private $generateId;
 
     /**
+     * @var string
+     *
+     * @ORM\Column(name="mode", type="string", length=30, nullable=true)
+     */
+     private $mode ='inventory';
+
+    /**
      * @var int
      *
      * @ORM\Column(name="sorting", type="smallint",  length=2, nullable=true)

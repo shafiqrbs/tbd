@@ -21,6 +21,7 @@ use Modules\Hospital\App\Models\ParticularModeModel;
 use Modules\Hospital\App\Models\ParticularModuleModel;
 use Modules\Hospital\App\Models\ParticularTypeMasterModel;
 use Modules\Hospital\App\Models\ParticularTypeModel;
+use Modules\Hospital\App\Models\ProductModel;
 use Modules\Inventory\App\Models\ProductBrandModel;
 use Modules\Inventory\App\Models\PurchaseItemModel;
 use Modules\Inventory\App\Models\SettingModel;
@@ -126,9 +127,10 @@ class HospitalController extends Controller
     {
         $domain = $this->domain;
         $term = $request->get('term');
-        $dropdown = MedicineModel::getMedicineDropdown($domain,$term);
+        $dropdown = ProductModel::getMedicineDropdown($domain,$term);
         $service = new JsonRequestResponse();
         return $service->returnJosnResponse($dropdown);
+
     }
 
 
@@ -244,7 +246,6 @@ class HospitalController extends Controller
         ini_set('memory_limit', '2G');
 
         $filePath = public_path('/uploads/medicine/medicine.xlsx');
-
         try {
             // Load file with minimal memory usage
             $reader = match (pathinfo($filePath, PATHINFO_EXTENSION)) {
@@ -354,6 +355,8 @@ class HospitalController extends Controller
                 }
             }
 
+
+
             // Commit all changes
             DB::statement('COMMIT');
 
@@ -396,6 +399,16 @@ class HospitalController extends Controller
                 'data' => null
             ];
         }
+    }
+
+    /**
+     * dropdown the specified resource from storage.
+     */
+    public function insertMedicineStockProcess()
+    {
+        $dropdown = ProductModel::insertExcelProducts($this->domain);
+        $service = new JsonRequestResponse();
+        return $service->returnJosnResponse($dropdown);
     }
 
     /**
