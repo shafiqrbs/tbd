@@ -85,7 +85,7 @@ class OpdController extends Controller
         try {
 
             $input['domain_id'] = $this->domain['global_id'];
-            $dob = ($input['dob']) ? new \DateTime($input['dob']) : null;
+            $dob = (isset($input['dob']) and $input['dob']) ? new \DateTime($input['dob']) : null;
             $input['dob'] = $dob;
             $entity = PatientModel::create($input);
             $invConfig = $this->domain['inv_config'];
