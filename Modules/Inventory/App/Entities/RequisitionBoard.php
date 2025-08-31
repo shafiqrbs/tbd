@@ -91,5 +91,24 @@ class RequisitionBoard
      * @ORM\Column(type="date", nullable=true)
      */
     private $generateDate;
+
+    /**
+     * @var boolean
+     * @ORM\Column(name="production_process", type="string", nullable=true)
+     */
+    private $productionProcess;
+
+    /**
+     * @ORM\ManyToOne(targetEntity="Modules\Core\App\Entities\User")
+     * @ORM\JoinColumn(onDelete="CASCADE")
+     **/
+    private  $productionApprovedBy;
+
+    /**
+     * @var \Date
+     * @ORM\Column(type="date", nullable=true)
+     */
+    private $productionApprovedDate;
+
 }
 

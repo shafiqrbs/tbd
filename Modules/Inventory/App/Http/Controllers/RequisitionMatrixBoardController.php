@@ -15,6 +15,7 @@ use Modules\Inventory\App\Models\RequisitionBoardModel;
 use Modules\Inventory\App\Models\RequisitionItemModel;
 use Modules\Inventory\App\Models\RequisitionMatrixBoardModel;
 use Modules\Inventory\App\Models\RequisitionModel;
+use Modules\Inventory\App\Models\RequisitionProductItemMatrixModel;
 use Modules\Inventory\App\Models\SalesItemModel;
 use Modules\Inventory\App\Models\SalesModel;
 use Symfony\Component\HttpFoundation\Response as ResponseAlias;
@@ -376,16 +377,46 @@ class RequisitionMatrixBoardController extends Controller
             }
 
             // 🔄 Filter unprocessed rows only (if needed)
-            $matrixCollection = $matrixCollection->where('process', '!=', 'Confirmed');
+            /*$matrixCollection = $matrixCollection->where('process', '!=', 'Confirmed');
 
             if ($matrixCollection->isEmpty()) {
                 return response()->json([
                     'status' => ResponseAlias::HTTP_CONFLICT,
                     'message' => 'Matrix data has already been processed.',
                 ], ResponseAlias::HTTP_CONFLICT);
-            }
+            }*/
 
-            // 🛠️ Group matrix to create batch input
+            $reqProItemMatrix = $matrixCollection->groupBy('vendor_stock_item_id')
+                ->map(function ($items) use ($findBoard) {
+                    $proItem = DB::table('pro_item')
+                        ->where('item_id', $items->first()['vendor_stock_item_id'])
+                        ->where('config_id', $this->domain['pro_config'])
+                        ->first();
+
+                    if (!$proItem) {
+                        return null; // skip this one
+                    }
+
+                    return [
+                        'requisition_board_id' => $findBoard->id,
+                        'config_id'            => $this->domain['pro_config'],
+                        'name'                 => $items->first()['display_name'],
+                        'item_id'              => $items->first()['vendor_stock_item_id'],
+                        'pro_item_id'          => $proItem->id,
+                        'quantity'             => $items->sum('approved_quantity'),
+                        'stock_quantity'       => $items->first()['vendor_stock_quantity'],
+                        'demand_quantity'      => $items->sum('approved_quantity'),
+                        'created_at'           => now(),
+                        'updated_at'           => now(),
+                    ];
+                })
+                ->filter() // remove nulls
+                ->values()
+                ->toArray();
+
+            RequisitionProductItemMatrixModel::insert($reqProItemMatrix);
+
+            /*// 🛠️ Group matrix to create batch input
             $batchInputs = $matrixCollection->groupBy('vendor_config_id')
                 ->map(function ($group) {
                     return [
@@ -451,7 +482,7 @@ class RequisitionMatrixBoardController extends Controller
             ])->update(['process' => 'Confirmed']);
 
             // ✅ Optionally, update board status itself to prevent duplicates
-            $findBoard->update(['process' => 'Confirmed']);
+            $findBoard->update(['process' => 'Confirmed','production_process'=>'Created']);*/
 
             DB::commit(); // All done
 
