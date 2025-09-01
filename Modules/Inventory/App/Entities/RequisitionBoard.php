@@ -68,7 +68,7 @@ class RequisitionBoard
      * @var string
      * @ORM\Column(name="process", type="string", nullable=true)
      */
-    private $process = "New";
+    private $process;
 
 
     /**

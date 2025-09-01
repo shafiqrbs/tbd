@@ -73,5 +73,34 @@ class ProductionExpense extends Model
         return $items;
     }
 
+    public static function handleProductionExpenseBatchItemIdWise(object $productionBatchItem, int $configId)
+    {
+        // Fetch recipe items and related stock data
+        $recipeItems = ProductionElements::join('inv_stock', 'inv_stock.id', '=', 'pro_element.material_id')
+            ->select('pro_element.*', 'inv_stock.name', 'inv_stock.purchase_price as item_purchase_price', 'inv_stock.sales_price as item_sale_price')
+            ->where('pro_element.production_item_id', $productionBatchItem->production_item_id)
+            ->get();
+
+        // If recipe items exist, calculate and store expenses
+        if ($recipeItems->isNotEmpty()) {
+            foreach ($recipeItems as $item) {
+                $filter = [
+                    'config_id' => $configId,
+                    'production_item_id' => $productionBatchItem->production_item_id,
+                    'production_batch_item_id' => $productionBatchItem->id,
+                    'production_element_id' => $item->id,
+                ];
+
+                $data = [
+                    'purchase_price' => $item->item_purchase_price,
+                    'sales_price' => $item->item_sale_price,
+                    'quantity' => $productionBatchItem->issue_quantity * $item->quantity,
+                    'issue_quantity' => $productionBatchItem->issue_quantity * $item->quantity,
+                ];
+
+                ProductionExpense::updateOrCreate($filter, $data);
+            }
+        }
+    }
 
 }

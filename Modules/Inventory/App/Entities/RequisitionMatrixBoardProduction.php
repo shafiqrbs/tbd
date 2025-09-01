@@ -54,18 +54,21 @@ class RequisitionMatrixBoardProduction
 
     /**
      * @ORM\ManyToOne(targetEntity="Modules\Production\App\Entities\ProductionBatchItem")
-     * @ORM\JoinColumn(onDelete="CASCADE")
+     * @ORM\JoinColumn(onDelete="SET NULL")
      **/
     private  $proBatchItem;
 
+    /**
+     * @ORM\ManyToOne(targetEntity="Modules\Production\App\Entities\ProductionBatch")
+     * @ORM\JoinColumn(onDelete="SET NULL")
+     **/
+    private  $proBatch;
 
     /**
      * @var float
      * @ORM\Column(name="quantity", type="float",nullable=true)
      */
     private $quantity;
-
-
 
     /**
      * @var float
@@ -78,6 +81,24 @@ class RequisitionMatrixBoardProduction
      * @ORM\Column(name="demand_quantity", type="float",nullable=true)
      */
     private $demandQuantity;
+
+    /**
+     * @var boolean
+    * @ORM\Column(name="process", type="string", nullable=true,options={"default"="Created"})
+     */
+    private $process;
+
+    /**
+     * @ORM\ManyToOne(targetEntity="Modules\Core\App\Entities\User")
+     * @ORM\JoinColumn(onDelete="CASCADE")
+     **/
+    private  $approvedBy;
+
+    /**
+     * @var \Date
+     * @ORM\Column(type="date", nullable=true)
+     */
+    private $approvedDate;
 
     /**
      * @var \DateTime

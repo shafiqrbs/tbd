@@ -130,6 +130,12 @@ Route::prefix('/inventory')->middleware([HeaderAuthenticationMiddleware::class,L
             Route::post('create', [RequisitionMatrixBoardController::class,'store'])->name('requisition_matrix_board_create');
             Route::post('quantity-update', [RequisitionMatrixBoardController::class,'matrixBoardQuantityUpdate'])->name('requisition_matrix_board_quantity_update');
             Route::post('batch-generate/{id}', [RequisitionMatrixBoardController::class,'matrixBoardBatchGenerate'])->name('requisition_matrix_board_batch_generate');
+            Route::prefix('production')->group(function() {
+                Route::get('{id}', [RequisitionMatrixBoardController::class,'boardWiseProduction']);
+                Route::post('quantity-update', [RequisitionMatrixBoardController::class,'matrixBoardProductionQuantityUpdate']);
+                Route::post('process', [RequisitionMatrixBoardController::class,'matrixBoardProductionProcess']);
+                Route::post('approve/{id}', [RequisitionMatrixBoardController::class,'matrixBoardProductionApproved']);
+            });
         });
     });
 

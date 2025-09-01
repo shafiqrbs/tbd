@@ -18,9 +18,13 @@ class RequisitionProductItemMatrixModel extends Model
         'name',
         'pro_item_id',
         'pro_batch_item_id',
+        'pro_batch_id',
         'quantity',
         'stock_quantity',
-        'demand_quantity'
+        'demand_quantity',
+        'approved_by_id',
+        'process',
+        'approved_date'
     ];
 
     public static function boot() {

@@ -8,6 +8,7 @@ use Illuminate\Http\Response;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Modules\AppsApi\App\Services\GeneratePatternCodeService;
 use Modules\Core\App\Models\UserModel;
 use Modules\Inventory\App\Models\InvoiceBatchItemModel;
 use Modules\Inventory\App\Models\InvoiceBatchModel;
@@ -18,6 +19,9 @@ use Modules\Inventory\App\Models\RequisitionModel;
 use Modules\Inventory\App\Models\RequisitionProductItemMatrixModel;
 use Modules\Inventory\App\Models\SalesItemModel;
 use Modules\Inventory\App\Models\SalesModel;
+use Modules\Production\App\Models\ProductionBatchItemModel;
+use Modules\Production\App\Models\ProductionBatchModel;
+use Modules\Production\App\Models\ProductionExpense;
 use Symfony\Component\HttpFoundation\Response as ResponseAlias;
 
 class RequisitionMatrixBoardController extends Controller
@@ -78,7 +82,7 @@ class RequisitionMatrixBoardController extends Controller
             // Fetch Requisition Items
             $getItems = RequisitionItemModel::where([
                 ['inv_requisition_item.vendor_config_id', $vendorConfigId],
-                ['inv_requisition.expected_date','<=', $expectedDate]
+                ['inv_requisition.expected_date', '<=', $expectedDate]
             ])
                 ->whereIn('inv_requisition.process', ['Approved'])
                 ->whereNotNull('inv_requisition.approved_by_id')
@@ -120,7 +124,7 @@ class RequisitionMatrixBoardController extends Controller
                     'process' => 'Created',
                     'generate_date' => $expectedDate,
                 ]);
-            }else{
+            } else {
                 return response()->json([
                     'status' => ResponseAlias::HTTP_CONFLICT,
                     'message' => 'No available data for create board.',
@@ -199,7 +203,7 @@ class RequisitionMatrixBoardController extends Controller
     }
 
 
-    public function matrixBoardDetails(Request $request , $id)
+    public function matrixBoardDetails(Request $request, $id)
     {
         DB::beginTransaction(); // Start Database Transaction
 
@@ -270,15 +274,15 @@ class RequisitionMatrixBoardController extends Controller
                 $totalRequestQuantity = 0;
                 foreach ($group as $item) {
                     $customerName = strtolower(str_replace(' ', '_', $item['customer_name']));
-                    $base[$customerName.'_id'] = $item['id'];
-                    $base[$customerName.'_approved_quantity'] = $item['approved_quantity'];
-                    $base[$customerName.'_requested_quantity'] = $item['requested_quantity'];
+                    $base[$customerName . '_id'] = $item['id'];
+                    $base[$customerName . '_approved_quantity'] = $item['approved_quantity'];
+                    $base[$customerName . '_requested_quantity'] = $item['requested_quantity'];
                     $base[$customerName] = $item['quantity'];
-                    $totalRequestQuantity+=$item['requested_quantity'];
+                    $totalRequestQuantity += $item['requested_quantity'];
                 }
 
                 $base['total_request_quantity'] = $totalRequestQuantity;
-                $base['remaining_quantity'] = $group->first()['vendor_stock_quantity']-$base['total_approved_quantity'];
+                $base['remaining_quantity'] = $group->first()['vendor_stock_quantity'] - $base['total_approved_quantity'];
 
                 return $base;
             })
@@ -334,7 +338,7 @@ class RequisitionMatrixBoardController extends Controller
         $findBoardMatrix->update([
             'quantity' => $quantity,
             'approved_quantity' => $quantity,
-            'sub_total' => $quantity*$findBoardMatrix->purchase_price,
+            'sub_total' => $quantity * $findBoardMatrix->purchase_price,
         ]);
 
         return response()->json([
@@ -350,7 +354,6 @@ class RequisitionMatrixBoardController extends Controller
         try {
             $findBoard = RequisitionBoardModel::find($id);
 
-            // 🔒 Check if board exists
             if (!$findBoard) {
                 return response()->json([
                     'status' => ResponseAlias::HTTP_NOT_FOUND,
@@ -358,7 +361,6 @@ class RequisitionMatrixBoardController extends Controller
                 ], ResponseAlias::HTTP_NOT_FOUND);
             }
 
-            // 🔒 Check if this board is already processed
             if ($findBoard->status === 'Confirmed') {
                 return response()->json([
                     'status' => ResponseAlias::HTTP_CONFLICT,
@@ -366,7 +368,6 @@ class RequisitionMatrixBoardController extends Controller
                 ], ResponseAlias::HTTP_CONFLICT);
             }
 
-            // Fetch the related matrix records
             $matrixCollection = $findBoard->requisition_matrix;
 
             if ($matrixCollection->isEmpty()) {
@@ -376,15 +377,14 @@ class RequisitionMatrixBoardController extends Controller
                 ], ResponseAlias::HTTP_BAD_REQUEST);
             }
 
-            // 🔄 Filter unprocessed rows only (if needed)
-            /*$matrixCollection = $matrixCollection->where('process', '!=', 'Confirmed');
+            $matrixCollection = $matrixCollection->where('process', '!=', 'Confirmed');
 
             if ($matrixCollection->isEmpty()) {
                 return response()->json([
                     'status' => ResponseAlias::HTTP_CONFLICT,
                     'message' => 'Matrix data has already been processed.',
                 ], ResponseAlias::HTTP_CONFLICT);
-            }*/
+            }
 
             $reqProItemMatrix = $matrixCollection->groupBy('vendor_stock_item_id')
                 ->map(function ($items) use ($findBoard) {
@@ -394,41 +394,40 @@ class RequisitionMatrixBoardController extends Controller
                         ->first();
 
                     if (!$proItem) {
-                        return null; // skip this one
+                        return null;
                     }
 
                     return [
                         'requisition_board_id' => $findBoard->id,
-                        'config_id'            => $this->domain['pro_config'],
-                        'name'                 => $items->first()['display_name'],
-                        'item_id'              => $items->first()['vendor_stock_item_id'],
-                        'pro_item_id'          => $proItem->id,
-                        'quantity'             => $items->sum('approved_quantity'),
-                        'stock_quantity'       => $items->first()['vendor_stock_quantity'],
-                        'demand_quantity'      => $items->sum('approved_quantity'),
-                        'created_at'           => now(),
-                        'updated_at'           => now(),
+                        'config_id' => $this->domain['pro_config'],
+                        'name' => $items->first()['display_name'],
+                        'item_id' => $items->first()['vendor_stock_item_id'],
+                        'pro_item_id' => $proItem->id,
+                        'quantity' => $items->sum('approved_quantity'),
+                        'stock_quantity' => $items->first()['vendor_stock_quantity'],
+                        'demand_quantity' => $items->sum('approved_quantity'),
+                        'created_at' => now(),
+                        'updated_at' => now(),
                     ];
                 })
-                ->filter() // remove nulls
+                ->filter()
                 ->values()
                 ->toArray();
 
             RequisitionProductItemMatrixModel::insert($reqProItemMatrix);
 
-            /*// 🛠️ Group matrix to create batch input
             $batchInputs = $matrixCollection->groupBy('vendor_config_id')
                 ->map(function ($group) {
                     return [
-                        'process'         => 'New',
-                        'config_id'       => $group->first()->vendor_config_id,
-                        'created_by_id'   => $this->domain['user_id'],
-                        'sales_by_id'     => $this->domain['user_id'],
-                        'approved_by_id'  => $this->domain['user_id'],
-                        'quantity'        => $group->sum('quantity'),
-                        'sub_total'       => $group->sum('sub_total'),
-                        'total'           => $group->sum('sub_total'),
-                        'invoice_date'    => now(),
+                        'process' => 'New',
+                        'config_id' => $group->first()->vendor_config_id,
+                        'created_by_id' => $this->domain['user_id'],
+                        'sales_by_id' => $this->domain['user_id'],
+                        'approved_by_id' => $this->domain['user_id'],
+                        'quantity' => $group->sum('quantity'),
+                        'sub_total' => $group->sum('sub_total'),
+                        'total' => $group->sum('sub_total'),
+                        'invoice_date' => now(),
                     ];
                 })->values()->first();
 
@@ -439,27 +438,25 @@ class RequisitionMatrixBoardController extends Controller
 
             $batch = InvoiceBatchModel::create($batchInputs);
 
-            // 🌐 Group by vendor_stock_item_id → for batch items
             $groupedItems = $matrixCollection->groupBy('vendor_stock_item_id')
                 ->map(function ($items) use ($batch) {
                     return [
                         'invoice_batch_id' => $batch->id,
-                        'quantity'         => $items->sum('quantity'),
-                        'sales_price'      => $items->first()['sales_price'],
-                        'purchase_price'   => $items->first()['purchase_price'],
-                        'price'            => $items->first()['purchase_price'],
-                        'sub_total'        => $items->sum('sub_total'),
-                        'stock_item_id'    => $items->first()['vendor_stock_item_id'],
-                        'uom'              => $items->first()['unit_name'],
-                        'name'             => $items->first()['display_name'],
-                        'created_at'       => now(),
-                        'updated_at'       => now(),
+                        'quantity' => $items->sum('quantity'),
+                        'sales_price' => $items->first()['sales_price'],
+                        'purchase_price' => $items->first()['purchase_price'],
+                        'price' => $items->first()['purchase_price'],
+                        'sub_total' => $items->sum('sub_total'),
+                        'stock_item_id' => $items->first()['vendor_stock_item_id'],
+                        'uom' => $items->first()['unit_name'],
+                        'name' => $items->first()['display_name'],
+                        'created_at' => now(),
+                        'updated_at' => now(),
                     ];
                 })->values()->toArray();
 
             InvoiceBatchItemModel::insert($groupedItems);
 
-            // 🧾 Group sales by customer
             $groupedSales = $this->groupSalesByCustomer($matrixCollection->toArray(), $batch);
 
             foreach ($groupedSales as $sale) {
@@ -470,25 +467,23 @@ class RequisitionMatrixBoardController extends Controller
                 SalesItemModel::insert($salesItems);
             }
 
-            // ✅ Matrix rows → Confirmed
             RequisitionMatrixBoardModel::whereIn('id', $matrixCollection->pluck('id')->toArray())
                 ->update(['process' => 'Confirmed']);
 
-            // ✅ Parent requisition update
             RequisitionModel::where([
                 ['matrix_generate_date', $findBoard->expected_date],
                 ['vendor_config_id', $findBoard->config_id],
                 ['process', 'Generated']
             ])->update(['process' => 'Confirmed']);
 
-            // ✅ Optionally, update board status itself to prevent duplicates
-            $findBoard->update(['process' => 'Confirmed','production_process'=>'Created']);*/
+            $findBoard->update(['process' => 'Confirmed', 'production_process' => 'Created']);
 
-            DB::commit(); // All done
+            DB::commit();
 
             return response()->json([
                 'status' => ResponseAlias::HTTP_OK,
                 'message' => 'Matrix data processed successfully.',
+                'pro_item_process' => count($reqProItemMatrix) ?? 0
             ], ResponseAlias::HTTP_OK);
 
         } catch (\Exception $e) {
@@ -504,7 +499,7 @@ class RequisitionMatrixBoardController extends Controller
     }
 
 
-    public function groupSalesByCustomer(array $salesData,$batch)
+    public function groupSalesByCustomer(array $salesData, $batch)
     {
         $groupedSales = [];
 
@@ -546,5 +541,231 @@ class RequisitionMatrixBoardController extends Controller
         return array_values($groupedSales);
     }
 
+    public function boardWiseProduction($id)
+    {
+        $findBoard = RequisitionBoardModel::find($id);
 
+        if (!$findBoard) {
+            return response()->json([
+                'status' => ResponseAlias::HTTP_NOT_FOUND,
+                'message' => 'Board not found.',
+                'data' => null
+            ], ResponseAlias::HTTP_NOT_FOUND);
+        }
+
+        $productionItems = $findBoard->requisition_matrix_production->map(function ($item) {
+            return [
+                'id' => $item->id,
+                'pro_item_id' => $item->pro_item_id,
+                'pro_batch_item_id' => $item->pro_batch_item_id,
+                'pro_batch_id' => $item->pro_batch_id,
+                'product_name' => $item->name ?? null,
+                'approved_by_id' => $item->approved_by_id,
+                'process' => $item->process,
+                'approved_date' => $item->approved_date,
+                'quantity' => $item->quantity,
+                'stock_quantity' => $item->stock_quantity,
+                'demand_quantity' => $item->demand_quantity,
+                'created_at' => $item->created_at ? $item->created_at->format('d-m-Y') : null,
+            ];
+        })->toArray();
+
+        return response()->json([
+            'status' => ResponseAlias::HTTP_OK,
+            'message' => 'Production items data found.',
+            'data' => [
+                'id' => $findBoard->id,
+                'config_id' => $findBoard->config_id,
+                'batch_no' => $findBoard->batch_no,
+                'total' => $findBoard->total,
+                'process' => $findBoard->process,
+                'board_status' => $findBoard->status,
+                'production_approved_by_id' => $findBoard->production_approved_by_id,
+                'production_process' => $findBoard->production_process,
+                'production_approved_date' => $findBoard->production_approved_date ? $findBoard->production_approved_date->format('d-m-Y') : null,
+                'created_at' => $findBoard->created_at ? $findBoard->created_at->format('d-m-Y') : null,
+                'production_items' => $productionItems
+            ]
+        ], ResponseAlias::HTTP_OK);
+    }
+
+    public function matrixBoardProductionQuantityUpdate(Request $request)
+    {
+        if (!$request->has('id') || empty($request->id)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Update ID not provided.'
+            ], ResponseAlias::HTTP_BAD_REQUEST);
+        }
+
+        $quantity = $request->quantity ?? 0;
+
+        try {
+            DB::beginTransaction();
+
+            $findBoardProductionItem = RequisitionProductItemMatrixModel::find($request->id);
+            if (!$findBoardProductionItem) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Board matrix item not found.'
+                ], ResponseAlias::HTTP_NOT_FOUND);
+            }
+
+            $findBoardProductionItem->update([
+                'demand_quantity' => $quantity,
+            ]);
+
+            if ($findBoardProductionItem->pro_batch_item_id && $findBoardProductionItem->pro_batch_id) {
+                $productionBatchItem = ProductionBatchItemModel::find($findBoardProductionItem->pro_batch_item_id);
+                if (!$productionBatchItem) {
+                    DB::rollBack();
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Production batch item not found.'
+                    ], ResponseAlias::HTTP_NOT_FOUND);
+                }
+
+                $productionBatchItem->update([
+                    'issue_quantity' => $quantity
+                ]);
+
+                ProductionExpense::handleProductionExpenseBatchItemIdWise($productionBatchItem, $productionBatchItem->config_id);
+            }
+
+            DB::commit();
+
+            return response()->json([
+                'status' => ResponseAlias::HTTP_OK,
+                'message' => 'Update successful.'
+            ], ResponseAlias::HTTP_OK);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            return response()->json([
+                'success' => false,
+                'message' => 'An error occurred during the update process.'
+            ], ResponseAlias::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
+
+
+    public function matrixBoardProductionProcess(Request $request, GeneratePatternCodeService $patternCodeService)
+    {
+        $itemIds = $request->input('item_ids', []);
+
+        if (empty($itemIds)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'No items provided.',
+            ], ResponseAlias::HTTP_BAD_REQUEST);
+        }
+
+        try {
+            DB::beginTransaction();
+
+            $productionMatrixItems = RequisitionProductItemMatrixModel::whereIn('id', $itemIds)->get();
+
+            if ($productionMatrixItems->isEmpty()) {
+                throw new \Exception('No valid production matrix items found.');
+            }
+
+            $firstItem = $productionMatrixItems->first();
+            $pattern = $patternCodeService->productBatch([
+                'config' => $firstItem->config_id,
+                'table' => 'pro_batch',
+                'prefix' => 'PB-',
+            ]);
+            $productionBatch = ProductionBatchModel::create([
+                'config_id' => $firstItem->config_id,
+                'code' => $pattern['code'],
+                'invoice' => $pattern['generateId'],
+                'process' => 'Draft',
+                'created_by_id' => $this->domain['user_id'],
+                'mode' => 'Production',
+                'status' => 1,
+            ]);
+
+            foreach ($productionMatrixItems as $findProductionMatrixItem) {
+                $productionBatchItem = ProductionBatchItemModel::create([
+                    'config_id' => $findProductionMatrixItem->config_id,
+                    'production_item_id' => $findProductionMatrixItem->pro_item_id,
+                    'issue_quantity' => $findProductionMatrixItem->demand_quantity,
+                    'batch_id' => $productionBatch->id,
+                ]);
+
+                ProductionExpense::handleProductionExpenseBatchItemIdWise($productionBatchItem, $findProductionMatrixItem->config_id);
+
+                $findProductionMatrixItem->update([
+                    'pro_batch_item_id' => $productionBatchItem->id,
+                    'pro_batch_id' => $productionBatch->id,
+                ]);
+            }
+
+            DB::commit();
+
+            return response()->json([
+                'status' => ResponseAlias::HTTP_OK,
+                'message' => 'Data successfully processed.',
+            ], ResponseAlias::HTTP_OK);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to process data: ' . $e->getMessage(),
+            ], ResponseAlias::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    public function matrixBoardProductionApproved($id)
+    {
+        $findProductionBatch = ProductionBatchModel::find($id);
+        if (!$findProductionBatch) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Production batch not found.',
+            ], ResponseAlias::HTTP_NOT_FOUND);
+        }
+
+        $findProductionMatrixBoardItems = RequisitionProductItemMatrixModel::where('pro_batch_id', $id)->get();
+        if ($findProductionMatrixBoardItems->isEmpty()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'No production matrix items found for this batch.',
+            ], ResponseAlias::HTTP_NOT_FOUND);
+        }
+
+        DB::beginTransaction();
+
+        try {
+            $findProductionBatch->update([
+                'process' => 'Created',
+            ]);
+
+            foreach ($findProductionMatrixBoardItems as $item) {
+                $item->update([
+                    'approved_by_id' => $this->domain['user_id'],
+                    'process' => 'Approved',
+                    'approved_date' => now()
+                ]);
+            }
+
+            DB::commit();
+
+            return response()->json([
+                'status' => ResponseAlias::HTTP_OK,
+                'message' => 'Approved successfully processed.',
+            ], ResponseAlias::HTTP_OK);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            return response()->json([
+                'success' => false,
+                'message' => 'An error occurred during the approval process.',
+            ], ResponseAlias::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
 }

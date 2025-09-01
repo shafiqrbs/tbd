@@ -18,6 +18,10 @@ class RequisitionBoardModel extends Model
         return $this->hasMany(RequisitionMatrixBoardModel::class,'requisition_board_id');
     }
 
+    public function requisition_matrix_production(){
+        return $this->hasMany(RequisitionProductItemMatrixModel::class,'requisition_board_id');
+    }
+
     public static function boot() {
 
         parent::boot();
