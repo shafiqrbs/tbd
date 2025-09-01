@@ -20,16 +20,16 @@ use Modules\Hospital\App\Models\HospitalConfigModel;
 use Modules\Hospital\App\Models\HospitalSalesModel;
 use Modules\Hospital\App\Models\InvoiceModel;
 use Modules\Hospital\App\Models\InvoiceParticularModel;
-use Modules\Hospital\App\Models\InvoiceTransactionModel;
 use Modules\Hospital\App\Models\OPDModel;
 use Modules\Hospital\App\Models\ParticularModel;
 use Modules\Hospital\App\Models\ParticularModeModel;
 use Modules\Hospital\App\Models\PatientModel;
+use Modules\Hospital\App\Models\PharmacyModel;
 use Modules\Hospital\App\Models\PrescriptionModel;
 
 
 
-class PrescriptionController extends Controller
+class PharmacyController extends Controller
 {
     protected $domain;
 
@@ -49,14 +49,12 @@ class PrescriptionController extends Controller
     public function index(Request $request){
 
         $domain = $this->domain;
-        $data = PrescriptionModel::getRecords($request,$domain);
+        $data = PharmacyModel::getRecords($request,$domain);
         $response = new Response();
         $response->headers->set('Content-Type','application/json');
         $response->setContent(json_encode([
             'message' => 'success',
             'status' => Response::HTTP_OK,
-            'ipdRooms' => $data['ipdRooms'],
-            'selectedRoom' => $data['selectedRoom'],
             'total' => $data['count'],
             'data' => $data['entities']
         ]));
@@ -101,7 +99,7 @@ class PrescriptionController extends Controller
         $entity->update($data);
         $return = PrescriptionModel::getShow($entity->id);
         HospitalSalesModel::insertMedicineDelivery($domain,$entity->id);
-        InvoiceTransactionModel::insertInvestigations($domain,$entity->id);
+    //    InvoiceParticularModel::insertUpdate($return,$data);
         $service = new JsonRequestResponse();
         return $service->returnJosnResponse($return);
 

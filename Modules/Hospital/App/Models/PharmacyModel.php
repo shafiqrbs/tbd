@@ -5,13 +5,14 @@ namespace Modules\Hospital\App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Support\Facades\DB;
+use Modules\Inventory\App\Models\SalesItemModel;
 
 
-class PrescriptionModel extends Model
+class PharmacyModel extends Model
 {
     use HasFactory;
 
-    protected $table = 'hms_prescription';
+    protected $table = 'inv_sales';
     public $timestamps = true;
     protected $guarded = ['id'];
 
@@ -35,31 +36,39 @@ class PrescriptionModel extends Model
         return $this->hasOne(InvoiceModel::class, 'id', 'hms_invoice_id');
     }
 
-    public function invoice_transaction()
-    {
-        return $this->hasOne(InvoiceTransactionModel::class, 'id', 'prescription_id');
-    }
-
     public function invoice_particular()
     {
         return $this->hasMany(InvoiceParticularModel::class, 'hms_invoice_id');
     }
+
+    public function salesItems()
+    {
+        return $this->hasManyThrough(
+            SalesItemModel::class,
+            PharmacyModel::class,
+            'id',       // Foreign key on SalesModel (inv_sales.id)
+            'sale_id',  // Foreign key on SalesItemModel
+            'sale_id',  // Local key on PrescriptionModel
+            'id'        // Local key on SalesModel
+        );
+    }
+
 
     public static function getRecords($request,$domain)
     {
         $page =  isset($request['page']) && $request['page'] > 0?($request['page'] - 1 ) : 0;
         $perPage = isset($request['offset']) && $request['offset']!=''? (int)($request['offset']):50;
         $skip = isset($page) && $page!=''? (int)$page * $perPage:0;
-        $entities = InvoiceModel::where([['hms_invoice.config_id',$domain['hms_config']]])
-            ->join('inv_sales as inv_sales','inv_sales.id','=','hms_invoice.sales_id')
-            ->leftjoin('hms_prescription','hms_prescription.hms_invoice_id','=','hms_invoice.id')
+        $entities = self::where([['hms_invoice.config_id',$domain['hms_config']]])
+            ->join('hms_prescription as hms_prescription','inv_sales.id','=','hms_prescription.sale_id')
+            ->join('hms_invoice','hms_prescription.hms_invoice_id','=','hms_invoice.id')
             ->leftjoin('hms_particular as vr','vr.id','=','hms_invoice.room_id')
             ->leftjoin('users as createdBy','createdBy.id','=','inv_sales.created_by_id')
             ->join('cor_customers as customer','customer.id','=','inv_sales.customer_id')
             ->join('hms_particular_mode as patient_mode','patient_mode.id','=','hms_invoice.patient_mode_id')
             ->join('hms_particular_mode as patient_payment_mode','patient_payment_mode.id','=','hms_invoice.patient_payment_mode_id')
             ->select([
-                'hms_invoice.id as invoice_id',
+                'inv_sales.id as sale_id',
                 'hms_prescription.id as prescription_id',
                 'customer.name',
                 'customer.mobile',
@@ -77,7 +86,14 @@ class PrescriptionModel extends Model
                 'patient_payment_mode.name as patient_payment_mode_name',
                 'createdBy.name as created_by',
                 'hms_invoice.sub_total as total',
-            ]);
+            ])->with(['salesItems' => function ($query) {
+                $query->select([
+                    'inv_sales_item.id',
+                    'inv_sales_item.name',
+                    'inv_sales_item.quantity',
+                    'inv_sales_item.price',
+                ]);
+            }]);
 
         if (isset($request['term']) && !empty($request['term'])){
             $entities = $entities->whereAny(['hms_invoice.invoice','cor_customers.name','cor_customers.mobile','salesBy.username','createdBy.username','acc_transaction_mode.name','hms_invoice.total'],'LIKE','%'.$request['term'].'%');
@@ -96,51 +112,15 @@ class PrescriptionModel extends Model
             $end_date = $request['end_date'].' 23:59:59';
             $entities = $entities->whereBetween('hms_invoice.created_at',[$start_date, $end_date]);
         }
-
         $total  = $entities->count();
         $entities = $entities->skip($skip)
             ->take($perPage)
-            ->orderBy('hms_invoice.updated_at','DESC')
+            ->orderBy('hms_prescription.updated_at','DESC')
             ->get();
-        $ipdRooms = self::getVisitingRooms($domain);
-        $data = array('count'=>$total,'entities' => $entities,'ipdRooms' => $ipdRooms['entities'],'selectedRoom' => $ipdRooms['selected']);
+        dd($entities);
+        $data = array('count'=> $total, 'entities' => $entities);
         return $data;
     }
-
-    public static function getVisitingRooms($domain)
-    {
-        $entities = ParticularModel::where([
-            ['hms_particular.config_id', $domain['hms_config']],
-            ['hms_particular_master_type.slug', 'opd-room'],
-            ])
-            ->join('hms_invoice', 'hms_invoice.room_id', '=', 'hms_particular.id')
-            ->join('hms_particular_type', 'hms_particular_type.id', '=', 'hms_particular.particular_type_id')
-            ->join('hms_particular_master_type', 'hms_particular_master_type.id', '=', 'hms_particular_type.particular_master_type_id')
-            ->select([
-                'hms_particular.id as id',
-                'hms_particular.name',
-                DB::raw('COUNT(hms_invoice.id) as invoice_count')
-            ])
-            ->groupBy('hms_particular.id')
-            ->get();
-
-        $selected = ParticularModel::where([
-            ['hms_particular.config_id', $domain['hms_config']],
-            ['hms_particular_master_type.slug', 'opd-room']])
-            ->join('hms_invoice', 'hms_invoice.room_id', '=', 'hms_particular.id')
-            ->join('hms_particular_type', 'hms_particular_type.id', '=', 'hms_particular.particular_type_id')
-            ->join('hms_particular_master_type', 'hms_particular_master_type.id', '=', 'hms_particular_type.particular_master_type_id')
-            ->select([
-                'hms_particular.id as id',
-            ])
-            ->groupBy('hms_particular.id')
-            ->orderBy(DB::raw('COUNT(hms_invoice.id)'), 'ASC')
-            ->limit(1)
-            ->get()->first()->id;
-
-        return array('entities' => $entities ,'selected' => $selected);
-    }
-
     public static function getShow($id)
     {
 

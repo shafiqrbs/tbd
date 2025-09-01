@@ -10,6 +10,7 @@ use Modules\Hospital\App\Http\Controllers\OpdController;
 use Modules\Hospital\App\Http\Controllers\ParticularController;
 use Modules\Hospital\App\Http\Controllers\ParticularModeController;
 use Modules\Hospital\App\Http\Controllers\ParticularTypeController;
+use Modules\Hospital\App\Http\Controllers\PharmacyController;
 use Modules\Hospital\App\Http\Controllers\PrescriptionController;
 use Modules\Hospital\App\Http\Controllers\SettingController;
 
@@ -91,6 +92,17 @@ Route::prefix('/hospital')->middleware([HeaderAuthenticationMiddleware::class])-
             'show' => 'prescription.show',
             'update' => 'prescription.update',
             'destroy' => 'prescription.destroy',
+        ]);
+
+    Route::apiResource('pharmacy',
+        PharmacyController::class)
+        ->middleware([HeaderAuthenticationMiddleware::class])
+        ->names([
+            'index' => 'pharmacy.index',
+            'store' => 'pharmacy.store',
+            'show' => 'pharmacy.show',
+            'update' => 'pharmacy.update',
+            'destroy' => 'pharmacy.destroy',
         ]);
 
 

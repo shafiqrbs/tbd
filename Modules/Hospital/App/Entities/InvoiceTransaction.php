@@ -26,7 +26,13 @@ class InvoiceTransaction
      * @ORM\ManyToOne(targetEntity="Invoice")
      * @ORM\JoinColumn(onDelete="CASCADE")
      **/
-    private $hmsInvoice;
+    private $invoice;
+
+    /**
+     * @ORM\ManyToOne(targetEntity="Prescription")
+     * @ORM\JoinColumn(onDelete="CASCADE")
+     **/
+    private $prescription;
 
 
     /**
@@ -137,14 +143,14 @@ class InvoiceTransaction
     /**
      * @var boolean
      *
-     * @ORM\Column(name="revised", type="boolean" )
+     * @ORM\Column(name="revised", type="boolean", nullable=true )
      */
     private $revised = false;
 
     /**
      * @var boolean
      *
-     * @ORM\Column(name="isMaster", type="boolean" )
+     * @ORM\Column(type="boolean",nullable=true )
      */
     private $isMaster = false;
 

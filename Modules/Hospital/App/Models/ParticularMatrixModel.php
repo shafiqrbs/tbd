@@ -40,7 +40,8 @@ class ParticularMatrixModel extends Model
             ->with([
                 'particularType.particulars' => function ($query) use ($config) {
                     $query->select('hms_particular.*') // ⚠️ include foreign key for relation
-                    ->where('hms_particular.config_id', $config);
+                    ->where('hms_particular.config_id', $config)
+                    ->groupBy('hms_particular.name');
                 }
             ]);
         $total  = $entities->count();
