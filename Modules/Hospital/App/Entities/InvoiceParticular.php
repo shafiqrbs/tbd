@@ -28,6 +28,20 @@ class InvoiceParticular
      **/
     private $hmsInvoice;
 
+
+    /**
+     * @ORM\ManyToOne(targetEntity="Prescription")
+     * @ORM\JoinColumn(onDelete="CASCADE")
+     **/
+    private $prescription;
+
+    /**
+     * @ORM\ManyToOne(targetEntity="InvoiceTransaction")
+     * @ORM\JoinColumn(onDelete="CASCADE")
+     **/
+    private $invoiceTransaction;
+
+
     /**
      * @ORM\ManyToOne(targetEntity="InvoicePathologicalGroup")
      * @ORM\JoinColumn(nullable=true,onDelete="SET NULL")

@@ -35,6 +35,12 @@ class Prescription
     private $hmsInvoice;
 
     /**
+     * @ORM\OneToOne(targetEntity="Modules\Inventory\App\Entities\Sales", cascade={"detach","merge"})
+     * @ORM\JoinColumn(name="sale_id", referencedColumnName="id", onDelete="CASCADE")
+     */
+    private $sale;
+
+    /**
      * @ORM\ManyToOne(targetEntity="Modules\Core\App\Entities\User")
      * @ORM\JoinColumn(onDelete="CASCADE")
      **/
@@ -68,9 +74,9 @@ class Prescription
     private $bloodPressure;
 
      /**
-     * @var string
+     * @var $jsonContent
      *
-     * @ORM\Column( type="text",nullable = true)
+     * @ORM\Column( type="json",nullable = true)
      */
     private $jsonContent;
 

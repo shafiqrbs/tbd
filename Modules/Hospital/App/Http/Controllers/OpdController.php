@@ -83,7 +83,6 @@ class OpdController extends Controller
         $input = $request->validated();
         DB::beginTransaction();
         try {
-
             $input['domain_id'] = $this->domain['global_id'];
             $dob = (isset($input['dob']) and $input['dob']) ? $input['dob'] : null;
             if($dob =="invalid" || $dob == null){
