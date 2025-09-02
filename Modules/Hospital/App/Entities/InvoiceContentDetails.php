@@ -5,12 +5,12 @@ use Doctrine\ORM\Mapping as ORM;
 use Gedmo\Mapping\Annotation as Gedmo;
 
 /**
- * PrescriptionMedicine
+ * InvoiceContentDetails
  *
- * @ORM\Table( name = "hms_prescription_investigation")
+ * @ORM\Table( name = "hms_invoice_content_details")
  * @ORM\Entity()
  */
-class PrescriptionInvestigation
+class InvoiceContentDetails
 {
     /**
      * @var integer
@@ -22,24 +22,44 @@ class PrescriptionInvestigation
     private $id;
 
     /**
+     * @ORM\ManyToOne(targetEntity="Invoice")
+     * @ORM\JoinColumn(onDelete="CASCADE")
+     **/
+    private $hmsInvoice;
+
+    /**
      * @ORM\ManyToOne(targetEntity="Prescription")
      * @ORM\JoinColumn(onDelete="CASCADE")
      **/
     private $prescription;
 
+    /**
+     * @ORM\ManyToOne(targetEntity="ParticularType", cascade={"detach","merge"})
+     * @ORM\JoinColumn(name="particular_type_id", referencedColumnName="id", onDelete="CASCADE")
+     */
+    private $particularType;
 
     /**
-     * @ORM\ManyToOne(targetEntity="Modules\Inventory\App\Entities\StockItem", cascade={"detach","merge"})
-     * @ORM\JoinColumn(name="investigation_id", referencedColumnName="id", onDelete="CASCADE")
+     * @ORM\ManyToOne(targetEntity="Particular", cascade={"detach","merge"})
+     * @ORM\JoinColumn(name="particular_id", referencedColumnName="id", onDelete="CASCADE")
      */
-    private $investigation;
+    private $particular;
+
 
     /**
      * @var string
      *
-     * @ORM\Column(name="name", type="string", length=50, nullable=true)
+     * @ORM\Column(name="name", type="string",nullable=true)
      */
     private $name;
+
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="value", type="string",nullable=true)
+     */
+    private $value;
 
 
     /**

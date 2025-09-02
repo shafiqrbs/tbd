@@ -55,16 +55,17 @@ class InvoiceTransactionModel extends Model
 
         collect($investigations)->map(function ($investigation) use ($prescription,$invoiceTransaction,$date) {
 
-            $particular = ParticularModel::find($investigation->investigation_id);
+            $particular = ParticularModel::find($investigation->id);
             if($particular){
                 InvoiceParticularModel::updateOrCreate(
                     [
-                        'hms_invoice_id'            => $prescription->hms_invoice_id,
+                        'hms_invoice_id'             => $prescription->hms_invoice_id,
                         'prescription_id'            => $prescription->id,
-                        'invoice_transaction_id'       => $invoiceTransaction->id,
-                        'particular_id'              => $investigation->investigation_id,
+                        'invoice_transaction_id'     => $invoiceTransaction->id,
+                        'particular_id'              => $investigation->id,
                     ],
                     [
+                        'name'      => $particular->name,
                         'quantity'      => 1,
                         'price'         => $particular->price ?? 0,
                         'updated_at'    => $date,

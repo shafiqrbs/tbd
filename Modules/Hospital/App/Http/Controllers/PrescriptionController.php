@@ -18,6 +18,7 @@ use Modules\Hospital\App\Http\Requests\OPDRequest;
 use Modules\Hospital\App\Http\Requests\PrescriptionRequest;
 use Modules\Hospital\App\Models\HospitalConfigModel;
 use Modules\Hospital\App\Models\HospitalSalesModel;
+use Modules\Hospital\App\Models\InvoiceContentDetailsModel;
 use Modules\Hospital\App\Models\InvoiceModel;
 use Modules\Hospital\App\Models\InvoiceParticularModel;
 use Modules\Hospital\App\Models\InvoiceTransactionModel;
@@ -102,6 +103,8 @@ class PrescriptionController extends Controller
         $return = PrescriptionModel::getShow($entity->id);
         HospitalSalesModel::insertMedicineDelivery($domain,$entity->id);
         InvoiceTransactionModel::insertInvestigations($domain,$entity->id);
+        InvoiceContentDetailsModel::insertContentDetails($domain,$entity->id);
+
         $service = new JsonRequestResponse();
         return $service->returnJosnResponse($return);
 
