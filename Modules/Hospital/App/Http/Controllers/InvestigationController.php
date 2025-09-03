@@ -10,13 +10,14 @@ use Modules\AppsApi\App\Services\JsonRequestResponse;
 use Modules\Core\App\Models\UserModel;
 use Modules\Hospital\App\Http\Requests\ParticularRequest;
 use Modules\Hospital\App\Models\ParticularDetailsModel;
+use Modules\Hospital\App\Models\ParticularInvestigationModeModel;
 use Modules\Hospital\App\Models\ParticularModel;
 use Modules\Hospital\App\Models\ParticularTypeMasterModel;
 use Modules\Hospital\App\Models\ParticularTypeModel;
 
 
 
-class ParticularController extends Controller
+class InvestigationController extends Controller
 {
     protected $domain;
 
@@ -31,7 +32,7 @@ class ParticularController extends Controller
 
     public function index(Request $request)
     {
-        $data = ParticularModel::getRecords($request, $this->domain);
+        $data = ParticularInvestigationModeModel::getRecords($request, $this->domain);
         $response = new Response();
         $response->headers->set('Content-Type', 'application/json');
         $response->setContent(json_encode([
@@ -82,7 +83,7 @@ class ParticularController extends Controller
     public function show($id)
     {
 
-        $entity = ParticularModel::with(['particularDetails','particularDetails.patientMode','particularDetails.paymentMode','particularDetails.genderMode','particularDetails.roomNo','particularDetails.cabinMode','reportFormat'])->find($id);
+        $entity = ParticularModel::with(['particularDetails','particularDetails.patientMode','particularDetails.paymentMode','particularDetails.genderMode','particularDetails.roomNo','particularDetails.cabinMode'])->find($id);
         if (!$entity) {
             $entity = 'Data not found';
         }
@@ -97,21 +98,6 @@ class ParticularController extends Controller
     public function edit($id)
     {
         $entity = ParticularModel::find($id);
-        $status = $entity ? Response::HTTP_OK : Response::HTTP_NOT_FOUND;
-        return response()->json([
-            'message' => 'success',
-            'status' => $status,
-            'data' => $entity ?? []
-        ], Response::HTTP_OK);
-
-    }
-
-     /**
-     * Show the specified resource for edit.
-     */
-    public function investigation($id)
-    {
-        $entity = ParticularModel::with(['particularDetails','reportFormat'])->find($id);
         $status = $entity ? Response::HTTP_OK : Response::HTTP_NOT_FOUND;
         return response()->json([
             'message' => 'success',

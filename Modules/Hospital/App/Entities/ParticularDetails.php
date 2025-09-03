@@ -46,6 +46,12 @@ class ParticularDetails
      **/
     private $patientMode;
 
+     /**
+     * @ORM\ManyToOne(targetEntity="ParticularMode")
+     * @ORM\JoinColumn(name="patient_type_id", referencedColumnName="id", nullable=true, onDelete="cascade")
+     **/
+    private $patientType;
+
     /**
      * @ORM\ManyToOne(targetEntity="ParticularMode")
      * @ORM\JoinColumn(name="gender_mode_id", referencedColumnName="id", nullable=true, onDelete="cascade")

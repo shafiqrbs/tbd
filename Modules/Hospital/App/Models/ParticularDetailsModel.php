@@ -49,6 +49,7 @@ class ParticularDetailsModel extends Model
 
     public static function insertBed($particular,$data){
 
+        $patient_type_id = (isset($data['patient_type_id']) and $data['patient_type_id']) ? $data['patient_type_id']:null;
         $room_id = (isset($data['room_id']) and $data['room_id']) ? $data['room_id']:null;
         $gender_mode_id = (isset($data['gender_mode_id']) and $data['gender_mode_id']) ? $data['gender_mode_id']:null;
         $payment_mode_id = (isset($data['payment_mode_id']) and $data['payment_mode_id']) ? $data['payment_mode_id']:null;
@@ -62,7 +63,7 @@ class ParticularDetailsModel extends Model
         if ($payment) { $parts[] = $payment->name; }
         if ($patient) { $parts[] = $patient->name; }
         if ($gender) { $parts[] = $gender->name; }
-        if ($room) { $parts[] = $room->name;}
+        if ($room) { $parts[] = $room->name; }
         $implode = implode(' ', $parts);
         $displayName = "{$implode} - {$particular->name}";
 
@@ -73,11 +74,13 @@ class ParticularDetailsModel extends Model
             [
                 'room_id'           => $room_id,
                 'display_name'      => $displayName,
+                'patient_type_id'   => $patient_type_id,
                 'patient_mode_id'   => $patient_mode_id,
                 'gender_mode_id'    => $gender_mode_id,
                 'payment_mode_id'   => $payment_mode_id,
             ]
         );
+
         ParticularModel::updateOrCreate(
             [
                 'id' => $particular->id,
@@ -90,18 +93,16 @@ class ParticularDetailsModel extends Model
 
     public static function insertCabin($particular,$data){
 
-        $gender_mode_id = (isset($data['gender_mode_id']) and $data['gender_mode_id']) ? $data['gender_mode_id']:null;
+        $patient_type_id = (isset($data['patient_type_id']) and $data['patient_type_id']) ? $data['patient_type_id']:null;
         $payment_mode_id = (isset($data['payment_mode_id']) and $data['payment_mode_id']) ? $data['payment_mode_id']:null;
-        $patient_mode_id = (isset($data['patient_mode_id']) and $data['patient_mode_id']) ? $data['patient_mode_id']:null;
         $cabin_mode_id = (isset($data['cabin_mode_id']) and $data['cabin_mode_id']) ? $data['cabin_mode_id']:null;
 
         $payment = ParticularModeModel::find($payment_mode_id);
-        $patient = ParticularModeModel::find($patient_mode_id);
+        $patient = ParticularModeModel::find($patient_type_id);
         $cabin = ParticularModeModel::find($cabin_mode_id);
 
         $parts = [];
         if ($payment) { $parts[] = $payment->name; }
-        if ($patient) { $parts[] = $patient->name; }
         if ($cabin) { $parts[] = $cabin->name; }
         $implode = implode(' ', $parts);
         $displayName = "{$implode} - {$particular->name}";
@@ -112,8 +113,7 @@ class ParticularDetailsModel extends Model
             ],
             [
                 'display_name'      => $displayName,
-                'patient_mode_id'   => $patient_mode_id,
-                'gender_mode_id'    => $gender_mode_id,
+                'patient_type_id'   => $patient_type_id,
                 'payment_mode_id'   => $payment_mode_id,
                 'cabin_mode_id'   => $cabin_mode_id,
             ]

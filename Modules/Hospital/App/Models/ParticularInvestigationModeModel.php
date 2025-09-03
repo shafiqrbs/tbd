@@ -10,7 +10,7 @@ use Modules\AppsApi\App\Services\GeneratePatternCodeService;
 use Modules\Core\App\Models\CustomerModel;
 use Ramsey\Collection\Collection;
 
-class ParticularModel extends Model
+class ParticularInvestigationModeModel extends Model
 {
     use HasFactory;
 
@@ -19,14 +19,9 @@ class ParticularModel extends Model
     protected $guarded = ['id'];
 
 
-    public function particularDetails()
-    {
-        return $this->hasOne(ParticularDetailsModel::class, 'particular_id', 'id');
-    }
-
     public function reportFormat()
     {
-        return $this->hasMany(InvestigationReportFormatModel::class, 'particular_id', 'id');
+        return $this->hasOne(InvestigationReportFormatModel::class, 'particular_id', 'id');
     }
 
 
@@ -63,7 +58,10 @@ class ParticularModel extends Model
                 DB::raw('DATE_FORMAT(hms_particular.created_at, "%d-%M-%Y") as created'),
                 'hms_particular_type.name as particular_type_name',
                 'hms_particular_type.slug as particular_type_slug',
-            ]);
+            ])
+            ->with(['reportFormat' => function ($query) {
+                $query->select(['*']);
+            }]);
 
         if (isset($request['term']) && !empty($request['term'])){
             $entity = $entity->whereAny(['hms_particular.name','hms_particular.slug','hms_particular_type.slug'],'LIKE','%'.trim($request['term']).'%');
@@ -93,38 +91,7 @@ class ParticularModel extends Model
 
     }
 
-    public static function getParticularDropdown($domain,$dropdownType)
-    {
-        $config = $domain['hms_config'];
-        return DB::table('hms_particular')
-            ->join('hms_particular_type','hms_particular_type.id','=','hms_particular.particular_type_id')
-            ->join('hms_particular_master_type','hms_particular_master_type.id','=','hms_particular_type.particular_master_type_id')
-            ->select([
-                'hms_particular.id',
-                'hms_particular.name'
-            ])
-            ->where([
-                ['hms_particular.config_id',$config],
-                ['hms_particular_master_type.slug',$dropdownType],
-                ['hms_particular.status',1]
-            ])
-            ->orderBy('hms_particular.name')
-            ->get();
-    }
 
-    public static function getDoctorNurseLabUser($user,$type)
-    {
-
-        $particular = DB::table('hms_particular')
-            ->join('hms_particular_type', 'hms_particular_type.id', '=', 'hms_particular.particular_type_id')
-            ->join('hms_particular_master_type', 'hms_particular_master_type.id', '=', 'hms_particular_type.particular_master_type_id')
-            ->select('hms_particular.id')
-            ->where('hms_particular_master_type.slug', $type)
-            ->where('hms_particular.employee_id', $user)
-            ->first();
-
-        return $particular;
-    }
 
 
 }

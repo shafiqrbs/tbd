@@ -63,6 +63,15 @@ Route::prefix('/hospital')->middleware([HeaderAuthenticationMiddleware::class])-
                 'update' => 'particular.update',
                 'destroy' => 'particular.destroy',
             ]);
+         Route::apiResource('investigation', InvestigationController::class)
+            ->middleware([HeaderAuthenticationMiddleware::class])
+            ->names([
+                'index' => 'particular.index',
+                'store' => 'particular.store',
+                'show' => 'particular.show',
+                'update' => 'particular.update',
+                'destroy' => 'particular.destroy',
+            ]);
         Route::apiResource('particular-type', ParticularTypeController::class)
             ->middleware([HeaderAuthenticationMiddleware::class])
             ->names([
