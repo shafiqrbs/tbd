@@ -64,8 +64,7 @@ class ParticularDetailsModel extends Model
         $genderName = $gender->name ?? '';
         $patientModeName = $patientMode->name ?? '';
         $roomName = $room->name ?? '';
-        echo $displayName = "{$paymentName} : {$genderName} {$patientModeName} {$roomName} - {$particular->name}";
-        exit;
+        $displayName = "{$paymentName} : {$genderName} {$patientModeName} {$roomName} - {$particular->name}";
         self::updateOrCreate(
             [
                 'particular_id' => $particular->id,
