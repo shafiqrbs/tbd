@@ -65,24 +65,31 @@ class HospitalSalesModel extends Model
         $date =  new \DateTime("now");
         $config = $domain['inv_config'];
         $jsonData = json_decode($prescription['json_content']);
+     //   dd($jsonData);
+
         if(empty($prescription->sale_id)){
             $insertData['config_id'] = $config;
             $insertData['customer_id'] = $prescription->invoice_details->customer_id ?? null;
             $sales = self::create($insertData);
-            $insertData = collect($jsonData->medicines)->map(function ($medicine) use ($sales, $date) {
-                if(StockItemModel::find($medicine->medicine_id)){
-                    return [
-                        'sale_id'       => $sales->id,
-                        'name'          => $medicine->medicineName ?? null,
-                        'stock_item_id' => $medicine->medicine_id ?? null,
-                        'quantity'      => $medicine->quantity ?? 0,
-                        'price'         => $medicine->price ?? 0,
-                        'created_at'    => $date,
-                        'updated_at'    => $date,
-                    ];
-                }
 
-            })->toArray();
+            $insertData = collect($jsonData->medicines)
+                ->map(function ($medicine) use ($sales, $date) {
+                    if (StockItemModel::find($medicine->medicine_id)) {
+                        return [
+                            'sale_id'       => $sales->id,
+                            'name'          => $medicine->medicine_name ?? null, // notice key: medicine_name not medicineName
+                            'stock_item_id' => $medicine->medicine_id ?? null,
+                            'quantity'      => $medicine->quantity ?? 0,
+                            'price'         => $medicine->price ?? 0,
+                            'created_at'    => $date,
+                            'updated_at'    => $date,
+                        ];
+                    }
+                    return null; // explicit
+                })
+                ->filter() // ✅ remove nulls
+                ->values() // ✅ reset array keys (important for upsert)
+                ->toArray();
 
             SalesItemModel::upsert(
                 $insertData,
