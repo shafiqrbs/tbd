@@ -88,6 +88,19 @@ class PrescriptionController extends Controller
         return $data;
     }
 
+     /**
+     * Show the form for editing the specified resource.
+     */
+    public function referred(Request $request,$id)
+    {
+        dd($id);
+        exit;
+        $service = new JsonRequestResponse();
+        $entity = PrescriptionModel::getShow($id);
+        $data = $service->returnJosnResponse($entity);
+        return $data;
+    }
+
     /**
      * Update the specified resource in storage.
      */

@@ -41,6 +41,12 @@ class InvoicePatientReferred
     private $invoice;
 
     /**
+     * @ORM\ManyToOne(targetEntity="Prescription", cascade={"detach","merge"})
+     * @ORM\JoinColumn(name="prescription_id", referencedColumnName="id", onDelete="CASCADE")
+     */
+    private $prescription;
+
+    /**
      * @ORM\ManyToOne(targetEntity="Particular")
      **/
     private  $assignDoctor;

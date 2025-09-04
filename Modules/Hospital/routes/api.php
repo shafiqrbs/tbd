@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Route;
 use Modules\Hospital\App\Http\Controllers\CategoryController;
 use Modules\Hospital\App\Http\Controllers\HospitalController;
 
+use Modules\Hospital\App\Http\Controllers\InvestigationController;
 use Modules\Hospital\App\Http\Controllers\OpdController;
 use Modules\Hospital\App\Http\Controllers\ParticularController;
 use Modules\Hospital\App\Http\Controllers\ParticularModeController;
@@ -53,17 +54,9 @@ Route::prefix('/hospital')->middleware([HeaderAuthenticationMiddleware::class])-
     Route::apiResource('opd', OpdController::class)->middleware([HeaderAuthenticationMiddleware::class]);
     Route::get('visiting-room', [OpdController::class,'getVisitingRooms'])->name('getVisitingRooms');
     Route::get('send-to-prescription/{id}', [OpdController::class,'sendPrescription'])->name('send_prescription');
+    Route::post('/prescription/referred/{id}', [PrescriptionController::class,'referred'])->name('prescription_referred');
     Route::prefix('core')->middleware([HeaderAuthenticationMiddleware::class])->group(function() {
         Route::apiResource('particular', ParticularController::class)
-            ->middleware([HeaderAuthenticationMiddleware::class])
-            ->names([
-                'index' => 'particular.index',
-                'store' => 'particular.store',
-                'show' => 'particular.show',
-                'update' => 'particular.update',
-                'destroy' => 'particular.destroy',
-            ]);
-         Route::apiResource('investigation', InvestigationController::class)
             ->middleware([HeaderAuthenticationMiddleware::class])
             ->names([
                 'index' => 'particular.index',
@@ -90,6 +83,15 @@ Route::prefix('/hospital')->middleware([HeaderAuthenticationMiddleware::class])-
                 'update' => 'category.update',
                 'destroy' => 'category.destroy',
             ]);
+        Route::apiResource('investigation', InvestigationController::class)
+            ->middleware([HeaderAuthenticationMiddleware::class])
+            ->names([
+                'index' => 'investigation.index',
+                'store' => 'investigation.store',
+                'show' => 'investigation.show',
+                'update' => 'investigation.update',
+                'destroy' => 'investigation.destroy',
+            ]);
         Route::apiResource('/particular-mode', ParticularModeController::class)->middleware([HeaderAuthenticationMiddleware::class]);
     });
     Route::post('/setting-matrix/create', [HospitalController::class,'settingMatrixCreate'])->name('particular_module_dropdown');
@@ -102,7 +104,6 @@ Route::prefix('/hospital')->middleware([HeaderAuthenticationMiddleware::class])-
             'update' => 'prescription.update',
             'destroy' => 'prescription.destroy',
         ]);
-
     Route::apiResource('pharmacy',
         PharmacyController::class)
         ->middleware([HeaderAuthenticationMiddleware::class])

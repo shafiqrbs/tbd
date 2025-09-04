@@ -57,16 +57,15 @@ class ParticularDetailsModel extends Model
         $room = ParticularModel::find($room_id);
         $gender = ParticularModeModel::find($gender_mode_id);
         $payment = ParticularModeModel::find($payment_mode_id);
-        $patient = ParticularModeModel::find($patient_mode_id);
+        $patientMode = ParticularModeModel::find($patient_mode_id);
 
         $parts = [];
-        if ($payment) { $parts[] = $payment->name; }
-        if ($patient) { $parts[] = $patient->name; }
-        if ($gender) { $parts[] = $gender->name; }
-        if ($room) { $parts[] = $room->name; }
-        $implode = implode(' ', $parts);
-        $displayName = "{$implode} - {$particular->name}";
-
+        $paymentName = $payment->name ?? '';
+        $genderName = $gender->name ?? '';
+        $patientModeName = $patientMode->name ?? '';
+        $roomName = $room->name ?? '';
+        echo $displayName = "{$paymentName} : {$genderName} {$patientModeName} {$roomName} - {$particular->name}";
+        exit;
         self::updateOrCreate(
             [
                 'particular_id' => $particular->id,
