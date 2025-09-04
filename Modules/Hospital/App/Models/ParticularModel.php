@@ -24,7 +24,7 @@ class ParticularModel extends Model
         return $this->hasOne(ParticularDetailsModel::class, 'particular_id', 'id');
     }
 
-    public function reportFormat()
+    public function investigationReportFormat()
     {
         return $this->hasMany(InvestigationReportFormatModel::class, 'particular_id', 'id');
     }

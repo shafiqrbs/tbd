@@ -8,6 +8,7 @@ use Illuminate\Http\Response;
 use Modules\AppsApi\App\Services\JsonRequestResponse;
 
 use Modules\Core\App\Models\UserModel;
+use Modules\Hospital\App\Http\Requests\ParticularInlineRequest;
 use Modules\Hospital\App\Http\Requests\ParticularRequest;
 use Modules\Hospital\App\Models\ParticularDetailsModel;
 use Modules\Hospital\App\Models\ParticularModel;
@@ -82,7 +83,7 @@ class ParticularController extends Controller
     public function show($id)
     {
 
-        $entity = ParticularModel::with(['particularDetails','particularDetails.patientMode','particularDetails.paymentMode','particularDetails.genderMode','particularDetails.roomNo','particularDetails.cabinMode','reportFormat'])->find($id);
+        $entity = ParticularModel::with(['particularDetails','particularDetails.patientMode','particularDetails.paymentMode','particularDetails.genderMode','particularDetails.roomNo','particularDetails.cabinMode','investigationReportFormat'])->find($id);
         if (!$entity) {
             $entity = 'Data not found';
         }
@@ -106,20 +107,26 @@ class ParticularController extends Controller
 
     }
 
+
      /**
      * Show the specified resource for edit.
      */
-    public function investigation($id)
+    public function particularInlineUpdate(ParticularInlineRequest $request,$id)
     {
-        $entity = ParticularModel::with(['particularDetails','reportFormat'])->find($id);
-        $status = $entity ? Response::HTTP_OK : Response::HTTP_NOT_FOUND;
-        return response()->json([
-            'message' => 'success',
-            'status' => $status,
-            'data' => $entity ?? []
-        ], Response::HTTP_OK);
+        $input = $request->validated();
+        $entity = ParticularModel::find($id);
+        $data = array();
+        $name = (isset($input['name']) and $input['name']) ? $input['name']:'';
+        $price = (isset($input['price']) and $input['price']) ? $input['price']:0;
+        if($price){$data['price'] = $price;}
+        if($name){$data['name'] = $name;}
+        if(!empty($data)){ $entity->update($input);}
+        $entity = ['message' => 'update'];
+        $service = new JsonRequestResponse();
+        return $service->returnJosnResponse($entity);
 
     }
+
 
     /**
      * Update the specified resource in storage.

@@ -65,6 +65,7 @@ Route::prefix('/hospital')->middleware([HeaderAuthenticationMiddleware::class])-
                 'update' => 'particular.update',
                 'destroy' => 'particular.destroy',
             ]);
+        Route::post('/particular/inline-update/{id}', [ParticularController::class,'particularInlineUpdate'])->name('particular_inline_update');
         Route::apiResource('particular-type', ParticularTypeController::class)
             ->middleware([HeaderAuthenticationMiddleware::class])
             ->names([

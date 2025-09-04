@@ -40,40 +40,40 @@ class InvoiceTransactionModel extends Model
         $date =  new \DateTime("now");
         $jsonData = json_decode($prescription['json_content']);
         $investigations = ($jsonData->patient_report->patient_examination->investigation);
+        if (!empty($investigations) && is_array($investigations)) {
+            $invoiceTransaction = self::updateOrCreate(
+                [
+                    'invoice_id'                    => $prescription->hms_invoice_id,
+                    'prescription_id'               => $prescription->id,
+                ],
+                [
+                    'created_by_id'    => $prescription->created_by_id,
+                    'updated_at'    => $date,
+                    'created_at'    => $date,
+                ]
+            );
+            collect($investigations)->map(function ($investigation) use ($prescription,$invoiceTransaction,$date) {
 
-        $invoiceTransaction = self::updateOrCreate(
-            [
-                'invoice_id'                    => $prescription->hms_invoice_id,
-                'prescription_id'               => $prescription->id,
-            ],
-            [
-                'created_by_id'    => $prescription->created_by_id,
-                'updated_at'    => $date,
-                'created_at'    => $date,
-            ]
-        );
-
-        collect($investigations)->map(function ($investigation) use ($prescription,$invoiceTransaction,$date) {
-
-            $particular = ParticularModel::find($investigation->id);
-            if($particular){
-                InvoiceParticularModel::updateOrCreate(
-                    [
-                        'hms_invoice_id'             => $prescription->hms_invoice_id,
-                        'prescription_id'            => $prescription->id,
-                        'invoice_transaction_id'     => $invoiceTransaction->id,
-                        'particular_id'              => $investigation->id,
-                    ],
-                    [
-                        'name'      => $particular->name,
-                        'quantity'      => 1,
-                        'price'         => $particular->price ?? 0,
-                        'updated_at'    => $date,
-                        'created_at'    => $date,
-                    ]
-                );
-            }
-        })->toArray();
+                $particular = ParticularModel::find($investigation->id);
+                if($particular){
+                    InvoiceParticularModel::updateOrCreate(
+                        [
+                            'hms_invoice_id'             => $prescription->hms_invoice_id,
+                            'prescription_id'            => $prescription->id,
+                            'invoice_transaction_id'     => $invoiceTransaction->id,
+                            'particular_id'              => $investigation->id,
+                        ],
+                        [
+                            'name'      => $particular->name,
+                            'quantity'      => 1,
+                            'price'         => $particular->price ?? 0,
+                            'updated_at'    => $date,
+                            'created_at'    => $date,
+                        ]
+                    );
+                }
+            })->toArray();
+        }
     }
 
 }

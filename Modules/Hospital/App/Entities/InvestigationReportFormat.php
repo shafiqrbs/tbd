@@ -29,7 +29,7 @@ class InvestigationReportFormat
 
     /**
      * @ORM\ManyToOne(targetEntity="InvestigationReportFormat", inversedBy="children", cascade={"detach","merge"})
-     * @ORM\JoinColumn(name="parent", referencedColumnName="id", onDelete="SET NULL")
+     * @ORM\JoinColumn(name="parent_id", referencedColumnName="id", onDelete="SET NULL")
      */
     protected $parent;
 

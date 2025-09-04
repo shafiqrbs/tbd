@@ -5,7 +5,7 @@ namespace Modules\Hospital\App\Http\Requests;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
-class InvestigationReportRequest extends FormRequest
+class ParticularInlineRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -26,26 +26,12 @@ class InvestigationReportRequest extends FormRequest
         switch($this->method())
         {
 
-            case 'PATCH':
-            {
-                return [
-                    'name' => 'string|nullable',
-                    'reference_value' => 'string|nullable',
-                    'sample_value' => 'string|nullable',
-                    'unit' => 'string|nullable',
-                    'parent_id' => 'integer|nullable',
-                ];
-            }
             case 'PUT':
             case 'POST':
             {
                 return [
-                    'particular_id' => 'integer|nullable',
                     'name' => 'string|nullable',
-                    'reference_value' => 'string|nullable',
-                    'sample_value' => 'string|nullable',
-                    'unit' => 'string|nullable',
-                    'parent_id' => 'integer|nullable',
+                    'price' => 'numeric|nullable',
                 ];
             }
 

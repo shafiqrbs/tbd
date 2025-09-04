@@ -8,7 +8,9 @@ use Illuminate\Http\Response;
 use Modules\AppsApi\App\Services\JsonRequestResponse;
 
 use Modules\Core\App\Models\UserModel;
+use Modules\Hospital\App\Http\Requests\InvestigationReportRequest;
 use Modules\Hospital\App\Http\Requests\ParticularRequest;
+use Modules\Hospital\App\Models\InvestigationReportFormatModel;
 use Modules\Hospital\App\Models\ParticularDetailsModel;
 use Modules\Hospital\App\Models\ParticularInvestigationModeModel;
 use Modules\Hospital\App\Models\ParticularModel;
@@ -49,29 +51,11 @@ class InvestigationController extends Controller
      /**
      * Store a newly created resource in storage.
      */
-    public function store(ParticularRequest $request)
+    public function store(InvestigationReportRequest $request)
     {
         $config = $this->domain['hms_config'];
         $input = $request->validated();
-        $input['config_id'] = $config;
-        $input['display_name'] = $input['name'];
-        $masterId = (isset($input['particular_type_master_id']) and $input['particular_type_master_id']) ? $input['particular_type_master_id']:'';
-        $masterType = ParticularTypeMasterModel::find($masterId);
-        $type = ParticularTypeModel::where([
-            ['config_id', $config],
-            ['particular_master_type_id', $masterId],
-        ])->first();
-        $input['particular_type_id'] = $type->id;
-        $entity = ParticularModel::create($input);
-        if($masterType->slug == 'bed'){
-             ParticularDetailsModel::insertBed($entity,$input);
-        }
-        if($masterType->slug == 'doctor'){
-            ParticularDetailsModel::insertDoctor($entity,$input);
-        }
-        if($masterType->slug == 'cabin'){
-            ParticularDetailsModel::insertCabin($entity,$input);
-        }
+        $entity = InvestigationReportFormatModel::create($input);
         $service = new JsonRequestResponse();
         $data = $service->returnJosnResponse($entity);
         return $data;
@@ -110,29 +94,12 @@ class InvestigationController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(ParticularRequest $request, $id)
+    public function update(InvestigationReportRequest $request, $id)
     {
-        $config = $this->domain['hms_config'];
+
         $input = $request->validated();
-        $entity = ParticularModel::find($id);
-        $input['display_name'] = $input['name'];
-        $masterId = (isset($input['particular_type_master_id']) and $input['particular_type_master_id']) ? $input['particular_type_master_id']:'';
-        $masterType = ParticularTypeMasterModel::find($masterId);
-        $type = ParticularTypeModel::where([
-            ['config_id', $config],
-            ['particular_master_type_id', $masterId],
-        ])->first();
-        $input['particular_type_id'] = $type->id;
+        $entity = InvestigationReportFormatModel::find($id);
         $entity->update($input);
-        if($masterType->slug == 'bed'){
-            ParticularDetailsModel::insertBed($entity,$input);
-        }
-        if($masterType->slug == 'doctor'){
-            ParticularDetailsModel::insertDoctor($entity,$input);
-        }
-        if($masterType->slug == 'cabin'){
-            ParticularDetailsModel::insertCabin($entity,$input);
-        }
         $service = new JsonRequestResponse();
         return $service->returnJosnResponse($entity);
     }
@@ -144,7 +111,7 @@ class InvestigationController extends Controller
     public function destroy($id)
     {
         $service = new JsonRequestResponse();
-        ParticularModel::find($id)->delete();
+        InvestigationReportFormatModel::find($id)->delete();
         $entity = ['message' => 'delete'];
         return $service->returnJosnResponse($entity);
     }
