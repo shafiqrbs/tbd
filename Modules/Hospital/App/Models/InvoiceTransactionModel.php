@@ -39,7 +39,7 @@ class InvoiceTransactionModel extends Model
         $prescription = PrescriptionModel::with(['invoice_transaction:id'])->find($id);
         $date =  new \DateTime("now");
         $jsonData = json_decode($prescription['json_content']);
-        $investigations = ($jsonData->patient_report->patient_examination->investigation);
+        $investigations = ($jsonData->patient_report->patient_examination->investigation ?? []);
         if (!empty($investigations) && is_array($investigations)) {
             $invoiceTransaction = self::updateOrCreate(
                 [

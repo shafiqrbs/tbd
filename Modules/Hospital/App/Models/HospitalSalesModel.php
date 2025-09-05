@@ -65,7 +65,8 @@ class HospitalSalesModel extends Model
         $date =  new \DateTime("now");
         $config = $domain['inv_config'];
         $jsonData = json_decode($prescription['json_content']);
-        if (!empty($jsonData->medicines) && is_array($jsonData->medicines)) {
+        $medicines = ($jsonData->medicines ?? []);
+        if (!empty($medicines) && is_array($medicines)) {
             if (empty($prescription->sale_id)) {
                 $insertData['config_id'] = $config;
                 $insertData['customer_id'] = $prescription->invoice_details->customer_id ?? null;
@@ -98,7 +99,7 @@ class HospitalSalesModel extends Model
 
             } else {
                 $sales = self::find($prescription->sale_id);
-                collect($jsonData->medicines)->map(function ($medicine) use ($sales, $date) {
+                collect($medicines)->map(function ($medicine) use ($sales, $date) {
                     if (StockItemModel::find($medicine->medicine_id)) {
                         SalesItemModel::updateOrCreate(
                             [
