@@ -93,7 +93,7 @@ class OpdController extends Controller
             ])->save();
         }
         $service = new JsonRequestResponse();
-        $entity = PrescriptionModel::getShow($id);
+        $entity = InvoiceModel::getShow($id);
         $data = $service->returnJosnResponse($entity);
         return $data;
     }
