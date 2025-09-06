@@ -94,10 +94,15 @@ class InvoiceModel extends Model
                 'patient_payment_mode.name as patient_payment_mode_name',
                 'createdBy.name as created_by',
                 'hms_invoice.sub_total as total',
+                'hms_invoice.referred_mode as referred_mode',
             ]);
 
         if (isset($request['term']) && !empty($request['term'])){
             $entities = $entities->whereAny(['inv_sales.invoice','customer.customer_id','customer.name','customer.mobile','createdBy.username','hms_invoice.total'],'LIKE','%'.$request['term'].'%');
+        }
+
+        if (isset($request['patient_mode']) && !empty($request['patient_mode'])){
+            $entities = $entities->where('patient_mode.slug',$request['patient_mode']);
         }
 
         if (isset($request['referred_mode']) && !empty($request['referred_mode'])){
