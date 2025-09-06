@@ -28,13 +28,20 @@ class ParticularModuleModel extends Model
 
     public static function getRecords()
     {
+        $slugs = [];
 
-        $entities = self::select(['*'])->with(['modes' => function ($query){
-            $query->select(['*']);
-        }]);
-        $total  = $entities->count();
-        $entities = $entities->get();
+        $records = ParticularModuleModel::all();
+        foreach ($records as $record):
+            $slugs[] = $record->slug;
+        endforeach;
+        $entities = ParticularModuleModel::with('modes')
+            ->whereIn('slug', $slugs)
+            ->get()
+            ->keyBy('slug'); // <-- use slug as key
         return $entities;
+
+
+
     }
 
 
