@@ -16,8 +16,10 @@ use Modules\Core\App\Models\CustomerModel;
 use Modules\Core\App\Models\UserModel;
 use Modules\Hospital\App\Entities\Prescription;
 use Modules\Hospital\App\Http\Requests\OPDRequest;
+use Modules\Hospital\App\Http\Requests\ReferredRequest;
 use Modules\Hospital\App\Models\HospitalConfigModel;
 use Modules\Hospital\App\Models\InvoiceModel;
+use Modules\Hospital\App\Models\InvoicePatientReferredModel;
 use Modules\Hospital\App\Models\OPDModel;
 use Modules\Hospital\App\Models\ParticularModel;
 use Modules\Hospital\App\Models\ParticularModeModel;
@@ -69,6 +71,32 @@ class OpdController extends Controller
         $data = InvoiceModel::getVisitingRooms($domain);
         $service = new JsonRequestResponse();
         $data = $service->returnJosnResponse($data);
+        return $data;
+    }
+
+    /**
+     * Show the form for editing the specified resource.
+     */
+    public function referred(ReferredRequest $request,$id)
+    {
+        $input = $request->validated();
+        $entity = InvoiceModel::find($id);
+        if ($entity && isset($input['referred_mode'])) {
+            $input['hms_invoice_id'] = $id;
+            $input['created_by_id'] = $request->header('X-Api-User');
+            InvoicePatientReferredModel::updateOrCreate(
+                [
+                    'hms_invoice_id' => $id, // condition to check existing record
+                ],
+                $input // fields to update if exists OR create if not
+            );
+            $entity->forceFill([
+                'referred_mode' => $input['referred_mode'],
+            ])->save();
+        }
+        $service = new JsonRequestResponse();
+        $entity = PrescriptionModel::getShow($id);
+        $data = $service->returnJosnResponse($entity);
         return $data;
     }
 

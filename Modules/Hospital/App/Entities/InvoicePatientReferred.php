@@ -35,7 +35,7 @@ class InvoicePatientReferred
     private  $createdBy;
 
     /**
-     * @ORM\ManyToOne(targetEntity="Invoice", cascade={"detach","merge"})
+     * @ORM\OneToOne(targetEntity="Invoice", cascade={"detach","merge"})
      * @ORM\JoinColumn(name="hms_invoice_id", referencedColumnName="id", onDelete="CASCADE")
      */
     private $invoice;
@@ -59,11 +59,6 @@ class InvoicePatientReferred
     /**
      * @ORM\ManyToOne(targetEntity="Particular")
      **/
-    private  $hospital;
-
-    /**
-     * @ORM\ManyToOne(targetEntity="Particular")
-     **/
     private  $opdRoom;
 
     /**
@@ -74,9 +69,16 @@ class InvoicePatientReferred
     /**
      * @var string
      *
-     * @ORM\Column(name="comment", type="string", length=50, nullable=true)
+     * @ORM\Column(name="comment", type="text", nullable=true)
      */
     private $comment;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="hospital", type="string", nullable=true)
+     */
+    private $hospital;
 
 
     /**

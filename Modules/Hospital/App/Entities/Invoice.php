@@ -205,6 +205,13 @@ class Invoice
      */
     private $prescriptionMode = "new";
 
+     /**
+     * @var string
+     *
+     * @ORM\Column(type="string", length=50, nullable=true)
+     */
+    private $referredMode;
+
     /**
      * @var string
      *

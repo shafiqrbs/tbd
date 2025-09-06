@@ -53,7 +53,7 @@ Route::prefix('/hospital')->middleware([HeaderAuthenticationMiddleware::class])-
     Route::get('/setting', [SettingController::class,'particularModuleDropdown'])->name('particular_module_dropdown');
     Route::get('visiting-room', [OpdController::class,'getVisitingRooms'])->name('getVisitingRooms');
     Route::get('send-to-prescription/{id}', [OpdController::class,'sendPrescription'])->name('send_prescription');
-    Route::post('/prescription/referred/{id}', [PrescriptionController::class,'referred'])->name('prescription_referred');
+    Route::post('/opd/referred/{id}', [OpdController::class,'referred'])->name('prescription_referred');
     Route::get('/core/particular/doctor-nurse', [ParticularController::class, 'doctorNurseStaff'])->name('particular.doctorNurseStaff');
     Route::apiResource('opd', OpdController::class)->middleware([HeaderAuthenticationMiddleware::class]);
     Route::prefix('core')->middleware([HeaderAuthenticationMiddleware::class])->group(function() {
