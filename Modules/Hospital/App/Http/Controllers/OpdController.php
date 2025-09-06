@@ -79,6 +79,7 @@ class OpdController extends Controller
     {
         $input = $request->validated();
         $entity = InvoiceModel::find($id);
+        $opd_room_id= (isset($input['opd_room_id']) && $input['opd_room_id']) ? $input['opd_room_id']:null;
         if ($entity && isset($input['referred_mode'])) {
             $input['hms_invoice_id'] = $id;
             $input['created_by_id'] = $request->header('X-Api-User');
@@ -89,7 +90,7 @@ class OpdController extends Controller
                 $input // fields to update if exists OR create if not
             );
             $entity->forceFill([
-                'referred_mode' => $input['referred_mode'], 'room_id' => $input['opd_room_id'],
+                'referred_mode' => $input['referred_mode'], 'room_id' => $opd_room_id,
             ])->save();
         }
         $service = new JsonRequestResponse();
