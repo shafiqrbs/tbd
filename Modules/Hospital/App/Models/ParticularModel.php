@@ -185,13 +185,11 @@ class ParticularModel extends Model
     public static function doctorNurseStaff($domain,$userGroup)
     {
 
-        $users = UserModel::where(
-            ['domain_id',$domain['id']]
-        )->get();
-        dd($users);
+      //  $users = UserModel::where(['domain_id' => $domain['id']])->get();
+       // dd($users);
 
-        $particular = DB::table('hms_particular')
-            ->join('hms_particular_type', 'hms_particular_type.id', '=', 'hms_particular.particular_type_id')
+        $particular = DB::table('users')
+            ->join('cor_setting', 'hms_particular_type.id', '=', 'hms_particular.particular_type_id')
             ->join('hms_particular_master_type', 'hms_particular_master_type.id', '=', 'hms_particular_type.particular_master_type_id')
             ->select('hms_particular.id')
             ->where('hms_particular_master_type.slug', $type)

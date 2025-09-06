@@ -47,7 +47,7 @@ class ParticularController extends Controller
 
     public function doctorNurseStaff(Request $request)
     {
-        dd($this->domain);
+
         $data = ParticularModel::getDoctorNurseStaff($request, $this->domain);
         $response = new Response();
         $response->headers->set('Content-Type', 'application/json');

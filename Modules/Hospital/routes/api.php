@@ -51,10 +51,11 @@ Route::prefix('/hospital')->middleware([HeaderAuthenticationMiddleware::class])-
     Route::get('/setting', [SettingController::class,'particularModuleDropdown'])->name('particular_module_dropdown');
     Route::get('/setting/matrix', [HospitalController::class,'settingMatrix'])->name('particular_module_dropdown');
     Route::get('/setting', [SettingController::class,'particularModuleDropdown'])->name('particular_module_dropdown');
-    Route::apiResource('opd', OpdController::class)->middleware([HeaderAuthenticationMiddleware::class]);
     Route::get('visiting-room', [OpdController::class,'getVisitingRooms'])->name('getVisitingRooms');
     Route::get('send-to-prescription/{id}', [OpdController::class,'sendPrescription'])->name('send_prescription');
     Route::post('/prescription/referred/{id}', [PrescriptionController::class,'referred'])->name('prescription_referred');
+    Route::get('/core/particular/doctor-nurse', [ParticularController::class, 'doctorNurseStaff'])->name('particular.doctorNurseStaff');
+    Route::apiResource('opd', OpdController::class)->middleware([HeaderAuthenticationMiddleware::class]);
     Route::prefix('core')->middleware([HeaderAuthenticationMiddleware::class])->group(function() {
 
         Route::apiResource('particular', ParticularController::class)
@@ -66,7 +67,6 @@ Route::prefix('/hospital')->middleware([HeaderAuthenticationMiddleware::class])-
                 'update' => 'particular.update',
                 'destroy' => 'particular.destroy',
             ]);
-        Route::get('/particular/doctor-nurse', [ParticularController::class, 'doctorNurseStaff'])->name('particular.doctorNurseStaff');
         Route::post('/particular/inline-update/{id}', [ParticularController::class,'particularInlineUpdate'])->name('particular_inline_update');
         Route::apiResource('particular-type', ParticularTypeController::class)
             ->middleware([HeaderAuthenticationMiddleware::class])

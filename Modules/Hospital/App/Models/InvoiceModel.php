@@ -67,7 +67,7 @@ class InvoiceModel extends Model
         $skip = isset($page) && $page!=''? (int)$page * $perPage:0;
         $entities = self::where([['hms_invoice.config_id',$domain['hms_config']]])
             ->join('inv_sales as inv_sales','inv_sales.id','=','hms_invoice.sales_id')
-            ->leftjoin('hms_prescription as prescription','prescription.id','=','hms_invoice.id')
+            ->leftjoin('hms_prescription as prescription','prescription.hms_invoice_id','=','hms_invoice.id')
             ->leftjoin('users as doctor','doctor.id','=','prescription.created_by_id')
             ->leftjoin('hms_particular as vr','vr.id','=','hms_invoice.room_id')
             ->leftjoin('users as createdBy','createdBy.id','=','inv_sales.created_by_id')
