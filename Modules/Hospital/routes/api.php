@@ -56,6 +56,7 @@ Route::prefix('/hospital')->middleware([HeaderAuthenticationMiddleware::class])-
     Route::get('send-to-prescription/{id}', [OpdController::class,'sendPrescription'])->name('send_prescription');
     Route::post('/prescription/referred/{id}', [PrescriptionController::class,'referred'])->name('prescription_referred');
     Route::prefix('core')->middleware([HeaderAuthenticationMiddleware::class])->group(function() {
+
         Route::apiResource('particular', ParticularController::class)
             ->middleware([HeaderAuthenticationMiddleware::class])
             ->names([
@@ -65,6 +66,7 @@ Route::prefix('/hospital')->middleware([HeaderAuthenticationMiddleware::class])-
                 'update' => 'particular.update',
                 'destroy' => 'particular.destroy',
             ]);
+        Route::get('/particular/doctor-nurse', [ParticularController::class, 'doctorNurseStaff'])->name('particular.doctorNurseStaff');
         Route::post('/particular/inline-update/{id}', [ParticularController::class,'particularInlineUpdate'])->name('particular_inline_update');
         Route::apiResource('particular-type', ParticularTypeController::class)
             ->middleware([HeaderAuthenticationMiddleware::class])

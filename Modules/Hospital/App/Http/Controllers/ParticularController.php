@@ -45,6 +45,22 @@ class ParticularController extends Controller
         return $response;
     }
 
+    public function doctorNurseStaff(Request $request)
+    {
+        dd($this->domain);
+        $data = ParticularModel::getDoctorNurseStaff($request, $this->domain);
+        $response = new Response();
+        $response->headers->set('Content-Type', 'application/json');
+        $response->setContent(json_encode([
+            'message' => 'success',
+            'status' => Response::HTTP_OK,
+            'total' => $data['count'],
+            'data' => $data['entities']
+        ]));
+        $response->setStatusCode(Response::HTTP_OK);
+        return $response;
+    }
+
 
      /**
      * Store a newly created resource in storage.

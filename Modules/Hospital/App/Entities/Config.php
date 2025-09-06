@@ -358,8 +358,11 @@ class Config
      */
     private $reportHeight = 0;
 
-
-
+    /**
+     * @ORM\ManyToOne(targetEntity="Modules\Core\App\Entities\User")
+     * @ORM\JoinColumn(name="consultant_by_id", referencedColumnName="id", nullable=true)
+     **/
+    private  $consultantBy;
 
     /**
      * @var boolean
