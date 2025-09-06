@@ -32,6 +32,10 @@ class ParticularController extends Controller
 
     public function index(Request $request)
     {
+        $userGroup = (isset($request['user_group']) and $request['user_group']) ? $request['user_group']:'';
+        if($userGroup){
+           ParticularModel::getDoctorNurseStaff($request, $this->domain);
+        }
         $data = ParticularModel::getRecords($request, $this->domain);
         $response = new Response();
         $response->headers->set('Content-Type', 'application/json');
@@ -45,21 +49,6 @@ class ParticularController extends Controller
         return $response;
     }
 
-    public function doctorNurseStaff(Request $request)
-    {
-
-        $data = ParticularModel::getDoctorNurseStaff($request, $this->domain);
-        $response = new Response();
-        $response->headers->set('Content-Type', 'application/json');
-        $response->setContent(json_encode([
-            'message' => 'success',
-            'status' => Response::HTTP_OK,
-            'total' => $data['count'],
-            'data' => $data['entities']
-        ]));
-        $response->setStatusCode(Response::HTTP_OK);
-        return $response;
-    }
 
 
      /**

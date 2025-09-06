@@ -125,10 +125,11 @@ class ParticularDetailsModel extends Model
             ]
         );
     }
-
-    public static function insertDoctor($particular,$data){
-        self::create([
-            'particular_id'     => $particular->id,
-        ]);
+    public static function insertDoctor($particular){
+        self::updateOrCreate(
+            [
+                'particular_id'     => $particular->id,
+            ]
+        );
     }
 }
