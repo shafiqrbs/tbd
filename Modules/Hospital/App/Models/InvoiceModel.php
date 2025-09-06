@@ -166,6 +166,7 @@ class InvoiceModel extends Model
                 'patient_mode.name as mode_name',
                 'particular_payment_mode.name as payment_mode_name',
                 'hms_invoice.process as process',
+                'hms_invoice.referred_mode as referred_mode',
             ])
             ->with(['invoice_particular' => function ($query) {
                 $query->select([
