@@ -116,7 +116,7 @@ class InvoiceModel extends Model
         if (isset($request['created']) && !empty($request['created'])){
             $date = new \DateTime($request['created']);
             $start_date = $date->format('Y-m-d 00:00:00');
-            echo $end_date = $date->format('Y-m-d 23:59:59');
+            $end_date = $date->format('Y-m-d 23:59:59');
             $entities = $entities->whereBetween('hms_invoice.created_at',[$start_date, $end_date]);
         }
 

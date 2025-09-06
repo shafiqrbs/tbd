@@ -107,6 +107,15 @@ Route::prefix('/hospital')->middleware([HeaderAuthenticationMiddleware::class])-
             'update' => 'prescription.update',
             'destroy' => 'prescription.destroy',
         ]);
+    Route::apiResource('ipd', IpdController::class)
+        ->middleware([HeaderAuthenticationMiddleware::class])
+        ->names([
+            'index' => 'ipd.index',
+            'store' => 'ipd.store',
+            'show' => 'ipd.show',
+            'update' => 'ipd.update',
+            'destroy' => 'ipd.destroy',
+        ]);
     Route::apiResource('pharmacy',
         PharmacyController::class)
         ->middleware([HeaderAuthenticationMiddleware::class])
