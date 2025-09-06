@@ -46,7 +46,6 @@ class OpdController extends Controller
      * Display a listing of the resource.
      */
     public function index(Request $request){
-       // $data = CustomerModel::getRecords($this->domain,$request);
         $domain = $this->domain;
         $data = InvoiceModel::getRecords($request,$domain);
         $response = new Response();
@@ -60,7 +59,6 @@ class OpdController extends Controller
         $response->setStatusCode(Response::HTTP_OK);
         return $response;
     }
-
 
     /**
      * Display a listing of the resource.

@@ -65,6 +65,7 @@ class InvoiceModel extends Model
         $page =  isset($request['page']) && $request['page'] > 0?($request['page'] - 1 ) : 0;
         $perPage = isset($request['offset']) && $request['offset']!=''? (int)($request['offset']):50;
         $skip = isset($page) && $page!=''? (int)$page * $perPage:0;
+
         $entities = self::where([['hms_invoice.config_id',$domain['hms_config']]])
             ->join('inv_sales as inv_sales','inv_sales.id','=','hms_invoice.sales_id')
             ->leftjoin('hms_prescription as prescription','prescription.hms_invoice_id','=','hms_invoice.id')
@@ -96,9 +97,12 @@ class InvoiceModel extends Model
             ]);
 
         if (isset($request['term']) && !empty($request['term'])){
-            $entities = $entities->whereAny(['hms_invoice.invoice','cor_customers.name','cor_customers.mobile','salesBy.username','createdBy.username','acc_transaction_mode.name','hms_invoice.total'],'LIKE','%'.$request['term'].'%');
+            $entities = $entities->whereAny(['inv_sales.invoice','customer.customer_id','customer.name','customer.mobile','createdBy.username','hms_invoice.total'],'LIKE','%'.$request['term'].'%');
         }
 
+        if (isset($request['referred_mode']) && !empty($request['referred_mode'])){
+            $entities = $entities->where('hms_invoice.referred_mode',$request['referred_mode']);
+        }
         if (isset($request['customer_id']) && !empty($request['customer_id'])){
             $entities = $entities->where('hms_invoice.customer_id',$request['customer_id']);
         }
