@@ -108,17 +108,15 @@ class InvoiceModel extends Model
         if (isset($request['referred_mode']) && !empty($request['referred_mode'])){
             $entities = $entities->where('hms_invoice.referred_mode',$request['referred_mode']);
         }
+
         if (isset($request['customer_id']) && !empty($request['customer_id'])){
             $entities = $entities->where('hms_invoice.customer_id',$request['customer_id']);
         }
-        if (isset($request['start_date']) && !empty($request['start_date']) && empty($request['end_date'])){
-            $start_date = $request['start_date'].' 00:00:00';
-            $end_date = $request['start_date'].' 23:59:59';
-            $entities = $entities->whereBetween('hms_invoice.created_at',[$start_date, $end_date]);
-        }
-        if (isset($request['start_date']) && !empty($request['start_date']) && isset($request['end_date']) && !empty($request['end_date'])){
-            $start_date = $request['start_date'].' 00:00:00';
-            $end_date = $request['end_date'].' 23:59:59';
+
+        if (isset($request['created']) && !empty($request['created'])){
+            $date = new \DateTime($request['created']);
+            $start_date = $date->format('Y-m-d 00:00:00');
+            echo $end_date = $date->format('Y-m-d 23:59:59');
             $entities = $entities->whereBetween('hms_invoice.created_at',[$start_date, $end_date]);
         }
 
