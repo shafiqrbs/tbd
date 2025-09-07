@@ -15,11 +15,13 @@ use Modules\Core\App\Http\Requests\CustomerRequest;
 use Modules\Core\App\Models\CustomerModel;
 use Modules\Core\App\Models\UserModel;
 use Modules\Hospital\App\Entities\Prescription;
+use Modules\Hospital\App\Http\Requests\IpdRequest;
 use Modules\Hospital\App\Http\Requests\OPDRequest;
 use Modules\Hospital\App\Http\Requests\ReferredRequest;
 use Modules\Hospital\App\Models\HospitalConfigModel;
 use Modules\Hospital\App\Models\InvoiceModel;
 use Modules\Hospital\App\Models\InvoicePatientReferredModel;
+use Modules\Hospital\App\Models\IpdModel;
 use Modules\Hospital\App\Models\OPDModel;
 use Modules\Hospital\App\Models\ParticularModel;
 use Modules\Hospital\App\Models\ParticularModeModel;
@@ -61,77 +63,28 @@ class IpdController extends Controller
     }
 
     /**
-     * Display a listing of the resource.
-     */
-
-    public function getVisitingRooms(Request $request){
-        $domain = $this->domain;
-        $data = InvoiceModel::getVisitingRooms($domain);
-        $service = new JsonRequestResponse();
-        $data = $service->returnJosnResponse($data);
-        return $data;
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function referred(ReferredRequest $request,$id)
-    {
-        $input = $request->validated();
-        $entity = InvoiceModel::find($id);
-        $opd_room_id= (isset($input['opd_room_id']) && $input['opd_room_id']) ? $input['opd_room_id']:null;
-        if ($entity && isset($input['referred_mode'])) {
-            $input['hms_invoice_id'] = $id;
-            $input['created_by_id'] = $request->header('X-Api-User');
-            InvoicePatientReferredModel::updateOrCreate(
-                [
-                    'hms_invoice_id' => $id, // condition to check existing record
-                ],
-                $input // fields to update if exists OR create if not
-            );
-            $entity->forceFill([
-                'referred_mode' => $input['referred_mode'], 'room_id' => $opd_room_id,
-            ])->save();
-        }
-        $service = new JsonRequestResponse();
-        $entity = InvoiceModel::getShow($id);
-        $data = $service->returnJosnResponse($entity);
-        return $data;
-    }
-
-
-    /**
      * Store a newly created resource in storage.
      */
-    public function store(OPDRequest $request)
+    public function store(IpdRequest $request)
     {
-
-        $service = new JsonRequestResponse();
+        $domain = $this->domain;
         $input = $request->validated();
+        $parentInvoice = InvoiceModel::find($input['hms_invoice_id']);
         DB::beginTransaction();
+
         try {
-            $input['domain_id'] = $this->domain['global_id'];
-            $dob = (isset($input['dob']) and $input['dob']) ? $input['dob'] : null;
-            if($dob =="invalid" || $dob == null){
-                $dob = null;
-            }else{
-                $dob = new \DateTime($input['dob']);
-            }
-            $input['dob'] = $dob;
-            $entity = PatientModel::create($input);
-            $invConfig = $this->domain['inv_config'];
-            $hmsConfig = $this->domain['hms_config'];
-            $config = HospitalConfigModel::find($hmsConfig);
-            if($entity){
-                $invoiceId = OPDModel::insertHmsInvoice($invConfig,$config, $entity,$input);
-            }
-            $accountingConfig = AccountingModel::where('id', $this->domain['acc_config'])->first();
-            $ledgerExist = AccountHeadModel::where('customer_id', $entity->id)->where('config_id', $this->domain['acc_config'])->where('parent_id', $config->account_customer_id)->first();
-            if (empty($ledgerExist)) {
-               AccountHeadModel::insertCustomerLedger($accountingConfig, $entity);
-            }
+            $input['parent_id'] = $parentInvoice->id;
+            $input['customer_id'] = $parentInvoice->customer_id;
+            $input['created_by_id'] = $request->header('X-Api-User');
+            $patient_mode_id = ParticularModeModel::firstWhere([
+                ['slug', 'ipd'],
+                ['particular_module_id', 3],
+            ])->id;
+            $input['patient_mode_id'] = $patient_mode_id;
+            $entity = IpdModel::create($input);
+            IpdModel::insertHmsInvoice($domain,$parentInvoice,$entity,$input);
             DB::commit();
-            $invoice = InvoiceModel::getShow($invoiceId);
+            $invoice = InvoiceModel::getShow($entity->id);
             $service = new JsonRequestResponse();
             return $service->returnJosnResponse($invoice);
         } catch (\Exception $e) {
@@ -160,7 +113,7 @@ class IpdController extends Controller
      *//**/
     public function show($id)
     {
-        $entity = InvoiceModel::getShow($id);
+        $entity = InvoiceModel::getIpdShow($id);
         if (!$entity){
             $entity = 'Data not found';
         }

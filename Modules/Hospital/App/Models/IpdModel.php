@@ -5,10 +5,11 @@ namespace Modules\Hospital\App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Support\Facades\DB;
+use Modules\AppsApi\App\Services\GeneratePatternCodeService;
 use Modules\Core\App\Models\CustomerModel;
 
 
-class InvoiceModel extends Model
+class IpdModel extends Model
 {
     use HasFactory;
 
@@ -21,14 +22,86 @@ class InvoiceModel extends Model
     public static function boot() {
         parent::boot();
         self::creating(function ($model) {
+            $model->process = 'New';
             $date =  new \DateTime("now");
             $model->created_at = $date;
+            $model->process = 'New';
         });
 
         self::updating(function ($model) {
             $date =  new \DateTime("now");
             $model->updated_at = $date;
         });
+    }
+
+
+    public static function salesEventListener($model)
+    {
+        $patientMode = ParticularModeModel::find($model->patinet_mode_id);
+        $mode = ($patientMode) ? $patientMode->short_code:'OPD';
+        $patternCodeService = app(GeneratePatternCodeService::class);
+        $params = [
+            'config' => $model->config_id,
+            'table' => 'hms_invoice',
+            'prefix' => "{$mode}-",
+        ];
+        return $patternCodeService->invoiceNo($params);
+    }
+
+    public static function insertHmsInvoice($domain,$parent,$entity,$data)
+    {
+
+        $config = HospitalConfigModel::find($domain['hms_config']);
+        $payment_payment_mode_id = $parent->patient_payment_mode_id;
+        $admissionFee = ParticularModel::find($config['admission_fee_id']);
+        $amount = $admissionFee->price;
+        $invoice = self::salesEventListener($entity)['generateId'];
+        $code = self::salesEventListener($entity)['code'];
+        if ($entity) {
+            $entity->update([
+                'invoice' => $invoice,
+                'code' => $code,
+                'patient_payment_mode_id' => $payment_payment_mode_id ?? null,
+                'free_identification' => $parent->free_identification ?? null,
+                'day' => $parent->day ?? null,
+                'month' => $parent->month ?? null,
+                'year' => $parent->year ?? null,
+                'guardian_name' => $parent->guardian_name ?? null,
+                'guardian_mobile' => $parent->guardian_mobile ?? null,
+                'process' => 'New',
+                'sub_total' => $amount,
+                'total' => $amount,
+            ]);
+        }
+        $minimumDaysRoomRent = ($config->minimum_days_room_rent)?$config->minimum_days_room_rent:0;
+        $roomRent = ParticularModel::find($entity->room_id);
+        InvoiceParticularModel::updateOrCreate(
+            [
+                'hms_invoice_id' => $entity->id,
+                'particular_id'  => $roomRent->id ?? null,
+            ],
+            [
+                'name'  => $roomRent->display_name,
+                'quantity'  => $minimumDaysRoomRent,
+                'price'     => $roomRent->price,
+                'sub_total' => ($roomRent->price * $minimumDaysRoomRent),
+            ]
+        );
+
+        InvoiceParticularModel::updateOrCreate(
+            [
+                'hms_invoice_id' => $entity->id,
+                'particular_id'  => $admissionFee->id ?? null,
+            ],
+            [
+                'name'  => $admissionFee->display_name,
+                'quantity'  => 1,
+                'price'     => $amount,
+                'sub_total' => $amount,
+            ]
+        );
+        return $entity->id;
+
     }
 
     public function customer()
@@ -145,7 +218,7 @@ class InvoiceModel extends Model
                 'hms_invoice.id',
                 DB::raw('DATE_FORMAT(hms_invoice.updated_at, "%d-%m-%y") as created'),
                 DB::raw('DATE_FORMAT(hms_invoice.appointment_date, "%d-%m-%y") as appointment'),
-                'hms_invoice.invoice as invoice',
+                'inv_sales.invoice as invoice',
                 'hms_invoice.total as total',
                 'hms_invoice.comment',
                 'cor_customers.name as name',

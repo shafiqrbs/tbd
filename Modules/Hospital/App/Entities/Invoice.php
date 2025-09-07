@@ -113,9 +113,31 @@ class Invoice
     private  $specialization;
 
     /**
-     * @ORM\ManyToOne(targetEntity="Particular", inversedBy="hmsInvoices")
+     * @ORM\ManyToOne(targetEntity="Particular")
      **/
     private  $department;
+
+    /**
+     * @ORM\ManyToOne(targetEntity="Particular")
+     **/
+    private $admitDoctor;
+
+    /**
+     * @ORM\ManyToOne(targetEntity="Particular")
+     **/
+    private $admitConsultant;
+
+    /**
+     * @ORM\ManyToOne(targetEntity="ParticularMode")
+     **/
+    private $admitUnit;
+
+
+    /**
+     * @ORM\ManyToOne(targetEntity="ParticularMode")
+     **/
+    private $admitDepartment;
+
 
     /**
      * @ORM\ManyToOne(targetEntity="Modules\Core\App\Entities\User")

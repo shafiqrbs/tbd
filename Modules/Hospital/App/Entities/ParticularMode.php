@@ -22,6 +22,12 @@ class ParticularMode
     private $id;
 
     /**
+     * @ORM\ManyToOne(targetEntity="Config", cascade={"detach","merge"})
+     * @ORM\JoinColumn(name="config_id", referencedColumnName="id", onDelete="CASCADE")
+     */
+    protected $config;
+
+    /**
      * @ORM\ManyToOne(targetEntity="ParticularModule", cascade={"detach","merge"})
      * @ORM\JoinColumn(name="particular_module_id", referencedColumnName="id", onDelete="CASCADE")
      */

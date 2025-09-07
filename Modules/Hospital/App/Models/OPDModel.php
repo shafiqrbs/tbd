@@ -39,11 +39,13 @@ class OPDModel extends Model
 
     public static function salesEventListener($model)
     {
+        $patientMode = ParticularModeModel::find($model->patinet_mode_id);
+        $mode = ($patientMode) ? $patientMode->short_code:'OPD';
         $patternCodeService = app(GeneratePatternCodeService::class);
         $params = [
             'config' => $model->config_id,
             'table' => 'inv_sales',
-            'prefix' => 'OPD-',
+            'prefix' => "{$mode}-",
         ];
         return $patternCodeService->invoiceNo($params);
     }

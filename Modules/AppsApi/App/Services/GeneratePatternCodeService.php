@@ -61,8 +61,6 @@ class GeneratePatternCodeService
         }
         $data = array('code'=>$code,'generateId'=>$customerId);
         return $data;
-
-
     }
 
     public function productBatch($queryParams = [])

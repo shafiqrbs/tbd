@@ -7,10 +7,10 @@ use Gedmo\Mapping\Annotation as Gedmo;
 /**
  * InvoiceParticular
  *
- * @ORM\Table( name = "hms_admission_patient_particular")
+ * @ORM\Table( name = "hms_admission_patient")
  * @ORM\Entity()
  */
-class AdmissionPatientParticular
+class AdmissionPatient
 {
     /**
      * @var integer
@@ -27,10 +27,10 @@ class AdmissionPatientParticular
     private $particular;
 
     /**
-     * @ORM\ManyToOne(targetEntity="InvoiceTransaction")
+     * @ORM\ManyToOne(targetEntity="Invoice")
      * @ORM\JoinColumn(onDelete="CASCADE")
      **/
-    private $invoiceTransaction;
+    private $hmsInvoice;
 
 
     /**

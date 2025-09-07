@@ -33,6 +33,12 @@ class InvoiceContentDetails
      **/
     private $prescription;
 
+     /**
+     * @ORM\ManyToOne(targetEntity="AdmissionPatient")
+     * @ORM\JoinColumn(onDelete="CASCADE")
+     **/
+    private $admissionPatient;
+
     /**
      * @ORM\ManyToOne(targetEntity="ParticularType", cascade={"detach","merge"})
      * @ORM\JoinColumn(name="particular_type_id", referencedColumnName="id", onDelete="CASCADE")
@@ -45,6 +51,12 @@ class InvoiceContentDetails
      */
     private $particular;
 
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="module", type="string",nullable=true)
+     */
+    private $module;
 
     /**
      * @var string
@@ -52,7 +64,6 @@ class InvoiceContentDetails
      * @ORM\Column(name="name", type="string",nullable=true)
      */
     private $name;
-
 
     /**
      * @var string

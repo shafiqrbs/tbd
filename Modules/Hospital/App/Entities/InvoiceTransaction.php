@@ -471,7 +471,7 @@ class InvoiceTransaction
     }
 
     /**
-     * @return AdmissionPatientParticular
+     * @return AdmissionPatient
      */
     public function getAdmissionPatientParticulars()
     {

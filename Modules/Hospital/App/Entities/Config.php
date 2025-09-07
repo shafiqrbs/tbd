@@ -65,6 +65,13 @@ class Config
     private $otFee;
 
     /**
+     * @var smallint
+     *
+     * @ORM\Column( type="smallint",  nullable=true)
+     */
+    private $minimumDaysRoomRent = 3;
+
+    /**
      * @var string
      *
      * @ORM\Column( type="string", length=50,nullable = true)

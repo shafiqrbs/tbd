@@ -49,7 +49,7 @@ class InvoiceParticular
     private $invoicePathologicalGroup;
 
      /**
-     * @ORM\ManyToOne(targetEntity="AdmissionPatientParticular")
+     * @ORM\ManyToOne(targetEntity="AdmissionPatient")
      * @ORM\JoinColumn(onDelete="CASCADE")
      **/
     private $admissionPatientParticular;
@@ -65,6 +65,7 @@ class InvoiceParticular
      * @ORM\ManyToOne(targetEntity="Particular")
      **/
     private $assignDoctor;
+
 
     /**
      * @ORM\ManyToOne(targetEntity="Particular")
@@ -99,7 +100,7 @@ class InvoiceParticular
     /**
      * @var integer
      *
-     * @ORM\Column(name="quantity", type="smallint")
+     * @ORM\Column(name="quantity", type="smallint", nullable=true)
      */
     private $quantity = 1;
 
@@ -121,7 +122,7 @@ class InvoiceParticular
     /**
      * @var float
      *
-     * @ORM\Column(name="price", type="float")
+     * @ORM\Column(name="price", type="float", nullable=true)
      */
     private $price;
 
@@ -167,7 +168,7 @@ class InvoiceParticular
      *
      * @ORM\Column(name="process", type="string", length=30, nullable=true)
      */
-    private $process ='In-progress';
+    private $process ='New';
 
     /**
      * @var string
