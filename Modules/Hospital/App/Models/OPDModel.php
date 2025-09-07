@@ -23,8 +23,6 @@ class OPDModel extends Model
     public static function boot() {
         parent::boot();
         self::creating(function ($model) {
-            $model->invoice = self::salesEventListener($model)['generateId'];
-            $model->code = self::salesEventListener($model)['code'];
             $model->process = 'New';
             $date =  new \DateTime("now");
             $model->created_at = $date;
@@ -37,22 +35,17 @@ class OPDModel extends Model
     }
 
 
-    public static function salesEventListener($model)
+    public static function salesEventListener($model,$patient_mode_id)
     {
-        $patientMode = ParticularModeModel::find($model->patinet_mode_id);
+        $patientMode = ParticularModeModel::find($patient_mode_id);
         $mode = ($patientMode) ? $patientMode->short_code:'OPD';
         $patternCodeService = app(GeneratePatternCodeService::class);
         $params = [
             'config' => $model->config_id,
-            'table' => 'inv_sales',
+            'table' => 'hms_invoice',
             'prefix' => "{$mode}-",
         ];
         return $patternCodeService->invoiceNo($params);
-    }
-
-    public function salesItems()
-    {
-        return $this->hasMany(SalesItemModel::class, 'sale_id');
     }
 
     public function customerDomain(){
@@ -96,10 +89,15 @@ class OPDModel extends Model
             ]
         );
 
+        $invoice = self::salesEventListener($entity,$patient_mode_id)['generateId'];
+        $code = self::salesEventListener($entity,$patient_mode_id)['code'];
+
         $invoice = InvoiceModel::updateOrCreate(
             ['sales_id' => $sales->id],
             [
                 'config_id' => $hmsConfig->id,
+                'invoice' => $invoice,
+                'code' => $code,
                 'customer_id' => $entity->id,
                 'referred_doctor_id' => $data['referred_doctor_id'] ?? null,
                 'assign_doctor_id' => $data['assign_doctor_id'] ?? null,
@@ -138,16 +136,6 @@ class OPDModel extends Model
 
     }
 
-    public function insertSalesItems($sales,$items)
-    {
-        $timestamp = Carbon::now();
-        foreach ($items as &$record) {
-            $record['sale_id'] = $sales->id;
-            $record['created_at'] = $timestamp;
-            $record['updated_at'] = $timestamp;
-        }
-
-    }
 
     public static function getShow($id,$domain)
     {

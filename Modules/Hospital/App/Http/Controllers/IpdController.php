@@ -73,6 +73,7 @@ class IpdController extends Controller
         DB::beginTransaction();
 
         try {
+            $input['config_id'] = $domain['hms_config'];
             $input['parent_id'] = $parentInvoice->id;
             $input['customer_id'] = $parentInvoice->customer_id;
             $input['created_by_id'] = $request->header('X-Api-User');

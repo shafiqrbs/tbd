@@ -38,7 +38,7 @@ class IpdModel extends Model
     public static function salesEventListener($model)
     {
         $patientMode = ParticularModeModel::find($model->patinet_mode_id);
-        $mode = ($patientMode) ? $patientMode->short_code:'OPD';
+        $mode = ($patientMode) ? $patientMode->short_code:'IPD';
         $patternCodeService = app(GeneratePatternCodeService::class);
         $params = [
             'config' => $model->config_id,
@@ -53,10 +53,10 @@ class IpdModel extends Model
 
         $config = HospitalConfigModel::find($domain['hms_config']);
         $payment_payment_mode_id = $parent->patient_payment_mode_id;
-        $admissionFee = ParticularModel::find($config['admission_fee_id']);
-        $amount = $admissionFee->price;
+
         $invoice = self::salesEventListener($entity)['generateId'];
         $code = self::salesEventListener($entity)['code'];
+        $amount = self::insertInvoiceParticular($config,$entity);
         if ($entity) {
             $entity->update([
                 'invoice' => $invoice,
@@ -73,6 +73,12 @@ class IpdModel extends Model
                 'total' => $amount,
             ]);
         }
+        return $entity->id;
+    }
+
+    public static function insertInvoiceParticular($config,$entity)
+    {
+        $admissionFee = ParticularModel::find($config['admission_fee_id']);
         $minimumDaysRoomRent = ($config->minimum_days_room_rent)?$config->minimum_days_room_rent:0;
         $roomRent = ParticularModel::find($entity->room_id);
         InvoiceParticularModel::updateOrCreate(
@@ -96,11 +102,16 @@ class IpdModel extends Model
             [
                 'name'  => $admissionFee->display_name,
                 'quantity'  => 1,
-                'price'     => $amount,
-                'sub_total' => $amount,
+                'price'     => $admissionFee->price,
+                'sub_total' => $admissionFee->price,
             ]
         );
-        return $entity->id;
+
+        $amount = InvoiceParticularModel::where('hms_invoice_id', $entity->id)
+            ->sum('sub_total');
+        return $amount;
+
+
 
     }
 

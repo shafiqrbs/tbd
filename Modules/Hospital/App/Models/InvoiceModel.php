@@ -67,34 +67,39 @@ class InvoiceModel extends Model
         $skip = isset($page) && $page!=''? (int)$page * $perPage:0;
 
         $entities = self::where([['hms_invoice.config_id',$domain['hms_config']]])
-            ->join('inv_sales as inv_sales','inv_sales.id','=','hms_invoice.sales_id')
             ->leftjoin('hms_prescription as prescription','prescription.hms_invoice_id','=','hms_invoice.id')
             ->leftjoin('users as doctor','doctor.id','=','prescription.created_by_id')
             ->leftjoin('hms_particular as vr','vr.id','=','hms_invoice.room_id')
-            ->leftjoin('users as createdBy','createdBy.id','=','inv_sales.created_by_id')
-            ->join('cor_customers as customer','customer.id','=','inv_sales.customer_id')
+            ->leftjoin('users as createdBy','createdBy.id','=','hms_invoice.created_by_id')
+            ->join('cor_customers as customer','customer.id','=','hms_invoice.customer_id')
             ->join('hms_particular_mode as patient_mode','patient_mode.id','=','hms_invoice.patient_mode_id')
             ->join('hms_particular_mode as patient_payment_mode','patient_payment_mode.id','=','hms_invoice.patient_payment_mode_id')
             ->select([
                 'hms_invoice.id',
                 'prescription.id as prescription_id',
+                'hms_invoice.invoice as invoice',
+                'customer.customer_id as patient_id',
+                'customer.health_id',
                 'doctor.name as doctor_name',
                 'customer.name',
                 'customer.mobile',
-                'customer.gender',
-                'customer.customer_id as patient_id',
-                'customer.health_id',
+                'customer.address',
                 DB::raw("CONCAT(UCASE(LEFT(customer.gender, 1)), LCASE(SUBSTRING(customer.gender, 2))) as gender"),
                 DB::raw('DATE_FORMAT(hms_invoice.created_at, "%d-%m-%Y") as created_at'),
                 DB::raw('DATE_FORMAT(hms_invoice.appointment_date, "%d-%M-%Y") as appointment'),
+                DB::raw('DATE_FORMAT(customer.dob, "%d-%M-%Y") as dob'),
                 'hms_invoice.process as process',
                 'vr.name as visiting_room',
-                'inv_sales.invoice as invoice',
                 'patient_mode.name as patient_mode_name',
                 'patient_payment_mode.name as patient_payment_mode_name',
+                'patient_payment_mode.slug as patient_payment_mode_slug',
                 'createdBy.name as created_by',
                 'hms_invoice.sub_total as total',
                 'hms_invoice.referred_mode as referred_mode',
+                'prescription.diabetes as diabetes',
+                'prescription.blood_pressure as blood_pressure',
+                'prescription.weight as weight',
+                'prescription.height as height',
             ]);
 
         if (isset($request['term']) && !empty($request['term'])){
@@ -102,7 +107,12 @@ class InvoiceModel extends Model
         }
 
         if (isset($request['patient_mode']) && !empty($request['patient_mode'])){
-            $entities = $entities->where('patient_mode.slug',$request['patient_mode']);
+            $entities = $entities->where('hms_invoice.patient_mode_id',39);
+          //  $entities = $entities->where('patient_mode.slug','ipd');
+        }
+
+        if (isset($request['process']) && !empty($request['process'])){
+            $entities = $entities->where('hms_invoice.process',$request['process']);
         }
 
         if (isset($request['referred_mode']) && !empty($request['referred_mode'])){

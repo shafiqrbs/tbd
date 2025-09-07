@@ -28,6 +28,7 @@ class IpdRequest extends FormRequest
             case 'POST':
             {
                 return [
+                    'config_id' => 'integer|nullable',
                     'hms_invoice_id' => 'integer|nullable',
                     'room_id' => 'integer|nullable',
                     'admit_unit_id' => 'integer|nullable',
