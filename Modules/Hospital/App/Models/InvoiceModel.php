@@ -107,7 +107,7 @@ class InvoiceModel extends Model
         }
 
         if (isset($request['patient_mode']) && !empty($request['patient_mode'])){
-            $entities = $entities->where('patient_mode.slug','ipd');
+            $entities = $entities->where('patient_mode.slug',$request['patient_mode']);
         }
 
         if (isset($request['process']) && !empty($request['process'])){
