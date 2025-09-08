@@ -107,8 +107,7 @@ class InvoiceModel extends Model
         }
 
         if (isset($request['patient_mode']) && !empty($request['patient_mode'])){
-            $entities = $entities->where('hms_invoice.patient_mode_id',39);
-          //  $entities = $entities->where('patient_mode.slug','ipd');
+            $entities = $entities->where('patient_mode.slug','ipd');
         }
 
         if (isset($request['process']) && !empty($request['process'])){
@@ -135,7 +134,6 @@ class InvoiceModel extends Model
             ->take($perPage)
             ->orderBy('hms_invoice.updated_at','DESC')
             ->get();
-
         $data = array('count'=>$total,'entities'=>$entities);
         return $data;
     }
