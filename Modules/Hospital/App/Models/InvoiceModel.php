@@ -76,6 +76,7 @@ class InvoiceModel extends Model
             ->join('hms_particular_mode as patient_payment_mode','patient_payment_mode.id','=','hms_invoice.patient_payment_mode_id')
             ->select([
                 'hms_invoice.id',
+                'hms_invoice.parent_id as parent_id',
                 'prescription.id as prescription_id',
                 'hms_invoice.invoice as invoice',
                 'customer.customer_id as patient_id',
@@ -110,12 +111,14 @@ class InvoiceModel extends Model
             $entities = $entities->where('patient_mode.slug',$request['patient_mode']);
         }
 
+
         if (isset($request['process']) && !empty($request['process'])){
             $entities = $entities->where('hms_invoice.process',$request['process']);
         }
 
-        if (isset($request['referred_mode']) && !empty($request['referred_mode'])){
-            $entities = $entities->where('hms_invoice.referred_mode',$request['referred_mode']);
+        if (!empty($request['referred_mode'])) {
+            $entities = $entities->where('hms_invoice.referred_mode', $request['referred_mode'])
+                ->whereNull('hms_invoice.parent_id');
         }
 
         if (isset($request['customer_id']) && !empty($request['customer_id'])){
@@ -145,6 +148,8 @@ class InvoiceModel extends Model
         ])
             ->leftjoin('cor_customers','cor_customers.id','=','hms_invoice.customer_id')
             ->leftjoin('inv_sales','inv_sales.id','=','hms_invoice.sales_id')
+            ->leftjoin('hms_prescription as prescription','prescription.hms_invoice_id','=','hms_invoice.id')
+            ->leftjoin('users as doctor','doctor.id','=','prescription.created_by_id')
             ->leftjoin('users as createdBy','createdBy.id','=','hms_invoice.created_by_id')
             ->leftjoin('hms_particular as room','room.id','=','hms_invoice.room_id')
             ->leftjoin('hms_particular_mode as patient_mode','patient_mode.id','=','hms_invoice.patient_mode_id')
@@ -199,16 +204,21 @@ class InvoiceModel extends Model
             ['hms_invoice.id', '=', $id]
         ])
             ->leftjoin('cor_customers','cor_customers.id','=','hms_invoice.customer_id')
-            ->leftjoin('inv_sales','inv_sales.id','=','hms_invoice.sales_id')
             ->leftjoin('users as createdBy','createdBy.id','=','hms_invoice.created_by_id')
+            ->leftjoin('hms_prescription as prescription','prescription.hms_invoice_id','=','hms_invoice.id')
+            ->leftjoin('users as prescription_doctor','prescription_doctor.id','=','prescription.created_by_id')
             ->leftjoin('hms_particular as room','room.id','=','hms_invoice.room_id')
             ->leftjoin('hms_particular_mode as patient_mode','patient_mode.id','=','hms_invoice.patient_mode_id')
+            ->leftjoin('hms_particular as admit_consultant','admit_consultant.id','=','hms_invoice.admit_consultant_id')
+            ->leftjoin('hms_particular as admit_doctor','admit_doctor.id','=','hms_invoice.admit_doctor_id')
+            ->leftjoin('hms_particular_mode as admit_unit','admit_unit.id','=','hms_invoice.admit_unit_id')
+            ->leftjoin('hms_particular_mode as admit_department','admit_department.id','=','hms_invoice.admit_department_id')
             ->leftjoin('hms_particular_mode as particular_payment_mode','particular_payment_mode.id','=','hms_invoice.patient_payment_mode_id')
             ->select([
                 'hms_invoice.id',
                 DB::raw('DATE_FORMAT(hms_invoice.updated_at, "%d-%m-%y") as created'),
                 DB::raw('DATE_FORMAT(hms_invoice.appointment_date, "%d-%m-%y") as appointment'),
-                'inv_sales.invoice as invoice',
+                'hms_invoice.invoice as invoice',
                 'hms_invoice.total as total',
                 'hms_invoice.comment',
                 'cor_customers.name as name',
@@ -232,7 +242,12 @@ class InvoiceModel extends Model
                 'patient_mode.name as mode_name',
                 'particular_payment_mode.name as payment_mode_name',
                 'hms_invoice.process as process',
-                'hms_invoice.referred_mode as referred_mode',
+                'admit_consultant.name as admit_consultant_name',
+                'admit_unit.name as admit_unit_name',
+                'admit_department.name as admit_department_name',
+                'admit_doctor.name as admit_doctor_name',
+                'prescription.id as prescription_id',
+                'prescription_doctor.name as prescription_doctor_name',
             ])
             ->with(['invoice_particular' => function ($query) {
                 $query->select([
@@ -241,6 +256,7 @@ class InvoiceModel extends Model
                     'hms_invoice_particular.name as item_name',
                     'hms_invoice_particular.quantity',
                     'hms_invoice_particular.price',
+                    'hms_invoice_particular.sub_total',
                 ]);
             }])
             ->first();

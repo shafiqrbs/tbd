@@ -60,6 +60,7 @@ class HospitalController extends Controller
             'hospitalConfig.opd_ticket_fee:id,name as ticket_fee_name,price as ticket_fee_price',
             'hospitalConfig.emergency_fee:id,name as emergency_fee_name,price as emergency_fee_price',
             'hospitalConfig.ot_fee:id,name as ot_fee_name,price as ot_fee_price',
+            'hospitalConfig.consultant_doctor:id,name as consultant_doctor_name',
         ])->find($this
             ->domain['global_id']);
         $service = new JsonRequestResponse();

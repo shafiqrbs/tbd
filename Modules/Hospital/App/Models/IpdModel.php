@@ -68,9 +68,13 @@ class IpdModel extends Model
                 'year' => $parent->year ?? null,
                 'guardian_name' => $parent->guardian_name ?? null,
                 'guardian_mobile' => $parent->guardian_mobile ?? null,
+                'admit_consultant_id' => $config->consultant_by_id ?? null,
                 'process' => 'New',
                 'sub_total' => $amount,
                 'total' => $amount,
+            ]);
+            $parent->update([
+                'process' => 'Closed',
             ]);
         }
         return $entity->id;

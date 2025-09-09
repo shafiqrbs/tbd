@@ -53,6 +53,11 @@ class HospitalConfigModel extends Model
         return $this->hasOne(ParticularModel::class, 'id','ot_fee_id');
     }
 
+     public function consultant_doctor()
+    {
+        return $this->hasOne(ParticularModel::class, 'id','consultant_by_id');
+    }
+
     public static function resetConfig($id){
 
         $table = 'hms_config';

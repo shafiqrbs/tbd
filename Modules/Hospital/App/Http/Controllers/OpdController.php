@@ -90,7 +90,7 @@ class OpdController extends Controller
                 $input // fields to update if exists OR create if not
             );
             $entity->forceFill([
-                'referred_mode' => $input['referred_mode'], 'room_id' => $opd_room_id,
+                'referred_mode' => $input['referred_mode'], 'room_id' => $opd_room_id, 'process' => 'In-progress',
             ])->save();
         }
         $service = new JsonRequestResponse();

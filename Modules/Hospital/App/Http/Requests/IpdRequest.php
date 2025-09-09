@@ -33,7 +33,6 @@ class IpdRequest extends FormRequest
                     'room_id' => 'integer|nullable',
                     'admit_unit_id' => 'integer|nullable',
                     'admit_doctor_id' => 'integer|nullable',
-                    'admit_consultant_id' => 'integer|nullable',
                     'admit_department_id' => 'integer|nullable',
                     'comment' => 'string|nullable',
                 ];
