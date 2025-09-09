@@ -473,7 +473,7 @@ class B2bController extends Controller
         B2BCategoryPriceMatrixModel::whereIn('id', $idsToKeepActive)->update(['status' => 1]);
         B2BCategoryPriceMatrixModel::whereIn('id', $idsToDisable)->update(['status' => 0]);
 
-        $updatedMappings = B2BCategoryPriceMatrixModel::where('sub_domain_id', $findSubDomain->id)->get();
+        $updatedMappings = B2BCategoryPriceMatrixModel::where('sub_domain_id', $findSubDomain->id)->where('status' , 1)->get();
 
         $findSubDomainIds = UserModel::getDomainData($findSubDomain->sub_domain_id);
         $childAccConfig = $findSubDomainIds['config_id'];
