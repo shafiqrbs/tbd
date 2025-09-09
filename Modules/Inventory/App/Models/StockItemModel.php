@@ -472,7 +472,7 @@ class StockItemModel extends Model
     public static function calculateStockItemAveragePrice($itemId, $configId, $currentItem)
     {
         // Fetch the existing stock item
-        $query = self::where('id', $itemId)->where('config_id', $configId)->first();
+        $query = self::find($itemId);
 
         // Handle missing stock item (set defaults)
         $existingQuantity = $query->quantity ?? 0;
@@ -489,6 +489,10 @@ class StockItemModel extends Model
 
         // Calculate total quantity
         $totalQuantity = $existingQuantity + $currentQuantity;
+        if (($totalQuantity == 0) || ($totalQuantity < 0) ){
+            $averagePrice = $query->purchase_price;
+            return $averagePrice;
+        }
 
         // Calculate and return the average price
         $averagePrice = $totalPrice / $totalQuantity;

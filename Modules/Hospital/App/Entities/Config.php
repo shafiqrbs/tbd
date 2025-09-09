@@ -31,6 +31,28 @@ class Config
 
     /**
      *
+     * @ORM\OneToOne(targetEntity="Modules\Core\App\Entities\Warehouse", cascade={"persist", "remove"})
+     * @ORM\JoinColumn(onDelete="SET NULL")
+     **/
+    private $ipdStore;
+
+    /**
+     *
+     * @ORM\OneToOne(targetEntity="Modules\Core\App\Entities\Warehouse", cascade={"persist", "remove"})
+     * @ORM\JoinColumn(onDelete="SET NULL")
+     **/
+    private $opdStore;
+
+    /**
+     *
+     * @ORM\OneToOne(targetEntity="Modules\Core\App\Entities\Warehouse", cascade={"persist", "remove"})
+     * @ORM\JoinColumn(onDelete="SET NULL")
+     **/
+    private $otStore;
+
+
+    /**
+     *
      * @ORM\OneToOne(targetEntity="Particular", cascade={"persist", "remove"})
      * @ORM\JoinColumn(onDelete="SET NULL")
      **/

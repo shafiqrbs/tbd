@@ -77,4 +77,48 @@ class InvoiceContentDetailsModel extends Model
 
     }
 
+    public static function insertIpdContentDetails($domain,$invoice,$data)
+    {
+
+        $date =  new \DateTime("now");
+        $jsonData = json_decode($data['json_content']);
+        $patientExam =$jsonData['patient_examination'] ?? '';
+
+        // Loop through all dynamic keys (chief_complaints, comorbidity, etc.)
+
+        if($patientExam){
+
+            foreach ($patientExam as $sectionName => $items) {
+
+                // $items can be array or object, ensure it's iterable
+                if (!is_array($items)) {
+                    continue;
+                }
+
+                foreach ($items as $item) {
+
+                    // Example DB insert like your investigation code
+                    $particular = ParticularModel::find($item->id);
+                    $particularParent = $particular->particular_type_id;
+                    if ($particular && $particularParent) {
+                        self::updateOrCreate(
+                            [
+                                'hms_invoice_id'  => $invoice,
+                                'particular_id'   => $item->id,
+                            ],
+                            [
+                                'particular_type_id'   => $particularParent,
+                                'name'   => $particular->name,
+                                'value'   => $item->value ?? null,
+                                'updated_at' => $date,
+                                'created_at' => $date,
+                            ]
+                        );
+                    }
+                }
+            }
+        }
+
+    }
+
 }

@@ -34,6 +34,12 @@ class InvoiceTransaction
      **/
     private $prescription;
 
+    /**
+     * @ORM\OneToOne(targetEntity="Modules\Inventory\App\Entities\Sales", cascade={"detach","merge"})
+     * @ORM\JoinColumn(name="sale_id", referencedColumnName="id", onDelete="CASCADE")
+     */
+    private $sale;
+
 
     /**
      * @ORM\ManyToOne(targetEntity="Modules\Core\App\Entities\User")

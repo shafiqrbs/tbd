@@ -126,12 +126,10 @@ class IpdController extends Controller
     /**
      * Show the specified resource.
      */
-    public function sendPrescription(Request $request,$id)
+    public function insertInvestigation(Request $request,$id)
     {
         $service = new JsonRequestResponse();
         $userId = $request->header('X-Api-User');
-        $patientPaymentMode = ParticularModel::getDoctorNurseLabUser($userId,'doctor');
-        $doctorId = $patientPaymentMode ? $patientPaymentMode->id : null;
         $entity = PrescriptionModel::updateOrCreate(
             ['hms_invoice_id' => $id],
             [
