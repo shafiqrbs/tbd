@@ -37,6 +37,7 @@ class ProductionExpense
 
     /**
      * @ORM\ManyToOne(targetEntity="ProductionItem")
+     * @ORM\JoinColumn(onDelete="CASCADE")
      **/
     private  $productionItem;
 
@@ -55,6 +56,7 @@ class ProductionExpense
 
     /**
      * @ORM\ManyToOne(targetEntity="ProductionElement")
+     * @ORM\JoinColumn(onDelete="CASCADE")
      **/
     private  $productionElement;
 

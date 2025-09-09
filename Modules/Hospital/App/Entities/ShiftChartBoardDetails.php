@@ -65,6 +65,13 @@ class ShiftChartBoardDetails
     private  $ipdCabin;
 
     /**
+     * @ORM\ManyToOne(targetEntity="ParticularMode")
+     * @ORM\JoinColumn(name="ipd_unit_id", referencedColumnName="id", nullable=true)
+     **/
+    private  $ipdUnit;
+
+
+    /**
      * @var boolean
      *
      * @ORM\Column(type="boolean",options={"default"="true"})
