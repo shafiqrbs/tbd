@@ -3,12 +3,14 @@
 namespace Modules\Core\App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Hash;
+use Log;
 use Modules\Accounting\App\Models\AccountHeadModel;
 use Modules\Accounting\App\Models\AccountingModel;
 use Modules\AppsApi\App\Services\JsonRequestResponse;
@@ -27,7 +29,7 @@ class UserController extends Controller
     public function __construct(Request $request)
     {
         $userId = $request->header('X-Api-User');
-        if ($userId && !empty($userId)){
+        if ($userId && !empty($userId)) {
             $userData = UserModel::getUserData($userId);
             $this->domain = $userData;
         }
@@ -37,11 +39,12 @@ class UserController extends Controller
      * Display a listing of the resource.
      */
 
-    public function index(Request $request){
+    public function index(Request $request)
+    {
 
-        $data = UserModel::getRecords($request,$this->domain);
+        $data = UserModel::getRecords($request, $this->domain);
         $response = new Response();
-        $response->headers->set('Content-Type','application/json');
+        $response->headers->set('Content-Type', 'application/json');
         $response->setContent(json_encode([
             'message' => 'success',
             'status' => Response::HTTP_OK,
@@ -70,25 +73,25 @@ class UserController extends Controller
             $config = AccountingModel::where('id', $this->domain['acc_config'])->first();
             $userGroup = $entity->userGroup;
 
-            if($userGroup->name =='Director') {
+            if ($userGroup->name == 'Director') {
                 $ledgerExist = AccountHeadModel::where('user_id', $entity->id)->where('config_id', $this->domain['acc_config'])->where('parent_id', $config->capital_investment_id)->first();
-                if (empty($ledgerExist)){
+                if (empty($ledgerExist)) {
                     AccountHeadModel::insertCapitalInvestmentAccount($config, $entity);
                 }
-            }else{
+            } else {
                 $ledgerExist = AccountHeadModel::where('user_id', $entity->id)->where('config_id', $this->domain['acc_config'])->where('parent_id', $config->account_customer_id)->first();
-                if(empty($ledgerExist))
-                AccountHeadModel::insertUserAccount($config, $entity);
+                if (empty($ledgerExist))
+                    AccountHeadModel::insertUserAccount($config, $entity);
             }
             DB::commit();
             $service = new JsonRequestResponse();
             return $service->returnJosnResponse($entity);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             // Something went wrong, rollback the transaction
             DB::rollBack();
 
             // Optionally log the exception for debugging purposes
-            \Log::error('Error storing domain and related data: ' . $e->getMessage());
+            Log::error('Error storing domain and related data: ' . $e->getMessage());
             $service = new JsonRequestResponse();
             return $service->returnJosnResponse(Response::HTTP_INTERNAL_SERVER_ERROR);
         }
@@ -100,7 +103,7 @@ class UserController extends Controller
     /**
      * Show the specified resource.
      */
-    public function show(Request $request,$id)
+    public function show(Request $request, $id)
     {
         $application = $request->query('application') ?? 'pos';
         $service = new JsonRequestResponse();
@@ -117,7 +120,7 @@ class UserController extends Controller
         }
 
 
-        if (!$entity){
+        if (!$entity) {
             $entity = 'Data not found';
         }
         $data = $service->returnJosnResponse($entity);
@@ -131,7 +134,7 @@ class UserController extends Controller
     {
         $service = new JsonRequestResponse();
         $entity = UserModel::find($id);
-        if (!$entity){
+        if (!$entity) {
             $entity = 'Data not found';
         }
         $data = $service->returnJosnResponse($entity);
@@ -176,9 +179,9 @@ class UserController extends Controller
             }
         }
 
-        if (!$userProfile){
+        if (!$userProfile) {
             UserProfileModel::create($data);
-        }else{
+        } else {
             $userProfile->update($data);
         }
 
@@ -189,9 +192,9 @@ class UserController extends Controller
         $accessControlRolesJson = null;
         if (isset($data['access_control_role'])) {
             $accessControlRoles = [];
-            UserRoleGroupModel::where('user_id',$id)->where('role_type','access_control_role')->delete();
+            UserRoleGroupModel::where('user_id', $id)->where('role_type', 'access_control_role')->delete();
             foreach ($data['access_control_role'] as $group) {
-                if ($group){
+                if ($group) {
                     foreach ($group["actions"] as $action) {
                         $accessControlRoles[] = $action["id"];
                         //insert role group
@@ -209,11 +212,11 @@ class UserController extends Controller
         }
 
         $androidControlRolesJson = null;
-        if (isset($data['android_control_role'])){
+        if (isset($data['android_control_role'])) {
             $androidControlRoles = [];
-            UserRoleGroupModel::where('user_id',$id)->where('role_type','android_control_role')->delete();
+            UserRoleGroupModel::where('user_id', $id)->where('role_type', 'android_control_role')->delete();
             foreach ($data['android_control_role'] as $group) {
-                if ($group){
+                if ($group) {
                     foreach ($group["actions"] as $action) {
                         $androidControlRoles[] = $action["id"];
                         // insert role group
@@ -230,13 +233,13 @@ class UserController extends Controller
             $androidControlRolesJson = json_encode($androidControlRoles, JSON_PRETTY_PRINT);
         }
 
-        if (!$userRole){
+        if (!$userRole) {
             UserRoleModel::create([
                 'user_id' => $id,
                 'access_control_role' => $accessControlRolesJson,
                 'android_control_role' => $androidControlRolesJson,
             ]);
-        }else{
+        } else {
             $userRole->update([
                 'user_id' => $id,
                 'access_control_role' => $accessControlRolesJson,
@@ -248,7 +251,7 @@ class UserController extends Controller
         return $service->returnJosnResponse($entity);
     }
 
-    public function updateImage(Request $request,$id)
+    public function updateImage(Request $request, $id)
     {
         $userProfile = UserProfileModel::where('user_id', $id)->first();
         $data['user_id'] = $id;
@@ -275,13 +278,13 @@ class UserController extends Controller
             }
         }
 
-        if (!$userProfile){
+        if (!$userProfile) {
             UserProfileModel::create($data);
-        }else{
+        } else {
             $userProfile->update($data);
         }
         $response = new Response();
-        $response->headers->set('Content-Type','application/json');
+        $response->headers->set('Content-Type', 'application/json');
         $response->setContent(json_encode([
             'message' => 'success',
             'status' => Response::HTTP_OK,
@@ -297,15 +300,16 @@ class UserController extends Controller
     {
         $service = new JsonRequestResponse();
         UserModel::find($id)->delete();
-        $entity = ['message'=>'delete'];
+        $entity = ['message' => 'delete'];
         $data = $service->returnJosnResponse($entity);
         return $data;
     }
 
-    public function localStorage(Request $request){
-        $data = UserModel::getRecordsForLocalStorage($request,$this->domain);
+    public function localStorage(Request $request)
+    {
+        $data = UserModel::getRecordsForLocalStorage($request, $this->domain);
         $response = new Response();
-        $response->headers->set('Content-Type','application/json');
+        $response->headers->set('Content-Type', 'application/json');
         $response->setContent(json_encode([
             'message' => 'success',
             'status' => Response::HTTP_OK,
