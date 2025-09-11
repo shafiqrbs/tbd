@@ -24,6 +24,7 @@ use Modules\Production\App\Models\ProductionElements;
 use Modules\Production\App\Models\ProductionExpense;
 use Modules\Production\App\Models\ProductionItems;
 use Modules\Production\App\Models\ProductionStockHistory;
+use Modules\Production\App\Models\SettingModel;
 use Symfony\Component\HttpFoundation\Response as ResponseAlias;
 
 class ProductionBatchController extends Controller
@@ -143,6 +144,14 @@ class ProductionBatchController extends Controller
                 'message' => $e->getMessage()
             ], 500);
         }
+    }
+
+
+    public function batchItemDelete($id){
+        $service = new JsonRequestResponse();
+        ProductionBatchItemModel::find($id)->delete();
+        $entity = ['message' => 'delete'];
+        return $service->returnJosnResponse($entity);
     }
 
     /**
@@ -342,7 +351,10 @@ class ProductionBatchController extends Controller
      */
     public function destroy($id)
     {
-        //
+        $service = new JsonRequestResponse();
+        ProductionBatchModel::find($id)->delete();
+        $entity = ['message' => 'delete'];
+        return $service->returnJosnResponse($entity);
     }
 
 
@@ -431,7 +443,7 @@ class ProductionBatchController extends Controller
                         configId: $this->domain['config_id'],
                         warehouseId: $batch->warehouse_id,
                         stockItemId: $productionItem->item_id,
-                        quantity: $batchItem->receive_quantity
+                        quantity: ($batchItem->receive_quantity) ? $batchItem->receive_quantity : $batchItem->issue_quantity
                     );
             }
 

@@ -64,6 +64,8 @@ class ParticularModel extends Model
                 DB::raw('DATE_FORMAT(hms_particular.created_at, "%d-%M-%Y") as created'),
                 'hms_particular_type.name as particular_type_name',
                 'hms_particular_type.slug as particular_type_slug',
+                'hms_particular_details.unit_id as unit_id',
+                'hms_particular_details.opd_room_id as opd_room_id',
             ]);
 
         if (isset($request['term']) && !empty($request['term'])){

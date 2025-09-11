@@ -32,6 +32,8 @@ class ParticularInlineRequest extends FormRequest
                 return [
                     'name' => 'string|nullable',
                     'price' => 'numeric|nullable',
+                    'unit_id' => 'numeric|nullable',
+                    'opd_room_id' => 'numeric|nullable',
                 ];
             }
 

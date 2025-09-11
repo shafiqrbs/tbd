@@ -31,7 +31,7 @@ class DailyStockService
         ?int $configId = null,
         ?int $warehouseId = null,
         ?int $stockItemId = null,
-        int $quantity = 0
+        ?int $quantity = 0
     ): DailyStockModel {
         // Basic validation for essential parameters
         if (is_null($configId) || is_null($stockItemId)) {

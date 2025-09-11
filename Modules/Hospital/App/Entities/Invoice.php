@@ -177,6 +177,29 @@ class Invoice
     /**
      * @var string
      *
+     * @ORM\Column(name="weight", type="string",length=50, nullable = true)
+     */
+    private $weight;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="height", type="string",length=50, nullable = true)
+     */
+    private $height;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="bp", type="string",length=50, nullable = true)
+     */
+    private $bp;
+
+
+
+    /**
+     * @var string
+     *
      * @ORM\Column(type="text", nullable=true)
      */
     private $deletedContent;

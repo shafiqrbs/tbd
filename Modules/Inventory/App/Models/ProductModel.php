@@ -178,7 +178,9 @@ class ProductModel extends Model
                 'inv_category.name'
             ], 'LIKE', '%'.$request['term'].'%');
         }
-
+        if (isset($request['product_nature']) && !empty($request['product_nature'])) {
+            $products = $products->where('inv_stock.is_master', 1);
+        }
         if (isset($request['name']) && !empty($request['name'])) {
             $products = $products->where('inv_product.name', $request['name']);
         }
@@ -197,8 +199,17 @@ class ProductModel extends Model
         if (isset($request['category_id']) && !empty($request['category_id'])) {
             $products = $products->where('inv_product.category_id', $request['category_id']);
         }
-        if (isset($request['product_type_id']) && !empty($request['product_type_id'])) {
-            $products = $products->where('inv_product.product_type_id', $request['product_type_id']);
+        if (isset($request['product_nature']) && !empty($request['product_nature']) and $request['product_nature'] !== "allstocks") {
+            if (!empty($request['product_nature']) and $request['product_nature'] == 'production') {
+                $types = ['pre-production', 'mid-production', 'post-production'];
+                $products = $products->whereIn('inv_setting.slug', $types);
+            }elseif (!empty($request['product_nature']) and $request['product_nature'] == 'stockable') {
+                $types = ['stockable'];
+                $products = $products->whereIn('inv_setting.slug', $types);
+            }elseif (!empty($request['product_nature']) and $request['product_nature'] == 'rawmaterial') {
+                $types = ['raw-materials'];
+                $products = $products->whereIn('inv_setting.slug', $types);
+            }
         }
         $total = $products->count();
         $entities = $products->skip($skip)

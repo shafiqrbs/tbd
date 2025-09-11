@@ -17,7 +17,6 @@ class ParticularTypeMasterModel extends Model
     protected $table = 'hms_particular_master_type';
     public $timestamps = true;
     protected $guarded = ['id'];
-
     protected $fillable = [];
 
 

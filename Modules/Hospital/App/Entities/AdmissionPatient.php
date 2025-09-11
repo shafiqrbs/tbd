@@ -7,7 +7,7 @@ use Gedmo\Mapping\Annotation as Gedmo;
 /**
  * InvoiceParticular
  *
- * @ORM\Table( name = "hms_admission_patient")
+ * @ORM\Table( name = "hms_admission_patient_details")
  * @ORM\Entity()
  */
 class AdmissionPatient
@@ -21,61 +21,74 @@ class AdmissionPatient
      */
     private $id;
 
-    /**
-     * @ORM\ManyToOne(targetEntity="Particular")
-     **/
-    private $particular;
 
     /**
-     * @ORM\ManyToOne(targetEntity="Invoice")
+     * @ORM\OneToOne(targetEntity="Invoice")
      * @ORM\JoinColumn(onDelete="CASCADE")
      **/
     private $hmsInvoice;
 
 
     /**
-     * @ORM\ManyToOne(targetEntity="Modules\Core\App\Entities\User")
-     * @ORM\JoinColumn(name="created_by_id", referencedColumnName="id", nullable=true)
-     **/
-    private  $createdBy;
-
-
-    /**
-     * @var integer
-     *
-     * @ORM\Column(name="quantity", type="smallint")
+     * @ORM\ManyToOne(targetEntity="Modules\Core\App\Entities\Country")
+     * @ORM\JoinColumn(name="country_id", referencedColumnName="id", nullable=true, onDelete="SET NULL")
      */
-    private $quantity = 1;
+    protected $country;
 
-    /**
-     * @var float
-     *
-     * @ORM\Column(name="salesPrice", type="float")
+
+     /**
+     * @ORM\ManyToOne(targetEntity="Modules\Core\App\Entities\Setting")
+     * @ORM\JoinColumn(name="religion_id", referencedColumnName="id", nullable=true, onDelete="SET NULL")
      */
-    private $salesPrice;
+    protected $religion;
+
+
+     /**
+     * @var string
+     *
+     * @ORM\Column(type="text",  nullable =true)
+     */
+    private $permanentAddress;
 
 
     /**
      * @var string
      *
-     * @ORM\Column(name="estimatePrice", type="decimal", nullable=true)
+     * @ORM\Column(type="string", length=100, nullable =true)
      */
-    private $estimatePrice;
+    private $fatherName;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(type="string", length=100, nullable =true)
+     */
+    private $motherName;
 
 
     /**
-     * @var boolean
+     * @var string
      *
-     * @ORM\Column(name="customPrice", type="boolean")
+     * @ORM\Column(name="profession", type="string", length=100, nullable =true)
      */
-    private $customPrice = false;
+    private $profession;
+
 
     /**
-     * @var float
+     * @var string
      *
-     * @ORM\Column(name="subTotal", type="float")
+     * @ORM\Column( type="string",length=100 , nullable = true)
      */
-    private $subTotal;
+    private $maritalStatus;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column( type="string",length=100 , nullable = true)
+     */
+    private $patientRelation;
+
+
 
     /**
      * @var string

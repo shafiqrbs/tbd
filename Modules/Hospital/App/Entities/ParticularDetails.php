@@ -58,6 +58,13 @@ class ParticularDetails
      **/
     private $genderMode;
 
+
+     /**
+     * @ORM\ManyToOne(targetEntity="Particular")
+     * @ORM\JoinColumn(name="opd_room_id", referencedColumnName="id", nullable=true, onDelete="cascade")
+     **/
+    private $opdRoom;
+
     /**
      * @ORM\ManyToOne(targetEntity="ParticularMode")
      * @ORM\JoinColumn(name="payment_mode_id", referencedColumnName="id", nullable=true, onDelete="cascade")
