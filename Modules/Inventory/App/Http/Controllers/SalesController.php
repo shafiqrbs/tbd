@@ -282,7 +282,7 @@ class SalesController extends Controller
                     'transaction_mode_id' => $getTransactionMode ?? null,
                     'process' => 'in-progress',
                     'mode' => 'Requisition',
-                    'is_requisition' => true
+                    'is_requisition' => 1
                 ]);
 
 

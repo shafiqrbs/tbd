@@ -37,6 +37,8 @@ class ProductionBatchModel extends Model
         'created_by_id',
         'approved_by_id',
         'warehouse_id',
+        'is_requisition',
+        'requisition_board_id',
         'status',
         'code'
     ];
