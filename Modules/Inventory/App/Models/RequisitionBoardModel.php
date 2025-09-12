@@ -4,6 +4,7 @@ namespace Modules\Inventory\App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
+use Modules\AppsApi\App\Services\GeneratePatternCodeService;
 
 class RequisitionBoardModel extends Model
 {
@@ -23,9 +24,10 @@ class RequisitionBoardModel extends Model
     }
 
     public static function boot() {
-
         parent::boot();
         self::creating(function ($model) {
+            $model->batch_no = self::salesEventListener($model)['generateId'];
+            $model->code = self::salesEventListener($model)['code'];
             $date =  new \DateTime("now");
             $model->created_at = $date;
         });
@@ -34,6 +36,17 @@ class RequisitionBoardModel extends Model
             $date =  new \DateTime("now");
             $model->updated_at = $date;
         });
+    }
+
+    public static function salesEventListener($model)
+    {
+        $patternCodeService = app(GeneratePatternCodeService::class);
+        $params = [
+            'config' => $model->config_id,
+            'table' => 'inv_requisition_board',
+            'prefix' => 'RB-',
+        ];
+        return $patternCodeService->invoiceNo($params);
     }
 
     public static function getRecords($request,$domain)
@@ -59,33 +72,18 @@ class RequisitionBoardModel extends Model
                 'createdBy.name as created_name',
                 'approvedBy.username as approved_username',
                 'approvedBy.name as approved_name',
-            ])->with(['requisition_matrix' => function ($query){
+            ]) ->with(['requisition_matrix' => function ($query) {
                 $query->select([
-                    'inv_requisition_matrix_board.id',
-                    'inv_requisition_matrix_board.requisition_board_id',
-                    'inv_requisition_matrix_board.vendor_config_id',
-                    'inv_requisition_matrix_board.customer_config_id',
-                    'cor_customers.name as customer_name',
                     'inv_requisition_matrix_board.vendor_stock_item_id',
-                    'inv_requisition_matrix_board.customer_stock_item_id',
-                    'inv_requisition_matrix_board.customer_name',
-                    'inv_requisition_matrix_board.barcode',
-                    'inv_requisition_matrix_board.unit_name',
                     'inv_requisition_matrix_board.display_name',
-                    'inv_requisition_matrix_board.purchase_price',
-                    'inv_requisition_matrix_board.sales_price',
-                    'inv_requisition_matrix_board.quantity',
-                    'inv_requisition_matrix_board.requested_quantity',
-                    'inv_requisition_matrix_board.approved_quantity',
-                    'inv_requisition_matrix_board.received_quantity',
-                    'inv_requisition_matrix_board.vendor_stock_quantity',
-                    'inv_requisition_matrix_board.sub_total',
-                    'inv_requisition_matrix_board.status',
-                    'inv_requisition_matrix_board.process',
-                    'inv_requisition_matrix_board.expected_date',
-                    'inv_requisition_matrix_board.generate_date'
+                    'inv_requisition_matrix_board.unit_name',
+                    DB::raw('SUM(inv_requisition_matrix_board.requested_quantity) as requested_quantity'),
+                    DB::raw('SUM(inv_requisition_matrix_board.approved_quantity) as approved_quantity'),
+                    DB::raw('SUM(inv_requisition_matrix_board.sub_Total) as sub_Total'),
+                    'inv_requisition_matrix_board.requisition_board_id', // required for relation
                 ])
-                    ->join('cor_customers','cor_customers.id','=','inv_requisition_matrix_board.customer_id');
+                    ->groupBy('inv_requisition_matrix_board.vendor_stock_item_id','inv_requisition_matrix_board.display_name','inv_requisition_matrix_board.unit_name',
+                        'inv_requisition_matrix_board.requisition_board_id');
             }]);
 
         if (isset($request['term']) && !empty($request['term'])){

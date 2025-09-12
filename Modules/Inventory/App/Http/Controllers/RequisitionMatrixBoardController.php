@@ -78,7 +78,6 @@ class RequisitionMatrixBoardController extends Controller
                     'message' => 'A board has already been created. Please settle the existing one before creating a new one.',
                 ], ResponseAlias::HTTP_CONFLICT);
             }
-
             // Fetch Requisition Items
             $getItems = RequisitionItemModel::where([
                 ['inv_requisition_item.vendor_config_id', $vendorConfigId],
@@ -113,12 +112,10 @@ class RequisitionMatrixBoardController extends Controller
                 ->join('cor_customers', 'cor_customers.id', '=', 'inv_requisition.customer_id')
                 ->get()
                 ->toArray();
-
             if (count($getItems) > 0) {
                 $board = RequisitionBoardModel::create([
                     'config_id' => $vendorConfigId,
                     'created_by_id' => $this->domain['user_id'],
-                    'batch_no' => $request->batch_no,
                     'total' => 0,
                     'status' => 1,
                     'process' => 'Created',
@@ -768,4 +765,11 @@ class RequisitionMatrixBoardController extends Controller
             ], ResponseAlias::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
+
+    public function matrixBoardProductionToRequisition($id)
+    {
+
+        $findProductionBatch = ProductionBatchModel::generateProductionToVendorRequisition($id);
+    }
+
 }
