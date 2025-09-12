@@ -11,9 +11,12 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Modules\AppsApi\App\Services\JsonRequestResponse;
 use Modules\Core\App\Models\FileUploadModel;
+use Modules\Core\App\Models\LocationModel;
 use Modules\Core\App\Models\UserModel;
 use Modules\Domain\App\Models\DomainModel;
 use Modules\Hospital\App\Models\CategoryModel;
+use Modules\Hospital\App\Models\HospitalConfigModel;
+use Modules\Hospital\App\Models\InvoiceModel;
 use Modules\Hospital\App\Models\MedicineModel;
 use Modules\Hospital\App\Models\ParticularMatrixModel;
 use Modules\Hospital\App\Models\ParticularModel;
@@ -25,6 +28,7 @@ use Modules\Hospital\App\Models\ProductModel;
 use Modules\Inventory\App\Models\ProductBrandModel;
 use Modules\Inventory\App\Models\PurchaseItemModel;
 use Modules\Inventory\App\Models\SettingModel;
+use Modules\Inventory\App\Models\StockItemModel;
 use Modules\Medicine\App\Models\MedicineGenericModel;
 use Modules\Production\App\Models\ProductionItems;
 use PhpOffice\PhpSpreadsheet\Exception;
@@ -66,6 +70,17 @@ class HospitalController extends Controller
         $service = new JsonRequestResponse();
         return $service->returnJosnResponse($entity);
 
+    }
+
+    /**
+     * Show the form for editing the specified resource.
+     */
+    public function patientSearch(Request $request)
+    {
+        $domain = $this->domain;
+        $data = InvoiceModel::getCustomerSearch($domain,$request);
+        $service = new JsonRequestResponse();
+        return $service->returnJosnResponse($data);
     }
 
     /**
@@ -400,6 +415,222 @@ class HospitalController extends Controller
                 'data' => null
             ];
         }
+    }
+
+    /**
+     * @throws Throwable
+     */
+    public function insertUpazilaDistrictxxx()
+    {
+        set_time_limit(0);
+        ini_set('memory_limit', '2G');
+
+        $filePath = public_path('/uploads/medicine/bss_locaton_format.xlsx');
+        try {
+            // Load file with minimal memory usage
+            $reader = match (pathinfo($filePath, PATHINFO_EXTENSION)) {
+            'xlsx' => new Xlsx(),
+                'csv' => new \PhpOffice\PhpSpreadsheet\Reader\Csv(),
+                default => throw new Exception('Unsupported file format.')
+            };
+
+            $reader->setReadDataOnly(true);
+            $reader->setReadEmptyCells(false);
+
+            $spreadsheet = $reader->load($filePath);
+            $worksheet = $spreadsheet->getActiveSheet();
+
+            // Get headers from first row
+            $headers = [];
+            $headerRow = $worksheet->getRowIterator(1, 1)->current();
+            foreach ($headerRow->getCellIterator() as $cell) {
+                $headers[] = trim($cell->getValue());
+            }
+
+            // Optimize MySQL settings for bulk insert
+            DB::statement('SET SESSION sql_mode = ""');
+            DB::statement('SET SESSION unique_checks = 0');
+            DB::statement('SET SESSION foreign_key_checks = 0');
+            DB::statement('SET SESSION autocommit = 0');
+            DB::disableQueryLog();
+
+            $batchSize = 2500; // Larger batch for raw SQL
+            $totalProcessed = 0;
+            $errorCount = 0;
+            $batch = [];
+
+            // Cache timestamp and config_id
+            $currentTimestamp = now()->format('Y-m-d H:i:s');
+
+            // Get table name
+            $tableName = (new LocationModel())->getTable();
+
+          //  dd($worksheet->getRowIterator(2));
+
+            foreach ($worksheet->getRowIterator(2) as $row) {
+
+                $values = [];
+                $columnIndex = 0;
+                foreach ($row->getCellIterator() as $cell) {
+                    if (isset($headers[$columnIndex])) {
+                        $values[$headers[$columnIndex]] = $cell->getCalculatedValue();
+                    }
+                    $columnIndex++;
+                }
+
+                // Skip empty rows
+                if (empty(array_filter($values, fn($v) => !is_null($v) && $v !== ''))) {
+                    continue;
+                }
+
+                // Prepare values for raw SQL (escape strings)
+                $Upazila = isset($values['Upazila']) ? DB::connection()->getPdo()->quote(trim($values['Upazila'])) : "''";
+                $UpazilaCode = isset($values['UpazilaCode']) ?  $values['UpazilaCode'] : 0;
+                $District = isset($values['District']) ? DB::connection()->getPdo()->quote(trim($values['District'])) : "''";
+                $DistrictCode = isset($values['DistrictCode']) ?  $values['DistrictCode'] : 0;
+                $Divison = isset($values['Divison']) ? DB::connection()->getPdo()->quote(trim($values['Divison'])) : "''";
+                $DivisonCode = isset($values['DivisonCode']) ? $values['DivisonCode'] : 0;
+
+                $batch[] = "({$Upazila}, {$UpazilaCode},{$District}, {$DistrictCode},{$Divison},{$DivisonCode})";
+
+                // Execute batch when size is reached
+                if (count($batch) >= $batchSize) {
+                    try {
+                        $sql = "INSERT INTO {$tableName}
+                           ( upazila, upazila_code, district, district_code, division, division_code,created_at,updated_at)
+                           VALUES " . implode(',', $batch);
+
+                        DB::statement($sql);
+                        $totalProcessed += count($batch);
+
+                    } catch (Exception $e) {
+                        $errorCount += count($batch);
+                        \Log::error("SQL batch insert failed: " . $e->getMessage());
+                    }
+
+                    $batch = [];
+
+                    // Memory management
+                    if ($totalProcessed % 2500 === 0) {
+                        gc_collect_cycles();
+                    }
+                }
+            }
+
+
+            // Commit all changes
+            DB::statement('COMMIT');
+
+            // Reset MySQL settings
+            DB::statement('SET SESSION unique_checks = 1');
+            DB::statement('SET SESSION foreign_key_checks = 1');
+            DB::statement('SET SESSION autocommit = 1');
+            DB::enableQueryLog();
+
+            // Clean up memory
+            $spreadsheet->disconnectWorksheets();
+            unset($spreadsheet, $worksheet, $batch, $values);
+            gc_collect_cycles();
+
+            $message = "Import completed! Processed: {$totalProcessed} records, Errors: {$errorCount}";
+            \Log::info($message);
+
+            return [
+                'success' => true,
+                'message' => $message,
+                'data' => [
+                    'total_processed' => $totalProcessed,
+                    'total_errors' => $errorCount
+                ]
+            ];
+
+        } catch (Exception $e) {
+            // Reset MySQL settings on error
+            DB::statement('ROLLBACK');
+            DB::statement('SET SESSION unique_checks = 1');
+            DB::statement('SET SESSION foreign_key_checks = 1');
+            DB::statement('SET SESSION autocommit = 1');
+            DB::enableQueryLog();
+
+            \Log::error("Medicine import failed: " . $e->getMessage());
+
+            return [
+                'success' => false,
+                'message' => 'Import failed: ' . $e->getMessage(),
+                'data' => null
+            ];
+        }
+    }
+
+    /**
+     * @throws Throwable
+     */
+    public function insertUpazilaDistrict()
+    {
+        set_time_limit(0);
+        ini_set('memory_limit', '2G');
+
+        $filePath = public_path('/uploads/medicine/bss_locaton_format.xlsx');
+        // Load file based on extension
+        $reader = match (pathinfo($filePath, PATHINFO_EXTENSION)) {
+        'xlsx' => new Xlsx(),
+            'csv' => new \PhpOffice\PhpSpreadsheet\Reader\Csv(),
+            default => throw new Exception('Unsupported file format.')
+        };
+
+        $allData = $reader->load($filePath)->getActiveSheet()->toArray();
+
+        // for process data with header
+        $spreadsheet = $reader->load($filePath);
+        $data = $spreadsheet->getActiveSheet()->toArray(null, true, true, true);
+
+        // Use the first row as headers
+        $headers = array_shift($data);
+
+        // Map rows to headers
+        $dataWithHeaders = [];
+        foreach ($data as $row) {
+            $mappedRow = [];
+            foreach ($headers as $column => $headerName) {
+                $mappedRow[$headerName] = $row[$column] ?? null; // Use header name as key
+            }
+            $dataWithHeaders[] = $mappedRow;
+        }
+
+            $batchSize = 1000;
+            $batch = [];
+            $rowsProcessed = 0;
+
+            foreach ($allData as $index => $data) {
+                $productData[] = [
+                    'upazila'        => $data[1],
+                    'upazila_code'   => (int)$data[2],
+                    'district'       => trim($data[3]),
+                    'district_code'  => (int)($data[4]),
+                    'division'       => trim($data[5]),
+                    'division_code'  => (int)($data[6]),
+                    'created_at'     => now(),   // required if your table uses timestamps
+                    'updated_at'     => now(),
+                ];
+            }
+
+            // Bulk insert
+            LocationModel::insert($productData);
+
+          //  self::processProductBatch($productData);
+    }
+
+
+
+    // product batch upload
+    private function processProductBatch(array $batch)
+    {
+        $rowCount = 0;
+        foreach ($batch as $productData) {
+
+            $rowCount++;
+        }
+        return $rowCount;
     }
 
     /**

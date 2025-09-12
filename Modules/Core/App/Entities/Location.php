@@ -10,9 +10,8 @@ use Modules\Domain\App\Entities\GlobalOption;
 
 
 /**
- * Category
+ * Location
  *
- * @Gedmo\Tree(type="materializedPath")
  * @ORM\Table(name="cor_locations")
  * @ORM\Entity()
  */
@@ -30,45 +29,56 @@ class Location
 
 
     /**
-     * @var GlobalOption
-     * @ORM\ManyToOne(targetEntity="Modules\Domain\App\Entities\GlobalOption")
-     * @ORM\JoinColumn(onDelete="CASCADE")
-     **/
-    protected $domain;
-
+     * @var string
+     * @ORM\Column(name="upazila", type="string", length=100)
+     */
+    private $upazila;
 
     /**
      * @var string
-     * @ORM\Column(name="name", type="string", length=255)
+     * @ORM\Column(name="upazila_code", type="string", length=4)
      */
-    private $name;
+    private $upazilaCode;
 
     /**
-     * @Gedmo\TreeParent
-     * @ORM\ManyToOne(targetEntity="Location", inversedBy="children")
-     * @ORM\JoinColumns({
-     *   @ORM\JoinColumn(name="parent", referencedColumnName="id", onDelete="SET NULL", nullable=true)
-     * })
+     * @var string
+     * @ORM\Column(name="district", type="string", length=100)
      */
-    private $parent;
+    private $district;
 
     /**
-     * @Gedmo\TreeLevel
-     * @ORM\Column(name="level", type="integer", nullable=true)
+     * @var string
+     * @ORM\Column(name="district_code", type="string", length=4)
      */
-    private $level;
+    private $districtCode;
 
     /**
-     * @ORM\OneToMany(targetEntity="Location" , mappedBy="parent")
-     * @ORM\OrderBy({"name" = "ASC"})
-     **/
-    private $children;
+     * @var string
+     * @ORM\Column(name="division", type="string", length=100)
+     */
+    private $division;
 
     /**
-     * @Gedmo\TreePath(separator="/")
-     * @ORM\Column(name="path", type="string", length=3000, nullable=true)
+     * @var string
+     * @ORM\Column(name="division_code", type="string", length=4)
      */
-    private $path;
+    private $divisionCode;
+
+    /**
+     * @var \DateTime
+     * @Gedmo\Timestampable(on="create")
+     * @ORM\Column(name="created_at", type="datetime")
+     */
+    private $createdAt;
+
+    /**
+     * @var \DateTime
+     * @Gedmo\Timestampable(on="create")
+     * @ORM\Column(name="updated_at", type="datetime")
+     */
+    private $updatedAt;
+
+
 
 
 }

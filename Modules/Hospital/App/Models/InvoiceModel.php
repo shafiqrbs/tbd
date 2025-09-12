@@ -59,6 +59,27 @@ class InvoiceModel extends Model
         return $this->hasOne(OpdModel::class, 'id', 'patient_mode_id');
     }
 
+    public static function getCustomerSearch($domain,$request)
+    {
+
+        $entities = self::where([['hms_invoice.config_id',$domain['hms_config']]])
+            ->join('cor_customers as customer','customer.id','=','hms_invoice.customer_id')
+            ->select([
+                'hms_invoice.id',
+                'customer.customer_id as patient_id',
+                'customer.health_id',
+                'customer.nid as nid',
+                'hms_invoice.invoice as invoice',
+                'customer.name as name',
+                'customer.mobile as mobile',
+            ]);
+        $entities = $entities->whereAny(['hms_invoice.invoice','customer.customer_id','customer.name','customer.mobile','customer.nid','customer.health_id'],'LIKE','%'.$request['term'].'%');
+        $entities = $entities
+            ->orderBy('customer.customer_id','ASC')
+            ->get();
+        return $entities;
+
+    }
 
     public static function getRecords($request,$domain)
     {
@@ -104,13 +125,12 @@ class InvoiceModel extends Model
             ]);
 
         if (isset($request['term']) && !empty($request['term'])){
-            $entities = $entities->whereAny(['inv_sales.invoice','customer.customer_id','customer.name','customer.mobile','createdBy.username','hms_invoice.total'],'LIKE','%'.$request['term'].'%');
+            $entities = $entities->whereAny(['hms_invoice.invoice','customer.customer_id','customer.name','customer.mobile','createdBy.username','hms_invoice.total','customer.nid','customer.health_id'],'LIKE','%'.$request['term'].'%');
         }
 
         if (isset($request['patient_mode']) && !empty($request['patient_mode'])){
             $entities = $entities->where('patient_mode.slug',$request['patient_mode']);
         }
-
 
         if (isset($request['process']) && !empty($request['process'])){
             $entities = $entities->where('hms_invoice.process',$request['process']);

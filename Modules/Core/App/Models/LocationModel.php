@@ -14,8 +14,6 @@ class LocationModel extends Model
     protected $table = 'cor_locations';
     public $timestamps = true;
     protected $guarded = ['id'];
-    protected $fillable = [
-        'name',
-    ];
+    protected $fillable = ['upazila,upazila_code'];
 
 }
