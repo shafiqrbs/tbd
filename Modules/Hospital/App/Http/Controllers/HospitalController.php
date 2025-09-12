@@ -86,6 +86,16 @@ class HospitalController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
+    public function locationDropdown(Request $request)
+    {
+        $data = LocationModel::getLocationSearch($request);
+        $service = new JsonRequestResponse();
+        return $service->returnJosnResponse($data);
+    }
+
+    /**
+     * Show the form for editing the specified resource.
+     */
     public function settingMatrix(Request $request)
     {
         $domain = $this->domain;
