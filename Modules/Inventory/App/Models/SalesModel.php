@@ -125,6 +125,7 @@ class SalesModel extends Model
                 'cor_customers.mobile as customerMobile',
                 'createdBy.username as createdByUser',
                 'createdBy.name as createdByName',
+                'cor_setting.name as customer_group',
                 'createdBy.id as createdById',
                 'salesBy.id as salesById',
                 'salesBy.username as salesByUser',

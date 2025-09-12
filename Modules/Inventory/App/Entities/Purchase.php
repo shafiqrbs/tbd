@@ -84,8 +84,7 @@ class Purchase
      *
      * @ORM\Column(name="mode", type="string", length=30, nullable=true)
      */
-    private $mode ='product';
-
+     private $mode ='product';
 
     /**
      * @var float
@@ -142,6 +141,13 @@ class Purchase
      * @ORM\Column(name="status", type="boolean", nullable=true)
      */
     private $status=true;
+
+    /**
+     * @var boolean
+     *
+     * @ORM\Column(name="is_requisition", type="boolean", nullable=true)
+     */
+    private $isRequisition = false;
 
     /**
      * @var boolean

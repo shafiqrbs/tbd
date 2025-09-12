@@ -86,13 +86,16 @@ class ProductionBatchModel extends Model
 
         $entity = self::where('pro_batch.config_id', $domain['pro_config'])
             ->join('users', 'users.id', '=', 'pro_batch.created_by_id')
+            ->leftJoin('inv_requisition_board', 'inv_requisition_board.id', '=', 'pro_batch.requisition_board_id')
             ->select([
                 'pro_batch.id',
                 'pro_batch.invoice',
                 'pro_batch.status',
                 'pro_batch.process',
                 'pro_batch.created_by_id',
-                'pro_batch.approved_by_id',
+                'pro_batch.created_by_id',
+                'pro_batch.is_requisition',
+                'inv_requisition_board.batch_no',
                 'users.name as created_by_name',
                 DB::raw('DATE_FORMAT(pro_batch.created_at, "%d-%M-%Y") as created_date'),
                 DB::raw('DATE_FORMAT(pro_batch.issue_date, "%d-%M-%Y") as issue_date'),

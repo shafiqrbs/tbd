@@ -678,6 +678,8 @@ class RequisitionMatrixBoardController extends Controller
                 'code' => $pattern['code'],
                 'invoice' => $pattern['generateId'],
                 'process' => 'Draft',
+                'is_requisition' => true,
+                'requisition_board_id' => $firstItem->requisition_board_id,
                 'created_by_id' => $this->domain['user_id'],
                 'mode' => 'Production',
                 'status' => 1,
@@ -716,7 +718,7 @@ class RequisitionMatrixBoardController extends Controller
         }
     }
 
-    public function matrixBoardProductionApproved($id)
+    public function matrixBoardProductionApproved(Request $request , $id)
     {
         $findProductionBatch = ProductionBatchModel::find($id);
         if (!$findProductionBatch) {
@@ -739,6 +741,7 @@ class RequisitionMatrixBoardController extends Controller
         try {
             $findProductionBatch->update([
                 'process' => 'Created',
+                'is_requisition' => true,
             ]);
 
             foreach ($findProductionMatrixBoardItems as $item) {
@@ -748,6 +751,9 @@ class RequisitionMatrixBoardController extends Controller
                     'approved_date' => now()
                 ]);
             }
+            $domain = $this->domain;
+            $userId = $request->header('X-Api-User');
+            ProductionBatchModel::generateProductionToVendorRequisition($domain,$userId,$id);
 
             DB::commit();
 
@@ -771,7 +777,7 @@ class RequisitionMatrixBoardController extends Controller
 
         $domain = $this->domain;
         $userId = $request->header('X-Api-User');
-        $findProductionBatch = ProductionBatchModel::generateProductionToVendorRequisition($domain,$userId,$id);
+        ProductionBatchModel::generateProductionToVendorRequisition($domain,$userId,$id);
     }
 
 }
