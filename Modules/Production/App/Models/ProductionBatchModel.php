@@ -581,18 +581,20 @@ class ProductionBatchModel extends Model
         ];
     }
 
-    public static function generateProductionToVendorRequisition($id)
+    public static function generateProductionToVendorRequisition($domain,$user,$id)
     {
-        $entity = self::find($id);
+
+        $invConfig = $domain['inv_config'];
+
         $inQuery = DB::table('pro_expense')
             ->select([
-                'inv_stock.id as id',
+                'inv_stock.id as stock_id',
                 'inv_stock.remaining_quantity',
                 'inv_stock.product_id',
                 'inv_product.parent_id',
                 'inv_product.vendor_id',
-                DB::raw('SUM(pro_expense.issue_quantity ) as total_in_quantity'),
-                DB::raw('SUM(inv_stock.remaining_quantity - pro_expense.issue_quantity ) as quantity')
+                DB::raw('SUM(pro_expense.issue_quantity) as issue_quantity'),
+                DB::raw('inv_stock.remaining_quantity as quantity')
             ])
             ->join('pro_batch_item', 'pro_batch_item.id', '=', 'pro_expense.production_batch_item_id')
             ->join('pro_batch', 'pro_batch.id', '=', 'pro_batch_item.batch_id')
@@ -600,127 +602,96 @@ class ProductionBatchModel extends Model
             ->join('inv_stock', 'inv_stock.id', '=', 'pro_element.material_id')
             ->join('inv_product', 'inv_product.id', '=', 'inv_stock.product_id')
             ->where('pro_batch.id', $id)
-            ->groupBy('inv_stock.id')
-            ->get();
+            ->groupBy('inv_stock.id', 'inv_product.vendor_id') // group here, no need to regroup later
+            ->get()
+            ->groupBy('vendor_id');
 
-        // Group by vendor_id
-        $grouped = $inQuery->groupBy('vendor_id');
-
-        // Convert to array
-        $result = $grouped->map(function ($items, $vendorId) {
-            return [
-                'vendor_id' => $vendorId,
-                'items' => $items->toArray()
-            ];
-        })->values()->toArray();
-
-        foreach ($result as $row) {
-
-            $input['config_id'] = $entity->config_id;
-            $input['status'] = true;
-            $input['process'] = "Created";
-            $findVendor = VendorModel::find($row['vendor_id']);
-
-            if (!$findVendor) {
-                throw new \Exception("Vendor not found");
-            }
-
-            if ($findVendor->customer_id) {
-                $input['customer_id'] = $findVendor->customer_id;
-                $input['customer_config_id'] = $entity->config_id;
-                $input['vendor_config_id'] = ConfigModel::where('domain_id', $findVendor->sub_domain_id)
-                    ->first()
-                    ->id;
-            }
-            dd($input);
-            $requisition = RequisitionModel::create($input);
-            dd($row['items']);
-        }
-
+        $vendorIds = $inQuery->keys();
+        $vendors = VendorModel::whereIn('id', $vendorIds)->get()->keyBy('id');
+        $configs = ConfigModel::whereIn('domain_id', $vendors->pluck('sub_domain_id'))->get()->keyBy('domain_id');
 
         DB::beginTransaction();
         try {
-            foreach ($result as $row){
-
-                $input['config_id'] = $entity->config_id;
-                $input['status'] = true;
-                $input['process'] = "Created";
-                $findVendor = VendorModel::find($row['vendor_id']);
-
-                if (!$findVendor) {
-                    throw new \Exception("Vendor not found");
+            foreach ($inQuery as $vendorId => $items) {
+                $vendor = $vendors->get($vendorId);
+                if (!$vendor) {
+                    throw new \Exception("Vendor {$vendorId} not found");
                 }
 
-                if ($findVendor->customer_id) {
-                    $input['customer_id'] = $findVendor->customer_id;
-                    $input['customer_config_id'] = $entity->config_id;
-                    $input['vendor_config_id'] = ConfigModel::where('domain_id', $findVendor->sub_domain_id)
-                        ->first()
-                        ->id;
+                $baseInput = [
+                    'config_id'     => $invConfig,
+                    'status'        => true,
+                    'process'       => "Created",
+                    'vendor_id'     => $vendorId,
+                    'created_by_id' => $user,
+                    'invoice_date'  => Carbon::now()->toDateString(),
+                    'expected_date' => Carbon::now()->toDateString(),
+                    'remark'        => "Generated automatically by the production system as requested by the branch and franchise."
+                ];
+
+                if ($vendor->customer_id) {
+                    $baseInput['customer_id']         = $vendor->customer_id;
+                    $baseInput['customer_config_id']  = $invConfig;
+                    $baseInput['vendor_config_id']    = optional($configs->get($vendor->sub_domain_id))->id;
                 }
-           //     $requisition = RequisitionModel::create($input);
-                $requisition = new RequisitionModel();
-                $requisition->fill($input); // will still check fillable
-                $requisition->save();
 
-                dd($row['items']);
-                if (!empty($row['items'])) {
+                $requisition = RequisitionModel::create($baseInput);
 
-                    $itemsToInsert = [];
-                    $total = 0;
-                    foreach ($row['items'] as $val) {
-                        $customerStockItem = StockItemModel::find($val['id']);
-                        if (!$customerStockItem) {
-                            throw new \Exception("Stock item not found");
-                        }
+                $itemsToInsert = [];
+                $total = 0;
 
-                        $findProduct = ProductModel::find($val['product_id']);
-                        if (!$findProduct) {
-                            throw new \Exception("Product not found");
-                        }
-
-                        $total += $val['sub_total'];
-                        $itemsToInsert[] = [
-                            'requisition_id' => $requisition->id,
-                            'customer_stock_item_id' => $val['product_id'],
-                            'vendor_stock_item_id' => $customerStockItem->parent_stock_item,
-                            'vendor_config_id' => $requisition->vendor_config_id,
-                            'customer_config_id' => $requisition->customer_config_id,
-                            'barcode' => $customerStockItem->barcode,
-                            'quantity' => $val['quantity'],
-                            'display_name' => $customerStockItem->display_name,
-                            'purchase_price' => $customerStockItem->purchase_price,
-                            'sales_price' => $customerStockItem->sales_price,
-                            'sub_total' => (abs($val['quantity']) * $customerStockItem->purchase_price),
-                            'unit_id' => $customerStockItem->unit_id,
-                            'unit_name' => $customerStockItem->uom,
-                            'created_at' => now(),
-                        ];
+                foreach ($items as $val) {
+                    $customerStockItem = StockItemModel::find($val->stock_id);
+                    if (!$customerStockItem) {
+                        throw new \Exception("Stock item {$val->stock_id} not found");
                     }
 
-                    dd($itemsToInsert);
+                    $quantity = $val->issue_quantity > $val->quantity
+                        ? $val->issue_quantity - $val->quantity
+                        : $val->issue_quantity;
 
-                    if (!empty($itemsToInsert)) {
-                        RequisitionItemModel::insert($itemsToInsert);
-                    }
+                    $subTotal = $quantity * $customerStockItem->purchase_price;
+                    $total += $subTotal;
+
+                    $itemsToInsert[] = [
+                        'requisition_id'        => $requisition->id,
+                        'customer_stock_item_id'=> $customerStockItem->id,
+                        'vendor_stock_item_id'  => $customerStockItem->parent_stock_item,
+                        'vendor_config_id'      => $requisition->vendor_config_id,
+                        'customer_config_id'    => $requisition->customer_config_id,
+                        'barcode'               => $customerStockItem->barcode,
+                        'quantity'              => $quantity,
+                        'display_name'          => $customerStockItem->display_name,
+                        'purchase_price'        => $customerStockItem->purchase_price,
+                        'sales_price'           => $customerStockItem->sales_price,
+                        'sub_total'             => $subTotal,
+                        'unit_id'               => $customerStockItem->unit_id,
+                        'unit_name'             => $customerStockItem->uom,
+                        'created_at'            => Carbon::now(),
+                    ];
                 }
 
-                $requisition->update(['sub_total' => $total, 'total' => $total]);
+                if ($itemsToInsert) {
+                    RequisitionItemModel::insert($itemsToInsert);
+                }
+
+                $requisition->update([
+                    'sub_total' => $total,
+                    'total'     => $total
+                ]);
             }
 
             DB::commit();
 
             return response()->json([
-                'status' => ResponseAlias::HTTP_OK,
+                'status'  => ResponseAlias::HTTP_OK,
                 'message' => 'Insert successfully',
-                'data' => $requisition,
             ], ResponseAlias::HTTP_OK);
+
         } catch (\Exception $e) {
             DB::rollBack();
-
+            throw $e; // rethrow for debugging
         }
-
-        return $result;
     }
 
 }

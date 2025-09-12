@@ -766,10 +766,12 @@ class RequisitionMatrixBoardController extends Controller
         }
     }
 
-    public function matrixBoardProductionToRequisition($id)
+    public function matrixBoardProductionToRequisition(Request $request ,$id)
     {
 
-        $findProductionBatch = ProductionBatchModel::generateProductionToVendorRequisition($id);
+        $domain = $this->domain;
+        $userId = $request->header('X-Api-User');
+        $findProductionBatch = ProductionBatchModel::generateProductionToVendorRequisition($domain,$userId,$id);
     }
 
 }
