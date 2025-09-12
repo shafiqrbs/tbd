@@ -62,6 +62,7 @@ class InvoiceModel extends Model
     public static function getCustomerSearch($domain,$request)
     {
 
+        $term = trim($request['request']);
         $entities = self::where([['hms_invoice.config_id',$domain['hms_config']]])
             ->join('cor_customers as customer','customer.id','=','hms_invoice.customer_id')
             ->select([
@@ -73,7 +74,14 @@ class InvoiceModel extends Model
                 'customer.name as name',
                 'customer.mobile as mobile',
             ]);
-        $entities = $entities->whereAny(['hms_invoice.invoice','customer.customer_id','customer.name','customer.mobile','customer.nid','customer.health_id'],'LIKE','%'.$request['term'].'%');
+        $entities = $entities->where(function ($q) use ($term) {
+            $q->where('hms_invoice.invoice', 'LIKE', "%{$term}%")
+                ->orWhere('customer.customer_id', 'LIKE', "%{$term}%")
+                ->orWhere('customer.name', 'LIKE', "%{$term}%")
+                ->orWhere('customer.mobile', 'LIKE', "%{$term}%")
+                ->orWhere('customer.nid', 'LIKE', "%{$term}%")
+                ->orWhere('customer.health_id', 'LIKE', "%{$term}%");
+        });
         $entities = $entities
             ->orderBy('customer.customer_id','ASC')
             ->get();
@@ -125,7 +133,15 @@ class InvoiceModel extends Model
             ]);
 
         if (isset($request['term']) && !empty($request['term'])){
-            $entities = $entities->whereAny(['hms_invoice.invoice','customer.customer_id','customer.name','customer.mobile','createdBy.username','hms_invoice.total','customer.nid','customer.health_id'],'LIKE','%'.$request['term'].'%');
+            $term = trim($request['request']);
+            $entities = $entities->where(function ($q) use ($term) {
+                $q->where('hms_invoice.invoice', 'LIKE', "%{$term}%")
+                    ->orWhere('customer.customer_id', 'LIKE', "%{$term}%")
+                    ->orWhere('customer.name', 'LIKE', "%{$term}%")
+                    ->orWhere('customer.mobile', 'LIKE', "%{$term}%")
+                    ->orWhere('customer.nid', 'LIKE', "%{$term}%")
+                    ->orWhere('customer.health_id', 'LIKE', "%{$term}%");
+            });
         }
 
         if (isset($request['patient_mode']) && !empty($request['patient_mode'])){
