@@ -142,7 +142,7 @@ class ParticularModel extends Model
                 'hms_particular.id',
                 'hms_particular.name',
                 'treatmentMode.name as  treatment_mode_name',
-            ]);
+            ])->with('treatmentMedicineFormat');
 
         if (isset($request['particular_type']) && !empty($request['particular_type'])){
             $entity = $entity->where('hms_particular_master_type.slug',$request['particular_type']);
