@@ -14,6 +14,7 @@ use Modules\Hospital\App\Http\Controllers\ParticularTypeController;
 use Modules\Hospital\App\Http\Controllers\PharmacyController;
 use Modules\Hospital\App\Http\Controllers\PrescriptionController;
 use Modules\Hospital\App\Http\Controllers\SettingController;
+use Modules\Hospital\App\Http\Controllers\TreatmentMedicineController;
 
 
 /*
@@ -95,6 +96,15 @@ Route::prefix('/hospital')->middleware([HeaderAuthenticationMiddleware::class])-
                 'show' => 'investigation.show',
                 'update' => 'investigation.update',
                 'destroy' => 'investigation.destroy',
+            ]);
+        Route::apiResource('treatment', TreatmentMedicineController::class)
+            ->middleware([HeaderAuthenticationMiddleware::class])
+            ->names([
+                'index' => 'treatment.index',
+                'store' => 'treatment.store',
+                'show' => 'treatment.show',
+                'update' => 'treatment.update',
+                'destroy' => 'treatment.destroy',
             ]);
         Route::apiResource('/particular-mode', ParticularModeController::class)->middleware([HeaderAuthenticationMiddleware::class]);
     });

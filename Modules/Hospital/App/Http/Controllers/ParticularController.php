@@ -77,6 +77,16 @@ class ParticularController extends Controller
         if($masterType->slug == 'cabin'){
             ParticularDetailsModel::insertCabin($entity,$input);
         }
+        if($masterType->slug == 'treatment-template' and $input['treatment_mode_id']){
+            ParticularDetailsModel::updateOrCreate(
+                [
+                    'particular_id' => $entity->id,
+                ],
+                [
+                    'treatment_mode_id'   => $input['treatment_mode_id'],
+                ]
+            );
+        }
         $service = new JsonRequestResponse();
         $data = $service->returnJosnResponse($entity);
         return $data;

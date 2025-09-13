@@ -72,6 +72,12 @@ class ParticularDetails
     private $paymentMode;
 
     /**
+     * @ORM\ManyToOne(targetEntity="ParticularMode")
+     * @ORM\JoinColumn(name="treatment_mode_id", referencedColumnName="id", nullable=true, onDelete="cascade")
+     **/
+    private $treatmentMode;
+
+    /**
      * @ORM\ManyToOne(targetEntity="Particular")
      * @ORM\JoinColumn(name="room_id", referencedColumnName="id", nullable=true, onDelete="cascade")
      **/

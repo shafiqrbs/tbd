@@ -62,7 +62,7 @@ class InvoiceModel extends Model
     public static function getCustomerSearch($domain,$request)
     {
 
-        $term = trim($request['request']);
+        $term = trim($request['term']);
         $entities = self::where([['hms_invoice.config_id',$domain['hms_config']]])
             ->join('cor_customers as customer','customer.id','=','hms_invoice.customer_id')
             ->select([
@@ -133,7 +133,7 @@ class InvoiceModel extends Model
             ]);
 
         if (isset($request['term']) && !empty($request['term'])){
-            $term = trim($request['request']);
+            $term = trim($request['term']);
             $entities = $entities->where(function ($q) use ($term) {
                 $q->where('hms_invoice.invoice', 'LIKE', "%{$term}%")
                     ->orWhere('customer.customer_id', 'LIKE', "%{$term}%")
