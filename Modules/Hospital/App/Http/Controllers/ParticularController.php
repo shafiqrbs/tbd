@@ -97,7 +97,6 @@ class ParticularController extends Controller
      */
     public function show($id)
     {
-
         $entity = ParticularModel::with(['particularDetails','particularDetails.patientMode','particularDetails.paymentMode','particularDetails.genderMode','particularDetails.roomNo','particularDetails.cabinMode','investigationReportFormat','treatmentMedicineFormat'])->find($id);
         if (!$entity) {
             $entity = 'Data not found';
@@ -187,6 +186,16 @@ class ParticularController extends Controller
         }
         if($masterType->slug == 'cabin'){
             ParticularDetailsModel::insertCabin($entity,$input);
+        }
+        if($masterType->slug == 'treatment-template' and $input['treatment_mode_id']){
+            ParticularDetailsModel::updateOrCreate(
+                [
+                    'particular_id' => $entity->id,
+                ],
+                [
+                    'treatment_mode_id'   => $input['treatment_mode_id'],
+                ]
+            );
         }
         $service = new JsonRequestResponse();
         return $service->returnJosnResponse($entity);

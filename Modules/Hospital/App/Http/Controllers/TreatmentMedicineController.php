@@ -11,10 +11,8 @@ use Modules\Core\App\Models\UserModel;
 use Modules\Hospital\App\Http\Requests\InvestigationReportRequest;
 use Modules\Hospital\App\Http\Requests\ParticularRequest;
 use Modules\Hospital\App\Http\Requests\TreatmentMedicineRequest;
-use Modules\Hospital\App\Models\InvestigationReportFormatModel;
-use Modules\Hospital\App\Models\ParticularDetailsModel;
 use Modules\Hospital\App\Models\TreatmentMedicineModel;
-use Modules\Hospital\App\Models\TreatmentMedicineModeModel;
+use Modules\Hospital\App\Models\ParticularDetailsModel;
 use Modules\Hospital\App\Models\ParticularModel;
 use Modules\Hospital\App\Models\ParticularTypeMasterModel;
 use Modules\Hospital\App\Models\ParticularTypeModel;
@@ -79,7 +77,7 @@ class TreatmentMedicineController extends Controller
      */
     public function edit($id)
     {
-        $entity = ParticularModel::find($id);
+        $entity = TreatmentMedicineModel::find($id);
         $status = $entity ? Response::HTTP_OK : Response::HTTP_NOT_FOUND;
         return response()->json([
             'message' => 'success',
@@ -96,7 +94,7 @@ class TreatmentMedicineController extends Controller
     {
 
         $input = $request->validated();
-        $entity = InvestigationReportFormatModel::find($id);
+        $entity = TreatmentMedicineModel::find($id);
         $entity->update($input);
         $service = new JsonRequestResponse();
         return $service->returnJosnResponse($entity);
@@ -109,7 +107,7 @@ class TreatmentMedicineController extends Controller
     public function destroy($id)
     {
         $service = new JsonRequestResponse();
-        InvestigationReportFormatModel::find($id)->delete();
+        TreatmentMedicineModel::find($id)->delete();
         $entity = ['message' => 'delete'];
         return $service->returnJosnResponse($entity);
     }

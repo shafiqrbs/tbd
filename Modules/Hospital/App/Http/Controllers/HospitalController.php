@@ -131,6 +131,16 @@ class HospitalController extends Controller
 
     }
 
+    /**
+     * Show the form for editing the specified resource.
+     */
+    public function particularModeDropdown(Request $request)
+    {
+        $mode = $request->get('dropdown-type');
+        $dropdown = ParticularModeModel::getParticularModuleDropdown($mode);
+        $service = new JsonRequestResponse();
+        return $service->returnJosnResponse($dropdown);
+    }
 
 
     /**
