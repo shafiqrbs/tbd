@@ -34,6 +34,13 @@ class TreatmentMedicine
     private $treatmentTemplate;
 
 
+     /**
+     * @ORM\ManyToOne(targetEntity="MedicineDosage")
+     * @ORM\JoinColumn(name="medicine_dosage_id", referencedColumnName="id", nullable=true, onDelete="cascade")
+     **/
+    private $medicineDosage;
+
+
     /**
      * @ORM\ManyToOne(targetEntity="Modules\Inventory\App\Entities\StockItem")
      * @ORM\JoinColumn(name="medicine_id", referencedColumnName="id", nullable=true, onDelete="cascade")
@@ -52,17 +59,24 @@ class TreatmentMedicine
     /**
      * @var string
      *
-     * @ORM\Column(name="name", type="string", length=255, nullable=true)
+     * @ORM\Column(name="medicine_name", type="string", length=255, nullable=true)
      */
-    private $name;
+    private $medicineName;
 
 
      /**
      * @var string
      *
-     * @ORM\Column(name="bymeal", type="string", length=100, nullable=true)
+     * @ORM\Column(name="by_meal", type="string", length=200, nullable=true)
      */
-    private $bymeal;
+    private $byMeal;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="dosage_form", type="string", length=100, nullable=true)
+     */
+    private $dosageForm;
 
 
      /**
@@ -82,9 +96,25 @@ class TreatmentMedicine
     /**
      * @var float
      *
+     * @ORM\Column(name="period", type="integer", nullable=true)
+     */
+    private $period;
+
+
+    /**
+     * @var float
+     *
      * @ORM\Column(name="quantity", type="integer", nullable=true)
      */
     private $quantity;
+
+
+    /**
+     * @var float
+     *
+     * @ORM\Column(name="total_quantity", type="integer", nullable=true)
+     */
+    private $total_quantity;
 
     /**
      * @var string

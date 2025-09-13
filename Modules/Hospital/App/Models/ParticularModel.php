@@ -30,6 +30,11 @@ class ParticularModel extends Model
         return $this->hasMany(InvestigationReportFormatModel::class, 'particular_id', 'id');
     }
 
+    public function treatmentMedicineFormat()
+    {
+        return $this->hasMany(TreatmentMedicineModel::class, 'treatment_template_id', 'id');
+    }
+
 
     public static function getRecords($request,$domain){
 
@@ -105,7 +110,53 @@ class ParticularModel extends Model
 
     }
 
-     public static function getDoctorNurseStaff($request,$domain)
+    public static function getParticularContentDropdown($domain,$dropdownType)
+    {
+
+        $config =  $domain['hms_config'];
+        return DB::table('hms_particular')->where('hms_particular.config_id',$config)
+            ->join('hms_particular_type','hms_particular_type.id','=','hms_particular.particular_type_id')
+            ->join('hms_particular_master_type','hms_particular_master_type.id','=','hms_particular_type.particular_master_type_id')
+            ->where('hms_particular_master_type.slug',$dropdownType)
+            ->select([
+                'hms_particular.id',
+                'hms_particular.name',
+                'hms_particular.display_name',
+                'hms_particular.price',
+                'hms_particular.slug',
+                'hms_particular.content',
+            ])
+            ->orderBy('hms_particular.ordering','ASC')
+            ->get();
+    }
+
+    public static function getTreatmentMedicine($domain,$request){
+
+        $config =  $domain['hms_config'];
+        $entity = self::where('hms_particular.config_id',$config)
+            ->join('hms_particular_type','hms_particular_type.id','=','hms_particular.particular_type_id')
+            ->join('hms_particular_master_type','hms_particular_master_type.id','=','hms_particular_type.particular_master_type_id')
+            ->leftJoin('hms_particular_details','hms_particular_details.particular_id','=','hms_particular.id')
+            ->leftJoin('hms_particular_mode as treatmentMode','treatmentMode.id','=','hms_particular_details.treatment_mode_id')
+            ->select([
+                'hms_particular.id',
+                'hms_particular.name',
+                'treatmentMode.name as  treatment_mode_name',
+            ]);
+
+        if (isset($request['particular_type']) && !empty($request['particular_type'])){
+            $entity = $entity->where('hms_particular_master_type.slug',$request['particular_type']);
+        }
+        if (isset($request['treatment_mode']) && !empty($request['treatment_mode'])){
+            $entity = $entity->where('treatmentMode.slug',$request['treatment_mode']);
+        }
+        $entities = $entity->get();
+        return $entities;
+
+    }
+
+
+    public static function getDoctorNurseStaff($request,$domain)
      {
 
          self::doctorNurseStaff($domain, $userGroup = 'doctor');

@@ -31,10 +31,10 @@ class TreatmentMedicineRequest extends FormRequest
                 return [
                     'medicine_id' => 'integer|nullable',
                     'treatment_template_id' => 'integer|nullable',
-                    'name' => 'string|nullable',
+                    'medicine_name' => 'string|nullable',
                     'generic' => 'string|nullable',
                     'dosage' => 'string|nullable',
-                    'bymeal' => 'string|nullable',
+                    'by_meal' => 'string|nullable',
                     'duration' => 'string|nullable',
                     'quantity' => 'integer|nullable',
                 ];
@@ -45,10 +45,10 @@ class TreatmentMedicineRequest extends FormRequest
                 return [
                     'medicine_id' => 'integer|nullable',
                     'treatment_template_id' => 'integer|nullable',
-                    'name' => 'string|nullable',
+                    'medicine_name' => 'string|nullable',
                     'generic' => 'string|nullable',
                     'dosage' => 'string|nullable',
-                    'bymeal' => 'string|nullable',
+                    'by_meal' => 'string|nullable',
                     'duration' => 'string|nullable',
                     'quantity' => 'integer|nullable',
                 ];

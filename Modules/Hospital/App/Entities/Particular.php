@@ -90,6 +90,14 @@ class Particular
     private $price;
 
     /**
+     * @var ordering
+     *
+     * @ORM\Column(name="ordering", type="integer", nullable=true)
+     */
+    private $ordering;
+
+
+    /**
      * @var string
      *
      * @ORM\Column(name="instruction", type="text", nullable=true)

@@ -7,6 +7,7 @@ use Modules\Hospital\App\Http\Controllers\CategoryController;
 use Modules\Hospital\App\Http\Controllers\HospitalController;
 
 use Modules\Hospital\App\Http\Controllers\InvestigationController;
+use Modules\Hospital\App\Http\Controllers\MedicineDosageController;
 use Modules\Hospital\App\Http\Controllers\OpdController;
 use Modules\Hospital\App\Http\Controllers\ParticularController;
 use Modules\Hospital\App\Http\Controllers\ParticularModeController;
@@ -33,6 +34,7 @@ Route::prefix('/hospital/select')->middleware([HeaderAuthenticationMiddleware::c
     Route::get('/category', [HospitalController::class,'categoryDropdown'])->name('category_dropdown');
     Route::get('/bymeal', [HospitalController::class,'mealDropdown'])->name('meal_dropdown');
     Route::get('/dosage', [HospitalController::class,'dosageDropdown'])->name('dosage_dropdown');
+    Route::get('/particular-content', [HospitalController::class,'particularContentDropdown'])->name('particular_content_dropdown');
     Route::get('/module', [HospitalController::class,'particularModuleDropdown'])->name('particular_module_dropdown');
     Route::get('/modules', [HospitalController::class,'particularModuleChildDropdown'])->name('particular_module_dropdown');
     Route::get('/mode', [HospitalController::class,'particularModeDropdown'])->name('particular_module_dropdown');
@@ -106,6 +108,17 @@ Route::prefix('/hospital')->middleware([HeaderAuthenticationMiddleware::class])-
                 'update' => 'treatment.update',
                 'destroy' => 'treatment.destroy',
             ]);
+
+        Route::apiResource('medicinedosage', MedicineDosageController::class)
+            ->middleware([HeaderAuthenticationMiddleware::class])
+            ->names([
+                'index' => 'medicinedosage.index',
+                'store' => 'medicinedosage.store',
+                'show' => 'medicinedosage.show',
+                'update' => 'medicinedosage.update',
+                'destroy' => 'medicinedosage.destroy',
+            ]);
+
         Route::apiResource('/particular-mode', ParticularModeController::class)->middleware([HeaderAuthenticationMiddleware::class]);
     });
     Route::post('/setting-matrix/create', [HospitalController::class,'settingMatrixCreate'])->name('particular_module_dropdown');

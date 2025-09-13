@@ -9,9 +9,11 @@ use Modules\AppsApi\App\Services\JsonRequestResponse;
 
 use Modules\Core\App\Models\UserModel;
 use Modules\Hospital\App\Http\Requests\InvestigationReportRequest;
+use Modules\Hospital\App\Http\Requests\MedicineDosageRequest;
 use Modules\Hospital\App\Http\Requests\ParticularRequest;
 use Modules\Hospital\App\Http\Requests\TreatmentMedicineRequest;
 use Modules\Hospital\App\Models\InvestigationReportFormatModel;
+use Modules\Hospital\App\Models\MedicineDosageModel;
 use Modules\Hospital\App\Models\ParticularDetailsModel;
 use Modules\Hospital\App\Models\TreatmentMedicineModel;
 use Modules\Hospital\App\Models\TreatmentMedicineModeModel;
@@ -21,7 +23,7 @@ use Modules\Hospital\App\Models\ParticularTypeModel;
 
 
 
-class TreatmentMedicineController extends Controller
+class MedicineDosageController extends Controller
 {
     protected $domain;
 
@@ -36,24 +38,29 @@ class TreatmentMedicineController extends Controller
 
     public function index(Request $request)
     {
-        $data = ParticularModel::getTreatmentMedicine($this->domain,$request);
+        $data = TreatmentMedicineModeModel::getRecords($request, $this->domain);
         $response = new Response();
         $response->headers->set('Content-Type', 'application/json');
-        $service = new JsonRequestResponse();
-        $data = $service->returnJosnResponse($data);
-        return $data;
+        $response->setContent(json_encode([
+            'message' => 'success',
+            'status' => Response::HTTP_OK,
+            'total' => $data['count'],
+            'data' => $data['entities']
+        ]));
+        $response->setStatusCode(Response::HTTP_OK);
+        return $response;
     }
+
 
      /**
      * Store a newly created resource in storage.
      */
-    public function store(TreatmentMedicineRequest $request)
+    public function store(MedicineDosageRequest $request)
     {
-
         $config = $this->domain['hms_config'];
         $input = $request->validated();
         $input['config_id'] = $config;
-        $entity = TreatmentMedicineModel::create($input);
+        $entity = MedicineDosageModel::create($input);
         $service = new JsonRequestResponse();
         $data = $service->returnJosnResponse($entity);
         return $data;

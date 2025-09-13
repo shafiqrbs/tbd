@@ -98,7 +98,7 @@ class ParticularController extends Controller
     public function show($id)
     {
 
-        $entity = ParticularModel::with(['particularDetails','particularDetails.patientMode','particularDetails.paymentMode','particularDetails.genderMode','particularDetails.roomNo','particularDetails.cabinMode','investigationReportFormat'])->find($id);
+        $entity = ParticularModel::with(['particularDetails','particularDetails.patientMode','particularDetails.paymentMode','particularDetails.genderMode','particularDetails.roomNo','particularDetails.cabinMode','investigationReportFormat','treatmentMedicineFormat'])->find($id);
         if (!$entity) {
             $entity = 'Data not found';
         }

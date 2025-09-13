@@ -10,16 +10,15 @@ use Modules\AppsApi\App\Services\GeneratePatternCodeService;
 use Modules\Core\App\Models\CustomerModel;
 use Ramsey\Collection\Collection;
 
-class TreatmentMedicineModel extends Model
+class MedicineDosageModel extends Model
 {
     use HasFactory;
 
-    protected $table = 'hms_treatment_medicine';
+    protected $table = 'hms_medicine_dosage';
     public $timestamps = true;
     protected $guarded = ['id'];
 
     protected $fillable = [];
-
 
 
 }
