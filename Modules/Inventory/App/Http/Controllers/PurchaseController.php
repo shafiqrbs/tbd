@@ -69,6 +69,7 @@ class PurchaseController extends Controller
         $input['config_id'] = $this->domain['config_id'];
         $input['created_by_id'] = $this->domain['user_id'];
         $input['process'] = "Created";
+        $input['mode'] = "Purchase";
 
         if(empty($input['vendor_id']) and isset($input['vendor_name']) and isset($input['vendor_mobile'])) {
             $find = VendorModel::uniqueVendorCheck($this->domain['domain_id'], $input['vendor_mobile'], $input['vendor_name']);

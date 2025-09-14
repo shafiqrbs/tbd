@@ -52,6 +52,13 @@ class RequisitionBoard
     private $batchNo;
 
     /**
+     * @var integer
+     *
+     * @ORM\Column(name="code", type="integer",  nullable=true)
+     */
+    private $code;
+
+    /**
      * @var string
      * @ORM\Column(name="total", type="string",  nullable = true)
      */

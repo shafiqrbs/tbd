@@ -10,13 +10,14 @@ use Modules\AppsApi\App\Services\GeneratePatternCodeService;
 use Modules\Core\App\Models\CustomerModel;
 use Ramsey\Collection\Collection;
 
-class ParticularTypeMasterModel extends Model
+class MedicineDosageModel extends Model
 {
     use HasFactory;
 
-    protected $table = 'hms_particular_master_type';
+    protected $table = 'hms_medicine_dosage';
     public $timestamps = true;
     protected $guarded = ['id'];
+
     protected $fillable = [];
 
 

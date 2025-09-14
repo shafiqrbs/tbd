@@ -66,6 +66,20 @@ class PrescriptionController extends Controller
     }
 
     /**
+     * Display a listing of the resource.
+     */
+    public function patientPrescription($id){
+
+        $domain = $this->domain;
+        $data = PrescriptionModel::getPatientPrescription($domain,$id);
+        $service = new JsonRequestResponse();
+        $response = $service->returnJosnResponse($data);
+        return $response;
+    }
+
+
+
+    /**
      * Show the specified resource.
      *//**/
     public function show($id)
@@ -116,7 +130,7 @@ class PrescriptionController extends Controller
     public function destroy($id)
     {
         $service = new JsonRequestResponse();
-        CustomerModel::find($id)->delete();
+        PrescriptionModel::find($id)->delete();
         $entity = ['message' => 'delete'];
         return $service->returnJosnResponse($entity);
     }

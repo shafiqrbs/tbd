@@ -58,11 +58,24 @@ class ParticularDetails
      **/
     private $genderMode;
 
+
+     /**
+     * @ORM\ManyToOne(targetEntity="Particular")
+     * @ORM\JoinColumn(name="opd_room_id", referencedColumnName="id", nullable=true, onDelete="cascade")
+     **/
+    private $opdRoom;
+
     /**
      * @ORM\ManyToOne(targetEntity="ParticularMode")
      * @ORM\JoinColumn(name="payment_mode_id", referencedColumnName="id", nullable=true, onDelete="cascade")
      **/
     private $paymentMode;
+
+    /**
+     * @ORM\ManyToOne(targetEntity="ParticularMode")
+     * @ORM\JoinColumn(name="treatment_mode_id", referencedColumnName="id", nullable=true, onDelete="cascade")
+     **/
+    private $treatmentMode;
 
     /**
      * @ORM\ManyToOne(targetEntity="Particular")
@@ -371,6 +384,12 @@ class ParticularDetails
      */
     private $mobile;
 
+    /**
+     * @var boolean
+     *
+     * @ORM\Column(type="boolean",options={"default"="false"})
+     */
+    private $opdReferred;
 
 
     /**

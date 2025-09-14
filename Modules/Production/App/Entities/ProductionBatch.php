@@ -39,6 +39,12 @@ class ProductionBatch
      private  $vendor;
 
     /**
+     * @ORM\ManyToOne(targetEntity="Modules\Inventory\App\Entities\RequisitionBoard")
+     * @ORM\JoinColumn(onDelete="CASCADE")
+     **/
+     private  $requisitionBoard;
+
+    /**
      *
      * @ORM\ManyToOne(targetEntity="Modules\Core\App\Entities\Setting")
      * @ORM\JoinColumn(onDelete="CASCADE")
@@ -126,6 +132,13 @@ class ProductionBatch
      * @ORM\Column(type="boolean", options={"default"="false"}, nullable = true)
      */
     private $status = false;
+
+    /**
+     * @var boolean
+     *
+     * @ORM\Column(type="boolean", options={"default"="false"}, nullable = true)
+     */
+    private $isRequisition = false;
 
 
     /**

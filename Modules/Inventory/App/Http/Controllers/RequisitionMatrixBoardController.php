@@ -78,7 +78,6 @@ class RequisitionMatrixBoardController extends Controller
                     'message' => 'A board has already been created. Please settle the existing one before creating a new one.',
                 ], ResponseAlias::HTTP_CONFLICT);
             }
-
             // Fetch Requisition Items
             $getItems = RequisitionItemModel::where([
                 ['inv_requisition_item.vendor_config_id', $vendorConfigId],
@@ -113,12 +112,10 @@ class RequisitionMatrixBoardController extends Controller
                 ->join('cor_customers', 'cor_customers.id', '=', 'inv_requisition.customer_id')
                 ->get()
                 ->toArray();
-
             if (count($getItems) > 0) {
                 $board = RequisitionBoardModel::create([
                     'config_id' => $vendorConfigId,
                     'created_by_id' => $this->domain['user_id'],
-                    'batch_no' => $request->batch_no,
                     'total' => 0,
                     'status' => 1,
                     'process' => 'Created',
@@ -653,23 +650,30 @@ class RequisitionMatrixBoardController extends Controller
     public function matrixBoardProductionProcess(Request $request, GeneratePatternCodeService $patternCodeService)
     {
         $itemIds = $request->input('item_ids', []);
-
         if (empty($itemIds)) {
             return response()->json([
                 'success' => false,
                 'message' => 'No items provided.',
             ], ResponseAlias::HTTP_BAD_REQUEST);
         }
-
+        // If it's a string that looks like a JSON array: "[31,32,33]" or "[]"
+        if (is_string($itemIds)) {
+            $decoded = json_decode($itemIds, true);
+            if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
+                $itemIds = $decoded;
+            } else {
+                // fallback: maybe comma-separated "31,32,33"
+                $itemIds = array_filter(array_map('intval', explode(',', $itemIds)));
+            }
+        }
+        // Ensure it's always an array of integers
+        $itemIds = array_map('intval', (array) $itemIds);
         try {
             DB::beginTransaction();
-
             $productionMatrixItems = RequisitionProductItemMatrixModel::whereIn('id', $itemIds)->get();
-
             if ($productionMatrixItems->isEmpty()) {
                 throw new \Exception('No valid production matrix items found.');
             }
-
             $firstItem = $productionMatrixItems->first();
             $pattern = $patternCodeService->productBatch([
                 'config' => $firstItem->config_id,
@@ -681,8 +685,10 @@ class RequisitionMatrixBoardController extends Controller
                 'code' => $pattern['code'],
                 'invoice' => $pattern['generateId'],
                 'process' => 'Draft',
+                'is_requisition' => 1,
+                'requisition_board_id' => $firstItem->requisition_board_id,
                 'created_by_id' => $this->domain['user_id'],
-                'mode' => 'Production',
+                'mode' => 'Requisition',
                 'status' => 1,
             ]);
 
@@ -719,7 +725,7 @@ class RequisitionMatrixBoardController extends Controller
         }
     }
 
-    public function matrixBoardProductionApproved($id)
+    public function matrixBoardProductionApproved(Request $request , $id)
     {
         $findProductionBatch = ProductionBatchModel::find($id);
         if (!$findProductionBatch) {
@@ -742,6 +748,7 @@ class RequisitionMatrixBoardController extends Controller
         try {
             $findProductionBatch->update([
                 'process' => 'Created',
+                'is_requisition' => 1,
             ]);
 
             foreach ($findProductionMatrixBoardItems as $item) {
@@ -751,6 +758,9 @@ class RequisitionMatrixBoardController extends Controller
                     'approved_date' => now()
                 ]);
             }
+            $domain = $this->domain;
+            $userId = $request->header('X-Api-User');
+            ProductionBatchModel::generateProductionToVendorRequisition($domain,$userId,$id);
 
             DB::commit();
 
@@ -768,4 +778,13 @@ class RequisitionMatrixBoardController extends Controller
             ], ResponseAlias::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
+
+    public function matrixBoardProductionToRequisition(Request $request ,$id)
+    {
+
+        $domain = $this->domain;
+        $userId = $request->header('X-Api-User');
+        ProductionBatchModel::generateProductionToVendorRequisition($domain,$userId,$id);
+    }
+
 }

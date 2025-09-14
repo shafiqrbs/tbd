@@ -36,6 +36,7 @@ class ReferredRequest extends FormRequest
                     'referred_mode' => 'nullable|string',
                     'hospital'      => 'nullable|string',
                     'referred_name' => 'nullable|string',
+                    'json_content' => 'nullable|text',
                 ];
             }
 

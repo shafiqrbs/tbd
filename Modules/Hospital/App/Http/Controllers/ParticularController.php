@@ -78,6 +78,16 @@ class ParticularController extends Controller
         if($masterType->slug == 'cabin'){
             ParticularDetailsModel::insertCabin($entity,$input);
         }
+        if($masterType->slug == 'treatment-template' and $input['treatment_mode_id']){
+            ParticularDetailsModel::updateOrCreate(
+                [
+                    'particular_id' => $entity->id,
+                ],
+                [
+                    'treatment_mode_id'   => $input['treatment_mode_id'],
+                ]
+            );
+        }
         $service = new JsonRequestResponse();
         $data = $service->returnJosnResponse($entity);
         return $data;
@@ -88,8 +98,7 @@ class ParticularController extends Controller
      */
     public function show($id)
     {
-
-        $entity = ParticularModel::with(['particularDetails','particularDetails.patientMode','particularDetails.paymentMode','particularDetails.genderMode','particularDetails.roomNo','particularDetails.cabinMode','investigationReportFormat'])->find($id);
+        $entity = ParticularModel::with(['particularDetails','particularDetails.patientMode','particularDetails.paymentMode','particularDetails.genderMode','particularDetails.roomNo','particularDetails.cabinMode','investigationReportFormat','treatmentMedicineFormat'])->find($id);
         if (!$entity) {
             $entity = 'Data not found';
         }
@@ -120,6 +129,38 @@ class ParticularController extends Controller
     public function particularInlineUpdate(ParticularInlineRequest $request, $id)
     {
         $input = $request->validated();
+<<<<<<< HEAD
+=======
+        $entity = ParticularModel::find($id);
+
+        $data = array();
+        $name = (isset($input['name']) and $input['name']) ? $input['name']:'';
+        $price = (isset($input['price']) and $input['price']) ? $input['price']:0;
+        if($price){$data['price'] = $price;}
+        if($name){$data['name'] = $name;}
+        if(!empty($data)){ $entity->update($data);}
+        $unit = (isset($input['unit_id']) and $input['unit_id']) ? $input['unit_id']:null;
+        $opd_room_id = (isset($input['opd_room_id']) and $input['opd_room_id']) ? $input['opd_room_id']:0;
+
+        $details = [];
+
+        $particularDetails = ParticularDetailsModel::where('particular_id', $id)->first();
+
+        if ($unit) {
+            $details['unit_id'] = $unit;
+        }
+        if ($opd_room_id) {
+            $details['opd_room_id'] = $opd_room_id;
+        }
+
+        if (!empty($details) && $particularDetails) {
+            $particularDetails->update($details);
+        }
+
+        $entity = ['message' => 'update'];
+        $service = new JsonRequestResponse();
+        return $service->returnJosnResponse($entity);
+>>>>>>> 84b900a4d802693e1a6155e3811679460dd7eef2
 
         $findParticular = ParticularModel::with('particularDetails')->findOrFail($id);
 
@@ -184,6 +225,16 @@ class ParticularController extends Controller
         }
         if($masterType->slug == 'cabin'){
             ParticularDetailsModel::insertCabin($entity,$input);
+        }
+        if($masterType->slug == 'treatment-template' and $input['treatment_mode_id']){
+            ParticularDetailsModel::updateOrCreate(
+                [
+                    'particular_id' => $entity->id,
+                ],
+                [
+                    'treatment_mode_id'   => $input['treatment_mode_id'],
+                ]
+            );
         }
         $service = new JsonRequestResponse();
         return $service->returnJosnResponse($entity);

@@ -280,7 +280,9 @@ class SalesController extends Controller
                     'created_by_id' => $this->domain['user_id'],
                     'vendor_id' => $getVendor->id ?? null,
                     'transaction_mode_id' => $getTransactionMode ?? null,
-                    'process' => 'created'
+                    'process' => 'in-progress',
+                    'mode' => 'Requisition',
+                    'is_requisition' => 1
                 ]);
 
 
@@ -320,8 +322,6 @@ class SalesController extends Controller
 
                         // Insert multiple records at once
                         PurchaseItemModel::insert($records);
-
-
                         $purchase->update([
                             'sub_total' => $totalPrice,
                             'total'=>$totalPrice,
@@ -332,7 +332,7 @@ class SalesController extends Controller
                     }
                 }
 
-                $getSales->update(['is_domain_sales_completed'=>1,'approved_by_id'=>$this->domain['user_id']]);
+                $getSales->update(['is_domain_sales_completed'=> 1,'approved_by_id'=>$this->domain['user_id'],'process' => 'In-progress']);
                 // Manege stock
                 if (sizeof($getSales->salesItems)>0){
                     foreach ($getSales->salesItems as $item){
@@ -426,11 +426,10 @@ class SalesController extends Controller
                 'approved_by_id' => $this->domain['user_id'],
                 'process' => 'Approved'
             ]);
-            $entity->update(['approved_by_id' => $this->domain['user_id']]);
+
             if ($entity->salesItems->count() > 0) {
                 foreach ($entity->salesItems as $item) {
                     StockItemHistoryModel::openingStockQuantity($item, 'sales', $this->domain);
-
                     // for maintain inventory daily stock
                     date_default_timezone_set('Asia/Dhaka');
                     DailyStockService::maintainDailyStock(

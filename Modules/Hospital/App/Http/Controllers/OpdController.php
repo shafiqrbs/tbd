@@ -82,7 +82,11 @@ class OpdController extends Controller
         $opd_room_id= (isset($input['opd_room_id']) && $input['opd_room_id']) ? $input['opd_room_id']:null;
         if ($entity && isset($input['referred_mode'])) {
             $input['hms_invoice_id'] = $id;
-            $input['created_by_id'] = $request->header('X-Api-User');
+            $input['created_by_id'] =  $this->domain['user_id'];
+            if($opd_room_id){
+                $prescription = PrescriptionModel::where('hms_invoice_id', $id)->first();
+                $input['json_content'] =  $prescription['json_content'];
+            }
             InvoicePatientReferredModel::updateOrCreate(
                 [
                     'hms_invoice_id' => $id, // condition to check existing record

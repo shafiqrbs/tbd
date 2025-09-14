@@ -5,7 +5,7 @@ namespace Modules\Hospital\App\Http\Requests;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
-class ParticularInlineRequest extends FormRequest
+class MedicineDosageRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -26,19 +26,21 @@ class ParticularInlineRequest extends FormRequest
         switch($this->method())
         {
 
+            case 'PATCH':
+            {
+                return [
+                    'name' => 'string|nullable',
+                    'dosage_form' => 'string|nullable',
+                    'quantity' => 'string|nullable',
+                ];
+            }
             case 'PUT':
             case 'POST':
             {
                 return [
                     'name' => 'string|nullable',
-<<<<<<< HEAD
-                    'unit_id' => 'nullable',
-                    'opd_room_id' => 'nullable',
-=======
-                    'price' => 'numeric|nullable',
-                    'unit_id' => 'numeric|nullable',
-                    'opd_room_id' => 'numeric|nullable',
->>>>>>> 84b900a4d802693e1a6155e3811679460dd7eef2
+                    'dosage_form' => 'string|nullable',
+                    'quantity' => 'string|nullable',
                 ];
             }
 

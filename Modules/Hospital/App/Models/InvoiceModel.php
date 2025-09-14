@@ -59,6 +59,35 @@ class InvoiceModel extends Model
         return $this->hasOne(OpdModel::class, 'id', 'patient_mode_id');
     }
 
+    public static function getCustomerSearch($domain,$request)
+    {
+
+        $term = trim($request['term']);
+        $entities = self::where([['hms_invoice.config_id',$domain['hms_config']]])
+            ->join('cor_customers as customer','customer.id','=','hms_invoice.customer_id')
+            ->select([
+                'hms_invoice.id',
+                'customer.customer_id as patient_id',
+                'customer.health_id',
+                'customer.nid as nid',
+                'hms_invoice.invoice as invoice',
+                'customer.name as name',
+                'customer.mobile as mobile',
+            ]);
+        $entities = $entities->where(function ($q) use ($term) {
+            $q->where('hms_invoice.invoice', 'LIKE', "%{$term}%")
+                ->orWhere('customer.customer_id', 'LIKE', "%{$term}%")
+                ->orWhere('customer.name', 'LIKE', "%{$term}%")
+                ->orWhere('customer.mobile', 'LIKE', "%{$term}%")
+                ->orWhere('customer.nid', 'LIKE', "%{$term}%")
+                ->orWhere('customer.health_id', 'LIKE', "%{$term}%");
+        });
+        $entities = $entities
+            ->orderBy('customer.customer_id','ASC')
+            ->get();
+        return $entities;
+
+    }
 
     public static function getRecords($request,$domain)
     {
@@ -104,13 +133,20 @@ class InvoiceModel extends Model
             ]);
 
         if (isset($request['term']) && !empty($request['term'])){
-            $entities = $entities->whereAny(['inv_sales.invoice','customer.customer_id','customer.name','customer.mobile','createdBy.username','hms_invoice.total'],'LIKE','%'.$request['term'].'%');
+            $term = trim($request['term']);
+            $entities = $entities->where(function ($q) use ($term) {
+                $q->where('hms_invoice.invoice', 'LIKE', "%{$term}%")
+                    ->orWhere('customer.customer_id', 'LIKE', "%{$term}%")
+                    ->orWhere('customer.name', 'LIKE', "%{$term}%")
+                    ->orWhere('customer.mobile', 'LIKE', "%{$term}%")
+                    ->orWhere('customer.nid', 'LIKE', "%{$term}%")
+                    ->orWhere('customer.health_id', 'LIKE', "%{$term}%");
+            });
         }
 
         if (isset($request['patient_mode']) && !empty($request['patient_mode'])){
             $entities = $entities->where('patient_mode.slug',$request['patient_mode']);
         }
-
 
         if (isset($request['process']) && !empty($request['process'])){
             $entities = $entities->where('hms_invoice.process',$request['process']);
@@ -347,7 +383,8 @@ class InvoiceModel extends Model
     {
         $entities = ParticularModel::where([
             ['hms_particular.config_id', $domain['hms_config']],
-            ['hms_particular_master_type.slug', 'opd-room']])
+            ['hms_particular_master_type.slug', 'opd-room'],
+            ['hms_particular.opd_referred', '<>', 1]])
             ->leftJoin('hms_invoice', 'hms_invoice.room_id', '=', 'hms_particular.id')
             ->join('hms_particular_type', 'hms_particular_type.id', '=', 'hms_particular.particular_type_id')
             ->join('hms_particular_master_type', 'hms_particular_master_type.id', '=', 'hms_particular_type.particular_master_type_id')
@@ -373,6 +410,25 @@ class InvoiceModel extends Model
             ->limit(1)
             ->get()->first()->id;
         return array('ipdRooms' => $entities ,'selectedRoom' => $selected);
+    }
+
+    public static function getOpdReferredRooms($domain)
+    {
+        $entities = ParticularModel::where([
+            ['hms_particular.config_id', $domain['hms_config']],
+            ['hms_particular_master_type.slug', 'opd-room'],
+            ['hms_particular.opd_referred',1]])
+            ->leftJoin('hms_invoice', 'hms_invoice.room_id', '=', 'hms_particular.id')
+            ->join('hms_particular_type', 'hms_particular_type.id', '=', 'hms_particular.particular_type_id')
+            ->join('hms_particular_master_type', 'hms_particular_master_type.id', '=', 'hms_particular_type.particular_master_type_id')
+            ->select([
+                'hms_particular.id as id',
+                'hms_particular.name',
+                DB::raw('COUNT(hms_invoice.id) as invoice_count')
+            ])
+            ->groupBy('hms_particular.id')
+            ->get();
+        return $entities;
     }
 
 

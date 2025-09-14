@@ -235,6 +235,7 @@ class FileUploadController extends Controller
         $productionsItems = ProductionItems::whereIn('id', $productionItemIds)->get()->keyBy('id');
 
         foreach ($inputData as $data) {
+
             $trimmedData = array_map(fn($item) => is_string($item) ? trim($item) : $item, $data);
             $productionItemId = $trimmedData['ProductionItemId'] ?? null;
             $issueQuantity = $trimmedData['IssueQuantity'] ?? 0;
@@ -601,6 +602,7 @@ class FileUploadController extends Controller
         $rowsProcessed = 0;
 
         foreach ($allData as $index => $data) {
+
             $values = array_map('trim', $data);
 
             // Fetch related IDs
@@ -668,6 +670,7 @@ class FileUploadController extends Controller
                 ]);
             }
             // Ensure valid data
+
             if ($productType && $values[5]) {
 
                 $productSize = ParticularModel::where('name', 'like', '%' . Str::slug(trim($values[8])) . '%')->where('config_id',$this->domain['config_id'])->first('id');
@@ -713,7 +716,6 @@ class FileUploadController extends Controller
         if (count($batch) > 0) {
             $rowsProcessed += $this->processProductBatch($batch, $em);
         }
-
         return ['is_insert' => true, 'row_count' => $rowsProcessed];
     }
 

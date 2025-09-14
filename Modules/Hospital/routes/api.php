@@ -7,6 +7,7 @@ use Modules\Hospital\App\Http\Controllers\CategoryController;
 use Modules\Hospital\App\Http\Controllers\HospitalController;
 
 use Modules\Hospital\App\Http\Controllers\InvestigationController;
+use Modules\Hospital\App\Http\Controllers\MedicineDosageController;
 use Modules\Hospital\App\Http\Controllers\OpdController;
 use Modules\Hospital\App\Http\Controllers\ParticularController;
 use Modules\Hospital\App\Http\Controllers\ParticularModeController;
@@ -14,6 +15,7 @@ use Modules\Hospital\App\Http\Controllers\ParticularTypeController;
 use Modules\Hospital\App\Http\Controllers\PharmacyController;
 use Modules\Hospital\App\Http\Controllers\PrescriptionController;
 use Modules\Hospital\App\Http\Controllers\SettingController;
+use Modules\Hospital\App\Http\Controllers\TreatmentMedicineController;
 
 
 /*
@@ -28,9 +30,11 @@ use Modules\Hospital\App\Http\Controllers\SettingController;
 */
 
 Route::prefix('/hospital/select')->middleware([HeaderAuthenticationMiddleware::class])->group(function() {
+    Route::get('/location', [HospitalController::class,'locationDropdown'])->name('location_dropdown');
     Route::get('/category', [HospitalController::class,'categoryDropdown'])->name('category_dropdown');
     Route::get('/bymeal', [HospitalController::class,'mealDropdown'])->name('meal_dropdown');
     Route::get('/dosage', [HospitalController::class,'dosageDropdown'])->name('dosage_dropdown');
+    Route::get('/particular-content', [HospitalController::class,'particularContentDropdown'])->name('particular_content_dropdown');
     Route::get('/module', [HospitalController::class,'particularModuleDropdown'])->name('particular_module_dropdown');
     Route::get('/modules', [HospitalController::class,'particularModuleChildDropdown'])->name('particular_module_dropdown');
     Route::get('/mode', [HospitalController::class,'particularModeDropdown'])->name('particular_module_dropdown');
@@ -38,14 +42,16 @@ Route::prefix('/hospital/select')->middleware([HeaderAuthenticationMiddleware::c
     Route::get('/particular-master-type', [HospitalController::class,'particularMasterTypeDropdown'])->name('particular_particular_dropdown');
     Route::get('/particulars', [HospitalController::class,'particularTypeChildDropdown'])->name('particular_particular_dropdown');
     Route::get('/particular', [HospitalController::class,'particularDropdown'])->name('particular_particular_dropdown');
+    Route::get('/opdroom', [HospitalController::class,'opdRoomDropdown'])->name('particular_particular_dropdown');
+    Route::get('/opdreferredroom', [HospitalController::class,'opdReferredRoomDropdown'])->name('particular_particular_dropdown');
     Route::get('/medicine', [HospitalController::class,'medicineDropdown'])->name('medicine_dropdown');
     Route::get('/medicine-generic', [HospitalController::class,'medicineGenericDropdown'])->name('medicine_generic_dropdown');
-
 });
 
 Route::prefix('/hospital')->middleware([HeaderAuthenticationMiddleware::class])->group(function() {
     Route::get('/config', [HospitalController::class,'domainHospitalConfig'])->name('domain_hospital_config');
-    Route::get('/medicine-import', [HospitalController::class,'insertMedicineStock'])->name('insert_medicine_stock');
+    Route::get('/patient-search', [HospitalController::class,'patientSearch'])->name('patient_search');
+    Route::get('/medicine-import', [HospitalController::class,'insertUpazilaDistrict'])->name('insert_medicine_stock');
     Route::get('/medicine-process', [HospitalController::class,'insertMedicineStockProcess'])->name('insert_medicine_stock_process');
     Route::get('/particular', [SettingController::class,'particularModuleDropdown'])->name('particular_module_dropdown');
     Route::get('/setting', [SettingController::class,'particularModuleDropdown'])->name('particular_module_dropdown');
@@ -95,9 +101,30 @@ Route::prefix('/hospital')->middleware([HeaderAuthenticationMiddleware::class])-
                 'update' => 'investigation.update',
                 'destroy' => 'investigation.destroy',
             ]);
+        Route::apiResource('treatment', TreatmentMedicineController::class)
+            ->middleware([HeaderAuthenticationMiddleware::class])
+            ->names([
+                'index' => 'treatment.index',
+                'store' => 'treatment.store',
+                'show' => 'treatment.show',
+                'update' => 'treatment.update',
+                'destroy' => 'treatment.destroy',
+            ]);
+
+        Route::apiResource('medicinedosage', MedicineDosageController::class)
+            ->middleware([HeaderAuthenticationMiddleware::class])
+            ->names([
+                'index' => 'medicinedosage.index',
+                'store' => 'medicinedosage.store',
+                'show' => 'medicinedosage.show',
+                'update' => 'medicinedosage.update',
+                'destroy' => 'medicinedosage.destroy',
+            ]);
+
         Route::apiResource('/particular-mode', ParticularModeController::class)->middleware([HeaderAuthenticationMiddleware::class]);
     });
     Route::post('/setting-matrix/create', [HospitalController::class,'settingMatrixCreate'])->name('particular_module_dropdown');
+    Route::get('/prescription/patient/{id}', [PrescriptionController::class,'patientPrescription'])->name('patient_prescription');
     Route::apiResource('prescription', PrescriptionController::class)
         ->middleware([HeaderAuthenticationMiddleware::class])
         ->names([
@@ -106,15 +133,6 @@ Route::prefix('/hospital')->middleware([HeaderAuthenticationMiddleware::class])-
             'show' => 'prescription.show',
             'update' => 'prescription.update',
             'destroy' => 'prescription.destroy',
-        ]);
-    Route::apiResource('ipd', IpdController::class)
-        ->middleware([HeaderAuthenticationMiddleware::class])
-        ->names([
-            'index' => 'ipd.index',
-            'store' => 'ipd.store',
-            'show' => 'ipd.show',
-            'update' => 'ipd.update',
-            'destroy' => 'ipd.destroy',
         ]);
     Route::apiResource('pharmacy',
         PharmacyController::class)
@@ -126,6 +144,4 @@ Route::prefix('/hospital')->middleware([HeaderAuthenticationMiddleware::class])-
             'update' => 'pharmacy.update',
             'destroy' => 'pharmacy.destroy',
         ]);
-
-
 });
