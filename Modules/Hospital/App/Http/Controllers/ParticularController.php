@@ -183,6 +183,16 @@ class ParticularController extends Controller
         ]);
     }
 
+    public function updateOrdering(Request $request)
+    {
+        foreach ($request->order as $row) {
+            ParticularModel::where('id', $row['id'])
+                ->update(['ordering' => $row['ordering']]);
+        }
+        return response()->json(['success' => true]);
+    }
+
+
 
 
 

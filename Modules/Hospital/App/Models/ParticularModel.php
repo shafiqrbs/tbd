@@ -102,7 +102,7 @@ class ParticularModel extends Model
         $total  = $entity->count();
         $entities = $entity->skip($skip)
             ->take($perPage)
-            ->orderBy('name','ASC')
+            ->orderBy('hms_particular.ordering','ASC')
             ->get();
 
         $data = array('count'=>$total,'entities' => $entities);
