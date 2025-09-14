@@ -66,6 +66,7 @@ class InvoiceContentDetailsModel extends Model
                                 'particular_type_id'   => $particularParent,
                                 'name'   => $particular->name,
                                 'value'   => $item->value ?? null,
+                                'duration'   => $item->duration ?? null,
                                 'updated_at' => $date,
                                 'created_at' => $date,
                             ]

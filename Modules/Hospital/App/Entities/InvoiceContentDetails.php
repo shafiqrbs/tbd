@@ -72,6 +72,13 @@ class InvoiceContentDetails
      */
     private $value;
 
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="duration", type="string",nullable=true)
+     */
+    private $duration;
+
 
     /**
      * @var \DateTime
