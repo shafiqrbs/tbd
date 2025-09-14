@@ -5,6 +5,7 @@ namespace Modules\Hospital\App\Http\Controllers;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\DB;
 use Modules\AppsApi\App\Services\JsonRequestResponse;
 
 use Modules\Core\App\Models\UserModel;
@@ -116,21 +117,46 @@ class ParticularController extends Controller
      /**
      * Show the specified resource for edit.
      */
-    public function particularInlineUpdate(ParticularInlineRequest $request,$id)
+    public function particularInlineUpdate(ParticularInlineRequest $request, $id)
     {
         $input = $request->validated();
-        $entity = ParticularModel::find($id);
-        $data = array();
-        $name = (isset($input['name']) and $input['name']) ? $input['name']:'';
-        $price = (isset($input['price']) and $input['price']) ? $input['price']:0;
-        if($price){$data['price'] = $price;}
-        if($name){$data['name'] = $name;}
-        if(!empty($data)){ $entity->update($input);}
-        $entity = ['message' => 'update'];
-        $service = new JsonRequestResponse();
-        return $service->returnJosnResponse($entity);
 
+        $findParticular = ParticularModel::with('particularDetails')->findOrFail($id);
+
+        // Update only changed fields
+        if (array_key_exists('name', $input)) {
+            $findParticular->name = $input['name'];
+            $findParticular->display_name = $input['name'];
+        }
+
+        $findParticular->save();
+
+        if ($findParticular->particularDetails) {
+            $updateDetails = [];
+
+            if (array_key_exists('opd_room_id', $input)) {
+                $updateDetails['room_id'] = $input['opd_room_id'];
+            }
+
+            if (array_key_exists('unit_id', $input)) {
+                $updateDetails['unit_id'] = $input['unit_id'];
+            }
+
+            if (!empty($updateDetails)) {
+                $findParticular->particularDetails->update($updateDetails);
+            }
+        }
+
+        $findParticular->load('particularDetails'); // ensure fresh data
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Updated successfully',
+            'data'    => $findParticular,
+        ]);
     }
+
+
 
 
     /**
