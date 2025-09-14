@@ -107,6 +107,37 @@ class PrescriptionModel extends Model
         return $data;
     }
 
+    public static function getPatientPrescription($domain,$id)
+    {
+
+        $entities = InvoiceModel::where([
+            ['hms_invoice.config_id',$domain['hms_config']],
+            ['hms_invoice.customer_id',$id]
+        ]
+        )
+            ->leftjoin('hms_prescription','hms_prescription.hms_invoice_id','=','hms_invoice.id')
+            ->leftjoin('hms_particular as vr','vr.id','=','hms_invoice.room_id')
+            ->leftjoin('users as createdBy','createdBy.id','=','hms_prescription.created_by_id')
+            ->leftjoin('cor_customers as customer','customer.id','=','hms_invoice.customer_id')
+            ->select([
+                'hms_invoice.id as invoice_id',
+                'hms_prescription.id as prescription_id',
+                'customer.name',
+                'customer.mobile',
+                'customer.gender',
+                'customer.customer_id as patient_id',
+                'customer.health_id',
+                DB::raw("CONCAT(UCASE(LEFT(customer.gender, 1)), LCASE(SUBSTRING(customer.gender, 2))) as gender"),
+                DB::raw('DATE_FORMAT(hms_invoice.created_at, "%d-%m-%Y") as created_at'),
+                DB::raw('DATE_FORMAT(hms_invoice.appointment_date, "%d-%M-%Y") as appointment'),
+                'hms_invoice.process as process',
+                'vr.name as visiting_room',
+                'vr.id as visiting_room_id',
+                'createdBy.name as created_by',
+            ])->get()->toArray();
+        return $entities;
+    }
+
     public static function getVisitingRooms($domain)
     {
         $entities = ParticularModel::where([

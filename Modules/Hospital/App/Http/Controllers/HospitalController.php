@@ -193,6 +193,40 @@ class HospitalController extends Controller
         return $service->returnJosnResponse($types);
     }
 
+    /**
+     * Show the form for editing the specified resource.
+     */
+    public function particularDropdown(Request $request)
+    {
+        $domain = $this->domain;
+        $mode = $request->get('dropdown-type');
+        $dropdown = ParticularModel::getParticularDropdown($domain,$mode);
+        $service = new JsonRequestResponse();
+        return $service->returnJosnResponse($dropdown);
+    }
+
+     /**
+     * Show the form for editing the specified resource.
+     */
+    public function opdRoomDropdown(Request $request)
+    {
+        $domain = $this->domain;
+        $dropdown = InvoiceModel::getVisitingRooms($domain);
+        $service = new JsonRequestResponse();
+        return $service->returnJosnResponse($dropdown);
+    }
+
+    /**
+     * Show the form for editing the specified resource.
+     */
+    public function opdReferredRoomDropdown(Request $request)
+    {
+        $domain = $this->domain;
+        $dropdown = InvoiceModel::getOpdReferredRooms($domain);
+        $service = new JsonRequestResponse();
+        return $service->returnJosnResponse($dropdown);
+    }
+
      /**
      * Show the form for editing the specified resource.
      */
@@ -230,26 +264,9 @@ class HospitalController extends Controller
         return $service->returnJosnResponse($types);
     }
 
-     /**
-     * Show the form for editing the specified resource.
-     */
-    public function adviceDropdown(Request $request)
-    {
-        $types = ParticularModuleModel::all();
-        $service = new JsonRequestResponse();
-        return $service->returnJosnResponse($types);
-    }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function particularDropdown(Request $request)
-    {
-        $mode = $request->get('dropdown-type');
-        $dropdown = ParticularModel::getParticularDropdown($mode);
-        $service = new JsonRequestResponse();
-        return $service->returnJosnResponse($dropdown);
-    }
+
+
 
     /**
      * Show the form for editing the specified resource.

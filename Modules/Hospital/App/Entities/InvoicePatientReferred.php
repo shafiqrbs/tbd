@@ -80,6 +80,13 @@ class InvoicePatientReferred
      */
     private $hospital;
 
+    /**
+     * @var $jsonContent
+     *
+     * @ORM\Column( type="json",nullable = true)
+     */
+    private $jsonContent;
+
 
     /**
      * @var \DateTime

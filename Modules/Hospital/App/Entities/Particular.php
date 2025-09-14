@@ -90,7 +90,7 @@ class Particular
     private $price;
 
     /**
-     * @var ordering
+     * @var integer
      *
      * @ORM\Column(name="ordering", type="integer", nullable=true)
      */
@@ -132,6 +132,8 @@ class Particular
      */
     private $status;
 
+
+
     /**
      * @var boolean
      *
@@ -146,6 +148,13 @@ class Particular
      * @ORM\Column(type="boolean",options={"default"="false"})
      */
     private $isDelete;
+
+    /**
+     * @var boolean
+     *
+     * @ORM\Column(type="boolean",options={"default"="false"})
+     */
+    private $opdReferred;
 
 
     /**
