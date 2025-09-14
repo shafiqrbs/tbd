@@ -129,8 +129,7 @@ class ParticularController extends Controller
     public function particularInlineUpdate(ParticularInlineRequest $request, $id)
     {
         $input = $request->validated();
-<<<<<<< HEAD
-=======
+
         $entity = ParticularModel::find($id);
 
         $data = array();
@@ -140,28 +139,13 @@ class ParticularController extends Controller
         if($name){$data['name'] = $name;}
         if(!empty($data)){ $entity->update($data);}
         $unit = (isset($input['unit_id']) and $input['unit_id']) ? $input['unit_id']:null;
-        $opd_room_id = (isset($input['opd_room_id']) and $input['opd_room_id']) ? $input['opd_room_id']:0;
+        $opd_room_id = (isset($input['opd_referred']) and $input['opd_referred']) ? $input['opd_referred']:0;
 
         $details = [];
 
-        $particularDetails = ParticularDetailsModel::where('particular_id', $id)->first();
-
-        if ($unit) {
-            $details['unit_id'] = $unit;
-        }
-        if ($opd_room_id) {
-            $details['opd_room_id'] = $opd_room_id;
-        }
-
-        if (!empty($details) && $particularDetails) {
-            $particularDetails->update($details);
-        }
-
-        $entity = ['message' => 'update'];
-        $service = new JsonRequestResponse();
-        return $service->returnJosnResponse($entity);
->>>>>>> 84b900a4d802693e1a6155e3811679460dd7eef2
-
+        ParticularDetailsModel::updateOrCreate(
+            ['particular_id'    => $id]
+        );
         $findParticular = ParticularModel::with('particularDetails')->findOrFail($id);
 
         // Update only changed fields
@@ -169,7 +153,9 @@ class ParticularController extends Controller
             $findParticular->name = $input['name'];
             $findParticular->display_name = $input['name'];
         }
-
+        if (array_key_exists('opd_referred', $input)) {
+            $findParticular->opd_referred = $findParticular->opd_referred ? 0:1;
+        }
         $findParticular->save();
 
         if ($findParticular->particularDetails) {

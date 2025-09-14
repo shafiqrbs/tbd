@@ -30,15 +30,13 @@ class ParticularInlineRequest extends FormRequest
             case 'POST':
             {
                 return [
-                    'name' => 'string|nullable',
-<<<<<<< HEAD
+                    'name' => 'nullable',
                     'unit_id' => 'nullable',
                     'opd_room_id' => 'nullable',
-=======
-                    'price' => 'numeric|nullable',
-                    'unit_id' => 'numeric|nullable',
-                    'opd_room_id' => 'numeric|nullable',
->>>>>>> 84b900a4d802693e1a6155e3811679460dd7eef2
+                    'opd_referred' => 'nullable',
+                    'price' => 'nullable',
+
+
                 ];
             }
 

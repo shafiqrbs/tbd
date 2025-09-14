@@ -61,6 +61,7 @@ class ParticularModel extends Model
                 'hms_particular.slug',
                 'hms_particular.price',
                 'hms_particular.status',
+                'hms_particular.opd_referred',
                 'hms_particular.content',
                 'inv_category.name as category',
                 'room.name as room_name',
@@ -72,13 +73,8 @@ class ParticularModel extends Model
                 DB::raw('DATE_FORMAT(hms_particular.created_at, "%d-%M-%Y") as created'),
                 'hms_particular_type.name as particular_type_name',
                 'hms_particular_type.slug as particular_type_slug',
-<<<<<<< HEAD
                 'hms_particular_details.unit_id',
                 'hms_particular_details.room_id as opd_room_id',
-=======
-                'hms_particular_details.unit_id as unit_id',
-                'hms_particular_details.opd_room_id as opd_room_id',
->>>>>>> 84b900a4d802693e1a6155e3811679460dd7eef2
             ]);
 
         if (!empty($request['term'])) {
