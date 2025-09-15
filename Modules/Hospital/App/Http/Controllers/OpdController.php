@@ -86,6 +86,7 @@ class OpdController extends Controller
             if($opd_room_id){
                 $prescription = PrescriptionModel::where('hms_invoice_id', $id)->first();
                 $input['json_content'] =  $prescription['json_content'];
+                $input['prescription_id'] =  $prescription['id'];
             }
             InvoicePatientReferredModel::updateOrCreate(
                 [

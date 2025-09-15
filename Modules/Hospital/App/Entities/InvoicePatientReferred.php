@@ -80,6 +80,13 @@ class InvoicePatientReferred
      */
     private $hospital;
 
+     /**
+     * @var string
+     *
+     * @ORM\Column(name="referred_mode", length=40, type="string", nullable=true)
+     */
+    private $referredMode;
+
     /**
      * @var $jsonContent
      *

@@ -115,7 +115,7 @@ class PrescriptionModel extends Model
             ['hms_invoice.customer_id',$id]
         ]
         )
-            ->leftjoin('hms_prescription','hms_prescription.hms_invoice_id','=','hms_invoice.id')
+            ->join('hms_prescription','hms_prescription.hms_invoice_id','=','hms_invoice.id')
             ->leftjoin('hms_particular as vr','vr.id','=','hms_invoice.room_id')
             ->leftjoin('users as createdBy','createdBy.id','=','hms_prescription.created_by_id')
             ->leftjoin('cor_customers as customer','customer.id','=','hms_invoice.customer_id')
@@ -179,6 +179,7 @@ class PrescriptionModel extends Model
             ['hms_prescription.id', '=', $id]
         ])
             ->join('hms_invoice','hms_invoice.id','=','hms_prescription.hms_invoice_id')
+            ->leftjoin('hms_invoice_patient_referred','hms_invoice_patient_referred.prescription_id','=','hms_prescription.id')
             ->leftjoin('users as doctor','doctor.id','=','hms_prescription.prescribe_doctor_id')
             ->leftjoin('cor_user_profiles as profiles','profiles.id','=','doctor.id')
             ->leftjoin('cor_setting as designation','designation.id','=','profiles.designation_id')
@@ -226,6 +227,8 @@ class PrescriptionModel extends Model
                 'patient_mode.name as mode_name',
                 'particular_payment_mode.name as payment_mode_name',
                 'hms_invoice.process as process',
+                'hms_invoice_patient_referred.id as patient_referred_id',
+                'hms_invoice_patient_referred.json_content as referred_json_content',
             ])
             ->with(['invoice_particular' => function ($query) {
                 $query->select([
