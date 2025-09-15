@@ -27,6 +27,11 @@ class Location
      */
     private $id;
 
+    /**
+     * @var string
+     * @ORM\Column(name="name", type="string", length=100)
+     */
+    private $name;
 
     /**
      * @var string
