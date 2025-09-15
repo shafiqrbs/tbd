@@ -160,7 +160,7 @@ class PurchaseModel extends Model
         $total  = $entities->count();
         $entities = $entities->skip($skip)
             ->take($perPage)
-            ->orderBy('inv_purchase.updated_at','DESC')
+            ->orderBy('inv_purchase.id','DESC')
             ->get();
         $data = array('count'=>$total,'entities'=>$entities);
         return $data;
