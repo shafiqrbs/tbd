@@ -111,7 +111,6 @@ class Warehouse
     protected $domain;
 
 
-
     /**
      * @var boolean
      * @ORM\Column(name="is_default", type="boolean", options={"default":0})

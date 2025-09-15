@@ -75,7 +75,7 @@ class WarehouseModel extends Model
         $domainId = $domain['global_id'] ?? 0;
 
         $warehouses = self::where([['domain_id', $domainId],['is_delete',0],['status',1]])
-            ->select(['id', 'name', 'location', 'contract_person', 'email', 'mobile', 'address', 'created_at'])
+            ->select(['id', 'name', 'location', 'contract_person', 'email', 'mobile', 'address', 'created_at','is_default'])
             ->when(!empty($request['term']), function ($query) use ($request) {
                 $query->whereAny(['name', 'email', 'contract_person', 'mobile', 'location', 'address'], 'LIKE', "%{$request['term']}%");
             })

@@ -89,6 +89,7 @@ class DomainConfigController extends Controller
             $configData =array(
                 'name'=> $data['shop_name'],
                 'business_model_id'=> $data['business_model_id'],
+                'address'=> $data['address'],
             );
             $domainConfig->update($configData);
             DB::commit();

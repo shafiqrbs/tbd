@@ -26,6 +26,7 @@ use Modules\Core\App\Models\SettingModel;
 use Modules\Core\App\Models\SettingTypeModel;
 use Modules\Core\App\Models\UserRoleModel;
 use Modules\Core\App\Models\VendorModel;
+use Modules\Core\App\Models\WarehouseModel;
 use Modules\Domain\App\Entities\GlobalOption;
 use Modules\Domain\App\Entities\SubDomain;
 use Modules\Domain\App\Http\Requests\DomainRequest;
@@ -233,6 +234,22 @@ class DomainController extends Controller
                     ]
                 );
             }
+
+            // Handle Warehouse
+            WarehouseModel::updateOrCreate(
+                [
+                    'domain_id' => $entity->id,
+                    'name' => 'Central',
+                    'is_default' => 1,
+                ],
+                [
+                    'mobile' => $entity->mobile,
+                    'address' => $entity->address,
+                    'status' => true,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]
+            );
 
 
             // Step 3: Create the inventory configuration (config)
@@ -743,7 +760,22 @@ class DomainController extends Controller
                 ]
             );
 
-
+            // Handle Warehouse
+            WarehouseModel::updateOrCreate(
+                [
+                    'domain_id' => $entity->id,
+                    'name' => 'Central',
+                    'is_default' => 1,
+                ],
+                [
+                    'mobile' => $entity->mobile,
+                    'address' => $entity->address,
+                    'email' => $entity->email,
+                    'status' => true,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]
+            );
 
             // Step 3: Create the inventory configuration (config)
             $currency = CurrencyModel::find(1);
