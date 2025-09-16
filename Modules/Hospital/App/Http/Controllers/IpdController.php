@@ -114,6 +114,7 @@ class IpdController extends Controller
      *//**/
     public function show($id)
     {
+
         $entity = InvoiceModel::getIpdShow($id);
         if (!$entity){
             $entity = 'Data not found';

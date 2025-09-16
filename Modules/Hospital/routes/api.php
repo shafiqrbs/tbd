@@ -65,6 +65,7 @@ Route::prefix('/hospital')->middleware([HeaderAuthenticationMiddleware::class])-
     Route::post('/opd/referred/{id}', [OpdController::class,'referred'])->name('prescription_referred');
     Route::get('/core/particular/doctor-nurse', [ParticularController::class, 'doctorNurseStaff'])->name('particular.doctorNurseStaff');
     Route::apiResource('opd', OpdController::class)->middleware([HeaderAuthenticationMiddleware::class]);
+    Route::post('/core/health-share', [HospitalController::class,'healthShare'])->name('healthShare');
     Route::prefix('core')->middleware([HeaderAuthenticationMiddleware::class])->group(function() {
 
         Route::apiResource('particular', ParticularController::class)
@@ -129,7 +130,6 @@ Route::prefix('/hospital')->middleware([HeaderAuthenticationMiddleware::class])-
         Route::apiResource('/particular-mode', ParticularModeController::class)->middleware([HeaderAuthenticationMiddleware::class]);
     });
     Route::post('/setting-matrix/create', [HospitalController::class,'settingMatrixCreate'])->name('particular_module_dropdown');
-    Route::post('/health-share', [HospitalController::class,'healthShare'])->name('particular_module_dropdown');
     Route::get('/prescription/patient/{id}/{prescription}', [PrescriptionController::class,'patientPrescription'])->name('patient_prescription');
     Route::apiResource('prescription', PrescriptionController::class)
         ->middleware([HeaderAuthenticationMiddleware::class])
@@ -139,6 +139,15 @@ Route::prefix('/hospital')->middleware([HeaderAuthenticationMiddleware::class])-
             'show' => 'prescription.show',
             'update' => 'prescription.update',
             'destroy' => 'prescription.destroy',
+        ]);
+    Route::apiResource('ipd', IpdController::class)
+        ->middleware([HeaderAuthenticationMiddleware::class])
+        ->names([
+            'index' => 'ipd.index',
+            'store' => 'ipd.store',
+            'show' => 'ipd.show',
+            'update' => 'ipd.update',
+            'destroy' => 'ipd.destroy',
         ]);
     Route::apiResource('pharmacy',
         PharmacyController::class)
