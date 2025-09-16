@@ -257,13 +257,26 @@ class HospitalController extends Controller
         return $service->returnJosnResponse($dropdown);
     }
 
+
+
+     /**
+     * Show the form for editing the specified resource.
+     */
+    public function opdAllOpdDropdown(Request $request)
+    {
+        $domain = $this->domain;
+        $dropdown = InvoiceModel::getAllOpdRooms($domain);
+        $service = new JsonRequestResponse();
+        return $service->returnJosnResponse($dropdown);
+    }
+
      /**
      * Show the form for editing the specified resource.
      */
     public function opdRoomDropdown(Request $request)
     {
         $domain = $this->domain;
-        $dropdown = InvoiceModel::getVisitingRooms($domain);
+        $dropdown = InvoiceModel::getOpdRooms($domain);
         $service = new JsonRequestResponse();
         return $service->returnJosnResponse($dropdown);
     }

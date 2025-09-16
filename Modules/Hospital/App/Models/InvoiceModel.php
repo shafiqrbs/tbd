@@ -2,6 +2,7 @@
 
 namespace Modules\Hospital\App\Models;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Support\Facades\DB;
@@ -370,33 +371,18 @@ class InvoiceModel extends Model
         return $entity;
     }
 
-    public static function getVisitingRoomss($domain)
-    {
-        $entities = self::where([
-            ['hms_invoice.config_id', $domain['hms_config']],
-            ['hms_particular_master_type.slug', 'visiting-room']])
-            ->leftJoin('hms_particular as vr', 'vr.id', '=', 'hms_invoice.room_id')
-            ->leftJoin('hms_particular_type', 'hms_particular_type.id', '=', 'vr.particular_type_id')
-            ->leftJoin('hms_particular_master_type', 'hms_particular_master_type.id', '=', 'hms_particular_type.particular_master_type_id')
-            ->select([
-                'vr.id as particular_id',
-                'vr.name',
-                DB::raw('COUNT(hms_invoice.id) as invoice_count')
-            ])
-            ->groupBy('vr.id', 'vr.name')
-            ->get();
-
-        return $entities;
-    }
-
-    public static function getVisitingRooms($domain)
+    public static function getAllOpdRooms($domain)
     {
         $entities = ParticularModel::where([
             ['hms_particular.config_id', $domain['hms_config']],
             ['hms_particular_master_type.slug', 'opd-room'],
-            ['hms_particular.status',1],
-            ['hms_particular.opd_referred', '<>', 1]])
-            ->leftJoin('hms_invoice', 'hms_invoice.room_id', '=', 'hms_particular.id')
+            ['hms_particular.status', 1],
+        ])
+            ->leftJoin('hms_invoice', function ($join) use ($domain) {
+                $join->on('hms_invoice.room_id', '=', 'hms_particular.id')
+                    ->where('hms_invoice.config_id', $domain['hms_config'])
+                    ->whereDate('hms_invoice.created_at', Carbon::today()); // ✅ only today's invoices
+            })
             ->join('hms_particular_type', 'hms_particular_type.id', '=', 'hms_particular.particular_type_id')
             ->join('hms_particular_master_type', 'hms_particular_master_type.id', '=', 'hms_particular_type.particular_master_type_id')
             ->select([
@@ -404,7 +390,36 @@ class InvoiceModel extends Model
                 'hms_particular.name',
                 DB::raw('COUNT(hms_invoice.id) as invoice_count')
             ])
-            ->groupBy('hms_particular.id')
+            ->groupBy('hms_particular.id', 'hms_particular.name')
+            ->orderBy('hms_particular.name', 'ASC')
+            ->get();
+
+        return $entities;
+    }
+
+    public static function getOpdRooms($domain)
+    {
+
+        $entities = ParticularModel::where([
+            ['hms_particular.config_id', $domain['hms_config']],
+            ['hms_particular_master_type.slug', 'opd-room'],
+            ['hms_particular.status', 1],
+            ['hms_particular.opd_referred', '<>', 1],
+        ])
+            ->leftJoin('hms_invoice', function ($join) use ($domain) {
+                $join->on('hms_invoice.room_id', '=', 'hms_particular.id')
+                    ->where('hms_invoice.config_id', $domain['hms_config'])
+                    ->whereDate('hms_invoice.created_at', Carbon::today()); // ✅ only today's invoices
+            })
+            ->join('hms_particular_type', 'hms_particular_type.id', '=', 'hms_particular.particular_type_id')
+            ->join('hms_particular_master_type', 'hms_particular_master_type.id', '=', 'hms_particular_type.particular_master_type_id')
+            ->select([
+                'hms_particular.id as id',
+                'hms_particular.name',
+                DB::raw('COUNT(hms_invoice.id) as invoice_count')
+            ])
+            ->groupBy('hms_particular.id', 'hms_particular.name')
+            ->orderBy('hms_particular.name', 'ASC')
             ->get();
 
         $selected = ParticularModel::where([
@@ -430,9 +445,14 @@ class InvoiceModel extends Model
         $entities = ParticularModel::where([
             ['hms_particular.config_id', $domain['hms_config']],
             ['hms_particular_master_type.slug', 'opd-room'],
-            ['hms_particular.status',1],
-            ['hms_particular.opd_referred',1]])
-            ->leftJoin('hms_invoice', 'hms_invoice.room_id', '=', 'hms_particular.id')
+            ['hms_particular.status', 1],
+            ['hms_particular.opd_referred', 1],
+        ])
+            ->leftJoin('hms_invoice', function ($join) use ($domain) {
+                $join->on('hms_invoice.room_id', '=', 'hms_particular.id')
+                    ->where('hms_invoice.config_id', $domain['hms_config'])
+                    ->whereDate('hms_invoice.created_at', Carbon::today()); // ✅ only today's invoices
+            })
             ->join('hms_particular_type', 'hms_particular_type.id', '=', 'hms_particular.particular_type_id')
             ->join('hms_particular_master_type', 'hms_particular_master_type.id', '=', 'hms_particular_type.particular_master_type_id')
             ->select([
@@ -440,7 +460,8 @@ class InvoiceModel extends Model
                 'hms_particular.name',
                 DB::raw('COUNT(hms_invoice.id) as invoice_count')
             ])
-            ->groupBy('hms_particular.id')
+            ->groupBy('hms_particular.id', 'hms_particular.name')
+            ->orderBy('hms_particular.name', 'ASC')
             ->get();
         return $entities;
     }

@@ -42,6 +42,7 @@ Route::prefix('/hospital/select')->middleware([HeaderAuthenticationMiddleware::c
     Route::get('/particular-master-type', [HospitalController::class,'particularMasterTypeDropdown'])->name('particular_particular_dropdown');
     Route::get('/particulars', [HospitalController::class,'particularTypeChildDropdown'])->name('particular_particular_dropdown');
     Route::get('/particular', [HospitalController::class,'particularDropdown'])->name('particular_particular_dropdown');
+    Route::get('/allopdroom', [HospitalController::class,'opdAllOpdDropdown'])->name('particular_particular_dropdown');
     Route::get('/opdroom', [HospitalController::class,'opdRoomDropdown'])->name('particular_particular_dropdown');
     Route::get('/opdreferredroom', [HospitalController::class,'opdReferredRoomDropdown'])->name('particular_particular_dropdown');
     Route::get('/medicine', [HospitalController::class,'medicineDropdown'])->name('medicine_dropdown');

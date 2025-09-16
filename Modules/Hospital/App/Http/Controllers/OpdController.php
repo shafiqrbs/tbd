@@ -66,7 +66,7 @@ class OpdController extends Controller
 
     public function getVisitingRooms(Request $request){
         $domain = $this->domain;
-        $data = InvoiceModel::getVisitingRooms($domain);
+        $data = InvoiceModel::getOpdRooms($domain);
         $service = new JsonRequestResponse();
         $data = $service->returnJosnResponse($data);
         return $data;
