@@ -210,6 +210,7 @@ class InvoiceModel extends Model
                 'cor_customers.mobile as mobile',
                 'hms_invoice.guardian_name as guardian_name',
                 'hms_invoice.guardian_mobile as guardian_mobile',
+                'cor_customers.id as customer_id',
                 'cor_customers.customer_id as patient_id',
                 'cor_customers.health_id as health_id',
                 'cor_customers.gender as gender',

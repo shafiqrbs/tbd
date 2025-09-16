@@ -37,8 +37,8 @@ class LocationModel extends Model
         }
 
         $entities = $entities
-            ->orderBy('cor_locations.upazila', 'ASC')
             ->orderBy('cor_locations.district', 'ASC')
+            ->orderBy('cor_locations.upazila', 'ASC')
             ->get();
         return $entities;
 

@@ -35,13 +35,14 @@ class OPDModel extends Model
     }
 
 
-    public static function salesEventListener($model,$patient_mode_id)
+    public static function salesEventListener($config,$patient_mode_id)
     {
         $patientMode = ParticularModeModel::find($patient_mode_id);
         $mode = ($patientMode) ? $patientMode->short_code:'OPD';
         $patternCodeService = app(GeneratePatternCodeService::class);
+
         $params = [
-            'config' => $model->config_id,
+            'config' => $config,
             'table' => 'hms_invoice',
             'prefix' => "{$mode}-",
         ];
@@ -89,8 +90,8 @@ class OPDModel extends Model
             ]
         );
 
-        $invoice = self::salesEventListener($entity,$patient_mode_id)['generateId'];
-        $code = self::salesEventListener($entity,$patient_mode_id)['code'];
+        $invoice = self::salesEventListener($hmsConfig->id,$patient_mode_id)['generateId'];
+        $code = self::salesEventListener($hmsConfig->id,$patient_mode_id)['code'];
 
         $invoice = InvoiceModel::updateOrCreate(
             ['sales_id' => $sales->id],

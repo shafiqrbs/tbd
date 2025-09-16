@@ -17,8 +17,8 @@ use Modules\Core\App\Models\SettingTypeModel;
 use Modules\Core\App\Models\UserModel;
 use Modules\Core\App\Models\WarehouseModel;
 use Modules\Domain\App\Models\DomainModel;
-use Modules\Hospital\App\Models\HealthShareModel;
 use Modules\Hospital\App\Models\HospitalConfigModel;
+use Modules\Hospital\App\Models\ShareHealthModel;
 use Modules\Inventory\App\Entities\Config;
 use Modules\Inventory\App\Models\ConfigDiscountModel;
 use Modules\Inventory\App\Models\ConfigModel;
@@ -79,7 +79,7 @@ class DomainConfigController extends Controller
             'hospitalConfig.opd_ticket_fee:id,name as opd_ticket_fee_name,price as opd_ticket_fee_price',
             'hospitalConfig.emergency_fee:id,name as emergency_fee_name,price as emergency_fee_price',
             'hospitalConfig.ot_fee:id,name as ot_fee_name,price as ot_fee_price',
-            'hospitalConfig.healthShare',
+            'hospitalConfig.shareHealth',
         ])->find($id);
         return $entity;
     }
@@ -472,7 +472,7 @@ class DomainConfigController extends Controller
         $entity = HospitalConfigModel::updateOrCreate([
             'domain_id' => $id,
         ]);
-        HealthShareModel::updateOrCreate(
+        ShareHealthModel::updateOrCreate(
             [
                 'config_id' => $entity->id,
             ],
@@ -535,7 +535,7 @@ class DomainConfigController extends Controller
                 'updated_at' => now(),
             ]
         );
-        HealthShareModel::updateOrCreate(
+        ShareHealthModel::updateOrCreate(
             [
                 'config_id' => $entity->id,
             ],

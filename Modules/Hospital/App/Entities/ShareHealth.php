@@ -8,10 +8,10 @@ use Gedmo\Mapping\Annotation as Gedmo;
 /**
  * HealthShare
  *
- * @ORM\Table( name ="hms_health_share")
+ * @ORM\Table( name ="hms_share_health")
  * @ORM\Entity()
  */
-class HealthShare
+class ShareHealth
 {
     /**
      * @var integer
@@ -28,6 +28,14 @@ class HealthShare
      * @ORM\JoinColumn(name="config_id", referencedColumnName="id", onDelete="CASCADE")
      */
     protected $config;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column( type="string",nullable = true)
+     */
+    private $healthShareUrl;
+
 
     /**
      * @var string
@@ -58,12 +66,6 @@ class HealthShare
      */
     private $from;
 
-    /**
-     * @var string
-     *
-     * @ORM\Column( type="string",nullable = true)
-     */
-    private $healthShareUrl;
 
      /**
      * @var string

@@ -54,6 +54,7 @@ class GeneratePatternCodeService
             ])->count('id');
         $lastCode = $entity;
         $code = (int)$lastCode + 1;
+
         if(empty($prefix)) {
             $customerId = sprintf("%s%s", $datetime->format('my'), str_pad($code, 5, '0', STR_PAD_LEFT));
         }else{
@@ -163,7 +164,7 @@ class GeneratePatternCodeService
     public function bedDisplayName($queryParams = [],$model)
     {
 
-        dd($model);
+
         $config     = $queryParams['config'];
         $category   = $queryParams['category'];
         $table      = $queryParams['table'];

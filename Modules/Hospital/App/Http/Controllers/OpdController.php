@@ -139,6 +139,7 @@ class OpdController extends Controller
                     'nid'    => $input['identity'] ?? null,
                 ]
             );
+
             $invConfig = $this->domain['inv_config'];
             $hmsConfig = $this->domain['hms_config'];
             $config = HospitalConfigModel::find($hmsConfig);
@@ -146,7 +147,7 @@ class OpdController extends Controller
                 $invoiceId = OPDModel::insertHmsInvoice($invConfig,$config, $entity,$input);
             }
             $accountingConfig = AccountingModel::where('id', $this->domain['acc_config'])->first();
-            $ledgerExist = AccountHeadModel::where('customer_id', $entity->id)->where('config_id', $this->domain['acc_config'])->where('parent_id', $config->account_customer_id)->first();
+            $ledgerExist = AccountHeadModel::where('customer_id', $entity->id)->first();
             if (empty($ledgerExist)) {
                AccountHeadModel::insertCustomerLedger($accountingConfig, $entity);
             }

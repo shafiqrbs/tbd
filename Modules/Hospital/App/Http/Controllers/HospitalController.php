@@ -153,6 +153,36 @@ class HospitalController extends Controller
 
     }
 
+     /**
+     * Show the form for editing the specified resource.
+     */
+    public function healthShare(Request $request)
+    {
+        $userId = $request->header('X-Api-User');
+        $domain = $this->domain;
+        $config = $domain['hms_config'];
+        $data = $request->request->all();
+        ParticularMatrixModel::updateOrCreate(
+            [
+                'config_id' => $config,
+            ],
+            [
+                'x_auth_token' => $data['x_auth_token'],
+                'client_id' => $data['client_id'],
+                'email' => $data['email'],
+                'from' => $data['from'],
+                'nid_url' => $data['nid_url'],
+                'patient_url' => $data['patient_url'],
+                'health_share_token' => $data['health_share_token'],
+                'health_share_password' => $data['health_share_password'],
+            ]
+        );
+        $data = ParticularMatrixModel::getRecords($domain);
+        $service = new JsonRequestResponse();
+        return $service->returnJosnResponse($data);
+
+    }
+
     /**
      * Show the form for editing the specified resource.
      */

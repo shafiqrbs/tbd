@@ -7,10 +7,10 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Modules\AppsApi\App\Services\GeneratePatternCodeService;
 
-class HealthShareModel extends Model
+class ShareHealthModel extends Model
 {
 
-    protected $table = 'hms_health_share';
+    protected $table = 'hms_share_health';
     public $timestamps = true;
     protected $guarded = ['id'];
     protected $fillable = [];

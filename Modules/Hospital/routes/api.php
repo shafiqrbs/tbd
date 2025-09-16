@@ -128,6 +128,7 @@ Route::prefix('/hospital')->middleware([HeaderAuthenticationMiddleware::class])-
         Route::apiResource('/particular-mode', ParticularModeController::class)->middleware([HeaderAuthenticationMiddleware::class]);
     });
     Route::post('/setting-matrix/create', [HospitalController::class,'settingMatrixCreate'])->name('particular_module_dropdown');
+    Route::post('/health-share', [HospitalController::class,'healthShare'])->name('particular_module_dropdown');
     Route::get('/prescription/patient/{id}/{prescription}', [PrescriptionController::class,'patientPrescription'])->name('patient_prescription');
     Route::apiResource('prescription', PrescriptionController::class)
         ->middleware([HeaderAuthenticationMiddleware::class])

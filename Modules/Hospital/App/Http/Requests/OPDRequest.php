@@ -54,6 +54,7 @@ class OPDRequest extends FormRequest
                     'api_patient_content' => 'string|nullable',
                     'district' => 'string|nullable',
                     'identity_mode' => 'string|nullable',
+                    'identity' => 'string|nullable',
                     'unit_id' => 'integer|nullable',
                     'free_identification' => 'string|nullable',
                     'created_by_id' => 'integer|nullable',

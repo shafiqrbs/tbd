@@ -60,9 +60,9 @@ class Customer
 
     /**
      * @ORM\ManyToOne(targetEntity="Modules\Core\App\Entities\Location")
-     * @ORM\JoinColumn(name="upazila_id", referencedColumnName="id", nullable=true, onDelete="SET NULL")
+     * @ORM\JoinColumn(name="upazilla_id", referencedColumnName="id", nullable=true, onDelete="SET NULL")
      **/
-    protected $upazila;
+    protected $upazilla;
 
      /**
      * @ORM\ManyToOne(targetEntity="Modules\Core\App\Entities\Setting")

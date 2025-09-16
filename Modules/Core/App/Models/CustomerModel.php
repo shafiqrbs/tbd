@@ -41,6 +41,7 @@ class CustomerModel extends Model
         'marketing_id',
         'code',
         'customer_id',
+        'upazilla_id',
         'customer_unique_name',
         'unique_id',
         'status',
