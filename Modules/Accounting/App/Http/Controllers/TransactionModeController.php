@@ -132,6 +132,10 @@ class TransactionModeController extends Controller
         $service = new JsonRequestResponse();
         $entity = TransactionModeModel::find($id);
 
+        if ($entity->path){
+            $entity['path'] = url('')."/uploads/accounting/transaction-mode/".$entity->path;
+        }
+
         if (!$entity){
             $entity = 'Data not found';
         }
