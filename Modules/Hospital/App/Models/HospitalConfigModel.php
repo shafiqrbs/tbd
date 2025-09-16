@@ -33,9 +33,9 @@ class HospitalConfigModel extends Model
         });
     }
 
-    public function health_share()
+    public function healthShare()
     {
-        return $this->hasOne(HealthShareModel::class,'id', 'config_id');
+        return $this->hasOne(HealthShareModel::class,'config_id');
     }
 
      public function admission_fee()

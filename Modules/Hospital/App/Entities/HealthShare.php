@@ -58,6 +58,48 @@ class HealthShare
      */
     private $from;
 
+    /**
+     * @var string
+     *
+     * @ORM\Column( type="string",nullable = true)
+     */
+    private $healthShareUrl;
+
+     /**
+     * @var string
+     *
+     * @ORM\Column( type="string",nullable = true)
+     */
+    private $nidUrl;
+
+     /**
+     * @var string
+     *
+     * @ORM\Column( type="string",nullable = true)
+     */
+    private $patientUrl;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column( type="string",nullable = true)
+     */
+    private $healthShareEmail;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column( type="string",nullable = true)
+     */
+    private $healthShareToken;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column( type="string",nullable = true)
+     */
+    private $healthSharePassword;
+
 
     /**
      * @var boolean

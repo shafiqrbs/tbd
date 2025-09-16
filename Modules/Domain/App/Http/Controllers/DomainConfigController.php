@@ -79,7 +79,7 @@ class DomainConfigController extends Controller
             'hospitalConfig.opd_ticket_fee:id,name as opd_ticket_fee_name,price as opd_ticket_fee_price',
             'hospitalConfig.emergency_fee:id,name as emergency_fee_name,price as emergency_fee_price',
             'hospitalConfig.ot_fee:id,name as ot_fee_name,price as ot_fee_price',
-            'hospitalConfig.health_share',
+            'hospitalConfig.healthShare',
         ])->find($id);
         return $entity;
     }
@@ -553,7 +553,7 @@ class DomainConfigController extends Controller
             HospitalConfigModel::investigationMasterReport($domain);
             DB::commit();
             $service = new JsonRequestResponse();
-            $return = $service->returnJosnResponse($this->domainConfigById($id));
+            $return = $service->returnJosnResponse($this->domainHospitalConfigById($id));
             return $return;
 
         } catch (ModelNotFoundException $e) {
