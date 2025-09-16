@@ -25,6 +25,7 @@ use Modules\Hospital\App\Models\ParticularModuleModel;
 use Modules\Hospital\App\Models\ParticularTypeMasterModel;
 use Modules\Hospital\App\Models\ParticularTypeModel;
 use Modules\Hospital\App\Models\ProductModel;
+use Modules\Hospital\App\Models\ShareHealthModel;
 use Modules\Inventory\App\Models\ProductBrandModel;
 use Modules\Inventory\App\Models\PurchaseItemModel;
 use Modules\Inventory\App\Models\SettingModel;
@@ -56,17 +57,19 @@ class HospitalController extends Controller
 
     public function domainHospitalConfig()
     {
+
+        $domain = $this->domain['global_id'];
         $entity = DomainModel::with(['accountConfig',
             'accountConfig.capital_investment','accountConfig.account_cash','accountConfig.account_bank','accountConfig.account_mobile','accountConfig.account_user','accountConfig.account_vendor','accountConfig.account_customer','accountConfig.account_product_group','accountConfig.account_category',
             'accountConfig.voucher_stock_opening','accountConfig.voucher_purchase','accountConfig.voucher_sales','accountConfig.voucher_purchase_return','accountConfig.voucher_stock_reconciliation',
-            'inventoryConfig','hospitalConfig','inventoryConfig.currency',
+            'inventoryConfig','hospitalConfig','inventoryConfig.configPurchase','inventoryConfig.configSales','inventoryConfig.configProduct','inventoryConfig.configDiscount','inventoryConfig.configVat','inventoryConfig.businessModel',
+            'inventoryConfig.currency',
             'hospitalConfig.admission_fee:id,name as admission_fee_name,price as admission_fee_price',
-            'hospitalConfig.opd_ticket_fee:id,name as ticket_fee_name,price as ticket_fee_price',
+            'hospitalConfig.opd_ticket_fee:id,name as opd_ticket_fee_name,price as opd_ticket_fee_price',
             'hospitalConfig.emergency_fee:id,name as emergency_fee_name,price as emergency_fee_price',
             'hospitalConfig.ot_fee:id,name as ot_fee_name,price as ot_fee_price',
-            'hospitalConfig.consultant_doctor:id,name as consultant_doctor_name',
-        ])->find($this
-            ->domain['global_id']);
+            'hospitalConfig.shareHealth',
+        ])->find($domain);
         $service = new JsonRequestResponse();
         return $service->returnJosnResponse($entity);
 
@@ -162,7 +165,7 @@ class HospitalController extends Controller
         $domain = $this->domain;
         $config = $domain['hms_config'];
         $data = $request->request->all();
-        ParticularMatrixModel::updateOrCreate(
+        $entitiy = ShareHealthModel::updateOrCreate(
             [
                 'config_id' => $config,
             ],
@@ -170,15 +173,14 @@ class HospitalController extends Controller
                 'x_auth_token' => $data['x_auth_token'],
                 'client_id' => $data['client_id'],
                 'email' => $data['email'],
-                'from' => $data['from'],
                 'nid_url' => $data['nid_url'],
                 'patient_url' => $data['patient_url'],
                 'health_share_token' => $data['health_share_token'],
+                'health_share_url' => $data['health_share_url'],
                 'health_share_password' => $data['health_share_password'],
             ]
         );
-        $data = ParticularMatrixModel::getRecords($domain);
-        $service = new JsonRequestResponse();
+        $service = new JsonRequestResponse($entitiy);
         return $service->returnJosnResponse($data);
 
     }
