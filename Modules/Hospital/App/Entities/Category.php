@@ -10,7 +10,7 @@ use Gedmo\Mapping\Annotation as Gedmo;
  *
  * @Gedmo\Tree(type="materializedPath")
  * @ORM\Table(name="hms_category")
- * @ORM\Entity(repositoryClass="Appstore\Bundle\HospitalBundle\Repository\HmsCategoryRepository")
+ * @ORM\Entity()
  */
 class Category
 {

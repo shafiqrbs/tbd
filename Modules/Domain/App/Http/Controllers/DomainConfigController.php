@@ -15,7 +15,9 @@ use Modules\AppsApi\App\Services\JsonRequestResponse;
 use Modules\Core\App\Models\SettingModel;
 use Modules\Core\App\Models\SettingTypeModel;
 use Modules\Core\App\Models\UserModel;
+use Modules\Core\App\Models\WarehouseModel;
 use Modules\Domain\App\Models\DomainModel;
+use Modules\Hospital\App\Models\HealthShareModel;
 use Modules\Hospital\App\Models\HospitalConfigModel;
 use Modules\Inventory\App\Entities\Config;
 use Modules\Inventory\App\Models\ConfigDiscountModel;
@@ -47,11 +49,7 @@ class DomainConfigController extends Controller
         $entity = DomainModel::with(['accountConfig',
             'accountConfig.capital_investment','accountConfig.account_cash','accountConfig.account_bank','accountConfig.account_mobile','accountConfig.account_user','accountConfig.account_vendor','accountConfig.account_customer','accountConfig.account_product_group','accountConfig.account_category',
             'accountConfig.voucher_stock_opening','accountConfig.voucher_purchase','accountConfig.voucher_sales','accountConfig.voucher_purchase_return','accountConfig.voucher_stock_reconciliation',
-            'productionConfig','gstConfig','inventoryConfig','hospitalConfig','inventoryConfig.configPurchase','inventoryConfig.configSales','inventoryConfig.configProduct','inventoryConfig.configDiscount','inventoryConfig.configVat','inventoryConfig.businessModel','inventoryConfig.currency',
-            'hospitalConfig.admission_fee:id,name as admission_fee_name,price as admission_fee_price',
-            'hospitalConfig.opd_ticket_fee:id,name as opd_ticket_fee_name,price as opd_ticket_fee_price',
-            'hospitalConfig.emergency_fee:id,name as emergency_fee_name,price as emergency_fee_price',
-            'hospitalConfig.ot_fee:id,name as ot_fee_name,price as ot_fee_price',
+            'productionConfig','gstConfig','inventoryConfig','hospitalConfig','inventoryConfig.configPurchase','inventoryConfig.configSales','inventoryConfig.configProduct','inventoryConfig.configDiscount','inventoryConfig.configVat','inventoryConfig.businessModel','inventoryConfig.currency'
         ])->find($this
             ->domain['global_id']);
         $service = new JsonRequestResponse();
@@ -60,6 +58,17 @@ class DomainConfigController extends Controller
     }
 
     public function domainConfigById($id)
+    {
+        $entity = DomainModel::with(['accountConfig',
+            'accountConfig.capital_investment','accountConfig.account_cash','accountConfig.account_bank','accountConfig.account_mobile','accountConfig.account_user','accountConfig.account_vendor','accountConfig.account_customer','accountConfig.account_product_group','accountConfig.account_category',
+            'accountConfig.voucher_stock_opening','accountConfig.voucher_purchase','accountConfig.voucher_sales','accountConfig.voucher_purchase_return','accountConfig.voucher_stock_reconciliation',
+            'productionConfig','gstConfig','inventoryConfig','hospitalConfig','inventoryConfig.configPurchase','inventoryConfig.configSales','inventoryConfig.configProduct','inventoryConfig.configDiscount','inventoryConfig.configVat','inventoryConfig.businessModel',
+            'inventoryConfig.currency'
+        ])->find($id);
+        return $entity;
+    }
+
+    public function domainHospitalConfigById($id)
     {
         $entity = DomainModel::with(['accountConfig',
             'accountConfig.capital_investment','accountConfig.account_cash','accountConfig.account_bank','accountConfig.account_mobile','accountConfig.account_user','accountConfig.account_vendor','accountConfig.account_customer','accountConfig.account_product_group','accountConfig.account_category',
@@ -459,11 +468,18 @@ class DomainConfigController extends Controller
 
     public function hospitalConfig(Request $request,$id)
     {
-
         $entity = HospitalConfigModel::updateOrCreate([
             'domain_id' => $id,
         ]);
-
+        HealthShareModel::updateOrCreate(
+            [
+                'config_id' => $entity->id,
+            ],
+            [
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]
+        );
         DB::beginTransaction();
         try {
 
@@ -474,7 +490,7 @@ class DomainConfigController extends Controller
             DB::commit();
 
             $service = new JsonRequestResponse();
-            $return = $service->returnJosnResponse($this->domainConfigById($id));
+            $return = $service->returnJosnResponse($this->domainHospitalConfigById($id));
             return $return;
 
         } catch (ModelNotFoundException $e) {
@@ -502,6 +518,23 @@ class DomainConfigController extends Controller
         $entity = HospitalConfigModel::updateOrCreate([
             'domain_id' => $id,
         ]);
+
+        // Handle Warehouse
+        WarehouseModel::updateOrCreate(
+            [
+                'domain_id' => $entity->id,
+                'name' => 'Central',
+                'is_default' => 1,
+            ],
+            [
+                'mobile' => $entity->mobile,
+                'address' => $entity->address,
+                'status' => true,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]
+        );
+
         DB::beginTransaction();
         try {
 

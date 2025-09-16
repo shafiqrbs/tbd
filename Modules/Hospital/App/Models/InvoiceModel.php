@@ -67,6 +67,7 @@ class InvoiceModel extends Model
             ->join('cor_customers as customer','customer.id','=','hms_invoice.customer_id')
             ->select([
                 'hms_invoice.id',
+                'customer.id as customer_id',
                 'customer.customer_id as patient_id',
                 'customer.health_id',
                 'customer.nid as nid',
@@ -146,6 +147,14 @@ class InvoiceModel extends Model
 
         if (isset($request['patient_mode']) && !empty($request['patient_mode'])){
             $entities = $entities->where('patient_mode.slug',$request['patient_mode']);
+        }
+
+        if (isset($request['process']) && !empty($request['process'])){
+            $entities = $entities->where('hms_invoice.process',$request['process']);
+        }
+
+        if (isset($request['room_id']) && !empty($request['room_id'])){
+            $entities = $entities->where('hms_invoice.room_id',$request['room_id']);
         }
 
         if (isset($request['process']) && !empty($request['process'])){
@@ -384,6 +393,7 @@ class InvoiceModel extends Model
         $entities = ParticularModel::where([
             ['hms_particular.config_id', $domain['hms_config']],
             ['hms_particular_master_type.slug', 'opd-room'],
+            ['hms_particular.status',1],
             ['hms_particular.opd_referred', '<>', 1]])
             ->leftJoin('hms_invoice', 'hms_invoice.room_id', '=', 'hms_particular.id')
             ->join('hms_particular_type', 'hms_particular_type.id', '=', 'hms_particular.particular_type_id')
@@ -398,7 +408,9 @@ class InvoiceModel extends Model
 
         $selected = ParticularModel::where([
             ['hms_particular.config_id', $domain['hms_config']],
-            ['hms_particular_master_type.slug', 'opd-room']])
+            ['hms_particular_master_type.slug', 'opd-room'],
+            ['hms_particular.status',1],
+            ['hms_particular.opd_referred', '<>', 1]])
             ->leftJoin('hms_invoice', 'hms_invoice.room_id', '=', 'hms_particular.id')
             ->join('hms_particular_type', 'hms_particular_type.id', '=', 'hms_particular.particular_type_id')
             ->join('hms_particular_master_type', 'hms_particular_master_type.id', '=', 'hms_particular_type.particular_master_type_id')
@@ -417,6 +429,7 @@ class InvoiceModel extends Model
         $entities = ParticularModel::where([
             ['hms_particular.config_id', $domain['hms_config']],
             ['hms_particular_master_type.slug', 'opd-room'],
+            ['hms_particular.status',1],
             ['hms_particular.opd_referred',1]])
             ->leftJoin('hms_invoice', 'hms_invoice.room_id', '=', 'hms_particular.id')
             ->join('hms_particular_type', 'hms_particular_type.id', '=', 'hms_particular.particular_type_id')

@@ -83,6 +83,13 @@ class ParticularType
     private $isPrivate;
 
     /**
+     * @var int
+     *
+     * @ORM\Column(type="integer",options={"default"="999"})
+     */
+    private $ordering;
+
+    /**
      * @var \DateTime
      * @Gedmo\Timestampable(on="create")
      * @ORM\Column(name="created_at", type="datetime")

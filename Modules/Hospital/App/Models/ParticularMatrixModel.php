@@ -37,6 +37,7 @@ class ParticularMatrixModel extends Model
                 'hms_particular_mode_matrix.particular_mode_id'
             )
             ->where('hms_particular_mode_matrix.config_id', $config)
+            ->orderBy('hms_particular_mode_matrix.ordering', 'ASC')
             ->with([
                 'particularType.particulars' => function ($query) use ($config) {
                     $query->select('hms_particular.*') // ⚠️ include foreign key for relation
@@ -58,10 +59,47 @@ class ParticularMatrixModel extends Model
     public static function getOperationParticularType($domain,$id){
 
         $config = $domain['hms_config'];
-        $entities = self::select(['*'])->where([
+        $entities = self::select(
+            'hms_particular_mode_matrix.*',
+            'hms_particular_mode.name as mode_name',
+            'hms_particular_mode.slug as mode_slug')
+            ->join(
+                'hms_particular_mode',
+                'hms_particular_mode.id',
+                '=',
+                'hms_particular_mode_matrix.particular_mode_id'
+        )->where([
             ['hms_particular_mode_matrix.config_id',$config],
             ['hms_particular_mode_matrix.particular_module_id',$id]
         ]);
+        $entities = $entities->get();
+        return $entities;
+
+    }
+
+    public static function getLists($domain){
+
+        $config = $domain['hms_config'];
+        $entities = self::select(
+            'hms_particular_mode_matrix.*',
+            'hms_particular_mode.name as mode_name',
+            'hms_particular_mode.slug as mode_slug',
+            'hms_particular_type.name as hms_particular_type_name'
+        )
+            ->join(
+                'hms_particular_mode',
+                'hms_particular_mode.id',
+                '=',
+                'hms_particular_mode_matrix.particular_mode_id'
+            )->join(
+                'hms_particular_type',
+                'hms_particular_type.id',
+                '=',
+                'hms_particular_mode_matrix.particular_type_id'
+            )
+            ->where([
+                ['hms_particular_mode_matrix.config_id',$config],
+            ]) ->orderBy('hms_particular_mode_matrix.ordering', 'ASC');
         $entities = $entities->get();
         return $entities;
 

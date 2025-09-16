@@ -68,10 +68,10 @@ class PrescriptionController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function patientPrescription($id){
+    public function patientPrescription($id,$prescription){
 
         $domain = $this->domain;
-        $data = PrescriptionModel::getPatientPrescription($domain,$id);
+        $data = PrescriptionModel::getPatientPrescription($domain,$id,$prescription);
         $service = new JsonRequestResponse();
         $response = $service->returnJosnResponse($data);
         return $response;

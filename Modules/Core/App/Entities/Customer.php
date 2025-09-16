@@ -57,6 +57,13 @@ class Customer
      **/
     protected $location;
 
+
+    /**
+     * @ORM\ManyToOne(targetEntity="Modules\Core\App\Entities\Location")
+     * @ORM\JoinColumn(name="upazila_id", referencedColumnName="id", nullable=true, onDelete="SET NULL")
+     **/
+    protected $upazila;
+
      /**
      * @ORM\ManyToOne(targetEntity="Modules\Core\App\Entities\Setting")
      * @ORM\JoinColumn(name="customer_group_id", referencedColumnName="id", nullable=true, onDelete="SET NULL")

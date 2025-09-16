@@ -1,16 +1,17 @@
 <?php
 
 namespace Modules\Hospital\App\Entities;
+
 use Doctrine\ORM\Mapping as ORM;
 use Gedmo\Mapping\Annotation as Gedmo;
 
 /**
- * Service
+ * HealthShare
  *
- * @ORM\Table( name ="hms_particular_mode_matrix")
+ * @ORM\Table( name ="hms_health_share")
  * @ORM\Entity()
  */
-class ParticularModeMatrix
+class HealthShare
 {
     /**
      * @var integer
@@ -21,38 +22,41 @@ class ParticularModeMatrix
      */
     private $id;
 
+
     /**
-     * @ORM\ManyToOne(targetEntity="Config", cascade={"detach","merge"})
+     * @ORM\OneToOne(targetEntity="Config", cascade={"detach","merge"})
      * @ORM\JoinColumn(name="config_id", referencedColumnName="id", onDelete="CASCADE")
      */
     protected $config;
 
-
     /**
-     * @ORM\ManyToOne(targetEntity="ParticularType", cascade={"detach","merge"})
-     * @ORM\JoinColumn(name="particular_type_id", referencedColumnName="id", onDelete="CASCADE")
+     * @var string
+     *
+     * @ORM\Column(name="x_auth_token", type="string", nullable=true)
      */
-    protected $particularType;
-
-   /**
-     * @ORM\ManyToOne(targetEntity="ParticularMode", cascade={"detach","merge"})
-     * @ORM\JoinColumn(name="particular_mode_id", referencedColumnName="id", onDelete="CASCADE")
-     */
-    protected $operationModeId;
+    private $xAuthToken;
 
     /**
      * @var string
      *
-     * @ORM\Column(name="operation_mode", type="string",  nullable=true)
+     * @ORM\Column(name="client_id", type="string", nullable=true)
      */
-    private $operationMode;
+    private $clientId;
 
     /**
-     * @var int
+     * @var string
      *
-     * @ORM\Column(type="integer",options={"default"="999"})
+     * @ORM\Column(name="email", type="string", nullable=true)
      */
-    private $ordering;
+    private $email;
+
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="from", type="string", nullable=true)
+     */
+    private $from;
 
 
     /**
@@ -75,6 +79,7 @@ class ParticularModeMatrix
      * @ORM\Column(name="updated_at", type="datetime")
      */
     private $updatedAt;
+
 
     /**
      * Get id

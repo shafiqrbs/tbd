@@ -83,6 +83,7 @@ class HospitalController extends Controller
         return $service->returnJosnResponse($data);
     }
 
+
     /**
      * Show the form for editing the specified resource.
      */
@@ -102,6 +103,27 @@ class HospitalController extends Controller
         $data = ParticularMatrixModel::getRecords($domain);
         $service = new JsonRequestResponse();
         return $service->returnJosnResponse($data);
+    }
+
+
+     /**
+     * Show the form for editing the specified resource.
+     */
+    public function modeMatrix(Request $request)
+    {
+        $domain = $this->domain;
+        $data = ParticularMatrixModel::getLists($domain);
+        $service = new JsonRequestResponse();
+        return $service->returnJosnResponse($data);
+    }
+
+    public function matrixUpdateOrdering(Request $request)
+    {
+        foreach ($request->order as $row) {
+            ParticularMatrixModel::where('id', $row['id'])
+                ->update(['ordering' => $row['ordering']]);
+        }
+        return response()->json(['success' => true]);
     }
 
 

@@ -156,6 +156,9 @@ class ParticularController extends Controller
         if (array_key_exists('opd_referred', $input)) {
             $findParticular->opd_referred = $findParticular->opd_referred ? 0:1;
         }
+        if (array_key_exists('status', $input)) {
+            $findParticular->status = $findParticular->status ? 0:1;
+        }
         $findParticular->save();
 
         if ($findParticular->particularDetails) {
@@ -191,9 +194,6 @@ class ParticularController extends Controller
         }
         return response()->json(['success' => true]);
     }
-
-
-
 
 
     /**

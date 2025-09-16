@@ -55,6 +55,8 @@ Route::prefix('/hospital')->middleware([HeaderAuthenticationMiddleware::class])-
     Route::get('/medicine-process', [HospitalController::class,'insertMedicineStockProcess'])->name('insert_medicine_stock_process');
     Route::get('/particular', [SettingController::class,'particularModuleDropdown'])->name('particular_module_dropdown');
     Route::get('/setting', [SettingController::class,'particularModuleDropdown'])->name('particular_module_dropdown');
+    Route::get('/mode/matrix', [HospitalController::class,'modeMatrix'])->name('particular_module_dropdown');
+    Route::post('/mode/matrix-ordering', [HospitalController::class,'matrixUpdateOrdering'])->name('matrixUpdateOrdering');
     Route::get('/setting/matrix', [HospitalController::class,'settingMatrix'])->name('particular_module_dropdown');
     Route::get('/setting', [SettingController::class,'particularModuleDropdown'])->name('particular_module_dropdown');
     Route::get('visiting-room', [OpdController::class,'getVisitingRooms'])->name('getVisitingRooms');
@@ -126,7 +128,7 @@ Route::prefix('/hospital')->middleware([HeaderAuthenticationMiddleware::class])-
         Route::apiResource('/particular-mode', ParticularModeController::class)->middleware([HeaderAuthenticationMiddleware::class]);
     });
     Route::post('/setting-matrix/create', [HospitalController::class,'settingMatrixCreate'])->name('particular_module_dropdown');
-    Route::get('/prescription/patient/{id}', [PrescriptionController::class,'patientPrescription'])->name('patient_prescription');
+    Route::get('/prescription/patient/{id}/{prescription}', [PrescriptionController::class,'patientPrescription'])->name('patient_prescription');
     Route::apiResource('prescription', PrescriptionController::class)
         ->middleware([HeaderAuthenticationMiddleware::class])
         ->names([

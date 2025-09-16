@@ -58,6 +58,7 @@ class OPDRequest extends FormRequest
                     'free_identification' => 'string|nullable',
                     'created_by_id' => 'integer|nullable',
                     'process' => 'string|nullable',
+                    'customer_id' => 'integer|nullable',
                 ];
             }
 

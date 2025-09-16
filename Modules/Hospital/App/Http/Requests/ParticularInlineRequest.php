@@ -33,6 +33,7 @@ class ParticularInlineRequest extends FormRequest
                     'name' => 'nullable',
                     'unit_id' => 'nullable',
                     'opd_room_id' => 'nullable',
+                    'status' => 'nullable',
                     'opd_referred' => 'nullable',
                     'price' => 'nullable',
 

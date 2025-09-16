@@ -107,12 +107,13 @@ class PrescriptionModel extends Model
         return $data;
     }
 
-    public static function getPatientPrescription($domain,$id)
+    public static function getPatientPrescription($domain,$id,$prescription)
     {
 
         $entities = InvoiceModel::where([
             ['hms_invoice.config_id',$domain['hms_config']],
-            ['hms_invoice.customer_id',$id]
+            ['hms_invoice.customer_id',$id],
+            ['hms_prescription.id', '<>', $prescription]
         ]
         )
             ->join('hms_prescription','hms_prescription.hms_invoice_id','=','hms_invoice.id')
