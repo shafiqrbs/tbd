@@ -4,15 +4,10 @@ namespace Modules\Inventory\App\Models;
 
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\DB;
-use Ramsey\Collection\Collection;
 
 class RequisitionModel extends Model
 {
-    use HasFactory;
-
     protected $table = 'inv_requisition';
     public $timestamps = true;
     protected $guarded = ['id'];

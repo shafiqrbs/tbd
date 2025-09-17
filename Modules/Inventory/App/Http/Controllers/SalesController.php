@@ -270,22 +270,28 @@ class SalesController extends Controller
                 $getAccountConfigId = DB::table('acc_config')->where('domain_id', $customerDomain->sub_domain_id)->first()->id;
                 $getInventoryConfigId = DB::table('inv_config')->where('domain_id', $customerDomain->sub_domain_id)->first()->id;
 
-                if ($getSales->transaction_mode_id){
-                    $getTransactionModeSlug = TransactionModeModel::find($getSales->transaction_mode_id)->slug;
-                    $getTransactionMode = TransactionModeModel::where('slug', $getTransactionModeSlug)->where('config_id',$getAccountConfigId)->first()->id;
+                $getTransactionMode = null;
+
+                if ($getSales->transaction_mode_id) {
+                    $getTransactionMode = TransactionModeModel::where('id', $getSales->transaction_mode_id)
+                        ->where('config_id', $getAccountConfigId)
+                        ->first();
+
+                    // If not found with the given config_id, fallback to first available
+                    if (!$getTransactionMode) {
+                        $getTransactionMode = TransactionModeModel::where('config_id', $getAccountConfigId)->first();
+                    }
                 }
 
                 $purchase = PurchaseModel::create([
-                    'config_id' => $getInventoryConfigId,
-                    'created_by_id' => $this->domain['user_id'],
-                    'vendor_id' => $getVendor->id ?? null,
-                    'transaction_mode_id' => $getTransactionMode ?? null,
-                    'process' => 'in-progress',
-                    'mode' => 'Requisition',
-                    'is_requisition' => 1
+                    'config_id'          => $getInventoryConfigId,
+                    'created_by_id'      => $this->domain['user_id'],
+                    'vendor_id'          => $getVendor->id ?? null,
+                    'transaction_mode_id'=> $getTransactionMode?->id,
+                    'process'            => 'in-progress',
+                    'mode'               => 'Requisition',
+                    'is_requisition'     => 1
                 ]);
-
-
 
                 if ($purchase){
                     if (sizeof($getSalesItems)>0){

@@ -685,6 +685,8 @@ class RequisitionMatrixBoardController extends Controller
                 'code' => $pattern['code'],
                 'invoice' => $pattern['generateId'],
                 'process' => 'Draft',
+                'issue_date' => now(),
+                'receive_date' => now(),
                 'is_requisition' => 1,
                 'requisition_board_id' => $firstItem->requisition_board_id,
                 'created_by_id' => $this->domain['user_id'],
@@ -758,9 +760,8 @@ class RequisitionMatrixBoardController extends Controller
                     'approved_date' => now()
                 ]);
             }
-            $domain = $this->domain;
-            $userId = $request->header('X-Api-User');
-            ProductionBatchModel::generateProductionToVendorRequisition($domain,$userId,$id);
+
+            ProductionBatchModel::generateProductionToVendorRequisition($this->domain->toArray(),$id);
 
             DB::commit();
 
