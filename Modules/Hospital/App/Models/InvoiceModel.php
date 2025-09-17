@@ -262,19 +262,19 @@ class InvoiceModel extends Model
             ->leftjoin('hms_particular_mode as admit_department','admit_department.id','=','hms_invoice.admit_department_id')
             ->leftjoin('hms_particular_mode as particular_payment_mode','particular_payment_mode.id','=','hms_invoice.patient_payment_mode_id')
             ->select([
-                'hms_invoice.id',
+                'hms_invoice.*',
                 DB::raw('DATE_FORMAT(hms_invoice.updated_at, "%d-%m-%y") as created'),
                 DB::raw('DATE_FORMAT(hms_invoice.appointment_date, "%d-%m-%y") as appointment'),
                 'hms_invoice.invoice as invoice',
                 'hms_invoice.total as total',
                 'hms_invoice.comment',
-                'cor_customers.name as name',
-                'cor_customers.mobile as mobile',
+                'cor_customers.*',
+                /*'cor_customers.mobile as mobile',
                 'hms_invoice.guardian_name as guardian_name',
                 'hms_invoice.guardian_mobile as guardian_mobile',
                 'cor_customers.customer_id as patient_id',
                 'cor_customers.health_id as health_id',
-                'cor_customers.gender as gender',
+                'cor_customers.gender as gender',*/
                 'hms_invoice.year as year',
                 'hms_invoice.month as month',
                 'hms_invoice.day as day',

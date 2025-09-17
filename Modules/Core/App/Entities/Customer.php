@@ -70,6 +70,12 @@ class Customer
      **/
     protected $customerGroup;
 
+     /**
+     * @ORM\ManyToOne(targetEntity="Modules\Core\App\Entities\Setting")
+     * @ORM\JoinColumn(name="religion_id", referencedColumnName="id", nullable=true, onDelete="SET NULL")
+     **/
+    protected $religionId;
+
     /**
      * @ORM\ManyToOne(targetEntity="Modules\Core\App\Entities\User")
      * @ORM\JoinColumn(name="marketing_id", referencedColumnName="id", nullable=true, onDelete="SET NULL")

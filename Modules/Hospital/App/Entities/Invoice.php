@@ -244,14 +244,6 @@ class Invoice
     private $patientRelation;
 
 
-     /**
-     * @var string
-     *
-     * @ORM\Column(type="string", nullable=true)
-     */
-    private $profession;
-
-
     /**
      * @var string
      *

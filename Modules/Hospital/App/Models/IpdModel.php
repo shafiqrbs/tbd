@@ -95,9 +95,6 @@ class IpdModel extends Model
                 'guardian_name' => $data['guardian_name'] ?? null,
                 'guardian_mobile' => $data['guardian_mobile'] ?? null,
                 'patient_relation' => $data['patient_relation'] ?? null,
-                'profession' => $data['profession'] ?? null,
-                'address' => $data['address'] ?? null,
-                'permanent_address' => $data['permanent_address'] ?? null,
                 'height' => $data['height'] ?? null,
                 'weight' => $data['weight'] ?? null,
                 'comment' => $data['comment'] ?? null,
@@ -117,6 +114,8 @@ class IpdModel extends Model
                 'name' => $data['name'] ?? null,
                 'mobile' => $data['mobile'] ?? null,
                 'gender' => $data['gender'] ?? null,
+                'permanent_address' => $data['permanent_address'] ?? null,
+                'address' => $data['address'] ?? null,
                 'identity_mode' => $data['identity_mode'] ?? null,
                 'nid' => $data['identity'] ?? null,
                 'father_name' => $data['father_name'] ?? null,
@@ -124,7 +123,9 @@ class IpdModel extends Model
                 'religion_id' => $data['religion_id'] ?? null,
                 'country_id' => $data['country_id'] ?? null,
                 'upazilla_id' => $data['upazilla_id'] ?? null,
+                'profession' => $data['profession'] ?? null,
             ]);
+            dd($patient);
         }
     }
 
