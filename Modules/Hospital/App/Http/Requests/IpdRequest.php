@@ -31,10 +31,6 @@ class IpdRequest extends FormRequest
                     'config_id' => 'integer|nullable',
                     'hms_invoice_id' => 'integer|nullable',
                     'room_id' => 'integer|nullable',
-                    'admit_unit_id' => 'integer|nullable',
-                    'admit_doctor_id' => 'integer|nullable',
-                    'admit_department_id' => 'integer|nullable',
-                    'comment' => 'string|nullable',
                 ];
             }
 

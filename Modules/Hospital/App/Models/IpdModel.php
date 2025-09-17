@@ -80,6 +80,55 @@ class IpdModel extends Model
         return $entity->id;
     }
 
+    public static function updateIpdInvoice($id,$data)
+    {
+        $entity = self::find($id);
+        if ($entity) {
+            $entity->update([
+                'day' => $data['day'] ?? null,
+                'month' => $data['month'] ?? null,
+                'year' => $data['year'] ?? null,
+                'admit_doctor_id' => $data['admit_doctor_id'] ?? null,
+                'admit_unit_id' => $data['admit_unit_id'] ?? null,
+                'admit_department_id' => $data['admit_department_id'] ?? null,
+                'bp' => $data['bp'] ?? null,
+                'guardian_name' => $data['guardian_name'] ?? null,
+                'guardian_mobile' => $data['guardian_mobile'] ?? null,
+                'patient_relation' => $data['patient_relation'] ?? null,
+                'profession' => $data['profession'] ?? null,
+                'address' => $data['address'] ?? null,
+                'permanent_address' => $data['permanent_address'] ?? null,
+                'height' => $data['height'] ?? null,
+                'weight' => $data['weight'] ?? null,
+                'comment' => $data['comment'] ?? null,
+            ]);
+            self::updateIpdPatient($id,$data);
+        }
+        return $entity;
+    }
+
+    public static function updateIpdPatient($id,$data)
+    {
+
+        $entity = self::find($id);
+        $patient = PatientModel::find($entity->customer_id);
+        if ($patient) {
+            $patient->update([
+                'name' => $data['name'] ?? null,
+                'mobile' => $data['mobile'] ?? null,
+                'gender' => $data['gender'] ?? null,
+                'identity_mode' => $data['identity_mode'] ?? null,
+                'nid' => $data['identity'] ?? null,
+                'father_name' => $data['father_name'] ?? null,
+                'mother_name' => $data['mother_name'] ?? null,
+                'religion_id' => $data['religion_id'] ?? null,
+                'country_id' => $data['country_id'] ?? null,
+                'upazilla_id' => $data['upazilla_id'] ?? null,
+            ]);
+        }
+    }
+
+
     public static function insertInvoiceParticular($config,$entity)
     {
         $admissionFee = ParticularModel::find($config['admission_fee_id']);

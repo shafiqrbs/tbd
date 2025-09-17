@@ -124,24 +124,6 @@ class IpdController extends Controller
         return $data;
     }
 
-    /**
-     * Show the specified resource.
-     */
-    public function insertInvestigation(Request $request,$id)
-    {
-        $service = new JsonRequestResponse();
-        $userId = $request->header('X-Api-User');
-        $entity = PrescriptionModel::updateOrCreate(
-            ['hms_invoice_id' => $id],
-            [
-                'created_by_id' => $userId ,
-                'doctor_id' => $doctorId
-            ]
-        );
-        $data = $service->returnJosnResponse($entity);
-        return $data;
-    }
-
 
 
     /**
@@ -210,13 +192,13 @@ class IpdController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(CustomerRequest $request, $id)
+    public function update(Request $request, $id)
     {
 
-
-        $data = $request->validated();
-        $entity = OPDModel::find($id);
-        $entity->update($data);
+       // $data = $request->validated();
+        $data = $request->all();
+        IpdModel::updateIpdInvoice($id,$data);
+        $entity = InvoiceModel::getIpdShow($id);
         $service = new JsonRequestResponse();
         return $service->returnJosnResponse($entity);
     }
