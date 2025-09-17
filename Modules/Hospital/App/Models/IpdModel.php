@@ -125,7 +125,6 @@ class IpdModel extends Model
                 'upazilla_id' => $data['upazilla_id'] ?? null,
                 'profession' => $data['profession'] ?? null,
             ]);
-            dd($patient);
         }
     }
 
