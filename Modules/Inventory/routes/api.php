@@ -17,6 +17,7 @@ use Modules\Inventory\App\Http\Controllers\PosController;
 use Modules\Inventory\App\Http\Controllers\ProductController;
 use Modules\Inventory\App\Http\Controllers\PurchaseController;
 use Modules\Inventory\App\Http\Controllers\PurchaseItemController;
+use Modules\Inventory\App\Http\Controllers\PurchaseReturnController;
 use Modules\Inventory\App\Http\Controllers\RequisitionController;
 use Modules\Inventory\App\Http\Controllers\RequisitionMatrixBoardController;
 use Modules\Inventory\App\Http\Controllers\SalesController;
@@ -109,10 +110,23 @@ Route::prefix('/inventory')->middleware([HeaderAuthenticationMiddleware::class,L
     Route::apiResource('/invoice-batch-transaction', InvoiceBatchTransactionControllerAlias::class);
 
 
-    Route::apiResource('/purchase', PurchaseController::class);
-    Route::get('/purchase/edit/{id}', [PurchaseController::class,'edit'])->name('get_edit_purchase');
-    Route::get('/purchase/copy/{id}', [PurchaseController::class,'purchaseCopy'])->name('get_purchase_copy');
-    Route::get('/purchase/approve/{id}', [PurchaseController::class,'approve'])->name('approve_purchase');
+    Route::prefix('purchase')->name('purchase.')->group(function () {
+        Route::apiResource('/', PurchaseController::class)->parameters(['' => 'id']);
+
+        Route::get('edit/{id}', [PurchaseController::class, 'edit'])->name('edit');
+        Route::get('copy/{id}', [PurchaseController::class, 'purchaseCopy'])->name('copy');
+        Route::get('approve/{id}', [PurchaseController::class, 'approve'])->name('approve');
+    });
+
+
+    Route::prefix('purchase-return')->group(function () {
+        Route::apiResource('/', PurchaseReturnController::class);
+
+        Route::get('/vendor-wise-purchase-item', [PurchaseReturnController::class, 'vendorWisePurchaseItem'])
+            ->name('purchase-return.vendor-wise-purchase-item');
+    });
+
+
 
     Route::apiResource('/purchase-item', PurchaseItemController::class);
 
