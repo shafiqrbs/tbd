@@ -58,13 +58,13 @@ Route::prefix('/hospital')->middleware([HeaderAuthenticationMiddleware::class])-
     Route::get('/setting', [SettingController::class,'particularModuleDropdown'])->name('particular_module_dropdown');
     Route::get('/mode/matrix', [HospitalController::class,'modeMatrix'])->name('particular_module_dropdown');
     Route::post('/mode/matrix-ordering', [HospitalController::class,'matrixUpdateOrdering'])->name('matrixUpdateOrdering');
+    Route::post('/mode/matrix-inline-update/{id}', [HospitalController::class,'matrixInlineUpdate'])->name('matrixUpdateOrdering');
     Route::get('/setting/matrix', [HospitalController::class,'settingMatrix'])->name('particular_module_dropdown');
     Route::get('/setting', [SettingController::class,'particularModuleDropdown'])->name('particular_module_dropdown');
     Route::get('visiting-room', [OpdController::class,'getVisitingRooms'])->name('getVisitingRooms');
     Route::get('send-to-prescription/{id}', [OpdController::class,'sendPrescription'])->name('send_prescription');
     Route::post('/opd/referred/{id}', [OpdController::class,'referred'])->name('prescription_referred');
     Route::get('/core/particular/doctor-nurse', [ParticularController::class, 'doctorNurseStaff'])->name('particular.doctorNurseStaff');
-    Route::apiResource('opd', OpdController::class)->middleware([HeaderAuthenticationMiddleware::class]);
     Route::post('/core/health-share', [HospitalController::class,'healthShare'])->name('healthShare');
     Route::prefix('core')->middleware([HeaderAuthenticationMiddleware::class])->group(function() {
 
@@ -131,6 +131,7 @@ Route::prefix('/hospital')->middleware([HeaderAuthenticationMiddleware::class])-
     });
     Route::post('/setting-matrix/create', [HospitalController::class,'settingMatrixCreate'])->name('particular_module_dropdown');
     Route::get('/prescription/patient/{id}/{prescription}', [PrescriptionController::class,'patientPrescription'])->name('patient_prescription');
+    Route::apiResource('opd', OpdController::class)->middleware([HeaderAuthenticationMiddleware::class]);
     Route::apiResource('prescription', PrescriptionController::class)
         ->middleware([HeaderAuthenticationMiddleware::class])
         ->names([

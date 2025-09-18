@@ -322,7 +322,7 @@ class UserModel extends Model
         // Define role groups for different applications and role types
         $roleGroups = [
             'hospital' => [
-                'access_control_role' => ['Operator', 'Doctor', 'Nurse', 'Medicine', 'Billing', 'Reports', 'Admin', 'Accounting'],
+                'access_control_role' => ['Doctor', 'Nurse', 'Pharmacy','Operator','Billing', 'Reports', 'Admin'],
                 'android_control_role' => [], // add if any exist
             ],
             'pos' => [

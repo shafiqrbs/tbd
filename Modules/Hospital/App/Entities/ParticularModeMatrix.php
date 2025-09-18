@@ -54,6 +54,13 @@ class ParticularModeMatrix
      */
     private $ordering;
 
+    /**
+     * @var boolean
+     *
+     * @ORM\Column(type="boolean",options={"default"="false"})
+     */
+    private $isAdditionalField;
+
 
     /**
      * @var boolean

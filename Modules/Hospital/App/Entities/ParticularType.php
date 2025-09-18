@@ -82,6 +82,7 @@ class ParticularType
      */
     private $isPrivate;
 
+
     /**
      * @var int
      *

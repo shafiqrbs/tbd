@@ -129,6 +129,15 @@ class HospitalController extends Controller
         return response()->json(['success' => true]);
     }
 
+    public function matrixInlineUpdate(Request $request,$id)
+    {
+        $input = $request->all();
+        $findParticular = ParticularMatrixModel::find($id);
+        $findParticular->is_additional_field = $findParticular->is_additional_field ? 0:1;
+        $findParticular->save();
+        return response()->json(['success' => true]);
+    }
+
 
      /**
      * Show the form for editing the specified resource.
