@@ -111,20 +111,22 @@ Route::prefix('/inventory')->middleware([HeaderAuthenticationMiddleware::class,L
 
 
     Route::prefix('purchase')->name('purchase.')->group(function () {
-        Route::apiResource('/', PurchaseController::class)->parameters(['' => 'id']);
+        Route::prefix('return')->name('return.')->group(function () {
+            Route::get('{id}/edit', [PurchaseReturnController::class, 'edit'])->name('edit');
+            Route::get('vendor-wise-purchase-item', [PurchaseReturnController::class, 'vendorWisePurchaseItem'])->name('vendorWisePurchaseItem');
+
+            // FIXED ✅
+            Route::apiResource('', PurchaseReturnController::class)
+                ->parameters(['' => 'id']);
+        });
+
+        Route::apiResource('', PurchaseController::class)->parameters(['' => 'id']);
 
         Route::get('edit/{id}', [PurchaseController::class, 'edit'])->name('edit');
         Route::get('copy/{id}', [PurchaseController::class, 'purchaseCopy'])->name('copy');
         Route::get('approve/{id}', [PurchaseController::class, 'approve'])->name('approve');
     });
 
-
-    Route::prefix('purchase-return')->group(function () {
-        Route::apiResource('/', PurchaseReturnController::class);
-
-        Route::get('/vendor-wise-purchase-item', [PurchaseReturnController::class, 'vendorWisePurchaseItem'])
-            ->name('purchase-return.vendor-wise-purchase-item');
-    });
 
 
 

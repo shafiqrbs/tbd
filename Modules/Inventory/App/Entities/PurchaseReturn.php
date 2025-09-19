@@ -44,21 +44,10 @@ class PurchaseReturn
      **/
     private  $createdBy;
 
-
     /**
-     * @var \DateTime
-     * @Gedmo\Timestampable(on="create")
-     * @ORM\Column(name="created", type="datetime",nullable=true)
-     */
-    private $created;
-
-
-    /**
-     * @var \DateTime
-     * @Gedmo\Timestampable(on="update")
-     * @ORM\Column(name="updated", type="datetime",nullable=true)
-     */
-    private $updated;
+     * @ORM\ManyToOne(targetEntity="Modules\Core\App\Entities\User")
+     **/
+    private  $issueBy;
 
     /**
      * @var string
@@ -70,14 +59,14 @@ class PurchaseReturn
     /**
      * @var integer
      *
-     * @ORM\Column(name="salesInvoice", type="integer", nullable=true)
+     * @ORM\Column(name="sales_invoice", type="integer", nullable=true)
      */
     private $salesInvoice;
 
      /**
      * @var integer
      *
-     * @ORM\Column(name="purchaseInvoice", type="integer", nullable=true)
+     * @ORM\Column(name="purchase_invoice", type="integer", nullable=true)
      */
     private $purchaseInvoice;
 
@@ -91,21 +80,21 @@ class PurchaseReturn
     /**
      * @var float
      *
-     * @ORM\Column(name="subTotal", type="float", nullable=true)
+     * @ORM\Column(name="sub_total", type="float", nullable=true)
      */
     private $subTotal;
 
     /**
      * @var float
      *
-     * @ORM\Column(name="spoilQuantity", type="float", nullable=true)
+     * @ORM\Column(name="spoil_quantity", type="float", nullable=true)
      */
     private $spoilQuantity;
 
     /**
      * @var float
      *
-     * @ORM\Column(name="damageQuantity", type="float", nullable=true)
+     * @ORM\Column(name="damage_quantity", type="float", nullable=true)
      */
     private $damageQuantity;
 
@@ -118,10 +107,15 @@ class PurchaseReturn
 
     /**
      * @var string
-     *
      * @ORM\Column(name="process", type="string", nullable=true)
      */
-    private $process = "created";
+    private $process;
+
+    /**
+     * @var string
+     * @ORM\Column(name="narration", type="string", nullable=true)
+     */
+    private $narration;
 
      /**
      * @var boolean
@@ -145,8 +139,8 @@ class PurchaseReturn
     private $updatedAt;
 
     /**
-     * @var \DateTime
-     * @ORM\Column(type="datetime", nullable=true)
+     * @var \Date
+     * @ORM\Column(type="date", nullable=true)
      */
     private $invoiceDate;
 

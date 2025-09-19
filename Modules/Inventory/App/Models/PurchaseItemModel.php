@@ -3,19 +3,12 @@
 namespace Modules\Inventory\App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Support\Facades\DB;
-use Modules\Inventory\App\Entities\StockItem;
-use Modules\Inventory\App\Entities\StockItemInventoryHistory;
-use Modules\Utility\App\Models\ProductUnitModel;
-use Ramsey\Collection\Collection;
 
 class PurchaseItemModel extends Model
 {
-    use HasFactory;
 
     protected $table = 'inv_purchase_item';
     public $timestamps = true;

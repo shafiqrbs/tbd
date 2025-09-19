@@ -32,75 +32,84 @@ class PurchaseReturnItem
 
 
     /**
-     * @ORM\ManyToOne(targetEntity="Product")
+     * @ORM\ManyToOne(targetEntity="StockItem")
      * @ORM\JoinColumn(onDelete="CASCADE")
      **/
-    private  $product;
+    private  $stockItem;
 
     /**
-     * @ORM\ManyToOne(targetEntity="WearHouse")
+     * @ORM\ManyToOne(targetEntity="Modules\Core\App\Entities\Warehouse")
      * @ORM\OrderBy({"sorting" = "ASC"})
      **/
-    private $wearHouse;
+    private $warehouse;
 
+    /**
+     * @ORM\ManyToOne(targetEntity="PurchaseItem")
+     * @ORM\OrderBy({"sorting" = "ASC"})
+     **/
+    private $purchaseItem;
+
+    /**
+     * @var string
+     * @ORM\Column(name="item_name", type="string", nullable=true)
+     */
+    private $itemName;
+
+    /**
+     * @var string
+     * @ORM\Column(name="uom", type="string", nullable=true)
+     */
+    private $uom;
 
 
     /**
      * @var integer
-     *
-     * @ORM\Column(type="integer",nullable=true)
+     * @ORM\Column(type="integer")
      */
     private $quantity;
 
      /**
      * @var integer
-     *
-     * @ORM\Column(type="integer",nullable=true)
+     * @ORM\Column(type="integer",name="spoil_qnt",nullable=true)
      */
     private $spoilQnt;
 
 
      /**
      * @var integer
-     *
-     * @ORM\Column(type="integer",nullable=true)
+     * @ORM\Column(type="integer",name="damage_qnt",nullable=true)
      */
     private $damageQnt;
 
     /**
      * @var integer
-     *
-     * @ORM\Column(type="integer",nullable=true)
+     * @ORM\Column(type="integer",name="deliver_qnt",nullable=true)
      */
     private $deliverQnt;
 
 
      /**
      * @var integer
-     *
-     * @ORM\Column(type="integer",nullable=true)
+     * @ORM\Column(type="integer",name="remaining_qnt",nullable=true)
      */
     private $remainingQnt;
 
 
      /**
      * @var integer
-     *
-     * @ORM\Column(type="float",nullable=true)
+     * @ORM\Column(type="float",name="sales_invoice_item",nullable=true)
      */
     private $salesInvoiceItem;
 
     /**
      * @var float
-     *
-     * @ORM\Column(type="float",nullable=true)
+     * @ORM\Column(type="float",name="purchase_price",nullable=true)
      */
     private $purchasePrice;
 
     /**
      * @var float
-     *
-     * @ORM\Column(type="float",nullable=true)
+     * @ORM\Column(type="float",name="sub_total",nullable=true)
      */
     private $subTotal;
 
