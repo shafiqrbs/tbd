@@ -54,7 +54,7 @@ class InvoiceContentDetailsModel extends Model
 
                     // Example DB insert like your investigation code
                     $particular = ParticularModel::find($item->id);
-                    $particularParent = ($particular->particular_type_id) ? $particular->particular_type_id : '';
+                    $particularParent = (isset($particular->particular_type_id) and !$particular->particular_type_id) ? $particular->particular_type_id : '';
                     if ($particular && $particularParent) {
                         self::updateOrCreate(
                             [
