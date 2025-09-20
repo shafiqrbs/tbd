@@ -146,6 +146,16 @@ class InvoiceModel extends Model
             });
         }
 
+        if (isset($request['prescription_mode']) && !empty($request['prescription_mode'])){
+            if (!empty($request['prescription_mode'])) {
+                if ($request['prescription_mode'] === 'prescription') {
+                    $entities = $entities->whereNotNull('prescription.id');
+                } elseif ($request['prescription_mode'] === 'non-prescription') {
+                    $entities = $entities->whereNull('prescription.id');
+                }
+            }
+        }
+
         if (isset($request['patient_mode']) && !empty($request['patient_mode'])){
             $entities = $entities->where('patient_mode.slug',$request['patient_mode']);
         }

@@ -65,6 +65,7 @@ Route::prefix('/hospital')->middleware([HeaderAuthenticationMiddleware::class])-
     Route::get('send-to-prescription/{id}', [OpdController::class,'sendPrescription'])->name('send_prescription');
     Route::post('/opd/referred/{id}', [OpdController::class,'referred'])->name('prescription_referred');
     Route::get('/core/particular/doctor-nurse', [ParticularController::class, 'doctorNurseStaff'])->name('particular.doctorNurseStaff');
+    Route::get('/core/userinfo/{id}', [HospitalController::class,'userInfo'])->name('userInfo');
     Route::post('/core/health-share', [HospitalController::class,'healthShare'])->name('healthShare');
     Route::prefix('core')->middleware([HeaderAuthenticationMiddleware::class])->group(function() {
 

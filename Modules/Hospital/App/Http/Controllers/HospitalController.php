@@ -90,6 +90,16 @@ class HospitalController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
+    public function userInfo($id)
+    {
+        $data = ParticularModel::with('particularDetails')->where('employee_id',$id)->first();
+        $service = new JsonRequestResponse();
+        return $service->returnJosnResponse($data);
+    }
+
+    /**
+     * Show the form for editing the specified resource.
+     */
     public function locationDropdown(Request $request)
     {
         $data = LocationModel::getLocationSearch($request);
@@ -308,8 +318,7 @@ class HospitalController extends Controller
      */
     public function particularMasterTypeDropdown()
     {
-
-        $types = ParticularTypeMasterModel::all();
+        $types = ParticularTypeMasterModel::orderBy('name', 'asc')->get();
         $service = new JsonRequestResponse();
         return $service->returnJosnResponse($types);
     }

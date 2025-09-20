@@ -53,7 +53,7 @@ class Particular
 
     /**
      * @Gedmo\Blameable(on="create")
-     * @ORM\ManyToOne(targetEntity="Modules\Core\App\Entities\User")
+     * @ORM\OneToOne(targetEntity="Modules\Core\App\Entities\User")
      * @ORM\JoinColumn(name="employee_id", referencedColumnName="id", nullable=true, onDelete="cascade")
      **/
      private  $employee;
