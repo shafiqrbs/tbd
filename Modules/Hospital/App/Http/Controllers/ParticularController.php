@@ -50,8 +50,6 @@ class ParticularController extends Controller
         return $response;
     }
 
-
-
      /**
      * Store a newly created resource in storage.
      */
