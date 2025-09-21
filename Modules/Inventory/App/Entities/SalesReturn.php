@@ -114,7 +114,19 @@ class SalesReturn
      *
      * @ORM\Column(name="process", type="string", nullable=true)
      */
-    private $process = "created";
+    private $process;
+
+    /**
+     * @ORM\ManyToOne(targetEntity="Modules\Inventory\App\Entities\PurchaseReturn", cascade={"detach","merge"} )
+     * @ORM\JoinColumn(onDelete="CASCADE")
+     **/
+    private  $purchaseReturn;
+
+    /**
+     * @var float
+     * @ORM\Column(name="quantity", type="float", nullable=true)
+     */
+    private $quantity;
 
 
 }

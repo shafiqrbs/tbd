@@ -2,7 +2,6 @@
 
 namespace Modules\Inventory\App\Models;
 
-use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -10,10 +9,10 @@ use Illuminate\Support\Facades\DB;
 use Modules\AppsApi\App\Services\GeneratePatternCodeService;
 use Modules\Core\App\Models\VendorModel;
 
-class PurchaseReturnModel extends Model
+class SalesReturnModel extends Model
 {
 
-    protected $table = 'inv_purchase_return';
+    protected $table = 'inv_sales_return';
     public $timestamps = true;
     protected $guarded = ['id'];
 
@@ -40,15 +39,15 @@ class PurchaseReturnModel extends Model
         $patternCodeService = app(GeneratePatternCodeService::class);
         $params = [
             'config' => $model->config_id,
-            'table' => 'inv_purchase_return',
+            'table' => 'inv_sales_return',
             'prefix' => 'INV-',
         ];
         return $patternCodeService->invoiceNo($params);
     }
 
-    public function purchaseReturnItems()
+    public function salesReturnItems()
     {
-        return $this->hasMany(PurchaseReturnItemModel::class, 'purchase_return_id');
+        return $this->hasMany(SalesReturnItemModel::class, 'sales_return_id');
     }
     public function purchaseItems()
     {
@@ -71,73 +70,76 @@ class PurchaseReturnModel extends Model
         $perPage = isset($request['offset']) && $request['offset'] != '' ? (int)($request['offset']) : 50;
         $skip = isset($page) && $page != '' ? (int)$page * $perPage : 0;
 
-        $entities = self::where([['inv_purchase_return.config_id', $domain['config_id']]])
-            ->leftjoin('users as createdBy', 'createdBy.id', '=', 'inv_purchase_return.created_by_id')
-            ->leftjoin('users as issueBy', 'issueBy.id', '=', 'inv_purchase_return.issue_by_id')
-            ->leftjoin('cor_vendors', 'cor_vendors.id', '=', 'inv_purchase_return.vendor_id')
+        $entities = self::where([['inv_sales_return.config_id', $domain['config_id']]])
+            ->leftjoin('users as createdBy', 'createdBy.id', '=', 'inv_sales_return.created_by_id')
+//            ->leftjoin('users as issueBy', 'issueBy.id', '=', 'inv_sales_return.issue_by_id')
+            ->leftjoin('cor_customers', 'cor_customers.id', '=', 'inv_sales_return.customer_id')
             ->select([
-                'inv_purchase_return.id',
-                DB::raw('DATE_FORMAT(inv_purchase_return.created_at, "%d-%m-%Y") as created'),
-                DB::raw('DATE_FORMAT(inv_purchase_return.invoice_date, "%d-%m-%Y") as invoice_date'),
-                'inv_purchase_return.invoice',
-                'inv_purchase_return.code',
-                'inv_purchase_return.quantity',
-                'inv_purchase_return.process',
-                'inv_purchase_return.sub_total',
-                'inv_purchase_return.narration',
-                'inv_purchase_return.vendor_id',
-                'inv_purchase_return.approved_by_id',
-                'cor_vendors.sub_domain_id',
-                'cor_vendors.name as vendor_name',
-                'cor_vendors.mobile as vendor_mobile',
+                'inv_sales_return.id',
+                DB::raw('DATE_FORMAT(inv_sales_return.created_at, "%d-%m-%Y") as created'),
+//                DB::raw('DATE_FORMAT(inv_sales_return.invoice_date, "%d-%m-%Y") as invoice_date'),
+                'inv_sales_return.invoice',
+                'inv_sales_return.code',
+                'inv_sales_return.quantity',
+                'inv_sales_return.process',
+                'inv_sales_return.sub_total',
+//                'inv_sales_return.narration',
+//                'inv_sales_return.vendor_id',
+//                'inv_sales_return.approved_by_id',
+//                'cor_vendors.sub_domain_id',
+//                'cor_vendors.name as vendor_name',
+//                'cor_vendors.mobile as vendor_mobile',
                 'createdBy.username as createdByUser',
                 'createdBy.name as createdByName',
                 'createdBy.id as createdById',
-                'issueBy.username as issueByUser',
-                'issueBy.name as issueByName',
-                'issueBy.id as issueById',
-            ])->with(['purchaseReturnItems' => function ($query) {
+                'cor_customers.name as customer_name',
+                'cor_customers.mobile as customer_mobile',
+//                'issueBy.username as issueByUser',
+//                'issueBy.name as issueByName',
+//                'issueBy.id as issueById',
+            ])->with(['salesReturnItems' => function ($query) {
                 $query->select([
-                    'inv_purchase_return_item.id',
-                    'inv_purchase_return_item.purchase_return_id',
-                    'inv_purchase_return_item.quantity',
-                    'inv_purchase_return_item.purchase_price',
-                    'inv_purchase_return_item.sub_total',
-                    'inv_purchase_return_item.stock_item_id',
-                    'inv_purchase_return_item.warehouse_id',
-                    'inv_purchase_return_item.item_name',
-                    'inv_purchase_return_item.uom',
-                    'inv_purchase_return_item.purchase_item_id',
+                    'inv_sales_return_item.id',
+                    'inv_sales_return_item.sales_return_id',
+                    'inv_sales_return_item.quantity',
+                    'inv_sales_return_item.price',
+                    'inv_sales_return_item.sub_total',
+                    'inv_sales_return_item.stock_item_id',
+                    'inv_sales_return_item.warehouse_id',
+                    'inv_sales_return_item.item_name',
+                    'inv_sales_return_item.uom',
+//                    'inv_sales_return_item.purchase_item_id',
+                    'inv_sales_return_item.sales_item_id',
                     'cor_warehouses.name as warehouse_name',
                     'cor_warehouses.location as warehouse_location',
                     'cor_warehouses.id as warehouse_id',
                 ])
-                    ->join('inv_stock', 'inv_stock.id', '=', 'inv_purchase_return_item.stock_item_id')
-                    ->leftjoin('cor_warehouses', 'cor_warehouses.id', '=', 'inv_purchase_return_item.warehouse_id');
+                    ->join('inv_stock', 'inv_stock.id', '=', 'inv_sales_return_item.stock_item_id')
+                    ->leftjoin('cor_warehouses', 'cor_warehouses.id', '=', 'inv_sales_return_item.warehouse_id');
             }]);
 
         if (isset($request['term']) && !empty($request['term'])) {
-            $entities = $entities->whereAny(['inv_purchase_return.invoice', 'inv_purchase_return.sub_total', 'inv_purchase_return.process', 'cor_vendors.name', 'cor_vendors.mobile', 'createdBy.username'], 'LIKE', '%' . $request['term'] . '%');
+            $entities = $entities->whereAny(['inv_sales_return.invoice', 'inv_sales_return.sub_total', 'inv_sales_return.process', 'cor_vendors.name', 'cor_vendors.mobile', 'createdBy.username'], 'LIKE', '%' . $request['term'] . '%');
         }
 
         if (isset($request['vendor_id']) && !empty($request['vendor_id'])) {
-            $entities = $entities->where('inv_purchase_return.vendor_id', $request['vendor_id']);
+            $entities = $entities->where('inv_sales_return.vendor_id', $request['vendor_id']);
         }
         if (isset($request['start_date']) && !empty($request['start_date']) && empty($request['end_date'])) {
             $start_date = $request['start_date'] . ' 00:00:00';
             $end_date = $request['start_date'] . ' 23:59:59';
-            $entities = $entities->whereBetween('inv_purchase_return.created_at', [$start_date, $end_date]);
+            $entities = $entities->whereBetween('inv_sales_return.created_at', [$start_date, $end_date]);
         }
         if (isset($request['start_date']) && !empty($request['start_date']) && isset($request['end_date']) && !empty($request['end_date'])) {
             $start_date = $request['start_date'] . ' 00:00:00';
             $end_date = $request['end_date'] . ' 23:59:59';
-            $entities = $entities->whereBetween('inv_purchase_return.created_at', [$start_date, $end_date]);
+            $entities = $entities->whereBetween('inv_sales_return.created_at', [$start_date, $end_date]);
         }
 
         $total = $entities->count();
         $entities = $entities->skip($skip)
             ->take($perPage)
-            ->orderBy('inv_purchase_return.id', 'DESC')
+            ->orderBy('inv_sales_return.id', 'DESC')
             ->get();
         $data = array('count' => $total, 'entities' => $entities);
         return $data;

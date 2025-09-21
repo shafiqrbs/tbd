@@ -3,35 +3,21 @@
 namespace Modules\Inventory\App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
-use App\Services\DailyStockService;
-use Doctrine\ORM\EntityManager;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
-use Modules\Accounting\App\Models\AccountHeadModel;
-use Modules\Accounting\App\Models\AccountingModel;
-use Modules\Accounting\App\Models\AccountJournalModel;
-use Modules\AppsApi\App\Services\JsonRequestResponse;
 use Modules\Core\App\Models\UserModel;
-use Modules\Core\App\Models\VendorModel;
-use Modules\Inventory\App\Entities\Purchase;
-use Modules\Inventory\App\Entities\SalesReturnItem;
-use Modules\Inventory\App\Http\Requests\PurchaseRequest;
 use Modules\Inventory\App\Http\Requests\PurchaseReturnRequest;
-use Modules\Inventory\App\Models\ConfigPurchaseModel;
-use Modules\Inventory\App\Models\PurchaseItemModel;
 use Modules\Inventory\App\Models\PurchaseModel;
 use Modules\Inventory\App\Models\PurchaseReturnModel;
-use Modules\Inventory\App\Models\SalesItemModel;
 use Modules\Inventory\App\Models\SalesReturnItemModel;
 use Modules\Inventory\App\Models\SalesReturnModel;
-use Modules\Inventory\App\Models\StockItemHistoryModel;
 use Modules\Inventory\App\Models\StockItemModel;
 use Symfony\Component\HttpFoundation\Response as ResponseAlias;
 use Throwable;
 use function Symfony\Component\HttpFoundation\Session\Storage\Handler\getInsertStatement;
 
-class PurchaseReturnController extends Controller
+class SalesReturnController extends Controller
 {
     protected $domain;
 
@@ -46,7 +32,7 @@ class PurchaseReturnController extends Controller
 
     public function index(Request $request)
     {
-        $data = PurchaseReturnModel::getRecords($request, $this->domain);
+        $data = SalesReturnModel::getRecords($request, $this->domain);
         $response = new Response();
         $response->headers->set('Content-Type', 'application/json');
         $response->setContent(json_encode([

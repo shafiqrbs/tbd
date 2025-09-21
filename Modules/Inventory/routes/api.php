@@ -21,6 +21,7 @@ use Modules\Inventory\App\Http\Controllers\PurchaseReturnController;
 use Modules\Inventory\App\Http\Controllers\RequisitionController;
 use Modules\Inventory\App\Http\Controllers\RequisitionMatrixBoardController;
 use Modules\Inventory\App\Http\Controllers\SalesController;
+use Modules\Inventory\App\Http\Controllers\SalesReturnController;
 use Modules\Inventory\App\Http\Controllers\SettingController;
 use Modules\Inventory\App\Http\Controllers\StockItemController;
 use Modules\Inventory\App\Http\Controllers\WarehouseIssueController;
@@ -101,11 +102,28 @@ Route::prefix('/inventory')->middleware([HeaderAuthenticationMiddleware::class,L
     Route::get('/stock-item', [StockItemController::class,'stockItem'])->name('get_stock_item');
     Route::get('generate/stock-item/xlsx', [StockItemController::class,'stockItemXlsxGenerate'])->name('get_stock_item_xlsx_generate');
 
-    Route::apiResource('/sales', SalesController::class);
+    /*Route::apiResource('/sales', SalesController::class);
     Route::get('/sales/edit/{id}', [SalesController::class,'edit'])->name('get_edit_sales');
     Route::get('/sales/copy/{id}', [SalesController::class,'salesCopy'])->name('get_sales_copy');
     Route::get('/sales/domain-customer/{id}', [SalesController::class,'domainCustomerSales'])->name('get_domain_customer_sales');
-    Route::get('/sales/not-domain-customer/{id}', [SalesController::class,'notDomainCustomerSales'])->name('get_not_domain_customer_sales');
+    Route::get('/sales/not-domain-customer/{id}', [SalesController::class,'notDomainCustomerSales'])->name('get_not_domain_customer_sales')*/;
+
+    Route::prefix('sales')->name('sales.')->group(function () {
+        Route::prefix('return')->name('return.')->group(function () {
+//            Route::get('{id}/approve/{vendor}', [PurchaseReturnController::class, 'approve'])->name('purchase-return.approve');
+
+            Route::apiResource('', SalesReturnController::class)
+                ->parameters(['' => 'id']);
+        });
+
+        Route::apiResource('', SalesController::class)->parameters(['' => 'id']);
+
+        Route::get('edit/{id}', [SalesController::class, 'edit'])->name('edit');
+        Route::get('copy/{id}', [SalesController::class, 'salesCopy'])->name('copy');
+        Route::get('domain-customer/{id}', [SalesController::class, 'domainCustomerSales'])->name('get_domain_customer_sales');
+        Route::get('not-domain-customer/{id}', [SalesController::class, 'notDomainCustomerSales'])->name('get_not_domain_customer_sales');
+    });
+
     Route::apiResource('/invoice-batch', InvoiceBatchController::class);
     Route::apiResource('/invoice-batch-transaction', InvoiceBatchTransactionControllerAlias::class);
 
@@ -113,6 +131,7 @@ Route::prefix('/inventory')->middleware([HeaderAuthenticationMiddleware::class,L
     Route::prefix('purchase')->name('purchase.')->group(function () {
         Route::prefix('return')->name('return.')->group(function () {
             Route::get('{id}/edit', [PurchaseReturnController::class, 'edit'])->name('edit');
+            Route::get('{id}/approve/{vendor}', [PurchaseReturnController::class, 'approve'])->name('purchase-return.approve');
             Route::get('vendor-wise-purchase-item', [PurchaseReturnController::class, 'vendorWisePurchaseItem'])->name('vendorWisePurchaseItem');
 
             // FIXED ✅

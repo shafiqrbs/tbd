@@ -11,7 +11,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 /**
  * BusinessInvoiceReturnItem
  *
- * @ORM\Table(name ="inv_invoice_return_item")
+ * @ORM\Table(name ="inv_sales_return_item")
  * @ORM\Entity()
  */
 class SalesReturnItem
@@ -26,85 +26,74 @@ class SalesReturnItem
     private $id;
 
     /**
-     * @ORM\ManyToOne(targetEntity="Product")
-     * @ORM\JoinColumn(onDelete="CASCADE")
-     **/
-    private  $particular;
-
-     /**
-     * @ORM\ManyToOne(targetEntity="Product")
-     * @ORM\JoinColumn(onDelete="CASCADE")
-     **/
-    private  $product;
-
-    /**
      * @ORM\ManyToOne(targetEntity="SalesItem")
      * @ORM\JoinColumn(onDelete="CASCADE")
      **/
     private  $salesItem;
 
     /**
-     * @ORM\ManyToOne(targetEntity="Sales")
-     * @ORM\JoinColumn(onDelete="CASCADE")
-     **/
-    private  $invoice;
-
-
-    /**
      * @ORM\ManyToOne(targetEntity="SalesReturn")
      * @ORM\JoinColumn(onDelete="CASCADE")
      **/
-    private  $invoiceReturn;
+    private  $salesReturn;
 
     /**
-     * @ORM\ManyToOne(targetEntity="Modules\Inventory\App\Entities\WearHouse")
+     * @var string
+     * @ORM\Column(name="item_name", type="string", nullable=true)
+     */
+    private $itemName;
+
+    /**
+     * @var string
+     * @ORM\Column(name="uom", type="string", nullable=true)
+     */
+    private $uom;
+
+    /**
+     * @ORM\ManyToOne(targetEntity="StockItem")
+     * @ORM\JoinColumn(onDelete="CASCADE")
+     **/
+    private  $stockItem;
+
+    /**
+     * @ORM\ManyToOne(targetEntity="Modules\Core\App\Entities\Warehouse")
      * @ORM\OrderBy({"sorting" = "ASC"})
      **/
-    private $wearHouse;
+    private $warehouse;
 
+    /**
+     * @ORM\ManyToOne(targetEntity="PurchaseReturnItem")
+     * @ORM\OrderBy({"sorting" = "ASC"})
+     **/
+    private $purchaseReturnItem;
 
     /**
      * @var float
-     *
      * @ORM\Column(name="quantity", type="float", nullable=true)
      */
     private $quantity;
 
     /**
      * @var float
-     *
-     * @ORM\Column(name="bonusQuantity", type="float",nullable=true)
+     * @ORM\Column(name="bonus_quantity", type="float",nullable=true)
      */
     private $bonusQuantity;
 
-
-
     /**
      * @var float
-     *
      * @ORM\Column(name="price", type="float",nullable=true)
      */
     private $price;
 
-
     /**
      * @var float
-     *
-     * @ORM\Column(name="purchaseSubTotal", type="float", nullable = true)
+     * @ORM\Column(name="sub_total", type="float", nullable = true)
      */
     private $subTotal;
-
-    /**
-     * @var string
-     *
-     * @ORM\Column(name="itemProcess", type="string", nullable = true)
-     */
-    private $itemProcess;
 
 
 	/**
 	 * @var boolean
-	 *
 	 * @ORM\Column(name="status", type="boolean")
 	 */
 	private $status=false;
