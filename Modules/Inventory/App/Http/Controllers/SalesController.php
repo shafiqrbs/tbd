@@ -290,7 +290,8 @@ class SalesController extends Controller
                     'transaction_mode_id'=> $getTransactionMode?->id,
                     'process'            => 'in-progress',
                     'mode'               => 'Requisition',
-                    'is_requisition'     => 1
+                    'is_requisition'     => 1,
+                    'parent_sale_id'     => $id
                 ]);
 
                 if ($purchase){
@@ -323,6 +324,7 @@ class SalesController extends Controller
                                 'mode'          => 'purchase',
                                 'updated_at'    => now(),
                                 'stock_item_id' => $getStockItemId,
+                                'parent_sales_item_id' => $item['id'],
                             ];
                         }
 
@@ -338,7 +340,7 @@ class SalesController extends Controller
                     }
                 }
 
-                $getSales->update(['is_domain_sales_completed'=> 1,'approved_by_id'=>$this->domain['user_id'],'process' => 'In-progress']);
+                $getSales->update(['is_domain_sales_completed'=> 1,'approved_by_id'=>$this->domain['user_id'],'process' => 'In-progress','child_purchase_id'=>$purchase->id]);
                 // Manege stock
                 if (sizeof($getSales->salesItems)>0){
                     foreach ($getSales->salesItems as $item){

@@ -68,6 +68,12 @@ class PurchaseItem
      **/
     private  $warehouse;
 
+    /**
+     * @ORM\OneToOne(targetEntity="SalesItem")
+     * @ORM\JoinColumn(onDelete="CASCADE")
+     **/
+    private  $parentSalesItem;
+
 
     /**
      * @var float

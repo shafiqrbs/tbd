@@ -51,6 +51,12 @@ class Sales
     private  $vendor;
 
     /**
+     * @ORM\OneToOne(targetEntity="Purchase")
+     * @ORM\JoinColumn(onDelete="CASCADE")
+     **/
+    private  $childPurchase;
+
+    /**
      * @Gedmo\Blameable(on="create")
      * @ORM\ManyToOne(targetEntity="Modules\Core\App\Entities\User")
      * @ORM\JoinColumn(onDelete="CASCADE")

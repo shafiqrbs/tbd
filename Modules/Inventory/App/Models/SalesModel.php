@@ -38,7 +38,8 @@ class SalesModel extends Model
         'narration',
         'process',
         'transaction_mode_id',
-        'sales_form'
+        'sales_form',
+        'child_purchase_id'
     ];
 
 

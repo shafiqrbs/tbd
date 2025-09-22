@@ -58,6 +58,12 @@ class Purchase
     private  $warehouse;
 
     /**
+     * @ORM\OneToOne(targetEntity="Sales")
+     * @ORM\JoinColumn(onDelete="CASCADE")
+     **/
+    private  $parentSales;
+
+    /**
      * @ORM\ManyToOne(targetEntity="Modules\Accounting\App\Entities\TransactionMode" ,cascade={"persist", "remove"})
      * @ORM\JoinColumn(onDelete="SET NULL", nullable=true)
      * @ORM\JoinColumn(onDelete="CASCADE")
