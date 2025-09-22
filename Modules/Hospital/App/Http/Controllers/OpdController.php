@@ -152,9 +152,12 @@ class OpdController extends Controller
                AccountHeadModel::insertCustomerLedger($accountingConfig, $entity);
             }
             DB::commit();
+            $getNextOpdRoom = InvoiceModel::getNextOpdRoom($this->domain);
             $invoice = InvoiceModel::getShow($invoiceId);
+            $invoice['opd_selected_room']=$getNextOpdRoom['name'];
+            $invoice['opd_selected_room_id']=$getNextOpdRoom['id'];
             $service = new JsonRequestResponse();
-            return $service->returnJosnResponse($invoice);
+            return $service->returnJosnResponse($getNextOpdRoom);
         } catch (\Exception $e) {
             // Something went wrong, rollback the transaction
             DB::rollBack();

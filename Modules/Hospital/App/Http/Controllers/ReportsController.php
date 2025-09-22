@@ -12,10 +12,9 @@ use Modules\AppsApi\App\Services\JsonRequestResponse;
 use Modules\Core\App\Models\CustomerModel;
 use Modules\Core\App\Models\UserModel;
 use Modules\Hospital\App\Models\InvoiceModel;
-use Modules\Hospital\App\Models\InvoiceParticularModel;
 use Modules\Inventory\App\Models\CategoryModel;
 
-class InvestigationController extends Controller
+class ReportsController extends Controller
 {
 
     protected $domain;
@@ -32,8 +31,8 @@ class InvestigationController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index(Request $request){
-        $data = InvoiceParticularModel::getRecords($this->domain,$request);
+    public function index(Request $request,EntityManagerInterface $em){
+        $data = CustomerModel::getRecords($this->domain,$request);
         $response = new Response();
         $response->headers->set('Content-Type','application/json');
         $response->setContent(json_encode([

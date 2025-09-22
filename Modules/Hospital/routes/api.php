@@ -14,6 +14,7 @@ use Modules\Hospital\App\Http\Controllers\ParticularModeController;
 use Modules\Hospital\App\Http\Controllers\ParticularTypeController;
 use Modules\Hospital\App\Http\Controllers\PharmacyController;
 use Modules\Hospital\App\Http\Controllers\PrescriptionController;
+use Modules\Hospital\App\Http\Controllers\ReportsController;
 use Modules\Hospital\App\Http\Controllers\SettingController;
 use Modules\Hospital\App\Http\Controllers\TreatmentMedicineController;
 
@@ -161,4 +162,9 @@ Route::prefix('/hospital')->middleware([HeaderAuthenticationMiddleware::class])-
             'update' => 'pharmacy.update',
             'destroy' => 'pharmacy.destroy',
         ]);
-});
+    Route::prefix('reports')->middleware([HeaderAuthenticationMiddleware::class])->group(function() {
+        Route::get('/dashboard-daily-summary', [ReportsController::class,'dailySummary'])->name('dashboard_daily_summary');
+
+    });
+
+    });

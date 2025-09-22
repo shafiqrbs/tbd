@@ -138,6 +138,7 @@ class ParticularController extends Controller
         if(!empty($data)){ $entity->update($data);}
         $unit = (isset($input['unit_id']) and $input['unit_id']) ? $input['unit_id']:null;
         $opd_room_id = (isset($input['opd_referred']) and $input['opd_referred']) ? $input['opd_referred']:0;
+        $is_available = (isset($input['is_available']) and $input['is_available']) ? $input['is_available']:0;
 
         $details = [];
 
@@ -153,6 +154,9 @@ class ParticularController extends Controller
         }
         if (array_key_exists('opd_referred', $input)) {
             $findParticular->opd_referred = $findParticular->opd_referred ? 0:1;
+        }
+        if (array_key_exists('is_available', $input)) {
+            $findParticular->is_available = $findParticular->is_available ? 0:1;
         }
         if (array_key_exists('status', $input)) {
             $findParticular->status = $findParticular->status ? 0:1;

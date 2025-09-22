@@ -132,6 +132,12 @@ class Particular
      */
     private $status;
 
+    /**
+     * @var boolean
+     *
+     * @ORM\Column(type="boolean",options={"default"="false"})
+     */
+    private $isAvailable;
 
 
     /**

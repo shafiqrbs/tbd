@@ -62,6 +62,7 @@ class ParticularModel extends Model
                 'hms_particular.slug',
                 'hms_particular.price',
                 'hms_particular.status',
+                'hms_particular.is_available',
                 'hms_particular.opd_referred',
                 'hms_particular.content',
                 'inv_category.name as category',
