@@ -7,6 +7,7 @@ use Modules\Hospital\App\Http\Controllers\CategoryController;
 use Modules\Hospital\App\Http\Controllers\HospitalController;
 
 use Modules\Hospital\App\Http\Controllers\InvestigationController;
+use Modules\Hospital\App\Http\Controllers\LabInvestigationController;
 use Modules\Hospital\App\Http\Controllers\MedicineDosageController;
 use Modules\Hospital\App\Http\Controllers\OpdController;
 use Modules\Hospital\App\Http\Controllers\ParticularController;
@@ -162,9 +163,20 @@ Route::prefix('/hospital')->middleware([HeaderAuthenticationMiddleware::class])-
             'update' => 'pharmacy.update',
             'destroy' => 'pharmacy.destroy',
         ]);
+
+     Route::apiResource('lab-investigation',
+         LabInvestigationController::class)
+        ->middleware([HeaderAuthenticationMiddleware::class])
+        ->names([
+            'index' => 'labInvestigation.index',
+            'store' => 'labInvestigation.store',
+            'show' => 'labInvestigation.show',
+            'update' => 'labInvestigation.update',
+            'destroy' => 'labInvestigation.destroy',
+        ]);
+
     Route::prefix('reports')->middleware([HeaderAuthenticationMiddleware::class])->group(function() {
         Route::get('/dashboard-daily-summary', [ReportsController::class,'dailySummary'])->name('dashboard_daily_summary');
-
     });
 
     });
