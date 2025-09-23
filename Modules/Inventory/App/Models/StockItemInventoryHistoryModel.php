@@ -83,6 +83,18 @@ class StockItemInventoryHistoryModel extends Model
                 $data['sales_item_id'] = $item->id;
             }
 
+            // Check if this is a sales-return operation
+            if ($process==='sales-return' && isset($item->sales_return_id)) {
+                $data['sales_return_id'] = $item->sales_return_id;
+                $data['sales_return_item_id'] = $item->id;
+            }
+
+            // Check if this is a purchase-return operation
+            if ($process==='purchase-return' && isset($item->purchase_return_id)) {
+                $data['purchase_return_id'] = $item->purchase_return_id;
+                $data['purchase_return_item_id'] = $item->id;
+            }
+
             // Create the database record
             self::create($data);
         }

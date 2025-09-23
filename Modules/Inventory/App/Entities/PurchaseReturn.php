@@ -119,6 +119,12 @@ class PurchaseReturn
 
     /**
      * @var string
+     * @ORM\Column(name="return_type", type="string")
+     */
+    private $returnType;
+
+    /**
+     * @var string
      * @ORM\Column(name="narration", type="string", nullable=true)
      */
     private $narration;

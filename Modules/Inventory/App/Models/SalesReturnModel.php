@@ -85,7 +85,7 @@ class SalesReturnModel extends Model
                 'inv_sales_return.sub_total',
 //                'inv_sales_return.narration',
 //                'inv_sales_return.vendor_id',
-//                'inv_sales_return.approved_by_id',
+                'inv_sales_return.approved_by_id',
 //                'cor_vendors.sub_domain_id',
 //                'cor_vendors.name as vendor_name',
 //                'cor_vendors.mobile as vendor_mobile',

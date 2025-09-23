@@ -102,15 +102,10 @@ Route::prefix('/inventory')->middleware([HeaderAuthenticationMiddleware::class,L
     Route::get('/stock-item', [StockItemController::class,'stockItem'])->name('get_stock_item');
     Route::get('generate/stock-item/xlsx', [StockItemController::class,'stockItemXlsxGenerate'])->name('get_stock_item_xlsx_generate');
 
-    /*Route::apiResource('/sales', SalesController::class);
-    Route::get('/sales/edit/{id}', [SalesController::class,'edit'])->name('get_edit_sales');
-    Route::get('/sales/copy/{id}', [SalesController::class,'salesCopy'])->name('get_sales_copy');
-    Route::get('/sales/domain-customer/{id}', [SalesController::class,'domainCustomerSales'])->name('get_domain_customer_sales');
-    Route::get('/sales/not-domain-customer/{id}', [SalesController::class,'notDomainCustomerSales'])->name('get_not_domain_customer_sales')*/;
 
     Route::prefix('sales')->name('sales.')->group(function () {
         Route::prefix('return')->name('return.')->group(function () {
-//            Route::get('{id}/approve/{vendor}', [PurchaseReturnController::class, 'approve'])->name('purchase-return.approve');
+            Route::get('{id}/approve/{type}', [SalesReturnController::class, 'approve'])->name('sales-return.approve');
 
             Route::apiResource('', SalesReturnController::class)
                 ->parameters(['' => 'id']);

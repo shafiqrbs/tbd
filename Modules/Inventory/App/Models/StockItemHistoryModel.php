@@ -50,6 +50,7 @@ class StockItemHistoryModel extends Model
         try {
             $configId = $item->config_id;
             $warehouseId = $item->warehouse_id;
+
             if ($process === 'production-issue'){
                 $findStockItem = StockItemModel::find($item->stock_item_id);
                 $configId = $findStockItem->config_id;
@@ -76,6 +77,8 @@ class StockItemHistoryModel extends Model
             $operatorData = [
                 'opening' => '+',
                 'purchase' => '+',
+                'sales-return' => '+',
+                'purchase-return' => '-',
                 'production' => '-',
                 'production-issue' => '-',
                 'sales' => '-',

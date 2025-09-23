@@ -64,33 +64,40 @@ class PurchaseReturnItem
 
     /**
      * @var integer
-     * @ORM\Column(type="integer")
+     * @ORM\Column(type="float",nullable=true)
+     */
+    private $purchaseQuantity;
+
+
+    /**
+     * @var integer
+     * @ORM\Column(type="float")
      */
     private $quantity;
 
      /**
      * @var integer
-     * @ORM\Column(type="integer",name="spoil_qnt",nullable=true)
+     * @ORM\Column(type="float",name="spoil_qnt",nullable=true)
      */
     private $spoilQnt;
 
 
      /**
      * @var integer
-     * @ORM\Column(type="integer",name="damage_qnt",nullable=true)
+     * @ORM\Column(type="float",name="damage_qnt",nullable=true)
      */
     private $damageQnt;
 
     /**
      * @var integer
-     * @ORM\Column(type="integer",name="deliver_qnt",nullable=true)
+     * @ORM\Column(type="float",name="deliver_qnt",nullable=true)
      */
     private $deliverQnt;
 
 
      /**
      * @var integer
-     * @ORM\Column(type="integer",name="remaining_qnt",nullable=true)
+     * @ORM\Column(type="float",name="remaining_qnt",nullable=true)
      */
     private $remainingQnt;
 

@@ -22,6 +22,7 @@ class PurchaseReturnRequest extends FormRequest
             'vendor_id' => 'required|integer|regex:/^\d+(\.\d{1,2})?$/',
             'issue_by_id' => 'nullable|integer',
             'narration' => 'nullable|string',
+            'return_type' => 'required|string',
             'invoice_date' => 'nullable|date',
             'warehouse_id' => 'nullable',
             'items' => 'required|array',

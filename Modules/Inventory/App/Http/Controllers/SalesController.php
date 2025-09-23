@@ -328,8 +328,23 @@ class SalesController extends Controller
                             ];
                         }
 
-                        // Insert multiple records at once
+                        // Convert collection of models/arrays into plain array of IDs
+                        $salesItemIds = collect($getSalesItems)->pluck('id')->toArray();
+
                         PurchaseItemModel::insert($records);
+
+                        // Fetch the inserted purchase items
+                        $inserted = PurchaseItemModel::where('purchase_id', $purchase->id)
+                            ->whereIn('parent_sales_item_id', $salesItemIds)
+                            ->get(['id', 'parent_sales_item_id']);
+
+                        // Map and update sales items
+                        foreach ($inserted as $pi) {
+                            SalesItemModel::where('id', $pi->parent_sales_item_id)
+                                ->update(['child_purchase_item_id' => $pi->id]);
+                        }
+
+
                         $purchase->update([
                             'sub_total' => $totalPrice,
                             'total'=>$totalPrice,
