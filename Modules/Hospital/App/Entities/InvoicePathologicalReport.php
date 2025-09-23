@@ -33,9 +33,15 @@ class InvoicePathologicalReport
 
     /**
      * @ORM\ManyToOne(targetEntity="InvestigationReportFormat")
-     * @ORM\JoinColumn(name="master_report_format_id", referencedColumnName="id")
+     * @ORM\JoinColumn(referencedColumnName="id")
      **/
-    private $masterReportFormat;
+    private $investigationReportFormat;
+
+     /**
+     * @ORM\ManyToOne(targetEntity="InvoiceParticular")
+     * @ORM\JoinColumn(referencedColumnName="id")
+     **/
+    private $invoiceParticular;
 
     /**
      * @ORM\ManyToOne(targetEntity="InvoicePathologicalReport", inversedBy="children", cascade={"detach","merge"})
@@ -67,7 +73,7 @@ class InvoicePathologicalReport
     /**
      * @var string
      *
-     * @ORM\Column(name="parentName", type="string", length=200, nullable=true)
+     * @ORM\Column( type="string", length=200, nullable=true)
      */
     private $parentName;
 
@@ -88,14 +94,14 @@ class InvoicePathologicalReport
     /**
      * @var string
      *
-     * @ORM\Column(name="referenceValue", type="text", nullable=true)
+     * @ORM\Column( type="text", nullable=true)
      */
     private $referenceValue;
 
     /**
      * @var string
      *
-     * @ORM\Column(name="sampleValue", type="text", nullable=true)
+     * @ORM\Column( type="text", nullable=true)
      */
     private $sampleValue;
 
@@ -109,9 +115,23 @@ class InvoicePathologicalReport
     /**
      * @var boolean
      *
-     * @ORM\Column(name="status", type="boolean" )
+     * @ORM\Column(type="boolean",options={"default"="false"})
      */
-    private $status= true;
+    private $status;
+
+    /**
+     * @var \DateTime
+     * @Gedmo\Timestampable(on="create")
+     * @ORM\Column(name="created_at", type="datetime")
+     */
+    private $createdAt;
+
+    /**
+     * @var \DateTime
+     * @Gedmo\Timestampable(on="create")
+     * @ORM\Column(name="updated_at", type="datetime")
+     */
+    private $updatedAt;
 
 
 }

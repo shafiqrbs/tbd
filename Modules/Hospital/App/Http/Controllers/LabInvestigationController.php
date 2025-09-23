@@ -83,9 +83,9 @@ class LabInvestigationController extends Controller
      *//**/
     public function show($id)
     {
+
         $service = new JsonRequestResponse();
-        $entity = PrescriptionModel::getShow($id);
-        //$entity = PrescriptionModel::with(['invoice_details','invoice_details.customer_details'])->find($id);
+        $entity = LabInvestigationModel::getShow($id);
         $data = $service->returnJosnResponse($entity);
         return $data;
     }
@@ -93,11 +93,15 @@ class LabInvestigationController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit($id)
+    public function report($id,$reportId)
     {
+
         $service = new JsonRequestResponse();
-        $entity = PrescriptionModel::getShow($id);
-        $data = $service->returnJosnResponse($entity);
+        $entity = LabInvestigationModel::getShow($id);
+        $report = InvoiceParticularModel::find($reportId);
+        $report_details = LabInvestigationModel::generateReport($report);
+        $details = ['entity' => $entity,'details'=>$report_details];
+        $data = $service->returnJosnResponse($details);
         return $data;
     }
 

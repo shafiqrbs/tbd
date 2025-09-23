@@ -164,7 +164,7 @@ Route::prefix('/hospital')->middleware([HeaderAuthenticationMiddleware::class])-
             'destroy' => 'pharmacy.destroy',
         ]);
 
-     Route::apiResource('lab-investigation',
+     /*Route::apiResource('lab-investigation',
          LabInvestigationController::class)
         ->middleware([HeaderAuthenticationMiddleware::class])
         ->names([
@@ -173,7 +173,16 @@ Route::prefix('/hospital')->middleware([HeaderAuthenticationMiddleware::class])-
             'show' => 'labInvestigation.show',
             'update' => 'labInvestigation.update',
             'destroy' => 'labInvestigation.destroy',
-        ]);
+        ]);*/
+
+
+    Route::prefix('lab-investigation')->name('lab-investigation.')->group(function () {
+        /*Route::prefix('report')->name('return.')->group(function () {
+            Route::get('{id}', [LabInvestigationController::class, 'edit'])->name('edit');
+        });*/
+        Route::apiResource('', LabInvestigationController::class)->parameters(['' => 'id']);
+        Route::get('{id}/report/{reportId}', [LabInvestigationController::class, 'report'])->name('report');
+    });
 
     Route::prefix('reports')->middleware([HeaderAuthenticationMiddleware::class])->group(function() {
         Route::get('/dashboard-daily-summary', [ReportsController::class,'dailySummary'])->name('dashboard_daily_summary');
