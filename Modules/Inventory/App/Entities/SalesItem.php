@@ -272,14 +272,14 @@ class SalesItem
     /**
      * @var \DateTime
      *
-     * @ORM\Column(name="effectedDate", type="datetime", nullable=true)
+     * @ORM\Column(name="production_date", type="datetime", nullable=true)
      */
-    private $effectedDate;
+    private $productionDate;
 
     /**
      * @var \DateTime
      *
-     * @ORM\Column(name="expiredDate", type="datetime", nullable=true)
+     * @ORM\Column(name="expired_date", type="datetime", nullable=true)
      */
     private $expiredDate;
 

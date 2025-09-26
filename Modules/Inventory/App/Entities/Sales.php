@@ -290,6 +290,12 @@ class Sales
     private $startDate;
 
     /**
+     * @var \DateTime
+     * @ORM\Column(type="date", nullable=true)
+     */
+    private $expectedDate;
+
+    /**
      * @var boolean
      * @ORM\Column(type="boolean", nullable=true)
      */

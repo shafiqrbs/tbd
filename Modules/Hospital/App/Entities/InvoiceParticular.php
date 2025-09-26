@@ -62,13 +62,13 @@ class InvoiceParticular
     private $particular;
 
     /**
-     * @ORM\ManyToOne(targetEntity="Particular")
+     * @ORM\ManyToOne(targetEntity="Modules\Core\App\Entities\User")
      **/
     private $assignDoctor;
 
 
     /**
-     * @ORM\ManyToOne(targetEntity="Particular")
+     * @ORM\ManyToOne(targetEntity="Modules\Core\App\Entities\User")
      **/
     private $assignLabuser;
 
@@ -160,9 +160,9 @@ class InvoiceParticular
     /**
      * @var string
      *
-     * @ORM\Column(name="process", type="string", length=30, nullable=true)
+     * @ORM\Column(type="process" , type="string", length=30,options={"default"="New"})
      */
-    private $process ='New';
+    private $process;
 
     /**
      * @var string

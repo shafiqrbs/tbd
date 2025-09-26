@@ -108,7 +108,6 @@ class StockItem
     private $displayName;
 
 
-
     /**
      * @var string
      * @ORM\Column( name="bangla_name",type="text", nullable = true)

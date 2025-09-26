@@ -33,5 +33,10 @@ class InvoiceParticularModel extends Model
         });
     }
 
+    public function reports()
+    {
+        return $this->hasMany(InvoicePathologicalReportModel::class, 'invoice_particular_id');
+    }
+
 
 }

@@ -190,6 +190,8 @@ class LabInvestigationModel extends Model
                 'admit_department.name as admit_department_name',
                 'admit_doctor.name as admit_doctor_name',
                 'prescription.id as prescription_id',
+                DB::raw('DATE_FORMAT(prescription.created_at, "%d-%m-%y") as prescription_created'),
+                'prescription_doctor.employee_id as prescription_doctor_id',
                 'prescription_doctor.name as prescription_doctor_name',
             ])
             ->with(['invoice_particular' => function ($query) {
@@ -223,9 +225,10 @@ class LabInvestigationModel extends Model
         return $entity;
     }
 
-    public static function generateReport($entity)
+    public static function generateReport($reportId)
     {
-         $investigation = $entity->particular_id;
+        $entity = InvoiceParticularModel::find($reportId);
+        $investigation = $entity->particular_id;
          $reportElements = InvestigationReportFormatModel::where('particular_id',$investigation)->get();
          foreach ($reportElements as $row):
              $exist = InvoicePathologicalReportModel::where([
@@ -246,7 +249,6 @@ class LabInvestigationModel extends Model
                 InvoicePathologicalReportModel::create($input);
             }
          endforeach;
-        return $reportElements;
     }
 
 

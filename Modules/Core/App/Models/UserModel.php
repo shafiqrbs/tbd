@@ -133,6 +133,7 @@ class UserModel extends Model
             'dom_domain.id as global_id',
             'dom_domain.id as domain_id',
             'users.id as user_id',
+            'users.name as user_name',
             'inv_config.id as config_id',
             'inv_config.id as inv_config',
             'acc_config.id as acc_config',

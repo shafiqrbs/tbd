@@ -37,6 +37,10 @@ class ProductionItem
      **/
     private  $item;
 
+    /**
+     * @ORM\ManyToOne(targetEntity="Modules\Inventory\App\Entities\WearHouse")
+     **/
+    private $wearHouse;
 
     /**
      * @Gedmo\Blameable(on="create")

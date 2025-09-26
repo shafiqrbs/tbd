@@ -146,7 +146,7 @@ class ProductModel extends Model
     {
 
         $page = isset($request['page']) && $request['page'] > 0 ? ($request['page'] - 1) : 0;
-        $perPage = isset($request['offset']) && $request['offset'] != '' ? (int)($request['offset']) : 0;
+        $perPage = isset($request['offset']) && $request['offset'] != '' ? (int)($request['offset']) : 100;
         $skip = isset($page) && $page != '' ? (int)$page * $perPage : 0;
 
         $products = self::where([['inv_product.config_id', $domain['config_id']]])
@@ -154,15 +154,12 @@ class ProductModel extends Model
             ->leftjoin('inv_particular', 'inv_particular.id', '=', 'inv_product.unit_id')
             ->leftjoin('inv_setting', 'inv_setting.id', '=', 'inv_product.product_type_id')
             ->join('inv_stock', 'inv_stock.product_id', '=', 'inv_product.id')
+            ->join('hms_medicine_details', 'hms_medicine_details.product_id', '=', 'inv_product.id')
             ->leftjoin('inv_particular as brand', 'brand.id', '=', 'inv_stock.brand_id')
-            ->leftjoin('inv_particular as model', 'model.id', '=', 'inv_stock.model_id')
-            ->leftjoin('inv_particular as color', 'color.id', '=', 'inv_stock.color_id')
-            ->leftjoin('inv_particular as grade', 'grade.id', '=', 'inv_stock.grade_id')
-            ->leftjoin('inv_particular as size', 'size.id', '=', 'inv_stock.size_id')
-            ->select([
+             ->select([
                 'inv_product.id as product_id',
                 'inv_stock.id as id',
-                'inv_stock.name as product_name',
+                'inv_product.name as product_name',
                 'inv_product.slug',
                 'inv_category.name as category_name',
                 'inv_particular.name as unit_name',
@@ -173,31 +170,24 @@ class ProductModel extends Model
                 'inv_stock.quantity as rem_quantity',
                 'inv_stock.bangla_name',
                 'inv_product.status',
-                'inv_product.parent_id',
-                'brand.name as brand_name',
-                'model.name as model_name',
-                'color.name as color_name',
-                'grade.name as grade_name',
-                'size.name as size_name',
+                 'hms_medicine_details.generic',
+                 'hms_medicine_details.company',
+                 'hms_medicine_details.formulation',
+                 'hms_medicine_details.dose_details',
+                 'hms_medicine_details.generic_id',
+                 'hms_medicine_details.doses_form',
+                 'hms_medicine_details.doses_details',
+                 'hms_medicine_details.by_meal',
+                 'hms_medicine_details.duration_month',
+                 'hms_medicine_details.duration_day',
+                 'hms_medicine_details.priority',
+                 'hms_medicine_details.price',
+                 'hms_medicine_details.instruction',
                 DB::raw('ROUND(inv_stock.price, 2) as price'),
                 DB::raw('ROUND(inv_stock.purchase_price, 2) as purchase_price'),
                 DB::raw('ROUND(inv_stock.sales_price, 2) as sales_price'),
                 DB::raw('ROUND(inv_stock.average_price, 2) as average_price'),
-            ])->with(['images' => function ($query) {
-                $query->select([
-                    'inv_product_gallery.id',
-                    'inv_product_gallery.product_id',
-                    'inv_product_gallery.feature_image',
-                    'inv_product_gallery.path_one',
-                    'inv_product_gallery.path_two',
-                    'inv_product_gallery.path_three',
-                    'inv_product_gallery.path_four'
-                ])->where('inv_product_gallery.status', 1);
-            }])->with(['measurments' => function ($query) {
-                $query->select([
-                    'inv_product_unit_measurment.id'
-                ]);
-            }]);
+            ]);
 
         if (isset($request['term']) && !empty($request['term'])) {
             $products = $products->whereAny([

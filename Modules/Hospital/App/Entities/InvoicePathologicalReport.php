@@ -70,6 +70,13 @@ class InvoicePathologicalReport
      */
     private $name;
 
+     /**
+     * @var string
+     *
+     * @ORM\Column(name="result", type="string", length=200, nullable=true)
+     */
+    private $result;
+
     /**
      * @var string
      *

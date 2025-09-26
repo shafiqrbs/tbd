@@ -258,6 +258,21 @@ class PurchaseItem
 
     /**
      * @var \DateTime
+     *
+     * @ORM\Column(name="production_date", type="datetime", nullable=true)
+     */
+    private $productionDate;
+
+    /**
+     * @var \DateTime
+     *
+     * @ORM\Column(name="expired_date", type="datetime", nullable=true)
+     */
+    private $expiredDate;
+
+
+    /**
+     * @var \DateTime
      * @Gedmo\Timestampable(on="create")
      * @ORM\Column(type="datetime")
      */

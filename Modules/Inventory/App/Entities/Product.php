@@ -105,6 +105,12 @@ class Product
      */
     private $slug;
 
+    /**
+     * @var integer
+     *
+     * @ORM\Column(type="integer", nullable = true)
+     */
+    private $expiry_duration;
 
     /**
      * @var string

@@ -42,7 +42,7 @@ class InvoiceModel extends Model
         return $this->hasOne(OpdModel::class, 'id', 'sales_id');
     }
 
-     public function invoice_particular()
+    public function invoice_particular()
     {
         return $this->hasMany(InvoiceParticularModel::class, 'hms_invoice_id');
     }
@@ -85,6 +85,7 @@ class InvoiceModel extends Model
                 ->orWhere('customer.health_id', 'LIKE', "%{$term}%");
         });
         $entities = $entities
+            ->groupBy('customer.customer_id')
             ->orderBy('customer.customer_id','ASC')
             ->get();
         return $entities;

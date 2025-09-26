@@ -4,6 +4,7 @@ use App\Http\Middleware\HeaderAuthenticationMiddleware;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Modules\Hospital\App\Http\Controllers\CategoryController;
+use Modules\Hospital\App\Http\Controllers\EpharamaController;
 use Modules\Hospital\App\Http\Controllers\HospitalController;
 
 use Modules\Hospital\App\Http\Controllers\InvestigationController;
@@ -15,6 +16,7 @@ use Modules\Hospital\App\Http\Controllers\ParticularModeController;
 use Modules\Hospital\App\Http\Controllers\ParticularTypeController;
 use Modules\Hospital\App\Http\Controllers\PharmacyController;
 use Modules\Hospital\App\Http\Controllers\PrescriptionController;
+use Modules\Hospital\App\Http\Controllers\ProductController;
 use Modules\Hospital\App\Http\Controllers\ReportsController;
 use Modules\Hospital\App\Http\Controllers\SettingController;
 use Modules\Hospital\App\Http\Controllers\TreatmentMedicineController;
@@ -164,16 +166,27 @@ Route::prefix('/hospital')->middleware([HeaderAuthenticationMiddleware::class])-
             'destroy' => 'pharmacy.destroy',
         ]);
 
-     /*Route::apiResource('lab-investigation',
-         LabInvestigationController::class)
+    Route::apiResource('medicine',
+        ProductController::class)
         ->middleware([HeaderAuthenticationMiddleware::class])
         ->names([
-            'index' => 'labInvestigation.index',
-            'store' => 'labInvestigation.store',
-            'show' => 'labInvestigation.show',
-            'update' => 'labInvestigation.update',
-            'destroy' => 'labInvestigation.destroy',
-        ]);*/
+            'index' => 'medicine.index',
+            'store' => 'medicine.store',
+            'show' => 'medicine.show',
+            'update' => 'medicine.update',
+            'destroy' => 'medicine.destroy',
+        ]);
+
+    Route::apiResource('epharma',
+        EpharamaController::class)
+        ->middleware([HeaderAuthenticationMiddleware::class])
+        ->names([
+            'index' => 'epharma.index',
+            'store' => 'epharma.store',
+            'show' => 'epharma.show',
+            'update' => 'epharma.update',
+            'destroy' => 'epharma.destroy',
+        ]);
 
 
     Route::prefix('lab-investigation')->name('lab-investigation.')->group(function () {
@@ -181,7 +194,9 @@ Route::prefix('/hospital')->middleware([HeaderAuthenticationMiddleware::class])-
             Route::get('{id}', [LabInvestigationController::class, 'edit'])->name('edit');
         });*/
         Route::apiResource('', LabInvestigationController::class)->parameters(['' => 'id']);
+        Route::post('/report/inline-update/{id}', [LabInvestigationController::class,'inlineUpdate'])->name('inline_update');
         Route::get('{id}/report/{reportId}', [LabInvestigationController::class, 'report'])->name('report');
+
     });
 
     Route::prefix('reports')->middleware([HeaderAuthenticationMiddleware::class])->group(function() {

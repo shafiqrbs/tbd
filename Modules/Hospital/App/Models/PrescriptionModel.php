@@ -122,6 +122,7 @@ class PrescriptionModel extends Model
             ->leftjoin('cor_customers as customer','customer.id','=','hms_invoice.customer_id')
             ->select([
                 'hms_invoice.id as invoice_id',
+                'hms_invoice.invoice as patient_invoice',
                 'hms_prescription.id as prescription_id',
                 'customer.name',
                 'customer.mobile',
@@ -195,7 +196,7 @@ class PrescriptionModel extends Model
                 'hms_invoice.id as invoice_id',
                 DB::raw('DATE_FORMAT(hms_invoice.updated_at, "%d-%m-%y") as created'),
                 DB::raw('DATE_FORMAT(hms_invoice.appointment_date, "%d-%m-%y") as appointment'),
-                'inv_sales.invoice as invoice',
+                'hms_invoice.invoice as invoice',
                 'hms_invoice.total as total',
                 'hms_invoice.comment',
                 'cor_customers.id as customer_id',
@@ -209,7 +210,9 @@ class PrescriptionModel extends Model
                 'hms_invoice.year as year',
                 'hms_invoice.month as month',
                 'hms_invoice.day as day',
-                'doctor.name as doctor_name',
+                'doctor.name as doctor_name','doctor.employee_id as employee_id',
+                DB::raw("CONCAT('".url('')."/uploads/core/user/signature/', profiles.signature_path) AS signature_path"),
+                'profiles.id as profiles_id',
                 'designation.name as designation_name',
                 'hms_prescription.blood_pressure as blood_pressure',
                 'hms_prescription.diabetes as diabetes',

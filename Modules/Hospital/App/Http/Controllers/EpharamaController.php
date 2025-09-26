@@ -16,6 +16,7 @@ use Modules\Core\App\Models\UserModel;
 use Modules\Hospital\App\Entities\Prescription;
 use Modules\Hospital\App\Http\Requests\OPDRequest;
 use Modules\Hospital\App\Http\Requests\PrescriptionRequest;
+use Modules\Hospital\App\Models\EpharmaModel;
 use Modules\Hospital\App\Models\HospitalConfigModel;
 use Modules\Hospital\App\Models\HospitalSalesModel;
 use Modules\Hospital\App\Models\InvoiceContentDetailsModel;
@@ -32,7 +33,7 @@ use Modules\Hospital\App\Models\PrescriptionModel;
 
 
 
-class LabInvestigationController extends Controller
+class EpharamaController extends Controller
 {
     protected $domain;
 
@@ -73,22 +74,11 @@ class LabInvestigationController extends Controller
     public function show($id)
     {
         $service = new JsonRequestResponse();
-        $entity = LabInvestigationModel::getShow($id);
+        $entity = EpharmaModel::getShow($id);
         $data = $service->returnJosnResponse($entity);
         return $data;
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function report($id,$reportId)
-    {
-        $service = new JsonRequestResponse();
-        LabInvestigationModel::generateReport($reportId);
-        $invoiceParticular = InvoiceParticularModel::with('reports')->find($reportId);
-        $data = $service->returnJosnResponse($invoiceParticular);
-        return $data;
-    }
 
     /**
      * Update the specified resource in storage.

@@ -8,10 +8,10 @@ use Gedmo\Mapping\Annotation as Gedmo;
 /**
  * BusinessDamage
  *
- * @ORM\Table("inv_damage")
+ * @ORM\Table("inv_damage_item")
  * @ORM\Entity()
  */
-class Damage
+class DamageItem
 {
     /**
      * @var integer
@@ -29,19 +29,17 @@ class Damage
      **/
     private $config;
 
-
     /**
-     * @Gedmo\Blameable(on="create")
-     * @ORM\ManyToOne(targetEntity="Modules\Core\App\Entities\User")
+     * @ORM\ManyToOne(targetEntity="Modules\Inventory\App\Entities\PurchaseItem")
+     * @ORM\JoinColumn(onDelete="CASCADE")
      **/
-    private  $createdBy;
+    private $purchaseItem;
 
     /**
      * @ORM\ManyToOne(targetEntity="Modules\Inventory\App\Entities\WearHouse")
      * @ORM\OrderBy({"sorting" = "ASC"})
      **/
-    private $wearHouse;
-
+     private $wearHouse;
 
     /**
      * @var integer
@@ -53,14 +51,21 @@ class Damage
     /**
      * @var float
      *
-     * @ORM\Column(name="purchasePrice", type="float",nullable=true)
+     * @ORM\Column(name="price", type="float",nullable=true)
+     */
+    private $price;
+
+    /**
+     * @var float
+     *
+     * @ORM\Column(name="purchase_price", type="float",nullable=true)
      */
     private $purchasePrice;
 
     /**
      * @var string
      *
-     * @ORM\Column(name="subTotal", type="float",nullable=true)
+     * @ORM\Column(name="sub_total", type="float",nullable=true)
      */
     private $subTotal;
 

@@ -19,6 +19,7 @@ class CategoryModel extends Model
         'name',
         'slug',
         'status',
+        'expiry_duration',
         'parent'
     ];
 
@@ -98,6 +99,7 @@ class CategoryModel extends Model
                 'inv_category.name',
                 'inv_category.slug',
                 'inv_category.status',
+                'inv_category.expiry_duration',
                 'inv_category.parent as parent_id',
             ]);
 
@@ -129,7 +131,8 @@ class CategoryModel extends Model
         $total  = $categories->count();
         $entities = $categories->skip($skip)
             ->take($perPage)
-            ->orderBy('inv_category.name','DESC')
+            ->orderBy('parent_name','ASC')
+            ->orderBy('inv_category.name','ASC')
             ->get();
 
         $data = array('count'=>$total,'entities'=>$entities);

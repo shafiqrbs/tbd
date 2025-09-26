@@ -40,6 +40,7 @@ class ProductRequest extends FormRequest
                     'size_id' => 'nullable|integer',
                     'grade_id' => 'nullable|integer',
                     'model_id' => 'nullable|integer',
+                    'expiry_duration' => 'nullable|integer',
                     'purchase_price' => 'nullable',
                     'sales_price' => 'nullable',
                 ];
@@ -64,6 +65,7 @@ class ProductRequest extends FormRequest
                     'reorder_quantity' => 'nullable|numeric|regex:/^\d+(\.\d{1,2})?$/',
                     'status' => 'required|boolean',
                     'description' => 'nullable|string',
+                    'expiry_duration' => 'nullable|integer',
                     'brand_id' => 'nullable|integer',
                     'color_id' => 'nullable|integer',
                     'size_id' => 'nullable|integer',

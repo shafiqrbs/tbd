@@ -30,6 +30,7 @@ class ProductModel extends Model
         'parent_id',
         'description',
         'quantity',
+        'expiry_duration',
         'is_private',
         'vendor_id',
     ];
@@ -142,6 +143,7 @@ class ProductModel extends Model
                 'inv_stock.quantity',
                 'inv_stock.quantity as rem_quantity',
                 'inv_stock.bangla_name',
+                'inv_product.expiry_duration',
                 'inv_product.status',
                 'inv_product.parent_id',
                 'brand.name as brand_name',
@@ -218,7 +220,6 @@ class ProductModel extends Model
             ->orderBy('inv_category.name', 'ASC')
             ->orderBy('inv_product.name', 'ASC')
             ->get();
-
         $data = array('count' => $total, 'entities' => $entities);
         return $data;
     }
@@ -252,6 +253,7 @@ class ProductModel extends Model
                 'inv_category.name as category_name',
                 'inv_particular.name as unit_name',
                 'inv_product.barcode',
+                'inv_product.expiry_duration',
                 'inv_product.alternative_name',
                 'inv_setting.name as product_type',
                 'inv_stock.quantity',

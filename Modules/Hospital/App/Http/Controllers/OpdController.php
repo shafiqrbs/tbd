@@ -123,23 +123,27 @@ class OpdController extends Controller
                 $dob = new \DateTime($input['dob']);
             }
             $input['dob'] = $dob;
-            $customerId =  $dob = (isset($input['customer_id']) and $input['customer_id']) ? $input['customer_id'] : '';
-            $entity = PatientModel::updateOrCreate(
-                ['id' => $customerId ?? null],
-                [
-                    'domain_id' => $this->domain['global_id'],
-                    'name'      => $input['name'] ?? null,
-                    'mobile'    => $input['mobile'] ?? null,
-                    'address'    => $input['address'] ?? null,
-                    'age'    => $input['age'] ?? null,
-                    'upazila'    => $input['upazila_id'] ?? null,
-                    'gender'    => $input['gender'] ?? null,
-                    'identity_mode'    => $input['identity_mode'] ?? null,
-                    'health_id'    => $input['health_id'] ?? null,
-                    'nid'    => $input['identity'] ?? null,
-                ]
-            );
-
+            $exist = PatientModel::where(['name' => $input['name']],['mobile' => $input['mobile']])->first();
+            if($exist){
+                $entity = $exist;
+            }else{
+                $customerId =  $dob = (isset($input['customer_id']) and $input['customer_id']) ? $input['customer_id'] : '';
+                $entity = PatientModel::updateOrCreate(
+                    ['id' => $customerId ?? null],
+                    [
+                        'domain_id' => $this->domain['global_id'],
+                        'name'      => $input['name'] ?? null,
+                        'mobile'    => $input['mobile'] ?? null,
+                        'address'    => $input['address'] ?? null,
+                        'age'    => $input['age'] ?? null,
+                        'upazila'    => $input['upazila_id'] ?? null,
+                        'gender'    => $input['gender'] ?? null,
+                        'identity_mode'    => $input['identity_mode'] ?? null,
+                        'health_id'    => $input['health_id'] ?? null,
+                        'nid'    => $input['identity'] ?? null,
+                    ]
+                );
+            }
             $invConfig = $this->domain['inv_config'];
             $hmsConfig = $this->domain['hms_config'];
             $config = HospitalConfigModel::find($hmsConfig);
