@@ -246,6 +246,8 @@ class DomainController extends Controller
                     'mobile' => $entity->mobile,
                     'address' => $entity->address,
                     'status' => true,
+                    'location' => 'Central',
+                    'contract_person' => 'Central',
                     'created_at' => now(),
                     'updated_at' => now(),
                 ]
@@ -771,6 +773,8 @@ class DomainController extends Controller
                     'mobile' => $entity->mobile,
                     'address' => $entity->address,
                     'email' => $entity->email,
+                    'location' => 'Central',
+                    'contract_person' => 'Central',
                     'status' => true,
                     'created_at' => now(),
                     'updated_at' => now(),

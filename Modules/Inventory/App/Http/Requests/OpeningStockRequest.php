@@ -25,6 +25,7 @@ class OpeningStockRequest extends FormRequest
             'sales_price' => 'nullable|numeric',
             'sub_total' => 'required|numeric|min:0.01',
             'mode' => 'required|string',
+            'warehouse_id' => 'nullable|string',
         ];
     }
 

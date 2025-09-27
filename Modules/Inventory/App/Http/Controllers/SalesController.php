@@ -462,6 +462,7 @@ class SalesController extends Controller
             if ($entity->salesItems->count() > 0) {
                 foreach ($entity->salesItems as $item) {
                     StockItemHistoryModel::openingStockQuantity($item, 'sales', $this->domain);
+
                     // for maintain inventory daily stock
                     date_default_timezone_set('Asia/Dhaka');
                     DailyStockService::maintainDailyStock(

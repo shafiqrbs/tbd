@@ -3,13 +3,11 @@
 namespace Modules\Inventory\App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Support\Facades\DB;
 use Modules\Production\App\Models\ProductionStockHistory;
 
 class StockItemHistoryModel extends Model
 {
-    use HasFactory;
 
     protected $table = 'inv_stock_item_history';
     public $timestamps = true;
@@ -59,19 +57,21 @@ class StockItemHistoryModel extends Model
             // Fetch the latest stock history
             $existingStockHistory = self::where('stock_item_id', $item->stock_item_id)
                 ->where('config_id', $configId)
+                ->where('warehouse_id', $warehouseId)
                 ->latest()
                 ->first();
+
+            # Remove this part after warehouse full implementation start ------------------------------------------
             $existingStockHistoryWithWarehouse = null;
             if ($warehouseId) {
                 $existingStockHistoryWithWarehouse = self::where('stock_item_id', $item->stock_item_id)
                     ->where('config_id', $configId)
                     ->where('warehouse_id', $warehouseId)
-                    /*->when(!empty($warehouseId), function ($query) use ($warehouseId) {
-                        $query->where('warehouse_id', $warehouseId);
-                    })*/
                     ->latest()
                     ->first();
             }
+            # Remove this part after warehouse full implementation end ------------------------------------------
+
 
             // Define operators for processes
             $operatorData = [
@@ -177,7 +177,7 @@ class StockItemHistoryModel extends Model
     {
         return [
             'stock_item_id' => $item->stock_item_id,
-            'item_name' => $item->name,
+            'item_name' => $item->name ?? $item->display_name,
             'config_id' => $configId,
             'quantity' => $quantity,
             'purchase_price' => $item->purchase_price ?? 0,

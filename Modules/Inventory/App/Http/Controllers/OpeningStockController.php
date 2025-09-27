@@ -3,6 +3,7 @@
 namespace Modules\Inventory\App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Services\DailyStockService;
 use Doctrine\ORM\EntityManager;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -20,6 +21,8 @@ use Modules\Inventory\App\Http\Requests\ProductRequest;
 use Modules\Inventory\App\Models\PurchaseItemModel;
 use Modules\Inventory\App\Models\PurchaseModel;
 use Modules\Inventory\App\Models\StockItemHistoryModel;
+use Modules\Inventory\App\Models\StockItemModel;
+use Symfony\Component\HttpFoundation\Response as ResponseAlias;
 
 
 class OpeningStockController extends Controller
@@ -43,11 +46,11 @@ class OpeningStockController extends Controller
         $response->headers->set('Content-Type', 'application/json');
         $response->setContent(json_encode([
             'message' => 'success',
-            'status' => Response::HTTP_OK,
+            'status' => ResponseAlias::HTTP_OK,
             'total' => $data['count'],
             'data' => $data['entities']
         ]));
-        $response->setStatusCode(Response::HTTP_OK);
+        $response->setStatusCode(ResponseAlias::HTTP_OK);
         return $response;
     }
 
@@ -58,10 +61,21 @@ class OpeningStockController extends Controller
     {
         $service = new JsonRequestResponse();
         $input = $request->validated();
+
+        $findStockItem = StockItemModel::find($input['product_id']);
+        if (!$findStockItem) {
+            return response()->json([
+                'status' => 404,
+                'message' => 'Stock Item not found',
+            ], 404);
+        }
+
         $input['config_id'] = $this->domain['config_id'];
         $input['created_by_id'] = $this->domain['user_id'];
         $input['stock_item_id'] = $input['product_id'];
         $input['quantity'] = $input['opening_quantity'];
+        $input['warehouse_id'] = $input['warehouse_id'] ?? $this->domain['warehouse_id'];
+        $input['name'] = $findStockItem->name ?? $findStockItem->display_name;
         $entity = PurchaseItemModel::create($input);
         $data = $service->returnJosnResponse($entity);
         return $data;
@@ -120,10 +134,10 @@ class OpeningStockController extends Controller
             // Validate purchase item existence
             if (!$getPurchaseItem) {
                 $response->setContent(json_encode([
-                    'status' => Response::HTTP_NOT_FOUND,
+                    'status' => ResponseAlias::HTTP_NOT_FOUND,
                     'message' => 'Data not found',
                 ]));
-                $response->setStatusCode(Response::HTTP_OK);
+                $response->setStatusCode(ResponseAlias::HTTP_OK);
                 return $response;
             }
 
@@ -134,6 +148,18 @@ class OpeningStockController extends Controller
 
                 // Call the opening stock quantity method
                 StockItemHistoryModel::openingStockQuantity($getPurchaseItem, 'opening',$this->domain);
+
+                // for maintain inventory daily stock
+                date_default_timezone_set('Asia/Dhaka');
+                DailyStockService::maintainDailyStock(
+                    date: date('Y-m-d'),
+                    field: 'purchase_quantity',
+                    configId: $this->domain['config_id'],
+                    warehouseId: $getPurchaseItem->warehouse_id,
+                    stockItemId: $getPurchaseItem->stock_item_id,
+                    quantity: $getPurchaseItem->quantity
+                );
+
                 AccountJournalModel::insertOpeningStockAccountJournal($this->domain,$getPurchaseItem->id);
             }
 
@@ -149,6 +175,12 @@ class OpeningStockController extends Controller
                 $getPurchaseItem->update([
                     'purchase_price' => $request->purchase_price,
                     'sub_total' => $request->subTotal,
+                ]);
+            }
+
+            if ($request->field_name === 'warehouse_id') {
+                $getPurchaseItem->update([
+                    'warehouse_id' => $request->warehouse_id,
                 ]);
             }
 

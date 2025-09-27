@@ -65,12 +65,15 @@ class PurchaseItemModel extends Model
 
         $purchaseItems = $purchaseItems->leftjoin('inv_stock','inv_stock.id','=','inv_purchase_item.stock_item_id')
             ->leftjoin('inv_product','inv_product.id','=','inv_stock.product_id')
+            ->leftjoin('cor_warehouses','cor_warehouses.id','=','inv_purchase_item.warehouse_id')
             ->leftjoin('inv_category','inv_category.id','=','inv_product.category_id')
             ->leftjoin('inv_particular as unit','unit.id','=','inv_product.unit_id')
             ->leftjoin('inv_setting','inv_setting.id','=','inv_product.product_type_id')
             ->select([
                 'inv_purchase_item.id',
                 'inv_purchase_item.stock_item_id',
+                'inv_purchase_item.warehouse_id',
+                'cor_warehouses.name as warehouse_name',
                 'inv_purchase_item.opening_quantity',
                 'inv_purchase_item.sales_price',
                 'inv_purchase_item.purchase_price',
