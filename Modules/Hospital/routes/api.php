@@ -122,14 +122,14 @@ Route::prefix('/hospital')->middleware([HeaderAuthenticationMiddleware::class])-
                 'destroy' => 'treatment.destroy',
             ]);
 
-        Route::apiResource('medicinedosage', MedicineDosageController::class)
+        Route::apiResource('dosage', MedicineDosageController::class)
             ->middleware([HeaderAuthenticationMiddleware::class])
             ->names([
-                'index' => 'medicinedosage.index',
-                'store' => 'medicinedosage.store',
-                'show' => 'medicinedosage.show',
-                'update' => 'medicinedosage.update',
-                'destroy' => 'medicinedosage.destroy',
+                'index' => 'dosage.index',
+                'store' => 'dosage.store',
+                'show' => 'dosage.show',
+                'update' => 'dosage.update',
+                'destroy' => 'dosage.destroy',
             ]);
 
         Route::apiResource('/particular-mode', ParticularModeController::class)->middleware([HeaderAuthenticationMiddleware::class]);

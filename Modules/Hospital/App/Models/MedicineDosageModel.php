@@ -20,5 +20,28 @@ class MedicineDosageModel extends Model
 
     protected $fillable = [];
 
+    public static function getRecords($request,$domain){
+
+        $config =  $domain['hms_config'];
+        $page =  isset($request['page']) && $request['page'] > 0?($request['page'] - 1 ) : 0;
+        $perPage = isset($request['offset']) && $request['offset']!=''? (int)($request['offset']):0;
+        $skip = isset($page) && $page!=''? (int)$page*$perPage:0;
+        $entity = self::where('hms_medicine_dosage.config_id',$config)
+            ->select(['*']);
+        if (isset($request['name']) && !empty($request['name'])){
+            $entity = $entity->where('hms_medicine_dosage.name','LIKE','%'.trim($request['name']));
+        }
+        $total  = $entity->count();
+        $entities = $entity->skip($skip)
+            ->take($perPage)
+            ->orderBy('hms_medicine_dosage.ordering','ASC')
+            ->get();
+
+        $data = array('count'=>$total,'entities' => $entities);
+        return $data;
+
+
+    }
+
 
 }

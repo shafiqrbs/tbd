@@ -27,8 +27,6 @@ class MedicineDosage
      **/
     private $config;
 
-
-
     /**
      * @var string
      *
@@ -59,7 +57,12 @@ class MedicineDosage
      */
     private $quantity;
 
-
+    /**
+     * @var int
+     *
+     * @ORM\Column(type="integer",options={"default"="999"})
+     */
+    private $ordering;
 
     /**
      * @var \DateTime

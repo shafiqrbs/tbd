@@ -111,8 +111,7 @@ class PrescriptionController extends Controller
         $data = $request->all();
         $entity = PrescriptionModel::find($id);
         $data['json_content'] = json_encode($data);
-        $userId = $request->header('X-Api-User');
-        $data['prescribe_doctor_id'] = $userId;
+        $data['prescribe_doctor_id'] = $domain['user_id'];
         $entity->update($data);
         $return = PrescriptionModel::getShow($entity->id);
         HospitalSalesModel::insertMedicineDelivery($domain,$entity->id);

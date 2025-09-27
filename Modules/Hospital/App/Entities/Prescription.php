@@ -73,6 +73,13 @@ class Prescription
      */
     private $bloodPressure;
 
+    /**
+     * @var string
+     *
+     * @ORM\Column( type="string",length=20, nullable = true)
+     */
+    private $process;
+
      /**
      * @var $jsonContent
      *

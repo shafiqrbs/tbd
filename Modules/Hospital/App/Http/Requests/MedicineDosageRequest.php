@@ -30,8 +30,10 @@ class MedicineDosageRequest extends FormRequest
             {
                 return [
                     'name' => 'string|nullable',
+                    'name_bn' => 'string|nullable',
                     'dosage_form' => 'string|nullable',
                     'quantity' => 'string|nullable',
+                    'instruction' => 'string|nullable',
                 ];
             }
             case 'PUT':
@@ -39,8 +41,10 @@ class MedicineDosageRequest extends FormRequest
             {
                 return [
                     'name' => 'string|nullable',
+                    'name_bn' => 'string|nullable',
                     'dosage_form' => 'string|nullable',
-                    'quantity' => 'string|nullable',
+                    'quantity' => 'integer|nullable',
+                    'instruction' => 'string|nullable',
                 ];
             }
 

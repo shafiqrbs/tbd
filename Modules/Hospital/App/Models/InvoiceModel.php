@@ -60,6 +60,12 @@ class InvoiceModel extends Model
         return $this->hasOne(OpdModel::class, 'id', 'patient_mode_id');
     }
 
+
+    public function children()
+    {
+        return $this->hasOne(InvoiceModel::class, 'parent_id');
+    }
+
     public static function getCustomerSearch($domain,$request)
     {
 
@@ -158,6 +164,17 @@ class InvoiceModel extends Model
             }
         }
 
+        if (isset($request['ipd_mode']) && !empty($request['ipd_mode'])){
+            if (!empty($request['ipd_mode'])) {
+                if ($request['ipd_mode'] === 'new') {
+                    $entities = $entities->where('hms_invoice.process','closed');
+                } elseif ($request['ipd_mode'] === 'confirmed') {
+                    $entities = $entities->where('hms_invoice.process','New');
+                    $entities = $entities->whereNotNull('hms_invoice.parent_id');
+                }
+            }
+        }
+
         if (isset($request['patient_mode']) && !empty($request['patient_mode'])){
             $entities = $entities->where('patient_mode.slug',$request['patient_mode']);
         }
@@ -176,7 +193,7 @@ class InvoiceModel extends Model
 
         if (!empty($request['referred_mode'])) {
             $entities = $entities->where('hms_invoice.referred_mode', $request['referred_mode'])
-                ->whereNull('hms_invoice.parent_id');
+                ->whereNull('hms_invoice.parent_id')->whereDoesntHave('children');
         }
 
         if (isset($request['customer_id']) && !empty($request['customer_id'])){

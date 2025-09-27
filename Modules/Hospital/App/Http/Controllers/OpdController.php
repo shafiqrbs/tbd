@@ -94,9 +94,16 @@ class OpdController extends Controller
                 ],
                 $input // fields to update if exists OR create if not
             );
-            $entity->forceFill([
-                'referred_mode' => $input['referred_mode'], 'room_id' => $opd_room_id, 'process' => 'In-progress',
-            ])->save();
+            if($input['referred_mode'] == "room"){
+                $entity->forceFill([
+                    'referred_mode' => $input['referred_mode'], 'room_id' => $opd_room_id,'process' => 'in-progress',
+                ])->save();
+            }else{
+                $entity->forceFill([
+                    'referred_mode' => $input['referred_mode'], 'room_id' => $opd_room_id,'process' => 'closed',
+                ])->save();
+            }
+
         }
         $service = new JsonRequestResponse();
         $entity = InvoiceModel::getShow($id);
@@ -158,10 +165,10 @@ class OpdController extends Controller
             DB::commit();
             $getNextOpdRoom = InvoiceModel::getNextOpdRoom($this->domain);
             $invoice = InvoiceModel::getShow($invoiceId);
-            $invoice['opd_selected_room']=$getNextOpdRoom['name'];
+            $invoice['opd_selected_room'] = $getNextOpdRoom['name'];
             $invoice['opd_selected_room_id']=$getNextOpdRoom['id'];
             $service = new JsonRequestResponse();
-            return $service->returnJosnResponse($getNextOpdRoom);
+            return $service->returnJosnResponse($invoice);
         } catch (\Exception $e) {
             // Something went wrong, rollback the transaction
             DB::rollBack();
@@ -204,15 +211,19 @@ class OpdController extends Controller
     {
         $service = new JsonRequestResponse();
         $userId = $request->header('X-Api-User');
-        $patientPaymentMode = ParticularModel::getDoctorNurseLabUser($userId,'doctor');
-        $doctorId = $patientPaymentMode ? $patientPaymentMode->id : null;
+        $doctor = ParticularModel::getDoctorNurseLabUser($userId,'doctor');
+        $doctorId = $doctor ? $doctor->id : null;
         $entity = PrescriptionModel::updateOrCreate(
             ['hms_invoice_id' => $id],
             [
                 'created_by_id' => $userId ,
+                'process' => "new",
                 'doctor_id' => $doctorId
             ]
         );
+        InvoiceModel::where('id', $id)->update([
+            'process' => 'in-progress'
+        ]);
         $data = $service->returnJosnResponse($entity);
         return $data;
     }

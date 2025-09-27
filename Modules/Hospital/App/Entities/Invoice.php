@@ -59,7 +59,7 @@ class Invoice
     private $customer;
 
     /**
-     * @ORM\ManyToOne(targetEntity="Invoice", inversedBy="children")
+     * @ORM\OneToOne(targetEntity="Invoice", inversedBy="children")
      * @ORM\JoinColumns({
      *   @ORM\JoinColumn(name="parent_id", referencedColumnName="id", onDelete="SET NULL", nullable=true)
      * })
@@ -67,7 +67,7 @@ class Invoice
     private $parent;
 
     /**
-     * @ORM\OneToMany(targetEntity="Invoice" , mappedBy="parent")
+     * @ORM\OneToOne(targetEntity="Invoice" , mappedBy="parent")
      * @ORM\OrderBy({"invoice" = "ASC"})
      **/
     private $children;
