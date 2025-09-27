@@ -165,14 +165,29 @@ class InvoiceModel extends Model
         }
 
         if (isset($request['ipd_mode']) && !empty($request['ipd_mode'])){
-            if (!empty($request['ipd_mode'])) {
-                if ($request['ipd_mode'] === 'new') {
-                    $entities = $entities->where('hms_invoice.process','closed');
-                } elseif ($request['ipd_mode'] === 'confirmed') {
-                    $entities = $entities->where('hms_invoice.process','New');
-                    $entities = $entities->whereNotNull('hms_invoice.parent_id');
-                }
+            if ($request['ipd_mode'] === 'new' and !empty($request['referred_mode']) and $request['referred_mode']) {
+                $entities = $entities->where('hms_invoice.process','ipd');
+                $entities = $entities->where('hms_invoice.referred_mode', $request['referred_mode'])
+                    ->whereNull('hms_invoice.parent_id')->whereDoesntHave('children');
+            } elseif ($request['ipd_mode'] === 'confirmed') {
+                $entities = $entities->where('hms_invoice.process','confirmed');
+                $entities = $entities->whereNotNull('hms_invoice.parent_id');
+            } elseif ($request['ipd_mode'] === 'admitted') {
+                $entities = $entities->where('hms_invoice.process','admitted');
+                $entities = $entities->whereNotNull('hms_invoice.parent_id');
             }
+            $entities
+                ->leftJoin('hms_particular as admit_consultant', 'admit_consultant.id', '=', 'hms_invoice.admit_consultant_id')
+                ->leftJoin('hms_particular as admit_doctor', 'admit_doctor.id', '=', 'hms_invoice.admit_doctor_id')
+                ->leftJoin('hms_particular_mode as admit_unit', 'admit_unit.id', '=', 'hms_invoice.admit_unit_id')
+                ->leftJoin('hms_particular_mode as admit_department', 'admit_department.id', '=', 'hms_invoice.admit_department_id')
+                ->addSelect([
+                    'admit_consultant.name as admit_consultant_name',
+                    'admit_doctor.name as admit_doctor_name',
+                    'admit_unit.name as admit_unit_name',
+                    'admit_department.name as admit_department_name',
+                ]);
+
         }
 
         if (isset($request['patient_mode']) && !empty($request['patient_mode'])){
@@ -191,10 +206,7 @@ class InvoiceModel extends Model
             $entities = $entities->where('hms_invoice.process',$request['process']);
         }
 
-        if (!empty($request['referred_mode'])) {
-            $entities = $entities->where('hms_invoice.referred_mode', $request['referred_mode'])
-                ->whereNull('hms_invoice.parent_id')->whereDoesntHave('children');
-        }
+
 
         if (isset($request['customer_id']) && !empty($request['customer_id'])){
             $entities = $entities->where('hms_invoice.customer_id',$request['customer_id']);
