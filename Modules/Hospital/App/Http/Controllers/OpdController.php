@@ -100,7 +100,7 @@ class OpdController extends Controller
                 ])->save();
             }else{
                 $entity->forceFill([
-                    'referred_mode' => $input['referred_mode'], 'room_id' => $opd_room_id,'process' => 'closed',
+                    'referred_mode' => $input['referred_mode'], 'room_id' => $opd_room_id,'process' => 'ipd',
                 ])->save();
             }
 
