@@ -39,6 +39,7 @@ class SalesModel extends Model
         'process',
         'transaction_mode_id',
         'sales_form',
+        'expected_date',
         'child_purchase_id'
     ];
 
@@ -111,6 +112,7 @@ class SalesModel extends Model
             ->select([
                 'inv_sales.id',
                 DB::raw('DATE_FORMAT(inv_sales.created_at, "%d-%m-%Y") as created'),
+                DB::raw('DATE_FORMAT(inv_sales.expected_date, "%d-%m-%Y") as expected_date'),
                 'inv_sales.invoice as invoice',
                 'inv_sales.sub_total as sub_total',
                 'inv_sales.total as total',
@@ -121,7 +123,7 @@ class SalesModel extends Model
                 'inv_sales.discount_calculation as discount_calculation',
                 'inv_sales.discount_type as discount_type',
                 'inv_sales.invoice_batch_id',
-                'inv_sales.sales_form',
+                DB::raw("CONCAT(UCASE(LEFT(sales_form,1)), LCASE(SUBSTRING(sales_form,2))) as sales_form"),
                 'cor_customers.id as customerId',
                 'cor_customers.name as customerName',
                 'cor_customers.mobile as customerMobile',

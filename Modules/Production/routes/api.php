@@ -43,7 +43,7 @@ Route::prefix('/production')->middleware([HeaderAuthenticationMiddleware::class,
             'update' => 'production.issue.update',
             'destroy' => 'production.issue.destroy'
         ]);
-    ;
+
 
     Route::apiResource('setting', SettingController::class)
         ->middleware([HeaderAuthenticationMiddleware::class])
@@ -54,7 +54,7 @@ Route::prefix('/production')->middleware([HeaderAuthenticationMiddleware::class,
             'update' => 'production.setting.update',
             'destroy' => 'production.setting.destroy'
         ]);
-    ;
+
 
     Route::get('/config', [ConfigController::class,'show'])->name('pro_config_show');
     Route::patch('/config-update', [ConfigController::class,'update'])->name('pro_config_update');

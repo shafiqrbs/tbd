@@ -4,6 +4,7 @@ namespace Modules\Production\App\Repositories;
 
 use Appstore\Bundle\TallyBundle\Entity\Damage;
 use Doctrine\ORM\EntityRepository;
+use Modules\Core\App\Entities\Warehouse;
 use Modules\Inventory\App\Entities\StockItem;
 use Modules\Production\App\Entities\Config;
 use Modules\Production\App\Entities\ProductionElement;
@@ -49,12 +50,13 @@ class ProductionItemRepository extends EntityRepository
         return  $result;
     }
 
-    public function insertUpdate($config,$item)
+    public function insertUpdate($config,$item,$warehouse)
     {
 
         $em = $this->_em;
         $config = $em->getRepository(Config::class)->find($config);
         $stockItem = $em->getRepository(StockItem::class)->find($item);
+        $stockItem = $em->getRepository(Warehouse::class)->find($warehouse);
         $stock =  $this->findOneBy(array('item'=> $item));
         if($stock){
          $entity = $stock;
@@ -62,6 +64,7 @@ class ProductionItemRepository extends EntityRepository
          $entity = new ProductionItem();
         }
         $entity->setItem($stockItem);
+        $entity->setWearhouse($stockItem);
         $entity->setConfig($config);
         $entity->setStatus(1);
         $em->persist($entity);

@@ -3,6 +3,7 @@
 namespace Modules\Core\App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
+use Modules\Domain\App\Models\DomainModel;
 
 class WarehouseModel extends Model
 {
@@ -26,6 +27,26 @@ class WarehouseModel extends Model
     public function userWarehouses()
     {
         return $this->belongsTo(UserWarehouseModel::class,'warehouse_id','id');
+    }
+
+    public static function insertDefaultWarehouse($id){
+
+        $entity = DomainModel::find($id);
+        $warehouse = WarehouseModel::updateOrCreate(
+            [
+                'domain_id' => $entity->id,
+                'name' => 'Central',
+                'is_default' => 1,
+            ],
+            [
+                'mobile' => $entity->mobile,
+                'address' => $entity->address,
+                'status' => true,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]
+        );
+        return $warehouse;
     }
 
     public static function insertAllUserWarehouses($domain)

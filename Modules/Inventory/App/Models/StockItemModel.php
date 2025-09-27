@@ -169,6 +169,38 @@ class StockItemModel extends Model
         return $data;
     }
 
+    public static function getProductStockDetails($id,$domain)
+    {
+        $product = self::where([['inv_product.config_id',$domain['config_id']],['inv_stock.id',$id]])
+            ->join('inv_product','inv_product.id','=','inv_stock.product_id')
+            ->leftjoin('inv_category','inv_category.id','=','inv_product.category_id')
+            ->leftjoin('inv_particular','inv_particular.id','=','inv_product.unit_id')
+            ->leftjoin('inv_setting','inv_setting.id','=','inv_product.product_type_id')
+            ->select([
+                'inv_product.product_type_id',
+                'inv_setting.name as product_type',
+                'inv_category.name as category_name',
+                'inv_particular.name as unit_name',
+                'inv_product.id',
+                'inv_product.name as product_name',
+                'inv_product.alternative_name',
+                'inv_product.slug',
+                'inv_product.category_id',
+                'inv_product.unit_id',
+                'inv_product.expiry_duration',
+                'inv_stock.opening_quantity',
+                'inv_stock.min_quantity',
+                'inv_stock.reorder_quantity',
+                'inv_stock.purchase_price',
+                'inv_stock.sales_price',
+                'inv_stock.barcode',
+                'inv_stock.sku',
+                'inv_stock.status'
+            ])->first();
+
+        return $product;
+    }
+
     public static function getProductDetails($id,$domain)
     {
         $product = self::where([['inv_product.config_id',$domain['config_id']],['inv_product.id',$id]])
@@ -187,6 +219,7 @@ class StockItemModel extends Model
                 'inv_product.slug',
                 'inv_product.category_id',
                 'inv_product.unit_id',
+                'inv_product.expiry_duration',
                 'inv_stock.opening_quantity',
                 'inv_stock.min_quantity',
                 'inv_stock.reorder_quantity',

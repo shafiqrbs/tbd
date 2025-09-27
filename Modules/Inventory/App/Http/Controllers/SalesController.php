@@ -307,8 +307,17 @@ class SalesController extends Controller
                             if (!$getStockItemId){
                                 return response()->json(['status' => 404, 'success' => false, 'message' => 'Stock item not found in child domain']);
                             }
-                            $getStockItemId =$getStockItemId->id;
 
+                            $expiryDuration = StockItemModel::getProductStockDetails($item->stock_item_id,$this->domain);
+                            if ($expiryDuration && $expiryDuration->expiry_duration) {
+                                $startDate = new \DateTime(); // today
+                                $endDate = (new \DateTime())->modify("+{$expiryDuration->expiry_duration} days"); // use the property
+                                $item->update([
+                                    'production_date' => $startDate,
+                                    'expired_date'    => $endDate,
+                                ]);
+                            }
+                            $getStockItemId = $getStockItemId->id;
                             $purchasePrice = $item['sales_price'] - ($item['sales_price'] * $customerDomain->discount_percent) / 100;
                             $subtotal = $item['quantity'] * $purchasePrice;
                             $totalPrice += $subtotal;
@@ -320,6 +329,8 @@ class SalesController extends Controller
                                 'created_at'    => now(),
                                 'quantity'      => $item['quantity'],
                                 'purchase_price' => $purchasePrice,
+                                'production_date'     => $item->production_date ?? null,
+                                'expired_date'     => $item->expired_date ?? null,
                                 'sub_total'     => $subtotal,
                                 'mode'          => 'purchase',
                                 'updated_at'    => now(),
@@ -343,8 +354,6 @@ class SalesController extends Controller
                             SalesItemModel::where('id', $pi->parent_sales_item_id)
                                 ->update(['child_purchase_item_id' => $pi->id]);
                         }
-
-
                         $purchase->update([
                             'sub_total' => $totalPrice,
                             'total'=>$totalPrice,

@@ -6,6 +6,7 @@ namespace Modules\Production\App\Models;
 use Cviebrock\EloquentSluggable\Sluggable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
+use Modules\Hospital\App\Models\InvoiceParticularModel;
 use Modules\Inventory\App\Entities\Product;
 use Modules\Inventory\App\Models\ProductModel;
 
@@ -48,6 +49,7 @@ class ProductionItems extends Model
         'status',
         'is_delete',
         'is_revised',
+        'warehouse_id',
         'process'
     ];
 
@@ -79,9 +81,28 @@ class ProductionItems extends Model
         });
     }
 
-    public function setting_type(): BelongsTo
+    public function setting_type()
     {
         return $this->belongsTo(SettingTypeModel::class);
+    }
+
+
+    public function itemAmendment()
+    {
+        return $this->hasMany(ProductionItemAmendmentModel::class, 'production_item_id');
+    }
+
+
+    public static function insertUpdate($configId,$itemId,$warehouseId){
+
+        self::updateOrCreate(
+            ['item_id' => $itemId], // condition
+            [
+                'warehouse_id' => $warehouseId,
+                'config_id'    => $configId,
+                'status'       => 1,
+            ]
+        );
     }
 
 
@@ -116,6 +137,7 @@ class ProductionItems extends Model
                 'inv_setting.slug as product_type_slug',
                 'inv_category.name as category_name',
                 'pro_item.status',
+                'pro_item.is_revised',
                 'pro_item.process',
             ])
             ->orderBy('pro_item.id','DESC')
@@ -142,6 +164,7 @@ class ProductionItems extends Model
             ->leftjoin('inv_particular','inv_particular.id','=','inv_product.unit_id')
             ->join('inv_category','inv_category.id','=','inv_product.category_id')
             ->join('inv_setting','inv_setting.id','=','inv_product.product_type_id')
+            ->join('cor_warehouses','cor_warehouses.id','=','pro_item.warehouse_id')
             ->select([
                 'pro_item.id',
                 'inv_stock.name as product_name',
@@ -160,9 +183,12 @@ class ProductionItems extends Model
                 'pro_item.reminig_quantity',
                 'inv_setting.slug as product_type_slug',
                 'inv_category.name as category_name',
+                'cor_warehouses.name as warehouse_name',
+                'cor_warehouses.id as warehouse_id',
                 'pro_item.status',
+                'pro_item.is_revised',
                 'pro_item.process',
-            ]);
+            ])->with(['itemAmendment:id,production_item_id,created_at']);
 
         if (isset($request['term']) && !empty($request['term'])){
             $entity = $entity->whereAny(['inv_stock.name','inv_setting.slug'],'LIKE','%'.trim($request['term']).'%');

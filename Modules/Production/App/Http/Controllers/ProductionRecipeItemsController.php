@@ -14,6 +14,7 @@ use Modules\Inventory\App\Models\StockItemModel;
 use Modules\Production\App\Entities\ProductionItem;
 use Modules\Production\App\Http\Requests\RecipeItemsRequest;
 use Modules\Production\App\Models\ProductionElements;
+use Modules\Production\App\Models\ProductionItemAmendmentModel;
 use Modules\Production\App\Models\ProductionItems;
 use Modules\Production\App\Models\ProductionValueAdded;
 use Modules\Production\App\Models\SettingModel;
@@ -53,11 +54,12 @@ class ProductionRecipeItemsController extends Controller
     {
         $pro_config =  $this->domain['pro_config'];
         $inv_config =  $this->domain['config_id'];
+        $warehouse =  $this->domain['warehouse_id'];
         $entities = $em->getRepository(StockItem::class)->getProductionItems($inv_config);
         $response = new Response();
         foreach ($entities as $entity) {
             if ($pro_config && $entity['id']){
-                $em->getRepository(ProductionItem::class)->insertUpdate($pro_config, $entity['id']);
+                ProductionItems::insertUpdate($pro_config,$entity['id'],$warehouse);
             }
         }
         $response->setContent(json_encode([
@@ -109,15 +111,20 @@ class ProductionRecipeItemsController extends Controller
         $getProductionItem = ProductionItems::find($pro_item_id);
         $getStockItem = StockItemModel::find($getProductionItem->item_id);
 
+        $data =[
+            'field' => $getValueAdded,
+            'item' => $getProductionItem,
+            'stock_item' => $getStockItem
+        ];
+        if($findItems->process == "approved"){
+            ProductionItemAmendmentModel::generateAmendment($this->domain,$findItems->id,$data);
+            $findItems->update(['process' => 'created','is_revised' => 1]);
+        }
         $response->headers->set('Content-Type', 'application/json');
         $response->setContent(json_encode([
             'status' => Response::HTTP_OK,
             'message' => 'success',
-            'data' => [
-                'field' => $getValueAdded,
-                'item' => $getProductionItem,
-                'stock_item' => $getStockItem
-            ],
+            'data' => $data,
         ]));
         $response->setStatusCode(Response::HTTP_OK);
         return $response;

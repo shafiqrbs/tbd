@@ -38,9 +38,9 @@ class ProductionItem
     private  $item;
 
     /**
-     * @ORM\ManyToOne(targetEntity="Modules\Inventory\App\Entities\WearHouse")
+     * @ORM\ManyToOne(targetEntity="Modules\Core\App\Entities\Warehouse")
      **/
-    private $wearHouse;
+    private $warehouse;
 
     /**
      * @Gedmo\Blameable(on="create")
@@ -59,7 +59,6 @@ class ProductionItem
      * @ORM\ManyToOne(targetEntity="Modules\Core\App\Entities\User")
      **/
     private  $approvedBy;
-
 
 
     /**
@@ -271,8 +270,6 @@ class ProductionItem
      * @ORM\Column(name="updated_at", type="datetime", nullable = true)
      */
     private $updated;
-
-
 
 
     /**
@@ -848,12 +845,6 @@ class ProductionItem
     {
         $this->isDelete = $isDelete;
     }
-
-
-
-
-
-
 
 
 

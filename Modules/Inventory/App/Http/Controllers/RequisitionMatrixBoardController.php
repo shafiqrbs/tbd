@@ -24,7 +24,7 @@ use Modules\Production\App\Models\ProductionBatchModel;
 use Modules\Production\App\Models\ProductionExpense;
 use Symfony\Component\HttpFoundation\Response as ResponseAlias;
 
-class RequisitionMatrixBoardController extends Controller
+class   RequisitionMatrixBoardController extends Controller
 {
     protected $domain;
 
@@ -458,13 +458,12 @@ class RequisitionMatrixBoardController extends Controller
 
             foreach ($groupedSales as $sale) {
                 $sale['sales_form'] = 'requisition';
+                $sale['expected_date'] = $findBoard->generate_date;
                 $sales = SalesModel::create($sale);
-
                 $salesItems = array_map(fn($item) => array_merge($item, ['sale_id' => $sales->id]), $sale['items']);
                 SalesItemModel::insert($salesItems);
             }
-
-            RequisitionMatrixBoardModel::whereIn('id', $matrixCollection->pluck('id')->toArray())
+                RequisitionMatrixBoardModel::whereIn('id', $matrixCollection->pluck('id')->toArray())
                 ->update(['process' => 'Confirmed']);
 
             RequisitionModel::where([

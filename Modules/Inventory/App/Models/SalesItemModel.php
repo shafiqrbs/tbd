@@ -41,6 +41,8 @@ class SalesItemModel extends Model
         'measurement_unit_id',
         'measurement_unit_string',
         'stock_item_price_matrix_id',
+        'production_date',
+        'expired_date',
     ];
 
     public static function boot() {

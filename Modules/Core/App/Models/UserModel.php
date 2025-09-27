@@ -148,6 +148,8 @@ class UserModel extends Model
             ->leftjoin('nbr_config','nbr_config.domain_id','=','dom_domain.id')
             ->leftjoin('hms_config','hms_config.domain_id','=','dom_domain.id')
             ->where('users.id',$id)->first();
+        $warehouse = WarehouseModel::insertDefaultWarehouse($data['id']);
+        $data['warehouse_id'] = $warehouse->id;
         return $data;
     }
 
@@ -183,6 +185,8 @@ class UserModel extends Model
             ->leftjoin('inv_config_purchase','inv_config_purchase.config_id','=','inv_config.id')
             ->leftjoin('inv_config_vat','inv_config_vat.config_id','=','inv_config.id')
             ->where('dom_domain.id',$id)->first();
+        $warehouse = WarehouseModel::insertDefaultWarehouse($data['id']);
+        $data['warehouse_id'] = $warehouse->id;
         return $data;
     }
 
