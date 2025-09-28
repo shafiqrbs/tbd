@@ -2,19 +2,13 @@
 
 namespace Modules\Inventory\App\Models;
 
-use Cviebrock\EloquentSluggable\Sluggable;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\DB;
 use Modules\AppsApi\App\Services\GeneratePatternCodeService;
-use Modules\Domain\App\Models\B2BCategoryPriceMatrixModel;
-use Modules\Inventory\App\Entities\Product;
-use Modules\Inventory\App\Entities\StockItem;
 
 class StockItemModel extends Model
 {
-    use HasFactory;
 
     protected $table = 'inv_stock';
     public $timestamps = true;

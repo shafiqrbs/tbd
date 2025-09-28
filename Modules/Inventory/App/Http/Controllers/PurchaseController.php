@@ -88,7 +88,8 @@ class PurchaseController extends Controller
         }
         $entity = PurchaseModel::create($input);
         $process = new PurchaseModel();
-        $process->insertPurchaseItems($entity,$input['items'],$input['warehouse_id']);
+        $warehouseId = $input['warehouse_id'] ?? $this->domain['warehouse_id'];
+        $process->insertPurchaseItems($entity,$input['items'],$warehouseId);
 
         // purchase auto approve
         $findInvConfig = ConfigPurchaseModel::where('config_id',$this->domain['inv_config'])->first();
@@ -109,7 +110,7 @@ class PurchaseController extends Controller
                         date: date('Y-m-d'),
                         field: 'purchase_quantity',
                         configId: $this->domain['config_id'],
-                        warehouseId: $entity->warehouse_id,
+                        warehouseId: $item->warehouse_id ?? $this->domain['warehouse_id'],
                         stockItemId: $item->stock_item_id,
                         quantity: $item->quantity
                     );
@@ -261,7 +262,7 @@ class PurchaseController extends Controller
                         date: date('Y-m-d'),
                         field: 'purchase_quantity',
                         configId: $this->domain['config_id'],
-                        warehouseId: $purchase->warehouse_id,
+                        warehouseId: $item->warehouse_id ?? $this->domain['warehouse_id'],
                         stockItemId: $item->stock_item_id,
                         quantity: $item->quantity
                     );

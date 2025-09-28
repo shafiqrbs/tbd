@@ -208,7 +208,7 @@ class PurchaseReturnController extends Controller
                         date: date('Y-m-d'),
                         field: 'purchase_return_quantity',
                         configId: $purchaseReturn->config_id,
-                        warehouseId: $item->warehouse_id,
+                        warehouseId: $item->warehouse_id ?? $this->domain['warehouse_id'],
                         stockItemId: $item->stock_item_id,
                         quantity: $item->quantity
                     );

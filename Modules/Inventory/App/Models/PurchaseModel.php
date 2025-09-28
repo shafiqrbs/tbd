@@ -71,7 +71,7 @@ class PurchaseModel extends Model
         return $this->belongsTo(VendorModel::class, 'vendor_id');
     }
 
-    public function insertPurchaseItems($purchase, $items, $warehouse = null)
+    public function insertPurchaseItems($purchase, $items, $warehouse)
     {
         $timestamp = Carbon::now();
 

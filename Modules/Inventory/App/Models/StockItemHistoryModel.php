@@ -117,7 +117,15 @@ class StockItemHistoryModel extends Model
             // Update stock item quantity
             $stockItem = StockItemModel::find($item->stock_item_id);
             if ($stockItem) {
-                $stockItem->update(['quantity' => $stockHistory->closing_quantity]);
+                if ($operator === '+') {
+                    $stockItem->update([
+                        'quantity' => ($stockItem->quantity ?? 0) + $item->quantity
+                    ]);
+                } elseif ($operator === '-') {
+                    $stockItem->update([
+                        'quantity' => ($stockItem->quantity ?? 0) - $item->quantity
+                    ]);
+                }
             }
 
             // Update product quantity
@@ -241,5 +249,27 @@ class StockItemHistoryModel extends Model
 
         return $latestEntries;
 
+    }
+
+
+    public static function allWarehouseWiseStockItem(int $stockItemId, int $configId , int $warehouseId = null)
+    {
+        $sub = self::select('warehouse_id', DB::raw('MAX(id) as latest_id'))
+            ->where('stock_item_id', $stockItemId)
+            ->where('config_id', $configId)
+            ->groupBy('warehouse_id');
+
+        return self::joinSub($sub, 'latest', function ($join) {
+            $join->on('inv_stock_item_history.id', '=', 'latest.latest_id');
+        })
+            ->join('cor_warehouses as w', 'w.id', '=', 'inv_stock_item_history.warehouse_id')
+            ->when($warehouseId, fn($q) => $q->where('inv_stock_item_history.warehouse_id', $warehouseId))
+            ->select(
+                'inv_stock_item_history.item_name',
+                'inv_stock_item_history.closing_quantity as stock',
+                'w.name as warehouse_name'
+            )
+            ->get()
+            ->toArray();
     }
 }

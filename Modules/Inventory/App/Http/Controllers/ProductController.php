@@ -187,12 +187,17 @@ class ProductController extends Controller
             $item['price_field_array'] = [];
         }
 
+        if ($entity->stock_item_id){
+            $warehouseWiseStock = StockItemHistoryModel::allWarehouseWiseStockItem($entity->stock_item_id,$this->domain['inv_config'],null);
+            $entity->warehouse_wise_stock = $warehouseWiseStock;
+        }
+
         if (!$entity) {
             $entity = 'Data not found';
         }
         $entity->multi_price_field = $item;
-        $data = $service->returnJosnResponse($entity);
-        return $data;
+
+        return $service->returnJosnResponse($entity);
     }
 
     /**
