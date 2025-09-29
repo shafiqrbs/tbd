@@ -114,6 +114,9 @@ class StockItemHistoryModel extends Model
             // Create stock history record
             $stockHistory = self::create($data);
 
+            // maintain current stock quantity
+            CurrentStockModel::maintainCurrentStock($configId,$warehouseId,$item->stock_item_id,$closing_quantity);
+
             // Update stock item quantity
             $stockItem = StockItemModel::find($item->stock_item_id);
             if ($stockItem) {
@@ -185,7 +188,7 @@ class StockItemHistoryModel extends Model
     {
         return [
             'stock_item_id' => $item->stock_item_id,
-            'item_name' => $item->name ?? $item->display_name,
+            'item_name' => $item->name ?? $item->item_name,
             'config_id' => $configId,
             'quantity' => $quantity,
             'purchase_price' => $item->purchase_price ?? 0,

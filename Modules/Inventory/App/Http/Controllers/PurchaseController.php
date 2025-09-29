@@ -281,10 +281,10 @@ class PurchaseController extends Controller
             DB::rollBack();
 
             $response->setContent(json_encode([
-                'status' => Response::HTTP_INTERNAL_SERVER_ERROR,
+                'status' => ResponseAlias::HTTP_INTERNAL_SERVER_ERROR,
                 'message' => 'An error occurred: ' . $e->getMessage(),
             ]));
-            $response->setStatusCode(Response::HTTP_INTERNAL_SERVER_ERROR);
+            $response->setStatusCode(ResponseAlias::HTTP_INTERNAL_SERVER_ERROR);
         }
 
         return $response;

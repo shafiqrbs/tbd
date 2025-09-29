@@ -101,6 +101,10 @@ class StockItemModel extends Model
     {
         return $this->hasMany(StockItemPriceMatrixModel::class, 'stock_item_id');
     }
+    public function currentWarehouseStock() :HasMany
+    {
+        return $this->hasMany(CurrentStockModel::class, 'stock_item_id');
+    }
 
     // In StockItemModel.php
     public function parentStock()
@@ -229,7 +233,19 @@ class StockItemModel extends Model
 
     public static function getStockItem($domain)
     {
-        return self::with(['product.measurement.unit', 'product.unit', 'product.category', 'product.setting', 'product.images','multiplePrice.priceUnitName'])
+        return self::with([
+            'product.measurement.unit',
+            'product.unit',
+            'product.category',
+            'product.setting',
+            'product.images',
+            'multiplePrice.priceUnitName',
+            'currentWarehouseStock' => function ($q) use ($domain) {
+                if (!empty($domain['config_id'])) {
+                    $q->where('config_id', $domain['config_id']);
+                }
+            }
+            ])
             ->where('config_id', $domain['config_id'])
             ->where('status', 1)
             ->orderByDesc('id')
@@ -264,6 +280,16 @@ class StockItemModel extends Model
                             'field_name'        => $m->priceUnitName->name ?? null,
                             'field_slug'        => $m->priceUnitName->slug ?? null,
                             'parent_slug'       => $m->priceUnitName->parent_slug ?? null,
+                        ];
+                    }),
+                    'current_warehouse_stock' => optional(optional($stock)->currentWarehouseStock)->map(function ($s) {
+                        return [
+                            'id'                => $s->id,
+                            'config_id'         => $s->config_id,
+                            'quantity'          => $s->quantity,
+                            'warehouse_id'      => $s->warehouse_id,
+                            'stock_item_id'     => $s->stock_item_id,
+                            'warehouse_name'    => $s->warehouse->name,
                         ];
                     }),
                     'measurements' => optional(optional($product)->measurement)->map(function ($m) {

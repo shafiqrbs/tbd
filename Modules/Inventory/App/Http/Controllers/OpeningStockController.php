@@ -188,19 +188,19 @@ class OpeningStockController extends Controller
             DB::commit();
 
             $response->setContent(json_encode([
-                'status' => Response::HTTP_OK,
+                'status' => ResponseAlias::HTTP_OK,
                 'message' => 'Updated successfully',
             ]));
-            $response->setStatusCode(Response::HTTP_OK);
+            $response->setStatusCode(ResponseAlias::HTTP_OK);
         } catch (\Exception $e) {
             // Rollback the transaction in case of an error
             DB::rollBack();
 
             $response->setContent(json_encode([
-                'status' => Response::HTTP_INTERNAL_SERVER_ERROR,
+                'status' => ResponseAlias::HTTP_INTERNAL_SERVER_ERROR,
                 'message' => 'An error occurred: ' . $e->getMessage(),
             ]));
-            $response->setStatusCode(Response::HTTP_INTERNAL_SERVER_ERROR);
+            $response->setStatusCode(ResponseAlias::HTTP_INTERNAL_SERVER_ERROR);
         }
 
         return $response;

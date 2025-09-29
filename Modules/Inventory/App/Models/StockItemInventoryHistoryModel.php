@@ -15,6 +15,8 @@ class StockItemInventoryHistoryModel extends Model
 
     protected $fillable = [
         'stock_item_history_id',
+        'purchase_return_item_id',
+        'purchase_return_id',
         'quantity',
         'brand',
         'category',
@@ -77,7 +79,7 @@ class StockItemInventoryHistoryModel extends Model
             }
 
             // Check if this is a purchase operation
-            if (($process==='purchase' || $process === 'purchase-return') && isset($item->purchase_id)) {
+            if (($process==='purchase') && isset($item->purchase_id)) {
                 $data['purchase_id'] = $item->purchase_id;
                 $data['purchase_item_id'] = $item->id;
             }
