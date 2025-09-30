@@ -4,6 +4,7 @@ namespace Modules\Inventory\App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Modules\AppsApi\App\Services\GeneratePatternCodeService;
 
@@ -104,6 +105,10 @@ class StockItemModel extends Model
     public function currentWarehouseStock() :HasMany
     {
         return $this->hasMany(CurrentStockModel::class, 'stock_item_id');
+    }
+    public function purchaseItemForSales() :HasMany
+    {
+        return $this->hasMany(PurchaseItemModel::class, 'stock_item_id');
     }
 
     // In StockItemModel.php
@@ -244,6 +249,11 @@ class StockItemModel extends Model
                 if (!empty($domain['config_id'])) {
                     $q->where('config_id', $domain['config_id']);
                 }
+            },
+            'purchaseItemForSales' => function ($q) use ($domain) {
+                $q->whereNotNull('expired_date')
+                    ->where('expired_date', '>', now()) // only not expired
+                    ->whereRaw('quantity > COALESCE(sales_quantity, 0)');
             }
             ])
             ->where('config_id', $domain['config_id'])
@@ -290,6 +300,19 @@ class StockItemModel extends Model
                             'warehouse_id'      => $s->warehouse_id,
                             'stock_item_id'     => $s->stock_item_id,
                             'warehouse_name'    => $s->warehouse->name,
+                        ];
+                    }),
+                    'purchase_item_for_sales' => optional(optional($stock)->purchaseItemForSales)->map(function ($s) {
+                        $salesQty = $s->sales_quantity ?? 0; // if null → 0
+                        return [
+                            'id'                => $s->id,
+                            'warehouse_id'      => $s->warehouse_id,
+                            'purchase_quantity' => $s->quantity,
+                            'sales_quantity'    => $salesQty,
+                            'remain_quantity'   => $s->quantity - $salesQty,
+                            'expired_date'      => $s->expired_date
+                                ? Carbon::parse($s->expired_date)->format('d-M-Y')
+                                : null,
                         ];
                     }),
                     'measurements' => optional(optional($product)->measurement)->map(function ($m) {
