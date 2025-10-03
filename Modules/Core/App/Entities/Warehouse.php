@@ -66,6 +66,12 @@ class Warehouse
      */
     private $mobile;
 
+     /**
+     * @var string
+     * @ORM\Column(name="unique_id", type="string", length=15, nullable=true)
+     */
+     private $uniqueId;
+
     /**
      * @var string
      * @ORM\Column(name="email", type="string", length=255, nullable=true)

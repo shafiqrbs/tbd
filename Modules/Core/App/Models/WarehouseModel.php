@@ -3,6 +3,7 @@
 namespace Modules\Core\App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 use Modules\Domain\App\Models\DomainModel;
 
 class WarehouseModel extends Model
@@ -23,6 +24,35 @@ class WarehouseModel extends Model
         'status',
         'is_default'
     ];
+
+    public static function generateUniqueCode($length = 12)
+    {
+        do {
+            // Generate random alphanumeric string
+            $code = Str::upper(Str::random($length));
+        } while (self::where('unique_id', $code)->exists());
+        return $code;
+    }
+
+    public static function boot() {
+        parent::boot();
+        self::creating(function ($model) {
+            $date =  new \DateTime("now");
+            $model->created_at = $date;
+            $model->updated_at = $date;
+            $model->status = true;
+            $model->is_delete = false;
+            if (empty($model->unique_id)) {
+                $model->unique_id = self::generateUniqueCode(12);
+            }
+        });
+
+        self::updating(function ($model) {
+            $date =  new \DateTime("now");
+            $model->updated_at = $date;
+        });
+
+    }
 
     public function userWarehouses()
     {
@@ -121,22 +151,6 @@ class WarehouseModel extends Model
 
 
 
-    public static function boot() {
-        parent::boot();
-        self::creating(function ($model) {
-            $date =  new \DateTime("now");
-            $model->created_at = $date;
-            $model->updated_at = $date;
-            $model->status = true;
-            $model->is_delete = false;
-        });
-
-        self::updating(function ($model) {
-            $date =  new \DateTime("now");
-            $model->updated_at = $date;
-        });
-
-    }
 
     /**
      * Return the sluggable configuration array for this model.
@@ -157,7 +171,7 @@ class WarehouseModel extends Model
         $domainId = $domain['global_id'] ?? 0;
 
         $warehouses = self::where([['domain_id', $domainId],['is_delete',0],['status',1]])
-            ->select(['id', 'name', 'location'])
+            ->select(['id', 'name', 'unique_id', 'location'])
             ->get();
         return $warehouses;
     }
