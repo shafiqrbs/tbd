@@ -50,6 +50,7 @@ class StockItemModel extends Model
             $date =  new \DateTime("now");
             $model->created_at = $date;
             $model->barcode = self::generatedEventListener($model)['generateId'];
+            $model->product_code = self::generatedEventListener($model)['productCode'];
             $model->code = self::generatedEventListener($model)['code'];
             $model->status = true;
         });
@@ -66,13 +67,12 @@ class StockItemModel extends Model
 
         $product = DB::table('inv_product as inv_product')
             ->where('inv_product.id', $model['product_id'])
-            ->select('inv_product.barcode')
+            ->select('inv_product.id','inv_product.barcode','inv_product.product_code')
             ->first();
 
         $params = [
-            'product' => $model['product_id'],
+            'product' => $product,
             'table' => 'inv_stock',
-            'barcode' => $product->barcode,
         ];
         return $patternCodeService->productStockBarcodeCode($params);
     }

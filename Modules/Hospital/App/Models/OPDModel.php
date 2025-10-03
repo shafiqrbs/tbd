@@ -6,6 +6,7 @@ use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 use Modules\AppsApi\App\Services\GeneratePatternCodeService;
 use Modules\Core\App\Models\CustomerModel;
 use Ramsey\Collection\Collection;
@@ -13,6 +14,7 @@ use Ramsey\Collection\Collection;
 class OPDModel extends Model
 {
     use HasFactory;
+
 
     protected $table = 'inv_sales';
     public $timestamps = true;

@@ -36,7 +36,7 @@ class Prescription
 
     /**
      * @ORM\OneToOne(targetEntity="Modules\Inventory\App\Entities\Sales", cascade={"detach","merge"})
-     * @ORM\JoinColumn(name="sale_id", referencedColumnName="id", onDelete="CASCADE")
+     * @ORM\JoinColumn(name="sale_id", referencedColumnName="id", onDelete="SET NULL")
      */
     private $sale;
 

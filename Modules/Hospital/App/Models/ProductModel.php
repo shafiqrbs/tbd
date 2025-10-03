@@ -117,8 +117,8 @@ class ProductModel extends Model
             ->leftjoin('hms_medicine_details', 'hms_medicine_details.product_id', '=', 'inv_product.id')
             ->select([
                 'inv_stock.id as id',
-                'inv_stock.id as stock_id',
-                'inv_product.id as product_id',
+                'inv_stock.id as product_id',
+               // 'inv_product.id as product_id',
                 'inv_product.name as product_name',
                 'hms_medicine_details.generic',
                 'hms_medicine_details.company',
@@ -134,6 +134,7 @@ class ProductModel extends Model
                 'hms_medicine_details.price',
                 'hms_medicine_details.instruction',
             ])
+            ->groupBy('inv_stock.id')
             ->orderBy('inv_product.name', 'ASC')
             ->take(100)
             ->get();

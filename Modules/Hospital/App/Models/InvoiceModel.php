@@ -6,6 +6,7 @@ use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 use Modules\Core\App\Models\CustomerModel;
 
 
@@ -19,11 +20,26 @@ class InvoiceModel extends Model
 
     protected $fillable = [];
 
+
+    public static function generateUniqueCode($length = 12)
+    {
+        do {
+            // Generate random alphanumeric string
+            $code = Str::upper(Str::random($length));
+        } while (self::where('barcode', $code)->exists());
+        return $code;
+    }
+
+
+
     public static function boot() {
         parent::boot();
         self::creating(function ($model) {
             $date =  new \DateTime("now");
             $model->created_at = $date;
+            if (empty($model->barcode)) {
+                $model->barcode = self::generateUniqueCode(12);
+            }
         });
 
         self::updating(function ($model) {
@@ -191,7 +207,11 @@ class InvoiceModel extends Model
         }
 
         if (isset($request['patient_mode']) && !empty($request['patient_mode'])){
-            $entities = $entities->where('patient_mode.slug',$request['patient_mode']);
+            if (is_array($request['patient_mode'])) {
+                $entities = $entities->whereIn('patient_mode.slug', $request['patient_mode']);
+            } else {
+                $entities = $entities->where('patient_mode.slug', $request['patient_mode']);
+            }
         }
 
         if (isset($request['process']) && !empty($request['process'])){
@@ -201,12 +221,6 @@ class InvoiceModel extends Model
         if (isset($request['room_id']) && !empty($request['room_id'])){
             $entities = $entities->where('hms_invoice.room_id',$request['room_id']);
         }
-
-        if (isset($request['process']) && !empty($request['process'])){
-            $entities = $entities->where('hms_invoice.process',$request['process']);
-        }
-
-
 
         if (isset($request['customer_id']) && !empty($request['customer_id'])){
             $entities = $entities->where('hms_invoice.customer_id',$request['customer_id']);
@@ -247,6 +261,7 @@ class InvoiceModel extends Model
                 DB::raw('DATE_FORMAT(hms_invoice.appointment_date, "%d-%m-%y") as appointment'),
                 'hms_invoice.invoice as invoice',
                 'hms_invoice.total as total',
+                'hms_invoice.barcode',
                 'hms_invoice.comment',
                 'hms_invoice.guardian_name as guardian_name',
                 'hms_invoice.guardian_mobile as guardian_mobile',
@@ -290,6 +305,65 @@ class InvoiceModel extends Model
                 ]);
             }])
             ->first();
+
+        return $entity;
+    }
+
+    public static function getInvoiceBasicInfo($id)
+    {
+        $entity = self::where([
+            ['hms_invoice.id', '=', $id]
+        ])
+            ->leftjoin('cor_customers','cor_customers.id','=','hms_invoice.customer_id')
+            ->leftjoin('inv_sales','inv_sales.id','=','hms_invoice.sales_id')
+            ->leftjoin('hms_prescription as prescription','prescription.hms_invoice_id','=','hms_invoice.id')
+            ->leftjoin('users as doctor','doctor.id','=','prescription.created_by_id')
+            ->leftjoin('users as createdBy','createdBy.id','=','hms_invoice.created_by_id')
+            ->leftjoin('hms_particular as room','room.id','=','hms_invoice.room_id')
+            ->leftjoin('hms_particular_mode as patient_mode','patient_mode.id','=','hms_invoice.patient_mode_id')
+            ->leftjoin('hms_particular_mode as particular_payment_mode','particular_payment_mode.id','=','hms_invoice.patient_payment_mode_id')
+            ->leftJoin('hms_particular as admit_consultant', 'admit_consultant.id', '=', 'hms_invoice.admit_consultant_id')
+            ->leftJoin('hms_particular as admit_doctor', 'admit_doctor.id', '=', 'hms_invoice.admit_doctor_id')
+            ->leftJoin('hms_particular_mode as admit_unit', 'admit_unit.id', '=', 'hms_invoice.admit_unit_id')
+            ->leftJoin('hms_particular_mode as admit_department', 'admit_department.id', '=', 'hms_invoice.admit_department_id')
+            ->select([
+                'hms_invoice.id as invoice_id',
+                DB::raw('DATE_FORMAT(hms_invoice.updated_at, "%d-%m-%y") as created'),
+                DB::raw('DATE_FORMAT(hms_invoice.appointment_date, "%d-%m-%y") as appointment'),
+                'hms_invoice.invoice as invoice',
+                'hms_invoice.parent_id as parent_id',
+                'prescription.id as prescription_id',
+                'hms_invoice.total as total',
+                'admit_consultant.name as admit_consultant_name',
+                'admit_doctor.name as admit_doctor_name',
+                'admit_unit.name as admit_unit_name',
+                'admit_unit.slug as admit_unit_slug',
+                'admit_department.name as admit_department_name',
+                'admit_department.slug as admit_department_slug',
+                'cor_customers.name as name',
+                'cor_customers.mobile as mobile',
+                'cor_customers.id as customer_id',
+                'cor_customers.customer_id as patient_id',
+                'cor_customers.health_id as health_id',
+                'cor_customers.gender as gender',
+                'cor_customers.father_name',
+                'cor_customers.mother_name',
+                'cor_customers.upazilla_id',
+                'cor_customers.nid',
+                'cor_customers.identity_mode',
+                DB::raw('DATE_FORMAT(cor_customers.dob, "%d-%m-%y") as dob'),
+                'cor_customers.identity_mode as identity_mode',
+                'createdBy.username as created_by_user_name',
+                'createdBy.name as created_by_name',
+                'createdBy.id as created_by_id',
+                'room.name as room_name',
+                'patient_mode.name as patient_mode_name',
+                'patient_mode.slug as patient_mode_slug',
+                'particular_payment_mode.name as payment_mode_name',
+                'particular_payment_mode.slug as payment_mode_slug',
+                'hms_invoice.process as process',
+                'hms_invoice.referred_mode as referred_mode',
+            ])->with(['children:id'])->first();
 
         return $entity;
     }

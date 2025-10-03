@@ -31,7 +31,7 @@ class Invoice
 
     /**
      * @ORM\ManyToOne(targetEntity="Modules\Inventory\App\Entities\Sales", cascade={"detach","merge"})
-     * @ORM\JoinColumn(name="sales_id", referencedColumnName="id", onDelete="CASCADE")
+     * @ORM\JoinColumn(name="sales_id", referencedColumnName="id", onDelete="SET NULL")
      */
     private $sales;
 
@@ -257,6 +257,14 @@ class Invoice
      * @ORM\Column(type="string", length=50, nullable=true)
      */
     private $prescriptionMode = "new";
+
+     /**
+     * @var string
+     *
+     * @ORM\Column(type="string", length=20, nullable=true)
+     */
+    private $barcode;
+
 
      /**
      * @var string

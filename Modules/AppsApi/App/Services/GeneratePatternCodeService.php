@@ -102,7 +102,7 @@ class GeneratePatternCodeService
             ->count('id');
         $lastCode = $entity;
         $code = (int)$lastCode + 1;
-        $generateId = sprintf("%s", str_pad($code, 3, '0', STR_PAD_LEFT));
+        $generateId = sprintf("%s", str_pad($code, 2, '0', STR_PAD_LEFT));
         $data = array('code' => $code,'generateId' => $generateId);
         return $data;
 
@@ -117,13 +117,33 @@ class GeneratePatternCodeService
         $table      = $queryParams['table'];
         $entity = DB::table("{$table} as e")
             ->where('e.config_id', $config)
+            ->where('e.category_id', $category->id)
             ->count('id');
         $lastCode = $entity;
         $code = (int)$lastCode + 1;
-        $generateId = sprintf("%s%s", $category,str_pad($code, 5, '0', STR_PAD_LEFT));
-        $data = array('code' => $code,'generateId' => $generateId);
+        $generateId = sprintf("%s%s", $category->generate_id,str_pad($code, 5, '0', STR_PAD_LEFT));
+        $productCode = sprintf("%s%s", $category->generate_id,str_pad($code, 3, '0', STR_PAD_LEFT));
+        $data = array('code' => $code,'generateId' => $generateId,'productCode' => $productCode);
         return $data;
     }
+
+    public function productStockBarcodeCode($queryParams = [])
+    {
+
+
+        $table      = $queryParams['table'];
+        $product      = $queryParams['product'];
+        $entity = DB::table("{$table} as e")
+            ->where('e.product_id', $product->id)
+            ->count('id');
+        $lastCode = $entity;
+        $code = (int)$lastCode + 1;
+        $generateId = sprintf("%s%s",$product->barcode, str_pad($code, 2, '0', STR_PAD_LEFT));
+        $productCode = sprintf("%s%s",$product->product_code, str_pad($code, 1, '0', STR_PAD_LEFT));
+        $data = array('code' => $code,'generateId' => $generateId,'productCode' => $productCode);
+        return $data;
+    }
+
 
     public function productMedicineCode($queryParams = [])
     {
@@ -142,24 +162,9 @@ class GeneratePatternCodeService
 
     }
 
-    public function productStockBarcodeCode($queryParams = [])
-    {
 
 
-        $table      = $queryParams['table'];
-        $product      = $queryParams['product'];
-        $barcode      = $queryParams['barcode'];
-        $entity = DB::table("{$table} as e")
-            ->where('e.product_id', $product)
-            ->count('id');
-        $lastCode = $entity;
-        $code = (int)$lastCode + 1;
-        $generateId = sprintf("%s%s",$barcode, str_pad($code, 2, '0', STR_PAD_LEFT));
-        $data = array('code' => $code,'generateId' => $generateId);
-        return $data;
 
-
-    }
 
     public function bedDisplayName($queryParams = [],$model)
     {

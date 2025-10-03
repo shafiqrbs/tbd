@@ -109,6 +109,7 @@ class PrescriptionController extends Controller
     {
         $domain = $this->domain;
         $data = $request->all();
+
         $entity = PrescriptionModel::find($id);
         $data['json_content'] = json_encode($data);
         $data['prescribe_doctor_id'] = $domain['user_id'];

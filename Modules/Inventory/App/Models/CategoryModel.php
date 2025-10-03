@@ -99,6 +99,7 @@ class CategoryModel extends Model
                 'inv_category.name',
                 'inv_category.slug',
                 'inv_category.status',
+                'inv_category.generate_id',
                 'inv_category.expiry_duration',
                 'inv_category.parent as parent_id',
             ]);

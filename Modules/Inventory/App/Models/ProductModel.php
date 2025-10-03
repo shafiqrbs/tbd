@@ -56,6 +56,7 @@ class ProductModel extends Model
             $date =  new \DateTime("now");
             $model->created_at = $date;
             $model->barcode = self::generatedEventListener($model)['generateId'];
+            $model->product_code = self::generatedEventListener($model)['productCode'];
             $model->code = self::generatedEventListener($model)['code'];
             $model->status = true;
         });
@@ -66,19 +67,20 @@ class ProductModel extends Model
         });
     }
 
+
     public static function generatedEventListener($model)
     {
         $patternCodeService = app(GeneratePatternCodeService::class);
 
         $category = DB::table('inv_category as inv_category')
             ->where('inv_category.id', $model['category_id'])
-            ->select('inv_category.generate_id')
+            ->select('inv_category.id','inv_category.generate_id')
             ->first();
 
         $params = [
             'config' => $model->config_id,
             'table' => 'inv_product',
-            'category' => $category->generate_id
+            'category' => $category
         ];
         return $patternCodeService->productBarcodeCode($params);
     }
@@ -132,7 +134,9 @@ class ProductModel extends Model
             ->leftjoin('inv_particular as size', 'size.id', '=', 'inv_stock.size_id')
             ->select([
                 'inv_product.id as product_id',
+                'inv_product.product_code as product_code',
                 'inv_stock.id as id',
+                'inv_stock.product_code as stock_product_code',
                 'inv_stock.name as product_name',
                 'inv_product.slug',
                 'inv_category.name as category_name',

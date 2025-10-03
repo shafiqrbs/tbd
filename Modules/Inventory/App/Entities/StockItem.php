@@ -356,9 +356,16 @@ class StockItem
     /**
      * @var integer
      *
-     * @ORM\Column(type="integer", length=50, nullable=true)
+     * @ORM\Column(type="integer", nullable=true)
      */
     private $code;
+
+    /**
+     * @var integer
+     *
+     * @ORM\Column(type="string", length=10,nullable=true)
+     */
+    private $productCode;
 
     /**
      * @var string

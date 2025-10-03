@@ -50,50 +50,123 @@ class PrescriptionModel extends Model
         $page =  isset($request['page']) && $request['page'] > 0?($request['page'] - 1 ) : 0;
         $perPage = isset($request['offset']) && $request['offset']!=''? (int)($request['offset']):50;
         $skip = isset($page) && $page!=''? (int)$page * $perPage:0;
+
         $entities = InvoiceModel::where([['hms_invoice.config_id',$domain['hms_config']]])
-            ->join('inv_sales as inv_sales','inv_sales.id','=','hms_invoice.sales_id')
-            ->leftjoin('hms_prescription','hms_prescription.hms_invoice_id','=','hms_invoice.id')
+            ->leftjoin('hms_prescription as prescription','prescription.hms_invoice_id','=','hms_invoice.id')
+            ->leftjoin('users as doctor','doctor.id','=','prescription.created_by_id')
             ->leftjoin('hms_particular as vr','vr.id','=','hms_invoice.room_id')
-            ->leftjoin('users as createdBy','createdBy.id','=','inv_sales.created_by_id')
-            ->join('cor_customers as customer','customer.id','=','inv_sales.customer_id')
+            ->leftjoin('users as createdBy','createdBy.id','=','hms_invoice.created_by_id')
+            ->join('cor_customers as customer','customer.id','=','hms_invoice.customer_id')
             ->join('hms_particular_mode as patient_mode','patient_mode.id','=','hms_invoice.patient_mode_id')
             ->join('hms_particular_mode as patient_payment_mode','patient_payment_mode.id','=','hms_invoice.patient_payment_mode_id')
             ->select([
-                'hms_invoice.id as invoice_id',
-                'hms_prescription.id as prescription_id',
-                'customer.name',
-                'customer.mobile',
-                'customer.gender',
+                'hms_invoice.id',
+                'hms_invoice.parent_id as parent_id',
+                'prescription.id as prescription_id',
+                'prescription.created_by_id as prescription_created_by_id',
+                'hms_invoice.invoice as invoice',
                 'customer.customer_id as patient_id',
                 'customer.health_id',
+                'doctor.name as doctor_name',
+                'customer.name',
+                'customer.mobile',
+                'customer.address',
                 DB::raw("CONCAT(UCASE(LEFT(customer.gender, 1)), LCASE(SUBSTRING(customer.gender, 2))) as gender"),
                 DB::raw('DATE_FORMAT(hms_invoice.created_at, "%d-%m-%Y") as created_at'),
                 DB::raw('DATE_FORMAT(hms_invoice.appointment_date, "%d-%M-%Y") as appointment'),
+                DB::raw('DATE_FORMAT(customer.dob, "%d-%M-%Y") as dob'),
                 'hms_invoice.process as process',
                 'vr.name as visiting_room',
-                'vr.id as visiting_room_id',
-                'inv_sales.invoice as invoice',
                 'patient_mode.name as patient_mode_name',
                 'patient_payment_mode.name as patient_payment_mode_name',
+                'patient_payment_mode.slug as patient_payment_mode_slug',
                 'createdBy.name as created_by',
                 'hms_invoice.sub_total as total',
+                'hms_invoice.referred_mode as referred_mode',
+                'prescription.diabetes as diabetes',
+                'prescription.blood_pressure as blood_pressure',
+                'prescription.weight as weight',
+                'prescription.height as height',
             ]);
 
         if (isset($request['term']) && !empty($request['term'])){
-            $entities = $entities->whereAny(['hms_invoice.invoice','cor_customers.name','cor_customers.mobile','salesBy.username','createdBy.username','acc_transaction_mode.name','hms_invoice.total'],'LIKE','%'.$request['term'].'%');
+            $term = trim($request['term']);
+            $entities = $entities->where(function ($q) use ($term) {
+                $q->where('hms_invoice.invoice', 'LIKE', "%{$term}%")
+                    ->orWhere('customer.customer_id', 'LIKE', "%{$term}%")
+                    ->orWhere('customer.name', 'LIKE', "%{$term}%")
+                    ->orWhere('customer.mobile', 'LIKE', "%{$term}%")
+                    ->orWhere('customer.nid', 'LIKE', "%{$term}%")
+                    ->orWhere('customer.health_id', 'LIKE', "%{$term}%");
+            });
         }
+
+        if (isset($request['prescription_mode']) && !empty($request['prescription_mode'])){
+            if (!empty($request['prescription_mode'])) {
+                if ($request['prescription_mode'] === 'prescription') {
+                    $entities = $entities->whereNotNull('prescription.id');
+                } elseif ($request['prescription_mode'] === 'non-prescription') {
+                    $entities = $entities->whereNull('prescription.id');
+                }
+            }
+        }
+
+        if (isset($request['ipd_mode']) && !empty($request['ipd_mode'])){
+            if ($request['ipd_mode'] === 'new' and !empty($request['referred_mode']) and $request['referred_mode']) {
+                $entities = $entities->where('hms_invoice.process','ipd');
+                $entities = $entities->where('hms_invoice.referred_mode', $request['referred_mode'])
+                    ->whereNull('hms_invoice.parent_id')->whereDoesntHave('children');
+            } elseif ($request['ipd_mode'] === 'confirmed') {
+                $entities = $entities->where('hms_invoice.process','confirmed');
+                $entities = $entities->whereNotNull('hms_invoice.parent_id');
+            } elseif ($request['ipd_mode'] === 'admitted') {
+                $entities = $entities->where('hms_invoice.process','admitted');
+                $entities = $entities->whereNotNull('hms_invoice.parent_id');
+            }
+            $entities
+                ->leftJoin('hms_particular as admit_consultant', 'admit_consultant.id', '=', 'hms_invoice.admit_consultant_id')
+                ->leftJoin('hms_particular as admit_doctor', 'admit_doctor.id', '=', 'hms_invoice.admit_doctor_id')
+                ->leftJoin('hms_particular_mode as admit_unit', 'admit_unit.id', '=', 'hms_invoice.admit_unit_id')
+                ->leftJoin('hms_particular_mode as admit_department', 'admit_department.id', '=', 'hms_invoice.admit_department_id')
+                ->addSelect([
+                    'admit_consultant.name as admit_consultant_name',
+                    'admit_doctor.name as admit_doctor_name',
+                    'admit_unit.name as admit_unit_name',
+                    'admit_department.name as admit_department_name',
+                ]);
+
+        }
+
+        if (isset($request['patient_mode']) && !empty($request['patient_mode'])){
+            if (is_array($request['patient_mode'])) {
+
+                $entities = $entities->whereIn('patient_mode.slug', $request['patient_mode']);
+            } else {
+                $entities = $entities->where('patient_mode.slug', $request['patient_mode']);
+            }
+        }
+
+        if (isset($request['process']) && !empty($request['process'])){
+            $entities = $entities->where('hms_invoice.process',$request['process']);
+        }
+
+        if (isset($request['room_id']) && !empty($request['room_id'])){
+            $entities = $entities->where('hms_invoice.room_id',$request['room_id']);
+        }
+
+        if (isset($request['process']) && !empty($request['process'])){
+            $entities = $entities->where('hms_invoice.process',$request['process']);
+        }
+
 
         if (isset($request['customer_id']) && !empty($request['customer_id'])){
             $entities = $entities->where('hms_invoice.customer_id',$request['customer_id']);
         }
-        if (isset($request['start_date']) && !empty($request['start_date']) && empty($request['end_date'])){
-            $start_date = $request['start_date'].' 00:00:00';
-            $end_date = $request['start_date'].' 23:59:59';
-            $entities = $entities->whereBetween('hms_invoice.created_at',[$start_date, $end_date]);
-        }
-        if (isset($request['start_date']) && !empty($request['start_date']) && isset($request['end_date']) && !empty($request['end_date'])){
-            $start_date = $request['start_date'].' 00:00:00';
-            $end_date = $request['end_date'].' 23:59:59';
+
+        if (isset($request['created']) && !empty($request['created'])){
+            $date = new \DateTime($request['created']);
+            $start_date = $date->format('Y-m-d 00:00:00');
+            $end_date = $date->format('Y-m-d 23:59:59');
             $entities = $entities->whereBetween('hms_invoice.created_at',[$start_date, $end_date]);
         }
 
@@ -102,8 +175,7 @@ class PrescriptionModel extends Model
             ->take($perPage)
             ->orderBy('hms_invoice.updated_at','DESC')
             ->get();
-        $ipdRooms = self::getVisitingRooms($domain);
-        $data = array('count'=>$total,'entities' => $entities,'ipdRooms' => $ipdRooms['entities'],'selectedRoom' => $ipdRooms['selected']);
+        $data = array('count'=>$total,'entities'=>$entities);
         return $data;
     }
 
@@ -181,7 +253,8 @@ class PrescriptionModel extends Model
             ['hms_prescription.id', '=', $id]
         ])
             ->join('hms_invoice','hms_invoice.id','=','hms_prescription.hms_invoice_id')
-            ->leftjoin('hms_invoice_patient_referred','hms_invoice_patient_referred.prescription_id','=','hms_prescription.id')
+            ->leftjoin('hms_invoice_patient_referred','hms_invoice_patient_referred.hms_invoice_id','=','hms_invoice.id')
+            ->leftjoin('hms_particular as referred_room','referred_room.id','=','hms_invoice_patient_referred.opd_room_id')
             ->leftjoin('users as doctor','doctor.id','=','hms_prescription.prescribe_doctor_id')
             ->leftjoin('cor_user_profiles as profiles','profiles.id','=','doctor.id')
             ->leftjoin('cor_setting as designation','designation.id','=','profiles.designation_id')
@@ -198,6 +271,7 @@ class PrescriptionModel extends Model
                 DB::raw('DATE_FORMAT(hms_invoice.appointment_date, "%d-%m-%y") as appointment'),
                 'hms_invoice.invoice as invoice',
                 'hms_invoice.total as total',
+                'hms_invoice.barcode',
                 'hms_invoice.comment',
                 'cor_customers.id as customer_id',
                 'cor_customers.name as name',
@@ -232,6 +306,10 @@ class PrescriptionModel extends Model
                 'particular_payment_mode.name as payment_mode_name',
                 'hms_invoice.process as process',
                 'hms_invoice_patient_referred.id as patient_referred_id',
+                'hms_invoice_patient_referred.referred_mode as referred_mode',
+                'hms_invoice_patient_referred.hospital as referred_hospital',
+                'referred_room.name as referred_room',
+                'hms_invoice_patient_referred.comment as referred_comment',
                 'hms_invoice_patient_referred.json_content as referred_json_content',
             ])
             ->with(['invoice_particular' => function ($query) {

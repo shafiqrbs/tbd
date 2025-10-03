@@ -221,9 +221,12 @@ class OpdController extends Controller
                 'doctor_id' => $doctorId
             ]
         );
-        InvoiceModel::where('id', $id)->update([
-            'process' => 'in-progress'
-        ]);
+        $invoiceInfo = InvoiceModel::getInvoiceBasicInfo($id);
+        if($invoiceInfo->payment_mode_slug == 'opd'){
+            InvoiceModel::where('id', $id)->update([
+                'process' => 'in-progress'
+            ]);
+        }
         $data = $service->returnJosnResponse($entity);
         return $data;
     }

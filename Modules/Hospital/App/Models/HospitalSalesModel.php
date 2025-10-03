@@ -66,20 +66,20 @@ class HospitalSalesModel extends Model
         $config = $domain['inv_config'];
         $jsonData = json_decode($prescription['json_content']);
         $medicines = ($jsonData->medicines ?? []);
+
         if (!empty($medicines) && is_array($medicines)) {
             if (empty($prescription->sale_id)) {
                 $insertData['config_id'] = $config;
                 $insertData['customer_id'] = $prescription->invoice_details->customer_id ?? null;
                 $sales = self::create($insertData);
-
                 $insertData = collect($jsonData->medicines)
                     ->map(function ($medicine) use ($sales, $date) {
                         if (StockItemModel::find($medicine->medicine_id)) {
                             return [
                                 'sale_id' => $sales->id,
-                                'name' => $medicine->medicine_name ?? null, // notice key: medicine_name not medicineName
+                                'name' => $medicine->medicine_name, // notice key: medicine_name not medicineName
                                 'stock_item_id' => $medicine->medicine_id ?? null,
-                                'quantity' => $medicine->quantity ?? 0,
+                                'quantity' => $medicine->opd_quantity ?? 0,
                                 'price' => $medicine->price ?? 0,
                                 'created_at' => $date,
                                 'updated_at' => $date,
@@ -90,7 +90,6 @@ class HospitalSalesModel extends Model
                     ->filter() // ✅ remove nulls
                     ->values() // ✅ reset array keys (important for upsert)
                     ->toArray();
-
                 SalesItemModel::upsert(
                     $insertData,
                     ['sale_id', 'name'], // unique keys
@@ -98,17 +97,19 @@ class HospitalSalesModel extends Model
                 );
 
             } else {
+
+                SalesItemModel::where('sale_id', $prescription->sale_id)->forceDelete();
                 $sales = self::find($prescription->sale_id);
                 collect($medicines)->map(function ($medicine) use ($sales, $date) {
                     if (StockItemModel::find($medicine->medicine_id)) {
                         SalesItemModel::updateOrCreate(
                             [
                                 'sale_id' => $sales->id,
-                                'name' => $medicine->medicineName ?? null, // unique keys
+                                'name' => $medicine->medicine_name ?? null, // unique keys
                             ],
                             [
                                 'stock_item_id' => $medicine->medicine_id ?? null,
-                                'quantity' => $medicine->quantity ?? 0,
+                                'quantity' => $medicine->opd_quantity ?? 0,
                                 'price' => $medicine->price ?? 0,
                                 'updated_at' => $date,
                                 'created_at' => $date,

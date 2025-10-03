@@ -127,11 +127,17 @@ class Product
      */
      private $code;
 
+    /**
+     * @var integer
+     *
+     * @ORM\Column(type="string", length=10,nullable=true)
+     */
+    private $productCode;
 
      /**
      * @var string
      *
-     * @ORM\Column(type="string",  nullable=true)
+     * @ORM\Column(type="string",length=20,  nullable=true)
      */
     private $barcode;
 
