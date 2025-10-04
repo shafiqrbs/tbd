@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Modules\Core\App\Models\CustomerModel;
+use Modules\Inventory\App\Models\SalesModel;
 
 
 class InvoiceModel extends Model
@@ -73,7 +74,10 @@ class InvoiceModel extends Model
     {
         return $this->hasOne(OpdModel::class, 'id', 'patient_mode_id');
     }
-
+    public function sales()
+    {
+        return $this->belongsTo(SalesModel::class, 'sales_id');
+    }
 
     public function children()
     {

@@ -155,15 +155,17 @@ Route::prefix('/hospital')->middleware([HeaderAuthenticationMiddleware::class])-
             'update' => 'ipd.update',
             'destroy' => 'ipd.destroy',
         ]);
-    Route::apiResource('pharmacy',
-        PharmacyController::class)
+
+
+    Route::apiResource('epharma',
+        EpharamaController::class)
         ->middleware([HeaderAuthenticationMiddleware::class])
         ->names([
-            'index' => 'pharmacy.index',
-            'store' => 'pharmacy.store',
-            'show' => 'pharmacy.show',
-            'update' => 'pharmacy.update',
-            'destroy' => 'pharmacy.destroy',
+            'index' => 'epharma.index',
+            'store' => 'epharma.store',
+            'show' => 'epharma.show',
+            'update' => 'epharma.update',
+            'destroy' => 'epharma.destroy',
         ]);
 
     Route::apiResource('medicine',
@@ -177,18 +179,9 @@ Route::prefix('/hospital')->middleware([HeaderAuthenticationMiddleware::class])-
             'destroy' => 'medicine.destroy',
         ]);
 
-    Route::apiResource('epharma',
-        EpharamaController::class)
-        ->middleware([HeaderAuthenticationMiddleware::class])
-        ->names([
-            'index' => 'epharma.index',
-            'store' => 'epharma.store',
-            'show' => 'epharma.show',
-            'update' => 'epharma.update',
-            'destroy' => 'epharma.destroy',
-        ]);
 
 
+    Route::get('/epharma/barcode/{barcode}', [EpharamaController::class,'patientPrescription'])->name('patient_prescription');
     Route::prefix('lab-investigation')->name('lab-investigation.')->group(function () {
         /*Route::prefix('report')->name('return.')->group(function () {
             Route::get('{id}', [LabInvestigationController::class, 'edit'])->name('edit');

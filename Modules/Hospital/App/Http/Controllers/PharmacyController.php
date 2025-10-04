@@ -16,6 +16,7 @@ use Modules\Core\App\Models\UserModel;
 use Modules\Hospital\App\Entities\Prescription;
 use Modules\Hospital\App\Http\Requests\OPDRequest;
 use Modules\Hospital\App\Http\Requests\PrescriptionRequest;
+use Modules\Hospital\App\Models\EpharmaModel;
 use Modules\Hospital\App\Models\HospitalConfigModel;
 use Modules\Hospital\App\Models\HospitalSalesModel;
 use Modules\Hospital\App\Models\InvoiceModel;
@@ -68,8 +69,7 @@ class PharmacyController extends Controller
     public function show($id)
     {
         $service = new JsonRequestResponse();
-        $entity = PrescriptionModel::getShow($id);
-        //$entity = PrescriptionModel::with(['invoice_details','invoice_details.customer_details'])->find($id);
+        $entity = EpharmaModel::getShow($id);
         $data = $service->returnJosnResponse($entity);
         return $data;
     }

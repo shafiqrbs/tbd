@@ -6,29 +6,15 @@ use App\Http\Controllers\Controller;
 use Doctrine\ORM\EntityManagerInterface;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
-use Illuminate\Support\Facades\DB;
-use Modules\Accounting\App\Models\AccountHeadModel;
-use Modules\Accounting\App\Models\AccountingModel;
 use Modules\AppsApi\App\Services\JsonRequestResponse;
-use Modules\Core\App\Http\Requests\CustomerRequest;
-use Modules\Core\App\Models\CustomerModel;
+
 use Modules\Core\App\Models\UserModel;
-use Modules\Hospital\App\Entities\Prescription;
-use Modules\Hospital\App\Http\Requests\OPDRequest;
-use Modules\Hospital\App\Http\Requests\PrescriptionRequest;
+
 use Modules\Hospital\App\Models\EpharmaModel;
-use Modules\Hospital\App\Models\HospitalConfigModel;
-use Modules\Hospital\App\Models\HospitalSalesModel;
-use Modules\Hospital\App\Models\InvoiceContentDetailsModel;
-use Modules\Hospital\App\Models\InvoiceModel;
+
 use Modules\Hospital\App\Models\InvoiceParticularModel;
 use Modules\Hospital\App\Models\InvoicePathologicalReportModel;
-use Modules\Hospital\App\Models\InvoiceTransactionModel;
-use Modules\Hospital\App\Models\LabInvestigationModel;
-use Modules\Hospital\App\Models\OPDModel;
-use Modules\Hospital\App\Models\ParticularModel;
-use Modules\Hospital\App\Models\ParticularModeModel;
-use Modules\Hospital\App\Models\PatientModel;
+
 use Modules\Hospital\App\Models\PrescriptionModel;
 
 
@@ -53,7 +39,7 @@ class EpharamaController extends Controller
     public function index(Request $request){
 
         $domain = $this->domain;
-        $data = LabInvestigationModel::getRecords($request,$domain);
+        $data = EpharmaModel::getRecords($request,$domain);
         $response = new Response();
         $response->headers->set('Content-Type','application/json');
         $response->setContent(json_encode([
