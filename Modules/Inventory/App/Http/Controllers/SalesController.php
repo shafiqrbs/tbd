@@ -65,11 +65,11 @@ class SalesController extends Controller
         $response->headers->set('Content-Type', 'application/json');
         $response->setContent(json_encode([
             'message' => 'success',
-            'status' => Response::HTTP_OK,
+            'status' => ResponseAlias::HTTP_OK,
             'total' => $data['count'],
             'data' => $data['entities']
         ]));
-        $response->setStatusCode(Response::HTTP_OK);
+        $response->setStatusCode(ResponseAlias::HTTP_OK);
         return $response;
     }
 
@@ -98,7 +98,7 @@ class SalesController extends Controller
             $sales->refresh();
 
             // Insert Sales Items
-            SalesItemModel::insertSalesItems($sales, $input['items']);
+            SalesItemModel::insertSalesItems($sales, $input['items'],$this->domain['warehouse_id']);
 
             // Fetch Sales Data for Response
             $salesData = SalesModel::getShow($sales->id, $this->domain);
@@ -146,6 +146,11 @@ class SalesController extends Controller
                             stockItemId: $item->stock_item_id,
                             quantity: $item->quantity
                         );
+
+                        // update for set sales quantity in purchase item for batch wise sales
+                        if ($item->purchase_item_id) {
+                            PurchaseItemModel::updateSalesQuantity($item->purchase_item_id,$item->quantity);
+                        }
                     }
                 }
                 AccountJournalModel::insertSalesAccountJournal($this->domain,$sales->id);
@@ -218,7 +223,7 @@ class SalesController extends Controller
 
             SalesItemModel::where('sale_id', $id)->delete();
             if (sizeof($data['items'])>0){
-                SalesItemModel::insertSalesItems($getSales, $data['items']);
+                SalesItemModel::insertSalesItems($getSales, $data['items'],$this->domain['warehouse_id']);
             }
             DB::commit();
 
@@ -380,6 +385,11 @@ class SalesController extends Controller
                             stockItemId: $item->stock_item_id,
                             quantity: $item->quantity
                         );
+
+                        // update for set sales quantity in purchase item for batch wise sales
+                        if ($item->purchase_item_id) {
+                            PurchaseItemModel::updateSalesQuantity($item->purchase_item_id,$item->quantity);
+                        }
                     }
                 }
 
@@ -404,8 +414,8 @@ class SalesController extends Controller
 
             $getSales->update(['approved_by_id'=>$this->domain['user_id']]);
             // Manege stock
-            if (sizeof($getSales->salesItems)>0){
-                foreach ($getSales->salesItems as $item){
+            if (sizeof($getSalesItems)>0){
+                foreach ($getSalesItems as $item){
                     StockItemHistoryModel::openingStockQuantity($item,'sales',$this->domain);
 
                     // for maintain inventory daily stock
@@ -418,6 +428,11 @@ class SalesController extends Controller
                         stockItemId: $item->stock_item_id,
                         quantity: $item->quantity
                     );
+
+                    // update for set sales quantity in purchase item for batch wise sales
+                    if ($item->purchase_item_id) {
+                        PurchaseItemModel::updateSalesQuantity($item->purchase_item_id,$item->quantity);
+                    }
                 }
             }
 

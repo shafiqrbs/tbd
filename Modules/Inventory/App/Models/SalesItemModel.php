@@ -43,6 +43,7 @@ class SalesItemModel extends Model
         'stock_item_price_matrix_id',
         'production_date',
         'expired_date',
+        'purchase_item_id',
     ];
 
     public static function boot() {
@@ -80,12 +81,12 @@ class SalesItemModel extends Model
      * @param array $items Incoming items to insert.
      * @return bool
      */
-    public static function insertSalesItems($sales, array $items): bool
+    public static function insertSalesItems($sales, array $items,$defaultWarehouse): bool
     {
         $timestamp = Carbon::now();
 
 
-        $formattedItems = array_map(function ($item) use ($sales, $timestamp) {
+        $formattedItems = array_map(function ($item) use ($sales, $timestamp,$defaultWarehouse) {
             return [
                 'sale_id'       => $sales->id,
                 'config_id'      => $sales->config_id,
@@ -94,7 +95,8 @@ class SalesItemModel extends Model
                 'name'  => $item['item_name'] ?? null,
                 'price'  => $item['price'] ?? null,
                 'uom'  => $item['uom'] ?? null,
-                'warehouse_id'   => $item['warehouse_id'] ?? null,
+                'warehouse_id'   => $item['warehouse_id'] ?? $defaultWarehouse,
+                'purchase_item_id'   => $item['purchase_item_id'] ?? null,
                 'bonus_quantity' => $item['bonus_quantity'] ?? 0,
                 'return_quantity' => $item['return_quantity'] ?? 0,
                 'damage_quantity' => $item['damage_quantity'] ?? 0,

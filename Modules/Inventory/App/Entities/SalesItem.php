@@ -37,6 +37,12 @@ class SalesItem
     private  $childPurchaseItem;
 
     /**
+     * @ORM\ManyToOne(targetEntity="PurchaseItem")
+     * @ORM\JoinColumn(onDelete="CASCADE")
+     **/
+    private  $purchaseItem;
+
+    /**
      * @ORM\ManyToOne(targetEntity="Modules\Inventory\App\Entities\Config" , cascade={"detach","merge"} )
      * @ORM\JoinColumn(onDelete="CASCADE")
      **/

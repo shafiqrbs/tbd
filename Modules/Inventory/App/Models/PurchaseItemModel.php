@@ -128,5 +128,20 @@ class PurchaseItemModel extends Model
         return $purchaseItems;
     }
 
+    public static function updateSalesQuantity($purchaseItemId, $quantity)
+    {
+        if (!is_numeric($purchaseItemId) || $quantity == 0) {
+            return false;
+        }
+
+        // Ensure null values are fixed before increment
+        self::where('id', $purchaseItemId)
+            ->whereNull('sales_quantity')
+            ->update(['sales_quantity' => 0]);
+
+        return self::where('id', $purchaseItemId)
+            ->increment('sales_quantity', $quantity);
+    }
+
 
 }
