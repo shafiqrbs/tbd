@@ -132,6 +132,7 @@ class InvoiceModel extends Model
                 'prescription.id as prescription_id',
                 'prescription.created_by_id as prescription_created_by_id',
                 'hms_invoice.invoice as invoice',
+                'hms_invoice.barcode  as barcode',
                 'customer.customer_id as patient_id',
                 'customer.health_id',
                 'doctor.name as doctor_name',

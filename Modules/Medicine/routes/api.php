@@ -4,6 +4,7 @@ use App\Http\Middleware\HeaderAuthenticationMiddleware;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Modules\Core\App\Http\Middleware\LogRequestResponse;
+use Modules\Medicine\App\Http\Controllers\MedicineController;
 use Modules\Medicine\App\Http\Controllers\PurchaseController;
 
 /*
@@ -21,11 +22,18 @@ use Modules\Medicine\App\Http\Controllers\PurchaseController;
     Route::get('medicine', fn (Request $request) => $request->user())->name('medicine');
 });*/
 
-Route::prefix('/medicine')->middleware([HeaderAuthenticationMiddleware::class,LogRequestResponse::class])->group(function() {
+Route::prefix('/pharmacy')->middleware([HeaderAuthenticationMiddleware::class,LogRequestResponse::class])->group(function() {
     Route::apiResource('/purchase', PurchaseController::class);
-//    Route::get('/purchase/edit/{id}', [PurchaseController::class,'edit'])->name('get_edit_purchase');
-//    Route::get('/purchase/copy/{id}', [PurchaseController::class,'purchaseCopy'])->name('get_purchase_copy');
-//    Route::get('/purchase/approve/{id}', [PurchaseController::class,'approve'])->name('approve_purchase');
-
+    Route::apiResource('medicine',
+        MedicineController::class)
+        ->middleware([HeaderAuthenticationMiddleware::class])
+        ->names([
+            'index' => 'medicine.index',
+            'store' => 'medicine.store',
+            'show' => 'medicine.show',
+            'update' => 'medicine.update',
+            'destroy' => 'medicine.destroy',
+        ]);
+    Route::post('/medicine/inline-update/{id}', [MedicineController::class,'medicineInlineUpdate'])->name('particular_inline_update');
 });
 

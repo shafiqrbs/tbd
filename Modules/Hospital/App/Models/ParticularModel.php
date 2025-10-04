@@ -77,7 +77,7 @@ class ParticularModel extends Model
                 'hms_particular_type.slug as particular_type_slug',
                 'hms_particular_details.unit_id',
                 'hms_particular_details.room_id as opd_room_id',
-                'hms_particular_details.id as hms_particular_details_id',
+                'hms_particular_details.store_id as store_id',
             ]);
 
         if (!empty($request['term'])) {

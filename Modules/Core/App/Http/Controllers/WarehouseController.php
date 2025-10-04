@@ -60,19 +60,19 @@ class WarehouseController extends Controller
         $input['status'] = true;
 
         // Ensure the setting type exists using firstOrCreate to avoid race conditions
-        $wareHouseSettingType = SettingTypeModel::firstOrCreate(
+        /*$wareHouseSettingType = SettingTypeModel::firstOrCreate(
             ['slug' => 'warehouse'],
             ['name' => 'Warehouse', 'status' => true, 'is_show_setting_dropdown' => false]
-        );
+        );*/
 
         DB::beginTransaction();
         try {
-            $input['setting_type_id'] = $wareHouseSettingType->id;
+         //   $input['setting_type_id'] = $wareHouseSettingType->id;
 
             // Create setting entry
-            $wareHouseSetting = SettingModel::create($input);
+         //   $wareHouseSetting = SettingModel::create($input);
 
-            $input['setting_id'] = $wareHouseSetting->id;
+          //  $input['setting_id'] = $wareHouseSetting->id;
 
             // Create warehouse entry
             $warehouse = WarehouseModel::create($input);

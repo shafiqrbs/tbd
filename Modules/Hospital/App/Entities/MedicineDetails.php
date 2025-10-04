@@ -132,6 +132,13 @@ class MedicineDetails
     private $priority;
 
     /**
+     * @var int
+     *
+     * @ORM\Column(type="integer", length=5, nullable=true)
+     */
+    private $opdQuantity;
+
+    /**
      * @var float
      *
      * @ORM\Column(name="price", type="decimal", nullable=true)

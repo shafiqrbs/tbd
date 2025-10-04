@@ -65,6 +65,12 @@ class ParticularDetails
      **/
     private $opdRoom;
 
+     /**
+     * @ORM\ManyToOne(targetEntity="Modules\Core\App\Entities\Warehouse")
+     * @ORM\JoinColumn(name="store_id", referencedColumnName="id", nullable=true, onDelete="cascade")
+     **/
+    private $store;
+
     /**
      * @ORM\ManyToOne(targetEntity="ParticularMode")
      * @ORM\JoinColumn(name="payment_mode_id", referencedColumnName="id", nullable=true, onDelete="cascade")

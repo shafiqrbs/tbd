@@ -127,7 +127,6 @@ class ParticularController extends Controller
     public function particularInlineUpdate(ParticularInlineRequest $request, $id)
     {
         $input = $request->validated();
-
         $entity = ParticularModel::find($id);
 
         $data = array();
@@ -136,11 +135,6 @@ class ParticularController extends Controller
         if($price){$data['price'] = $price;}
         if($name){$data['name'] = $name;}
         if(!empty($data)){ $entity->update($data);}
-        $unit = (isset($input['unit_id']) and $input['unit_id']) ? $input['unit_id']:null;
-        $opd_room_id = (isset($input['opd_referred']) and $input['opd_referred']) ? $input['opd_referred']:0;
-        $is_available = (isset($input['is_available']) and $input['is_available']) ? $input['is_available']:0;
-
-        $details = [];
 
         ParticularDetailsModel::updateOrCreate(
             ['particular_id'    => $id]
@@ -170,6 +164,10 @@ class ParticularController extends Controller
                 $updateDetails['room_id'] = $input['opd_room_id'];
             }
 
+            if (array_key_exists('store_id', $input)) {
+                $updateDetails['store_id'] = $input['store_id'];
+            }
+
             if (array_key_exists('unit_id', $input)) {
                 $updateDetails['unit_id'] = $input['unit_id'];
             }
@@ -180,7 +178,12 @@ class ParticularController extends Controller
         }
 
         $findParticular->load('particularDetails'); // ensure fresh data
-
+        if($entity->employee_id and $name){
+            $user = UserModel::find($entity->employee_id);
+            $user->update([
+                'name' => $name
+            ]);
+        }
         return response()->json([
             'success' => true,
             'message' => 'Updated successfully',

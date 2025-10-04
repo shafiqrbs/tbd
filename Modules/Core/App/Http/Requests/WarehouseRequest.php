@@ -26,8 +26,8 @@ class WarehouseRequest extends FormRequest
             {
                 return [
                     'name' => 'required|string',
-                    'location' => 'required|string',
-                    'contract_person' => 'required|string',
+                    'location' => 'string|nullable',
+                    'contract_person' => 'string|nullable',
                     'mobile' => [
                         'nullable',
                         Rule::unique('Modules\Core\App\Entities\Warehouse', 'mobile')
@@ -42,8 +42,8 @@ class WarehouseRequest extends FormRequest
             {
                 return [
                     'name' => 'required|string',
-                    'location' => 'required|string',
-                    'contract_person' => 'required|string',
+                    'location' => 'string|nullable',
+                    'contract_person' => 'string|nullable',
                     'mobile' => [
                         'nullable',
                     ],

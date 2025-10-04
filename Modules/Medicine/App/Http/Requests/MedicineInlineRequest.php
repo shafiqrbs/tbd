@@ -1,11 +1,11 @@
 <?php
 
-namespace Modules\Hospital\App\Http\Requests;
+namespace Modules\Medicine\App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
-class ParticularInlineRequest extends FormRequest
+class MedicineInlineRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -30,16 +30,10 @@ class ParticularInlineRequest extends FormRequest
             case 'POST':
             {
                 return [
-                    'name' => 'nullable',
-                    'unit_id' => 'nullable',
-                    'opd_room_id' => 'nullable',
-                    'store_id' => 'nullable',
-                    'status' => 'nullable',
-                    'is_available' => 'nullable',
-                    'opd_referred' => 'nullable',
-                    'price' => 'nullable',
-
-
+                    'product_name' => 'nullable',
+                    'company' => 'nullable',
+                    'generic' => 'nullable',
+                    'opd_quantity' => 'nullable',
                 ];
             }
 
