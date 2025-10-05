@@ -225,7 +225,11 @@ class InvoiceModel extends Model
             $entities = $entities->where('hms_invoice.room_id',$request['room_id']);
         }
 
-        if (isset($request['customer_id']) && !empty($request['customer_id'])){
+        if (isset($request['created_by_id']) && !empty($request['created_by_id'])){
+            $entities = $entities->where('hms_invoice.created_by_id',$request['created_by_id']);
+        }
+
+         if (isset($request['customer_id']) && !empty($request['customer_id'])){
             $entities = $entities->where('hms_invoice.customer_id',$request['customer_id']);
         }
 
