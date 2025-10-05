@@ -83,6 +83,14 @@ class MedicineController extends Controller
                 $updateDetails['company'] = $company;
             }
 
+            if (array_key_exists('medicine_dosage_id', $input)) {
+                $updateDetails['medicine_dosage_id'] = $input['medicine_dosage_id'];
+            }
+
+            if (array_key_exists('medicine_bymeal_id', $input)) {
+                $updateDetails['medicine_bymeal_id'] = $input['medicine_bymeal_id'];
+            }
+
             if (array_key_exists('generic', $input)) {
                 $updateDetails['generic'] = $generic;
             }

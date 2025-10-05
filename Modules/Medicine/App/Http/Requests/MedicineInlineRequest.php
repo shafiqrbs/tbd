@@ -34,6 +34,8 @@ class MedicineInlineRequest extends FormRequest
                     'company' => 'nullable',
                     'generic' => 'nullable',
                     'opd_quantity' => 'nullable',
+                    'medicine_dosage_id' => 'nullable',
+                    'medicine_bymeal_id' => 'nullable',
                 ];
             }
 

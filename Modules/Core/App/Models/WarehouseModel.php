@@ -168,8 +168,7 @@ class WarehouseModel extends Model
 
     public static function getDropdown($request, $domain)
     {
-        $domainId = $domain['global_id'] ?? 0;
-
+        $domainId = $domain['id'] ?? 0;
         $warehouses = self::where([['domain_id', $domainId],['is_delete',0],['status',1]])
             ->select(['id', 'name', 'unique_id', 'location'])
             ->get();

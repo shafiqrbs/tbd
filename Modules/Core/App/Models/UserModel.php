@@ -149,7 +149,10 @@ class UserModel extends Model
             ->leftjoin('hms_config','hms_config.domain_id','=','dom_domain.id')
             ->where('users.id',$id)->first();
         $warehouse = WarehouseModel::insertDefaultWarehouse($data['id']);
-        $data['warehouse_id'] = $warehouse->id;
+        $data['warehouse_id'] = '';
+        if($warehouse){
+            $data['warehouse_id'] = $warehouse->id;
+        }
         return $data;
     }
 

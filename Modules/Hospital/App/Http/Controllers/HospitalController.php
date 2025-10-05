@@ -278,8 +278,6 @@ class HospitalController extends Controller
         return $service->returnJosnResponse($dropdown);
     }
 
-
-
      /**
      * Show the form for editing the specified resource.
      */
