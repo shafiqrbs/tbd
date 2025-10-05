@@ -8,11 +8,14 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 use Modules\AppsApi\App\Services\JsonRequestResponse;
 use Modules\Core\App\Models\FileUploadModel;
 use Modules\Core\App\Models\LocationModel;
 use Modules\Core\App\Models\UserModel;
+use Modules\Core\App\Models\UserProfileModel;
 use Modules\Domain\App\Models\DomainModel;
 use Modules\Hospital\App\Models\CategoryModel;
 use Modules\Hospital\App\Models\HospitalConfigModel;
@@ -805,7 +808,151 @@ class HospitalController extends Controller
     }
 
 
+    /**
+     * @throws Throwable
+     */
+    public function userImport()
+    {
+        set_time_limit(0);
+        ini_set('memory_limit', '2G');
 
+        $filePath = public_path('/uploads/medicine/user-info.xlsx');
+
+        // 🧭 Detect file type
+        $reader = match (pathinfo($filePath, PATHINFO_EXTENSION)) {
+            'xlsx' => new Xlsx(),
+            'csv'  => new Csv(),
+            default => throw new Exception('Unsupported file format.')
+        };
+
+        // 📄 Load spreadsheet
+        $spreadsheet = $reader->load($filePath);
+        $rows = $spreadsheet->getActiveSheet()->toArray(null, true, true, true);
+
+        if (empty($rows)) {
+            throw new Exception('File is empty or invalid.');
+        }
+
+        // 🧱 Extract headers
+        $headers = array_shift($rows);
+        $headers = array_map(fn($h) => trim(strtolower($h)), $headers);
+
+        // 🧾 Optional: track skipped users
+        $skippedUsers = [];
+
+        DB::beginTransaction();
+
+        try {
+            foreach ($rows as $rowIndex => $row) {
+                // 🧩 Map columns → headers
+                $mapped = [];
+                foreach ($headers as $col => $headerName) {
+                    $mapped[$headerName] = $row[$col] ?? null;
+                }
+
+                // Skip empty usernames
+                if (empty($mapped['username'])) {
+                    $skippedUsers[] = ['row' => $rowIndex + 2, 'reason' => 'Missing username'];
+                    continue;
+                }
+
+                $username = trim($mapped['username'] ?? '');
+                $email = trim($mapped['emailaddress'] ?? '');
+
+                // 📧 If email empty → use username
+                if (empty($email)) {
+                    $email = $username;
+                }
+
+                // Add @gmail.com if missing
+                if (!str_contains($email, '@')) {
+                    $email .= '@gmail.com';
+                }
+
+                // Skip duplicates
+                if (UserModel::where('email', $email)->exists()) {
+                    $skippedUsers[] = ['row' => $rowIndex + 2, 'email' => $email, 'reason' => 'Duplicate email'];
+                    continue;
+                }
+
+                // 👤 Create User
+                $userData = [
+                    'domain_id'         => 13,
+                    'username'          => $username,
+                    'email'             => $email,
+                    'name'              => $username,
+                    'mobile'            => trim($mapped['contactnumbermob'] ?? ''),
+                    'email_verified_at' => now(),
+                    'password'          => Hash::make('@123456'),
+                    'is_delete'         => 0,
+                    'user_group'        => 'user',
+                    'employee_group_id' => 104,
+                    'enabled'           => ($mapped['useractive'] ?? 0) == 1 ? 1 : 0,
+                ];
+
+                $user = UserModel::create($userData);
+
+                // 🏢 Department logic
+                $deptName = trim($mapped['deptname'] ?? '');
+                $deptId = null;
+
+                if (!empty($deptName)) {
+                    $dept = \Modules\Core\App\Models\SettingModel::firstOrCreate(
+                        [
+                            'setting_type_id' => 4,
+                            'domain_id' => 13,
+                            'name' => $deptName,
+                        ],
+                        [
+                            'slug' => Str::slug($deptName),
+                            'status' => 1,
+                            'is_private' => 0,
+                        ]
+                    );
+                    $deptId = $dept->id;
+                }
+
+                $rawDob = trim($mapped['dateofbirth'] ?? '');
+                $dob = null;
+
+                if (!empty($rawDob)) {
+                    try {
+                        $dob = \Carbon\Carbon::parse($rawDob)->format('Y-m-d');
+                    } catch (\Exception $e) {
+                        $dob = null;
+                    }
+                }
+
+                // 🧾 User Profile
+                $profileData = [
+                    'user_id'       => $user->id,
+                    'department_id' => $deptId,
+                    'name'          => $user->name,
+                    'email'         => $user->email,
+                    'mobile'        => trim($mapped['contactnumbermob'] ?? ''),
+                    'address'       => trim($mapped['fulladdress'] ?? ''),
+                    'gender'        => trim($mapped['gender'] ?? ''),
+                    'dob'           => $dob,
+                ];
+
+                UserProfileModel::create($profileData);
+            }
+
+            DB::commit();
+
+            // ✅ Optional: Log skipped users to file
+            if (!empty($skippedUsers)) {
+                $logPath = storage_path('logs/user_import_skipped_' . now()->format('Ymd_His') . '.log');
+                file_put_contents($logPath, json_encode($skippedUsers, JSON_PRETTY_PRINT));
+            }
+
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            throw $e;
+        }
+
+        return "✅ User import completed successfully.";
+    }
 
 
 }
