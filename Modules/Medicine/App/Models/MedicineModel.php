@@ -166,6 +166,8 @@ class MedicineModel extends Model
                  'hms_medicine_details.priority',
                  'hms_medicine_details.price',
                  'hms_medicine_details.instruction',
+                 'hms_medicine_details.medicine_dosage_id',
+                 'hms_medicine_details.medicine_bymeal_id',
                 DB::raw('ROUND(inv_stock.price, 2) as price'),
                 DB::raw('ROUND(inv_stock.purchase_price, 2) as purchase_price'),
                 DB::raw('ROUND(inv_stock.sales_price, 2) as sales_price'),

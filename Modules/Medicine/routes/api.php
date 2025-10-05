@@ -22,6 +22,12 @@ use Modules\Medicine\App\Http\Controllers\PurchaseController;
     Route::get('medicine', fn (Request $request) => $request->user())->name('medicine');
 });*/
 
+Route::prefix('/medicine/select')->middleware([HeaderAuthenticationMiddleware::class])->group(function() {
+    Route::get('/bymeal', [MedicineController::class,'medicineBymealDropdown'])->name('meal_dropdown');
+    Route::get('/dosage', [MedicineController::class,'medicineDosageDropdown'])->name('dosage_dropdown');
+    Route::get('/generic', [MedicineController::class,'medicineGenericDropdown'])->name('medicine_generic_dropdown');
+});
+
 Route::prefix('/pharmacy')->middleware([HeaderAuthenticationMiddleware::class,LogRequestResponse::class])->group(function() {
     Route::apiResource('/purchase', PurchaseController::class);
     Route::apiResource('medicine',

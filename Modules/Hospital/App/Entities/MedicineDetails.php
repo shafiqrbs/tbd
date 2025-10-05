@@ -34,6 +34,18 @@ class MedicineDetails
      **/
     private $product;
 
+    /**
+     * @ORM\OneToOne(targetEntity="MedicineDosage")
+     * @ORM\JoinColumn(referencedColumnName="id", nullable=true, onDelete="cascade")
+     **/
+    private $medicineDosage;
+
+    /**
+     * @ORM\OneToOne(targetEntity="MedicineDosage")
+     * @ORM\JoinColumn(referencedColumnName="id", nullable=true, onDelete="cascade")
+     **/
+    private $medicineBymeal;
+
 
     /**
      * @var string

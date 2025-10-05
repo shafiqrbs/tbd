@@ -44,4 +44,16 @@ class MedicineDosageModel extends Model
     }
 
 
+    public static function getMedicineDosageDropdown($domain,$mode){
+
+        $config =  $domain['hms_config'];
+        $entity = self::where('hms_medicine_dosage.config_id',$config)
+            ->select('id','name');
+        $entity = $entity->where('hms_medicine_dosage.mode',$mode);
+        $entities = $entity->orderBy('hms_medicine_dosage.name','ASC')->get();
+        return $entities;
+
+    }
+
+
 }

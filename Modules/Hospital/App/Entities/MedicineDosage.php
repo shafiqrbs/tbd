@@ -51,6 +51,14 @@ class MedicineDosage
 
 
     /**
+     * @var string
+     *
+     * @ORM\Column(name="mode", type="string", length=20, nullable=true)
+     */
+    private $mode;
+
+
+    /**
      * @var float
      *
      * @ORM\Column(name="quantity", type="integer", nullable=true)

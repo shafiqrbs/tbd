@@ -29,6 +29,7 @@ class MedicineDosageRequest extends FormRequest
             case 'PATCH':
             {
                 return [
+                    'mode' => 'string|nullable',
                     'name' => 'string|nullable',
                     'name_bn' => 'string|nullable',
                     'dosage_form' => 'string|nullable',
@@ -40,6 +41,7 @@ class MedicineDosageRequest extends FormRequest
             case 'POST':
             {
                 return [
+                    'mode' => 'string|nullable',
                     'name' => 'string|nullable',
                     'name_bn' => 'string|nullable',
                     'dosage_form' => 'string|nullable',
