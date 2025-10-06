@@ -880,7 +880,7 @@ class HospitalController extends Controller
                     'domain_id'         => 13,
                     'username'          => $username,
                     'email'             => $email,
-                    'name'              => $username,
+                    'name'              => trim($mapped['userfullname'] ?? ''),
                     'mobile'            => trim($mapped['contactnumbermob'] ?? ''),
                     'email_verified_at' => now(),
                     'password'          => Hash::make('@123456'),
