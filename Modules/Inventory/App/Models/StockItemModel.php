@@ -299,7 +299,7 @@ class StockItemModel extends Model
                             'quantity'          => $s->quantity,
                             'warehouse_id'      => $s->warehouse_id,
                             'stock_item_id'     => $s->stock_item_id,
-                            'warehouse_name'    => $s->warehouse->name,
+                            'warehouse_name'    => $s->warehouse->name ?? null,
                         ];
                     }),
                     'purchase_item_for_sales' => optional(optional($stock)->purchaseItemForSales)->map(function ($s) {
