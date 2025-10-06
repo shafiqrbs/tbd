@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Modules\AppsApi\App\Services\GeneratePatternCodeService;
+use Modules\Core\App\Models\WarehouseModel;
 
 class StockItemModel extends Model
 {
@@ -573,6 +574,115 @@ class StockItemModel extends Model
         // Calculate and return the average price
         $averagePrice = $totalPrice / $totalQuantity;
         return $averagePrice;
+    }
+
+
+
+    public static function getStockItemMatrix($domain, $request)
+    {
+        $page = isset($request['page']) && $request['page'] > 0 ? ($request['page'] - 1) : 0;
+        $perPage = isset($request['offset']) && $request['offset'] != '' ? (int)$request['offset'] : 25;
+        $skip = $page * $perPage;
+
+        // --- Base Query
+        $query = self::with([
+            'product.measurement.unit',
+            'product.unit',
+            'product.category',
+            'product.setting',
+            'product.images',
+            'currentWarehouseStock' => function ($q) use ($domain) {
+                if (!empty($domain['config_id'])) {
+                    $q->where('config_id', $domain['config_id']);
+                }
+                $q->with('warehouse:id,name');
+            }
+        ])
+            ->where('config_id', $domain['config_id'])
+            ->where('status', 1)
+            ->where('is_delete', 0);
+            // Only include items that have currentWarehouseStock
+            /*->whereHas('currentWarehouseStock', function ($q) use ($domain) {
+                if (!empty($domain['config_id'])) {
+                    $q->where('config_id', $domain['config_id']);
+                }
+            });*/
+
+        // --- Search Filter
+        if (!empty($request['term'])) {
+            $term = $request['term'];
+            $query->where(function ($q) use ($term) {
+                // Search within stock name or barcode
+                $q->where('name', 'LIKE', "%{$term}%")
+                    ->orWhere('barcode', 'LIKE', "%{$term}%")
+                    // Search within related product fields
+                    ->orWhereHas('product', function ($p) use ($term) {
+                        $p->where('name', 'LIKE', "%{$term}%")
+                            ->orWhere('slug', 'LIKE', "%{$term}%")
+                            ->orWhereHas('category', fn($c) => $c->where('name', 'LIKE', "%{$term}%"));
+//                            ->orWhereHas('brand', fn($b) => $b->where('name', 'LIKE', "%{$term}%"))
+//                            ->orWhereHas('setting', fn($s) => $s->where('name', 'LIKE', "%{$term}%"));
+                    });
+            });
+        }
+
+        // --- Total Count (before pagination)
+        $total = $query->count();
+
+        // --- Paginated Results
+        $stockItems = $query
+            ->orderByDesc('id')
+            ->skip($skip)
+            ->take($perPage)
+            ->get()
+            ->map(function ($stock) {
+                $product = $stock->product;
+
+                // Warehouse quantities indexed by warehouse ID
+                $warehouseQuantities = [];
+                if (!empty($stock->currentWarehouseStock)) {
+                    foreach ($stock->currentWarehouseStock as $s) {
+                        if (!empty($s->warehouse)) {
+                            $warehouseQuantities[$s->warehouse->id] = [
+                                'name' => $s->warehouse->name,
+                                'quantity' => $s->quantity,
+                            ];
+                        }
+                    }
+                }
+
+                return [
+                    'id' => $stock->id,
+                    'name' => $stock->display_name ?? $stock->name,
+                    'category_name' => $product->category->name ?? null,
+                    'product_id' => $product->id ?? null,
+                    'unit_name' => $product->unit->name ?? null,
+                    'quantity' => $stock->quantity,
+                    'sales_price' => round($stock->sales_price, 2),
+                    'purchase_price' => round($stock->purchase_price, 2),
+                    'barcode' => $stock->barcode,
+                    'product_nature' => $product->setting->slug ?? null,
+                    'feature_image' => optional($product->images)->feature_image ?? null,
+                    'warehouses' => $warehouseQuantities,
+                ];
+            });
+
+        // --- Get all active warehouses for this config
+        $warehouses = WarehouseModel::where('domain_id', $domain['domain_id'])
+            ->where('status', 1)
+            ->where('is_delete', 0)
+            ->select('id', 'name')
+            ->orderBy('name')
+            ->get();
+
+        // --- Final Response
+        return [
+            'data' => $stockItems,
+            'warehouses' => $warehouses,
+            'total' => $total,
+            'page' => $page + 1,
+            'perPage' => $perPage,
+        ];
     }
 
 

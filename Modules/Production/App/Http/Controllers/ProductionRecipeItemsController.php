@@ -20,6 +20,7 @@ use Modules\Production\App\Models\ProductionValueAdded;
 use Modules\Production\App\Models\SettingModel;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
+use Symfony\Component\HttpFoundation\Response as ResponseAlias;
 
 class ProductionRecipeItemsController extends Controller
 {
@@ -238,6 +239,32 @@ class ProductionRecipeItemsController extends Controller
             'message' => 'success',
         ]));
         $response->setStatusCode(Response::HTTP_OK);
+        return $response;
+    }
+    public function updateWarehouse(Request $request)
+    {
+        $response = new Response();
+
+        $findProItem = ProductionItems::find($request->get('id'));
+
+        if (!$findProItem){
+            $response->setContent(json_encode([
+                'message' => 'Production item not found',
+                'status' => ResponseAlias::HTTP_NOT_FOUND
+            ]));
+            $response->setStatusCode(ResponseAlias::HTTP_OK);
+            return $response;
+        }
+        $findProItem->update([
+            'warehouse_id' => $request->get('warehouse_id')
+        ]);
+
+        $response->headers->set('Content-Type', 'application/json');
+        $response->setContent(json_encode([
+            'status' => ResponseAlias::HTTP_OK,
+            'message' => 'success',
+        ]));
+        $response->setStatusCode(ResponseAlias::HTTP_OK);
         return $response;
     }
 

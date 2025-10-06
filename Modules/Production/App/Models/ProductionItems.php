@@ -101,6 +101,7 @@ class ProductionItems extends Model
                 'warehouse_id' => $warehouseId,
                 'config_id'    => $configId,
                 'status'       => 1,
+                'is_delete'     => 0
             ]
         );
     }

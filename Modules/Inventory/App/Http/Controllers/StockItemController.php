@@ -24,6 +24,7 @@ use Modules\Inventory\App\Models\StockItemPriceMatrixModel;
 use Modules\Inventory\App\Repositories\StockItemRepository;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
+use Symfony\Component\HttpFoundation\Response as ResponseAlias;
 
 class StockItemController extends Controller
 {
@@ -337,6 +338,19 @@ class StockItemController extends Controller
         $data = StockItemModel::getStockItem($this->domain);
 
         return $service->returnJosnResponse($data);
+    }
+
+    public function stockItemMatrix(Request $request)
+    {
+        $data = StockItemModel::getStockItemMatrix($this->domain, $request->all());
+
+        return response()->json([
+            'message' => 'success',
+            'status' => ResponseAlias::HTTP_OK,
+            'total' => $data['total'],
+            'data' => $data['data'],
+            'warehouses' => $data['warehouses']
+        ], ResponseAlias::HTTP_OK);
     }
 
     public function productForRecipe()

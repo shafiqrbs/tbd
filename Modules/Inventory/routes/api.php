@@ -100,6 +100,7 @@ Route::prefix('/inventory')->middleware([HeaderAuthenticationMiddleware::class,L
         ]);
     Route::apiResource('/stock', StockItemController::class);
     Route::get('/stock-item', [StockItemController::class,'stockItem'])->name('get_stock_item');
+    Route::get('/stock-item/matrix', [StockItemController::class,'stockItemMatrix'])->name('get_stock_item_matrix');
     Route::get('generate/stock-item/xlsx', [StockItemController::class,'stockItemXlsxGenerate'])->name('get_stock_item_xlsx_generate');
 
 

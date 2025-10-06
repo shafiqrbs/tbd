@@ -64,6 +64,8 @@ Route::prefix('/production')->middleware([HeaderAuthenticationMiddleware::class,
     Route::post('/inline-update-element-status', [ProductionRecipeItemsController::class,'inlineUpdateElementStatus'])->name('pro_inline_update_element_status');
     Route::post('/recipe-items-process', [ProductionRecipeItemsController::class,'updateProcess'])->name('pro_item_update_process');
 
+    Route::post('recipe-items/update-warehouse', [ProductionRecipeItemsController::class, 'updateWarehouse'])->name('pro_item_update_warehouse');
+
     Route::apiResource('recipe-items', ProductionRecipeItemsController::class)
         ->middleware([HeaderAuthenticationMiddleware::class])
         ->names([
