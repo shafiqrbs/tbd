@@ -190,6 +190,9 @@ class ProductModel extends Model
         if (isset($request['name']) && !empty($request['name'])) {
             $products = $products->where('inv_product.name', $request['name']);
         }
+        if (isset($request['expiry_duration']) && !empty($request['expiry_duration'])) {
+            $products = $products->whereNotNull('inv_product.expiry_duration');
+        }
         if (isset($request['alternative_name']) && !empty($request['alternative_name'])) {
             $products = $products->where('inv_product.alternative_name', $request['alternative_name']);
         }
@@ -298,6 +301,7 @@ class ProductModel extends Model
                 'inv_category.name as category_name',
                 'inv_product.unit_id',
                 'inv_particular.name as unit_name',
+                'inv_product.expiry_duration',
                 'inv_product.barcode',
                 'inv_product.alternative_name',
                 'inv_product.product_type_id',
@@ -335,6 +339,7 @@ class ProductModel extends Model
                 'inv_product.name as display_name',
                 'inv_product.name as product_name',
                 'inv_product.slug',
+                'inv_product.expiry_duration',
                 'inv_category.name as category_name',
                 'inv_particular.id as unit_id',
                 'inv_particular.name as unit_name',
