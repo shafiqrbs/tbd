@@ -157,8 +157,8 @@ Route::prefix('/hospital')->middleware([HeaderAuthenticationMiddleware::class])-
             'update' => 'ipd.update',
             'destroy' => 'ipd.destroy',
         ]);
-
-    Route::patch('/ipd/data-process', [IpdController::class,'settingMatrixCreate'])->name('particular_module_dropdown');
+    Route::post('/ipd/data-process/{id}', [IpdController::class,'ipdDataProcess'])->name('ipd_data_process');
+    Route::get('/ipd/transaction/{id}', [IpdController::class,'transaction'])->name('ipd_data_transaction');
 
     Route::apiResource('epharma',
         EpharamaController::class)

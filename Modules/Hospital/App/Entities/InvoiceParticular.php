@@ -175,9 +175,9 @@ class InvoiceParticular
      /**
      * @var string
      *
-     * @ORM\Column(name="reportContent", type="text", nullable=true)
+     * @ORM\Column(name="content", type="text", nullable=true)
      */
-    private $reportContent;
+    private $content;
 
     /**
      * @var string
@@ -210,9 +210,15 @@ class InvoiceParticular
 
     /**
      * @var \DateTime
-     * @ORM\Column(name="collectionDate", type="datetime", nullable=true)
+     * @ORM\Column(name="collection_date", type="datetime", nullable=true)
      */
     private $collectionDate;
+
+     /**
+     * @var \DateTime
+     * @ORM\Column(name="start_date", type="datetime", nullable=true)
+     */
+    private $startDate;
 
      /**
      * @var \DateTime

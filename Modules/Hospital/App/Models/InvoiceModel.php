@@ -62,6 +62,11 @@ class InvoiceModel extends Model
         return $this->hasMany(InvoiceParticularModel::class, 'hms_invoice_id');
     }
 
+    public function invoice_transaction()
+    {
+        return $this->hasMany(InvoiceTransactionModel::class, 'invoice_id');
+    }
+
     public function room()
     {
         return $this->hasOne(ParticularModel::class, 'id', 'room_id');
@@ -446,6 +451,15 @@ class InvoiceModel extends Model
                     'hms_invoice_particular.quantity',
                     'hms_invoice_particular.price',
                     'hms_invoice_particular.sub_total',
+                ]);
+            }])
+            ->with(['invoice_transaction' => function ($query) {
+                $query->select([
+                    'hms_invoice_transaction.id',
+                    'hms_invoice_transaction.invoice_id',
+                    'hms_invoice_transaction.created_by_id',
+                    'hms_invoice_transaction.mode',
+                    DB::raw('DATE_FORMAT(hms_invoice_transaction.created_at, "%d-%m-%y") as created'),
                 ]);
             }])
             ->first();

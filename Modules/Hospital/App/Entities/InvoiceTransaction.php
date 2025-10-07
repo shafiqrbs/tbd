@@ -85,7 +85,7 @@ class InvoiceTransaction
     /**
      * @var string
      *
-     * @ORM\Column(name="subTotal", type="decimal", nullable=true)
+     * @ORM\Column(name="sub_total", type="decimal", nullable=true)
      */
     private $subTotal= 0;
 
@@ -109,6 +109,13 @@ class InvoiceTransaction
      * @ORM\Column(name="process", type="string", length=50, nullable=true)
      */
     private $process ='Pending';
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="mode", type="string", length=30, nullable=true)
+     */
+    private $mode;
 
     /**
      * @var string

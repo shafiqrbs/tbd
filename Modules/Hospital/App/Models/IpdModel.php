@@ -85,12 +85,24 @@ class IpdModel extends Model
     public static function insertInvoiceParticular($config,$entity)
     {
 
+        $date =  new \DateTime("now");
+        $invoiceTransaction = self::create(
+            [
+                'invoice_id' => $entity->id,
+                'created_by_id'    => $entity->created_by_id,
+                'mode' => 'admission',
+                'updated_at'    => $date,
+                'created_at'    => $date,
+            ]
+        );
+
         $admissionFee = ParticularModel::find($config['admission_fee_id']);
         $minimumDaysRoomRent = ($config->minimum_days_room_rent) ? $config->minimum_days_room_rent:0;
         $roomRent = ParticularModel::find($entity->room_id);
         InvoiceParticularModel::updateOrCreate(
             [
                 'hms_invoice_id' => $entity->id,
+                'invoice_transaction_id'     => $invoiceTransaction->id,
                 'particular_id'  => $roomRent->id ?? null,
             ],
             [
@@ -104,6 +116,7 @@ class IpdModel extends Model
         InvoiceParticularModel::updateOrCreate(
             [
                 'hms_invoice_id' => $entity->id,
+                'invoice_transaction_id'     => $invoiceTransaction->id,
                 'particular_id'  => $admissionFee->id ?? null,
             ],
             [
@@ -113,9 +126,10 @@ class IpdModel extends Model
                 'sub_total' => $admissionFee->price,
             ]
         );
-
         $amount = InvoiceParticularModel::where('hms_invoice_id', $entity->id)
             ->sum('sub_total');
+        $invoiceTransaction->update(['sub_total' => $amount , 'total' => $amount]);
+        $entity->update(['sub_total' => $amount , 'total' => $amount]);
         return $amount;
 
 

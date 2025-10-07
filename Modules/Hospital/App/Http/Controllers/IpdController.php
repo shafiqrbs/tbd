@@ -19,8 +19,11 @@ use Modules\Hospital\App\Http\Requests\IpdRequest;
 use Modules\Hospital\App\Http\Requests\OPDRequest;
 use Modules\Hospital\App\Http\Requests\ReferredRequest;
 use Modules\Hospital\App\Models\HospitalConfigModel;
+use Modules\Hospital\App\Models\HospitalSalesModel;
+use Modules\Hospital\App\Models\InvoiceContentDetailsModel;
 use Modules\Hospital\App\Models\InvoiceModel;
 use Modules\Hospital\App\Models\InvoicePatientReferredModel;
+use Modules\Hospital\App\Models\InvoiceTransactionModel;
 use Modules\Hospital\App\Models\IpdModel;
 use Modules\Hospital\App\Models\OPDModel;
 use Modules\Hospital\App\Models\ParticularModel;
@@ -208,70 +211,63 @@ class IpdController extends Controller
     */
     public function ipdDataProcess(Request $request, $id)
     {
+        DB::beginTransaction();
+        try {
+            $domain = $this->domain;
+            $data = $request->all();
+            $content = $data['json_content'];
+            $module = $data['ipd_module'];
+            if ($module == 'medicine') {
+                InvoiceTransactionModel::insertIpdMedicines($domain, $id, $content);
+            }
+            if ($module == 'investigation') {
+                InvoiceTransactionModel::insertIpdInvestigations($domain, $id, $content);
+            }
+            if ($module == 'room') {
+                InvoiceTransactionModel::insertIpdRoom($domain, $id, $content);
+            }
+            if ($module == 'advice') {
+                InvoiceTransactionModel::adviceIpdRoom($domain, $id, $content);
+            }
+            $entity = InvoiceModel::getIpdShow($id);
+            DB::commit();
+            $service = new JsonRequestResponse();
+            return $service->returnJosnResponse($entity);
+        } catch (\Exception $e) {
+            // Something went wrong, rollback the transaction
+            DB::rollBack();
 
-       // $data = $request->validated();
-        $data = $request->all();
-        IpdModel::updateIpdInvoice($id,$data);
-        $entity = InvoiceModel::getIpdShow($id);
-        $service = new JsonRequestResponse();
-        return $service->returnJosnResponse($entity);
+            // Optionally log the exception for debugging purposes
+            \Log::error('Error storing domain and related data: ' . $e->getMessage());
+
+            // Return an error response
+            $response = new Response();
+            $response->headers->set('Content-Type', 'application/json');
+            $response->setContent(json_encode([
+                'message' => 'An error occurred while saving the domain and related data.',
+                'error' => $e->getMessage(),
+                'status' => Response::HTTP_INTERNAL_SERVER_ERROR,
+            ]));
+            $response->setStatusCode(Response::HTTP_INTERNAL_SERVER_ERROR);
+            return $response;
+        }
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function medicine(Request $request, $id)
+    public function transaction(Request $request, $id)
     {
-
-        // $data = $request->validated();
         $data = $request->all();
-        IpdModel::updateIpdInvoice($id,$data);
-        $entity = InvoiceModel::getIpdShow($id);
+        if($data['mode'] == "medicine"){
+            $entity = InvoiceTransactionModel::getMedicine($id);
+        }else{
+            $entity = InvoiceTransactionModel::getInvoiceParticulars($id,$data['mode']);
+        }
         $service = new JsonRequestResponse();
         return $service->returnJosnResponse($entity);
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function room(Request $request, $id)
-    {
-
-        // $data = $request->validated();
-        $data = $request->all();
-        IpdModel::updateIpdInvoice($id,$data);
-        $entity = InvoiceModel::getIpdShow($id);
-        $service = new JsonRequestResponse();
-        return $service->returnJosnResponse($entity);
-    }
-
-     /**
-     * Update the specified resource in storage.
-     */
-    public function advice(Request $request, $id)
-    {
-
-        // $data = $request->validated();
-        $data = $request->all();
-        IpdModel::updateIpdInvoice($id,$data);
-        $entity = InvoiceModel::getIpdShow($id);
-        $service = new JsonRequestResponse();
-        return $service->returnJosnResponse($entity);
-    }
-
-     /**
-     * Update the specified resource in storage.
-     */
-    public function instruction(Request $request, $id)
-    {
-
-        // $data = $request->validated();
-        $data = $request->all();
-        IpdModel::updateIpdInvoice($id,$data);
-        $entity = InvoiceModel::getIpdShow($id);
-        $service = new JsonRequestResponse();
-        return $service->returnJosnResponse($entity);
-    }
 
     /**
      * Remove the specified resource from storage.

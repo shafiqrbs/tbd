@@ -10,6 +10,7 @@ use Modules\AppsApi\App\Services\GeneratePatternCodeService;
 use Modules\Core\App\Models\CustomerModel;
 use Modules\Hospital\App\Entities\InvoiceParticular;
 use Modules\Inventory\App\Models\SalesItemModel;
+use Modules\Inventory\App\Models\SalesModel;
 use Modules\Inventory\App\Models\StockItemModel;
 use Ramsey\Collection\Collection;
 
@@ -78,30 +79,33 @@ class InvoiceTransactionModel extends Model
         }
     }
 
-    public static function insertIpdInvestigations($domain,$invoice,$user,$data)
+    public static function insertIpdInvestigations($domain,$id,$data)
     {
 
         $date =  new \DateTime("now");
-        $jsonData = json_decode($data['json_investigation']);
-        $investigations = ($jsonData ?? []);
+        $invoice = InvoiceModel::find($id);
+        $investigations = $data;
+
         if (!empty($investigations) && is_array($investigations)) {
-            $invoiceTransaction = self::insert(
+            $invoiceTransaction = self::create(
                 [
-                    'invoice_id' => $invoice,
-                    'created_by_id'    => $user,
+                    'invoice_id' => $invoice->id,
+                    'created_by_id'    => $domain['user_id'],
+                    'mode' => 'investigation',
                     'updated_at'    => $date,
                     'created_at'    => $date,
                 ]
             );
+
             collect($investigations)->map(function ($investigation) use ($invoice,$invoiceTransaction,$date) {
 
-                $particular = ParticularModel::find($investigation->id);
+                $particular = ParticularModel::find($investigation['id']);
                 if($particular){
                     InvoiceParticularModel::updateOrCreate(
                         [
-                            'hms_invoice_id'             => $invoice,
+                            'hms_invoice_id'             => $invoice->id,
                             'invoice_transaction_id'     => $invoiceTransaction->id,
-                            'particular_id'              => $investigation->id,
+                            'particular_id'              => $particular->id,
                         ],
                         [
                             'name'      => $particular->name,
@@ -116,46 +120,44 @@ class InvoiceTransactionModel extends Model
         }
     }
 
-    public static function insertIpdMedicines($domain,$invoice,$user,$data)
+    public static function insertIpdMedicines($domain,$id,$data)
     {
         $date =  new \DateTime("now");
         $config = $domain['inv_config'];
-        $jsonData = json_decode($data['json_content_medicine']);
-        $medicines = ($jsonData->medicines ?? []);
+        $invoice = InvoiceModel::find($id);
+        $medicines = $data;
         if (!empty($medicines) && is_array($medicines)) {
-
-            $invoiceTransaction = self::insert(
+            $invoiceTransaction = self::create(
                 [
-                    'invoice_id' => $invoice,
-                    'created_by_id'    => $user,
+                    'invoice_id' => $invoice->id,
+                    'mode' => 'medicine',
+                    'created_by_id'    => $domain['user_id'],
                     'updated_at'    => $date,
                     'created_at'    => $date,
                 ]
             );
-
             if (empty($invoiceTransaction->sale_id)) {
                 $insertData['config_id'] = $config;
                 $insertData['customer_id'] = $invoice->customer_id ?? null;
-                $sales = self::create($insertData);
-                $insertData = collect($jsonData->medicines)
-                    ->map(function ($medicine) use ($sales, $date) {
-                        if (StockItemModel::find($medicine->medicine_id)) {
-                            return [
-                                'sale_id' => $sales->id,
-                                'name' => $medicine->medicine_name ?? null, // notice key: medicine_name not medicineName
-                                'stock_item_id' => $medicine->medicine_id ?? null,
-                                'quantity' => $medicine->quantity ?? 0,
-                                'price' => $medicine->price ?? 0,
-                                'created_at' => $date,
-                                'updated_at' => $date,
-                            ];
-                        }
-                        return null; // explicit
-                    })
-                    ->filter() // ✅ remove nulls
-                    ->values() // ✅ reset array keys (important for upsert)
-                    ->toArray();
-
+                $sales = HospitalSalesModel::create($insertData);
+                $insertData = collect($medicines)
+                        ->map(function ($medicine) use ($sales, $date) {
+                            if (StockItemModel::find($medicine['medicine_id'])) {
+                                return [
+                                    'sale_id' => $sales->id,
+                                    'name' => $medicine['medicine_name'] ?? null, // notice key: medicine_name not medicineName
+                                    'stock_item_id' => $medicine['medicine_id'] ?? null,
+                                    'quantity' => $medicine['quantity'] ?? 0,
+                                    'price' => $medicine['price'] ?? 0,
+                                    'created_at' => $date,
+                                    'updated_at' => $date,
+                                ];
+                            }
+                            return null; // explicit
+                        })
+                        ->filter() // ✅ remove nulls
+                        ->values() // ✅ reset array keys (important for upsert)
+                        ->toArray();
                 SalesItemModel::upsert(
                     $insertData,
                     ['sale_id', 'name'], // unique keys
@@ -165,16 +167,17 @@ class InvoiceTransactionModel extends Model
             } else {
                 $sales = self::find($invoiceTransaction->sale_id);
                 collect($medicines)->map(function ($medicine) use ($sales, $date) {
-                    if (StockItemModel::find($medicine->medicine_id)) {
+                    if (StockItemModel::find($medicine['medicine_id'])) {
                         SalesItemModel::updateOrCreate(
                             [
                                 'sale_id' => $sales->id,
-                                'name' => $medicine->medicineName ?? null, // unique keys
+                                'name' => $medicine['medicine_name'] ?? null, // unique keys
                             ],
                             [
-                                'stock_item_id' => $medicine->medicine_id ?? null,
-                                'quantity' => $medicine->quantity ?? 0,
-                                'price' => $medicine->price ?? 0,
+                                'name' => $medicine['medicine_name'] ?? null, // notice key: medicine_name not medicineName
+                                'stock_item_id' => $medicine['medicine_id'] ?? null,
+                                'quantity' => $medicine['quantity'] ?? 0,
+                                'price' => $medicine['price'] ?? 0,
                                 'updated_at' => $date,
                                 'created_at' => $date,
                             ]
@@ -187,75 +190,163 @@ class InvoiceTransactionModel extends Model
         }
     }
 
-    public static function insertIpdPatientExamination($domain,$invoice,$user,$data)
+    public static function insertIpdRoom($domain,$id,$data)
     {
         $date =  new \DateTime("now");
-        $config = $domain['inv_config'];
-        $jsonData = json_decode($data['json_content_medicine']);
-        $medicines = ($jsonData->medicines ?? []);
-        if (!empty($medicines) && is_array($medicines)) {
+        $invoice = InvoiceModel::find($id);
+        $items = $data;
 
-            $invoiceTransaction = self::insert(
+        if (!empty($items) && is_array($items)) {
+            $invoiceTransaction = self::create(
                 [
-                    'invoice_id' => $invoice,
-                    'created_by_id'    => $user,
+                    'invoice_id' => $invoice->id,
+                    'created_by_id'    => $domain['user_id'],
+                    'mode' => 'room',
                     'updated_at'    => $date,
                     'created_at'    => $date,
                 ]
             );
 
-            if (empty($invoiceTransaction->sale_id)) {
-                $insertData['config_id'] = $config;
-                $insertData['customer_id'] = $invoice->customer_id ?? null;
-                $sales = self::create($insertData);
-                $insertData = collect($jsonData->medicines)
-                    ->map(function ($medicine) use ($sales, $date) {
-                        if (StockItemModel::find($medicine->medicine_id)) {
-                            return [
-                                'sale_id' => $sales->id,
-                                'name' => $medicine->medicine_name ?? null, // notice key: medicine_name not medicineName
-                                'stock_item_id' => $medicine->medicine_id ?? null,
-                                'quantity' => $medicine->quantity ?? 0,
-                                'price' => $medicine->price ?? 0,
-                                'created_at' => $date,
-                                'updated_at' => $date,
-                            ];
-                        }
-                        return null; // explicit
-                    })
-                    ->filter() // ✅ remove nulls
-                    ->values() // ✅ reset array keys (important for upsert)
-                    ->toArray();
+            collect($items)->map(function ($item) use ($invoice,$invoiceTransaction,$date) {
 
-                SalesItemModel::upsert(
-                    $insertData,
-                    ['sale_id', 'name'], // unique keys
-                    ['stock_item_id', 'quantity', 'price', 'updated_at'] // update columns
-                );
-
-            } else {
-                $sales = self::find($invoiceTransaction->sale_id);
-                collect($medicines)->map(function ($medicine) use ($sales, $date) {
-                    if (StockItemModel::find($medicine->medicine_id)) {
-                        SalesItemModel::updateOrCreate(
-                            [
-                                'sale_id' => $sales->id,
-                                'name' => $medicine->medicineName ?? null, // unique keys
-                            ],
-                            [
-                                'stock_item_id' => $medicine->medicine_id ?? null,
-                                'quantity' => $medicine->quantity ?? 0,
-                                'price' => $medicine->price ?? 0,
-                                'updated_at' => $date,
-                                'created_at' => $date,
-                            ]
-                        );
-                    }
-                })->toArray();
-            }
-            InvoiceTransactionModel::where('id', $invoiceTransaction->id)
-                ->update(['sale_id' => $sales->id]);
+                $particular = ParticularModel::find($item['id']);
+                if($particular){
+                    InvoiceParticularModel::updateOrCreate(
+                        [
+                            'hms_invoice_id'             => $invoice->id,
+                            'invoice_transaction_id'     => $invoiceTransaction->id,
+                            'particular_id'              => $particular->id,
+                        ],
+                        [
+                            'name'          => $particular->name,
+                            'quantity'      => $item['quantity'],
+                            'start_date'    => new \DateTime($item['start_date']),
+                            'price'         => $particular->price ?? 0,
+                            'updated_at'    => $date,
+                            'created_at'    => $date,
+                        ]
+                    );
+                }
+            })->toArray();
         }
     }
+
+    public static function adviceIpdRoom($domain,$id,$data)
+    {
+        $date =  new \DateTime("now");
+        $invoice = InvoiceModel::find($id);
+        $items = $data;
+        if (!empty($items) && is_array($items)) {
+            $invoiceTransaction = self::create(
+                [
+                    'invoice_id' => $invoice->id,
+                    'created_by_id'    => $domain['user_id'],
+                    'mode' => 'advice',
+                    'updated_at'    => $date,
+                    'created_at'    => $date,
+                ]
+            );
+
+            collect($items)->map(function ($item) use ($invoice,$invoiceTransaction,$date) {
+                InvoiceParticularModel::updateOrCreate(
+                    [
+                        'hms_invoice_id'             => $invoice->id,
+                        'invoice_transaction_id'     => $invoiceTransaction->id,
+                        'content'                     => $item['content'],
+                    ],
+                    [
+                        'updated_at'    => $date,
+                        'created_at'    => $date,
+                    ]
+                );
+            })->toArray();
+        }
+    }
+
+
+
+    public function sales()
+    {
+        return $this->belongsTo(SalesModel::class, 'sale_id');
+    }
+
+     public function invoiceParticular()
+    {
+        return $this->hasMany(InvoiceParticularModel::class, 'invoice_transaction_id');
+    }
+
+    public function salesItems()
+    {
+        return $this->hasManyThrough(
+            SalesItemModel::class,
+            SalesModel::class,
+            'id',        // Foreign key on inv_sales (local key for InvoiceTransaction)
+            'sale_id',   // Foreign key on inv_sales_item
+            'sale_id',   // Local key on hms_invoice_transaction
+            'id'         // Local key on inv_sales
+        );
+    }
+
+    public static function getInvoiceParticulars($id,$mode)
+    {
+        $entity = self::where([
+            'hms_invoice.id' => $id,
+            'hms_invoice_transaction.mode' => $mode
+        ])
+            ->join('hms_invoice', 'hms_invoice.id', '=', 'hms_invoice_transaction.invoice_id')
+            ->with(['invoiceParticular' => function ($query) {
+                $query->select([
+                    'hms_invoice_particular.id',
+                    'hms_invoice_particular.invoice_transaction_id',
+                    'hms_invoice_particular.name',
+                    'hms_invoice_particular.content',
+                    'hms_invoice_particular.price',
+                ]);
+            }])
+            ->select(
+                'hms_invoice_transaction.id','hms_invoice_transaction.sub_total','hms_invoice_transaction.total','hms_invoice_transaction.process',
+                DB::raw('DATE_FORMAT(hms_invoice_transaction.updated_at, "%d-%m-%y") as created')
+            )
+            ->get();
+        return $entity;
+    }
+
+    public static function getMedicine($id)
+    {
+        $entity = self::where([
+            'hms_invoice.id' => $id,
+            'hms_invoice_transaction.mode' => 'medicine'
+        ])
+            ->join('hms_invoice', 'hms_invoice.id', '=', 'hms_invoice_transaction.invoice_id')
+            ->leftJoin('inv_sales', 'inv_sales.id', '=', 'hms_invoice_transaction.sale_id')
+            ->with(['salesItems' => function ($query) {
+                $query->select([
+                    'inv_sales_item.id',
+                    'inv_sales_item.sale_id',
+                    'inv_sales_item.stock_item_id as product_id',
+                    'inv_sales_item.unit_id',
+                    'inv_sales_item.name as item_name',
+                    'inv_sales_item.uom as uom',
+                    'inv_sales_item.quantity',
+                    'inv_sales_item.sales_price',
+                    'inv_sales_item.purchase_price',
+                    'inv_sales_item.price',
+                    'inv_sales_item.sub_total',
+                    'inv_sales_item.bonus_quantity'
+                ]);
+            }])
+            ->select(
+                'hms_invoice_transaction.id',
+                'hms_invoice_transaction.sale_id',
+                'hms_invoice_transaction.invoice_id',
+                'inv_sales.id as inv_sales_id',
+                'hms_invoice.id as hms_invoice_id',
+                DB::raw('DATE_FORMAT(hms_invoice_transaction.updated_at, "%d-%m-%y") as created')
+            )
+            ->get();
+        return $entity;
+    }
+
+
 
 }
