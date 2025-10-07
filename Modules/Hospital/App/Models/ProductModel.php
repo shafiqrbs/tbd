@@ -133,6 +133,9 @@ class ProductModel extends Model
                 'hms_medicine_details.priority',
                 'hms_medicine_details.price',
                 'hms_medicine_details.instruction',
+                'hms_medicine_details.medicine_dosage_id',
+                'hms_medicine_details.medicine_bymeal_id',
+                'hms_medicine_details.opd_quantity',
             ])
             ->groupBy('inv_stock.id')
             ->orderBy('inv_product.name', 'ASC')
