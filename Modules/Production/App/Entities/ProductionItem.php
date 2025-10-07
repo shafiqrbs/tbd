@@ -138,6 +138,14 @@ class ProductionItem
     private $remark;
 
 
+      /**
+     * @var string
+     *
+     * @ORM\Column(type="string", nullable=true)
+     */
+    private $amendmentReason;
+
+
      /**
      * @var string
      *

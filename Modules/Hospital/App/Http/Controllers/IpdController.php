@@ -204,6 +204,76 @@ class IpdController extends Controller
     }
 
     /**
+    * Update the specified resource in storage.
+    */
+    public function ipdDataProcess(Request $request, $id)
+    {
+
+       // $data = $request->validated();
+        $data = $request->all();
+        IpdModel::updateIpdInvoice($id,$data);
+        $entity = InvoiceModel::getIpdShow($id);
+        $service = new JsonRequestResponse();
+        return $service->returnJosnResponse($entity);
+    }
+
+    /**
+     * Update the specified resource in storage.
+     */
+    public function medicine(Request $request, $id)
+    {
+
+        // $data = $request->validated();
+        $data = $request->all();
+        IpdModel::updateIpdInvoice($id,$data);
+        $entity = InvoiceModel::getIpdShow($id);
+        $service = new JsonRequestResponse();
+        return $service->returnJosnResponse($entity);
+    }
+
+    /**
+     * Update the specified resource in storage.
+     */
+    public function room(Request $request, $id)
+    {
+
+        // $data = $request->validated();
+        $data = $request->all();
+        IpdModel::updateIpdInvoice($id,$data);
+        $entity = InvoiceModel::getIpdShow($id);
+        $service = new JsonRequestResponse();
+        return $service->returnJosnResponse($entity);
+    }
+
+     /**
+     * Update the specified resource in storage.
+     */
+    public function advice(Request $request, $id)
+    {
+
+        // $data = $request->validated();
+        $data = $request->all();
+        IpdModel::updateIpdInvoice($id,$data);
+        $entity = InvoiceModel::getIpdShow($id);
+        $service = new JsonRequestResponse();
+        return $service->returnJosnResponse($entity);
+    }
+
+     /**
+     * Update the specified resource in storage.
+     */
+    public function instruction(Request $request, $id)
+    {
+
+        // $data = $request->validated();
+        $data = $request->all();
+        IpdModel::updateIpdInvoice($id,$data);
+        $entity = InvoiceModel::getIpdShow($id);
+        $service = new JsonRequestResponse();
+        return $service->returnJosnResponse($entity);
+    }
+
+    /**
      * Remove the specified resource from storage.
      */
     public function destroy($id)

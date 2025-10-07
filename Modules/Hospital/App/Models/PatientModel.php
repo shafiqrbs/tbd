@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\DB;
 use Modules\Accounting\App\Models\AccountHeadModel;
 use Modules\AppsApi\App\Services\GeneratePatternCodeService;
 use Modules\Core\App\Entities\Customer;
+use Modules\Core\App\Models\LocationModel;
 use Modules\Domain\App\Models\DomainModel;
 use Modules\Inventory\App\Models\ConfigSalesModel;
 
@@ -102,9 +103,9 @@ class PatientModel extends Model
         $params = [
             'domain' => $model->domain_id,
             'table' => 'cor_customers',
-            'prefix' => 'PID-',
+            'prefix' => 'TBH-',
         ];
-        return $patternCodeService->customerCode($params);
+        return $patternCodeService->PatientCode($params);
     }
 
 

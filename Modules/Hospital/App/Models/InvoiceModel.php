@@ -255,6 +255,7 @@ class InvoiceModel extends Model
             ['hms_invoice.id', '=', $id]
         ])
             ->leftjoin('cor_customers','cor_customers.id','=','hms_invoice.customer_id')
+            ->leftjoin('cor_locations','cor_locations.id','=','cor_customers.upazilla_id')
             ->leftjoin('inv_sales','inv_sales.id','=','hms_invoice.sales_id')
             ->leftjoin('hms_prescription as prescription','prescription.hms_invoice_id','=','hms_invoice.id')
             ->leftjoin('users as doctor','doctor.id','=','prescription.created_by_id')
@@ -281,6 +282,8 @@ class InvoiceModel extends Model
                 'cor_customers.father_name',
                 'cor_customers.mother_name',
                 'cor_customers.upazilla_id',
+                'cor_locations.upazila',
+                'cor_locations.district',
                 'cor_customers.country_id',
                 'cor_customers.profession',
                 'cor_customers.religion_id',

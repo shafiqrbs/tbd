@@ -8,6 +8,7 @@ use Modules\Hospital\App\Http\Controllers\EpharamaController;
 use Modules\Hospital\App\Http\Controllers\HospitalController;
 
 use Modules\Hospital\App\Http\Controllers\InvestigationController;
+use Modules\Hospital\App\Http\Controllers\IpdController;
 use Modules\Hospital\App\Http\Controllers\LabInvestigationController;
 use Modules\Hospital\App\Http\Controllers\MedicineDosageController;
 use Modules\Hospital\App\Http\Controllers\OpdController;
@@ -157,6 +158,7 @@ Route::prefix('/hospital')->middleware([HeaderAuthenticationMiddleware::class])-
             'destroy' => 'ipd.destroy',
         ]);
 
+    Route::patch('/ipd/data-process', [IpdController::class,'settingMatrixCreate'])->name('particular_module_dropdown');
 
     Route::apiResource('epharma',
         EpharamaController::class)

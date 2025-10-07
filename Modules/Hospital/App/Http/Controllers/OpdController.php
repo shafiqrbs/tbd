@@ -143,7 +143,7 @@ class OpdController extends Controller
                         'mobile'    => $input['mobile'] ?? null,
                         'address'    => $input['address'] ?? null,
                         'age'    => $input['age'] ?? null,
-                        'upazila'    => $input['upazila_id'] ?? null,
+                        'upazilla_id'    => $input['upazilla_id'] ?? null,
                         'gender'    => $input['gender'] ?? null,
                         'identity_mode'    => $input['identity_mode'] ?? null,
                         'health_id'    => $input['health_id'] ?? null,
@@ -299,15 +299,16 @@ class OpdController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(CustomerRequest $request, $id)
+    public function update(OPDRequest $request, $id)
     {
-
-
         $data = $request->validated();
-        $entity = OPDModel::find($id);
+        $entity = InvoiceModel::find($id);
+        $patient = PatientModel::find($entity->customer_id);
         $entity->update($data);
+        $patient->update($data);
+        $invoice = InvoiceModel::getShow($id);
         $service = new JsonRequestResponse();
-        return $service->returnJosnResponse($entity);
+        return $service->returnJosnResponse($patient);
     }
 
     /**
