@@ -48,9 +48,12 @@ class RequisitionModel extends Model
         $entities = self::where([['inv_requisition.customer_config_id',$domain['config_id']]])
             ->leftjoin('users as createdBy','createdBy.id','=','inv_requisition.created_by_id')
             ->leftjoin('cor_vendors','cor_vendors.id','=','inv_requisition.vendor_id')
+            ->join('cor_warehouses','cor_warehouses.id','=','inv_requisition.warehouse_id')
             ->select([
                 'inv_requisition.id',
                 'inv_requisition.invoice',
+                'inv_requisition.warehouse_id',
+                'cor_warehouses.name as warehouse_name',
                 DB::raw('DATE_FORMAT(inv_requisition.created_at, "%d-%m-%Y") as created'),
                 DB::raw('DATE_FORMAT(inv_requisition.expected_date, "%d-%m-%Y") as expected_date'),
                 'inv_requisition.sub_total as sub_total',
@@ -129,6 +132,7 @@ class RequisitionModel extends Model
                 'inv_requisition.discount as discount',
                 'inv_requisition.discount_calculation as discount_calculation',
                 'inv_requisition.discount_type as discount_type',
+                'inv_requisition.warehouse_id',
                 'inv_requisition.approved_by_id',
                 'cor_vendors.id as vendor_id',
                 'cor_vendors.name as vendor_name',

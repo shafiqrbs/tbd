@@ -25,6 +25,7 @@ class RequisitionRequest extends FormRequest
             'expected_date' => 'required|date',
             'remark' => 'nullable|string',
             'created_by_id' => 'required|integer',
+            'warehouse_id' => 'nullable|integer',
             'items' => 'required|array',
         ];
     }
