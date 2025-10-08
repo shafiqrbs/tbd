@@ -41,6 +41,14 @@ class TreatmentMedicine
     private $medicineDosage;
 
 
+
+     /**
+     * @ORM\ManyToOne(targetEntity="MedicineDosage")
+     * @ORM\JoinColumn(name="medicine_bymeal_id", referencedColumnName="id", nullable=true, onDelete="cascade")
+     **/
+    private $medicineBymeal;
+
+
     /**
      * @ORM\ManyToOne(targetEntity="Modules\Inventory\App\Entities\StockItem")
      * @ORM\JoinColumn(name="medicine_id", referencedColumnName="id", nullable=true, onDelete="cascade")

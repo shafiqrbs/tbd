@@ -115,6 +115,8 @@ class ProductModel extends Model
             })
             ->join('inv_product', 'inv_product.id', '=', 'inv_stock.product_id')
             ->leftjoin('hms_medicine_details', 'hms_medicine_details.product_id', '=', 'inv_product.id')
+            ->leftjoin('hms_medicine_dosage as dosage', 'dosage.id', '=', 'hms_medicine_details.medicine_dosage_id')
+            ->leftjoin('hms_medicine_dosage as bymeal', 'bymeal.id', '=', 'hms_medicine_details.medicine_bymeal_id')
             ->select([
                 'inv_stock.id as id',
                 'inv_stock.id as product_id',
@@ -123,11 +125,10 @@ class ProductModel extends Model
                 'hms_medicine_details.generic',
                 'hms_medicine_details.company',
                 'hms_medicine_details.formulation',
-                'hms_medicine_details.dose_details',
+                'dosage.name as doses_details',
                 'hms_medicine_details.generic_id',
                 'hms_medicine_details.doses_form',
-                'hms_medicine_details.doses_details',
-                'hms_medicine_details.by_meal',
+                'bymeal.name as by_meal',
                 'hms_medicine_details.duration_month',
                 'hms_medicine_details.duration_day',
                 'hms_medicine_details.priority',
