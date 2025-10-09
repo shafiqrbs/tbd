@@ -24,7 +24,8 @@ class RequisitionProductItemMatrixModel extends Model
         'demand_quantity',
         'approved_by_id',
         'process',
-        'approved_date'
+        'approved_date',
+        'warehouse_id'
     ];
 
     public static function boot() {

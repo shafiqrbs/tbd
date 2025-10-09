@@ -400,6 +400,7 @@ class   RequisitionMatrixBoardController extends Controller
                         'name' => $items->first()['display_name'],
                         'item_id' => $items->first()['vendor_stock_item_id'],
                         'pro_item_id' => $proItem->id,
+                        'warehouse_id' => $proItem->warehouse_id,
                         'quantity' => $items->sum('approved_quantity'),
                         'stock_quantity' => $items->first()['vendor_stock_quantity'],
                         'demand_quantity' => $items->sum('approved_quantity'),

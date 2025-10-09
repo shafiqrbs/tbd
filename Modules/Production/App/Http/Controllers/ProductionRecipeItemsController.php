@@ -91,9 +91,9 @@ class ProductionRecipeItemsController extends Controller
         if (!$findItems){
             $response->setContent(json_encode([
                 'message' => 'Production Item not found',
-                'status' => Response::HTTP_NOT_FOUND
+                'status' => ResponseAlias::HTTP_NOT_FOUND
             ]));
-            $response->setStatusCode(Response::HTTP_OK);
+            $response->setStatusCode(ResponseAlias::HTTP_OK);
             return $response;
         }
 
@@ -123,11 +123,11 @@ class ProductionRecipeItemsController extends Controller
         }
         $response->headers->set('Content-Type', 'application/json');
         $response->setContent(json_encode([
-            'status' => Response::HTTP_OK,
+            'status' => ResponseAlias::HTTP_OK,
             'message' => 'success',
             'data' => $data,
         ]));
-        $response->setStatusCode(Response::HTTP_OK);
+        $response->setStatusCode(ResponseAlias::HTTP_OK);
         return $response;
     }
 
