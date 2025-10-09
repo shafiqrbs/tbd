@@ -117,10 +117,6 @@ class ProductionRecipeItemsController extends Controller
             'item' => $getProductionItem,
             'stock_item' => $getStockItem
         ];
-        if($findItems->process == "approved"){
-            ProductionItemAmendmentModel::generateAmendment($this->domain,$findItems->id,$data);
-            $findItems->update(['process' => 'created','is_revised' => 1]);
-        }
         $response->headers->set('Content-Type', 'application/json');
         $response->setContent(json_encode([
             'status' => Response::HTTP_OK,
@@ -131,37 +127,6 @@ class ProductionRecipeItemsController extends Controller
         return $response;
     }
 
-    /**
-     * Show the specified resource.
-     */
-    public function show($id)
-    {
-        return view('production::show');
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit($id)
-    {
-        return view('production::edit');
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, $id): RedirectResponse
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy($id)
-    {
-        //
-    }
 
     public function inlineUpdateValueAdded(Request $request)
     {
@@ -232,7 +197,6 @@ class ProductionRecipeItemsController extends Controller
         $getProductionItems->update([
             'process' => $request->get('process')
         ]);
-
         $response->headers->set('Content-Type', 'application/json');
         $response->setContent(json_encode([
             'status' => Response::HTTP_OK,
@@ -241,6 +205,42 @@ class ProductionRecipeItemsController extends Controller
         $response->setStatusCode(Response::HTTP_OK);
         return $response;
     }
+
+    public function amendmentProcess($id)
+    {
+        $response = new Response();
+
+        $item = ProductionItems::find($id);
+        $getValueAdded = ProductionValueAdded::getValueAddedWithInputGenerate($item->id);
+        $getProductionItem = ProductionItems::find($item->id);
+        $getStockItem = StockItemModel::find($item->item_id);
+        $data =[
+            'field' => $getValueAdded,
+            'item' => $getProductionItem,
+            'stock_item' => $getStockItem
+        ];
+        if($item->process == "approved"){
+            ProductionItemAmendmentModel::generateAmendment($this->domain,$item->id,$data);
+            $item->update(['process' => 'created','is_revised' => 1]);
+        }
+        if (!$item){
+            $response->setContent(json_encode([
+                'message' => 'Production item not found',
+                'status' => Response::HTTP_NOT_FOUND
+            ]));
+            $response->setStatusCode(Response::HTTP_OK);
+            return $response;
+        }
+        $response->headers->set('Content-Type', 'application/json');
+        $response->setContent(json_encode([
+            'status' => Response::HTTP_OK,
+            'message' => 'success',
+            'data' => $data,
+        ]));
+        $response->setStatusCode(Response::HTTP_OK);
+        return $response;
+    }
+
     public function updateWarehouse(Request $request)
     {
         $response = new Response();
@@ -370,4 +370,37 @@ class ProductionRecipeItemsController extends Controller
         $filePath = storage_path('exports/'.$fileName);
         return response()->download($filePath, $fileName)->deleteFileAfterSend(true);
     }
+
+    /**
+     * Show the specified resource.
+     */
+    public function show($id)
+    {
+        return view('production::show');
+    }
+
+    /**
+     * Show the form for editing the specified resource.
+     */
+    public function edit($id)
+    {
+        return view('production::edit');
+    }
+
+    /**
+     * Update the specified resource in storage.
+     */
+    public function update(Request $request, $id): RedirectResponse
+    {
+        //
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     */
+    public function destroy($id)
+    {
+        //
+    }
+
 }

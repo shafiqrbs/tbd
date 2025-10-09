@@ -58,6 +58,7 @@ class Config
      **/
     private $admissionFee;
 
+
     /**
      *
      * @ORM\OneToOne(targetEntity="Particular", cascade={"persist", "remove"})
