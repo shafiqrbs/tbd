@@ -32,6 +32,13 @@ class RequisitionMatrixBoard
     private  $requisitionBoard;
 
     /**
+     *
+     * @ORM\ManyToOne(targetEntity="Modules\Core\App\Entities\Warehouse")
+     * @ORM\JoinColumn(onDelete="CASCADE")
+     **/
+    private  $warehouse;
+
+    /**
      * @ORM\ManyToOne(targetEntity="Modules\Inventory\App\Entities\Config" , cascade={"detach","merge"} )
      * @ORM\JoinColumn(name="vendor_config_id", onDelete="CASCADE")
      **/

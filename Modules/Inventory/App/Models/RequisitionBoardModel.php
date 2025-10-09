@@ -77,6 +77,7 @@ class RequisitionBoardModel extends Model
                     'inv_requisition_matrix_board.vendor_stock_item_id',
                     'inv_requisition_matrix_board.display_name',
                     'inv_requisition_matrix_board.unit_name',
+                    'inv_requisition_matrix_board.warehouse_id',
                     DB::raw('SUM(inv_requisition_matrix_board.requested_quantity) as requested_quantity'),
                     DB::raw('SUM(inv_requisition_matrix_board.approved_quantity) as approved_quantity'),
                     DB::raw('SUM(inv_requisition_matrix_board.sub_Total) as sub_Total'),

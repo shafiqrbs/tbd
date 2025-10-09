@@ -4,6 +4,7 @@ namespace Modules\Inventory\App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
+use Modules\Core\App\Models\WarehouseModel;
 
 class RequisitionProductItemMatrixModel extends Model
 {
@@ -40,6 +41,10 @@ class RequisitionProductItemMatrixModel extends Model
             $date =  new \DateTime("now");
             $model->updated_at = $date;
         });
+    }
+
+    public function warehouse(){
+        return $this->belongsTo(WarehouseModel::class,'warehouse_id');
     }
 
     public static function getRecords($request,$domain)

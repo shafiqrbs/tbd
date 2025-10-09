@@ -30,6 +30,12 @@ class InvoiceBatchItem
      **/
     private  $invoiceBatch;
 
+    /**
+     *
+     * @ORM\ManyToOne(targetEntity="Modules\Core\App\Entities\Warehouse")
+     * @ORM\JoinColumn(onDelete="CASCADE")
+     **/
+    private  $warehouse;
 
     /**
      * @ORM\ManyToOne(targetEntity="StockItem")

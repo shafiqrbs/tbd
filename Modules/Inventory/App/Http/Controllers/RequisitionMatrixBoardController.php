@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Modules\AppsApi\App\Services\GeneratePatternCodeService;
 use Modules\Core\App\Models\UserModel;
+use Modules\Inventory\App\Models\CurrentStockModel;
 use Modules\Inventory\App\Models\InvoiceBatchItemModel;
 use Modules\Inventory\App\Models\InvoiceBatchModel;
 use Modules\Inventory\App\Models\RequisitionBoardModel;
@@ -157,11 +158,17 @@ class   RequisitionMatrixBoardController extends Controller
                         'customer_name' => $val['customer_name'],
                         'expected_date' => $val['expected_date'],
                         'generate_date' => $expectedDate,
-                        'vendor_stock_quantity' => $val['vendor_stock_quantity'],
+//                        'vendor_stock_quantity' => $val['vendor_stock_quantity'],
+                        'vendor_stock_quantity' => CurrentStockModel::getCurrentStockByWarehouseAndStockItemId(
+                            $this->domain['config_id'],
+                            $this->domain['warehouse_id'],
+                            $val['vendor_stock_item_id']
+                        ),
                         'status' => true,
                         'process' => 'Created',
                         'requisition_board_id' => $board->id,
                         'created_at' => now(),
+                        'warehouse_id' => $this->domain['warehouse_id'],
                     ];
                     // Check if a Generated record already exists for this vendor and expected date
                 }
@@ -260,8 +267,12 @@ class   RequisitionMatrixBoardController extends Controller
                     'vendor_stock_item_id' => $group->first()['vendor_stock_item_id'],
                     'customer_stock_item_id' => $group->first()['customer_stock_item_id'],
                     'product' => $group->first()['display_name'],
+                    'warehouse_id' => $group->first()['warehouse_id'],
+                    'warehouse_name' => DB::table('cor_warehouses')->where('id',$group->first()['warehouse_id'])->first()?->name,
+                    'id' => $group->first()['id'],
                     'vendor_stock_quantity' => $group->first()['vendor_stock_quantity'],
                     'total_approved_quantity' => $group->sum('approved_quantity'),
+                    'is_production_item' => DB::table('pro_item')->where('item_id', $group->first()['vendor_stock_item_id'])->where('config_id', $this->domain['pro_config'])->where('process','approved')->exists(),
                 ];
 
                 foreach ($shops as $shop) {
@@ -321,8 +332,6 @@ class   RequisitionMatrixBoardController extends Controller
      */
     public function matrixBoardQuantityUpdate(Request $request)
     {
-        $quantity = $request->quantity ?? 0;
-
         if (!$request->has('id') || empty($request->id)) {
             throw new \Exception("Update id not found");
         }
@@ -332,11 +341,26 @@ class   RequisitionMatrixBoardController extends Controller
             throw new \Exception("Board matrix not found");
         }
 
-        $findBoardMatrix->update([
-            'quantity' => $quantity,
-            'approved_quantity' => $quantity,
-            'sub_total' => $quantity * $findBoardMatrix->purchase_price,
-        ]);
+        $type = $request->type;
+
+        if ($type == 'quantity') {
+            $quantity = $request->quantity ?? 0;
+
+            $findBoardMatrix->update([
+                'quantity' => $quantity,
+                'approved_quantity' => $quantity,
+                'sub_total' => $quantity * $findBoardMatrix->purchase_price,
+            ]);
+        }elseif ($type == 'warehouse') {
+            $warehouseId = $request->warehouse_id;
+            $stockItemId = $request->stock_item_id;
+
+            $currentStock = CurrentStockModel::getCurrentStockByWarehouseAndStockItemId($this->domain['config_id'], $warehouseId, $stockItemId);
+            $findBoardMatrix->update([
+                'warehouse_id' => $warehouseId,
+                'vendor_stock_quantity' => $currentStock,
+            ]);
+        }
 
         return response()->json([
             'status' => ResponseAlias::HTTP_OK,
@@ -388,6 +412,7 @@ class   RequisitionMatrixBoardController extends Controller
                     $proItem = DB::table('pro_item')
                         ->where('item_id', $items->first()['vendor_stock_item_id'])
                         ->where('config_id', $this->domain['pro_config'])
+                        ->where('process','approved')
                         ->first();
 
                     if (!$proItem) {
@@ -448,6 +473,7 @@ class   RequisitionMatrixBoardController extends Controller
                         'stock_item_id' => $items->first()['vendor_stock_item_id'],
                         'uom' => $items->first()['unit_name'],
                         'name' => $items->first()['display_name'],
+                        'warehouse_id' => $items->first()['warehouse_id'],
                         'created_at' => now(),
                         'updated_at' => now(),
                     ];
@@ -526,6 +552,7 @@ class   RequisitionMatrixBoardController extends Controller
                 'price' => $item['purchase_price'],
                 'sub_total' => $item['sub_total'],
                 'stock_item_id' => $item['vendor_stock_item_id'],
+                'warehouse_id' => $item['warehouse_id'],
                 'config_id' => $this->domain['config_id'],
                 'created_at' => now(),
                 'updated_at' => now(),
@@ -563,6 +590,8 @@ class   RequisitionMatrixBoardController extends Controller
                 'quantity' => $item->quantity,
                 'stock_quantity' => $item->stock_quantity,
                 'demand_quantity' => $item->demand_quantity,
+                'warehouse_id' => $item->warehouse_id,
+                'warehouse_name' => $item->warehouse->name,
                 'created_at' => $item->created_at ? $item->created_at->format('d-m-Y') : null,
             ];
         })->toArray();

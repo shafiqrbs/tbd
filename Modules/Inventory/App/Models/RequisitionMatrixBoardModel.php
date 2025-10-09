@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Support\Facades\DB;
+use Modules\Core\App\Models\WarehouseModel;
 use Modules\Inventory\App\Entities\StockItem;
 use Modules\Inventory\App\Entities\StockItemInventoryHistory;
 use Modules\Utility\App\Models\ProductUnitModel;
@@ -34,5 +35,9 @@ class RequisitionMatrixBoardModel extends Model
             $date =  new \DateTime("now");
             $model->updated_at = $date;
         });
+    }
+
+    public function warehouse(){
+        return $this->belongsTo(WarehouseModel::class,'warehouse_id');
     }
 }

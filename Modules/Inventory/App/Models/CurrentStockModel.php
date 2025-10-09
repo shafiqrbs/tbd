@@ -57,4 +57,12 @@ class CurrentStockModel extends Model
         );
     }
 
+    public static function getCurrentStockByWarehouseAndStockItemId(int $configID, int $warehouseId, int $stockItemId): int
+    {
+        return (int) self::where('config_id', $configID)
+            ->where('warehouse_id', $warehouseId)
+            ->where('stock_item_id', $stockItemId)
+            ->value('quantity') ?? 0;
+    }
+
 }
