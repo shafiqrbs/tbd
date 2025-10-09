@@ -268,11 +268,15 @@ class InvoiceModel extends Model
             ->leftjoin('hms_particular as room','room.id','=','hms_invoice.room_id')
             ->leftjoin('hms_particular_mode as patient_mode','patient_mode.id','=','hms_invoice.patient_mode_id')
             ->leftjoin('hms_particular_mode as particular_payment_mode','particular_payment_mode.id','=','hms_invoice.patient_payment_mode_id')
+            ->leftjoin('hms_invoice as invoice_parent','invoice_parent.id','=','hms_invoice.parent_id')
+            ->leftjoin('hms_particular_mode as parent_patient_mode','parent_patient_mode.id','=','invoice_parent.patient_mode_id')
             ->select([
                 'hms_invoice.*',
                 DB::raw('DATE_FORMAT(hms_invoice.updated_at, "%d-%m-%y") as created'),
                 DB::raw('DATE_FORMAT(hms_invoice.appointment_date, "%d-%m-%y") as appointment'),
                 'hms_invoice.invoice as invoice',
+                'parent_patient_mode.name as parent_patient_mode_name',
+                'parent_patient_mode.slug as parent_patient_mode_slug',
                 'hms_invoice.total as total',
                 'hms_invoice.barcode',
                 'hms_invoice.comment',
@@ -341,12 +345,17 @@ class InvoiceModel extends Model
             ->leftJoin('hms_particular as admit_doctor', 'admit_doctor.id', '=', 'hms_invoice.admit_doctor_id')
             ->leftJoin('hms_particular_mode as admit_unit', 'admit_unit.id', '=', 'hms_invoice.admit_unit_id')
             ->leftJoin('hms_particular_mode as admit_department', 'admit_department.id', '=', 'hms_invoice.admit_department_id')
+            ->leftjoin('hms_invoice as invoice_parent','invoice_parent.id','=','hms_invoice.parent_id')
+            ->leftjoin('hms_particular_mode as parent_patient_mode','parent_patient_mode.id','=','invoice_parent.patient_mode_id')
+
             ->select([
                 'hms_invoice.id as invoice_id',
                 DB::raw('DATE_FORMAT(hms_invoice.updated_at, "%d-%m-%y") as created'),
                 DB::raw('DATE_FORMAT(hms_invoice.appointment_date, "%d-%m-%y") as appointment'),
                 'hms_invoice.invoice as invoice',
                 'hms_invoice.parent_id as parent_id',
+                'parent_patient_mode.name as parent_patient_mode_name',
+                'parent_patient_mode.slug as parent_patient_mode_slug',
                 'prescription.id as prescription_id',
                 'hms_invoice.total as total',
                 'admit_consultant.name as admit_consultant_name',
@@ -399,8 +408,12 @@ class InvoiceModel extends Model
             ->leftjoin('hms_particular_mode as admit_unit','admit_unit.id','=','hms_invoice.admit_unit_id')
             ->leftjoin('hms_particular_mode as admit_department','admit_department.id','=','hms_invoice.admit_department_id')
             ->leftjoin('hms_particular_mode as particular_payment_mode','particular_payment_mode.id','=','hms_invoice.patient_payment_mode_id')
+            ->leftjoin('hms_invoice as invoice_parent','invoice_parent.id','=','hms_invoice.parent_id')
+            ->leftjoin('hms_particular_mode as parent_patient_mode','parent_patient_mode.id','=','invoice_parent.patient_mode_id')
             ->select([
                 'hms_invoice.*',
+                'parent_patient_mode.name as parent_patient_mode_name',
+                'parent_patient_mode.slug as parent_patient_mode_slug',
                 DB::raw('DATE_FORMAT(hms_invoice.updated_at, "%d-%m-%y") as created'),
                 DB::raw('DATE_FORMAT(hms_invoice.appointment_date, "%d-%m-%y") as appointment'),
                 'hms_invoice.invoice as invoice',
