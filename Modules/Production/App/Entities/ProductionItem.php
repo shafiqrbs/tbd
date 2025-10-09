@@ -262,9 +262,10 @@ class ProductionItem
     /**
      * @var string
      *
-     * @ORM\Column(type="string" , nullable=true)
+     * @ORM\Column(type="string", options={"default": "created"})
      */
-    private $process = 'created';
+    private $process;
+
 
     /**
      * @var \DateTime

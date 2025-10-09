@@ -86,7 +86,7 @@ class IpdModel extends Model
     {
 
         $date =  new \DateTime("now");
-        $invoiceTransaction = self::create(
+        $invoiceTransaction = InvoiceTransactionModel::create(
             [
                 'invoice_id' => $entity->id,
                 'created_by_id'    => $entity->created_by_id,
@@ -126,8 +126,7 @@ class IpdModel extends Model
                 'sub_total' => $admissionFee->price,
             ]
         );
-        $amount = InvoiceParticularModel::where('hms_invoice_id', $entity->id)
-            ->sum('sub_total');
+        $amount = InvoiceParticularModel::where('hms_invoice_id', $entity->id)->sum('sub_total');
         $invoiceTransaction->update(['sub_total' => $amount , 'total' => $amount]);
         $entity->update(['sub_total' => $amount , 'total' => $amount]);
         return $amount;

@@ -58,7 +58,12 @@ class HospitalConfigModel extends Model
         return $this->hasOne(ParticularModel::class, 'id','ot_fee_id');
     }
 
-     public function consultant_doctor()
+    public function emergency_room()
+    {
+        return $this->hasOne(ParticularModel::class, 'id','emergency_room_id');
+    }
+
+    public function consultant_doctor()
     {
         return $this->hasOne(ParticularModel::class, 'id','consultant_by_id');
     }
