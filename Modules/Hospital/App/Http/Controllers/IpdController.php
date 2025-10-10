@@ -127,69 +127,12 @@ class IpdController extends Controller
         return $data;
     }
 
-
-
-    /**
-     * Show the specified resource.
-     */
-    public function prescription(Request $request , $id)
-    {
-        $service = new JsonRequestResponse();
-        $input = $request->validated();
-        DB::beginTransaction();
-        try {
-
-            $input['domain_id'] = $this->domain['global_id'];
-            $entity = PatientModel::create($input);
-            $invConfig = $this->domain['inv_config'];
-            $hmsConfig = $this->domain['hms_config'];
-            $config = HospitalConfigModel::find($hmsConfig);
-            if($entity){
-                OPDModel::insertHmsInvoice($invConfig,$config, $entity,$input);
-            }
-            $accountingConfig = AccountingModel::where('id', $this->domain['acc_config'])->first();
-            $ledgerExist = AccountHeadModel::where('customer_id', $entity->id)->where('config_id', $this->domain['acc_config'])->where('parent_id', $config->account_customer_id)->first();
-            if (empty($ledgerExist)) {
-                AccountHeadModel::insertCustomerLedger($accountingConfig, $entity);
-            }
-            DB::commit();
-            $data = $service->returnJosnResponse($entity);
-            return $data;
-        } catch (\Exception $e) {
-            // Something went wrong, rollback the transaction
-            DB::rollBack();
-
-            // Optionally log the exception for debugging purposes
-            \Log::error('Error storing domain and related data: ' . $e->getMessage());
-
-            // Return an error response
-            $response = new Response();
-            $response->headers->set('Content-Type', 'application/json');
-            $response->setContent(json_encode([
-                'message' => 'An error occurred while saving the domain and related data.',
-                'error' => $e->getMessage(),
-                'status' => Response::HTTP_INTERNAL_SERVER_ERROR,
-            ]));
-            $response->setStatusCode(Response::HTTP_INTERNAL_SERVER_ERROR);
-            return $response;
-        }
-    }
-
-
     /**
      * Show the form for editing the specified resource.
      */
     public function edit($id)
     {
-        $service = new JsonRequestResponse();
-        $entity = OPDModel::find($id);
 
-        if (!$entity){
-            $entity = 'Data not found';
-        }
-
-        $data = $service->returnJosnResponse($entity);
-        return $data;
     }
 
     /**

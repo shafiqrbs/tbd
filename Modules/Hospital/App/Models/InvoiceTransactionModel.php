@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Support\Facades\DB;
 use Modules\AppsApi\App\Services\GeneratePatternCodeService;
 use Modules\Core\App\Models\CustomerModel;
+use Modules\Core\App\Models\UserModel;
 use Modules\Hospital\App\Entities\InvoiceParticular;
 use Modules\Inventory\App\Models\SalesItemModel;
 use Modules\Inventory\App\Models\SalesModel;
@@ -35,6 +36,17 @@ class InvoiceTransactionModel extends Model
             $date =  new \DateTime("now");
             $model->updated_at = $date;
         });
+    }
+
+    public function items()
+    {
+        return $this->hasMany(InvoiceParticularModel::class, 'invoice_transaction_id');
+    }
+
+
+    public function createdDoctorInfo()
+    {
+        return $this->hasOne(UserModel::class, 'id', 'created_by_id');
     }
 
     public static function insertInvestigations($domain,$id)
@@ -89,7 +101,7 @@ class InvoiceTransactionModel extends Model
         if (!empty($investigations) && is_array($investigations)) {
             $invoiceTransaction = self::create(
                 [
-                    'invoice_id' => $invoice->id,
+                    'hms_invoice_id' => $invoice->id,
                     'created_by_id'    => $domain['user_id'],
                     'mode' => 'investigation',
                     'updated_at'    => $date,
@@ -129,7 +141,7 @@ class InvoiceTransactionModel extends Model
         if (!empty($medicines) && is_array($medicines)) {
             $invoiceTransaction = self::create(
                 [
-                    'invoice_id' => $invoice->id,
+                    'hms_invoice_id' => $invoice->id,
                     'mode' => 'medicine',
                     'created_by_id'    => $domain['user_id'],
                     'updated_at'    => $date,
@@ -199,7 +211,7 @@ class InvoiceTransactionModel extends Model
         if (!empty($items) && is_array($items)) {
             $invoiceTransaction = self::create(
                 [
-                    'invoice_id' => $invoice->id,
+                    'hms_invoice_id' => $invoice->id,
                     'created_by_id'    => $domain['user_id'],
                     'mode' => 'room',
                     'updated_at'    => $date,
@@ -239,7 +251,7 @@ class InvoiceTransactionModel extends Model
         if (!empty($items) && is_array($items)) {
             $invoiceTransaction = self::create(
                 [
-                    'invoice_id' => $invoice->id,
+                    'hms_invoice_id' => $invoice->id,
                     'created_by_id'    => $domain['user_id'],
                     'mode' => 'advice',
                     'updated_at'    => $date,

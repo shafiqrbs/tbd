@@ -3,6 +3,7 @@
 use App\Http\Middleware\HeaderAuthenticationMiddleware;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use Modules\Hospital\App\Http\Controllers\BillingController;
 use Modules\Hospital\App\Http\Controllers\CategoryController;
 use Modules\Hospital\App\Http\Controllers\EpharamaController;
 use Modules\Hospital\App\Http\Controllers\HospitalController;
@@ -74,7 +75,6 @@ Route::prefix('/hospital')->middleware([HeaderAuthenticationMiddleware::class])-
     Route::post('/core/health-share', [HospitalController::class,'healthShare'])->name('healthShare');
     Route::prefix('core')->middleware([HeaderAuthenticationMiddleware::class])->group(function() {
         Route::get('/user-import', [HospitalController::class,'userImport'])->name('user-import');
-
         Route::apiResource('particular', ParticularController::class)
             ->middleware([HeaderAuthenticationMiddleware::class])
             ->names([
@@ -186,13 +186,14 @@ Route::prefix('/hospital')->middleware([HeaderAuthenticationMiddleware::class])-
 
     Route::get('/epharma/barcode/{barcode}', [EpharamaController::class,'patientPrescription'])->name('patient_prescription');
     Route::prefix('lab-investigation')->name('lab-investigation.')->group(function () {
-        /*Route::prefix('report')->name('return.')->group(function () {
-            Route::get('{id}', [LabInvestigationController::class, 'edit'])->name('edit');
-        });*/
         Route::apiResource('', LabInvestigationController::class)->parameters(['' => 'id']);
         Route::post('/report/inline-update/{id}', [LabInvestigationController::class,'inlineUpdate'])->name('inline_update');
         Route::get('{id}/report/{reportId}', [LabInvestigationController::class, 'report'])->name('report');
+    });
 
+    Route::prefix('billing')->name('billing')->group(function () {
+        Route::apiResource('', BillingController::class)->parameters(['' => 'id']);
+        Route::get('{id}/payment/{transactionId}', [BillingController::class, 'transaction'])->name('transaction');
     });
 
     Route::prefix('reports')->middleware([HeaderAuthenticationMiddleware::class])->group(function() {

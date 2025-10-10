@@ -26,7 +26,7 @@ class InvoiceTransaction
      * @ORM\ManyToOne(targetEntity="Invoice")
      * @ORM\JoinColumn(onDelete="CASCADE")
      **/
-    private $invoice;
+    private $hmsInvoice;
 
     /**
      * @ORM\ManyToOne(targetEntity="Prescription")
@@ -106,9 +106,9 @@ class InvoiceTransaction
     /**
      * @var string
      *
-     * @ORM\Column(name="process", type="string", length=50, nullable=true)
+     * @ORM\Column(name="process", type="string", length=50, nullable=true,options={"default"="New"})
      */
-    private $process ='Pending';
+    private $process;
 
     /**
      * @var string
