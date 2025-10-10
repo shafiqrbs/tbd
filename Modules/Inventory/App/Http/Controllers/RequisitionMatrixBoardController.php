@@ -139,6 +139,17 @@ class   RequisitionMatrixBoardController extends Controller
                 $itemsToInsert = [];
 
                 foreach ($groupedItems as $val) {
+                    $findProItem = DB::table('pro_item')
+                        ->where('item_id', $val['vendor_stock_item_id'])
+                        ->where('config_id', $this->domain['pro_config'])
+                        ->where('process','approved')
+                        ->first();
+
+                    $warehouseId = $this->domain['warehouse_id'];
+                    if ($findProItem) {
+                        $warehouseId = $findProItem->warehouse_id;
+                    }
+
                     $itemsToInsert[] = [
                         'customer_stock_item_id' => $val['customer_stock_item_id'],
                         'vendor_stock_item_id' => $val['vendor_stock_item_id'],
@@ -161,14 +172,15 @@ class   RequisitionMatrixBoardController extends Controller
 //                        'vendor_stock_quantity' => $val['vendor_stock_quantity'],
                         'vendor_stock_quantity' => CurrentStockModel::getCurrentStockByWarehouseAndStockItemId(
                             $this->domain['config_id'],
-                            $this->domain['warehouse_id'],
+                            $warehouseId,
                             $val['vendor_stock_item_id']
                         ),
                         'status' => true,
                         'process' => 'Created',
                         'requisition_board_id' => $board->id,
                         'created_at' => now(),
-                        'warehouse_id' => $this->domain['warehouse_id'],
+                        'warehouse_id' => $warehouseId,
+                        
                     ];
                     // Check if a Generated record already exists for this vendor and expected date
                 }
