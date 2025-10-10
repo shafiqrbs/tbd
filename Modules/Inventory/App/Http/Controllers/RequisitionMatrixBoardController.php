@@ -272,7 +272,7 @@ class   RequisitionMatrixBoardController extends Controller
                     'id' => $group->first()['id'],
                     'vendor_stock_quantity' => $group->first()['vendor_stock_quantity'],
                     'total_approved_quantity' => $group->sum('approved_quantity'),
-                    'is_production_item' => DB::table('pro_item')->where('item_id', $group->first()['vendor_stock_item_id'])->where('config_id', $this->domain['pro_config'])->where('process','approved')->exists(),
+                    'is_production_item' => DB::table('pro_item')->where('item_id', $group->first()['vendor_stock_item_id'])->where('config_id', $this->domain['pro_config'])->exists(),
                 ];
 
                 foreach ($shops as $shop) {
