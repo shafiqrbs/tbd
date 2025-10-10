@@ -71,6 +71,10 @@ class RequisitionController extends Controller
             $input['status'] = true;
             $input['process'] = "Created";
 
+            $input['warehouse_id'] = !empty($input['warehouse_id'])
+                ? $input['warehouse_id']
+                : $this->domain['warehouse_id'];
+
             $findVendor = VendorModel::find($input['vendor_id']);
             if (!$findVendor) {
                 throw new \Exception("Vendor not found");
@@ -114,7 +118,7 @@ class RequisitionController extends Controller
                         'purchase_price' => $val['purchase_price'],
                         'sales_price' => $val['sales_price'],
                         'sub_total' => $val['sub_total'],
-                        'warehouse_id' => $input['warehouse_id'] ?? $this->domain['warehouse_id'],
+                        'warehouse_id' => $requisition->warehouse_id,
                         'unit_id' => $findProduct->unit_id,
                         'unit_name' => $customerStockItem->uom,
                         'created_at' => now(),

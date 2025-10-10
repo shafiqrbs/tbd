@@ -715,6 +715,7 @@ class ProductionBatchModel extends Model
             ->groupBy('vendor_id');
 
         $vendorIds = $inQuery->keys();
+        dump($inQuery);
         $vendors = VendorModel::whereIn('id', $vendorIds)->get()->keyBy('id');
         $configs = ConfigModel::whereIn('domain_id', $vendors->pluck('sub_domain_id'))->get()->keyBy('domain_id');
 
