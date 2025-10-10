@@ -146,6 +146,7 @@ class User
 	/**
      * @var Setting
 	 * @ORM\ManyToOne(targetEntity="Modules\Core\App\Entities\Setting")
+     * @ORM\JoinColumn(onDelete="CASCADE")
      * @ORM\JoinColumns({
      *   @ORM\JoinColumn(name="employee_group_id", referencedColumnName="id", nullable=true)
      * })
