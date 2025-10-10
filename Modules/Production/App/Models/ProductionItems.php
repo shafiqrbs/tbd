@@ -96,10 +96,9 @@ class ProductionItems extends Model
     public static function insertUpdate($configId,$itemId,$warehouseId){
 
         self::updateOrCreate(
-            ['item_id' => $itemId], // condition
+            ['item_id' => $itemId,'config_id'=> $configId], // condition
             [
                 'warehouse_id' => $warehouseId,
-                'config_id'    => $configId,
                 'status'       => 1,
                 'is_delete'     => 0
             ]
