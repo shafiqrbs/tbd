@@ -20,6 +20,14 @@ class TreatmentMedicineModel extends Model
 
     protected $fillable = [];
 
+    public function medicineDosage()
+    {
+        return $this->hasOne(MedicineDosageModel::class, 'id', 'medicine_dosage_id');
+    }
 
+    public function medicineBymeal()
+    {
+        return $this->hasOne(MedicineDosageModel::class, 'id', 'medicine_bymeal_id');
+    }
 
 }

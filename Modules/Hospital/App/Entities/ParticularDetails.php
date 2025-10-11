@@ -48,6 +48,13 @@ class ParticularDetails
 
      /**
      * @ORM\ManyToOne(targetEntity="ParticularMode")
+     * @ORM\JoinColumn(name="investigation_group_id", referencedColumnName="id", nullable=true, onDelete="cascade")
+     **/
+    private $investigationGroup;
+
+
+     /**
+     * @ORM\ManyToOne(targetEntity="ParticularMode")
      * @ORM\JoinColumn(name="patient_type_id", referencedColumnName="id", nullable=true, onDelete="cascade")
      **/
     private $patientType;
@@ -479,6 +486,7 @@ class ParticularDetails
      * @ORM\Column(type="boolean",options={"default"="true"})
      */
     private $isReportContent;
+
 
     /**
      * @var boolean

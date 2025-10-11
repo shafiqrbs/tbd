@@ -37,6 +37,8 @@ class TreatmentMedicineRequest extends FormRequest
                     'by_meal' => 'string|nullable',
                     'duration' => 'string|nullable',
                     'quantity' => 'integer|nullable',
+                    'medicine_dosage_id' => 'integer|nullable',
+                    'medicine_bymeal_id' => 'integer|nullable',
                 ];
             }
             case 'PUT':
@@ -51,6 +53,8 @@ class TreatmentMedicineRequest extends FormRequest
                     'by_meal' => 'string|nullable',
                     'duration' => 'string|nullable',
                     'quantity' => 'integer|nullable',
+                    'medicine_dosage_id' => 'integer|nullable',
+                    'medicine_bymeal_id' => 'integer|nullable',
                 ];
             }
 

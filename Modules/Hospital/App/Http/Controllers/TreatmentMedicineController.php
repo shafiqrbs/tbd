@@ -63,7 +63,7 @@ class TreatmentMedicineController extends Controller
     public function show($id)
     {
 
-        $entity = ParticularModel::with(['particularDetails','particularDetails.patientMode','particularDetails.paymentMode','particularDetails.genderMode','particularDetails.roomNo','particularDetails.cabinMode'])->find($id);
+        $entity = ParticularModel::with(['treatmentMedicineFormat','treatmentMedicineFormat.medicineDosage','treatmentMedicineFormat.medicineBymeal'])->find($id);
         if (!$entity) {
             $entity = 'Data not found';
         }

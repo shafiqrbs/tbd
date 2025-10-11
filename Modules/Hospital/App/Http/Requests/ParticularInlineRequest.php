@@ -36,7 +36,9 @@ class ParticularInlineRequest extends FormRequest
                     'store_id' => 'nullable',
                     'status' => 'nullable',
                     'is_available' => 'nullable',
+                    'report_format' => 'nullable',
                     'opd_referred' => 'nullable',
+                    'investigation_group' => 'nullable',
                     'price' => 'nullable',
 
 

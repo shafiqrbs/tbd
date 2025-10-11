@@ -146,6 +146,7 @@ class ParticularController extends Controller
             $findParticular->name = $input['name'];
             $findParticular->display_name = $input['name'];
         }
+
         if (array_key_exists('opd_referred', $input)) {
             $findParticular->opd_referred = $findParticular->opd_referred ? 0:1;
         }
@@ -159,6 +160,10 @@ class ParticularController extends Controller
 
         if ($findParticular->particularDetails) {
             $updateDetails = [];
+
+            if (array_key_exists('investigation_group_id', $input)) {
+                $updateDetails['investigation_group_id'] = $input['investigation_group_id'];
+            }
 
             if (array_key_exists('opd_room_id', $input)) {
                 $updateDetails['room_id'] = $input['opd_room_id'];

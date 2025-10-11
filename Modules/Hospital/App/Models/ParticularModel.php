@@ -35,6 +35,16 @@ class ParticularModel extends Model
         return $this->hasMany(TreatmentMedicineModel::class, 'treatment_template_id', 'id');
     }
 
+    public function medicineDosage()
+    {
+        return $this->belongsTo(MedicineDosageModel::class, 'dosage_id');
+    }
+
+    public function medicineBymeal()
+    {
+        return $this->belongsTo(MedicineDosageModel::class, 'bymeal_id');
+    }
+
 
     public static function getRecords($request,$domain){
 
@@ -54,6 +64,7 @@ class ParticularModel extends Model
             ->leftJoin('hms_particular_mode as genderMode','genderMode.id','=','hms_particular_details.gender_mode_id')
             ->leftJoin('hms_particular_mode as paymentMode','paymentMode.id','=','hms_particular_details.payment_mode_id')
             ->leftJoin('hms_particular_mode as treatmentMode','treatmentMode.id','=','hms_particular_details.treatment_mode_id')
+            ->leftJoin('hms_particular_mode as investigationGroup','investigationGroup.id','=','hms_particular_details.investigation_group_id')
             ->select([
                 'hms_particular.id',
                 'hms_particular.employee_id',
@@ -72,12 +83,15 @@ class ParticularModel extends Model
                 'paymentMode.name as payment_mode_name',
                 'genderMode.name as gender_mode_name',
                 'treatmentMode.name as  treatment_mode_name',
+                'investigationGroup.id as  investigation_group_id',
+                'investigationGroup.name as  investigation_group_name',
                 DB::raw('DATE_FORMAT(hms_particular.created_at, "%d-%M-%Y") as created'),
                 'hms_particular_type.name as particular_type_name',
                 'hms_particular_type.slug as particular_type_slug',
                 'hms_particular_details.unit_id',
                 'hms_particular_details.room_id as opd_room_id',
                 'hms_particular_details.store_id as store_id',
+                'hms_particular_details.report_format as report_format',
             ]);
 
         if (!empty($request['term'])) {
@@ -146,7 +160,7 @@ class ParticularModel extends Model
                 'hms_particular.id',
                 'hms_particular.name',
                 'treatmentMode.name as  treatment_mode_name',
-            ])->with('treatmentMedicineFormat');
+            ]);
 
         if (isset($request['particular_type']) && !empty($request['particular_type'])){
             $entity = $entity->where('hms_particular_master_type.slug',$request['particular_type']);
@@ -154,7 +168,26 @@ class ParticularModel extends Model
         if (isset($request['treatment_mode']) && !empty($request['treatment_mode'])){
             $entity = $entity->where('treatmentMode.slug',$request['treatment_mode']);
         }
-        $entities = $entity->get();
+        $entities = $entity->get()->map(function ($item) {
+            // Transform nested relations
+            $item->treatmentMedicineFormat = $item->treatmentMedicineFormat->map(function ($format) {
+                return [
+                    'id'  => $format->medicine_id ?? null,
+                    'medicine_id'  => $format->medicine_id ?? null,
+                    'medicine_name'  => $format->id ?? null,
+                    'generic'  => $format->generic ?? null,
+                    'duration'  => $format->duration ?? null,
+                    'quantity'  => $format->quantity ?? null,
+                    'medicine_dosage_id'  => $format->medicineDosage->id ?? null,
+                    'dosage' => $format->medicineDosage->name ?? null,
+                    'dosage_quantity' => $format->medicineDosage->quantity ?? null,
+                    'medicine_bymeal_id' => $format->medicineBymeal->id ?? null,
+                    'by_meal' => $format->medicineBymeal->name ?? null,
+                ];
+            });
+
+            return $item;
+        });
         return $entities;
 
     }
