@@ -64,7 +64,7 @@ class InvoiceModel extends Model
 
     public function invoice_transaction()
     {
-        return $this->hasMany(InvoiceTransactionModel::class, 'invoice_id');
+        return $this->hasMany(InvoiceTransactionModel::class, 'hms_invoice_id');
     }
 
     public function room()
@@ -437,7 +437,7 @@ class InvoiceModel extends Model
                 'cor_customers.identity_mode',
                 'cor_customers.address',
                 'cor_customers.permanent_address',
-                DB::raw('DATE_FORMAT(cor_customers.dob, "%d-%m-%y") as dob'),
+                DB::raw('DATE_FORMAT(cor_customers.dob, "%m-%d-%y") as dob'),
                 'cor_customers.identity_mode as identity_mode',
                 'hms_invoice.year as year',
                 'hms_invoice.month as month',
@@ -469,7 +469,7 @@ class InvoiceModel extends Model
             ->with(['invoice_transaction' => function ($query) {
                 $query->select([
                     'hms_invoice_transaction.id',
-                    'hms_invoice_transaction.invoice_id',
+                    'hms_invoice_transaction.hms_invoice_id',
                     'hms_invoice_transaction.created_by_id',
                     'hms_invoice_transaction.mode',
                     DB::raw('DATE_FORMAT(hms_invoice_transaction.created_at, "%d-%m-%y") as created'),

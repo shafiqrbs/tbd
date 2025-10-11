@@ -58,7 +58,7 @@ class InvoiceTransactionModel extends Model
         if (!empty($investigations) && is_array($investigations)) {
             $invoiceTransaction = self::updateOrCreate(
                 [
-                    'invoice_id'                    => $prescription->hms_invoice_id,
+                    'hms_invoice_id'                    => $prescription->hms_invoice_id,
                     'prescription_id'               => $prescription->id,
                 ],
                 [
