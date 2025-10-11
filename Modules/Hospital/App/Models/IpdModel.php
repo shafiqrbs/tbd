@@ -165,6 +165,8 @@ class IpdModel extends Model
 
         $entity = self::find($id);
         $patient = PatientModel::find($entity->customer_id);
+        $dob = (isset($data['dob']) and $data['dob']) ? $data['dob']:'';
+        $birth = new \DateTime($dob);
         if ($patient) {
             $patient->update([
                 'name' => $data['name'] ?? null,
@@ -174,6 +176,7 @@ class IpdModel extends Model
                 'address' => $data['address'] ?? null,
                 'identity_mode' => $data['identity_mode'] ?? null,
                 'nid' => $data['identity'] ?? null,
+                'dob' => $dob ? $birth : null,
                 'father_name' => $data['father_name'] ?? null,
                 'mother_name' => $data['mother_name'] ?? null,
                 'religion_id' => $data['religion_id'] ?? null,
