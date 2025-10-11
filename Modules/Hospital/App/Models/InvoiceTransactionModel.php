@@ -305,7 +305,7 @@ class InvoiceTransactionModel extends Model
             'hms_invoice.id' => $id,
             'hms_invoice_transaction.mode' => $mode
         ])
-            ->join('hms_invoice', 'hms_invoice.id', '=', 'hms_invoice_transaction.invoice_id')
+            ->join('hms_invoice', 'hms_invoice.id', '=', 'hms_invoice_transaction.hms_invoice_id')
             ->with(['invoiceParticular' => function ($query) {
                 $query->select([
                     'hms_invoice_particular.id',
@@ -329,7 +329,7 @@ class InvoiceTransactionModel extends Model
             'hms_invoice.id' => $id,
             'hms_invoice_transaction.mode' => 'medicine'
         ])
-            ->join('hms_invoice', 'hms_invoice.id', '=', 'hms_invoice_transaction.invoice_id')
+            ->join('hms_invoice', 'hms_invoice.id', '=', 'hms_invoice_transaction.hms_invoice_id')
             ->leftJoin('inv_sales', 'inv_sales.id', '=', 'hms_invoice_transaction.sale_id')
             ->with(['salesItems' => function ($query) {
                 $query->select([
