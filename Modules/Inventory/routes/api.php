@@ -166,7 +166,7 @@ Route::prefix('/inventory')->middleware([HeaderAuthenticationMiddleware::class,L
                 Route::post('quantity-update', [RequisitionMatrixBoardController::class,'matrixBoardProductionQuantityUpdate']);
                 Route::post('process', [RequisitionMatrixBoardController::class,'matrixBoardProductionProcess']);
                 Route::post('approve/{id}', [RequisitionMatrixBoardController::class,'matrixBoardProductionApproved']);
-                Route::get('vendor-requisition/{id}', [RequisitionMatrixBoardController::class,'matrixBoardProductionToRequisition']);
+//                Route::get('vendor-requisition/{id}', [RequisitionMatrixBoardController::class,'matrixBoardProductionToRequisition']);
             });
         });
     });

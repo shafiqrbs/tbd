@@ -44,6 +44,7 @@ class SalesItemModel extends Model
         'production_date',
         'expired_date',
         'purchase_item_id',
+        'requisition_item_id',
     ];
 
     public static function boot() {

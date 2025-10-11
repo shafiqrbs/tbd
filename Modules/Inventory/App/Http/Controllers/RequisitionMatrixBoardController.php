@@ -79,6 +79,7 @@ class   RequisitionMatrixBoardController extends Controller
                     'message' => 'A board has already been created. Please settle the existing one before creating a new one.',
                 ], ResponseAlias::HTTP_CONFLICT);
             }
+
             // Fetch Requisition Items
             $getItems = RequisitionItemModel::where([
                 ['inv_requisition_item.vendor_config_id', $vendorConfigId],
@@ -108,11 +109,12 @@ class   RequisitionMatrixBoardController extends Controller
                     'vendor_stock_item.quantity as vendor_stock_quantity',
                     'inv_requisition.id as requisition_id',
                 ])
-                ->join('inv_requisition', 'inv_requisition.id', '=', 'inv_requisition_item.requisition_id')
-                ->join('inv_stock as vendor_stock_item', 'vendor_stock_item.id', '=', 'inv_requisition_item.vendor_stock_item_id')
-                ->join('cor_customers', 'cor_customers.id', '=', 'inv_requisition.customer_id')
+                ->leftjoin('inv_requisition', 'inv_requisition.id', '=', 'inv_requisition_item.requisition_id')
+                ->leftjoin('inv_stock as vendor_stock_item', 'vendor_stock_item.id', '=', 'inv_requisition_item.vendor_stock_item_id')
+                ->leftjoin('cor_customers', 'cor_customers.id', '=', 'inv_requisition.customer_id')
                 ->get()
                 ->toArray();
+
             if (count($getItems) > 0) {
                 $board = RequisitionBoardModel::create([
                     'config_id' => $vendorConfigId,
@@ -153,6 +155,7 @@ class   RequisitionMatrixBoardController extends Controller
                     $itemsToInsert[] = [
                         'customer_stock_item_id' => $val['customer_stock_item_id'],
                         'vendor_stock_item_id' => $val['vendor_stock_item_id'],
+                        'requisition_item_id' => $val['requisition_item_id'],
                         'customer_config_id' => $val['customer_config_id'],
                         'vendor_config_id' => $val['vendor_config_id'],
                         'unit_id' => $val['unit_id'],
@@ -180,7 +183,7 @@ class   RequisitionMatrixBoardController extends Controller
                         'requisition_board_id' => $board->id,
                         'created_at' => now(),
                         'warehouse_id' => $warehouseId,
-                        
+
                     ];
                     // Check if a Generated record already exists for this vendor and expected date
                 }
@@ -318,6 +321,7 @@ class   RequisitionMatrixBoardController extends Controller
                     'id' => $group->first()['id'],
                     'customer_stock_item_id' => $group->first()['customer_stock_item_id'],
                     'vendor_stock_item_id' => $group->first()['vendor_stock_item_id'],
+                    'requisition_item_id' => $group->first()['id'],
                     'customer_config_id' => $group->first()['customer_config_id'],
                     'vendor_config_id' => $group->first()['vendor_config_id'],
                     'quantity' => $group->sum('quantity'),
@@ -565,6 +569,7 @@ class   RequisitionMatrixBoardController extends Controller
                 'sub_total' => $item['sub_total'],
                 'stock_item_id' => $item['vendor_stock_item_id'],
                 'warehouse_id' => $item['warehouse_id'],
+                'requisition_item_id' => $item['requisition_item_id'],
                 'config_id' => $this->domain['config_id'],
                 'created_at' => now(),
                 'updated_at' => now(),
@@ -723,6 +728,7 @@ class   RequisitionMatrixBoardController extends Controller
             ]);
             $productionBatch = ProductionBatchModel::create([
                 'config_id' => $firstItem->config_id,
+                'warehouse_id' => $firstItem->warehouse_id,
                 'code' => $pattern['code'],
                 'invoice' => $pattern['generateId'],
                 'process' => 'Draft',
@@ -741,6 +747,7 @@ class   RequisitionMatrixBoardController extends Controller
                     'production_item_id' => $findProductionMatrixItem->pro_item_id,
                     'issue_quantity' => $findProductionMatrixItem->demand_quantity,
                     'batch_id' => $productionBatch->id,
+                    'warehouse_id' => $findProductionMatrixItem->warehouse_id,
                 ]);
 
                 ProductionExpense::handleProductionExpenseBatchItemIdWise($productionBatchItem, $findProductionMatrixItem->config_id);
@@ -802,7 +809,7 @@ class   RequisitionMatrixBoardController extends Controller
                 ]);
             }
 
-            ProductionBatchModel::generateProductionToVendorRequisition($this->domain->toArray(),$id);
+            ProductionBatchModel::generateProductionToVendorRequisition($this->domain->toArray(),$id,$findProductionBatch);
 
             DB::commit();
 
@@ -821,12 +828,12 @@ class   RequisitionMatrixBoardController extends Controller
         }
     }
 
-    public function matrixBoardProductionToRequisition(Request $request ,$id)
+    /*public function matrixBoardProductionToRequisition(Request $request ,$id)
     {
 
         $domain = $this->domain;
         $userId = $request->header('X-Api-User');
         ProductionBatchModel::generateProductionToVendorRequisition($domain,$userId,$id);
-    }
+    }*/
 
 }

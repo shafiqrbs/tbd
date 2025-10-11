@@ -43,6 +43,12 @@ class SalesItem
     private  $purchaseItem;
 
     /**
+     * @ORM\ManyToOne(targetEntity="RequisitionItem" , cascade={"detach","merge"} )
+     * @ORM\JoinColumn(name="requisition_item_id", onDelete="CASCADE")
+     **/
+    private  $requisitionItem;
+
+    /**
      * @ORM\ManyToOne(targetEntity="Modules\Inventory\App\Entities\Config" , cascade={"detach","merge"} )
      * @ORM\JoinColumn(onDelete="CASCADE")
      **/

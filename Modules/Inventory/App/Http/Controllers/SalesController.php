@@ -33,6 +33,7 @@ use Modules\Inventory\App\Models\ConfigSalesModel;
 use Modules\Inventory\App\Models\ProductModel;
 use Modules\Inventory\App\Models\PurchaseItemModel;
 use Modules\Inventory\App\Models\PurchaseModel;
+use Modules\Inventory\App\Models\RequisitionItemModel;
 use Modules\Inventory\App\Models\SalesItemModel;
 use Modules\Inventory\App\Models\SalesModel;
 use Modules\Inventory\App\Models\SettingModel;
@@ -327,6 +328,13 @@ class SalesController extends Controller
                             $subtotal = $item['quantity'] * $purchasePrice;
                             $totalPrice += $subtotal;
 
+                            $findRequisitionItem = RequisitionItemModel::find($item['requisition_item_id']);
+
+                            $warehouseId = null;
+                            if ($findRequisitionItem){
+                                $warehouseId = $findRequisitionItem->warehouse_id;
+                            }
+
                             $records[] = [  // Add each record to the $records array
                                 'purchase_id'   => $purchase->id,
                                 'created_by_id' => $this->domain['user_id'],
@@ -338,6 +346,7 @@ class SalesController extends Controller
                                 'expired_date'     => $item->expired_date ?? null,
                                 'sub_total'     => $subtotal,
                                 'mode'          => 'purchase',
+                                'warehouse_id'          => $warehouseId,
                                 'updated_at'    => now(),
                                 'stock_item_id' => $getStockItemId,
                                 'parent_sales_item_id' => $item['id'],
