@@ -129,12 +129,11 @@ class OpdController extends Controller
             }else{
                 $dob = new \DateTime($input['dob']);
             }
-            $input['dob'] = $dob;
             $exist = PatientModel::where(['name' => $input['name']],['mobile' => $input['mobile']])->first();
             if($exist){
                 $entity = $exist;
             }else{
-                $customerId =  $dob = (isset($input['customer_id']) and $input['customer_id']) ? $input['customer_id'] : '';
+                $customerId = (isset($input['customer_id']) and $input['customer_id']) ? $input['customer_id'] : '';
                 $entity = PatientModel::updateOrCreate(
                     ['id' => $customerId ?? null],
                     [
@@ -142,7 +141,7 @@ class OpdController extends Controller
                         'name'      => $input['name'] ?? null,
                         'mobile'    => $input['mobile'] ?? null,
                         'address'    => $input['address'] ?? null,
-                        'age'    => $input['age'] ?? null,
+                        'dob'    => $dob ?? null,
                         'upazilla_id'    => $input['upazilla_id'] ?? null,
                         'gender'    => $input['gender'] ?? null,
                         'identity_mode'    => $input['identity_mode'] ?? null,

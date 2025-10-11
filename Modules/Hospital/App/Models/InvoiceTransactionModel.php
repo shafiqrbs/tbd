@@ -350,7 +350,6 @@ class InvoiceTransactionModel extends Model
             ->select(
                 'hms_invoice_transaction.id',
                 'hms_invoice_transaction.sale_id',
-                'hms_invoice_transaction.invoice_id',
                 'inv_sales.id as inv_sales_id',
                 'hms_invoice.id as hms_invoice_id',
                 DB::raw('DATE_FORMAT(hms_invoice_transaction.updated_at, "%d-%m-%y") as created')
