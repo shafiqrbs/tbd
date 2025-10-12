@@ -182,57 +182,63 @@ class SettingModel extends Model
     {
         $findParentProductType = self::find($parentProductType);
         if (!$findParentProductType) {
-            return null; // or throw an exception
+            return null; // or throw new \Exception("Invalid parent product type");
         }
 
-        // Find child product type under same setting + config
+        // Cache setting IDs to avoid duplicate queries
+        $settingSlugs = \Modules\Utility\App\Models\SettingModel::whereIn('slug', ['stockable', 'raw-materials'])
+            ->pluck('id', 'slug');
+
+        $stockableSettingId = $settingSlugs['stockable'] ?? null;
+        $rawMaterialSettingId = $settingSlugs['raw-materials'] ?? null;
+
+        if (!$stockableSettingId || !$rawMaterialSettingId) {
+            throw new \Exception("Missing 'stockable' or 'raw-materials' setting in utility table.");
+        }
+
+        // Ensure both exist for this config
+        $stockableProductType = self::updateOrCreate(
+            [
+                'setting_id'  => $stockableSettingId,
+                'config_id'   => $configId,
+                'slug'        => 'stockable',
+                'parent_slug' => 'product-type',
+            ],
+            [
+                'status'        => 1,
+                'name'          => 'Stockable',
+                'is_production' => 0,
+            ]
+        );
+
+        $rawMaterialProductType = self::updateOrCreate(
+            [
+                'setting_id'  => $rawMaterialSettingId,
+                'config_id'   => $configId,
+                'slug'        => 'raw-materials',
+                'parent_slug' => 'product-type',
+            ],
+            [
+                'status'        => 1,
+                'name'          => 'Raw Materials',
+                'is_production' => 0,
+            ]
+        );
+
+        // Now determine which product type ID to return
         $childProductType = self::where('setting_id', $findParentProductType->setting_id)
             ->where('config_id', $configId)
             ->first();
 
-        // If not found, create both possible product types for this config
-        if (!$childProductType) {
-            $stockableSettingId = \Modules\Utility\App\Models\SettingModel::where('slug', 'stockable')->value('id');
-            $rawMaterialSettingId = \Modules\Utility\App\Models\SettingModel::where('slug', 'raw-materials')->value('id');
-
-            // Create if not exists (per config)
-            self::updateOrCreate(
-                [
-                    'setting_id' => $stockableSettingId,
-                    'config_id'  => $configId,
-                    'slug'       => 'stockable',
-                    'parent_slug'=> 'product-type'
-                ],
-                [
-                    'status' => 1,
-                    'name'   => 'Stockable',
-                    'is_production' => 0
-                ]
-            );
-
-            self::updateOrCreate(
-                [
-                    'setting_id' => $rawMaterialSettingId,
-                    'config_id'  => $configId,
-                    'slug'       => 'raw-materials',
-                    'parent_slug'=> 'product-type'
-                ],
-                [
-                    'status' => 1,
-                    'name'   => 'Raw Materials',
-                    'is_production' => 0
-                ]
-            );
-
-            // Default return stockable
-            return self::where('slug', 'stockable')
-                ->where('config_id', $configId)
-                ->value('id');
+        // If parent was "raw-materials", return that
+        if ($childProductType && $childProductType->slug === 'raw-materials') {
+            return $rawMaterialProductType->id;
         }
 
-        // Return the found child product type’s id
-        return $childProductType->id;
+        // Otherwise return "stockable"
+        return $stockableProductType->id;
     }
+
 
 
 
