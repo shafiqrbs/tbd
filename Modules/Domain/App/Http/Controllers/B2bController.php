@@ -569,7 +569,7 @@ class B2bController extends Controller
             'barcode' => $parentProduct->barcode,
             'alternative_name' => $parentProduct->alternative_name,
             'unit_id' => $parentProduct->unit_id,
-            'product_type_id' => $childProductType->id,
+            'product_type_id' => $childProductType?->id ?? null,
             'parent_id' => $parentProduct->id,
             'description' => $parentProduct->description,
             'vendor_id' => $findSubDomain->vendor_id,
