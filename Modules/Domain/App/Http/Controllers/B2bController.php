@@ -524,7 +524,11 @@ class B2bController extends Controller
         // Update child product's status
         $productUpdate->update([
             'status' => $status,
-            'product_type_id' => $childProductType->id,
+            'product_type_id' => (
+                $childProductType && $childProductType->slug === 'raw-materials'
+                    ? 'raw-materials'
+                    : 'stockable'
+                ),
             'vendor_id' => $findSubDomain->vendor_id,
         ]);
 
