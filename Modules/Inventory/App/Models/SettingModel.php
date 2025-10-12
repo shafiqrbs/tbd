@@ -205,7 +205,8 @@ class SettingModel extends Model
                 ],
                 [
                     'status' => 1,
-                    'name'   => 'Stockable'
+                    'name'   => 'Stockable',
+                    'is_production' => 0
                 ]
             );
 
@@ -218,7 +219,8 @@ class SettingModel extends Model
                 ],
                 [
                     'status' => 1,
-                    'name'   => 'Raw Materials'
+                    'name'   => 'Raw Materials',
+                    'is_production' => 0
                 ]
             );
 
