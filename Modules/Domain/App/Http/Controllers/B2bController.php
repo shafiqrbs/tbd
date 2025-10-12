@@ -519,16 +519,12 @@ class B2bController extends Controller
 
     private function updateProductAndStock($parentProduct, $productUpdate, $parentStock, $findSubDomain,$categoryMatrix) {
         $status = $categoryMatrix->status;
-        $findParentProductType = \Modules\Inventory\App\Models\SettingModel::find($parentProduct->product_type_id);
-        $childProductType = \Modules\Inventory\App\Models\SettingModel::where('setting_id', $findParentProductType->setting_id)->where('config_id',$productUpdate->config_id)->first();
+        $findProductTypeId = \Modules\Inventory\App\Models\SettingModel::getProductTypeOrCreate($parentProduct->product_type_id,$productUpdate->config_id);
+
         // Update child product's status
         $productUpdate->update([
             'status' => $status,
-            'product_type_id' => (
-                $childProductType && $childProductType->slug === 'raw-materials'
-                    ? 'raw-materials'
-                    : 'stockable'
-                ),
+            'product_type_id' => $findProductTypeId,
             'vendor_id' => $findSubDomain->vendor_id,
         ]);
 
@@ -562,8 +558,8 @@ class B2bController extends Controller
     }
 
     private function createChildProduct($parentProduct, $category, $childAccConfig, $parentStock,$findSubDomain) {
-        $findParentProductType = \Modules\Inventory\App\Models\SettingModel::find($parentProduct->product_type_id);
-        $childProductType = \Modules\Inventory\App\Models\SettingModel::where('setting_id', $findParentProductType->setting_id)->where('config_id',$childAccConfig)->first();
+        $findProductTypeId = \Modules\Inventory\App\Models\SettingModel::getProductTypeOrCreate($parentProduct->product_type_id,$childAccConfig);
+
         // Create a new child product
         $childProduct = ProductModel::create([
             'category_id' => $category->sub_domain_category_id,
@@ -573,11 +569,7 @@ class B2bController extends Controller
             'barcode' => $parentProduct->barcode,
             'alternative_name' => $parentProduct->alternative_name,
             'unit_id' => $parentProduct->unit_id,
-            'product_type_id' => (
-                $childProductType && $childProductType->slug === 'raw-materials'
-                    ? 'raw-materials'
-                    : 'stockable'
-            ),
+            'product_type_id' => $findProductTypeId,
             'parent_id' => $parentProduct->id,
             'description' => $parentProduct->description,
             'vendor_id' => $findSubDomain->vendor_id,

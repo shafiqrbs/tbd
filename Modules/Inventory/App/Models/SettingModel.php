@@ -5,13 +5,12 @@ namespace Modules\Inventory\App\Models;
 
 use Cviebrock\EloquentSluggable\Sluggable;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Support\Facades\DB;
 
 
 class SettingModel extends Model
 {
-    use HasFactory,Sluggable;
+    use Sluggable;
 
     protected $table = 'inv_setting';
     public $timestamps = true;
@@ -178,6 +177,61 @@ class SettingModel extends Model
             ])
             ->get();
     }
+
+    public static function getProductTypeOrCreate($parentProductType, $configId)
+    {
+        $findParentProductType = self::find($parentProductType);
+        if (!$findParentProductType) {
+            return null; // or throw an exception
+        }
+
+        // Find child product type under same setting + config
+        $childProductType = self::where('setting_id', $findParentProductType->setting_id)
+            ->where('config_id', $configId)
+            ->first();
+
+        // If not found, create both possible product types for this config
+        if (!$childProductType) {
+            $stockableSettingId = \Modules\Utility\App\Models\SettingModel::where('slug', 'stockable')->value('id');
+            $rawMaterialSettingId = \Modules\Utility\App\Models\SettingModel::where('slug', 'raw-materials')->value('id');
+
+            // Create if not exists (per config)
+            self::updateOrCreate(
+                [
+                    'setting_id' => $stockableSettingId,
+                    'config_id'  => $configId,
+                    'slug'       => 'stockable',
+                    'parent_slug'=> 'product-type'
+                ],
+                [
+                    'status' => 1,
+                    'name'   => 'Stockable'
+                ]
+            );
+
+            self::updateOrCreate(
+                [
+                    'setting_id' => $rawMaterialSettingId,
+                    'config_id'  => $configId,
+                    'slug'       => 'raw-materials',
+                    'parent_slug'=> 'product-type'
+                ],
+                [
+                    'status' => 1,
+                    'name'   => 'Raw Materials'
+                ]
+            );
+
+            // Default return stockable
+            return self::where('slug', 'stockable')
+                ->where('config_id', $configId)
+                ->value('id');
+        }
+
+        // Return the found child product type’s id
+        return $childProductType->id;
+    }
+
 
 
 
