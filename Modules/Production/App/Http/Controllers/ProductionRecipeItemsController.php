@@ -7,6 +7,7 @@ use Doctrine\ORM\EntityManager;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\DB;
 use Modules\Core\App\Models\UserModel;
 use Modules\Inventory\App\Entities\StockItem;
 use Modules\Inventory\App\Models\ProductModel;
@@ -206,40 +207,71 @@ class ProductionRecipeItemsController extends Controller
         return $response;
     }
 
-    public function amendmentProcess($id)
-    {
-        $response = new Response();
 
+    public function amendmentProcess(Request $request, $id)
+    {
+        $comment = $request->input('comment');
+
+        // Find production item once
         $item = ProductionItems::find($id);
+        if (!$item) {
+            return response()->json([
+                'message' => 'Production item not found',
+                'status' => ResponseAlias::HTTP_NOT_FOUND
+            ], ResponseAlias::HTTP_NOT_FOUND);
+        }
+
+        // Fetch related data (avoid duplicate queries)
         $getValueAdded = ProductionValueAdded::getValueAddedWithInputGenerate($item->id);
-        $getProductionItem = ProductionItems::find($item->id);
         $getStockItem = StockItemModel::find($item->item_id);
-        $data =[
+
+        $data = [
             'field' => $getValueAdded,
-            'item' => $getProductionItem,
+            'item' => $item,
             'stock_item' => $getStockItem
         ];
-        if($item->process == "approved"){
-            ProductionItemAmendmentModel::generateAmendment($this->domain,$item->id,$data);
-            $item->update(['process' => 'created','is_revised' => 1]);
+
+        try {
+            DB::beginTransaction();
+
+            // If approved, create amendment
+            if ($item->process === "approved") {
+                ProductionItemAmendmentModel::generateAmendment($this->domain, $item->id, $data, $comment);
+
+                $item->update([
+                    'process' => 'created',
+                    'is_revised' => 1
+                ]);
+            }
+
+            DB::commit();
+
+            return response()->json([
+                'status' => ResponseAlias::HTTP_OK,
+                'message' => 'Amendment process successfully.',
+            ], ResponseAlias::HTTP_OK);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            return response()->json([
+                'status' => ResponseAlias::HTTP_INTERNAL_SERVER_ERROR,
+                'message' => 'Failed to process amendment.',
+            ], ResponseAlias::HTTP_INTERNAL_SERVER_ERROR);
         }
-        if (!$item){
-            $response->setContent(json_encode([
-                'message' => 'Production item not found',
-                'status' => Response::HTTP_NOT_FOUND
-            ]));
-            $response->setStatusCode(Response::HTTP_OK);
-            return $response;
-        }
-        $response->headers->set('Content-Type', 'application/json');
-        $response->setContent(json_encode([
-            'status' => Response::HTTP_OK,
-            'message' => 'success',
-            'data' => $data,
-        ]));
-        $response->setStatusCode(Response::HTTP_OK);
-        return $response;
     }
+
+    public function amendmentIndex(Request $request)
+    {
+        $data = ProductionItemAmendmentModel::getRecords($request, $this->domain);
+        return response()->json([
+            'status' => ResponseAlias::HTTP_OK,
+            'message' => 'success',
+            'total' => $data['count'],
+            'data' => $data['items']
+        ], ResponseAlias::HTTP_OK);
+    }
+
 
     public function updateWarehouse(Request $request)
     {

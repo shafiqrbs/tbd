@@ -52,6 +52,13 @@ class ProductionItemAmendment
      */
     private $status = false;
 
+
+    /**
+     * @var string
+     * @ORM\Column(type="string" , nullable=true)
+     */
+    private $comment;
+
     /**
      * @var \DateTime
      * @Gedmo\Timestampable(on="create")

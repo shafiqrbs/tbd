@@ -63,7 +63,12 @@ Route::prefix('/production')->middleware([HeaderAuthenticationMiddleware::class,
     Route::post('/inline-update-value-added', [ProductionRecipeItemsController::class,'inlineUpdateValueAdded'])->name('pro_inline_update_value_added');
     Route::post('/inline-update-element-status', [ProductionRecipeItemsController::class,'inlineUpdateElementStatus'])->name('pro_inline_update_element_status');
     Route::post('/recipe-items-process', [ProductionRecipeItemsController::class,'updateProcess'])->name('pro_item_update_process');
-    Route::post('/recipe-items-amendment/{id}', [ProductionRecipeItemsController::class,'amendmentProcess'])->name('pro_item_amendment_process');
+
+    Route::prefix('production-item-amendments')->group(function() {
+        Route::get('', [ProductionRecipeItemsController::class, 'amendmentIndex']);
+        Route::post('{id}', [ProductionRecipeItemsController::class,'amendmentProcess']);
+
+    });
 
     Route::post('recipe-items/update-warehouse', [ProductionRecipeItemsController::class, 'updateWarehouse'])->name('pro_item_update_warehouse');
 
