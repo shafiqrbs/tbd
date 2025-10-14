@@ -238,12 +238,17 @@ class InvoiceModel extends Model
             $entities = $entities->where('hms_invoice.customer_id',$request['customer_id']);
         }
 
-        if (isset($request['created']) && !empty($request['created'])){
+        /*if (isset($request['created']) && !empty($request['created'])){
             $date = new \DateTime($request['created']);
             $start_date = $date->format('Y-m-d 00:00:00');
             $end_date = $date->format('Y-m-d 23:59:59');
             $entities = $entities->whereBetween('hms_invoice.created_at',[$start_date, $end_date]);
-        }
+        }else{
+            $date = new \DateTime();
+            $start_date = $date->format('Y-m-d 00:00:00');
+            $end_date = $date->format('Y-m-d 23:59:59');
+            $entities = $entities->whereBetween('hms_invoice.created_at',[$start_date, $end_date]);
+        }*/
 
         $total  = $entities->count();
         $entities = $entities->skip($skip)
@@ -574,10 +579,15 @@ class InvoiceModel extends Model
         $start_date = $date->format('Y-m-d 00:00:00');
         $end_date   = $date->format('Y-m-d 23:59:59');
 
+        $config = HospitalConfigModel::find($domain['hms_config']);
+        $emergencyRoomId = $config->emergency_room_id ? $config->emergency_room_id:'';
+
+
         $entities = ParticularModel::where([
             ['hms_particular.config_id', $domain['hms_config']],
             ['hms_particular_master_type.slug', 'opd-room'],
             ['hms_particular.status', 1],
+            ['hms_particular.id', '!=', $emergencyRoomId],
             ['hms_particular.opd_referred', '<>', 1]
         ])
             ->leftJoin('hms_invoice', function($join) use ($start_date, $end_date) {
@@ -588,7 +598,7 @@ class InvoiceModel extends Model
             ->join('hms_particular_master_type', 'hms_particular_master_type.id', '=', 'hms_particular_type.particular_master_type_id')
             ->select(
                 'hms_particular.id as id',
-                DB::raw("CONCAT(hms_particular.name, ' (', COUNT(hms_invoice.id), ')') as name"),
+                DB::raw("hms_particular.name as name"),
                 DB::raw('COUNT(hms_invoice.id) as invoice_count')
             )
             ->groupBy('hms_particular.id', 'hms_particular.name')
@@ -599,6 +609,65 @@ class InvoiceModel extends Model
             ['hms_particular.config_id', $domain['hms_config']],
             ['hms_particular_master_type.slug', 'opd-room'],
             ['hms_particular.status', 1],
+            ['hms_particular.id', '!=', $emergencyRoomId],
+            ['hms_particular.opd_referred', '<>', 1]
+        ])
+            ->leftJoin('hms_invoice', function($join) use ($start_date, $end_date) {
+                $join->on('hms_invoice.room_id', '=', 'hms_particular.id')
+                    ->whereBetween('hms_invoice.created_at', [$start_date, $end_date]);
+            })
+            ->join('hms_particular_type', 'hms_particular_type.id', '=', 'hms_particular.particular_type_id')
+            ->join('hms_particular_master_type', 'hms_particular_master_type.id', '=', 'hms_particular_type.particular_master_type_id')
+            ->select(
+                'hms_particular.id as id'
+            )
+            ->groupBy('hms_particular.id', 'hms_particular.name')
+            ->orderBy(DB::raw('COUNT(hms_invoice.id)'), 'ASC')
+            ->limit(1)
+            ->get()->first()->id;
+
+        return array('ipdRooms' => $entities ,'selectedRoom' => $selected);
+    }
+
+    public static function getIpdRooms($domain)
+    {
+
+
+        $date = new \DateTime();
+        $start_date = $date->format('Y-m-d 00:00:00');
+        $end_date   = $date->format('Y-m-d 23:59:59');
+
+        $config = HospitalConfigModel::find($domain['hms_config']);
+        $emergencyRoomId = $config->emergency_room_id ? $config->emergency_room_id:'';
+
+
+        $entities = ParticularModel::where([
+            ['hms_particular.config_id', $domain['hms_config']],
+            ['hms_particular_master_type.slug', 'opd-room'],
+            ['hms_particular.status', 1],
+            ['hms_particular.id', '!=', $emergencyRoomId],
+            ['hms_particular.opd_referred', '<>', 1]
+        ])
+            ->leftJoin('hms_invoice', function($join) use ($start_date, $end_date) {
+                $join->on('hms_invoice.room_id', '=', 'hms_particular.id')
+                    ->whereBetween('hms_invoice.created_at', [$start_date, $end_date]);
+            })
+            ->join('hms_particular_type', 'hms_particular_type.id', '=', 'hms_particular.particular_type_id')
+            ->join('hms_particular_master_type', 'hms_particular_master_type.id', '=', 'hms_particular_type.particular_master_type_id')
+            ->select(
+                'hms_particular.id as id',
+                DB::raw("hms_particular.name as name"),
+                DB::raw('COUNT(hms_invoice.id) as invoice_count')
+            )
+            ->groupBy('hms_particular.id', 'hms_particular.name')
+            ->orderBy('hms_particular.name', 'ASC')
+            ->get();
+
+        $selected = ParticularModel::where([
+            ['hms_particular.config_id', $domain['hms_config']],
+            ['hms_particular_master_type.slug', 'opd-room'],
+            ['hms_particular.status', 1],
+            ['hms_particular.id', '!=', $emergencyRoomId],
             ['hms_particular.opd_referred', '<>', 1]
         ])
             ->leftJoin('hms_invoice', function($join) use ($start_date, $end_date) {

@@ -190,7 +190,7 @@ class LabInvestigationModel extends Model
                 'admit_department.name as admit_department_name',
                 'admit_doctor.name as admit_doctor_name',
                 'prescription.id as prescription_id',
-                DB::raw('DATE_FORMAT(prescription.created_at, "%d-%m-%y") as prescription_created'),
+                DB::raw('DATE_FORMAT(prescription.created_at, "%d-%m-%Y") as prescription_created'),
                 'prescription_doctor.employee_id as prescription_doctor_id',
                 'prescription_doctor.name as prescription_doctor_name',
             ])
@@ -208,6 +208,8 @@ class LabInvestigationModel extends Model
                     'hms_invoice_particular.assign_labuser_name',
                     'hms_invoice_particular.assign_doctor_name',
                     'hms_invoice_particular.process',
+                    'hms_invoice_particular.barcode',
+                    DB::raw('DATE_FORMAT(hms_invoice_particular.collection_date, "%d-%m-%Y") as collection_date'),
                 ])->join('hms_particular as hms_particular','hms_particular.id','=','hms_invoice_particular.particular_id')
                     ->join('hms_particular_type as hms_particular_type','hms_particular_type.id','=','hms_particular.particular_type_id')
                     ->join('hms_particular_master_type','hms_particular_master_type.id','=','hms_particular_type.particular_master_type_id')

@@ -66,7 +66,6 @@ class HospitalSalesModel extends Model
         $config = $domain['inv_config'];
         $jsonData = json_decode($prescription['json_content']);
         $medicines = ($jsonData->medicines ?? []);
-
         if (!empty($medicines) && is_array($medicines)) {
             if (empty($prescription->sale_id)) {
                 $insertData['config_id'] = $config;
@@ -105,10 +104,11 @@ class HospitalSalesModel extends Model
                         SalesItemModel::updateOrCreate(
                             [
                                 'sale_id' => $sales->id,
-                                'name' => $medicine->medicine_name ?? null, // unique keys
+                                'stock_item_id' => $medicine->medicine_id ?? null,
+                                 // unique keys
                             ],
                             [
-                                'stock_item_id' => $medicine->medicine_id ?? null,
+                                'name' => $medicine->medicine_name ?? null,
                                 'quantity' => $medicine->opd_quantity ?? 0,
                                 'price' => $medicine->price ?? 0,
                                 'updated_at' => $date,
@@ -118,6 +118,8 @@ class HospitalSalesModel extends Model
                     }
                 })->toArray();
             }
+            InvoiceModel::where('id', $prescription->invoice_details->id)
+                ->update(['sales_id' => $sales->id]);
             PrescriptionModel::where('id', $prescription->id)
                 ->update(['sale_id' => $sales->id]);
         }

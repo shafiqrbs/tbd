@@ -102,6 +102,7 @@ class LabInvestigationController extends Controller
             $data['process'] = 'In-progress';
             $data['assign_labuser_id'] = $domain['user_id'];
             $data['assign_labuser_name'] = $domain['user_name'];
+            $data['collection_date'] = new \DateTime();
         }if($entity->process == "In-progress"){
             $data['assign_doctor_id'] = $domain['user_id'];
             $data['assign_doctor_name'] = $domain['user_name'];
