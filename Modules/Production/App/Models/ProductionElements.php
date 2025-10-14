@@ -51,7 +51,7 @@ class ProductionElements extends Model
         $skip = isset($page) && $page!=''? (int)$page*$perPage:0;
 
         $entity = self::where([
-//                    ['pro_element.status', '=', 1],
+                    ['pro_element.status', '=', 1],
                     ['pro_element.config_id', '=', $domain['pro_config']],
                 ])
             ->join('inv_stock','inv_stock.id','=','pro_element.material_id')
@@ -85,5 +85,32 @@ class ProductionElements extends Model
         $data = array('count'=>$total,'entities' => $entities);
         return $data;
     }
+    public static function getProductionExpenseElement($productionItemId, $domain)
+    {
+        return self::from('pro_element as pe')
+            ->join('inv_stock as s', 's.id', '=', 'pe.material_id')
+            ->join('inv_product as p','p.id','=','s.product_id')
+            ->leftJoin('inv_particular as u', 'u.id', '=', 'p.unit_id')
+            ->where([
+                ['pe.status', '=', 1],
+                ['pe.config_id', '=', $domain['pro_config']],
+                ['pe.production_item_id', '=', $productionItemId],
+            ])
+            ->select([
+                'pe.id',
+                's.display_name as product_name',
+                'u.name as unit_name',
+                'pe.quantity',
+                'pe.material_quantity',
+                'pe.price',
+                'pe.sub_total',
+                'pe.wastage_quantity',
+                'pe.wastage_percent',
+                'pe.wastage_amount',
+                'pe.status',
+            ])
+            ->get();
+    }
+
 
 }

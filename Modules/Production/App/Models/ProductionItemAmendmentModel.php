@@ -53,7 +53,7 @@ class ProductionItemAmendmentModel extends Model
                 'users.name as created_by_name',
                 'pro_item_amendment.content',
                 'pro_item_amendment.comment',
-                DB::raw('DATE_FORMAT(pro_item_amendment.created_at, "%d-%M-%Y") as created_date'),
+                DB::raw('DATE_FORMAT(CONVERT_TZ(pro_item_amendment.created_at, "+00:00", "+06:00"), "%d-%M-%Y %r") as created_date')
             ]);
 
         $total = $query->count();

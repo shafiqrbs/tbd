@@ -222,13 +222,12 @@ class ProductionRecipeItemsController extends Controller
         }
 
         // Fetch related data (avoid duplicate queries)
+        $productionElements = ProductionElements::getProductionExpenseElement($id, $this->domain);
         $getValueAdded = ProductionValueAdded::getValueAddedWithInputGenerate($item->id);
-        $getStockItem = StockItemModel::find($item->item_id);
 
         $data = [
             'field' => $getValueAdded,
-            'item' => $item,
-            'stock_item' => $getStockItem
+            'item' => $productionElements
         ];
 
         try {
