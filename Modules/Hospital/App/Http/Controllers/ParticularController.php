@@ -153,6 +153,7 @@ class ParticularController extends Controller
         if (array_key_exists('is_available', $input)) {
             $findParticular->is_available = $findParticular->is_available ? 0:1;
         }
+
         if (array_key_exists('status', $input)) {
             $findParticular->status = $findParticular->status ? 0:1;
         }
@@ -175,6 +176,10 @@ class ParticularController extends Controller
 
             if (array_key_exists('unit_id', $input)) {
                 $updateDetails['unit_id'] = $input['unit_id'];
+            }
+
+            if (array_key_exists('report_format', $input)) {
+                $updateDetails['report_format'] = $findParticular->report_format ? 0:1;
             }
 
             if (!empty($updateDetails)) {

@@ -195,6 +195,40 @@ class Invoice
      */
     private $bp;
 
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="oxygen", type="string",length=50, nullable = true)
+     */
+    private $oxygen;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="temperature", type="string",length=50, nullable = true)
+     */
+    private $temperature;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="pulse", type="string",length=50, nullable = true)
+     */
+    private $pulse;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="blood_sugar", type="string",length=50, nullable = true)
+     */
+    private $bloodSugar;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="blood_group", type="string",length=50, nullable = true)
+     */
+    private $bloodGroup;
 
 
     /**

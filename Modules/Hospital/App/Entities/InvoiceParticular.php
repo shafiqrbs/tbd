@@ -108,9 +108,9 @@ class InvoiceParticular
     /**
      * @var string
      *
-     * @ORM\Column(name="reportCode", type="string",  nullable=true)
+     * @ORM\Column(name="barcode", type="string",  nullable=true)
      */
-    private $reportCode;
+    private $barcode;
 
 
     /**

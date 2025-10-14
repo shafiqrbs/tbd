@@ -56,4 +56,15 @@ class ReportsController extends Controller
         return $data;
     }
 
+    /**
+     * Display a listing of the resource.
+     */
+    public function monthlyPatientModeSummary(Request $request){
+
+        $data = InvoiceModel::getSummary($this->domain,$request);
+        $service = new JsonRequestResponse();
+        $data = $service->returnJosnResponse($data);
+        return $data;
+    }
+
 }
