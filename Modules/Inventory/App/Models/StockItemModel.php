@@ -576,12 +576,12 @@ class StockItemModel extends Model
         return $averagePrice;
     }
 
-
-
     public static function getStockItemMatrix($domain, $request)
     {
+        // --- Pagination
         $page = isset($request['page']) && $request['page'] > 0 ? ($request['page'] - 1) : 0;
         $perPage = isset($request['offset']) && $request['offset'] != '' ? (int)$request['offset'] : 25;
+        $perPage = min($perPage, 100);
         $skip = $page * $perPage;
 
         // --- Base Query
@@ -601,27 +601,61 @@ class StockItemModel extends Model
             ->where('config_id', $domain['config_id'])
             ->where('status', 1)
             ->where('is_delete', 0);
-            // Only include items that have currentWarehouseStock
+
             /*->whereHas('currentWarehouseStock', function ($q) use ($domain) {
                 if (!empty($domain['config_id'])) {
                     $q->where('config_id', $domain['config_id']);
                 }
             });*/
 
-        // --- Search Filter
+        // --- Warehouse Stock Filter
+        if (!empty($request['warehouse_id'])) {
+            $warehouseId = $request['warehouse_id'];
+
+            $query->whereHas('currentWarehouseStock', function ($q) use ($domain, $warehouseId) {
+                if (!empty($domain['config_id'])) {
+                    $q->where('config_id', $domain['config_id']);
+                }
+                $q->where('warehouse_id', $warehouseId);
+            });
+        }
+
+
+        // --- Product Nature Filter
+        if (!empty($request['product_nature'])) {
+            $natureMap = [
+                'stockable' => ['stockable'],
+                'raw-material' => ['raw-materials'],
+                'production' => ['pre-production', 'mid-production', 'post-production'],
+            ];
+
+            if (isset($natureMap[$request['product_nature']])) {
+                $findProductNatureIds = SettingModel::whereIn('slug', $natureMap[$request['product_nature']])
+                    ->where('config_id', $domain['config_id'])
+                    ->pluck('id')
+                    ->toArray();
+
+                $query->whereHas('product', function ($q) use ($findProductNatureIds) {
+                    $q->whereIn('product_type_id', $findProductNatureIds);
+                });
+            }
+        }
+
+        // ---  Filter expire product only
+        if (isset($request['is_expire']) && $request['is_expire']) {
+            $query->whereHas('product', function ($q) {
+                $q->whereNotNull('expiry_duration');
+            });
+        }
+
+        // --- Filter term only
         if (!empty($request['term'])) {
             $term = $request['term'];
             $query->where(function ($q) use ($term) {
-                // Search within stock name or barcode
                 $q->where('name', 'LIKE', "%{$term}%")
                     ->orWhere('barcode', 'LIKE', "%{$term}%")
-                    // Search within related product fields
                     ->orWhereHas('product', function ($p) use ($term) {
-                        $p->where('name', 'LIKE', "%{$term}%")
-                            ->orWhere('slug', 'LIKE', "%{$term}%")
-                            ->orWhereHas('category', fn($c) => $c->where('name', 'LIKE', "%{$term}%"));
-//                            ->orWhereHas('brand', fn($b) => $b->where('name', 'LIKE', "%{$term}%"))
-//                            ->orWhereHas('setting', fn($s) => $s->where('name', 'LIKE', "%{$term}%"));
+                        $p->where('name', 'LIKE', "%{$term}%");
                     });
             });
         }
@@ -635,10 +669,10 @@ class StockItemModel extends Model
             ->skip($skip)
             ->take($perPage)
             ->get()
-            ->map(function ($stock) {
+            ->map(function ($stock) use ($request) {
                 $product = $stock->product;
 
-                // Warehouse quantities indexed by warehouse ID
+                // product group by warehouse
                 $warehouseQuantities = [];
                 if (!empty($stock->currentWarehouseStock)) {
                     foreach ($stock->currentWarehouseStock as $s) {
@@ -651,11 +685,13 @@ class StockItemModel extends Model
                     }
                 }
 
-                return [
+                $data = [
                     'id' => $stock->id,
                     'name' => $stock->display_name ?? $stock->name,
                     'category_name' => $product->category->name ?? null,
                     'product_id' => $product->id ?? null,
+                    'product_code' => $product->product_code ?? null,
+                    'expiry_duration' => $product->expiry_duration ? $product->expiry_duration . ' days' : null,
                     'unit_name' => $product->unit->name ?? null,
                     'quantity' => $stock->quantity,
                     'sales_price' => round($stock->sales_price, 2),
@@ -665,9 +701,19 @@ class StockItemModel extends Model
                     'feature_image' => optional($product->images)->feature_image ?? null,
                     'warehouses' => $warehouseQuantities,
                 ];
-            });
 
-        // --- Get all active warehouses for this config
+                if (!empty($request['warehouse_id'])) {
+                    // Get the stock qty for the filtered warehouse
+                    $filterStock = optional($stock->currentWarehouseStock)
+                        ->firstWhere('warehouse_id', $request['warehouse_id']);
+
+                    $data['filter_warehouses_stock'] = $filterStock->quantity ?? 0;
+                }
+
+                return $data;
+            });
+        
+        // --- All Active Warehouses for this domain
         $warehouses = WarehouseModel::where('domain_id', $domain['domain_id'])
             ->where('status', 1)
             ->where('is_delete', 0)
@@ -675,7 +721,7 @@ class StockItemModel extends Model
             ->orderBy('name')
             ->get();
 
-        // --- Final Response
+        // --- Response
         return [
             'data' => $stockItems,
             'warehouses' => $warehouses,
