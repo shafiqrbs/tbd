@@ -208,10 +208,11 @@ class ProductionItems extends Model
     }
 
 
-    public static function dropdown($domain){
+    public static function dropdown($domain,$warehouseId = null){
         $entity = self::where([
             ['pro_item.status', '=', 1],
             ['pro_item.is_delete', '=', 0],
+            ['pro_item.warehouse_id', '=', $warehouseId],
             ['pro_config.domain_id', '=', $domain['global_id']],
         ])
             ->where('inv_setting.is_production', '=', 1)

@@ -12,8 +12,10 @@ use Modules\Core\App\Models\UserModel;
 use Modules\Inventory\App\Entities\StockItem;
 use Modules\Inventory\App\Models\ProductModel;
 use Modules\Inventory\App\Models\StockItemModel;
+use Modules\Production\App\Entities\ProductionBatch;
 use Modules\Production\App\Entities\ProductionItem;
 use Modules\Production\App\Http\Requests\RecipeItemsRequest;
+use Modules\Production\App\Models\ProductionBatchModel;
 use Modules\Production\App\Models\ProductionElements;
 use Modules\Production\App\Models\ProductionItemAmendmentModel;
 use Modules\Production\App\Models\ProductionItems;
@@ -299,9 +301,15 @@ class ProductionRecipeItemsController extends Controller
         return $response;
     }
 
-    public function dropdown()
+    public function dropdown(Request $request)
     {
-        $data = ProductionItems::dropdown($this->domain);
+        $batchId = $request->input('batch_id');
+        $warehouseId = null;
+        if ($batchId){
+            $findBatch = ProductionBatchModel::find($batchId);
+            $warehouseId = $findBatch->warehouse_id;
+        }
+        $data = ProductionItems::dropdown($this->domain,$warehouseId);
         $response = new Response();
         $response->headers->set('Content-Type', 'application/json');
         $response->setContent(json_encode([

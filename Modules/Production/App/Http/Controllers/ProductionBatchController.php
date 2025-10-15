@@ -71,6 +71,9 @@ class ProductionBatchController extends Controller
         $input['invoice'] = $pattern['generateId'];
         $input['process'] = 'Created';
         $input['created_by_id'] = $this->domain['user_id'];
+        if (empty($input['warehouse_id'])){
+            $input['warehouse_id'] = $this->domain['warehouse_id'];
+        }
         $entity = ProductionBatchModel::create($input);
         $data = $service->returnJosnResponse($entity);
         return $data;
