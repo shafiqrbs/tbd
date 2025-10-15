@@ -55,7 +55,8 @@ class ProductionReportController extends Controller
         $params = $request->all();
         $productionConfigId = $this->domain['pro_config'];
         $domainConfigId = $this->domain['domain_id'];
-        $entity = ProductionBatchModel::issueReportData($params, $domainConfigId, $productionConfigId);
+        $defaultWarehouseId = $this->domain['warehouse_id'];
+        $entity = ProductionBatchModel::issueReportData($params, $domainConfigId, $productionConfigId, $defaultWarehouseId);
         return response()->json([
             'message' => 'success',
             'status' => ResponseAlias::HTTP_OK,
@@ -577,7 +578,8 @@ class ProductionReportController extends Controller
      */
     private function processProductionBatchData($params, $domainConfigId, $productionConfigId)
     {
-        $batches = ProductionBatchModel::issueReportData($params, $domainConfigId, $productionConfigId);
+        $defaultWarehouseId = $this->domain['warehouse_id'];
+        $batches = ProductionBatchModel::issueReportData($params, $domainConfigId, $productionConfigId,$defaultWarehouseId);
 
         if ($batches->isEmpty()) {
             throw new Exception('No data to export.');

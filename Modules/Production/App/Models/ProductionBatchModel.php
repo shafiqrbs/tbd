@@ -219,12 +219,13 @@ class ProductionBatchModel extends Model
         return self::where([['pro_batch.config_id', $domain['pro_config']], ['pro_batch.status', 1]])->select(['pro_batch.id', 'pro_batch.invoice', 'mode', 'issue_date', DB::raw('DATE_FORMAT(pro_batch.created_at, "%d-%M-%Y") as created_date')])->get();
     }
 
-    public static function issueReportData(array $params, int $domain_id, int $production_config_id)
+    public static function issueReportData(array $params, int $domain_id, int $production_config_id, int $defaultWarehouseId)
     {
         $data = self::query()
-            ->leftjoin('cor_warehouses', 'cor_warehouses.id', '=', 'pro_batch.warehouse_id')
+            ->join('cor_warehouses', 'cor_warehouses.id', '=', 'pro_batch.warehouse_id')
             ->where('pro_batch.config_id', '=', $production_config_id)
             ->where('pro_batch.status', '=', 1)
+            ->where('pro_batch.warehouse_id', '=', $params['warehouse_id'] ?? $defaultWarehouseId)
             ->when(!empty($params['start_date']), function ($query) use ($params) {
                 $start = Carbon::parse($params['start_date'])->startOfDay();
                 $query->where('pro_batch.created_at', '>=', $start);
@@ -291,7 +292,7 @@ class ProductionBatchModel extends Model
 
                 $stockHistories = StockItemHistoryModel::select([
                     'stock_item_id',
-                    $isWarehouse ? 'warehouse_closing_quantity' : 'closing_quantity',
+                    $isWarehouse ? 'closing_quantity' : 'closing_quantity',
                 ])
                     ->whereIn('stock_item_id', $materialIds)
                     ->when($isWarehouse, fn($q) => $q->where('warehouse_id', $batch->warehouse_id))
@@ -306,7 +307,7 @@ class ProductionBatchModel extends Model
                         $materialId = $expense->material_id;
 
                         $expense->stock_quantity = (float)(
-                            $stockHistories[$materialId]->{$isWarehouse ? 'warehouse_closing_quantity' : 'closing_quantity'}
+                            $stockHistories[$materialId]->{$isWarehouse ? 'closing_quantity' : 'closing_quantity'}
                             ?? 0.0
                         );
 
