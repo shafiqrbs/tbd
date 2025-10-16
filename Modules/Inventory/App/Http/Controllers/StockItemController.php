@@ -512,4 +512,36 @@ class StockItemController extends Controller
         return response()->download($filePath, $fileName)->deleteFileAfterSend(true);
     }
 
+    public function stockItemHistory(Request $request)
+    {
+        $params = $request->only(['warehouse_id', 'stock_item_id', 'start_date', 'end_date','page','offset']);
+        if (!$params['warehouse_id']) {
+            $params['warehouse_id'] = $this->domain['warehouse_id'];
+        }
+        if (!$params['stock_item_id']) {
+            return response([
+                'result' => false,
+                'message' => 'Stock item missing.',
+                'status' => ResponseAlias::HTTP_BAD_REQUEST
+            ]);
+        }
+        if (!$params['start_date']) {
+            return response([
+                'result' => false,
+                'message' => 'Date missing.',
+                'status' => ResponseAlias::HTTP_BAD_REQUEST
+            ]);
+        }
+
+        $items = StockItemHistoryModel::getStockItemHistory($params,$this->domain);
+
+        return response([
+            'result' => true,
+            'message' => 'Stock item history.',
+            'status' => ResponseAlias::HTTP_OK,
+            'total' => $items['count'],
+            'data' => $items['items']
+        ]);
+    }
+
 }
