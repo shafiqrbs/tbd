@@ -24,6 +24,7 @@ use Modules\Inventory\App\Http\Controllers\SalesController;
 use Modules\Inventory\App\Http\Controllers\SalesReturnController;
 use Modules\Inventory\App\Http\Controllers\SettingController;
 use Modules\Inventory\App\Http\Controllers\StockItemController;
+use Modules\Inventory\App\Http\Controllers\StockTransferController;
 use Modules\Inventory\App\Http\Controllers\WarehouseIssueController;
 
 /*
@@ -98,7 +99,16 @@ Route::prefix('/inventory')->middleware([HeaderAuthenticationMiddleware::class,L
             'update' => 'domain.setting.update',
             'destroy' => 'domain.setting.destroy',
         ]);
-    Route::apiResource('/stock', StockItemController::class);
+
+    Route::prefix('stock')->name('stock')->group(function () {
+        Route::prefix('transfer')->name('transfer.')->group(function () {
+            Route::get('items', [StockTransferController::class, 'getItemsForTransfer']);
+
+//            Route::apiResource('', SalesReturnController::class)->parameters(['' => 'id']);
+        });
+        Route::apiResource('', StockItemController::class)->parameters(['' => 'id']);
+    });
+
     Route::get('/stock-item', [StockItemController::class,'stockItem'])->name('get_stock_item');
     Route::get('/stock-item/matrix', [StockItemController::class,'stockItemMatrix'])->name('get_stock_item_matrix');
     Route::get('generate/stock-item/xlsx', [StockItemController::class,'stockItemXlsxGenerate'])->name('get_stock_item_xlsx_generate');
