@@ -184,6 +184,8 @@ class InvoiceModel extends Model
                     $entities = $entities->whereNotNull('prescription.id');
                 } elseif ($request['prescription_mode'] === 'non-prescription') {
                     $entities = $entities->whereNull('prescription.id');
+                }elseif(in_array($request['prescription_mode'],['room','admission','referred'])) {
+                    $entities = $entities->where('hms_invoice.referred_mode',$request['prescription_mode']);
                 }
             }
         }
@@ -419,8 +421,8 @@ class InvoiceModel extends Model
                 'hms_invoice.*',
                 'parent_patient_mode.name as parent_patient_mode_name',
                 'parent_patient_mode.slug as parent_patient_mode_slug',
-                DB::raw('DATE_FORMAT(hms_invoice.updated_at, "%d-%m-%y") as created'),
-                DB::raw('DATE_FORMAT(hms_invoice.appointment_date, "%d-%m-%y") as appointment'),
+                DB::raw('DATE_FORMAT(hms_invoice.updated_at, "%d-%m-%Y") as created'),
+                DB::raw('DATE_FORMAT(hms_invoice.appointment_date, "%d-%m-%Y") as appointment'),
                 'hms_invoice.invoice as invoice',
                 'hms_invoice.total as total',
                 'hms_invoice.comment',
@@ -442,7 +444,7 @@ class InvoiceModel extends Model
                 'cor_customers.identity_mode',
                 'cor_customers.address',
                 'cor_customers.permanent_address',
-                DB::raw('DATE_FORMAT(cor_customers.dob, "%m-%d-%y") as dob'),
+                DB::raw('DATE_FORMAT(cor_customers.dob, "%m-%d-%Y") as dob'),
                 'cor_customers.identity_mode as identity_mode',
                 'hms_invoice.year as year',
                 'hms_invoice.month as month',

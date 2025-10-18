@@ -89,6 +89,22 @@ class HospitalController extends Controller
         return $service->returnJosnResponse($data);
     }
 
+    public function roomCabin(Request $request)
+    {
+
+        $data = ParticularModel::getRoomCabin($request, $this->domain);
+        $response = new Response();
+        $response->headers->set('Content-Type', 'application/json');
+        $response->setContent(json_encode([
+            'message' => 'success',
+            'status' => Response::HTTP_OK,
+            'total' => $data['count'],
+            'data' => $data['entities']
+        ]));
+        $response->setStatusCode(Response::HTTP_OK);
+        return $response;
+    }
+
 
     /**
      * Show the form for editing the specified resource.
