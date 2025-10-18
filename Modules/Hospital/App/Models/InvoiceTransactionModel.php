@@ -178,6 +178,7 @@ class InvoiceTransactionModel extends Model
 
             } else {
                 $sales = self::find($invoiceTransaction->sale_id);
+
                 collect($medicines)->map(function ($medicine) use ($sales, $date) {
                     if (StockItemModel::find($medicine['medicine_id'])) {
                         SalesItemModel::updateOrCreate(
@@ -198,7 +199,7 @@ class InvoiceTransactionModel extends Model
                 })->toArray();
             }
             InvoiceTransactionModel::where('id', $invoiceTransaction->id)
-                ->update(['sale_id' => $sales->id]);
+                ->update([ 'json_content' => json_encode($medicines),'sale_id' => $sales->id]);
         }
     }
 
@@ -352,6 +353,7 @@ class InvoiceTransactionModel extends Model
                 'hms_invoice_transaction.sale_id',
                 'inv_sales.id as inv_sales_id',
                 'hms_invoice.id as hms_invoice_id',
+                'hms_invoice_transaction.json_content as json_content',
                 DB::raw('DATE_FORMAT(hms_invoice_transaction.updated_at, "%d-%m-%y") as created')
             )
             ->get();

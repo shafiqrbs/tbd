@@ -131,6 +131,13 @@ class InvoiceTransaction
      */
     private $discountRequestedComment;
 
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="json_content", type="json", nullable=true)
+     */
+    private $jsonContent;
+
 
     /**
      * @var string

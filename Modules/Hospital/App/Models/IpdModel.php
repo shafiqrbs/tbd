@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Support\Facades\DB;
 use Modules\AppsApi\App\Services\GeneratePatternCodeService;
 use Modules\Core\App\Models\CustomerModel;
+use function Symfony\Component\TypeInfo\int;
 
 
 class IpdModel extends Model
@@ -109,7 +110,7 @@ class IpdModel extends Model
                 'name'  => $roomRent->display_name,
                 'quantity'  => $minimumDaysRoomRent,
                 'price'     => $roomRent->price,
-                'sub_total' => ($roomRent->price * $minimumDaysRoomRent),
+                'sub_total' => ($roomRent->price * (int)$minimumDaysRoomRent),
             ]
         );
 
