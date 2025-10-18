@@ -71,6 +71,7 @@ class BillingModel extends Model
             ->join('cor_customers as customer','customer.id','=','hms_invoice.customer_id')
             ->select([
                 'hms_invoice.id',
+                'hms_invoice.barcode',
                 'prescription.created_by_id as prescription_created_by_id',
                 'hms_invoice.invoice as invoice',
                 'customer.customer_id as patient_id',
@@ -110,12 +111,19 @@ class BillingModel extends Model
         if (isset($request['customer_id']) && !empty($request['customer_id'])){
             $entities = $entities->where('hms_invoice.customer_id',$request['customer_id']);
         }
-        if (isset($request['created']) && !empty($request['created'])){
-            $date = new \DateTime($request['created']);
-            $start_date = $date->format('Y-m-d 00:00:00');
-            $end_date = $date->format('Y-m-d 23:59:59');
-            $entities = $entities->whereBetween('hms_invoice.created_at',[$start_date, $end_date]);
-        }
+
+        /*if (isset($request['created']) && !empty($request['created'])){
+             $date = new \DateTime($request['created']);
+             $start_date = $date->format('Y-m-d 00:00:00');
+             $end_date = $date->format('Y-m-d 23:59:59');
+             $entities = $entities->whereBetween('hms_invoice.created_at',[$start_date, $end_date]);
+         }else{
+             $date = new \DateTime();
+             $start_date = $date->format('Y-m-d 00:00:00');
+             $end_date = $date->format('Y-m-d 23:59:59');
+             $entities = $entities->whereBetween('hms_invoice.created_at',[$start_date, $end_date]);
+         }*/
+
         $entities->groupBy('hms_invoice_transaction.hms_invoice_id');
         $total  = $entities->count();
         $entities = $entities->skip($skip)

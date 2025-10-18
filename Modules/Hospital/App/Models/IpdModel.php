@@ -97,7 +97,7 @@ class IpdModel extends Model
         );
 
         $admissionFee = ParticularModel::find($config['admission_fee_id']);
-        $minimumDaysRoomRent = ($config->minimum_days_room_rent) ? $config->minimum_days_room_rent:0;
+        $minimumDaysRoomRent = ($config->minimum_days_room_rent) ? $config->minimum_days_room_rent:3;
         $roomRent = ParticularModel::find($entity->room_id);
         InvoiceParticularModel::updateOrCreate(
             [
