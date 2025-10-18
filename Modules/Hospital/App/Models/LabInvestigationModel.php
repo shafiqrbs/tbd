@@ -229,28 +229,43 @@ class LabInvestigationModel extends Model
 
     public static function generateReport($reportId)
     {
-        $entity = InvoiceParticularModel::find($reportId);
-        $investigation = $entity->particular_id;
-         $reportElements = InvestigationReportFormatModel::where('particular_id',$investigation)->get();
-         foreach ($reportElements as $row):
-             $exist = InvoicePathologicalReportModel::where([
-                 ['invoice_particular_id', $entity->id],
-                 ['particular_id', $investigation],
-                 ['investigation_report_format_id', $row->id],
-             ])->first();
-            if(empty($exist)){
-                $input =[
-                    'invoice_particular_id' => $entity->id,
-                    'particular_id' => $investigation,
-                    'investigation_report_format_id' => $row->id,
-                    'name' => $row->name,
-                    'reference_value' => $row->reference_value,
-                    'unit' => $row->unit,
-                    'sample_value' => $row->sample_value
-                ];
-                InvoicePathologicalReportModel::create($input);
-            }
-         endforeach;
+         $entity = InvoiceParticularModel::with('particular')->find($reportId);
+         $date =  new \DateTime("now");
+         if($entity->particular->is_custom_report == 1){
+             InvoiceParticularTestReportModel::updateOrCreate(
+                 [
+                     'invoice_particular_id'     => $entity->id,
+                 ],
+                 [
+                     'updated_at'    => $date,
+                     'created_at'    => $date,
+                 ]
+             );
+         }else{
+             $investigation = $entity->particular_id;
+             $reportElements = InvestigationReportFormatModel::where('particular_id',$investigation)->get();
+             foreach ($reportElements as $row):
+                 $exist = InvoicePathologicalReportModel::where([
+                     ['invoice_particular_id', $entity->id],
+                     ['particular_id', $investigation],
+                     ['investigation_report_format_id', $row->id],
+                 ])->first();
+                 if(empty($exist)){
+                     $input =[
+                         'invoice_particular_id' => $entity->id,
+                         'particular_id' => $investigation,
+                         'investigation_report_format_id' => $row->id,
+                         'name' => $row->name,
+                         'reference_value' => $row->reference_value,
+                         'unit' => $row->unit,
+                         'sample_value' => $row->sample_value
+                     ];
+                     InvoicePathologicalReportModel::create($input);
+                 }
+             endforeach;
+         }
+
+
     }
 
 

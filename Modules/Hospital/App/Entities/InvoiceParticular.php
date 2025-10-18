@@ -171,6 +171,12 @@ class InvoiceParticular
      */
     private $comment;
 
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="json_report", type="json", nullable=true)
+     */
+    private $json_report;
 
      /**
      * @var string

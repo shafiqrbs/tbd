@@ -21,6 +21,7 @@ use Modules\Hospital\App\Models\HospitalSalesModel;
 use Modules\Hospital\App\Models\InvoiceContentDetailsModel;
 use Modules\Hospital\App\Models\InvoiceModel;
 use Modules\Hospital\App\Models\InvoiceParticularModel;
+use Modules\Hospital\App\Models\InvoiceParticularTestReportModel;
 use Modules\Hospital\App\Models\InvoicePathologicalReportModel;
 use Modules\Hospital\App\Models\InvoiceTransactionModel;
 use Modules\Hospital\App\Models\LabInvestigationModel;
@@ -85,7 +86,7 @@ class LabInvestigationController extends Controller
     {
         $service = new JsonRequestResponse();
         LabInvestigationModel::generateReport($reportId);
-        $invoiceParticular = InvoiceParticularModel::with('reports')->find($reportId);
+        $invoiceParticular = InvoiceParticularModel::with(['reports','particular:id,slug,lab_room_id,is_custom_report,instruction','customReport'])->find($reportId);
         $data = $service->returnJosnResponse($invoiceParticular);
         return $data;
     }
@@ -97,6 +98,7 @@ class LabInvestigationController extends Controller
     {
         $domain = $this->domain;
         $data = $request->all();
+
         $entity = InvoiceParticularModel::find($id);
         if($entity->process == "New"){
             $data['process'] = 'In-progress';
@@ -107,6 +109,13 @@ class LabInvestigationController extends Controller
             $data['assign_doctor_id'] = $domain['user_id'];
             $data['assign_doctor_name'] = $domain['user_name'];
             $data['process'] = 'Done';
+        }
+        $json_content = (isset($data['json_content']) and $data['json_content']) ? $data['json_content']:'';
+
+        if($json_content){
+            $data['json_report'] = json_encode($json_content) ?? null;
+            $testReport = InvoiceParticularTestReportModel::where('invoice_particular_id',$entity->id)->first();
+            $testReport->update($json_content);
         }
         $data['comment'] = $data['comment'] ?? null;
         $entity->update($data);

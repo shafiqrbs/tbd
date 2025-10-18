@@ -51,6 +51,11 @@ class Particular
      **/
     private $department;
 
+     /**
+     * @ORM\ManyToOne(targetEntity="ParticularMode", inversedBy="particularDepartments")
+     **/
+     private $labRoom;
+
     /**
      * @Gedmo\Blameable(on="create")
      * @ORM\OneToOne(targetEntity="Modules\Core\App\Entities\User")
@@ -138,6 +143,14 @@ class Particular
      * @ORM\Column(type="boolean",options={"default"="false"})
      */
     private $isAvailable;
+
+
+    /**
+     * @var boolean
+     *
+     * @ORM\Column(type="boolean",options={"default"="false"})
+     */
+    private $isCustomReport;
 
 
     /**
