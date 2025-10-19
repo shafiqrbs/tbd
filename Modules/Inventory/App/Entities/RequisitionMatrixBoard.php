@@ -190,5 +190,12 @@ class RequisitionMatrixBoard
      * @ORM\Column(type="date", nullable=true)
      */
     private $generateDate;
+
+    /**
+     *
+     * @ORM\ManyToOne(targetEntity="Modules\Core\App\Entities\Warehouse")
+     * @ORM\JoinColumn(name="child_warehouse_id",onDelete="CASCADE")
+     **/
+    private  $childWarehouseId;
 }
 

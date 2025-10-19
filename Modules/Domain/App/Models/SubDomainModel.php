@@ -50,6 +50,7 @@ class SubDomainModel extends Model
             'dom_sub_domain.id as id',
             'dom_sub_domain.domain_id',
             'dom_sub_domain.sub_domain_id',
+            'inv_config.id as sub_domain_inv_config_id',
             'd.company_name as name',
             'd.short_name as short_name',
             'd.email',
@@ -61,6 +62,7 @@ class SubDomainModel extends Model
             'dom_sub_domain.percent_mode',
             'dom_sub_domain.status'
         ])->join('dom_domain as d','d.id','=','dom_sub_domain.sub_domain_id')
+            ->leftjoin('inv_config','inv_config.domain_id','=','dom_sub_domain.sub_domain_id')
             ->where('dom_sub_domain.domain_id', [$domain])
             ->where('dom_sub_domain.status', 1)
             ->get()->toArray();

@@ -117,5 +117,11 @@ class RequisitionBoard
      */
     private $productionApprovedDate;
 
+    /**
+     * @var boolean
+     * @ORM\Column(name="is_warehouse_board", type="boolean", options={"default"="false"})
+     */
+    private $isWarehouseBoard;
+
 }
 
