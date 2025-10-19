@@ -30,12 +30,24 @@ class InvoiceTransactionModel extends Model
         self::creating(function ($model) {
             $date =  new \DateTime("now");
             $model->created_at = $date;
+            if (empty($model->barcode)) {
+                $model->uid = self::generateUniqueCode(12);
+            }
         });
 
         self::updating(function ($model) {
             $date =  new \DateTime("now");
             $model->updated_at = $date;
         });
+    }
+
+    public static function generateUniqueCode($length = 12)
+    {
+        do {
+            // Generate a random 12-digit number
+            $code = str_pad(random_int(0, 9999999999), 10, '0', STR_PAD_LEFT);
+        } while (self::where('uid', $code)->exists());
+        return $code;
     }
 
     public function items()

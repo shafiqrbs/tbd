@@ -23,6 +23,13 @@ class Prescription
     private $id;
 
     /**
+     * @var string
+     *
+     * @ORM\Column(type="string", length=20, nullable=true)
+     */
+    private $uid;
+
+    /**
      * @ORM\ManyToOne(targetEntity="Config", cascade={"detach","merge"})
      * @ORM\JoinColumn(name="config_id", referencedColumnName="id", onDelete="CASCADE")
      */

@@ -97,8 +97,7 @@ class LabInvestigationController extends Controller
     public function update(Request $request, $id)
     {
         $domain = $this->domain;
-        $data = $request->all();
-
+        $data = $request->only(['json_content','comment']);
         $entity = InvoiceParticularModel::find($id);
         if($entity->process == "New"){
             $data['process'] = 'In-progress';
@@ -110,12 +109,12 @@ class LabInvestigationController extends Controller
             $data['assign_doctor_name'] = $domain['user_name'];
             $data['process'] = 'Done';
         }
-        $json_content = (isset($data['json_content']) and $data['json_content']) ? $data['json_content']:'';
-
-        if($json_content){
-            $data['json_report'] = json_encode($json_content) ?? null;
+        if(isset($data['json_content'])){
+            $data['json_report'] = json_encode($data['json_content']);
             $testReport = InvoiceParticularTestReportModel::where('invoice_particular_id',$entity->id)->first();
-            $testReport->update($json_content);
+            if($testReport){
+                $testReport->update($data['json_content']);
+            }
         }
         $data['comment'] = $data['comment'] ?? null;
         $entity->update($data);

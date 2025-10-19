@@ -28,6 +28,7 @@ class InvoiceParticularModel extends Model
             $model->created_at = $date;
             if (empty($model->barcode)) {
                 $model->barcode = self::generateUniqueCode(12);
+                $model->uid = self::generateUniqueCode(12);
             }
         });
 

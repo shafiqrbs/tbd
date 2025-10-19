@@ -21,6 +21,13 @@ class InvoiceParticular
      */
     private $id;
 
+    /**
+     * @var string
+     *
+     * @ORM\Column(type="string", length=20, nullable=true)
+     */
+    private $uid;
+
 
     /**
      * @ORM\ManyToOne(targetEntity="Invoice")

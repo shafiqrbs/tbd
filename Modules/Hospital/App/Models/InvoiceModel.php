@@ -25,8 +25,8 @@ class InvoiceModel extends Model
     public static function generateUniqueCode($length = 12)
     {
         do {
-            // Generate random alphanumeric string
-            $code = Str::upper(Str::random($length));
+            // Generate a random 12-digit number
+            $code = str_pad(random_int(0, 9999999999), 10, '0', STR_PAD_LEFT);
         } while (self::where('barcode', $code)->exists());
         return $code;
     }
