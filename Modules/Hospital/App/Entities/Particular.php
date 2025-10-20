@@ -173,6 +173,13 @@ class Particular
      *
      * @ORM\Column(type="boolean",options={"default"="false"})
      */
+    private $isBooked;
+
+    /**
+     * @var boolean
+     *
+     * @ORM\Column(type="boolean",options={"default"="false"})
+     */
     private $opdReferred;
 
 

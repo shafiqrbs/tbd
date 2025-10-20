@@ -130,6 +130,7 @@ class IpdModel extends Model
         $amount = InvoiceParticularModel::where('hms_invoice_id', $entity->id)->sum('sub_total');
         $invoiceTransaction->update(['sub_total' => $amount , 'total' => $amount]);
         $entity->update(['sub_total' => $amount , 'total' => $amount]);
+        $roomRent->update(['is_booked' => true]);
         return $amount;
 
 

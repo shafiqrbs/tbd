@@ -132,7 +132,7 @@ class ParticularController extends Controller
         $data = array();
         $name = (isset($input['name']) and $input['name']) ? $input['name']:'';
         $price = (isset($input['price']) and $input['price']) ? $input['price']:0;
-        if($price){$data['price'] = $price;}
+        if($price){$data['price'] = $price; }
         if($name){$data['name'] = $name;}
         if(!empty($data)){ $entity->update($data);}
 
