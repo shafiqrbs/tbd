@@ -167,7 +167,7 @@ Route::prefix('/inventory')->middleware([HeaderAuthenticationMiddleware::class,L
     Route::prefix('/requisition')->group(function() {
         Route::get('approve/{id}', [RequisitionController::class,'approve'])->name('requisition_approve');
         Route::prefix('matrix/board')->group(function() {
-            Route::get('', [RequisitionMatrixBoardController::class,'index']);
+            Route::get('', [RequisitionMatrixBoardController::class,'index'])->name('dd.requisition.matrix.board');
             Route::get('{id}', [RequisitionMatrixBoardController::class,'matrixBoardDetails']);
             Route::post('create', [RequisitionMatrixBoardController::class,'store']);
             Route::post('quantity-update', [RequisitionMatrixBoardController::class,'matrixBoardQuantityUpdate']);
@@ -177,11 +177,9 @@ Route::prefix('/inventory')->middleware([HeaderAuthenticationMiddleware::class,L
                 Route::post('quantity-update', [RequisitionMatrixBoardController::class,'matrixBoardProductionQuantityUpdate']);
                 Route::post('process', [RequisitionMatrixBoardController::class,'matrixBoardProductionProcess']);
                 Route::post('approve/{id}', [RequisitionMatrixBoardController::class,'matrixBoardProductionApproved']);
-//                Route::get('vendor-requisition/{id}', [RequisitionMatrixBoardController::class,'matrixBoardProductionToRequisition']);
             });
         });
         Route::prefix('matrix/board/warehouse')->group(function() {
-            Route::get('', [RequisitionMatrixBoardWarehouseController::class,'index']);
             Route::get('{id}', [RequisitionMatrixBoardWarehouseController::class,'matrixBoardDetails']);
             Route::post('create', [RequisitionMatrixBoardWarehouseController::class,'store']);
             Route::post('quantity-update', [RequisitionMatrixBoardWarehouseController::class,'matrixBoardQuantityUpdate']);

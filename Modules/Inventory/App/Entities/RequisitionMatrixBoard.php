@@ -197,5 +197,11 @@ class RequisitionMatrixBoard
      * @ORM\JoinColumn(name="child_warehouse_id",onDelete="CASCADE")
      **/
     private  $childWarehouseId;
+
+    /**
+     * @var string
+     * @ORM\Column(type="string",name="child_warehouse_name", nullable=true)
+     */
+    private $childWarehouseName;
 }
 

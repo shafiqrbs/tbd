@@ -16,3 +16,4 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', function () {
     return view('welcome');
 });
+Route::get('/api/accounting/select/head', [App\Http\Controllers\AccountingController::class, 'selectHead'])->name('web.accounting.head.dropdown');
