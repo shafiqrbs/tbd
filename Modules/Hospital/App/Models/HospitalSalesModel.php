@@ -76,7 +76,7 @@ class HospitalSalesModel extends Model
                         if (StockItemModel::find($medicine->medicine_id)) {
                             return [
                                 'sale_id' => $sales->id,
-                                'name' => $medicine->medicine_name, // notice key: medicine_name not medicineName
+                                'name' => $medicine->generic, // notice key: medicine_name not medicineName
                                 'stock_item_id' => $medicine->medicine_id ?? null,
                                 'quantity' => $medicine->opd_quantity ?? 0,
                                 'price' => $medicine->price ?? 0,
@@ -108,7 +108,7 @@ class HospitalSalesModel extends Model
                                  // unique keys
                             ],
                             [
-                                'name' => $medicine->medicine_name ?? null,
+                                'name' => $medicine->generic ?? null,
                                 'quantity' => $medicine->opd_quantity ?? 0,
                                 'price' => $medicine->price ?? 0,
                                 'updated_at' => $date,
