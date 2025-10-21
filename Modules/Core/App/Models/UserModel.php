@@ -54,11 +54,11 @@ class UserModel extends Model
         ])->leftjoin('cor_setting','cor_setting.id','=','users.employee_group_id');
 
         if (isset($request['term']) && !empty($request['term'])){
-            $users = $users->whereAny(['name','email','username','mobile'],'LIKE','%'.$request['term'].'%');
+            $users = $users->whereAny(['users.name','email','username','mobile','employee_id'],'LIKE','%'.$request['term'].'%');
         }
 
         if (isset($request['name']) && !empty($request['name'])){
-            $users = $users->where('name',$request['name']);
+            $users = $users->where('users.name',$request['name']);
         }
 
         if (isset($request['mobile']) && !empty($request['mobile'])){
@@ -72,7 +72,7 @@ class UserModel extends Model
         $total  = $users->count('users.id');
         $entities = $users->skip($skip)
             ->take($perPage)
-            ->orderBy('users.name','DESC')
+            ->orderBy('users.name','ASC')
             ->get();
 
         $data = array('count'=>$total,'entities' => $entities);

@@ -39,7 +39,7 @@ class InvoicePathologicalReport
 
      /**
      * @ORM\ManyToOne(targetEntity="InvoiceParticular")
-     * @ORM\JoinColumn(referencedColumnName="id")
+     * @ORM\JoinColumn(referencedColumnName="id",onDelete="CASCADE")
      **/
     private $invoiceParticular;
 
