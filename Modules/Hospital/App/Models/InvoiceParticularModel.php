@@ -42,10 +42,12 @@ class InvoiceParticularModel extends Model
     {
         do {
             // Generate a random 12-digit number
-            $code = str_pad(random_int(0, 9999999999), 10, '0', STR_PAD_LEFT);
+            $code = str_pad(random_int(0, 999999999999), 12, '0', STR_PAD_LEFT);
         } while (self::where('barcode', $code)->exists());
         return $code;
     }
+
+
 
     public function particular()
     {

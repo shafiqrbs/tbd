@@ -20,6 +20,11 @@ class ParticularModel extends Model
     protected $guarded = ['id'];
 
 
+    public function category()
+    {
+        return $this->belongsTo(CategoryModel::class, 'category_id');
+    }
+
     public function particularDetails()
     {
         return $this->hasOne(ParticularDetailsModel::class, 'particular_id', 'id');

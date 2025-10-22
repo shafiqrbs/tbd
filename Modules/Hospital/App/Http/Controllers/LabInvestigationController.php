@@ -86,9 +86,21 @@ class LabInvestigationController extends Controller
     {
         $service = new JsonRequestResponse();
         LabInvestigationModel::generateReport($reportId);
-        $invoiceParticular = InvoiceParticularModel::with(['reports','particular:id,slug,lab_room_id,is_custom_report,instruction','custom_report'])->find($reportId);
+        $invoiceParticular = InvoiceParticularModel::with(['reports','particular:id,slug,lab_room_id,is_custom_report,instruction,slug','particular.category:id,name','custom_report'])->find($reportId);
         $data = $service->returnJosnResponse($invoiceParticular);
         return $data;
+    }
+
+    /**
+     * Show the form for editing the specified resource.
+     */
+    public function print($id)
+    {
+        $service = new JsonRequestResponse();
+        $invoiceParticular = InvoiceParticularModel::with(['reports','particular:id,slug,lab_room_id,is_custom_report,instruction,slug,category_id','particular.category:id,name','custom_report'])->find($id);
+        $entity = InvoiceModel::getInvoiceBasicInfo($invoiceParticular->hms_invoice_id);
+        $data = ['entity'=>$entity,'invoiceParticular'=>$invoiceParticular];
+        return  $service->returnJosnResponse($data);
     }
 
     /**

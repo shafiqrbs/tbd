@@ -190,6 +190,7 @@ Route::prefix('/hospital')->middleware([HeaderAuthenticationMiddleware::class])-
         Route::apiResource('', LabInvestigationController::class)->parameters(['' => 'id']);
         Route::post('/report/inline-update/{id}', [LabInvestigationController::class,'inlineUpdate'])->name('inline_update');
         Route::get('{id}/report/{reportId}', [LabInvestigationController::class, 'report'])->name('report');
+        Route::get('/print/{id}', [LabInvestigationController::class, 'print'])->name('print');
     });
 
     Route::prefix('billing')->name('billing')->group(function () {

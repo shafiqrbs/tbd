@@ -106,7 +106,7 @@ class BillingController extends Controller
         }
         $data['comment'] = $data['comment'] ?? null;
         $entity->update($data);
-        InvoiceParticularModel::where('invoice_transaction_id', $id)->update(['process' => 'In-progress','status' => true]);
+        InvoiceParticularModel::where('invoice_transaction_id', $id)->update(['status' => true]);
         $amount = InvoiceTransactionModel::where('hms_invoice_id', $entity->hms_invoice_id)->where('process','Done')->sum('amount');
         $total = InvoiceParticularModel::where('hms_invoice_id', $entity->hms_invoice_id)->where('status',true)->sum('sub_total');
         InvoiceModel::find($entity->hms_invoice_id)->update(['sub_total' => $total , 'total' => $total, 'amount' => $amount]);
