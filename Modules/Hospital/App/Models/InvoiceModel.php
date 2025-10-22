@@ -479,8 +479,10 @@ class InvoiceModel extends Model
                     'hms_invoice_transaction.hms_invoice_id',
                     'hms_invoice_transaction.created_by_id',
                     'hms_invoice_transaction.mode',
+                    'hms_invoice_transaction.sub_total',
+                    'hms_invoice_transaction.process',
                     DB::raw('DATE_FORMAT(hms_invoice_transaction.created_at, "%d-%m-%y") as created'),
-                ]);
+                ])->orderBy('hms_invoice_transaction.created_at','DESC');
             }])
             ->first();
 

@@ -7,10 +7,10 @@ use Gedmo\Mapping\Annotation as Gedmo;
 /**
  * Invoice
  *
- * @ORM\Table( name ="hms_invoice_transaction")
+ * @ORM\Table( name ="hms_refund_invoice_transaction")
  * @ORM\Entity()
  */
-class InvoiceTransaction
+class RefundInvoiceTransaction
 {
     /**
      * @var integer
@@ -35,17 +35,17 @@ class InvoiceTransaction
      **/
     private $hmsInvoice;
 
-    /**
-     * @ORM\ManyToOne(targetEntity="Prescription")
+     /**
+     * @ORM\ManyToOne(targetEntity="InvoiceTransaction")
      * @ORM\JoinColumn(onDelete="CASCADE")
      **/
-    private $prescription;
+    private $hmsInvoiceTransaction;
 
     /**
-     * @ORM\OneToOne(targetEntity="Modules\Inventory\App\Entities\Sales", cascade={"detach","merge"})
-     * @ORM\JoinColumn(name="sale_id", referencedColumnName="id", onDelete="CASCADE")
-     */
-    private $sale;
+     * @ORM\ManyToOne(targetEntity="InvoiceParticular")
+     * @ORM\JoinColumn(onDelete="CASCADE")
+     **/
+    private $hmsInvoiceParticular;
 
 
     /**
@@ -70,37 +70,10 @@ class InvoiceTransaction
     /**
      * @var string
      *
-     * @ORM\Column(name="discount", type="decimal", nullable=true)
+     * @ORM\Column(name="payment", type="decimal", nullable=true)
      */
-    private $discount;
+    private $payment;
 
-    /**
-     * @var string
-     *
-     * @ORM\Column(name="amount", type="decimal", nullable=true)
-     */
-    private $amount;
-
-    /**
-     * @var string
-     *
-     * @ORM\Column(name="sub_total", type="decimal", nullable=true)
-     */
-    private $subTotal= 0;
-
-     /**
-     * @var string
-     *
-     * @ORM\Column(name="total", type="decimal", nullable=true)
-     */
-    private $total= 0;
-
-    /**
-     * @var string
-     *
-     * @ORM\Column(name="vat", type="decimal", nullable=true)
-     */
-    private $vat;
 
     /**
      * @var string
@@ -108,35 +81,6 @@ class InvoiceTransaction
      * @ORM\Column(name="process", type="string", length=50, nullable=true,options={"default"="New"})
      */
     private $process;
-
-    /**
-     * @var string
-     *
-     * @ORM\Column(name="mode", type="string", length=30, nullable=true)
-     */
-    private $mode;
-
-    /**
-     * @var string
-     *
-     * @ORM\Column(type="string", nullable=true)
-     */
-    private $discountRequestedBy;
-
-    /**
-     * @var string
-     *
-     * @ORM\Column( type="string", nullable=true)
-     */
-    private $discountRequestedComment;
-
-    /**
-     * @var string
-     *
-     * @ORM\Column(name="json_content", type="json", nullable=true)
-     */
-    private $jsonContent;
-
 
     /**
      * @var string
@@ -151,27 +95,6 @@ class InvoiceTransaction
      * @ORM\Column(name="code", type="integer",  nullable=true)
      */
      private $code;
-
-     /**
-     * @var string
-     *
-     * @ORM\Column(name="transactionCode", type="string", length= 5,  nullable=true)
-     */
-     private $transactionCode;
-
-    /**
-     * @var boolean
-     *
-     * @ORM\Column( type="boolean",  nullable=true, options={"default"="false"})
-     */
-    private $revised = false;
-
-    /**
-     * @var boolean
-     *
-     * @ORM\Column( type="boolean",  nullable=true, options={"default"="false"})
-     */
-    private $isMaster;
 
 
     /**

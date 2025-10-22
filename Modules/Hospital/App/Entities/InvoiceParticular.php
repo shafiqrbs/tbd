@@ -233,6 +233,13 @@ class InvoiceParticular
      */
     private $startDate;
 
+    /**
+     * @var boolean
+     *
+     * @ORM\Column(name="status", type="boolean", nullable=true, options={"default"="false"})
+     */
+    private $status;
+
      /**
      * @var \DateTime
      * @Gedmo\Timestampable(on="create")

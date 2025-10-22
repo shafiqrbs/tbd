@@ -42,7 +42,7 @@ class BillingModel extends Model
         return $this->hasOne(OpdModel::class, 'id', 'sales_id');
     }
 
-    public function invoiceTransaction()
+    public function invoice_transaction()
     {
         return $this->hasMany(
             InvoiceTransactionModel::class,
@@ -72,6 +72,7 @@ class BillingModel extends Model
             ->select([
                 'hms_invoice.id',
                 'hms_invoice.barcode',
+                'hms_invoice.uid',
                 'prescription.created_by_id as prescription_created_by_id',
                 'hms_invoice.invoice as invoice',
                 'customer.customer_id as patient_id',
@@ -196,15 +197,18 @@ class BillingModel extends Model
                 'prescription_doctor.employee_id as prescription_doctor_id',
                 'prescription_doctor.name as prescription_doctor_name',
             ])
-            ->with(['invoiceTransaction' => function ($query) {
+            ->with(['invoice_transaction' => function ($query) {
                 $query->select([
-                    'hms_invoice_transaction.hms_invoice_id as hms_invoice_id',
                     'hms_invoice_transaction.id as hms_invoice_transaction_id',
+                    'hms_invoice_transaction.hms_invoice_id',
+                    'hms_invoice_transaction.created_by_id',
+                    'hms_invoice_transaction.mode',
                     'hms_invoice_transaction.sub_total',
-                    DB::raw('DATE_FORMAT(hms_invoice_transaction.created_at, "%d-%m-%y") as invoice_created'),
                     'hms_invoice_transaction.total',
+                    'hms_invoice_transaction.amount',
                     'hms_invoice_transaction.process',
-                ]);
+                    DB::raw('DATE_FORMAT(hms_invoice_transaction.created_at, "%d-%m-%y") as created'),
+                ])->whereIn('hms_invoice_transaction.mode', ['investigation', 'admission'])->orderBy('hms_invoice_transaction.created_at','DESC');
             }])
             ->first();
 

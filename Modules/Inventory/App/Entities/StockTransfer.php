@@ -8,10 +8,10 @@ use Gedmo\Mapping\Annotation as Gedmo;
 /**
  * MedicineDamage
  *
- * @ORM\Table("inv_stock_transfer_item")
+ * @ORM\Table("inv_stock_transfer")
  * @ORM\Entity()
  */
-class StockItemTransfer
+class StockTransfer
 {
     /**
      * @var integer
@@ -28,41 +28,27 @@ class StockItemTransfer
      **/
     private $config;
 
-
     /**
-     * @ORM\ManyToOne(targetEntity="StockTransfer")
-     * @ORM\JoinColumn(onDelete="CASCADE")
+     * @ORM\ManyToOne(targetEntity="Modules\Core\App\Entities\Warehouse")
      **/
-    private $stockTransfer;
-
+    private  $fromWarehouse;
 
     /**
-     * @ORM\ManyToOne(targetEntity="StockItem")
-     * @ORM\JoinColumn(onDelete="CASCADE")
+     * @ORM\ManyToOne(targetEntity="Modules\Core\App\Entities\Warehouse")
      **/
-    private $stockItem;
+    private  $toWarehouse;
 
 
     /**
-     * @ORM\ManyToOne(targetEntity="PurchaseItem")
-     * @ORM\JoinColumn(onDelete="CASCADE")
+     * @ORM\ManyToOne(targetEntity="Modules\Core\App\Entities\User")
      **/
-    private $purchaseItem;
-
-
-    /**
-     * @var integer
-     *
-     * @ORM\Column(name="quantity", type="integer",nullable=true)
-     */
-    private $quantity;
+    private  $createdBy;
 
     /**
-     * @var integer
-     *
-     * @ORM\Column(name="bonus", type="integer",nullable=true)
-     */
-    private $bonus;
+     * @ORM\ManyToOne(targetEntity="Modules\Core\App\Entities\User")
+     **/
+    private  $approvedBy;
+
 
     /**
      * @var string
@@ -78,12 +64,6 @@ class StockItemTransfer
 	 */
 	private $process = "Created";
 
-    /**
-     * @var string
-     *
-     * @ORM\Column(name="mode", type="string", nullable=true)
-     */
-    private $mode = "minus";
 
     /**
      * @var \DateTime

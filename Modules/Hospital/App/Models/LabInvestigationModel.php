@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Support\Facades\DB;
 use Modules\Core\App\Models\CustomerModel;
+use function Doctrine\Common\Collections\orderBy;
 
 
 class LabInvestigationModel extends Model
@@ -40,6 +41,16 @@ class LabInvestigationModel extends Model
     public function invoice()
     {
         return $this->hasOne(OpdModel::class, 'id', 'sales_id');
+    }
+
+
+    public function invoice_transaction()
+    {
+        return $this->hasMany(
+            InvoiceTransactionModel::class,
+            'hms_invoice_id',             // foreign key in hms_invoice_particular
+            'id'                          // local key in hms_invoice
+        );
     }
 
     public function invoice_particular()
@@ -194,34 +205,47 @@ class LabInvestigationModel extends Model
                 'prescription_doctor.employee_id as prescription_doctor_id',
                 'prescription_doctor.name as prescription_doctor_name',
             ])
-            ->with(['invoice_particular' => function ($query) {
-                $query->select([
-                    'hms_invoice_particular.id as invoice_particular_id',
-                    'hms_invoice_particular.hms_invoice_id',
-                    'hms_invoice_particular.name as item_name',
-                    'hms_invoice_particular.quantity',
-                    'hms_invoice_particular.price',
-                    'hms_particular.is_available',
-                    'hms_particular.display_name',
-                    'hms_invoice_particular.sample_collected_name',
-                    'hms_invoice_particular.report_delivered_name',
-                    'hms_invoice_particular.assign_labuser_name',
-                    'hms_invoice_particular.assign_doctor_name',
-                    'hms_invoice_particular.process',
-                    'hms_invoice_particular.barcode',
-                    DB::raw('DATE_FORMAT(hms_invoice_particular.collection_date, "%d-%m-%Y") as collection_date'),
-                ])->join('hms_particular as hms_particular','hms_particular.id','=','hms_invoice_particular.particular_id')
-                    ->join('hms_particular_type as hms_particular_type','hms_particular_type.id','=','hms_particular.particular_type_id')
-                    ->join('hms_particular_master_type','hms_particular_master_type.id','=','hms_particular_type.particular_master_type_id')
-                    ->where('hms_particular_master_type.slug','investigation')
-                    ->where('hms_particular.is_available',1);
-            }])->whereHas('invoice_particular', function($query) {
-                $query->join('hms_particular','hms_particular.id','=','hms_invoice_particular.particular_id')
-                    ->join('hms_particular_type','hms_particular_type.id','=','hms_particular.particular_type_id')
-                    ->join('hms_particular_master_type','hms_particular_master_type.id','=','hms_particular_type.particular_master_type_id')
-                    ->where('hms_particular_master_type.slug','investigation')
-                    ->where('hms_particular.is_available',1);
-            })
+            ->with([
+                'invoice_transaction' => function ($query) {
+                    $query->select([
+                        'hms_invoice_transaction.id',
+                        'hms_invoice_transaction.hms_invoice_id',
+                        'hms_invoice_transaction.mode',
+                        'hms_invoice_transaction.process',
+                        'hms_invoice_transaction.total',
+                        'hms_invoice_transaction.created_at'
+                    ])->where('hms_invoice_transaction.mode','investigation')
+                        ->where('hms_invoice_transaction.process','Done')->orderBy('hms_invoice_transaction.created_at','DESC')
+                        // include each transaction’s items
+                        ->with([
+                            'items' => function ($query) {
+                                $query->select([
+                                    'hms_invoice_particular.invoice_transaction_id as invoice_transaction_id',
+                                    'hms_invoice_particular.id as invoice_particular_id',
+                                    'hms_invoice_particular.hms_invoice_id',
+                                    'hms_invoice_particular.name as item_name',
+                                    'hms_invoice_particular.quantity',
+                                    'hms_invoice_particular.price',
+                                    'hms_particular.is_available',
+                                    'hms_particular.display_name',
+                                    'hms_invoice_particular.sample_collected_name',
+                                    'hms_invoice_particular.report_delivered_name',
+                                    'hms_invoice_particular.assign_labuser_name',
+                                    'hms_invoice_particular.assign_doctor_name',
+                                    'hms_invoice_particular.process',
+                                    'hms_invoice_particular.barcode',
+                                    'hms_invoice_particular.uid',
+                                    DB::raw('DATE_FORMAT(hms_invoice_particular.collection_date, "%d-%m-%Y") as collection_date'),
+                                ])->join('hms_particular as hms_particular','hms_particular.id','=','hms_invoice_particular.particular_id')
+                                    ->join('hms_particular_type as hms_particular_type','hms_particular_type.id','=','hms_particular.particular_type_id')
+                                    ->join('hms_particular_master_type','hms_particular_master_type.id','=','hms_particular_type.particular_master_type_id')
+                                    ->where('hms_particular_master_type.slug','investigation')
+                                    ->where('hms_invoice_particular.status',1)->where('hms_particular.is_available',1);
+                            }
+                        ]);
+                }
+            ])
+
             ->first();
 
         return $entity;

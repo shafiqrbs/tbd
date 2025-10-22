@@ -56,6 +56,7 @@ class InvoiceTransactionModel extends Model
     }
 
 
+
     public function createdDoctorInfo()
     {
         return $this->hasOne(UserModel::class, 'id', 'created_by_id');
@@ -135,12 +136,18 @@ class InvoiceTransactionModel extends Model
                             'name'      => $particular->name,
                             'quantity'      => 1,
                             'price'         => $particular->price ?? 0,
+                            'sub_total'         => $particular->price ?? 0,
                             'updated_at'    => $date,
                             'created_at'    => $date,
                         ]
                     );
                 }
             })->toArray();
+            $amount = InvoiceParticularModel::where('invoice_transaction_id', $invoiceTransaction->id)->sum('sub_total');
+            $invoiceTransaction->update(['sub_total' => $amount , 'total' => $amount]);
+           // $amount = InvoiceParticularModel::where('hms_invoice_id', $invoice->id)->sum('sub_total');
+          //  $invoice->update(['sub_total' => $amount , 'total' => $amount]);
+
         }
     }
 

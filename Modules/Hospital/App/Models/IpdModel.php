@@ -108,6 +108,7 @@ class IpdModel extends Model
             ],
             [
                 'name'  => $roomRent->display_name,
+                'status'  => true,
                 'quantity'  => $minimumDaysRoomRent,
                 'price'     => $roomRent->price,
                 'sub_total' => ($roomRent->price * (int)$minimumDaysRoomRent),
@@ -122,13 +123,14 @@ class IpdModel extends Model
             ],
             [
                 'name'  => $admissionFee->display_name,
+                'status'  => true,
                 'quantity'  => 1,
                 'price'     => $admissionFee->price,
                 'sub_total' => $admissionFee->price,
             ]
         );
         $amount = InvoiceParticularModel::where('hms_invoice_id', $entity->id)->sum('sub_total');
-        $invoiceTransaction->update(['sub_total' => $amount , 'total' => $amount]);
+        $invoiceTransaction->update(['hms_invoice_id' => $entity->id ,'is_master' => true ,'sub_total' => $amount , 'total' => $amount]);
         $entity->update(['sub_total' => $amount , 'total' => $amount]);
         $roomRent->update(['is_booked' => true]);
         return $amount;
