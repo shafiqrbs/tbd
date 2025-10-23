@@ -11,7 +11,7 @@ use Gedmo\Mapping\Annotation as Gedmo;
  * @ORM\Table("inv_stock_transfer_item")
  * @ORM\Entity()
  */
-class StockItemTransfer
+class StockTransferItem
 {
     /**
      * @var integer

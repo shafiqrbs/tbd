@@ -71,7 +71,7 @@ class CurrentStockModel extends Model
         $warehouses = self::with([
             'warehouse:id,name',
             'stockItem' => function ($q) {
-                $q->select(['id', 'name'])
+                $q->select(['id', 'name','uom','sales_price','purchase_price'])
                     ->with([
                         'purchaseItemForSales' => function ($q) {
                             $q->select([
@@ -108,6 +108,9 @@ class CurrentStockModel extends Model
                             'id'   => $stockItem?->id,
                             'stock_item_id'   => $stockItem?->id,
                             'stock_item_name' => $stockItem?->name,
+                            'uom' => $stockItem?->uom,
+                            'sales_price' => $stockItem?->sales_price,
+                            'purchase_price' => $stockItem?->purchase_price,
                             'total_quantity'  => $itemStocks->sum('quantity'),
                             'is_purchase_item' => count($stockItem->purchaseItemForSales)>0 ? true : false,
                             'purchase_items'  => $stockItem && $stockItem->purchaseItemForSales
