@@ -122,7 +122,7 @@ class IpdModel extends Model
                 'particular_id'  => $admissionFee->id ?? null,
             ],
             [
-                'name'  => $admissionFee->display_name,
+                'name'  => 'Admission Fee',
                 'status'  => true,
                 'quantity'  => 1,
                 'price'     => $admissionFee->price,
@@ -131,7 +131,7 @@ class IpdModel extends Model
         );
         $amount = InvoiceParticularModel::where('hms_invoice_id', $entity->id)->sum('sub_total');
         $invoiceTransaction->update(['hms_invoice_id' => $entity->id ,'is_master' => true ,'sub_total' => $amount , 'total' => $amount]);
-        $entity->update(['sub_total' => $amount , 'total' => $amount]);
+        $entity->update(['sub_total' => $amount , 'total' => $amount, 'admission_date' => $date]);
         $roomRent->update(['is_booked' => true]);
         return $amount;
 

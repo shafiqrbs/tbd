@@ -250,17 +250,21 @@ class InvoiceTransactionModel extends Model
                             'particular_id'              => $particular->id,
                         ],
                         [
-                            'name'          => $particular->name,
+                            'name'          => $particular->display_name,
                             'quantity'      => $item['quantity'],
                             'start_date'    => new \DateTime($item['start_date']),
                             'price'         => $particular->price ?? 0,
+                            'sub_total'         => ($particular->price) ? ($item['quantity'] * $particular->price) : 0,
                             'updated_at'    => $date,
                             'created_at'    => $date,
                         ]
                     );
                 }
             })->toArray();
+            $amount = InvoiceParticularModel::where('invoice_transaction_id', $invoiceTransaction->id)->sum('sub_total');
+            $invoiceTransaction->update(['sub_total' => $amount , 'total' => $amount]);
         }
+
     }
 
     public static function adviceIpdRoom($domain,$id,$data)

@@ -333,6 +333,28 @@ class Invoice
     /**
      * @var integer
      *
+     * @ORM\Column(name="admission_day", type="integer",  nullable=true)
+     */
+    private $admissionDay;
+
+    /**
+     * @var integer
+     *
+     * @ORM\Column(name="consume_day", type="integer",  nullable=true)
+     */
+    private $consumeDay;
+
+    /**
+     * @var integer
+     *
+     * @ORM\Column(name="remaining_day", type="integer",  nullable=true)
+     */
+    private $remainingDay;
+
+
+    /**
+     * @var integer
+     *
      * @ORM\Column(name="code", type="integer",  nullable=true)
      */
     private $code;
@@ -505,6 +527,12 @@ class Invoice
      * @ORM\Column(name="updated_at", type="datetime")
      */
     private $updatedAt;
+
+    /**
+     * @var \DateTime
+     * @ORM\Column(type="datetime", nullable=true)
+     */
+    private $admissionDate;
 
     /**
      * @var \DateTime

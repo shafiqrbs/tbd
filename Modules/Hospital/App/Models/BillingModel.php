@@ -69,6 +69,7 @@ class BillingModel extends Model
             ->leftjoin('hms_particular as vr','vr.id','=','hms_invoice.room_id')
             ->leftjoin('users as createdBy','createdBy.id','=','hms_invoice.created_by_id')
             ->join('cor_customers as customer','customer.id','=','hms_invoice.customer_id')
+            ->join('hms_particular_mode as patient_mode','patient_mode.id','=','hms_invoice.patient_mode_id')
             ->select([
                 'hms_invoice.id',
                 'hms_invoice.barcode',
@@ -79,12 +80,18 @@ class BillingModel extends Model
                 'doctor.name as doctor_name',
                 'customer.name',
                 'customer.mobile',
+                'patient_mode.name as patient_mode_name',
                 DB::raw("CONCAT(UCASE(LEFT(customer.gender, 1)), LCASE(SUBSTRING(customer.gender, 2))) as gender"),
                 DB::raw('DATE_FORMAT(hms_invoice.created_at, "%d-%m-%Y") as created_at'),
+                DB::raw('DATE_FORMAT(hms_invoice.admission_date, "%d-%m-%Y") as admission_date'),
                 'hms_invoice.process as process',
-                'vr.name as visiting_room',
+                'vr.display_name as display_name',
                 'createdBy.name as created_by',
                 'hms_invoice.sub_total as total',
+                'hms_invoice.amount as amount',
+                'hms_invoice.admission_day as admission_day',
+                'hms_invoice.consume_day as consume_day',
+                'hms_invoice.remaining_day as remaining_day',
             ]);
 
         if (isset($request['term']) && !empty($request['term'])){
@@ -208,7 +215,7 @@ class BillingModel extends Model
                     'hms_invoice_transaction.amount',
                     'hms_invoice_transaction.process',
                     DB::raw('DATE_FORMAT(hms_invoice_transaction.created_at, "%d-%m-%y") as created'),
-                ])->whereIn('hms_invoice_transaction.mode', ['investigation', 'admission'])->orderBy('hms_invoice_transaction.created_at','DESC');
+                ])->whereIn('hms_invoice_transaction.mode', ['investigation', 'admission', 'room'])->orderBy('hms_invoice_transaction.created_at','DESC');
             }])
             ->first();
 

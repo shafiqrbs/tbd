@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Support\Facades\DB;
 use Modules\Core\App\Models\CustomerModel;
+use Modules\Hospital\App\Http\Requests\ParticularInlineRequest;
 use function Doctrine\Common\Collections\orderBy;
 
 
@@ -117,8 +118,70 @@ class LabInvestigationModel extends Model
         if (isset($request['process']) && !empty($request['process'])){
             $entities = $entities->where('hms_invoice.process',$request['process']);
         }
-        if (isset($request['room_id']) && !empty($request['room_id'])){
-            $entities = $entities->where('hms_invoice.room_id',$request['room_id']);
+        if (isset($request['customer_id']) && !empty($request['customer_id'])){
+            $entities = $entities->where('hms_invoice.customer_id',$request['customer_id']);
+        }
+        if (isset($request['created']) && !empty($request['created'])){
+            $date = new \DateTime($request['created']);
+            $start_date = $date->format('Y-m-d 00:00:00');
+            $end_date = $date->format('Y-m-d 23:59:59');
+            $entities = $entities->whereBetween('hms_invoice.created_at',[$start_date, $end_date]);
+        }
+
+        $total  = $entities->count();
+        $entities = $entities->skip($skip)
+            ->take($perPage)
+            ->orderBy('hms_invoice.updated_at','DESC')
+            ->get();
+        $data = array('count'=>$total,'entities'=>$entities);
+        return $data;
+    }
+
+    public static function getLabReports($request,$domain)
+    {
+        $page =  isset($request['page']) && $request['page'] > 0?($request['page'] - 1 ) : 0;
+        $perPage = isset($request['offset']) && $request['offset']!=''? (int)($request['offset']):50;
+        $skip = isset($page) && $page!=''? (int)$page * $perPage:0;
+
+        $entities = InvoiceParticularModel::where([
+            ['hms_invoice.config_id', $domain['hms_config']]
+        ])
+            ->join('hms_invoice as hms_invoice', 'hms_invoice.id', '=', 'hms_invoice_particular.hms_invoice_id')
+            ->leftJoin('users as createdBy', 'createdBy.id', '=', 'hms_invoice.created_by_id')
+            ->leftjoin('hms_particular as vr','vr.id','=','hms_invoice.room_id')
+            ->join('cor_customers as customer', 'customer.id', '=', 'hms_invoice.customer_id')
+            ->join('hms_particular as hms_particular', 'hms_particular.id', '=', 'hms_invoice_particular.particular_id')
+            ->join('hms_particular_type', 'hms_particular_type.id', '=', 'hms_particular.particular_type_id')
+            ->join('hms_particular_master_type', 'hms_particular_master_type.id', '=', 'hms_particular_type.particular_master_type_id')
+            ->leftJoin('inv_category as inv_category', 'inv_category.id', '=', 'hms_particular.category_id') // ✅ fixed here
+            ->select([
+                'hms_invoice_particular.id',
+                'hms_invoice_particular.name as investigation',
+                'hms_invoice_particular.process',
+                'hms_invoice_particular.uid',
+                'inv_category.name as category_name',
+                'hms_invoice.invoice as invoice',
+                'customer.customer_id as patient_id',
+                'customer.name',
+                'customer.mobile',
+                DB::raw("CONCAT(UCASE(LEFT(customer.gender, 1)), LCASE(SUBSTRING(customer.gender, 2))) as gender"),
+                DB::raw('DATE_FORMAT(hms_invoice.created_at, "%d-%m-%Y") as created_at'),
+                'vr.display_name as room',
+                'createdBy.name as created_by'
+            ])
+            ->where('hms_particular_master_type.slug', 'investigation')
+            ->where('hms_particular.is_available', 1);
+
+        if (isset($request['term']) && !empty($request['term'])){
+            $term = trim($request['term']);
+            $entities = $entities->where(function ($q) use ($term) {
+                $q->where('hms_invoice.invoice', 'LIKE', "%{$term}%")
+                    ->orWhere('customer.customer_id', 'LIKE', "%{$term}%")
+                    ->orWhere('customer.name', 'LIKE', "%{$term}%")
+                    ->orWhere('customer.mobile', 'LIKE', "%{$term}%")
+                    ->orWhere('customer.nid', 'LIKE', "%{$term}%")
+                    ->orWhere('customer.health_id', 'LIKE', "%{$term}%");
+            });
         }
 
         if (isset($request['process']) && !empty($request['process'])){

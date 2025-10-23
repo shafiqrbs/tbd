@@ -109,6 +109,7 @@ class BillingController extends Controller
         InvoiceParticularModel::where('invoice_transaction_id', $id)->update(['status' => true]);
         $amount = InvoiceTransactionModel::where('hms_invoice_id', $entity->hms_invoice_id)->where('process','Done')->sum('amount');
         $total = InvoiceParticularModel::where('hms_invoice_id', $entity->hms_invoice_id)->where('status',true)->sum('sub_total');
+        InvoiceParticularModel::getCountBedRoom($entity->hms_invoice_id);
         InvoiceModel::find($entity->hms_invoice_id)->update(['sub_total' => $total , 'total' => $total, 'amount' => $amount]);
         $service = new JsonRequestResponse();
         return $service->returnJosnResponse($entity);

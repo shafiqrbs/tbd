@@ -22,6 +22,7 @@ use Modules\Hospital\App\Models\HospitalConfigModel;
 use Modules\Hospital\App\Models\HospitalSalesModel;
 use Modules\Hospital\App\Models\InvoiceContentDetailsModel;
 use Modules\Hospital\App\Models\InvoiceModel;
+use Modules\Hospital\App\Models\InvoiceParticularModel;
 use Modules\Hospital\App\Models\InvoicePatientReferredModel;
 use Modules\Hospital\App\Models\InvoiceTransactionModel;
 use Modules\Hospital\App\Models\IpdModel;
@@ -52,6 +53,7 @@ class IpdController extends Controller
      */
     public function index(Request $request){
         $domain = $this->domain;
+        InvoiceParticularModel::getPatientCountBedRoom($domain);
         $data = InvoiceModel::getRecords($request,$domain);
         $response = new Response();
         $response->headers->set('Content-Type','application/json');
