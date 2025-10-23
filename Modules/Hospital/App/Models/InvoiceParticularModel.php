@@ -67,7 +67,7 @@ class InvoiceParticularModel extends Model
     public static function getPatientCountBedRoom($domain){
 
 
-        InvoiceModel::where('hms_config', $domain['hms_config'])
+        InvoiceModel::where('hms_invoice.config_id', $domain['hms_config'])
             ->where('process', $domain['admitted'])
             ->chunk(100, function ($entities) {
                 foreach ($entities as $entity) {
