@@ -76,7 +76,7 @@ class InvoiceTransactionModel extends Model
                 ],
                 [
                     'created_by_id'    => $prescription->created_by_id,
-                    'process'    => 'investigation',
+                    'mode'    => 'investigation',
                     'updated_at'    => $date,
                     'created_at'    => $date,
                 ]
