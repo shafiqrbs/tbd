@@ -749,6 +749,7 @@ class   RequisitionMatrixBoardWarehouseController extends Controller
                     'config_id' => $findProductionMatrixItem->config_id,
                     'production_item_id' => $findProductionMatrixItem->pro_item_id,
                     'issue_quantity' => $findProductionMatrixItem->demand_quantity,
+                    'receive_quantity' => $findProductionMatrixItem->demand_quantity,
                     'batch_id' => $productionBatch->id,
                     'warehouse_id' => $findProductionMatrixItem->warehouse_id,
                 ]);

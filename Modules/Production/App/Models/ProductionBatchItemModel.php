@@ -3,14 +3,10 @@
 namespace Modules\Production\App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Support\Facades\DB;
 
 
 class ProductionBatchItemModel extends Model
 {
-    use HasFactory;
-
     protected $table = 'pro_batch_item';
     public $timestamps = true;
     protected $guarded = ['id'];

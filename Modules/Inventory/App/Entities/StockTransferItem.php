@@ -100,6 +100,19 @@ class StockTransferItem
     private $updatedAt;
 
 
+    /**
+     * @var string
+     * @ORM\Column(type="string", length=50, nullable=true)
+     */
+    private $uom;
+
+    /**
+     * @var string
+     * @ORM\Column(type="string", nullable=true)
+     */
+    private $name;
+
+
 
 
 

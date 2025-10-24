@@ -104,8 +104,7 @@ Route::prefix('/inventory')->middleware([HeaderAuthenticationMiddleware::class,L
     Route::prefix('stock')->name('stock')->group(function () {
         Route::prefix('transfer')->name('transfer.')->group(function () {
             Route::get('items', [StockTransferController::class, 'getItemsForTransfer']);
-
-//            Route::apiResource('', SalesReturnController::class)->parameters(['' => 'id']);
+            Route::apiResource('', StockTransferController::class)->parameters(['' => 'id']);
         });
         Route::apiResource('', StockItemController::class)->parameters(['' => 'id']);
     });

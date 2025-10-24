@@ -505,7 +505,7 @@ class ProductionBatchController extends Controller
         $data = [
             'stock_item_id' => $getStockItemId,
             'config_id' => $stockItem->config_id,
-            'item_name' => $stockItem->item_name,
+            'item_name' => $stockItem->item_name ?? $stockItem->name,
             'quantity' => $quantity,
             'purchase_price' => $stockItem->purchase_price ?? 0,
             'sales_price' => $stockItem->sales_price ?? 0,
@@ -513,7 +513,7 @@ class ProductionBatchController extends Controller
             'opening_balance' => $existingStockHistory->closing_balance ?? 0,
             'closing_quantity' => $closing_quantity,
             'closing_balance' => $closing_balance,
-            'warehouse_id' => $batchItem->warehouse_id ?? null,
+            'warehouse_id' => $batchItem->warehouse_id,
             'mode' => 'production',
             'process' => 'approved',
             'created_by' => $this->domain['user_id']

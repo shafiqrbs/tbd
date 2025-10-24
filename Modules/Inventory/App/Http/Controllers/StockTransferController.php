@@ -10,12 +10,14 @@ use Illuminate\Support\Facades\DB;
 use Modules\Core\App\Models\UserModel;
 use Modules\Core\App\Models\WarehouseModel;
 use Modules\Inventory\App\Http\Requests\PurchaseReturnRequest;
+use Modules\Inventory\App\Http\Requests\StockTransferRequest;
 use Modules\Inventory\App\Models\ConfigModel;
 use Modules\Inventory\App\Models\CurrentStockModel;
 use Modules\Inventory\App\Models\PurchaseModel;
 use Modules\Inventory\App\Models\PurchaseReturnModel;
 use Modules\Inventory\App\Models\SalesReturnModel;
 use Modules\Inventory\App\Models\StockItemHistoryModel;
+use Modules\Inventory\App\Models\StockTransferModel;
 use Symfony\Component\HttpFoundation\Response as ResponseAlias;
 use Throwable;
 use function Symfony\Component\HttpFoundation\Session\Storage\Handler\getInsertStatement;
@@ -51,15 +53,37 @@ class StockTransferController extends Controller
     }
 
 
+    /**
+     * Store a newly created resource in storage.
+     */
+    public function store(StockTransferRequest $request)
+    {
+        $input   = $request->validated();
+
+        $input['process']       = "Created";
+        $input['config_id']     = $this->domain['config_id'];
+        $input['created_by_id'] = $this->domain['user_id'];
 
 
+        DB::beginTransaction();
+        try {
+            $stockTransfer = StockTransferModel::create($input);
 
+            // Insert transfer items
+            StockTransferModel::insertStockTransferItems($stockTransfer, $input['items'],$this->domain['config_id']);
 
-    /*OLD*/
+            DB::commit();
+
+            return response()->json(['status' => 200, 'message' => 'Stock transfer created successfully.']);
+        } catch (Throwable $e) {
+            DB::rollBack();
+            report($e);
+        }
+    }
 
     public function index(Request $request)
     {
-        $data = SalesReturnModel::getRecords($request, $this->domain);
+        $data = StockTransferModel::getRecords($request, $this->domain);
         $response = new Response();
         $response->headers->set('Content-Type', 'application/json');
         $response->setContent(json_encode([
@@ -73,39 +97,13 @@ class StockTransferController extends Controller
     }
 
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(PurchaseReturnRequest $request)
-    {
-        $input   = $request->validated();
 
-        $input['process']       = "Created";
-        $input['config_id']     = $this->domain['config_id'];
-        $input['created_by_id'] = $this->domain['user_id'];
 
-        DB::beginTransaction();
-        try {
-            // Create purchase return
-            $purchaseReturn = PurchaseReturnModel::create($input);
 
-            // Insert purchase return items
-            $totals = PurchaseReturnModel::insertPurchaseReturnItems($purchaseReturn, $input['items']);
 
-            // Update purchase return with totals
-            $purchaseReturn->update([
-                'quantity'  => $totals['quantity'],
-                'sub_total' => $totals['sub_total'],
-            ]);
 
-            DB::commit();
+    /*OLD*/
 
-            return response()->json(['status' => 200, 'message' => 'Purchase return created successfully.']);
-        } catch (Throwable $e) {
-            DB::rollBack();
-            report($e);
-        }
-    }
 
     /**
      * Show the specified resource.
