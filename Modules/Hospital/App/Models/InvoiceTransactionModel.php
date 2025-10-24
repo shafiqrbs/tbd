@@ -71,11 +71,12 @@ class InvoiceTransactionModel extends Model
         if (!empty($investigations) && is_array($investigations)) {
             $invoiceTransaction = self::updateOrCreate(
                 [
-                    'hms_invoice_id'                    => $prescription->hms_invoice_id,
-                    'prescription_id'               => $prescription->id,
+                    'hms_invoice_id'               => $prescription->hms_invoice_id,
+                    'prescription_id'              => $prescription->id,
                 ],
                 [
                     'created_by_id'    => $prescription->created_by_id,
+                    'process'    => 'investigation',
                     'updated_at'    => $date,
                     'created_at'    => $date,
                 ]
@@ -83,7 +84,7 @@ class InvoiceTransactionModel extends Model
             collect($investigations)->map(function ($investigation) use ($prescription,$invoiceTransaction,$date) {
 
                 $particular = ParticularModel::find($investigation->id);
-                if($particular){
+                if($particular and $particular->is_available == 1){
                     InvoiceParticularModel::updateOrCreate(
                         [
                             'hms_invoice_id'             => $prescription->hms_invoice_id,
