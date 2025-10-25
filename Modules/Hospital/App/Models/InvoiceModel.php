@@ -26,7 +26,15 @@ class InvoiceModel extends Model
     {
         do {
             // Generate a random 12-digit number
-            $code = str_pad(random_int(0, 9999999999), 10, '0', STR_PAD_LEFT);
+            $code = str_pad(random_int(0, 999999999999), 12, '0', STR_PAD_LEFT);
+        } while (self::where('uid', $code)->exists());
+        return $code;
+    }
+    public static function generateUniqueBarcode($length = 12)
+    {
+        do {
+            // Generate a random 12-digit number
+            $code = str_pad(random_int(0, 999999999999), 12, '0', STR_PAD_LEFT);
         } while (self::where('barcode', $code)->exists());
         return $code;
     }
@@ -37,7 +45,7 @@ class InvoiceModel extends Model
             $date =  new \DateTime("now");
             $model->created_at = $date;
             if (empty($model->barcode)) {
-                $model->barcode = self::generateUniqueCode(12);
+                $model->barcode = self::generateUniqueBarcode(12);
                 $model->uid = self::generateUniqueCode(12);
             }
         });
@@ -138,6 +146,7 @@ class InvoiceModel extends Model
             ->join('hms_particular_mode as patient_payment_mode','patient_payment_mode.id','=','hms_invoice.patient_payment_mode_id')
             ->select([
                 'hms_invoice.id',
+                'hms_invoice.uid',
                 'hms_invoice.parent_id as parent_id',
                 'prescription.id as prescription_id',
                 'prescription.created_by_id as prescription_created_by_id',
@@ -166,8 +175,6 @@ class InvoiceModel extends Model
                 'hms_invoice.referred_mode as referred_mode',
                 'prescription.diabetes as diabetes',
                 'prescription.blood_pressure as blood_pressure',
-                'prescription.weight as weight',
-                'prescription.height as height',
                 'hms_invoice.admission_day as admission_day',
                 'hms_invoice.consume_day as consume_day',
                 'hms_invoice.remaining_day as remaining_day',
@@ -220,15 +227,28 @@ class InvoiceModel extends Model
                     'admit_unit.name as admit_unit_name',
                     'admit_department.name as admit_department_name',
                 ]);
-
         }
-
         if (isset($request['patient_mode']) && !empty($request['patient_mode'])){
             if (is_array($request['patient_mode'])) {
                 $entities = $entities->whereIn('patient_mode.slug', $request['patient_mode']);
             } else {
                 $entities = $entities->where('patient_mode.slug', $request['patient_mode']);
             }
+        }
+        if (isset($request['is_vital']) && !empty($request['is_vital'])){
+            $entities = $entities ->addSelect([
+                'hms_invoice.weight as weight',
+                'hms_invoice.height as height',
+                'hms_invoice.bp  as bp',
+                'hms_invoice.oxygen  as oxygen',
+                'hms_invoice.temperature  as temperature',
+                'hms_invoice.sat_with_O2  as sat_with_O2',
+                'hms_invoice.sat_without_O2  as sat_without_O2',
+                'hms_invoice.respiration  as respiration',
+                'hms_invoice.pulse  as pulse',
+            ]);
+            $entities = $entities->where('hms_invoice.is_vital',1);
+            $entities = $entities->whereIn('hms_invoice.process', ['New','In-progress']);
         }
 
         if (isset($request['process']) && !empty($request['process'])){
@@ -315,6 +335,7 @@ class InvoiceModel extends Model
                 'cor_customers.address',
                 'cor_customers.permanent_address',
                 DB::raw('DATE_FORMAT(cor_customers.dob, "%d-%m-%y") as dob'),
+                DB::raw('DATE_FORMAT(cor_customers.dob,"%Y-%m-%d") as date_of_birth'),
                 'cor_customers.identity_mode as identity_mode',
                 'hms_invoice.year as year',
                 'hms_invoice.month as month',
@@ -409,7 +430,7 @@ class InvoiceModel extends Model
     public static function getIpdShow($id)
     {
         $entity = self::where([
-            ['hms_invoice.id', '=', $id]
+            ['hms_invoice.uid', '=', $id]
         ])
             ->leftjoin('cor_customers','cor_customers.id','=','hms_invoice.customer_id')
             ->leftjoin('users as createdBy','createdBy.id','=','hms_invoice.created_by_id')

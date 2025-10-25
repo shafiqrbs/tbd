@@ -20,13 +20,32 @@ class IpdModel extends Model
 
     protected $fillable = [];
 
+    public static function generateUniqueCode($length = 12)
+    {
+        do {
+            // Generate a random 12-digit number
+            $code = str_pad(random_int(0, 999999999999), 12, '0', STR_PAD_LEFT);
+        } while (self::where('uid', $code)->exists());
+        return $code;
+    }
+    public static function generateUniqueBarcode($length = 12)
+    {
+        do {
+            // Generate a random 12-digit number
+            $code = str_pad(random_int(0, 999999999999), 12, '0', STR_PAD_LEFT);
+        } while (self::where('barcode', $code)->exists());
+        return $code;
+    }
+
     public static function boot() {
         parent::boot();
         self::creating(function ($model) {
-            $model->process = 'New';
             $date =  new \DateTime("now");
             $model->created_at = $date;
-            $model->process = 'New';
+            if (empty($model->barcode)) {
+                $model->barcode = self::generateUniqueBarcode(12);
+                $model->uid = self::generateUniqueCode(12);
+            }
         });
 
         self::updating(function ($model) {
@@ -157,6 +176,9 @@ class IpdModel extends Model
                 'oxygen' => $data['oxygen'] ?? null,
                 'temperature' => $data['temperature'] ?? null,
                 'pulse' => $data['pulse'] ?? null,
+                'sat_with_O2' => $data['sat_with_O2'] ?? null,
+                'sat_without_O2' => $data['sat_without_O2'] ?? null,
+                'respiration' => $data['respiration'] ?? null,
                 'bp' => $data['bp'] ?? null,
                 'weight' => $data['weight'] ?? null,
                 'blood_sugar' => $data['blood_sugar'] ?? null,

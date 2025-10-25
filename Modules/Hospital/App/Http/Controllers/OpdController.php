@@ -140,7 +140,7 @@ class OpdController extends Controller
                         'domain_id' => $this->domain['global_id'],
                         'name'      => $input['name'] ?? null,
                         'mobile'    => $input['mobile'] ?? null,
-                        'address'    => $input['address'] ?? null,
+                      //  'address'    => $input['address'] ?? null,
                         'dob'    => $dob ?? null,
                         'upazilla_id'    => $input['upazilla_id'] ?? null,
                         'gender'    => $input['gender'] ?? null,
@@ -307,7 +307,19 @@ class OpdController extends Controller
         $patient->update($data);
         $invoice = InvoiceModel::getShow($id);
         $service = new JsonRequestResponse();
-        return $service->returnJosnResponse($patient);
+        return $service->returnJosnResponse($invoice);
+    }
+
+    /**
+     * Update the specified resource in storage.
+     */
+    public function vitalUpdate(Request $request, $id)
+    {
+        $data = $request->all();
+        $entity = InvoiceModel::find($id);
+        $entity->update($data);
+        $service = new JsonRequestResponse();
+        return $service->returnJosnResponse('success');
     }
 
     /**

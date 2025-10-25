@@ -217,6 +217,27 @@ class Invoice
      */
     private $temperature;
 
+     /**
+     * @var string
+     *
+     * @ORM\Column(name="sat_with_O2", type="string",length=50, nullable = true)
+     */
+    private $satWithO2;
+
+     /**
+     * @var string
+     *
+     * @ORM\Column(name="sat_without_O2", type="string",length=50, nullable = true)
+     */
+    private $satWithoutO2;
+
+     /**
+     * @var string
+     *
+     * @ORM\Column(name="respiration", type="string",length=50, nullable = true)
+     */
+    private $respiration;
+
     /**
      * @var string
      *
@@ -426,6 +447,13 @@ class Invoice
      * @ORM\Column(type="boolean",options={"default"="false"})
      */
     private $isDelete;
+
+     /**
+     * @var boolean
+     *
+     * @ORM\Column(type="boolean",options={"default"="false"})
+     */
+    private $isVital;
 
     /**
      * @var string

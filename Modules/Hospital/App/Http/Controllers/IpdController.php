@@ -74,7 +74,7 @@ class IpdController extends Controller
     {
         $domain = $this->domain;
         $input = $request->validated();
-        $parentInvoice = InvoiceModel::find($input['hms_invoice_id']);
+        $parentInvoice = InvoiceModel::where('uid',$input['hms_invoice_id'])->first();
         DB::beginTransaction();
 
         try {
@@ -116,13 +116,14 @@ class IpdController extends Controller
 
     /**
      * Show the specified resource.
-     *//**/
+     */
+
     public function show($id)
     {
 
         $entity = InvoiceModel::getIpdShow($id);
         if (!$entity){
-            $entity = 'Data not found';
+            $entity = 'not_found';
         }
         $service = new JsonRequestResponse();
         $data = $service->returnJosnResponse($entity);

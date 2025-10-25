@@ -140,6 +140,7 @@ Route::prefix('/hospital')->middleware([HeaderAuthenticationMiddleware::class])-
     Route::post('/setting-matrix/create', [HospitalController::class,'settingMatrixCreate'])->name('particular_module_dropdown');
     Route::get('/prescription/patient/{id}/{prescription}', [PrescriptionController::class,'patientPrescription'])->name('patient_prescription');
     Route::apiResource('opd', OpdController::class)->middleware([HeaderAuthenticationMiddleware::class]);
+    Route::patch('/opd/vital-update/{id}', [OpdController::class, 'vitalUpdate'])->name('vitalUpdate');
     Route::apiResource('prescription', PrescriptionController::class)
         ->middleware([HeaderAuthenticationMiddleware::class])
         ->names([
@@ -149,6 +150,8 @@ Route::prefix('/hospital')->middleware([HeaderAuthenticationMiddleware::class])-
             'update' => 'prescription.update',
             'destroy' => 'prescription.destroy',
         ]);
+    Route::get('/prescription/vital/{id}', [PrescriptionController::class, 'vitalCheck'])->name('vitalCheck');
+
     Route::apiResource('ipd', IpdController::class)
         ->middleware([HeaderAuthenticationMiddleware::class])
         ->names([
