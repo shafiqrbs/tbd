@@ -101,6 +101,18 @@ class DailyStock
      * @var float
      * @ORM\Column(type="float", nullable = true,options={"default":0})
      */
+    private $stockTransferIn= 0.00;
+
+    /**
+     * @var float
+     * @ORM\Column(type="float", nullable = true,options={"default":0})
+     */
+    private $stockTransferOut= 0.00;
+
+    /**
+     * @var float
+     * @ORM\Column(type="float", nullable = true,options={"default":0})
+     */
     private $openingBalance= 0.00;
 
     /**

@@ -3,11 +3,9 @@
 namespace Modules\Inventory\App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class StockItemInventoryHistoryModel extends Model
 {
-    use HasFactory;
 
     protected $table = 'inv_stock_item_inventory_history';
     public $timestamps = true;
@@ -29,7 +27,9 @@ class StockItemInventoryHistoryModel extends Model
         'sales_price',
         'sub_total',
         'config_id',
-        'total'
+        'total',
+        'stock_transfer_item_id',
+        'stock_transfer_id'
     ];
 
     public static function boot() {
@@ -43,70 +43,69 @@ class StockItemInventoryHistoryModel extends Model
         });
     }
 
-    public static function openingInventoryHistory($item, $stockItemHistory,$process,$domain)
+    public static function openingInventoryHistory($item, $stockItemHistory, $process, $domain)
     {
-        // Check for existing record
-        $exist = self::where('stock_item_history_id', $stockItemHistory->id)->first();
+        try {
+            $exist = self::where('stock_item_history_id', $stockItemHistory->id)->first();
+            $findStockItem = StockItemModel::with(['brand', 'product.category'])->find($item->stock_item_id);
 
-        // Fetch related stock item details with eager loading
-        $findStockItem = StockItemModel::with(['brand', 'product.category'])->find($item->stock_item_id);
+            if (!$findStockItem || $exist) {
+                return; // Safe exit
+            }
 
-        if (!$findStockItem) {
-            return; // Exit if stock item doesn't exist
-        }
+            $brandName = $findStockItem->brand->name ?? null;
+            $categoryName = $findStockItem->product->category->name ?? null;
 
-        // Get related details using relationships if available
-        $brandName = $findStockItem->brand->name ?? null;
-        $categoryName = $findStockItem->product->category->name ?? null;
-
-        if (!$exist) {
             $data = [
                 'stock_item_history_id' => $stockItemHistory->id,
                 'quantity' => $item->quantity,
                 'brand' => $brandName,
                 'category' => $categoryName,
-                'price' => $item->purchase_price, // Assuming purchase price as default
-                'purchase_price' => $item->purchase_price,
-                'sales_price' => $item->sales_price,
-                'sub_total' => $item->sub_total,
-                'total' => $item->sub_total,
+                'price' => $item->purchase_price ?? 0,
+                'purchase_price' => $item->purchase_price ?? 0,
+                'sales_price' => $item->sales_price ?? 0,
+                'sub_total' => $item->sub_total ?? 0,
+                'total' => $item->sub_total ?? 0,
                 'config_id' => $item->config_id,
             ];
 
-            // Check if this is a purchase operation
-            if ($process==='opening' && isset($item->id)) {
-                $data['purchase_item_id'] = $item->id;
+            switch ($process) {
+                case 'opening':
+                    $data['purchase_item_id'] = $item->id ?? null;
+                    break;
+                case 'purchase':
+                    $data['purchase_id'] = $item->purchase_id ?? null;
+                    $data['purchase_item_id'] = $item->id ?? null;
+                    break;
+                case 'sales':
+                    $data['sale_id'] = $item->sale_id ?? null;
+                    $data['sales_item_id'] = $item->id ?? null;
+                    break;
+                case 'sales-return':
+                    $data['sales_return_id'] = $item->sales_return_id ?? null;
+                    $data['sales_return_item_id'] = $item->id ?? null;
+                    break;
+                case 'purchase-return':
+                    $data['purchase_return_id'] = $item->purchase_return_id ?? null;
+                    $data['purchase_return_item_id'] = $item->id ?? null;
+                    break;
+                case 'stock-transfer-in':
+                case 'stock-transfer-out':
+                    $data['stock_transfer_item_id'] = $item->stock_transfer_item_id ?? null;
+                    $data['stock_transfer_id'] = $item->stock_transfer_id ?? null;
+                    break;
             }
 
-            // Check if this is a purchase operation
-            if (($process==='purchase') && isset($item->purchase_id)) {
-                $data['purchase_id'] = $item->purchase_id;
-                $data['purchase_item_id'] = $item->id;
-            }
-
-            // Check if this is a sales operation
-            if ($process==='sales' && isset($item->sale_id)) {
-                $data['sale_id'] = $item->sale_id;
-                $data['sales_item_id'] = $item->id;
-            }
-
-            // Check if this is a sales-return operation
-            if ($process==='sales-return' && isset($item->sales_return_id)) {
-                $data['sales_return_id'] = $item->sales_return_id;
-                $data['sales_return_item_id'] = $item->id;
-            }
-
-            // Check if this is a purchase-return operation
-            if ($process==='purchase-return' && isset($item->purchase_return_id)) {
-                $data['purchase_return_id'] = $item->purchase_return_id;
-                $data['purchase_return_item_id'] = $item->id;
-            }
-
-            // Create the database record
             self::create($data);
+        } catch (\Throwable $e) {
+            logger()->error('openingInventoryHistory failed', [
+                'error' => $e->getMessage(),
+                'process' => $process,
+                'item' => $item,
+            ]);
         }
-
     }
+
 
 
 }

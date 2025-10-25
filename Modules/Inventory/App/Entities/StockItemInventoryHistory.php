@@ -83,6 +83,18 @@ class StockItemInventoryHistory
      **/
     protected  $salesReturn;
 
+    /**
+     * @ORM\ManyToOne(targetEntity="StockTransfer")
+     * @ORM\JoinColumn(onDelete="CASCADE")
+     **/
+    protected  $stockTransfer;
+
+    /**
+     * @ORM\ManyToOne(targetEntity="StockTransferItem")
+     * @ORM\JoinColumn(onDelete="CASCADE")
+     **/
+    protected  $stockTransferItem;
+
 
     /**
      * @var string

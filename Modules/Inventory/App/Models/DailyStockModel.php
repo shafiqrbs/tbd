@@ -40,6 +40,8 @@ class DailyStockModel extends Model
         'total_out_quantity',
         'closing_quantity',
         'closing_balance',
+        'stock_transfer_in',
+        'stock_transfer_out',
     ];
 
     /*protected $fillable = [

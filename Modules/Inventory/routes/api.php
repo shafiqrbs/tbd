@@ -104,6 +104,7 @@ Route::prefix('/inventory')->middleware([HeaderAuthenticationMiddleware::class,L
     Route::prefix('stock')->name('stock')->group(function () {
         Route::prefix('transfer')->name('transfer.')->group(function () {
             Route::get('items', [StockTransferController::class, 'getItemsForTransfer']);
+            Route::get('approve/{id}', [StockTransferController::class, 'approve']);
             Route::apiResource('', StockTransferController::class)->parameters(['' => 'id']);
         });
         Route::apiResource('', StockItemController::class)->parameters(['' => 'id']);
@@ -118,8 +119,7 @@ Route::prefix('/inventory')->middleware([HeaderAuthenticationMiddleware::class,L
         Route::prefix('return')->name('return.')->group(function () {
             Route::get('{id}/approve/{type}', [SalesReturnController::class, 'approve'])->name('sales-return.approve');
 
-            Route::apiResource('', SalesReturnController::class)
-                ->parameters(['' => 'id']);
+            Route::apiResource('', SalesReturnController::class)->parameters(['' => 'id']);
         });
 
         Route::apiResource('', SalesController::class)->parameters(['' => 'id']);

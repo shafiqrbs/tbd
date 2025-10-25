@@ -3,6 +3,7 @@
 namespace Modules\Inventory\App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Collection;
@@ -60,7 +61,7 @@ class   RequisitionMatrixBoardController extends Controller
 
         // Validate input
         if (!$expectedDate || empty($expectedDate)) {
-            throw new \Exception("Expected date not found");
+            throw new Exception("Expected date not found");
         }
 
         DB::beginTransaction(); // Start transaction
@@ -144,7 +145,7 @@ class   RequisitionMatrixBoardController extends Controller
                     $findProItem = DB::table('pro_item')
                         ->where('item_id', $val['vendor_stock_item_id'])
                         ->where('config_id', $this->domain['pro_config'])
-                        ->where('process','approved')
+                        ->where('process', 'approved')
                         ->first();
 
                     $warehouseId = $this->domain['warehouse_id'];
@@ -209,7 +210,7 @@ class   RequisitionMatrixBoardController extends Controller
                 'data' => $board
             ], ResponseAlias::HTTP_OK);
 
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             DB::rollBack(); // Rollback if any error
             Log::error("Matrix Batch Generation Error: " . $e->getMessage());
 
@@ -251,7 +252,7 @@ class   RequisitionMatrixBoardController extends Controller
                 ]
             ], ResponseAlias::HTTP_OK);
 
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             // Rollback all changes if any exception occurs
             DB::rollBack();
 
@@ -283,11 +284,11 @@ class   RequisitionMatrixBoardController extends Controller
                     'customer_stock_item_id' => $group->first()['customer_stock_item_id'],
                     'product' => $group->first()['display_name'],
                     'warehouse_id' => $group->first()['warehouse_id'],
-                    'warehouse_name' => DB::table('cor_warehouses')->where('id',$group->first()['warehouse_id'])->first()?->name,
+                    'warehouse_name' => DB::table('cor_warehouses')->where('id', $group->first()['warehouse_id'])->first()?->name,
                     'id' => $group->first()['id'],
                     'vendor_stock_quantity' => $group->first()['vendor_stock_quantity'],
                     'total_approved_quantity' => $group->sum('approved_quantity'),
-                    'is_production_item' => DB::table('pro_item')->where('item_id', $group->first()['vendor_stock_item_id'])->where('config_id', $this->domain['pro_config'])->where('process','approved')->exists(),
+                    'is_production_item' => DB::table('pro_item')->where('item_id', $group->first()['vendor_stock_item_id'])->where('config_id', $this->domain['pro_config'])->where('process', 'approved')->exists(),
                 ];
 
                 foreach ($shops as $shop) {
@@ -344,17 +345,17 @@ class   RequisitionMatrixBoardController extends Controller
 
 
     /**
-     * @throws \Exception
+     * @throws Exception
      */
     public function matrixBoardQuantityUpdate(Request $request)
     {
         if (!$request->has('id') || empty($request->id)) {
-            throw new \Exception("Update id not found");
+            throw new Exception("Update id not found");
         }
 
         $findBoardMatrix = RequisitionMatrixBoardModel::find($request->id);
         if (!$findBoardMatrix) {
-            throw new \Exception("Board matrix not found");
+            throw new Exception("Board matrix not found");
         }
 
         $type = $request->type;
@@ -367,7 +368,7 @@ class   RequisitionMatrixBoardController extends Controller
                 'approved_quantity' => $quantity,
                 'sub_total' => $quantity * $findBoardMatrix->purchase_price,
             ]);
-        }elseif ($type == 'warehouse') {
+        } elseif ($type == 'warehouse') {
             $warehouseId = $request->warehouse_id;
             $stockItemId = $request->stock_item_id;
 
@@ -428,7 +429,7 @@ class   RequisitionMatrixBoardController extends Controller
                     $proItem = DB::table('pro_item')
                         ->where('item_id', $items->first()['vendor_stock_item_id'])
                         ->where('config_id', $this->domain['pro_config'])
-                        ->where('process','approved')
+                        ->where('process', 'approved')
                         ->first();
 
                     if (!$proItem) {
@@ -506,7 +507,7 @@ class   RequisitionMatrixBoardController extends Controller
                 $salesItems = array_map(fn($item) => array_merge($item, ['sale_id' => $sales->id]), $sale['items']);
                 SalesItemModel::insert($salesItems);
             }
-                RequisitionMatrixBoardModel::whereIn('id', $matrixCollection->pluck('id')->toArray())
+            RequisitionMatrixBoardModel::whereIn('id', $matrixCollection->pluck('id')->toArray())
                 ->update(['process' => 'Confirmed']);
 
             RequisitionModel::where([
@@ -525,7 +526,7 @@ class   RequisitionMatrixBoardController extends Controller
                 'pro_item_process' => count($reqProItemMatrix) ?? 0
             ], ResponseAlias::HTTP_OK);
 
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             DB::rollBack();
             Log::error("Matrix Batch Generation Error: " . $e->getMessage());
 
@@ -682,7 +683,7 @@ class   RequisitionMatrixBoardController extends Controller
                 'message' => 'Update successful.'
             ], ResponseAlias::HTTP_OK);
 
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             DB::rollBack();
 
             return response()->json([
@@ -713,12 +714,12 @@ class   RequisitionMatrixBoardController extends Controller
             }
         }
         // Ensure it's always an array of integers
-        $itemIds = array_map('intval', (array) $itemIds);
+        $itemIds = array_map('intval', (array)$itemIds);
         try {
             DB::beginTransaction();
             $productionMatrixItems = RequisitionProductItemMatrixModel::whereIn('id', $itemIds)->get();
             if ($productionMatrixItems->isEmpty()) {
-                throw new \Exception('No valid production matrix items found.');
+                throw new Exception('No valid production matrix items found.');
             }
             $firstItem = $productionMatrixItems->first();
             $pattern = $patternCodeService->productBatch([
@@ -766,7 +767,7 @@ class   RequisitionMatrixBoardController extends Controller
                 'message' => 'Data successfully processed.',
             ], ResponseAlias::HTTP_OK);
 
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             DB::rollBack();
 
             return response()->json([
@@ -776,7 +777,7 @@ class   RequisitionMatrixBoardController extends Controller
         }
     }
 
-    public function matrixBoardProductionApproved(Request $request , $id)
+    public function matrixBoardProductionApproved(Request $request, $id)
     {
         $findProductionBatch = ProductionBatchModel::find($id);
         if (!$findProductionBatch) {
@@ -810,7 +811,7 @@ class   RequisitionMatrixBoardController extends Controller
                 ]);
             }
 
-            ProductionBatchModel::generateProductionToVendorRequisition($this->domain->toArray(),$id,$findProductionBatch);
+            ProductionBatchModel::generateProductionToVendorRequisition($this->domain->toArray(), $id, $findProductionBatch);
 
             DB::commit();
 
@@ -819,7 +820,7 @@ class   RequisitionMatrixBoardController extends Controller
                 'message' => 'Approved successfully processed.',
             ], ResponseAlias::HTTP_OK);
 
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             DB::rollBack();
 
             return response()->json([

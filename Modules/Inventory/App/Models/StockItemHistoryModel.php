@@ -29,10 +29,6 @@ class StockItemHistoryModel extends Model
         'opening_balance',
         'created_by',
         'item_name',
-        'warehouse_opening_quantity',
-        'warehouse_opening_balance',
-        'warehouse_closing_quantity',
-        'warehouse_closing_balance'
     ];
 
     public static function boot() {
@@ -62,38 +58,27 @@ class StockItemHistoryModel extends Model
                 ->latest()
                 ->first();
 
-            # Remove this part after warehouse full implementation start ------------------------------------------
-            $existingStockHistoryWithWarehouse = null;
-            if ($warehouseId) {
-                $existingStockHistoryWithWarehouse = self::where('stock_item_id', $item->stock_item_id)
-                    ->where('config_id', $configId)
-                    ->where('warehouse_id', $warehouseId)
-                    ->latest()
-                    ->first();
-            }
-            # Remove this part after warehouse full implementation end ------------------------------------------
-
-
             // Define operators for processes
             $operatorData = [
                 'opening' => '+',
                 'purchase' => '+',
                 'sales-return' => '+',
+                'stock-transfer-in' => '+',
                 'purchase-return' => '-',
                 'production' => '-',
                 'production-issue' => '-',
                 'sales' => '-',
+                'stock-transfer-out' => '-',
             ];
 
             // Determine the operator and apply calculations
             $operator = $operatorData[$process] ?? '+';
 
             // Extract quantities and balances for new stock history
-            list($closing_quantity, $closing_balance, $quantity,$warehouse_closing_quantity, $warehouse_closing_balance) = self::calculateClosingStock(
+            list($closing_quantity, $closing_balance, $quantity) = self::calculateClosingStock(
                 $existingStockHistory,
                 $item,
                 $operator,
-                $existingStockHistoryWithWarehouse
             );
 
             // Prepare data for creating stock history
@@ -106,10 +91,7 @@ class StockItemHistoryModel extends Model
                 $process,
                 $domain,
                 $configId,
-                $warehouseId,
-                $existingStockHistoryWithWarehouse,
-                $warehouse_closing_quantity,
-                $warehouse_closing_balance
+                $warehouseId
             );
 
             // Create stock history record
@@ -159,7 +141,7 @@ class StockItemHistoryModel extends Model
         }
     }
 
-    private static function calculateClosingStock($existingStockHistory, $item, $operator, $existingStockHistoryWithWarehouse)
+    private static function calculateClosingStock($existingStockHistory, $item, $operator)
     {
         $quantity = $item->quantity ?? 0;
         $subTotal = $item->sub_total ?? 0;
@@ -167,14 +149,10 @@ class StockItemHistoryModel extends Model
         if ($operator === '+') {
             $closing_quantity = ($existingStockHistory->closing_quantity ?? 0) + $quantity;
             $closing_balance = ($existingStockHistory->closing_balance ?? 0) + $subTotal;
-            $warehouse_closing_quantity = ($existingStockHistoryWithWarehouse->warehouse_closing_quantity ?? 0) + $quantity;
-            $warehouse_closing_balance = ($existingStockHistoryWithWarehouse->warehouse_closing_balance ?? 0) + $subTotal;
         } elseif ($operator === '-') {
             $closing_quantity = ($existingStockHistory->closing_quantity ?? 0) - $quantity;
             $closing_balance = ($existingStockHistory->closing_balance ?? 0) - $subTotal;
 
-            $warehouse_closing_quantity = ($existingStockHistoryWithWarehouse->warehouse_closing_quantity ?? 0) - $quantity;
-            $warehouse_closing_balance = ($existingStockHistoryWithWarehouse->warehouse_closing_balance ?? 0) - $subTotal;
             $quantity = -$quantity; // Set negative quantity for deductions
         } else {
             $closing_quantity = $quantity;
@@ -182,10 +160,10 @@ class StockItemHistoryModel extends Model
             $warehouse_closing_quantity = $quantity;
             $warehouse_closing_balance = $subTotal;
         }
-        return [$closing_quantity, $closing_balance, $quantity,$warehouse_closing_quantity, $warehouse_closing_balance];
+        return [$closing_quantity, $closing_balance, $quantity];
     }
 
-    private static function prepareStockHistoryData($existingStockHistory, $item, $closing_quantity, $closing_balance, $quantity, $process,$domain,$configId,$warehouseId = null,$existingStockHistoryWithWarehouse,$warehouse_closing_quantity,$warehouse_closing_balance)
+    private static function prepareStockHistoryData($existingStockHistory, $item, $closing_quantity, $closing_balance, $quantity, $process,$domain,$configId,$warehouseId = null)
     {
         return [
             'stock_item_id' => $item->stock_item_id,
@@ -198,10 +176,6 @@ class StockItemHistoryModel extends Model
             'opening_balance' => $existingStockHistory->closing_balance ?? 0,
             'closing_quantity' => $closing_quantity,
             'closing_balance' => $closing_balance,
-            'warehouse_opening_quantity' => $existingStockHistoryWithWarehouse->warehouse_closing_quantity ?? 0,
-            'warehouse_opening_balance' => $existingStockHistoryWithWarehouse->warehouse_closing_balance ?? 0,
-            'warehouse_closing_quantity' => $warehouse_closing_quantity,
-            'warehouse_closing_balance' => $warehouse_closing_balance,
             'warehouse_id' => $warehouseId,
             'mode' => $process,
             'process' => 'approved',
