@@ -152,7 +152,7 @@ class LabInvestigationController extends Controller
         $data['comment'] = $data['comment'] ?? null;
         $entity->update($data);
         $service = new JsonRequestResponse();
-        return $service->returnJosnResponse($entity);
+        return $service->returnJosnResponse($data['json_content']);
 
     }
 

@@ -154,18 +154,23 @@ class LabInvestigationModel extends Model
             ->join('hms_particular_type', 'hms_particular_type.id', '=', 'hms_particular.particular_type_id')
             ->join('hms_particular_master_type', 'hms_particular_master_type.id', '=', 'hms_particular_type.particular_master_type_id')
             ->leftJoin('inv_category as inv_category', 'inv_category.id', '=', 'hms_particular.category_id') // ✅ fixed here
+            ->join('hms_particular_mode as patient_mode','patient_mode.id','=','hms_invoice.patient_mode_id')
+
             ->select([
                 'hms_invoice_particular.id',
+                'hms_invoice_particular.uid',
+                'hms_invoice_particular.barcode',
                 'hms_invoice_particular.name as investigation',
                 'hms_invoice_particular.process',
-                'hms_invoice_particular.uid',
                 'inv_category.name as category_name',
+                'hms_invoice.id as invoice_id',
                 'hms_invoice.invoice as invoice',
                 'customer.customer_id as patient_id',
+                'patient_mode.name as mode',
                 'customer.name',
                 'customer.mobile',
                 DB::raw("CONCAT(UCASE(LEFT(customer.gender, 1)), LCASE(SUBSTRING(customer.gender, 2))) as gender"),
-                DB::raw('DATE_FORMAT(hms_invoice.created_at, "%d-%m-%Y") as created_at'),
+                DB::raw('DATE_FORMAT(hms_invoice_particular.created_at, "%d-%m-%Y") as created_at'),
                 'vr.display_name as room',
                 'createdBy.name as created_by'
             ])
@@ -180,13 +185,16 @@ class LabInvestigationModel extends Model
                     ->orWhere('customer.name', 'LIKE', "%{$term}%")
                     ->orWhere('customer.mobile', 'LIKE', "%{$term}%")
                     ->orWhere('customer.nid', 'LIKE', "%{$term}%")
-                    ->orWhere('customer.health_id', 'LIKE', "%{$term}%");
+                    ->orWhere('customer.health_id', 'LIKE', "%{$term}%")
+                    ->orWhere('hms_invoice.uid', 'LIKE', "%{$term}%")
+                    ->orWhere('hms_invoice_particular.uid', 'LIKE', "%{$term}%");
             });
         }
 
-        if (isset($request['process']) && !empty($request['process'])){
-            $entities = $entities->where('hms_invoice.process',$request['process']);
+        if (isset($request['process']) && !empty($request['process']) && $request['process'] != "all"){
+            $entities = $entities->where('hms_invoice_particular.process',$request['process']);
         }
+
         if (isset($request['customer_id']) && !empty($request['customer_id'])){
             $entities = $entities->where('hms_invoice.customer_id',$request['customer_id']);
         }
@@ -194,9 +202,8 @@ class LabInvestigationModel extends Model
             $date = new \DateTime($request['created']);
             $start_date = $date->format('Y-m-d 00:00:00');
             $end_date = $date->format('Y-m-d 23:59:59');
-            $entities = $entities->whereBetween('hms_invoice.created_at',[$start_date, $end_date]);
+            $entities = $entities->whereBetween('hms_invoice_particular.created_at',[$start_date, $end_date]);
         }
-
         $total  = $entities->count();
         $entities = $entities->skip($skip)
             ->take($perPage)
