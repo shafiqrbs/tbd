@@ -2,12 +2,9 @@
 
 namespace Modules\Inventory\App\Models;
 
+use DateTime;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\DB;
-use Modules\AppsApi\App\Services\GeneratePatternCodeService;
-use Modules\Core\App\Models\VendorModel;
 
 class StockTransferModel extends Model
 {
@@ -17,19 +14,19 @@ class StockTransferModel extends Model
     protected $guarded = ['id'];
 
     protected $fillable = [
-        'config_id','from_warehouse_id','to_warehouse_id','created_by_id','notes','process','approved_by_id'
+        'config_id', 'from_warehouse_id', 'to_warehouse_id', 'created_by_id', 'notes', 'process', 'approved_by_id'
     ];
 
     public static function boot()
     {
         parent::boot();
         self::creating(function ($model) {
-            $date = new \DateTime("now");
+            $date = new DateTime("now");
             $model->created_at = $date;
         });
 
         self::updating(function ($model) {
-            $date = new \DateTime("now");
+            $date = new DateTime("now");
             $model->updated_at = $date;
         });
     }
@@ -42,13 +39,15 @@ class StockTransferModel extends Model
 
     public static function getRecords($request, $domain)
     {
+        // Pagination setup
         $page = isset($request['page']) && $request['page'] > 0 ? ($request['page'] - 1) : 0;
-        $perPage = isset($request['offset']) && $request['offset'] != '' ? (int)($request['offset']) : 50;
-        $skip = isset($page) && $page != '' ? (int)$page * $perPage : 0;
+        $perPage = !empty($request['offset']) ? (int)$request['offset'] : 50;
+        $skip = $page * $perPage;
 
-        $entities = self::where([['inv_stock_transfer.config_id', $domain['config_id']]])
-            ->leftjoin('users as createdBy', 'createdBy.id', '=', 'inv_stock_transfer.created_by_id')
-            ->leftjoin('users as approveBy', 'approveBy.id', '=', 'inv_stock_transfer.approved_by_id')
+        // Base query
+        $entities = self::where('inv_stock_transfer.config_id', $domain['config_id'])
+            ->leftJoin('users as createdBy', 'createdBy.id', '=', 'inv_stock_transfer.created_by_id')
+            ->leftJoin('users as approveBy', 'approveBy.id', '=', 'inv_stock_transfer.approved_by_id')
             ->join('cor_warehouses as fw', 'fw.id', '=', 'inv_stock_transfer.from_warehouse_id')
             ->join('cor_warehouses as tw', 'tw.id', '=', 'inv_stock_transfer.to_warehouse_id')
             ->select([
@@ -67,46 +66,68 @@ class StockTransferModel extends Model
                 DB::raw('DATE_FORMAT(inv_stock_transfer.created_at, "%d-%m-%Y") as created'),
                 DB::raw('DATE_FORMAT(inv_stock_transfer.updated_at, "%d-%m-%Y") as invoice_date'),
             ])
-            ->with(['stockTransferItems' => function ($query) {
-                $query->select([
-                    'inv_stock_transfer_item.id',
-                    'inv_stock_transfer_item.stock_transfer_id',
-                    'inv_stock_transfer_item.stock_item_id',
-                    'inv_stock_transfer_item.purchase_item_id',
-                    'inv_stock_transfer_item.quantity',
-                    'inv_stock_transfer_item.name',
-                    'inv_stock_transfer_item.uom',
-                ]);
-//                    ->join('inv_stock', 'inv_stock.id', '=', 'inv_stock_transfer_item.stock_item_id')
-//                    ->leftjoin('cor_warehouses', 'cor_warehouses.id', '=', 'inv_stock_transfer_item.warehouse_id');
-            }]);
+            ->with([
+                'stockTransferItems' => function ($query) {
+                    $query->select([
+                        'inv_stock_transfer_item.id',
+                        'inv_stock_transfer_item.stock_transfer_id',
+                        'inv_stock_transfer_item.stock_item_id',
+                        'inv_stock_transfer_item.purchase_item_id',
+                        'inv_stock_transfer_item.quantity',
+                        'inv_stock_transfer_item.name',
+                        'inv_stock_transfer_item.uom',
+                    ]);
+                }
+            ]);
 
-        if (isset($request['term']) && !empty($request['term'])) {
-            $entities = $entities->whereAny(['inv_stock_transfer.process', 'tw.name', 'fw.name', 'createdBy.name'], 'LIKE', '%' . $request['term'] . '%');
+        // 🔍 Search filter
+        if (!empty($request['term'])) {
+            $term = '%' . $request['term'] . '%';
+            $entities->where(function ($query) use ($term) {
+                $query->where('inv_stock_transfer.process', 'LIKE', $term)
+                    ->orWhere('tw.name', 'LIKE', $term)
+                    ->orWhere('fw.name', 'LIKE', $term)
+                    ->orWhere('createdBy.name', 'LIKE', $term);
+            });
         }
 
-        if (isset($request['start_date']) && !empty($request['start_date']) && empty($request['end_date'])) {
+        // 🏭 From warehouse filter
+        if (!empty($request['from_warehouse_id'])) {
+            $entities->where('inv_stock_transfer.from_warehouse_id', $request['from_warehouse_id']);
+        }
+
+        // 🏭 To warehouse filter
+        if (!empty($request['to_warehouse_id'])) {
+            $entities->where('inv_stock_transfer.to_warehouse_id', $request['to_warehouse_id']);
+        }
+
+        // 📅 Date range filter
+        if (!empty($request['start_date'])) {
             $start_date = $request['start_date'] . ' 00:00:00';
-            $end_date = $request['start_date'] . ' 23:59:59';
-            $entities = $entities->whereBetween('inv_stock_transfer.created_at', [$start_date, $end_date]);
-        }
-        if (isset($request['start_date']) && !empty($request['start_date']) && isset($request['end_date']) && !empty($request['end_date'])) {
-            $start_date = $request['start_date'] . ' 00:00:00';
-            $end_date = $request['end_date'] . ' 23:59:59';
-            $entities = $entities->whereBetween('inv_stock_transfer.created_at', [$start_date, $end_date]);
+            $end_date = !empty($request['end_date'])
+                ? $request['end_date'] . ' 23:59:59'
+                : $request['start_date'] . ' 23:59:59';
+
+            $entities->whereBetween('inv_stock_transfer.created_at', [$start_date, $end_date]);
         }
 
+        // Get total count before pagination
         $total = $entities->count();
-        $entities = $entities->skip($skip)
+
+        // Pagination + sorting
+        $entities = $entities->orderBy('inv_stock_transfer.id', 'DESC')
+            ->skip($skip)
             ->take($perPage)
-            ->orderBy('inv_stock_transfer.id', 'DESC')
             ->get();
-        $data = array('count' => $total, 'entities' => $entities);
-        return $data;
+
+        return [
+            'count' => $total,
+            'entities' => $entities,
+        ];
     }
 
 
-    public static function insertStockTransferItems($stockTransfer, array $items , int $configId): bool
+    public static function insertStockTransferItems($stockTransfer, array $items, int $configId): bool
     {
         if (empty($items)) {
             return false;
@@ -118,15 +139,15 @@ class StockTransferModel extends Model
 
         foreach ($items as $record) {
             $insertData[] = [
-                'config_id'             => $configId,
-                'stock_transfer_id'     => $stockTransfer->id,
-                'stock_item_id'         => $record['stock_item_id'],
-                'purchase_item_id'      => $record['purchase_item_id'],
-                'quantity'              => $record['quantity'],
-                'name'                  => $record['display_name'],
-                'uom'                   => $record['unit_name'],
-                'created_at'            => $timestamp,
-                'updated_at'            => $timestamp,
+                'config_id' => $configId,
+                'stock_transfer_id' => $stockTransfer->id,
+                'stock_item_id' => $record['stock_item_id'],
+                'purchase_item_id' => $record['purchase_item_id'],
+                'quantity' => $record['quantity'],
+                'name' => $record['display_name'],
+                'uom' => $record['unit_name'],
+                'created_at' => $timestamp,
+                'updated_at' => $timestamp,
             ];
         }
 
