@@ -172,6 +172,13 @@ class Invoice
      **/
     private  $waiverApprovedBy;
 
+    /**
+     * @var string
+     *
+     * @ORM\Column(type="text", nullable=true)
+     */
+    private $waiverComment;
+
 
     /**
      * @ORM\ManyToOne(targetEntity="Modules\Core\App\Entities\User")

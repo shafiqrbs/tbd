@@ -69,17 +69,24 @@ class EpharmaModel extends Model
         $page =  isset($request['page']) && $request['page'] > 0?($request['page'] - 1 ) : 0;
         $perPage = isset($request['offset']) && $request['offset']!=''? (int)($request['offset']):50;
         $skip = isset($page) && $page!=''? (int)$page * $perPage:0;
-        $entities = self::where([['hms_invoice.config_id',$domain['hms_config']]])
+        $entities = self::where([
+            ['hms_invoice.config_id', $domain['hms_config']],
+            ['hms_invoice.is_medicine_delivered',1],
+            ])
             ->join('hms_prescription as hms_prescription','inv_sales.id','=','hms_prescription.sale_id')
             ->join('hms_invoice','hms_prescription.hms_invoice_id','=','hms_invoice.id')
             ->leftjoin('hms_particular as vr','vr.id','=','hms_invoice.room_id')
             ->leftjoin('users as createdBy','createdBy.id','=','inv_sales.created_by_id')
+            ->leftjoin('users as deliveredBy','deliveredBy.id','=','hms_invoice.medicine_delivered_by_id')
             ->join('cor_customers as customer','customer.id','=','inv_sales.customer_id')
             ->join('hms_particular_mode as patient_mode','patient_mode.id','=','hms_invoice.patient_mode_id')
             ->join('hms_particular_mode as patient_payment_mode','patient_payment_mode.id','=','hms_invoice.patient_payment_mode_id')
             ->select([
                 'inv_sales.id as sale_id',
                 'hms_prescription.id as prescription_id',
+                'hms_invoice.id as id',
+                'hms_invoice.uid as uid',
+                'hms_invoice.is_medicine_delivered as is_medicine_delivered',
                 'customer.name',
                 'customer.mobile',
                 'customer.gender',
@@ -87,14 +94,16 @@ class EpharmaModel extends Model
                 'customer.health_id',
                 DB::raw("CONCAT(UCASE(LEFT(customer.gender, 1)), LCASE(SUBSTRING(customer.gender, 2))) as gender"),
                 DB::raw('DATE_FORMAT(hms_invoice.created_at, "%d-%m-%Y") as created_at'),
-                DB::raw('DATE_FORMAT(hms_invoice.appointment_date, "%d-%M-%Y") as appointment'),
+                DB::raw('DATE_FORMAT(hms_invoice.medicine_delivered_date, "%d-%M-%Y") as delivered_date'),
                 'hms_invoice.process as process',
+                'hms_invoice.medicine_delivered_comment as comment',
                 'vr.name as visiting_room',
                 'vr.id as visiting_room_id',
                 'inv_sales.invoice as invoice',
                 'patient_mode.name as patient_mode_name',
                 'patient_payment_mode.name as patient_payment_mode_name',
                 'createdBy.name as created_by',
+                'deliveredBy.name as delivered_by',
                 'hms_invoice.sub_total as total',
             ])->with(['salesItems' => function ($query) {
                 $query->select([
@@ -134,7 +143,6 @@ class EpharmaModel extends Model
 
     public static function getShow($id)
     {
-
         $entity = InvoiceModel::with([
             'sales.salesItems' => function ($query) {
                 $query->select([
@@ -178,7 +186,9 @@ class EpharmaModel extends Model
                 'createdBy.id as created_by_id',
                 'hms_invoice.process as process_id',
             ])
-            ->where('hms_invoice.barcode',$id)->first();
+            ->where('hms_invoice.barcode', $id)
+            ->where('is_medicine_delivered', '!=', 1)
+            ->first();
 
         return $entity;
     }

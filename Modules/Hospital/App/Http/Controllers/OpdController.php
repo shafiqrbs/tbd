@@ -342,7 +342,8 @@ class OpdController extends Controller
     {
         $data = $request->all();
         $entity = InvoiceModel::where('uid',$id)->first();
-        $data['waver_created_by_id']= $this->domain['user_id'];
+        $data['waiver_created_by_id']= $this->domain['user_id'];
+        $data['waiverComment']= $data['comment'] ?? null;
         $entity->update($data);
         InvoiceParticularModel::updateWaverParticular($entity->id,$data['particulars']);
         $service = new JsonRequestResponse();

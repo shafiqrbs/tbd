@@ -122,11 +122,11 @@ class InvoiceParticularModel extends Model
     {
 
         // Reset all to 0 first
+        $array = json_decode($data, true);
         self::where('hms_invoice_id', $entity)->update(['is_waver' => 0]);
-
         // Set only selected ones to 1
         self::where('hms_invoice_id', $entity)
-            ->whereIn('id', $data)
+            ->whereIn('id', $array)
             ->update(['is_waver' => 1]);
 
     }
