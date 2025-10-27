@@ -118,5 +118,18 @@ class InvoiceParticularModel extends Model
         return $totalQuantity;
     }
 
+    public static function updateWaverParticular($entity,$data)
+    {
+
+        // Reset all to 0 first
+        self::where('hms_invoice_id', $entity)->update(['is_waver' => 0]);
+
+        // Set only selected ones to 1
+        self::where('hms_invoice_id', $entity)
+            ->whereIn('id', $data)
+            ->update(['is_waver' => 1]);
+
+    }
+
 
 }

@@ -160,6 +160,19 @@ class Invoice
     private  $approvedBy;
 
 
+     /**
+     * @ORM\ManyToOne(targetEntity="Modules\Core\App\Entities\User")
+     * @ORM\JoinColumn(name="waiver_created_by_id", referencedColumnName="id", nullable=true)
+     **/
+    private  $waiverCreatedBy;
+
+    /**
+     * @ORM\ManyToOne(targetEntity="Modules\Core\App\Entities\User")
+     * @ORM\JoinColumn(name="waiver_approved_by_id", referencedColumnName="id", nullable=true)
+     **/
+    private  $waiverApprovedBy;
+
+
     /**
      * @ORM\ManyToOne(targetEntity="Modules\Core\App\Entities\User")
      * @ORM\JoinColumn(name="delivered_by_id", referencedColumnName="id", nullable=true)
@@ -172,7 +185,6 @@ class Invoice
      * @ORM\JoinColumn(name="discharge_by_id", referencedColumnName="id", nullable=true)
      **/
     private  $dischargeBy;
-
 
 
     /**
@@ -538,7 +550,7 @@ class Invoice
     /**
      * @var string
      *
-     * @ORM\Column(name="mobile", type="text", nullable=true)
+     * @ORM\Column(name="mobile", type="string", nullable=true)
      */
     private $mobile;
 
@@ -569,7 +581,7 @@ class Invoice
     private $releaseDate;
 
     /**
-     * @var DateTime
+     * @var \DateTime
      *
      * @ORM\Column(type="datetime", nullable=true)
      */
@@ -624,7 +636,32 @@ class Invoice
      */
     private $deliveryDateTime;
 
+    /**
+     * @var boolean
+     *
+     * @ORM\Column(type="boolean", nullable=true, options={"default"="false"})
+     */
+    private $isMedicineDelivered;
 
+    /**
+     * @var \DateTime
+     *
+     * @ORM\Column(type="datetime", nullable=true)
+     */
+    private $medicineDeliveredDate;
+
+    /**
+     * @ORM\ManyToOne(targetEntity="Modules\Core\App\Entities\User")
+     * @ORM\JoinColumn(name="medicine_delivered_by_id", referencedColumnName="id", nullable=true)
+     **/
+    private  $medicineDeliveredBy;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(type="text", nullable=true)
+     */
+    private $medicineDeliveredComment;
 
     /**
      * Get id

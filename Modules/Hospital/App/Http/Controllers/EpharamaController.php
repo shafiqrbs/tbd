@@ -12,6 +12,7 @@ use Modules\Core\App\Models\UserModel;
 
 use Modules\Hospital\App\Models\EpharmaModel;
 
+use Modules\Hospital\App\Models\InvoiceModel;
 use Modules\Hospital\App\Models\InvoiceParticularModel;
 use Modules\Hospital\App\Models\InvoicePathologicalReportModel;
 
@@ -73,17 +74,13 @@ class EpharamaController extends Controller
     {
         $domain = $this->domain;
         $data = $request->all();
-        $entity = InvoiceParticularModel::find($id);
-        if($entity->process == "New"){
-            $data['process'] = 'In-progress';
-            $data['assign_labuser_id'] = $domain['user_id'];
-            $data['assign_labuser_name'] = $domain['user_name'];
-        }if($entity->process == "In-progress"){
-            $data['assign_doctor_id'] = $domain['user_id'];
-            $data['assign_doctor_name'] = $domain['user_name'];
-            $data['process'] = 'Done';
+        $entity = InvoiceModel::where('barcode',$id)->first();
+        if($entity->is_medicine_delivered != 1){
+            $data['is_medicine_delivered'] = 1;
+            $data['medicine_delivered_by_id'] = $domain['user_id'];
+            $data['medicine_delivered_comment'] = $data['comment'] ?? null;
+            $data['medicine_delivered_date'] = new \DateTime('now') ?? null;
         }
-        $data['comment'] = $data['comment'] ?? null;
         $entity->update($data);
         $service = new JsonRequestResponse();
         return $service->returnJosnResponse($entity);

@@ -81,6 +81,7 @@ class CategoryModel extends Model
         if ($type == 'child'){
             $query->whereNull('parent');
         }
+        $query->orderBy('inv_category.name','ASC');
 
         return $query->get();
     }

@@ -141,6 +141,8 @@ Route::prefix('/hospital')->middleware([HeaderAuthenticationMiddleware::class])-
     Route::get('/prescription/patient/{id}/{prescription}', [PrescriptionController::class,'patientPrescription'])->name('patient_prescription');
     Route::apiResource('opd', OpdController::class)->middleware([HeaderAuthenticationMiddleware::class]);
     Route::patch('/opd/vital-update/{id}', [OpdController::class, 'vitalUpdate'])->name('vitalUpdate');
+    Route::patch('/opd/patient-waver/{id}', [OpdController::class, 'patientWaver'])->name('patientWaver');
+    Route::post('/opd/police-case/{id}', [OpdController::class, 'policeCase'])->name('patientWaver');
     Route::apiResource('prescription', PrescriptionController::class)
         ->middleware([HeaderAuthenticationMiddleware::class])
         ->names([

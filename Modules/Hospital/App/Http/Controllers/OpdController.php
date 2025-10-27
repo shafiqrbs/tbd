@@ -19,11 +19,13 @@ use Modules\Hospital\App\Http\Requests\OPDRequest;
 use Modules\Hospital\App\Http\Requests\ReferredRequest;
 use Modules\Hospital\App\Models\HospitalConfigModel;
 use Modules\Hospital\App\Models\InvoiceModel;
+use Modules\Hospital\App\Models\InvoiceParticularModel;
 use Modules\Hospital\App\Models\InvoicePatientReferredModel;
 use Modules\Hospital\App\Models\OPDModel;
 use Modules\Hospital\App\Models\ParticularModel;
 use Modules\Hospital\App\Models\ParticularModeModel;
 use Modules\Hospital\App\Models\PatientModel;
+use Modules\Hospital\App\Models\PoliceCaseModel;
 use Modules\Hospital\App\Models\PrescriptionModel;
 use function Symfony\Component\TypeInfo\null;
 
@@ -332,6 +334,61 @@ class OpdController extends Controller
         $entity = ['message'=>'delete'];
         return $service->returnJosnResponse($entity);
     }
+
+    /**
+     * Update the specified resource in storage.
+     */
+    public function patientWaver(Request $request, $id)
+    {
+        $data = $request->all();
+        $entity = InvoiceModel::where('uid',$id)->first();
+        $data['waver_created_by_id']= $this->domain['user_id'];
+        $entity->update($data);
+        InvoiceParticularModel::updateWaverParticular($entity->id,$data['particulars']);
+        $service = new JsonRequestResponse();
+        return $service->returnJosnResponse($data);
+
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     */
+    public function patientWaverShow($id)
+    {
+        $service = new JsonRequestResponse();
+        $entity = InvoiceModel::where('uid',$id)->first();
+        return $service->returnJosnResponse($entity);
+    }
+
+
+    /**
+     * Remove the specified resource from storage.
+     */
+    public function patientWaverApprove($id)
+    {
+        $service = new JsonRequestResponse();
+        $entity = InvoiceModel::where('uid',$id)->first();
+        $data['waver_approved_by_id'] = $this->domain['user_id'];
+        $entity->update($data);
+        return $service->returnJosnResponse($entity);
+
+    }
+
+
+    /**
+     * Update the specified resource in storage.
+     */
+
+    public function policeCase(Request $request, $id)
+    {
+        $data = $request->all();
+        $entity = InvoiceModel::where('uid',$id)->first();
+        PoliceCaseModel::insert($this->domain,$entity->id,$data);
+        $service = new JsonRequestResponse();
+        return $service->returnJosnResponse($data);
+
+    }
+
 
 
 }

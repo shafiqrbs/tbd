@@ -240,6 +240,13 @@ class InvoiceParticular
      */
     private $status;
 
+    /**
+     * @var boolean
+     *
+     * @ORM\Column(type="boolean", nullable=true, options={"default"="false"})
+     */
+     private $isWaver;
+
      /**
      * @var \DateTime
      * @Gedmo\Timestampable(on="create")

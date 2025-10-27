@@ -27,6 +27,12 @@ class Particular
      **/
     private $config;
 
+    /**
+     * @ORM\OneToOne(targetEntity="Invoice")
+     * @ORM\JoinColumn(name="admission_id", referencedColumnName="id", nullable=true,onDelete="SET NULL"))
+     **/
+    private  $admission;
+
 
     /**
      * @ORM\ManyToOne(targetEntity="ParticularType")
