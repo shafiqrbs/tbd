@@ -99,14 +99,14 @@ class AdmissionPatient
 
      /**
      * @var \DateTime
-     * @Gedmo\Timestampable(on="create")
+     * @Gedmo\Timestampable(on="create_at")
      * @ORM\Column(name="created", type="datetime")
      */
     private $created;
 
     /**
      * @var \DateTime
-     * @Gedmo\Timestampable(on="update")
+     * @Gedmo\Timestampable(on="update_at")
      * @ORM\Column(name="updated", type="datetime")
      */
     private $updated;

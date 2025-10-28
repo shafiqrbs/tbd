@@ -347,7 +347,7 @@ class OpdController extends Controller
         $entity->update($data);
         InvoiceParticularModel::updateWaverParticular($entity->id,$data['particulars']);
         $service = new JsonRequestResponse();
-        return $service->returnJosnResponse($data);
+        return $service->returnJosnResponse($entity);
 
     }
 

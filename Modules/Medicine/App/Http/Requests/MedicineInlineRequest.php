@@ -36,6 +36,9 @@ class MedicineInlineRequest extends FormRequest
                     'opd_quantity' => 'nullable',
                     'medicine_dosage_id' => 'nullable',
                     'medicine_bymeal_id' => 'nullable',
+                    'admin_status' => 'nullable',
+                    'ipd_status' => 'nullable',
+                    'opd_status' => 'nullable',
                 ];
             }
 

@@ -104,20 +104,6 @@ class Prescription
     /**
      * @var string
      *
-     * @ORM\Column(type="string",length=10 , nullable = true)
-     */
-    private $ageGroup;
-
-    /**
-     * @var integer
-     *
-     * @ORM\Column(name="age", type="smallint",length=3, nullable = true)
-     */
-    private $age;
-
-    /**
-     * @var string
-     *
      * @ORM\Column(name="weight", type="string",length=50, nullable = true)
      */
     private $weight;

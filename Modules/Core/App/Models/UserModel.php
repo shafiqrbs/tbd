@@ -304,7 +304,7 @@ class UserModel extends Model
             'users.employee_id',
             'users.enabled',
             'cor_user_profiles.alternative_email',
-            'cor_user_profiles.dob',
+            DB::raw('DATE_FORMAT(cor_user_profiles.dob, "%Y-%m-%d") as dob'),
             'cor_user_profiles.gender',
             'cor_user_profiles.location_id',
             'cor_user_profiles.designation_id',

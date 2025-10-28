@@ -13,6 +13,7 @@ use Modules\Hospital\App\Models\MedicineDosageModel;
 use Modules\Hospital\App\Models\ProductModel;
 use Modules\Inventory\App\Models\CategoryModel;
 use Modules\Medicine\App\Http\Requests\MedicineInlineRequest;
+use Modules\Medicine\App\Models\MedicineCompanyModel;
 use Modules\Medicine\App\Models\MedicineDetailsModel;
 use Modules\Medicine\App\Models\MedicineGenericModel;
 use Modules\Medicine\App\Models\MedicineModel;
@@ -91,6 +92,18 @@ class MedicineController extends Controller
                 $updateDetails['medicine_bymeal_id'] = $input['medicine_bymeal_id'];
             }
 
+            if (array_key_exists('admin_status', $input)) {
+                $updateDetails['admin_status'] = $input['admin_status'] ? 0:1;
+            }
+
+            if (array_key_exists('opd_status', $input)) {
+                $updateDetails['opd_status'] = $input['opd_status'] ? 0:1;
+            }
+
+            if (array_key_exists('ipd_status', $input)) {
+                $updateDetails['ipd_status'] = $input['ipd_status'] ? 0:1;
+            }
+
             if (array_key_exists('generic', $input)) {
                 $updateDetails['generic'] = $generic;
             }
@@ -122,9 +135,19 @@ class MedicineController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
+    public function medicineCompanyDropdown(Request $request)
+    {
+        $term = $request->get('term');
+        $dropdown = MedicineCompanyModel::getMedicineCompanyDropdown($term);
+        $service = new JsonRequestResponse();
+        return $service->returnJosnResponse($dropdown);
+    }
+
+    /**
+     * Show the form for editing the specified resource.
+     */
     public function medicineDosageDropdown(Request $request)
     {
-
         $dropdown = MedicineDosageModel::getMedicineDosageDropdown($this->domain,'Dosage');
         $service = new JsonRequestResponse();
         return $service->returnJosnResponse($dropdown);
@@ -135,7 +158,6 @@ class MedicineController extends Controller
      */
     public function medicineBymealDropdown(Request $request)
     {
-        //dd($this->domain);
         $dropdown = MedicineDosageModel::getMedicineDosageDropdown($this->domain,'Bymeal');
         $service = new JsonRequestResponse();
         return $service->returnJosnResponse($dropdown);

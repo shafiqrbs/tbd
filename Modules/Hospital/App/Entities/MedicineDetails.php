@@ -35,6 +35,18 @@ class MedicineDetails
     private $product;
 
     /**
+     * @ORM\ManyToOne(targetEntity="ParticularMode")
+     * @ORM\JoinColumn(referencedColumnName="id", nullable=true, onDelete="cascade")
+     **/
+     private $medicineGroup;
+
+    /**
+     * @ORM\ManyToOne(targetEntity="Modules\Medicine\App\Entities\MedicineCompany")
+     * @ORM\JoinColumn(name="medicine_company_id",referencedColumnName="id", nullable=true, onDelete="cascade")
+     **/
+     private $medicineCompany;
+
+     /**
      * @ORM\ManyToOne(targetEntity="MedicineDosage")
      * @ORM\JoinColumn(referencedColumnName="id", nullable=true, onDelete="cascade")
      **/
@@ -197,7 +209,31 @@ class MedicineDetails
      *
      * @ORM\Column(type="boolean",options={"default"="false"})
      */
+    private $opdStatus;
+
+    /**
+     * @var boolean
+     *
+     * @ORM\Column(type="boolean",options={"default"="false"})
+     */
+    private $ipdStatus;
+
+
+    /**
+     * @var boolean
+     *
+     * @ORM\Column(type="boolean",options={"default"="false"})
+     */
+    private $adminStatus;
+
+
+    /**
+     * @var boolean
+     *
+     * @ORM\Column(type="boolean",options={"default"="false"})
+     */
     private $isDelete;
+
 
 
     /**
