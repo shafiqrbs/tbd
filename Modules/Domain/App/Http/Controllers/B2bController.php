@@ -875,6 +875,7 @@ class B2bController extends Controller
                     'inv_stock.id',
                     'inv_stock.status',
                     'inv_stock.name',
+                    'inv_stock.quantity as sub_domain_stock',
                     'inv_stock.sales_price as sub_domain_sales_price',
                     'inv_stock.purchase_price as sub_domain_purchase_price',
                     'inv_category.name as category_name',
@@ -882,11 +883,15 @@ class B2bController extends Controller
                     'parent_stock.quantity as center_stock',
                     'parent_stock.sales_price as center_sales_price',
                     'parent_stock.purchase_price as center_purchase_price',
+                    'parent_stock.quantity as center_stock',
                     'matrix.mrp_percent',
                     'matrix.purchase_percent',
                     'matrix.percent_mode',
                     'matrix.sub_domain_id as b2b_id',
                 ]);
+            if (isset($request['term']) && !empty($request['term'])){
+                $products = $products->whereAny(['inv_stock.name','inv_stock.slug','inv_category.name'],'LIKE','%'.$request['term'].'%');
+            }
 
             $total  = $products->count();
             $entities = $products->skip($skip)

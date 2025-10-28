@@ -13,7 +13,7 @@ class StockTransferItemModel extends Model
     protected $guarded = ['id'];
 
     protected $fillable = [
-        'config_id','stock_transfer_id','stock_item_id','purchase_item_id','quantity','created_at','updated_at','uom','name'
+        'config_id','stock_transfer_id','stock_item_id','purchase_item_id','quantity','created_at','updated_at','uom','name','stock_quantity'
     ];
 
     public static function boot()

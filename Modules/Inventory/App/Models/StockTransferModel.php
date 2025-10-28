@@ -146,6 +146,7 @@ class StockTransferModel extends Model
                 'quantity' => $record['quantity'],
                 'name' => $record['display_name'],
                 'uom' => $record['unit_name'],
+                'stock_quantity' => $record['stock_quantity'],
                 'created_at' => $timestamp,
                 'updated_at' => $timestamp,
             ];

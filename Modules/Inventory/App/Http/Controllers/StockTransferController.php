@@ -10,6 +10,7 @@ use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
 use Modules\Core\App\Models\UserModel;
 use Modules\Core\App\Models\WarehouseModel;
+use Modules\Inventory\App\Entities\StockTransfer;
 use Modules\Inventory\App\Http\Requests\StockTransferRequest;
 use Modules\Inventory\App\Models\ConfigModel;
 use Modules\Inventory\App\Models\CurrentStockModel;
@@ -60,8 +61,7 @@ class StockTransferController extends Controller
 
         $input['process'] = "Created";
         $input['config_id'] = $this->domain['config_id'];
-        $input['created_by_id'] = $this->domain['user_id'];
-
+        $input['created_by_id'] = $input['created_by_id'] ?? $this->domain['user_id'];
 
         DB::beginTransaction();
         try {
@@ -228,5 +228,65 @@ class StockTransferController extends Controller
             ], 500);
         }
     }
+
+    public function show($id){
+        $findStockTransfer = StockTransferModel::with('stockTransferItems')->find($id);
+        $findStockTransfer->created_date = $findStockTransfer->created_at->format('Y-m-d');
+        if (!$findStockTransfer) {
+            return response()->json([
+                'status' => 404,
+                'message' => 'Data not found.',
+            ], 404);
+        }
+        return response()->json([
+            'status' => 200,
+            'data' => $findStockTransfer,
+        ],200);
+    }
+
+    public function update(StockTransferRequest $request, $id)
+    {
+        $input = $request->validated();
+
+        $input['process'] = "Created";
+        $input['config_id'] = $this->domain['config_id'];
+
+        DB::beginTransaction();
+
+        try {
+            $stockTransfer = StockTransferModel::findOrFail($id);
+
+            $stockTransfer->update([
+                'to_warehouse_id'   => $input['to_warehouse_id'],
+                'created_by_id'     => $input['created_by_id'] ?? $this->domain['user_id'],
+                'notes'             => $input['notes'],
+            ]);
+
+            // Delete old transfer items
+            $stockTransfer->stockTransferItems()->delete();
+
+            // Insert new transfer items
+            StockTransferModel::insertStockTransferItems(
+                $stockTransfer,
+                $input['items'],
+                $this->domain['config_id']
+            );
+
+            DB::commit();
+
+            return response()->json([
+                'status' => 200,
+                'message' => 'Stock transfer updated successfully.',
+            ]);
+        } catch (Throwable $e) {
+            DB::rollBack();
+            report($e);
+            return response()->json([
+                'status' => 500,
+                'message' => 'Error updating stock transfer.',
+            ]);
+        }
+    }
+
 
 }

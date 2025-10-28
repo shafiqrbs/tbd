@@ -52,10 +52,15 @@ class StockTransferItem
 
     /**
      * @var integer
-     *
      * @ORM\Column(name="quantity", type="integer",nullable=true)
      */
     private $quantity;
+
+    /**
+     * @var integer
+     * @ORM\Column(name="stock_quantity", type="integer",nullable=true)
+     */
+    private $stockQuantity;
 
     /**
      * @var integer

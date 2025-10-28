@@ -35,6 +35,7 @@ class StockTransferRequest extends FormRequest
             'items*.sub_total' => 'required',
             'items*.display_name' => 'nullable|string',
             'items*.unit_name' => 'nullable|string',
+            'items*.stock_quantity' => 'nullable|integer',
         ];
     }
 
