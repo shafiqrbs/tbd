@@ -1109,6 +1109,86 @@ class B2bController extends Controller
     }
 
 
+    public function domainStock(Request $request)
+    {
+        dump($this->domain['domain_id']);
+//        dump($this->domain['config_id']);
+
+
+        $page =  isset($request['page']) && $request['page'] > 0?($request['page'] - 1 ) : 0;
+        $perPage = isset($request['offset']) && $request['offset']!=''? (int)($request['offset']):0;
+        $skip = isset($page) && $page!=''? (int)$page * $perPage:0;
+
+        try {
+            // Validate inputs and find required models
+            $findSubDomainsIds = SubDomainModel::where('domain_id',$this->domain['domain_id'])->pluck('id')->toArray();
+            dump($findSubDomainsIds);
+            $findCategoryMatrix = B2BStockPriceMatrixModel::whereIn('sub_domain_id', $findSubDomainsIds)->get()->toArray();
+            dump($findCategoryMatrix);
+
+            /*// Get base products query
+            $products = StockItemModel::join('inv_product', 'inv_product.id', '=', 'inv_stock.product_id')
+                ->join('inv_category', 'inv_category.id', '=', 'inv_product.category_id')
+                ->leftJoin('inv_stock as parent_stock', 'parent_stock.id', '=', 'inv_stock.parent_stock_item')
+                ->leftJoin('inv_b2b_category_price_matrix as matrix', function($join) use ($id) {
+                    $join->on('matrix.sub_domain_category_id', '=', 'inv_category.id')
+                        ->where('matrix.sub_domain_id', $id);
+                })
+                ->where('inv_stock.config_id', $findCategoryMatrix->config_id)
+                ->where('inv_stock.status', 1)
+                ->where('inv_product.vendor_id', $findSubDomain->vendor_id)
+                ->whereNotNull('inv_stock.parent_stock_item')
+                ->select([
+                    'inv_stock.id',
+                    'inv_stock.status',
+                    'inv_stock.name',
+                    'inv_stock.quantity as sub_domain_stock',
+                    'inv_stock.sales_price as sub_domain_sales_price',
+                    'inv_stock.purchase_price as sub_domain_purchase_price',
+                    'inv_category.name as category_name',
+                    'inv_category.id as category_id',
+                    'parent_stock.quantity as center_stock',
+                    'parent_stock.sales_price as center_sales_price',
+                    'parent_stock.purchase_price as center_purchase_price',
+                    'parent_stock.quantity as center_stock',
+                    'matrix.mrp_percent',
+                    'matrix.purchase_percent',
+                    'matrix.percent_mode',
+                    'matrix.sub_domain_id as b2b_id',
+                ]);
+            if (isset($request['term']) && !empty($request['term'])){
+                $products = $products->whereAny(['inv_stock.name','inv_stock.slug','inv_category.name'],'LIKE','%'.$request['term'].'%');
+            }
+
+            $total  = $products->count();
+            $entities = $products->skip($skip)
+                ->take($perPage)
+                ->orderBy('inv_stock.id','DESC')
+                ->get();
+
+            return response()->json([
+                'status' => ResponseAlias::HTTP_OK,
+                'message' => 'Success',
+                'total' => $total,
+                'data' => $entities,
+            ]);*/
+
+        } catch (ModelNotFoundException $e) {
+            return response()->json([
+                'status' => ResponseAlias::HTTP_NOT_FOUND,
+                'message' => 'Subdomain or category matrix not found'
+            ], ResponseAlias::HTTP_NOT_FOUND);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => ResponseAlias::HTTP_INTERNAL_SERVER_ERROR,
+                'message' => 'Failed to retrieve products',
+                'error' => $e->getMessage()
+            ], ResponseAlias::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
+
+
 
 
 }

@@ -70,6 +70,7 @@ Route::prefix('/domain')->middleware(array(HeaderAuthenticationMiddleware::class
 
     Route::prefix('b2b')->middleware([HeaderAuthenticationMiddleware::class])->group(function() {
         Route::get('domain', [B2bController::class,'index'])->name('b2b_domain');
+        Route::get('domain-stock', [B2bController::class,'domainStock'])->name('b2b_domain_stock');
         Route::get('users', [DomainController::class,'users'])->name('domain_users');
         Route::get('sub-domain-users', [DomainController::class,'subDomainUsers'])->name('domain_users');
         Route::get('impersonate/{domain}/{user}', [B2bController::class, 'impersonate'])->name('auth');
