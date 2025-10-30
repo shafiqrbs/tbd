@@ -5,6 +5,7 @@ namespace Modules\Medicine\App\Http\Controllers;
 use App\Http\Controllers\Controller;
 use Doctrine\ORM\EntityManager;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Modules\Core\App\Models\UserModel;
 use Modules\Medicine\App\Http\Requests\PurchaseRequest;
 use Modules\Medicine\App\Models\PurchaseModel;
@@ -25,86 +26,58 @@ class PurchaseController extends Controller
 
     public function index(Request $request)
     {
-        $purchases = PurchaseModel::getRecords($request->all(), $this->domain->toArray());
-
-        return response()->json([
+        $data = PurchaseModel::getRecords($request, $this->domain);
+        $response = new Response();
+        $response->headers->set('Content-Type', 'application/json');
+        $response->setContent(json_encode([
             'message' => 'success',
-            'status'  => Response::HTTP_OK,
-            'total'   => $purchases['total'],
-            'data'    => $purchases['data'],
-        ], Response::HTTP_OK);
+            'status' => Response::HTTP_OK,
+            'total' => $data['count'],
+            'data' => $data['entities']
+        ]));
+        $response->setStatusCode(Response::HTTP_OK);
+        return $response;
     }
 
     /**
      * Store a newly created resource in storage.
      */
-    public function store(PurchaseRequest $request,EntityManager $em)
+    public function store(PurchaseRequest $request)
     {
-//        $service = new JsonRequestResponse();
         $input = $request->validated();
-//        dump($input);
+        DB::beginTransaction();
+        try {
+            // Common fields
+            $input['config_id'] = $this->domain['config_id'];
+            $input['process'] = 'Created';
+            $input['warehouse_id'] = $input['warehouse_id'] ?? $this->domain['warehouse_id'];
+            $input['mode'] = 'Purchase';
+            $input['status'] = 1;
 
-        $input['config_id'] = $this->domain['config_id'];
-        $input['created_by_id'] = $this->domain['user_id'];
-        $input['process'] = "Created";
-        $input['mode'] = "Purchase";
+            // 1️⃣ Create purchase master record
+            $purchase = PurchaseModel::create($input);
 
-        PurchaseModel::create($input);
+            // 2️⃣ Insert related purchase items
+            PurchaseModel::insertPurchaseItems($purchase, $input['items'], $input['warehouse_id']);
 
-        /*if(empty($input['vendor_id']) and isset($input['vendor_name']) and isset($input['vendor_mobile'])) {
-            $find = VendorModel::uniqueVendorCheck($this->domain['domain_id'], $input['vendor_mobile'], $input['vendor_name']);
-            if (empty($find)) {
-                $find = VendorModel::insertPurchaseVendor($this->domain, $input);
-                $config = AccountingModel::where('id', $this->domain['acc_config'])->first();
-                $ledgerExist = AccountHeadModel::where('vendor_id', $find->id)->where('config_id', $this->domain['acc_config'])->where('parent_id', $config->account_vendor_id)->first();
-                if (empty($ledgerExist)) {
-                    AccountHeadModel::insertVendorLedger($config, $find);
-                }
-                $vendor = $find->refresh();
-                $input['vendor_id'] = $vendor->id;
-            }else{
-                $input['vendor_id'] = $find->id;
-            }
-        }
-        $entity = PurchaseModel::create($input);
-        $process = new PurchaseModel();
-        $process->insertPurchaseItems($entity,$input['items'],$input['warehouse_id']);
+            // 3️⃣ Commit transaction only if everything succeeds
+            DB::commit();
 
-        // purchase auto approve
-        $findInvConfig = ConfigPurchaseModel::where('config_id',$this->domain['inv_config'])->first();
-
-        if ($findInvConfig->is_purchase_auto_approved == 1){
-            if (sizeof($entity->purchaseItems)>0){
-                foreach ($entity->purchaseItems as $item){
-                    // get average price
-                    $itemAveragePrice = StockItemModel::calculateStockItemAveragePrice($item->stock_item_id,$item->config_id,$item);
-                    //set average price
-                    StockItemModel::where('id', $item->stock_item_id)->where('config_id',$item->config_id)->update(['average_price' => $itemAveragePrice,'purchase_price' => $item['purchase_price'],'price' => $item['sales_price'],'sales_price' => $item['sales_price']]);
-                    $item->update(['approved_by_id' => $this->domain['user_id']]);
-                    StockItemHistoryModel::openingStockQuantity($item,'purchase',$this->domain);
-
-                    // for maintain inventory daily stock
-                    date_default_timezone_set('Asia/Dhaka');
-                    DailyStockService::maintainDailyStock(
-                        date: date('Y-m-d'),
-                        field: 'purchase_quantity',
-                        configId: $this->domain['config_id'],
-                        warehouseId: $entity->warehouse_id,
-                        stockItemId: $item->stock_item_id,
-                        quantity: $item->quantity
-                    );
-                }
-            }
-            $entity->update([
-                'approved_by_id' => $this->domain['user_id'],
-                'process' => 'Approved'
+            return response()->json([
+                'status' => Response::HTTP_CREATED,
+                'success' => true,
+                'message' => 'Purchase created successfully!',
             ]);
-            AccountJournalModel::insertPurchaseAccountJournal($this->domain,$entity->id);
+        } catch (\Throwable $e) {
+            // Rollback on any failure
+            DB::rollBack();
+
+            return response()->json([
+                'status' => Response::HTTP_INTERNAL_SERVER_ERROR,
+                'success' => false,
+                'message' => 'Failed to create purchase. Please try again.',
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
-
-        $data = $service->returnJosnResponse($entity);
-        return $data;*/
-
     }
 
     /**

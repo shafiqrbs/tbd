@@ -20,12 +20,14 @@ class PurchaseRequest extends FormRequest
         // Common validation rules for 'POST', 'PUT', and 'PATCH' methods
         return [
             'vendor_id' => 'required|integer|regex:/^\d+(\.\d{1,2})?$/',
-            'items' => 'required|array',
             'created_by_id' => 'nullable|integer',
-            'process' => 'nullable|string',
-            'narration' => 'nullable|string',
-            'invoice_date' => 'nullable|date',
-            'warehouse_id' => 'nullable',
+            'comment' => 'nullable|string',
+            'items' => 'required|array',
+            'items*.expired_date' => 'nullable|date',
+            'items*.production_date' => 'nullable|date',
+            'items*.medicine_id' => 'required|integer|regex:/^\d+(\.\d{1,2})?$/',
+            'items*.quantity' => 'required|integer',
+            'items*.medicine_name' => 'nullable|string',
         ];
     }
 

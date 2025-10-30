@@ -257,16 +257,16 @@ class PurchaseItem
 	private $status=false;
 
     /**
-     * @var \DateTime
+     * @var \Date
      *
-     * @ORM\Column(name="production_date", type="datetime", nullable=true)
+     * @ORM\Column(name="production_date", type="date", nullable=true)
      */
     private $productionDate;
 
     /**
-     * @var \DateTime
+     * @var \Date
      *
-     * @ORM\Column(name="expired_date", type="datetime", nullable=true)
+     * @ORM\Column(name="expired_date", type="date", nullable=true)
      */
     private $expiredDate;
 
