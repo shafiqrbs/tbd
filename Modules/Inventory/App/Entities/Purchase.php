@@ -232,6 +232,18 @@ class Purchase
      */
     private $invoiceDate;
 
+    /**
+     * @ORM\ManyToOne(targetEntity="Modules\Core\App\Entities\User")
+     * @ORM\JoinColumn(onDelete="CASCADE")
+     **/
+    private  $receivedBy;
+
+    /**
+     * @var \Date
+     * @ORM\Column(type="date", nullable=true)
+     */
+    private $receivedDate;
+
 
 
 }

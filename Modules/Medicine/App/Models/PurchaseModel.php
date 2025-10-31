@@ -32,6 +32,8 @@ class PurchaseModel extends Model
         'is_requisition',
         'process',
         'created_by_id',
+        'received_by_id',
+        'received_date',
     ];
 
     protected static function booted(): void
@@ -64,29 +66,48 @@ class PurchaseModel extends Model
         return $this->hasMany(StockItemInventoryHistoryModel::class, 'purchase_id');
     }
 
-    public static function insertPurchaseItems($purchase, $items, $warehouseId)
+    public static function syncPurchaseItems($purchase, $items, $warehouseId)
     {
-        $timestamp = Carbon::now();
+        $timestamp = now();
+        $existingItems = PurchaseItemModel::where('purchase_id', $purchase->id)
+            ->pluck('id')
+            ->toArray();
 
-        $preparedItems = collect($items)->map(function ($item) use ($purchase, $warehouseId, $timestamp) {
-            return [
+        $sentItemIds = collect($items)
+            ->pluck('id')
+            ->filter()
+            ->toArray();
+
+        // 1️⃣ Delete removed items
+        $itemsToDelete = array_diff($existingItems, $sentItemIds);
+        if (!empty($itemsToDelete)) {
+            PurchaseItemModel::whereIn('id', $itemsToDelete)->delete();
+        }
+
+        // 2️⃣ Insert or update items
+        foreach ($items as $item) {
+            $data = [
                 'purchase_id'    => $purchase->id,
                 'config_id'      => $purchase->config_id,
                 'warehouse_id'   => $item['warehouse_id'] ?? $warehouseId,
                 'stock_item_id'  => $item['medicine_id'],
                 'quantity'       => $item['quantity'],
-                'name'           => $item['medicine_name'],
-                'production_date'=> $item['production_date'],
-                'expired_date'   => $item['expired_date'],
-                'created_at'     => $timestamp,
+                'name'           => $item['medicine_name'] ?? null,
+                'production_date'=> $item['production_date'] ?? null,
+                'expired_date'   => $item['expired_date'] ?? null,
                 'updated_at'     => $timestamp,
-                // other item fields you may need
             ];
-        })->toArray();
 
-        PurchaseItemModel::insert($preparedItems);
+            if (isset($item['id']) && in_array($item['id'], $existingItems)) {
+                // update
+                PurchaseItemModel::where('id', $item['id'])->update($data);
+            } else {
+                // insert new
+                $data['created_at'] = $timestamp;
+                PurchaseItemModel::create($data);
+            }
+        }
     }
-
 
     public static function getRecords($request, $domain)
     {
@@ -95,7 +116,7 @@ class PurchaseModel extends Model
         $skip = isset($page) && $page != '' ? (int)$page * $perPage : 0;
 
         $entities = self::where([['inv_purchase.config_id', $domain['config_id']]])
-            ->leftjoin('users as createdBy', 'createdBy.id', '=', 'inv_purchase.created_by_id')
+            ->leftjoin('users as cb', 'cb.id', '=', 'inv_purchase.created_by_id')
             ->leftjoin('cor_vendors', 'cor_vendors.id', '=', 'inv_purchase.vendor_id')
             ->select([
                 'inv_purchase.id',
@@ -107,9 +128,9 @@ class PurchaseModel extends Model
                 'cor_vendors.id as vendor_id',
                 'cor_vendors.name as vendor_name',
                 'cor_vendors.mobile as vendor_mobile',
-                'createdBy.username as createdByUser',
-                'createdBy.name as createdByName',
-                'createdBy.id as createdById',
+                'cb.username as cbUser',
+                'cb.name as cbName',
+                'cb.id as cbId',
                 'inv_purchase.process as process',
                 'cor_vendors.address as customer_address',
             ])->with(['purchaseItems' => function ($query) {
@@ -152,6 +173,54 @@ class PurchaseModel extends Model
         $data = array('count' => $total, 'entities' => $entities);
         return $data;
     }
+
+
+    public static function getShow($id, $domain)
+    {
+        $entity = self::where([['inv_purchase.config_id', $domain['config_id']], ['inv_purchase.id', $id]])
+            ->leftjoin('cor_vendors', 'cor_vendors.id', '=', 'inv_purchase.vendor_id')
+            ->leftjoin('users as cb', 'cb.id', '=', 'inv_purchase.created_by_id')
+            ->leftjoin('users as ab', 'ab.id', '=', 'inv_purchase.approved_by_id')
+            ->select([
+                'inv_purchase.id',
+                'inv_purchase.invoice',
+                'inv_purchase.process',
+                'inv_purchase.warehouse_id',
+                'inv_purchase.created_by_id',
+                'inv_purchase.approved_by_id',
+                'ab.username as ab_username',
+                'ab.name as ab_name',
+                'inv_purchase.remark',
+                'inv_purchase.created_by_id',
+                'cb.username as cb_username',
+                'cb.name as cb_name',
+                'inv_purchase.vendor_id',
+                'cor_vendors.name as vendor_name',
+                'cor_vendors.mobile as vendor_mobile',
+                DB::raw('DATE_FORMAT(inv_purchase.created_at, "%d-%M-%Y") as created'),
+
+
+            ])->with(['purchaseItems' => function ($query) {
+                $query->leftjoin('inv_stock', 'inv_stock.id', '=', 'inv_purchase_item.stock_item_id');
+                $query->leftjoin('cor_warehouses', 'cor_warehouses.id', '=', 'inv_purchase_item.warehouse_id');
+                $query->select([
+                    'inv_purchase_item.id',
+                    'inv_purchase_item.stock_item_id',
+                    'purchase_id',
+                    'inv_purchase_item.name',
+                    'inv_purchase_item.quantity',
+                    'inv_purchase_item.production_date',
+                    'inv_purchase_item.expired_date',
+                    DB::raw("CONCAT(cor_warehouses.name, ' (', cor_warehouses.location, ')') as warehouse_name"),
+                    'cor_warehouses.name as warehouse',
+                    'cor_warehouses.location as warehouse_location',
+                    'cor_warehouses.id as warehouse_id'
+                ]);
+            }])->first();
+
+        return $entity;
+    }
+
 
 
 }

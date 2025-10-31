@@ -3,11 +3,13 @@
 namespace Modules\Medicine\App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
-use Doctrine\ORM\EntityManager;
+use App\Services\DailyStockService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Modules\Core\App\Models\UserModel;
+use Modules\Inventory\App\Models\StockItemHistoryModel;
 use Modules\Medicine\App\Http\Requests\PurchaseRequest;
+use Modules\Medicine\App\Models\PurchaseItemModel;
 use Modules\Medicine\App\Models\PurchaseModel;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -58,7 +60,7 @@ class PurchaseController extends Controller
             $purchase = PurchaseModel::create($input);
 
             // 2️⃣ Insert related purchase items
-            PurchaseModel::insertPurchaseItems($purchase, $input['items'], $input['warehouse_id']);
+            PurchaseModel::syncPurchaseItems($purchase, $input['items'], $input['warehouse_id']);
 
             // 3️⃣ Commit transaction only if everything succeeds
             DB::commit();
@@ -85,27 +87,20 @@ class PurchaseController extends Controller
      */
     public function show($id)
     {
-        $service = new JsonRequestResponse();
-        $entity = PurchaseModel::getShow($id, $this->domain);
-        if (!$entity) {
-            $entity = 'Data not found';
+        $purchase = PurchaseModel::getShow($id, $this->domain);
+        if (empty($purchase)){
+            return response()->json([
+                'status' => Response::HTTP_NOT_FOUND,
+                'success' => false,
+                'message' => 'Data not found.',
+            ]);
         }
-        $data = $service->returnJosnResponse($entity);
-        return $data;
-    }
-
-    /**
-     * Show the specified resource.
-     */
-    public function edit($id)
-    {
-        $service = new JsonRequestResponse();
-        $entity = PurchaseModel::getEditData($id, $this->domain);
-        if (!$entity) {
-            $entity = 'Data not found';
-        }
-        $data = $service->returnJosnResponse($entity);
-        return $data;
+        return response()->json([
+            'status' => Response::HTTP_OK,
+            'success' => true,
+            'message' => 'Purchase data retrieved successfully!',
+            'data' => $purchase
+        ]);
     }
 
     /**
@@ -117,51 +112,38 @@ class PurchaseController extends Controller
 
         DB::beginTransaction();
         try {
-            $getPurchase = PurchaseModel::findOrFail($id);
-            $data['remark']=$request->narration;
-            $data['due'] = ($data['total'] ?? 0) - ($data['payment'] ?? 0);
-            $data['process'] = 'Created';
-            $getPurchase->fill($data);
-            $getPurchase->save();
-
-            PurchaseItemModel::class::where('purchase_id', $id)->delete();
-            if (sizeof($data['items'])>0){
-                foreach ($data['items'] as $item){
-                    $item['stock_item_id'] = $item['product_id'];
-                    $item['config_id'] = $getPurchase->config_id;
-                    $item['purchase_id'] = $id;
-                    $item['quantity'] = $item['quantity'] ?? 0;
-                    $item['purchase_price'] = $item['purchase_price'] ?? 0;
-                    $item['sub_total'] = $item['sub_total'] ?? 0;
-                    $item['mode'] = 'purchase';
-                    $item['warehouse_id'] = $item['warehouse_id'] ?? $data['warehouse_id'];
-                    $item['bonus_quantity'] = $item['bonus_quantity'];
-                    PurchaseItemModel::create($item);
-                }
+            $purchase = PurchaseModel::find($id);
+            if (!$purchase) {
+                return response()->json([
+                    'status' => Response::HTTP_NOT_FOUND,
+                    'success' => false,
+                    'message' => 'Data not found.',
+                ]);
             }
+
+            // Update purchase master (vendor, comment, etc.)
+            $data['warehouse_id'] = $data['warehouse_id'] ?? $this->domain['warehouse_id'];
+            $purchase->update($data);
+
+            // Sync related items (insert, update, delete)
+            PurchaseModel::syncPurchaseItems($purchase, $data['items'], $data['warehouse_id']);
+
             DB::commit();
 
-            $response = new Response();
-            $response->headers->set('Content-Type', 'application/json');
-            $response->setContent(json_encode([
-                'message' => 'success',
-                'status' => ResponseAlias::HTTP_OK,
-            ]));
-            $response->setStatusCode(ResponseAlias::HTTP_OK);
-
+            return response()->json([
+                'status' => Response::HTTP_OK,
+                'success' => true,
+                'message' => 'Purchase updated successfully!',
+            ]);
         } catch (\Exception $e) {
-            DB::rollback();
-            $response = new Response();
-            $response->headers->set('Content-Type', 'application/json');
-            $response->setContent(json_encode([
-                'message' => 'error',
-                'status' => ResponseAlias::HTTP_INTERNAL_SERVER_ERROR,
+            DB::rollBack();
+            return response()->json([
+                'status' => Response::HTTP_INTERNAL_SERVER_ERROR,
+                'success' => false,
+                'message' => 'Failed to update purchase. Please try again.',
                 'error' => $e->getMessage(),
-            ]));
-            $response->setStatusCode(ResponseAlias::HTTP_OK);
+            ]);
         }
-
-        return $response;
     }
 
     /**
@@ -169,120 +151,160 @@ class PurchaseController extends Controller
      */
     public function destroy($id)
     {
-        $service = new JsonRequestResponse();
-        PurchaseModel::find($id)->delete();
-        $entity = ['message' => 'delete'];
-        return $service->returnJosnResponse($entity);
+        $purchase = PurchaseModel::find($id);
+
+        if (!$purchase) {
+            return response()->json([
+                'status' => Response::HTTP_NOT_FOUND,
+                'success' => false,
+                'message' => 'Data not found.',
+            ]);
+        }
+
+        if ($purchase->process === 'Received') {
+            return response()->json([
+                'status' => Response::HTTP_BAD_REQUEST,
+                'success' => false,
+                'message' => 'Cannot delete purchase — it has already been received.',
+            ]);
+        }
+
+        DB::beginTransaction();
+
+        try {
+            // delete related items first
+            PurchaseItemModel::where('purchase_id', $id)->delete();
+
+            // delete main record
+            $purchase->delete();
+
+            DB::commit();
+
+            return response()->json([
+                'status' => Response::HTTP_OK,
+                'success' => true,
+                'message' => 'Purchase deleted successfully!',
+            ]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'status' => Response::HTTP_INTERNAL_SERVER_ERROR,
+                'success' => false,
+                'message' => 'Failed to delete purchase. Please try again.',
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
     }
 
     /**
      * Approve the specified resource from storage.
      */
-    public function approve($id)
+
+    public function approve(PurchaseRequest $request, $id)
     {
-        $response = new Response();
-        $response->headers->set('Content-Type', 'application/json');
+        $data = $request->validated();
 
-        // Start the database transaction
         DB::beginTransaction();
-
         try {
             $purchase = PurchaseModel::find($id);
-            $purchase->update([
-                'approved_by_id' => $this->domain['user_id'],
-                'process' => 'Approved'
-            ]);
-
-            if (sizeof($purchase->purchaseItems)>0){
-                foreach ($purchase->purchaseItems as $item){
-                    // get average price
-                    $itemAveragePrice = StockItemModel::calculateStockItemAveragePrice($item->stock_item_id,$item->config_id,$item);
-                    //set average price
-                    StockItemModel::where('id', $item->stock_item_id)->where('config_id',$item->config_id)->update([
-                        'average_price' => $itemAveragePrice,
-                        'purchase_price' => $item['purchase_price'],
-                        'price' => $item['sales_price'] ?? 0,
-                        'sales_price' => $item['sales_price'] ?? 0
-                    ]);
-
-                    $item->update(['approved_by_id' => $this->domain['user_id']]);
-                    StockItemHistoryModel::openingStockQuantity($item,'purchase',$this->domain);
-
-                    // for maintain inventory daily stock
-                    date_default_timezone_set('Asia/Dhaka');
-                    DailyStockService::maintainDailyStock(
-                        date: date('Y-m-d'),
-                        field: 'purchase_quantity',
-                        configId: $this->domain['config_id'],
-                        warehouseId: $purchase->warehouse_id,
-                        stockItemId: $item->stock_item_id,
-                        quantity: $item->quantity
-                    );
-                }
-                AccountJournalModel::insertPurchaseAccountJournal($this->domain,$purchase->id);
+            if (!$purchase) {
+                return response()->json([
+                    'status' => Response::HTTP_NOT_FOUND,
+                    'success' => false,
+                    'message' => 'Data not found.',
+                ]);
             }
-            // Commit the transaction after all updates are successful
-            DB::commit();
-            $response->setContent(json_encode([
-                'status' => ResponseAlias::HTTP_OK,
-                'message' => 'Approved successfully',
-            ]));
-            $response->setStatusCode(ResponseAlias::HTTP_OK);
-        } catch (\Exception $e) {
-            // Rollback the transaction in case of an error
-            DB::rollBack();
 
-            $response->setContent(json_encode([
-                'status' => Response::HTTP_INTERNAL_SERVER_ERROR,
-                'message' => 'An error occurred: ' . $e->getMessage(),
-            ]));
-            $response->setStatusCode(Response::HTTP_INTERNAL_SERVER_ERROR);
-        }
+            // Update master
+            $data['warehouse_id'] = $data['warehouse_id'] ?? $this->domain['warehouse_id'];
+            $data['approved_by_id'] = $this->domain['user_id'];
+            $data['process'] = 'Approved';
+            $purchase->update($data);
 
-        return $response;
-    }
-
-    public function purchaseCopy($id)
-    {
-        try {
-            DB::beginTransaction();
-
-            $original = PurchaseModel::with('purchaseItems')->findOrFail($id);
-
-            $newPurchase = $original->replicate([
-                'approved_by_id','process','invoice_date'
-            ]);
-            $newPurchase->approved_by_id = null;
-            $newPurchase->invoice_date = now();
-            $newPurchase->process = 'Created';
-            $newPurchase->save();
-
-            foreach ($original->purchaseItems as $item) {
-                $newItem = $item->replicate(['purchase_id','approved_by_id']);
-                $newItem->purchase_id = $newPurchase->id;
-                $newItem->approved_by_id = null;
-                $newItem->save();
-            }
+            // Sync items (add / update / delete)
+            PurchaseModel::syncPurchaseItems($purchase, $data['items'], $data['warehouse_id']);
 
             DB::commit();
 
             return response()->json([
-                'status' => 200,
+                'status' => Response::HTTP_OK,
                 'success' => true,
-                'message' => 'Purchase duplicated successfully!',
-                'new_purchase_id' => $newPurchase->id,
+                'message' => 'Purchase approved successfully!',
             ]);
         } catch (\Exception $e) {
             DB::rollBack();
-
             return response()->json([
-                'status' => 500,
+                'status' => Response::HTTP_INTERNAL_SERVER_ERROR,
                 'success' => false,
-                'message' => 'Duplication failed.',
+                'message' => 'Failed to approve purchase. Please try again.',
                 'error' => $e->getMessage(),
-            ], 500);
+            ]);
         }
     }
 
+    public function receive(PurchaseRequest $request, $id)
+    {
+        $data = $request->validated();
 
+        DB::beginTransaction();
+        try {
+            $purchase = PurchaseModel::find($id);
+            if (!$purchase) {
+                return response()->json([
+                    'status' => Response::HTTP_NOT_FOUND,
+                    'success' => false,
+                    'message' => 'Data not found.',
+                ]);
+            }
+
+            if ($purchase->process === 'Received') {
+                return response()->json([
+                    'status' => Response::HTTP_BAD_REQUEST,
+                    'success' => false,
+                    'message' => 'This purchase has already been received.',
+                ]);
+            }
+
+            // Update master
+            $data['warehouse_id'] = $data['warehouse_id'] ?? $this->domain['warehouse_id'];
+            $data['received_by_id'] = $this->domain['user_id'];
+            $data['received_date'] = now();
+            $data['process'] = 'Received';
+            $purchase->update($data);
+
+            // Sync items first
+            PurchaseModel::syncPurchaseItems($purchase, $data['items'], $data['warehouse_id']);
+
+            // Maintain stock for all received items
+            $purchase->refresh();
+            foreach ($purchase->purchaseItems as $item) {
+                $item->update(['approved_by_id' => $this->domain['user_id']]);
+                StockItemHistoryModel::openingStockQuantity($item, 'purchase', $this->domain);
+
+                DailyStockService::maintainDailyStock(
+                    date: now()->format('Y-m-d'),
+                    field: 'purchase_quantity',
+                    configId: $this->domain['config_id'],
+                    warehouseId: $item->warehouse_id ?? $this->domain['warehouse_id'],
+                    stockItemId: $item->stock_item_id,
+                    quantity: $item->quantity
+                );
+            }
+
+            DB::commit();
+
+            return response()->json([
+                'status' => Response::HTTP_OK,
+                'success' => true,
+                'message' => 'Purchase received successfully!',
+            ]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'status' => Response::HTTP_INTERNAL_SERVER_ERROR,
+                'success' => false,
+                'message' => 'Failed to receive purchase. Please try again.',
+                'error' => $e->getMessage(),
+            ]);
+        }
+    }
 }
