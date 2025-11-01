@@ -50,7 +50,7 @@ class TreatmentMedicine
 
 
     /**
-     * @ORM\ManyToOne(targetEntity="Modules\Inventory\App\Entities\StockItem")
+     * @ORM\ManyToOne(targetEntity="MedicineDetails")
      * @ORM\JoinColumn(name="medicine_id", referencedColumnName="id", nullable=true, onDelete="cascade")
      **/
     private $medicine;

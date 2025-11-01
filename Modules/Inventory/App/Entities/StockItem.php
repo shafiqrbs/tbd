@@ -41,12 +41,6 @@ class StockItem
      **/
     protected  $config;
 
-    /**
-     * @var integer
-     *
-     * @ORM\Column(type="integer",nullable=true)
-     */
-    private $genericId;
 
     /**
      * @ORM\ManyToOne(targetEntity="Product", inversedBy="stockItems")
