@@ -40,6 +40,7 @@ Route::prefix('/pharmacy')->middleware([HeaderAuthenticationMiddleware::class,Lo
             ->parameters(['' => 'id']);
     });
 
+    Route::get('/stock-item/matrix', [MedicineStockController::class,'stockItemMatrix'])->name('get_stock_item_matrix');
 
     Route::apiResource('medicine',
         MedicineController::class)

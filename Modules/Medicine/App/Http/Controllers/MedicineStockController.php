@@ -9,7 +9,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Modules\AppsApi\App\Services\JsonRequestResponse;
 use Modules\Core\App\Models\UserModel;
-use Modules\Inventory\App\Models\StockItemModel;
+use Modules\Medicine\App\Models\StockItemModel;
 use Modules\Medicine\App\Models\ProductModel;
 use Modules\Inventory\App\Models\CategoryModel;
 use Modules\Medicine\App\Http\Requests\MedicineInlineRequest;
@@ -17,6 +17,7 @@ use Modules\Medicine\App\Http\Requests\StockRequest;
 use Modules\Medicine\App\Models\MedicineDetailsModel;
 use Modules\Medicine\App\Models\MedicineModel;
 use Modules\Medicine\App\Models\MedicineStockModel;
+use Symfony\Component\HttpFoundation\Response as ResponseAlias;
 
 class MedicineStockController extends Controller
 {
@@ -209,6 +210,19 @@ class MedicineStockController extends Controller
         }
         $entity = ['message' => 'delete'];
         return $service->returnJosnResponse($entity);
+    }
+
+    public function stockItemMatrix(Request $request)
+    {
+        $data = StockItemModel::getStockItemMatrix($this->domain, $request->all());
+
+        return response()->json([
+            'message' => 'success',
+            'status' => ResponseAlias::HTTP_OK,
+            'total' => $data['total'],
+            'data' => $data['data'],
+            'warehouses' => $data['warehouses']
+        ], ResponseAlias::HTTP_OK);
     }
 
 
