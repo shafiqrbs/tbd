@@ -11,6 +11,7 @@ use Modules\Core\App\Models\UserModel;
 use Modules\Hospital\App\Http\Requests\InvestigationReportRequest;
 use Modules\Hospital\App\Http\Requests\ParticularRequest;
 use Modules\Hospital\App\Http\Requests\TreatmentMedicineRequest;
+use Modules\Hospital\App\Models\MedicineDetailsModel;
 use Modules\Hospital\App\Models\TreatmentMedicineModel;
 use Modules\Hospital\App\Models\ParticularDetailsModel;
 use Modules\Hospital\App\Models\ParticularModel;
@@ -51,10 +52,17 @@ class TreatmentMedicineController extends Controller
         $config = $this->domain['hms_config'];
         $input = $request->validated();
         $input['config_id'] = $config;
+        $medicineId = $input['medicine_id'];
+        $medicine = MedicineDetailsModel::find($medicineId);
+        $dosage_id = $medicine->medicineStock->medicine_dosage_id ?? null;
+        $medicine_bymeal_id = $medicine->medicineStock->medicine_bymeal_id ?? null;
+        $input['medicine_dosage_id'] = $dosage_id;
+        $input['medicine_bymeal_id'] = $medicine_bymeal_id;
         $entity = TreatmentMedicineModel::create($input);
         $service = new JsonRequestResponse();
         $data = $service->returnJosnResponse($entity);
         return $data;
+
     }
 
     /**

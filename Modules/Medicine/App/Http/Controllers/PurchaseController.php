@@ -152,7 +152,6 @@ class PurchaseController extends Controller
     public function destroy($id)
     {
         $purchase = PurchaseModel::find($id);
-
         if (!$purchase) {
             return response()->json([
                 'status' => Response::HTTP_NOT_FOUND,
@@ -160,7 +159,6 @@ class PurchaseController extends Controller
                 'message' => 'Data not found.',
             ]);
         }
-
         if ($purchase->process === 'Received') {
             return response()->json([
                 'status' => Response::HTTP_BAD_REQUEST,
@@ -168,7 +166,6 @@ class PurchaseController extends Controller
                 'message' => 'Cannot delete purchase — it has already been received.',
             ]);
         }
-
         DB::beginTransaction();
 
         try {
