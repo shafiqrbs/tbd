@@ -28,11 +28,23 @@ class MedicineDetails
     private $config;
 
 
-    /**
-     * @ORM\OneToOne(targetEntity="Modules\Inventory\App\Entities\Product")
+     /**
+     * @ORM\ManyToOne(targetEntity="Modules\Inventory\App\Entities\Product")
      * @ORM\JoinColumn(name="product_id", referencedColumnName="id", nullable=true, onDelete="cascade")
      **/
-    private $product;
+     private $product;
+
+    /**
+     * @ORM\ManyToOne(targetEntity="Modules\Inventory\App\Entities\StockItem")
+     * @ORM\JoinColumn(name="stock_item_id", referencedColumnName="id", nullable=true, onDelete="cascade")
+     **/
+     private $stockItem;
+
+    /**
+     * @ORM\ManyToOne(targetEntity="MedicineStock")
+     * @ORM\JoinColumn(name="medicine_stock_id", referencedColumnName="id", nullable=true, onDelete="cascade")
+     **/
+     private $medicineStock;
 
     /**
      * @ORM\ManyToOne(targetEntity="ParticularMode")
@@ -66,6 +78,12 @@ class MedicineDetails
      */
     private $generic;
 
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="name", type="string", length=255, nullable=true)
+     */
+    private $name;
 
     /**
      * @var string
@@ -200,9 +218,16 @@ class MedicineDetails
     /**
      * @var boolean
      *
-     * @ORM\Column(type="boolean",options={"default"="true"})
+     * @ORM\Column(type="boolean",options={"default"="0"})
      */
     private $status;
+
+    /**
+     * @var boolean
+     *
+     * @ORM\Column(type="boolean" ,options={"default":0})
+     */
+    private $isDelete;
 
     /**
      * @var boolean
@@ -227,12 +252,7 @@ class MedicineDetails
     private $adminStatus;
 
 
-    /**
-     * @var boolean
-     *
-     * @ORM\Column(type="boolean",options={"default"="false"})
-     */
-    private $isDelete;
+
 
 
 

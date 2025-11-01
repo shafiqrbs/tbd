@@ -818,7 +818,7 @@ class HospitalController extends Controller
     public function categoryDropdown(Request $request)
     {
         $type = $request->get('type');
-        $dropdown = CategoryModel::getCategoryDropdown($this->domain,$type);
+        $dropdown = CategoryModel::getCategoryHospitalDropdown($this->domain,$type);
         $service = new JsonRequestResponse();
         return $service->returnJosnResponse($dropdown);
     }

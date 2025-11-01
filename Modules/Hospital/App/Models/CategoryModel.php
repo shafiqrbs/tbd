@@ -78,6 +78,14 @@ class CategoryModel extends Model
         return $query->get();
     }
 
+    public static function getCategoryHospitalDropdown($domain,$type = 'service')
+    {
+        $query = self::select(['inv_category.name', 'inv_category.slug', 'inv_category.id'])
+            ->leftjoin('inv_setting as p','p.id','=','inv_category.category_nature_id')
+            ->where([['inv_category.status', 1],['inv_category.config_id', $domain['config_id']],['p.slug', $type]])->whereNull('inv_category.is_private')->whereNotNull('parent');
+        return $query->get();
+    }
+
 
     public static function getRecords($request,$domain)
     {

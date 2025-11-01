@@ -32,20 +32,23 @@ class MedicineGenericModel extends Model
 
     public static function getMedicineGenericDropdown($term){
 
-
         $entities = self::where(function ($query) use ($term) {
-                $query->where('medicine_brand.name', 'LIKE', '%' . trim($term) . '%')
-                    ->orWhere('medicine_generic.name', 'LIKE', '%' . trim($term) . '%');
-            })
-            ->leftJoin('medicine_generic','medicine_generic.id','=','medicine_brand.medicineGeneric_id')
-            ->leftJoin('medicine_company','medicine_company.id','=','medicine_brand.medicineCompany_id')
-            ->select('medicine_brand.name as name',
+            $query->where('medicine_generic.name', 'LIKE', '%' . trim($term) . '%');
+        })
+            ->leftJoin('medicine_generic', 'medicine_generic.id', '=', 'medicine_brand.medicineGeneric_id')
+            ->leftJoin('medicine_company', 'medicine_company.id', '=', 'medicine_brand.medicineCompany_id')
+            ->select([
+                DB::raw("
+                    CONCAT(
+                        IF(medicine_brand.medicineForm != '', CONCAT(trim(medicine_brand.medicineForm), '. '), ''),
+                        trim(medicine_brand.name),
+                        IF(medicine_brand.strength != '', CONCAT(' - ', trim(medicine_brand.strength)), '')
+                    ) as name
+                "),
                 'medicine_generic.name as generic',
-                'medicine_brand.medicineForm',
-                'medicine_brand.strength',
                 'medicine_brand.packSize',
-                'medicine_company.name as medicine_company'
-            )
+                'medicine_company.name as medicine_company',
+            ])
             ->orderBy('medicine_brand.name', 'ASC')
             ->take(100)
             ->get();

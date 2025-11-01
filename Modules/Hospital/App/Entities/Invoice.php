@@ -250,6 +250,13 @@ class Invoice
      */
     private $satWithoutO2;
 
+    /**
+     * @var int
+     *
+     * @ORM\Column(name="sat_liter", type="integer",length=4, nullable = true)
+     */
+    private $satLiter;
+
      /**
      * @var string
      *

@@ -5,6 +5,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Modules\Core\App\Http\Middleware\LogRequestResponse;
 use Modules\Medicine\App\Http\Controllers\MedicineController;
+use Modules\Medicine\App\Http\Controllers\MedicineStockController;
 use Modules\Medicine\App\Http\Controllers\PurchaseController;
 
 /*
@@ -29,6 +30,7 @@ Route::prefix('/medicine/select')->middleware([HeaderAuthenticationMiddleware::c
     Route::get('/company', [MedicineController::class,'medicineCompanyDropdown'])->name('medicine_generic_dropdown');
 });
 
+Route::post('/medicine/inline-update/{id}', [MedicineController::class,'medicineInlineUpdate'])->name('particular_inline_update');
 Route::prefix('/pharmacy')->middleware([HeaderAuthenticationMiddleware::class,LogRequestResponse::class])->group(function() {
     Route::prefix('purchase')->name('purchase.')->group(function () {
         Route::patch('approve/{id}', [PurchaseController::class, 'approve'])->name('approve');
@@ -50,5 +52,18 @@ Route::prefix('/pharmacy')->middleware([HeaderAuthenticationMiddleware::class,Lo
             'destroy' => 'medicine.destroy',
         ]);
     Route::post('/medicine/inline-update/{id}', [MedicineController::class,'medicineInlineUpdate'])->name('particular_inline_update');
+    Route::get('/stock/generic', [MedicineStockController::class,'generic'])->name('particular_inline_update');
+    Route::get('/stock/search', [MedicineStockController::class,'stockDropdown'])->name('particular_inline_update');
+    Route::apiResource('stock',
+        MedicineStockController::class)
+        ->middleware([HeaderAuthenticationMiddleware::class])
+        ->names([
+            'index' => 'stock.index',
+            'store' => 'stock.store',
+            'show' => 'stock.show',
+            'update' => 'stock.update',
+            'destroy' => 'stock.destroy',
+        ]);
+
 });
 

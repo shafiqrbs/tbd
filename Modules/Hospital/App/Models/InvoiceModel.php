@@ -244,6 +244,7 @@ class InvoiceModel extends Model
                 'hms_invoice.temperature  as temperature',
                 'hms_invoice.sat_with_O2  as sat_with_O2',
                 'hms_invoice.sat_without_O2  as sat_without_O2',
+                'hms_invoice.sat_liter  as sat_liter',
                 'hms_invoice.respiration  as respiration',
                 'hms_invoice.pulse  as pulse',
             ]);

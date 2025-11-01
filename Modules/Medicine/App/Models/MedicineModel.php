@@ -18,7 +18,7 @@ class MedicineModel extends Model
 {
     use HasFactory,Sluggable;
 
-    protected $table = 'inv_product';
+    protected $table = 'hms_medicine_details';
     public $timestamps = true;
     protected $guarded = ['id'];
 
@@ -88,32 +88,29 @@ class MedicineModel extends Model
     public static function getMedicineDropdown($domain,$term){
 
         $config =  $domain['inv_config'];
-        $entities = StockItemModel::where('inv_product.config_id', $config)
+        $entities = self::where('inv_product.config_id', $config)
             ->where(function ($query) use ($term) {
-                $query->where('inv_product.name', 'LIKE', '%' . trim($term) . '%')
-                    ->orWhere('hms_medicine_details.generic', 'LIKE', '%' . trim($term) . '%');
+                $query->where('hms_medicine_details.name', 'LIKE', '%' . trim($term) . '%')
+                    ->orWhere('inv_product.name', 'LIKE', '%' . trim($term) . '%');
             })
-            ->join('inv_product', 'inv_product.id', '=', 'inv_stock.product_id')
-            ->leftjoin('hms_medicine_details', 'hms_medicine_details.product_id', '=', 'inv_product.id')
+            ->leftjoin('hms_medicine_stock', 'hms_medicine_stock.id', '=', 'hms_medicine_details.medicine_stock_id')
+            ->leftjoin('inv_product', 'hms_medicine_stock.product_id', '=', 'inv_product.id')
+            ->leftjoin('hms_medicine_dosage as dosage', 'dosage.id', '=', 'hms_medicine_stock.medicine_dosage_id')
+            ->leftjoin('hms_medicine_dosage as bymeal', 'bymeal.id', '=', 'hms_medicine_stock.medicine_bymeal_id')
             ->select([
-                'inv_stock.id as id',
-                'inv_stock.id as product_id',
-               // 'inv_product.id as product_id',
-                'inv_product.name as product_name',
-                'hms_medicine_details.generic',
-                'hms_medicine_details.opd_quantity',
+                'hms_medicine_details.id as id',
+                'hms_medicine_details.id as product_id',
+                'hms_medicine_details.name as product_name',
+                'inv_product.name as generic',
                 'hms_medicine_details.company',
                 'hms_medicine_details.formulation',
-                'hms_medicine_details.dose_details',
-                'hms_medicine_details.generic_id',
+                'dosage.name as doses_details',
                 'hms_medicine_details.doses_form',
-                'hms_medicine_details.doses_details',
-                'hms_medicine_details.by_meal',
-                'hms_medicine_details.duration_month',
-                'hms_medicine_details.duration_day',
-                'hms_medicine_details.priority',
-                'hms_medicine_details.price',
-                'hms_medicine_details.instruction',
+                'bymeal.name as by_meal',
+                'hms_medicine_stock.duration_day',
+                'hms_medicine_stock.medicine_dosage_id',
+                'hms_medicine_stock.medicine_bymeal_id',
+                'hms_medicine_stock.opd_quantity',
             ])
             ->groupBy('inv_stock.id')
             ->orderBy('inv_product.name', 'ASC')
@@ -131,50 +128,28 @@ class MedicineModel extends Model
         $perPage = isset($request['offset']) && $request['offset'] != '' ? (int)($request['offset']) : 100;
         $skip = isset($page) && $page != '' ? (int)$page * $perPage : 0;
 
-        $products = self::where([['inv_product.config_id', $domain['config_id']]])
+        $products = self::where([['hms_medicine_details.config_id', $domain['hms_config']]])
+            ->leftjoin('hms_medicine_stock', 'hms_medicine_stock.id', '=', 'hms_medicine_details.medicine_stock_id')
+            ->leftjoin('inv_product', 'hms_medicine_stock.product_id', '=', 'inv_product.id')
             ->leftjoin('inv_category', 'inv_category.id', '=', 'inv_product.category_id')
             ->leftjoin('inv_particular', 'inv_particular.id', '=', 'inv_product.unit_id')
             ->leftjoin('inv_setting', 'inv_setting.id', '=', 'inv_product.product_type_id')
-            ->join('inv_stock', 'inv_stock.product_id', '=', 'inv_product.id')
-            ->join('hms_medicine_details', 'hms_medicine_details.product_id', '=', 'inv_product.id')
-            ->leftjoin('inv_particular as brand', 'brand.id', '=', 'inv_stock.brand_id')
-             ->select([
-                'inv_product.id as id',
-                'inv_stock.id as stock_id',
-                'inv_product.name as product_name',
-                'inv_product.slug',
-                'inv_category.name as category_name',
-                'inv_particular.name as unit_name',
-                'inv_stock.barcode',
-                'inv_product.alternative_name',
-                'inv_setting.name as product_type',
-                'inv_stock.quantity',
-                'inv_stock.quantity as rem_quantity',
-                'inv_stock.bangla_name',
-                'inv_product.status',
-                 'hms_medicine_details.opd_quantity',
-                 'hms_medicine_details.generic',
-                 'hms_medicine_details.company',
-                 'hms_medicine_details.formulation',
-                 'hms_medicine_details.dose_details',
-                 'hms_medicine_details.generic_id',
-                 'hms_medicine_details.doses_form',
-                 'hms_medicine_details.doses_details',
-                 'hms_medicine_details.by_meal',
-                 'hms_medicine_details.duration_month',
-                 'hms_medicine_details.duration_day',
-                 'hms_medicine_details.priority',
-                 'hms_medicine_details.price',
-                 'hms_medicine_details.instruction',
-                 'hms_medicine_details.medicine_dosage_id',
-                 'hms_medicine_details.medicine_bymeal_id',
-                 'hms_medicine_details.opd_status',
-                 'hms_medicine_details.ipd_status',
-                 'hms_medicine_details.admin_status',
-                DB::raw('ROUND(inv_stock.price, 2) as price'),
-                DB::raw('ROUND(inv_stock.purchase_price, 2) as purchase_price'),
-                DB::raw('ROUND(inv_stock.sales_price, 2) as sales_price'),
-                DB::raw('ROUND(inv_stock.average_price, 2) as average_price'),
+            ->leftjoin('hms_medicine_dosage as dosage', 'dosage.id', '=', 'hms_medicine_stock.medicine_dosage_id')
+            ->leftjoin('hms_medicine_dosage as bymeal', 'bymeal.id', '=', 'hms_medicine_stock.medicine_bymeal_id')
+            ->select([
+                'hms_medicine_details.id as id',
+                'hms_medicine_details.id as product_id',
+                'hms_medicine_details.name as product_name',
+                'inv_product.name as generic',
+                'hms_medicine_details.company',
+                'hms_medicine_details.formulation',
+                'dosage.name as doses_details',
+                'hms_medicine_details.doses_form',
+                'bymeal.name as by_meal',
+                'hms_medicine_stock.duration_day',
+                'hms_medicine_stock.medicine_dosage_id',
+                'hms_medicine_stock.medicine_bymeal_id',
+                'hms_medicine_stock.opd_quantity',
             ]);
 
         if (isset($request['term']) && !empty($request['term'])) {
@@ -314,17 +289,22 @@ class MedicineModel extends Model
     }
 
 
-    public static function getStockItem($domain)
+    public static function getStockItem($request,$domain)
     {
-        $products = self::where([['inv_product.config_id',$domain['config_id']]])
+        $page = isset($request['page']) && $request['page'] > 0 ? ($request['page'] - 1) : 0;
+        $perPage = isset($request['offset']) && $request['offset'] != '' ? (int)($request['offset']) : 100;
+        $skip = isset($page) && $page != '' ? (int)$page * $perPage : 0;
+
+        $entities = StockItemModel::where([['inv_product.config_id',$domain['config_id']]])
             ->join('inv_product','inv_product.id','=','inv_stock.product_id')
             ->leftjoin('inv_category','inv_category.id','=','inv_product.category_id')
             ->leftjoin('inv_particular','inv_particular.id','=','inv_product.unit_id')
             ->leftjoin('inv_setting','inv_setting.id','=','inv_product.product_type_id')
             ->select([
-                'inv_product.id',
-                'inv_product.name as display_name',
-                'inv_product.name as product_name',
+                'inv_stock.id',
+                'inv_stock.quantity',
+                'inv_stock.min_quantity',
+                'inv_product.name as name',
                 'inv_product.slug',
                 'inv_category.name as category_name',
                 'inv_particular.id as unit_id',
@@ -334,8 +314,17 @@ class MedicineModel extends Model
                 'inv_stock.sku',
                 'inv_stock.status'
             ]);
-        $products = $products->orderBy('inv_product.id','DESC')->get();
-        return $products;
+        $entities = $entities->orderBy('inv_product.name','ASC');
+        $total = $entities->count();
+        $entities = $entities->skip($skip)
+            ->take($perPage)
+            ->orderBy('inv_setting.name', 'ASC')
+            ->orderBy('inv_category.name', 'ASC')
+            ->orderBy('inv_product.name', 'ASC')
+            ->get();
+
+        $data = array('count' => $total, 'entities' => $entities);
+        return $data;
     }
 
     public static function insertExcelProducts($domain)

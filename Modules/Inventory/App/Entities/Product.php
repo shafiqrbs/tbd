@@ -28,6 +28,13 @@ class Product
      **/
     private  $config;
 
+    /**
+     * @var integer
+     *
+     * @ORM\Column(type="integer",nullable=true)
+     */
+    private $genericId;
+
 
      /**
      * @ORM\OneToMany(targetEntity="StockItem", mappedBy="product" )
@@ -161,6 +168,13 @@ class Product
      * @ORM\Column(type="boolean" )
      */
     private $status= true;
+
+    /**
+     * @var boolean
+     *
+     * @ORM\Column(type="boolean" ,options={"default":0})
+     */
+    private $isDelete = false;
 
     /**
      * @ORM\Column(type="string", length=255, nullable=true)
