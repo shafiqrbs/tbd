@@ -43,7 +43,7 @@ class CoreRepository extends EntityRepository{
     public function vendorAutoComplete($domain, $term, $type = 'NULL')
     {
         $entity = DB::table("cor_vendors as e")
-            ->select(DB::raw("CONCAT(e.mobile, ' - ', e.name) AS name"),'e.id as id')
+            ->select(DB::raw("CONCAT(e.company_name) AS name"),'e.id as id')
         //    ->where('e.status', 1)
             ->where('e.domain_id', $domain)
             ->where(function ($query) use ($term) {

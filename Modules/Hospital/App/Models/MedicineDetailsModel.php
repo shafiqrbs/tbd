@@ -5,6 +5,8 @@ namespace Modules\Hospital\App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Support\Facades\DB;
+use Modules\Inventory\App\Models\ParticularModel;
+use Modules\Medicine\App\Models\MedicineStockModel;
 
 
 class MedicineDetailsModel extends Model
@@ -28,5 +30,11 @@ class MedicineDetailsModel extends Model
             $date =  new \DateTime("now");
             $model->updated_at = $date;
         });
+    }
+
+
+    public function medicineStock()
+    {
+        return $this->belongsTo(MedicineStockModel::class, 'medicine_stock_id');
     }
 }

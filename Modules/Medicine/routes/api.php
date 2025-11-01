@@ -35,12 +35,9 @@ Route::prefix('/pharmacy')->middleware([HeaderAuthenticationMiddleware::class,Lo
     Route::prefix('purchase')->name('purchase.')->group(function () {
         Route::patch('approve/{id}', [PurchaseController::class, 'approve'])->name('approve');
         Route::patch('receive/{id}', [PurchaseController::class, 'receive'])->name('receive');
-
         Route::apiResource('', PurchaseController::class)
             ->parameters(['' => 'id']);
     });
-
-
     Route::apiResource('medicine',
         MedicineController::class)
         ->middleware([HeaderAuthenticationMiddleware::class])
