@@ -25,7 +25,7 @@ class PurchaseRequest extends FormRequest
             'items' => 'required|array',
             'items*.expired_date' => 'nullable|date',
             'items*.production_date' => 'nullable|date',
-            'items*.medicine_id' => 'required|integer|regex:/^\d+(\.\d{1,2})?$/',
+            'items*.stock_item_id' => 'required|integer|regex:/^\d+(\.\d{1,2})?$/',
             'items*.quantity' => 'required|integer',
             'items*.medicine_name' => 'nullable|string',
         ];

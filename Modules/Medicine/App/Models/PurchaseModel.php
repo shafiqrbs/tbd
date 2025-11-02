@@ -90,7 +90,7 @@ class PurchaseModel extends Model
                 'purchase_id'    => $purchase->id,
                 'config_id'      => $purchase->config_id,
                 'warehouse_id'   => $item['warehouse_id'] ?? $warehouseId,
-                'stock_item_id'  => $item['medicine_id'],
+                'stock_item_id'  => $item['stock_item_id'],
                 'quantity'       => $item['quantity'],
                 'name'           => $item['medicine_name'] ?? null,
                 'production_date'=> $item['production_date'] ?? null,
