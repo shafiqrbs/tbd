@@ -59,6 +59,7 @@ class CategoryController extends Controller
             }
         }
         $input['parent'] = $entity->id;
+        $input['category_nature_id'] = $entity->category_nature_id;
         $entity = CategoryModel::create($input);
         $data = $service->returnJosnResponse($entity);
         return $data;

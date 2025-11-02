@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Modules\AppsApi\App\Services\JsonRequestResponse;
 use Modules\Core\App\Models\UserModel;
+use Modules\Medicine\App\Http\Requests\MedicineStockInlineRequest;
 use Modules\Medicine\App\Models\StockItemModel;
 use Modules\Medicine\App\Models\ProductModel;
 use Modules\Inventory\App\Models\CategoryModel;
@@ -118,69 +119,43 @@ class MedicineStockController extends Controller
     /**
      * Show the specified resource for edit.
      */
-    public function medicineInlineUpdate(MedicineInlineRequest $request, $id)
+    public function medicineStockInlineUpdate(MedicineStockInlineRequest $request, $id)
     {
         $input = $request->validated();
-
-        $entity = MedicineModel::find($id);
-
-        $data = array();
-        $company = (isset($input['company']) and $input['company']) ? $input['company']:'';
-        $name = (isset($input['name']) and $input['name']) ? $input['name']:'';
-        $generic = (isset($input['generic']) and $input['generic']) ? $input['generic']:'';
-        $opd_quantity = (isset($input['opd_quantity']) and $input['opd_quantity']) ? $input['opd_quantity']:0;
-
-        // Update only changed fields
-        if (array_key_exists('name', $input)) {
-            $entity->name = $name;
+        $entity = MedicineStockModel::find($id);
+        $category = (isset($input['category_id']) and $input['category_id']) ? $input['category_id']:'';
+        if($category){
+            $entity->product()->update(['category_id' => $category]);
         }
-        $entity->save();
-
-        $medicineDetails = MedicineDetailsModel::where('product_id',$id)->first();
-        if ($medicineDetails) {
+        if ($entity) {
             $updateDetails = [];
-
             if (array_key_exists('opd_quantity', $input)) {
                 $updateDetails['opd_quantity'] = $input['opd_quantity'];
             }
-
-            if (array_key_exists('company', $input)) {
-                $updateDetails['company'] = $company;
-            }
-
             if (array_key_exists('medicine_dosage_id', $input)) {
                 $updateDetails['medicine_dosage_id'] = $input['medicine_dosage_id'];
             }
-
             if (array_key_exists('medicine_bymeal_id', $input)) {
                 $updateDetails['medicine_bymeal_id'] = $input['medicine_bymeal_id'];
             }
-
             if (array_key_exists('admin_status', $input)) {
                 $updateDetails['admin_status'] = $input['admin_status'] ? 0:1;
             }
-
             if (array_key_exists('opd_status', $input)) {
                 $updateDetails['opd_status'] = $input['opd_status'] ? 0:1;
             }
-
             if (array_key_exists('ipd_status', $input)) {
                 $updateDetails['ipd_status'] = $input['ipd_status'] ? 0:1;
             }
-
-            if (array_key_exists('generic', $input)) {
-                $updateDetails['generic'] = $generic;
-            }
-
             if (!empty($updateDetails)) {
-                $medicineDetails->update($updateDetails);
+                $entity->update($updateDetails);
             }
         }
 
         return response()->json([
             'success' => true,
-            'message' => 'Updated Successfully',
-            'data'    => $medicineDetails,
+            'message' => 'success',
+            'data'    => $entity,
         ]);
     }
 

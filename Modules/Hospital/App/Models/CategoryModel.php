@@ -20,6 +20,7 @@ class CategoryModel extends Model
         'slug',
         'status',
         'is_private',
+        'category_nature_id',
         'parent'
     ];
 
@@ -95,9 +96,11 @@ class CategoryModel extends Model
 
         $categories = self::where('inv_category.config_id',$domain['config_id'])->whereNull('inv_category.is_private')
             ->leftjoin('inv_category as p','p.id','=','inv_category.parent')
+            ->leftjoin('inv_setting as inv_setting','inv_setting.id','=','inv_category.category_nature_id')
             ->select([
                 'inv_category.id',
                 'inv_category.name',
+                'inv_setting.name as category_nature',
                 'inv_category.slug',
                 'inv_category.status',
                 'inv_category.parent as parent_id',

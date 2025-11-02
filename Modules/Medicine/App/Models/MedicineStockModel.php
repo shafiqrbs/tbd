@@ -82,6 +82,11 @@ class MedicineStockModel extends Model
         return $this->belongsTo(SettingModel::class, 'product_type_id');
     }
 
+    public function product()
+    {
+        return $this->belongsTo(ProductModel::class, 'product_id');
+    }
+
     public static function getStockDropdown($domain,$term){
 
         $config =  $domain['config_id'];
@@ -177,6 +182,7 @@ class MedicineStockModel extends Model
                 'inv_product.name as product_name',
                 'inv_product.slug',
                 'inv_category.name as category_name',
+                'inv_category.id as category_id',
                 'inv_particular.name as unit_name',
                 'inv_stock.barcode',
                 'inv_stock.quantity',

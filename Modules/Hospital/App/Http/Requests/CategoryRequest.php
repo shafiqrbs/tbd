@@ -23,6 +23,7 @@ class CategoryRequest extends FormRequest
             case 'POST':
             {
                 return [
+                    'category_nature_id' => 'required|string',
                     'name' => 'required|string',
                     'status' => 'boolean|nullable',
                 ];

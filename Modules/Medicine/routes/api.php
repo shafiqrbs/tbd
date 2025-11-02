@@ -51,7 +51,7 @@ Route::prefix('/pharmacy')->middleware([HeaderAuthenticationMiddleware::class,Lo
             'update' => 'medicine.update',
             'destroy' => 'medicine.destroy',
         ]);
-    Route::post('/medicine/inline-update/{id}', [MedicineController::class,'medicineInlineUpdate'])->name('particular_inline_update');
+    Route::post('/medicine/inline-update/{id}', [MedicineController::class,'medicineInlineUpdate'])->name('medicineInlineUpdate');
     Route::get('/stock/generic', [MedicineStockController::class,'generic'])->name('particular_inline_update');
     Route::get('/stock/search', [MedicineStockController::class,'stockDropdown'])->name('particular_inline_update');
     Route::apiResource('stock',
@@ -64,6 +64,8 @@ Route::prefix('/pharmacy')->middleware([HeaderAuthenticationMiddleware::class,Lo
             'update' => 'stock.update',
             'destroy' => 'stock.destroy',
         ]);
+    Route::post('/stock/inline-update/{id}', [MedicineStockController::class,'medicineStockInlineUpdate'])->name('medicineStockInlineUpdate');
+
 
 });
 
