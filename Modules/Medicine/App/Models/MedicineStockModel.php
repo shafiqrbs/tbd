@@ -96,10 +96,8 @@ class MedicineStockModel extends Model
             })
             ->join('inv_product', 'inv_product.id', '=', 'inv_stock.product_id')
             ->select([
-                'inv_stock.id as id',
-                'inv_stock.id as stock_id',
+                'inv_stock.id as stock_item_id',
                 'inv_product.name as product_name',
-                'inv_product.slug',
             ])
             ->orderBy('inv_product.name', 'ASC')
             ->take(100)
