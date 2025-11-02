@@ -30,6 +30,7 @@ class PurchaseModel extends Model
         'status',
         'mode',
         'is_requisition',
+        'remark',
         'process',
         'created_by_id',
         'received_by_id',
