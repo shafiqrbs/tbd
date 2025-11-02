@@ -125,7 +125,7 @@ class MedicineModel extends Model
     {
 
         $page = isset($request['page']) && $request['page'] > 0 ? ($request['page'] - 1) : 0;
-        $perPage = isset($request['offset']) && $request['offset'] != '' ? (int)($request['offset']) : 100;
+        $perPage = isset($request['offset']) && $request['offset'] != '' ? (int)($request['offset']) : 50;
         $skip = isset($page) && $page != '' ? (int)$page * $perPage : 0;
 
         $products = self::where([['hms_medicine_details.config_id', $domain['hms_config']]])

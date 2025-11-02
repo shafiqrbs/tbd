@@ -108,7 +108,7 @@ class MedicineStockModel extends Model
     {
 
         $page = isset($request['page']) && $request['page'] > 0 ? ($request['page'] - 1) : 0;
-        $perPage = isset($request['offset']) && $request['offset'] != '' ? (int)($request['offset']) : 100;
+        $perPage = isset($request['offset']) && $request['offset'] != '' ? (int)($request['offset']) : 50;
         $skip = isset($page) && $page != '' ? (int)$page * $perPage : 0;
 
         $products = StockItemModel::where([['inv_stock.config_id', $domain['config_id']],['inv_product.is_delete',0]])
