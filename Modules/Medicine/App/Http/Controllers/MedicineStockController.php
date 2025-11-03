@@ -172,6 +172,17 @@ class MedicineStockController extends Controller
     }
 
     /**
+     * Show the form for editing the specified resource.
+     */
+    public function stockCategory(Request $request)
+    {
+        $term = $request->get('category_id');
+        $dropdown = MedicineStockModel::getCategoryStock($this->domain,$term);
+        $service = new JsonRequestResponse();
+        return $service->returnJosnResponse($dropdown);
+    }
+
+    /**
      * Remove the specified resource from storage.
      */
     public function destroy($id)

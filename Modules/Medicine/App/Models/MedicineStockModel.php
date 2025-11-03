@@ -87,6 +87,26 @@ class MedicineStockModel extends Model
         return $this->belongsTo(ProductModel::class, 'product_id');
     }
 
+    public static function getCategoryStock($domain,$category){
+
+        $entities = StockItemModel::where([['inv_stock.config_id', $domain['config_id']],['inv_product.is_delete',0]])
+            /*->where(function ($query) use ($category) {
+                $query->where('inv_product.category_id', '=',$category);
+            })*/
+            ->join('inv_product', 'inv_product.id', '=', 'inv_stock.product_id')
+            ->select([
+                'inv_stock.id as id',
+                'inv_stock.id as stock_item_id',
+                'inv_product.name as medicine_name',
+                'inv_product.name as generic',
+            ])
+            ->orderBy('inv_product.name', 'ASC')
+            ->take(100)
+            ->get();
+        return $entities;
+
+    }
+
     public static function getStockDropdown($domain,$term){
 
         $config =  $domain['config_id'];
@@ -104,7 +124,6 @@ class MedicineStockModel extends Model
             ->orderBy('inv_product.name', 'ASC')
             ->take(100)
             ->get();
-
         return $entities;
 
     }

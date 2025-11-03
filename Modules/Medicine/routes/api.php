@@ -55,6 +55,7 @@ Route::prefix('/pharmacy')->middleware([HeaderAuthenticationMiddleware::class,Lo
     Route::post('/medicine/inline-update/{id}', [MedicineController::class,'medicineInlineUpdate'])->name('medicineInlineUpdate');
     Route::get('/stock/generic', [MedicineStockController::class,'generic'])->name('particular_inline_update');
     Route::get('/stock/search', [MedicineStockController::class,'stockDropdown'])->name('particular_inline_update');
+    Route::get('/stock/category', [MedicineStockController::class,'stockCategory'])->name('stock_category');
     Route::apiResource('stock',
         MedicineStockController::class)
         ->middleware([HeaderAuthenticationMiddleware::class])
