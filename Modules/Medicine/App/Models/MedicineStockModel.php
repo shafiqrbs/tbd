@@ -90,14 +90,14 @@ class MedicineStockModel extends Model
     public static function getCategoryStock($domain,$category){
 
         $entities = StockItemModel::where([['inv_stock.config_id', $domain['config_id']],['inv_product.is_delete',0]])
-            /*->where(function ($query) use ($category) {
+            ->where(function ($query) use ($category) {
                 $query->where('inv_product.category_id', '=',$category);
-            })*/
+            })
             ->join('inv_product', 'inv_product.id', '=', 'inv_stock.product_id')
             ->select([
                 'inv_stock.id as id',
                 'inv_stock.id as stock_item_id',
-                'inv_product.name as medicine_name',
+                'inv_product.name as product_name',
                 'inv_product.name as generic',
             ])
             ->orderBy('inv_product.name', 'ASC')
