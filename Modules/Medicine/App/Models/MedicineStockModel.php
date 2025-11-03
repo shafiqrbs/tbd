@@ -98,10 +98,8 @@ class MedicineStockModel extends Model
                 'inv_stock.id as id',
                 'inv_stock.id as stock_item_id',
                 'inv_product.name as product_name',
-                'inv_product.name as generic',
             ])
             ->orderBy('inv_product.name', 'ASC')
-            ->take(100)
             ->get();
         return $entities;
 
@@ -118,7 +116,7 @@ class MedicineStockModel extends Model
             ->select([
                 'inv_stock.id as id',
                 'inv_stock.id as stock_item_id',
-                'inv_product.name as medicine_name',
+                'inv_product.name as product_name',
                 'inv_product.name as generic',
             ])
             ->orderBy('inv_product.name', 'ASC')
