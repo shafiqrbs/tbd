@@ -409,7 +409,12 @@ class UserModel extends Model
 
     public  function user_warehouses(){
 
-        return $this->hasMany(UserWarehouseModel::class, 'user_id', 'id');
+        return $this->belongsToMany(
+            WarehouseModel::class,   // ✅ related model (not pivot)
+            'cor_user_warehouse',    // ✅ pivot table
+            'user_id',               // foreign key on pivot for user
+            'warehouse_id'           // foreign key on pivot for warehouse
+        );
     }
 
     public static function getStoreUsers($domain)
@@ -422,7 +427,7 @@ class UserModel extends Model
                 'users.id as user_id',
                 'users.name',
                 'users.username',
-            ])->with(['user_warehouses'])->get();
+            ])->with('user_warehouses')->get();
         return $data;
     }
 
