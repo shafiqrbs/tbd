@@ -93,7 +93,7 @@ class PurchaseModel extends Model
                 'warehouse_id'   => $item['warehouse_id'] ?? $warehouseId,
                 'stock_item_id'  => $item['stock_item_id'],
                 'quantity'       => $item['quantity'],
-                'name'           => $item['medicine_name'] ?? null,
+                'name'           => $item['name'] ?? null,
                 'production_date'=> $item['production_date'] ?? null,
                 'expired_date'   => $item['expired_date'] ?? null,
                 'updated_at'     => $timestamp,

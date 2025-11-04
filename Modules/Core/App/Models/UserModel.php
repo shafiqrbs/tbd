@@ -407,5 +407,37 @@ class UserModel extends Model
         return $data;
     }
 
+    public  function user_warehouses(){
+
+        return $this->hasMany(UserWarehouseModel::class, 'user_id', 'id');
+    }
+
+    public static function getStoreUsers($domain)
+    {
+        $data = self::join('cor_setting','cor_setting.id','=','users.employee_group_id')
+            ->where('users.domain_id',$domain)
+            ->where('users.enabled',1)
+            ->whereIn('cor_setting.slug', ['employee', 'nurse', 'pharmacy'])
+            ->select([
+                'users.id as user_id',
+                'users.name',
+                'users.username',
+            ])->with(['user_warehouses'])->get();
+        return $data;
+    }
+
+    public static function getUserActiveWarehouse($userId)
+    {
+        $data = WarehouseModel::where('cor_user_warehouse.user_id',$userId)
+            ->join('cor_user_warehouse','cor_warehouses.id','=','cor_user_warehouse.warehouse_id')
+            ->select([
+                'cor_user_warehouse.id',
+                'cor_user_warehouse.user_id',
+                'cor_warehouses.name as warehouse_name',
+            ])
+            ->get();
+        return $data;
+    }
+
 
 }

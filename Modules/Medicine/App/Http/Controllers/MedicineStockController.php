@@ -211,5 +211,17 @@ class MedicineStockController extends Controller
         ], ResponseAlias::HTTP_OK);
     }
 
+    /**
+     * Show the form for editing the specified resource.
+     */
+    public function warehouse(Request $request)
+    {
+        $domain = $this->domain;
+        $id = $request->get('id');
+        $data = UserModel::getUserActiveWarehouse($id);
+        $service = new JsonRequestResponse();
+        return $service->returnJosnResponse($data);
+    }
+
 
 }

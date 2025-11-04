@@ -74,6 +74,8 @@ Route::prefix('/hospital')->middleware([HeaderAuthenticationMiddleware::class])-
     Route::get('/core/particular/doctor-nurse', [ParticularController::class, 'doctorNurseStaff'])->name('particular.doctorNurseStaff');
     Route::get('/core/userinfo/{id}', [HospitalController::class,'userInfo'])->name('userInfo');
     Route::post('/core/health-share', [HospitalController::class,'healthShare'])->name('healthShare');
+    Route::get('/core/store-user', [HospitalController::class,'storeUser'])->name('storeUser');
+    Route::post('/core/store-user/inline-update/{id}', [HospitalController::class,'storeUserInlineUpdate'])->name('storeUserInlineUpdate');
     Route::prefix('core')->middleware([HeaderAuthenticationMiddleware::class])->group(function() {
         Route::get('/user-import', [HospitalController::class,'userImport'])->name('user-import');
         Route::apiResource('particular', ParticularController::class)

@@ -16,6 +16,7 @@ use Modules\Core\App\Models\FileUploadModel;
 use Modules\Core\App\Models\LocationModel;
 use Modules\Core\App\Models\UserModel;
 use Modules\Core\App\Models\UserProfileModel;
+use Modules\Core\App\Models\UserWarehouseModel;
 use Modules\Domain\App\Models\DomainModel;
 use Modules\Hospital\App\Models\CategoryModel;
 use Modules\Hospital\App\Models\HospitalConfigModel;
@@ -115,6 +116,54 @@ class HospitalController extends Controller
         $service = new JsonRequestResponse();
         return $service->returnJosnResponse($data);
     }
+
+
+    /**
+     * Show the form for editing the specified resource.
+     */
+    public function storeUser()
+    {
+        $domain = $this->domain;
+        $data = UserModel::getStoreUsers($domain['id']);
+        $service = new JsonRequestResponse();
+        return $service->returnJosnResponse($data);
+    }
+
+    /**
+     * Show the specified resource for edit.
+     */
+    public function storeUserInlineUpdate(Request $request, $id)
+    {
+
+        $ids = json_decode($request->get('store_id'));
+        $entity = UserModel::find($id);
+        if ($ids && is_array($ids)) {
+            // Remove warehouses that are not selected anymore
+            UserWarehouseModel::where('user_id', $id)
+                ->whereNotIn('warehouse_id', $ids)
+                ->delete();
+
+            // Insert or update warehouses in the list
+            foreach ($ids as $storeId) {
+                UserWarehouseModel::updateOrCreate(
+                    [
+                        'user_id' => $id,
+                        'warehouse_id' => $storeId,
+                    ],
+                    [
+                        'status' => true,
+                        'updated_at' => now(),
+                    ]
+                );
+            }
+        }
+        return response()->json([
+            'success' => true,
+            'message' => 'success',
+            'data'    => $ids,
+        ]);
+    }
+
 
     /**
      * Show the form for editing the specified resource.
