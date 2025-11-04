@@ -196,9 +196,8 @@ class PurchaseController extends Controller
      * Approve the specified resource from storage.
      */
 
-    public function approve(PurchaseRequest $request, $id)
+    public function approve($id)
     {
-        $data = $request->validated();
 
         DB::beginTransaction();
         try {
@@ -212,13 +211,9 @@ class PurchaseController extends Controller
             }
 
             // Update master
-            $data['warehouse_id'] = $data['warehouse_id'] ?? $this->domain['warehouse_id'];
             $data['approved_by_id'] = $this->domain['user_id'];
             $data['process'] = 'Approved';
             $purchase->update($data);
-
-            // Sync items (add / update / delete)
-            PurchaseModel::syncPurchaseItems($purchase, $data['items'], $data['warehouse_id']);
 
             DB::commit();
 
@@ -238,10 +233,8 @@ class PurchaseController extends Controller
         }
     }
 
-    public function receive(PurchaseRequest $request, $id)
+    public function receive($id)
     {
-        $data = $request->validated();
-
         DB::beginTransaction();
         try {
             $purchase = PurchaseModel::find($id);
@@ -262,14 +255,11 @@ class PurchaseController extends Controller
             }
 
             // Update master
-            $data['warehouse_id'] = $data['warehouse_id'] ?? $this->domain['warehouse_id'];
             $data['received_by_id'] = $this->domain['user_id'];
             $data['received_date'] = now();
             $data['process'] = 'Received';
             $purchase->update($data);
 
-            // Sync items first
-            PurchaseModel::syncPurchaseItems($purchase, $data['items'], $data['warehouse_id']);
 
             // Maintain stock for all received items
             $purchase->refresh();

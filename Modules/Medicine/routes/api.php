@@ -35,8 +35,8 @@ Route::prefix('/medicine/select')->middleware([HeaderAuthenticationMiddleware::c
 Route::post('/medicine/inline-update/{id}', [MedicineController::class,'medicineInlineUpdate'])->name('particular_inline_update');
 Route::prefix('/pharmacy')->middleware([HeaderAuthenticationMiddleware::class,LogRequestResponse::class])->group(function() {
     Route::prefix('purchase')->name('purchase.')->group(function () {
-        Route::patch('approve/{id}', [PurchaseController::class, 'approve'])->name('approve');
-        Route::patch('receive/{id}', [PurchaseController::class, 'receive'])->name('receive');
+        Route::get('approve/{id}', [PurchaseController::class, 'approve'])->name('approve');
+        Route::get('receive/{id}', [PurchaseController::class, 'receive'])->name('receive');
         Route::apiResource('', PurchaseController::class)
             ->parameters(['' => 'id']);
     });

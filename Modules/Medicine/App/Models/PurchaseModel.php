@@ -27,6 +27,7 @@ class PurchaseModel extends Model
         'warehouse_id',
         'discount_type',
         'approved_by_id',
+        'grn',
         'status',
         'mode',
         'is_requisition',
@@ -123,6 +124,7 @@ class PurchaseModel extends Model
                 'inv_purchase.id',
                 DB::raw('DATE_FORMAT(inv_purchase.created_at, "%d-%m-%Y") as created'),
                 'inv_purchase.invoice as invoice',
+                'inv_purchase.received_by_id',
                 'inv_purchase.approved_by_id',
                 'inv_purchase.warehouse_id',
                 'inv_purchase.mode as mode',
@@ -182,23 +184,28 @@ class PurchaseModel extends Model
             ->leftjoin('cor_vendors', 'cor_vendors.id', '=', 'inv_purchase.vendor_id')
             ->leftjoin('users as cb', 'cb.id', '=', 'inv_purchase.created_by_id')
             ->leftjoin('users as ab', 'ab.id', '=', 'inv_purchase.approved_by_id')
+            ->leftjoin('users as re', 're.id', '=', 'inv_purchase.received_by_id')
             ->select([
                 'inv_purchase.id',
                 'inv_purchase.invoice',
                 'inv_purchase.process',
+                'inv_purchase.grn',
                 'inv_purchase.warehouse_id',
                 'inv_purchase.created_by_id',
                 'inv_purchase.approved_by_id',
+                'inv_purchase.received_by_id',
+                're.username as re_username',
+                're.name as re_name',
                 'ab.username as ab_username',
                 'ab.name as ab_name',
                 'inv_purchase.remark',
-                'inv_purchase.created_by_id',
                 'cb.username as cb_username',
                 'cb.name as cb_name',
                 'inv_purchase.vendor_id',
                 'cor_vendors.name as vendor_name',
                 'cor_vendors.mobile as vendor_mobile',
                 DB::raw('DATE_FORMAT(inv_purchase.created_at, "%d-%M-%Y") as created'),
+                DB::raw('DATE_FORMAT(inv_purchase.received_date, "%d-%M-%Y") as received_date'),
 
 
             ])->with(['purchaseItems' => function ($query) {
