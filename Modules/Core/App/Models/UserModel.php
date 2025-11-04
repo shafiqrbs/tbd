@@ -3,6 +3,8 @@
 namespace Modules\Core\App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Support\Facades\DB;
 
 class UserModel extends Model
@@ -407,19 +409,46 @@ class UserModel extends Model
         return $data;
     }
 
-    public  function user_warehouses(){
-
+    public function user_warehouses(): BelongsToMany
+    {
         return $this->belongsToMany(
-            WarehouseModel::class,   // ✅ related model (not pivot)
-            'cor_user_warehouse',    // ✅ pivot table
-            'user_id',               // foreign key on pivot for user
-            'warehouse_id'           // foreign key on pivot for warehouse
+            WarehouseModel::class,
+            'cor_user_warehouse',
+            'user_id',
+            'warehouse_id'
         );
     }
 
     public static function getStoreUsers($domain)
     {
-        $data = self::join('cor_setting','cor_setting.id','=','users.employee_group_id')
+        $users = self::with(['user_warehouses' => function ($q) {
+            $q->select('cor_user_warehouse.id','cor_user_warehouse.user_id','cor_user_warehouse.warehouse_id');
+        }])
+            ->where('domain_id', $domain)
+            ->where('enabled', 1)
+
+            ->select('users.id', 'users.name', 'users.username') // select user columns only
+            ->get()
+            ->map(function ($user) {
+                return [
+                    'user_id'    => $user->id,
+                    'name'       => $user->name,
+                    'username'   => $user->username,
+                    'warehouses' => $user->user_warehouses->map(function ($wh) {
+                        return [
+                            'warehouse_id' => $wh->warehouse_id,
+                        ];
+                    })->values(), // values() resets keys
+                ];
+            })->toArray();
+
+        return $users;
+    }
+
+    public static function getStoreUsers1($domain)
+    {
+        $data = self::with('user_warehouses')
+        ->join('cor_setting','cor_setting.id','=','users.employee_group_id')
             ->where('users.domain_id',$domain)
             ->where('users.enabled',1)
             ->whereIn('cor_setting.slug', ['employee', 'nurse', 'pharmacy'])
@@ -427,7 +456,7 @@ class UserModel extends Model
                 'users.id as user_id',
                 'users.name',
                 'users.username',
-            ])->with('user_warehouses')->get();
+            ])->get();
         return $data;
     }
 
