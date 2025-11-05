@@ -465,9 +465,10 @@ class UserModel extends Model
         $data = WarehouseModel::where('cor_user_warehouse.user_id',$userId)
             ->join('cor_user_warehouse','cor_warehouses.id','=','cor_user_warehouse.warehouse_id')
             ->select([
-                'cor_user_warehouse.id',
+                'cor_user_warehouse.warehouse_id as id',
                 'cor_user_warehouse.user_id',
                 'cor_warehouses.name as warehouse_name',
+                'cor_warehouses.name',
             ])
             ->get();
         return $data;

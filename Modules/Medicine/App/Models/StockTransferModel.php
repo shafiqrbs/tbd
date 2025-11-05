@@ -125,6 +125,48 @@ class StockTransferModel extends Model
             'entities' => $entities,
         ];
     }
+    public static function getDetails($id)
+    {
+        $entities = self::where('inv_stock_transfer.id',$id)
+            ->leftJoin('users as createdBy', 'createdBy.id', '=', 'inv_stock_transfer.created_by_id')
+            ->leftJoin('users as approveBy', 'approveBy.id', '=', 'inv_stock_transfer.approved_by_id')
+            ->join('cor_warehouses as fw', 'fw.id', '=', 'inv_stock_transfer.from_warehouse_id')
+            ->join('cor_warehouses as tw', 'tw.id', '=', 'inv_stock_transfer.to_warehouse_id')
+            ->select([
+                'inv_stock_transfer.id',
+                'inv_stock_transfer.config_id',
+                'inv_stock_transfer.from_warehouse_id',
+                'fw.name as from_warehouse',
+                'inv_stock_transfer.to_warehouse_id',
+                'tw.name as to_warehouse',
+                'inv_stock_transfer.created_by_id',
+                'createdBy.name as created_by',
+                'inv_stock_transfer.approved_by_id',
+                'approveBy.name as approved_by',
+                'inv_stock_transfer.notes',
+                'inv_stock_transfer.process',
+                DB::raw('DATE_FORMAT(inv_stock_transfer.created_at, "%d-%m-%Y") as created'),
+                DB::raw('DATE_FORMAT(inv_stock_transfer.updated_at, "%d-%m-%Y") as invoice_date'),
+            ])
+            ->with([
+                'stockTransferItems' => function ($query) {
+                    $query->select([
+                        'inv_stock_transfer_item.id',
+                        'inv_stock_transfer_item.stock_transfer_id',
+                        'inv_stock_transfer_item.stock_item_id',
+                        'inv_stock_transfer_item.purchase_item_id',
+                        'inv_stock_transfer_item.quantity',
+                        'inv_stock_transfer_item.name',
+                        'inv_stock_transfer_item.uom',
+                    ]);
+                }
+            ]);
+
+        // Pagination + sorting
+        $entities = $entities->first();
+
+        return $entities;
+    }
 
 
     public static function insertStockTransferItems($stockTransfer, array $items, int $configId): bool
@@ -142,10 +184,11 @@ class StockTransferModel extends Model
                 'config_id' => $configId,
                 'stock_transfer_id' => $stockTransfer->id,
                 'stock_item_id' => $record['stock_item_id'],
-                'purchase_item_id' => $record['purchase_item_id'],
+                'purchase_item_id' => $record['purchase_item_id'] ?? null,
                 'quantity' => $record['quantity'],
-                'name' => $record['display_name'],
-                'uom' => $record['unit_name'],
+                'name' => $record['name'] ?? null,
+                'uom' => $record['unit_name'] ?? null,
+                'stock_quantity' => $record['stock_quantity'] ?? null,
                 'created_at' => $timestamp,
                 'updated_at' => $timestamp,
             ];
@@ -154,6 +197,7 @@ class StockTransferModel extends Model
         if (!empty($insertData)) {
             StockTransferItemModel::insert($insertData);
         }
+
         return true;
     }
 }

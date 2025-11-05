@@ -135,9 +135,9 @@ class HospitalController extends Controller
     public function storeUserInlineUpdate(Request $request, $id)
     {
 
-        $ids = json_decode($request->get('store_id'));
+        $ids = $request->get('store_id');
         $entity = UserModel::find($id);
-        if ($ids && is_array($ids)) {
+        if ($ids && is_array($ids) && $entity) {
             // Remove warehouses that are not selected anymore
             UserWarehouseModel::where('user_id', $id)
                 ->whereNotIn('warehouse_id', $ids)
@@ -151,7 +151,7 @@ class HospitalController extends Controller
                         'warehouse_id' => $storeId,
                     ],
                     [
-                        'status' => true,
+                        'is_status' => true,
                         'updated_at' => now(),
                     ]
                 );

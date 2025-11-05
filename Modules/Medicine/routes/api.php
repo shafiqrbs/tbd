@@ -7,6 +7,7 @@ use Modules\Core\App\Http\Middleware\LogRequestResponse;
 use Modules\Medicine\App\Http\Controllers\MedicineController;
 use Modules\Medicine\App\Http\Controllers\MedicineStockController;
 use Modules\Medicine\App\Http\Controllers\PurchaseController;
+use Modules\Medicine\App\Http\Controllers\StockTransferController;
 
 /*
     |--------------------------------------------------------------------------
@@ -39,6 +40,11 @@ Route::prefix('/pharmacy')->middleware([HeaderAuthenticationMiddleware::class,Lo
         Route::get('receive/{id}', [PurchaseController::class, 'receive'])->name('receive');
         Route::apiResource('', PurchaseController::class)
             ->parameters(['' => 'id']);
+    });
+
+    Route::prefix('stock-transfer')->name('stock-transfer.')->group(function () {
+        Route::get('approve/{id}', [StockTransferController::class, 'approve']);
+        Route::apiResource('', StockTransferController::class)->parameters(['' => 'id']);
     });
 
     Route::get('/stock-item/matrix', [MedicineStockController::class,'stockItemMatrix'])->name('get_stock_item_matrix');

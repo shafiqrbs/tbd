@@ -3,13 +3,10 @@
 namespace Modules\Core\App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Builder;
 
 
 class UserWarehouseModel extends Model
 {
-    use HasFactory;
 
     protected $table = 'cor_user_warehouse';
     public $timestamps = true;
@@ -17,7 +14,8 @@ class UserWarehouseModel extends Model
     protected $fillable = [
         'user_id',
         'warehouse_id',
-        'max_discount'
+        'max_discount',
+        'is_status',
     ];
     protected $dates = ['created_at'];
 

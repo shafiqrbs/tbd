@@ -9,13 +9,8 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
 use Modules\Core\App\Models\UserModel;
-use Modules\Core\App\Models\WarehouseModel;
-use Modules\Inventory\App\Http\Requests\StockTransferRequest;
-use Modules\Inventory\App\Models\ConfigModel;
-use Modules\Inventory\App\Models\CurrentStockModel;
-use Modules\Inventory\App\Models\StockItemHistoryModel;
-use Modules\Inventory\App\Models\StockItemModel;
-use Modules\Inventory\App\Models\StockTransferModel;
+use Modules\Medicine\App\Http\Requests\StockTransferRequest;
+use Modules\Medicine\App\Models\StockTransferModel;
 use Symfony\Component\HttpFoundation\Response as ResponseAlias;
 use Throwable;
 
@@ -32,25 +27,6 @@ class StockTransferController extends Controller
         }
     }
 
-    public function getItemsForTransfer(Request $request)
-    {
-        $findWarehouseEnable = ConfigModel::where('domain_id', $this->domain['domain_id'])->value('sku_warehouse');
-
-        if (!$findWarehouseEnable) {
-            return response()->json(['status' => ResponseAlias::HTTP_BAD_REQUEST, 'message' => 'Warehouse not enable.']);
-        }
-
-        $getWarehouseIds = WarehouseModel::where('domain_id', $this->domain['domain_id'])->where('status', 1)->where('is_delete', 0)->pluck('id')->toArray();
-
-        if (count($getWarehouseIds) == 0) {
-            return response()->json(['status' => ResponseAlias::HTTP_NOT_FOUND, 'message' => 'Warehouse not found.']);
-        }
-
-        $items = CurrentStockModel::getItemsForTransfer($this->domain, $getWarehouseIds);
-        return response()->json(['status' => ResponseAlias::HTTP_OK, 'message' => 'Warehouse wise data found.', 'items' => $items]);
-    }
-
-
     /**
      * Store a newly created resource in storage.
      */
@@ -60,8 +36,7 @@ class StockTransferController extends Controller
 
         $input['process'] = "Created";
         $input['config_id'] = $this->domain['config_id'];
-        $input['created_by_id'] = $this->domain['user_id'];
-
+        $input['from_warehouse_id'] = $this->domain['warehouse_id'];
 
         DB::beginTransaction();
         try {
@@ -93,6 +68,65 @@ class StockTransferController extends Controller
         $response->setStatusCode(ResponseAlias::HTTP_OK);
         return $response;
     }
+
+    /**
+     * show the specified resource from storage.
+     */
+    public function show($id)
+    {
+        $findStockTransfer = StockTransferModel::getDetails($id);
+        if (!$findStockTransfer) {
+            return response()->json(['status' => 400, 'message' => 'Data not found.']);
+        }
+        return response()->json(['status' => 200, 'message' => 'Data found successfully.','data' => $findStockTransfer]);
+    }
+
+    public function update(StockTransferRequest $request, $id)
+    {
+        $input = $request->validated();
+
+        $data['process'] = "Created";
+        $data['to_warehouse_id'] = $input['to_warehouse_id'];
+
+        DB::beginTransaction();
+        try {
+            // Fetch stock transfer record safely
+            $stockTransfer = StockTransferModel::lockForUpdate()->findOrFail($id);
+
+            // Remove old items in one query
+            $stockTransfer->stockTransferItems()->delete();
+
+            // Update parent record
+            $stockTransfer->update($data);
+
+            // Insert new transfer items if provided
+            if (!empty($input['items'])) {
+                StockTransferModel::insertStockTransferItems(
+                    $stockTransfer,
+                    $input['items'],
+                    $this->domain['config_id']
+                );
+            }
+
+            DB::commit();
+
+            return response()->json([
+                'status'  => 200,
+                'message' => 'Stock transfer updated successfully.',
+            ]);
+
+        } catch (Throwable $e) {
+            DB::rollBack();
+            report($e);
+
+            return response()->json([
+                'status'  => 500,
+                'message' => 'An error occurred while updating the stock transfer.',
+                'error'   => $e->getMessage(),
+            ], 500);
+        }
+    }
+
 
     /**
      * Remove the specified resource from storage.
