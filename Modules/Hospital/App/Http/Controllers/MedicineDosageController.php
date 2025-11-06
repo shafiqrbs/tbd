@@ -72,7 +72,7 @@ class MedicineDosageController extends Controller
     public function show($id)
     {
 
-        $entity = ParticularModel::with(['particularDetails','particularDetails.patientMode','particularDetails.paymentMode','particularDetails.genderMode','particularDetails.roomNo','particularDetails.cabinMode'])->find($id);
+        $entity = MedicineDosageModel::find($id);
         if (!$entity) {
             $entity = 'Data not found';
         }
@@ -86,7 +86,7 @@ class MedicineDosageController extends Controller
      */
     public function edit($id)
     {
-        $entity = ParticularModel::find($id);
+        $entity = MedicineDosageModel::find($id);
         $status = $entity ? Response::HTTP_OK : Response::HTTP_NOT_FOUND;
         return response()->json([
             'message' => 'success',
@@ -99,11 +99,11 @@ class MedicineDosageController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(InvestigationReportRequest $request, $id)
+    public function update(MedicineDosageRequest $request, $id)
     {
 
         $input = $request->validated();
-        $entity = InvestigationReportFormatModel::find($id);
+        $entity = MedicineDosageModel::find($id);
         $entity->update($input);
         $service = new JsonRequestResponse();
         return $service->returnJosnResponse($entity);

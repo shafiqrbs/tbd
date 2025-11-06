@@ -60,7 +60,7 @@ class MedicineDosage
     /**
      * @var string
      *
-     * @ORM\Column(name="continue_mode", type="string", length=20, nullable=true,options={"default"="stat"})
+     * @ORM\Column(name="continue_mode", type="string", length=20, nullable=true,options={"default"="Stat"})
      * Stat|sos
      */
     private $continueMode;

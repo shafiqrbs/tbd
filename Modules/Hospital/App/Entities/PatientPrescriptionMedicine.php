@@ -69,6 +69,13 @@ class PatientPrescriptionMedicine
      /**
      * @var string
      *
+     * @ORM\Column(name="opd_quantity", type="string", length=100, nullable=true)
+     */
+    private $opdQuantity;
+
+     /**
+     * @var string
+     *
      * @ORM\Column(name="quantity", type="string", length=100, nullable=true)
      */
     private $quantity;
@@ -160,7 +167,7 @@ class PatientPrescriptionMedicine
     /**
      * @var string
      *
-     * @ORM\Column(name="continue_mode", type="string", length=20, nullable=true,options={"default"="stat"})
+     * @ORM\Column(name="continue_mode", type="string", length=20, nullable=true,options={"default"="Stat"})
      * Stat|sos
      */
     private $continueMode;
