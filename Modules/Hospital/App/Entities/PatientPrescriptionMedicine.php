@@ -22,6 +22,12 @@ class PatientPrescriptionMedicine
     private $id;
 
     /**
+     * @ORM\ManyToOne(targetEntity="Invoice")
+     * @ORM\JoinColumn(onDelete="CASCADE")
+     **/
+    private $hmsInvoice;
+
+     /**
      * @ORM\ManyToOne(targetEntity="Prescription")
      * @ORM\JoinColumn(onDelete="CASCADE")
      **/
@@ -29,6 +35,13 @@ class PatientPrescriptionMedicine
 
     /**
      * @ORM\ManyToOne(targetEntity="Modules\Inventory\App\Entities\StockItem")
+     * @ORM\JoinColumn(name="stock_item_id", referencedColumnName="id", nullable=true, onDelete="cascade")
+     **/
+    private $stockItem;
+
+
+     /**
+     * @ORM\ManyToOne(targetEntity="MedicineDetails")
      * @ORM\JoinColumn(name="medicine_id", referencedColumnName="id", nullable=true, onDelete="cascade")
      **/
     private $medicine;
@@ -39,6 +52,12 @@ class PatientPrescriptionMedicine
      * @ORM\JoinColumn(name="medicine_dosage_id", referencedColumnName="id", nullable=true, onDelete="cascade")
      **/
     private $medicineDosage;
+
+     /**
+     * @ORM\ManyToOne(targetEntity="Modules\Hospital\App\Entities\MedicineDosage")
+     * @ORM\JoinColumn(name="medicine_bymeal_id", referencedColumnName="id", nullable=true, onDelete="cascade")
+     **/
+    private $medicineBymeal;
 
     /**
      * @var string
@@ -61,12 +80,104 @@ class PatientPrescriptionMedicine
      */
     private $medicineName;
 
+     /**
+     * @var string
+     *
+     * @ORM\Column(type="string", length=255, nullable=true)
+     */
+    private $company;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(type="string", length=255, nullable=true)
+     */
+    private $byMeal;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(type="string", length=255, nullable=true)
+     */
+    private $byMealBn;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(type="string", length=255, nullable=true)
+     */
+    private $doseDetails;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(type="string", length=255, nullable=true)
+     */
+    private $doseDetailsBn;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(type="string", length=255, nullable=true)
+     */
+    private $generic;
+
+    /**
+     * @var integer
+     *
+     * @ORM\Column(type="integer",  nullable=true)
+     */
+    private $genericId;
+
     /**
      * @var boolean
      *
      * @ORM\Column(type="boolean",options={"default"="false"})
      */
     private $isStock;
+
+    /**
+     * @var boolean
+     *
+     * @ORM\Column(type="boolean",options={"default"="true"})
+     */
+    private $ipdStatus;
+
+    /**
+     * @var boolean
+     *
+     * @ORM\Column(type="boolean",options={"default"="true"})
+     */
+    private $opdStatus;
+
+    /**
+     * @var boolean
+     *
+     * @ORM\Column(type="boolean",options={"default"="false"})
+     */
+    private $isActive;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="continue_mode", type="string", length=20, nullable=true,options={"default"="stat"})
+     * Stat|sos
+     */
+    private $continueMode;
+
+
+    /**
+     * @var \DateTime
+     * @ORM\Column(name="start_date", type="datetime", nullable=true)
+     */
+    private $startDate;
+
+    /**
+     * @var \DateTime
+     * @ORM\Column(name="end_date", type="datetime", nullable=true)
+     */
+    private $endDate;
+
 
 
     /**

@@ -45,6 +45,7 @@ class MedicineGenericModel extends Model
                         IF(medicine_brand.strength != '', CONCAT(' - ', trim(medicine_brand.strength)), '')
                     ) as name
                 "),
+                'medicine_brand.id as generic_id',
                 'medicine_generic.name as generic',
                 'medicine_brand.packSize',
                 'medicine_company.name as medicine_company',

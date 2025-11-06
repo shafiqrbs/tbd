@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\DB;
 use Modules\AppsApi\App\Services\GeneratePatternCodeService;
 use Modules\Hospital\App\Models\MedicineDetailsModel;
+use Modules\Hospital\App\Models\MedicineDosageModel;
 use Modules\Inventory\App\Entities\Particular;
 use Modules\Inventory\App\Models\CategoryModel;
 use Modules\Inventory\App\Models\ParticularModel;
@@ -86,6 +87,22 @@ class MedicineStockModel extends Model
     {
         return $this->belongsTo(ProductModel::class, 'product_id');
     }
+
+    public function stock()
+    {
+        return $this->belongsTo(StockItemModel::class, 'stock_item_id');
+    }
+
+    public function dosage()
+    {
+        return $this->belongsTo(MedicineDosageModel::class, 'medicine_dosage_id');
+    }
+
+    public function bymeal()
+    {
+        return $this->belongsTo(MedicineDosageModel::class, 'medicine_bymeal_id');
+    }
+
 
     public static function getCategoryStock($domain,$category){
 

@@ -73,11 +73,13 @@ class HospitalSalesModel extends Model
                 $sales = self::create($insertData);
                 $insertData = collect($jsonData->medicines)
                     ->map(function ($medicine) use ($sales, $date) {
-                        if (StockItemModel::find($medicine->medicine_id)) {
+                        $medicineDetails = MedicineDetailsModel::find($medicine->medicine_id);
+                        if ($medicineDetails) {
+                            $medicine = $medicineDetails->medicineStock;
                             return [
                                 'sale_id' => $sales->id,
-                                'name' => $medicine->generic, // notice key: medicine_name not medicineName
-                                'stock_item_id' => $medicine->medicine_id ?? null,
+                                'name' => $medicine->product->name ?? null, // notice key: medicine_name not medicineName
+                                'stock_item_id' => $medicine->stock_item_id ?? null,
                                 'quantity' => $medicine->opd_quantity ?? 0,
                                 'price' => $medicine->price ?? 0,
                                 'created_at' => $date,
@@ -96,19 +98,20 @@ class HospitalSalesModel extends Model
                 );
 
             } else {
-
                 SalesItemModel::where('sale_id', $prescription->sale_id)->forceDelete();
                 $sales = self::find($prescription->sale_id);
                 collect($medicines)->map(function ($medicine) use ($sales, $date) {
-                    if (StockItemModel::find($medicine->medicine_id)) {
+                    $medicineDetails = MedicineDetailsModel::find($medicine->medicine_id);
+                    if ($medicineDetails) {
+                        $medicine = $medicineDetails->medicineStock;
                         SalesItemModel::updateOrCreate(
                             [
                                 'sale_id' => $sales->id,
-                                'stock_item_id' => $medicine->medicine_id ?? null,
+                                'stock_item_id' =>  $medicine->stock_item_id ?? null,
                                  // unique keys
                             ],
                             [
-                                'name' => $medicine->generic ?? null,
+                                'name' => $medicine->product->name ?? null,
                                 'quantity' => $medicine->opd_quantity ?? 0,
                                 'price' => $medicine->price ?? 0,
                                 'updated_at' => $date,

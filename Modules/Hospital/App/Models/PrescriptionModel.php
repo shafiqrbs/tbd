@@ -57,6 +57,11 @@ class PrescriptionModel extends Model
         return $this->hasMany(InvoiceParticularModel::class, 'hms_invoice_id');
     }
 
+     public function prescription_medicine()
+    {
+        return $this->hasMany(PatientPrescriptionMedicineModel::class, 'hms_invoice_id');
+    }
+
     public static function getRecords($request,$domain)
     {
         $page =  isset($request['page']) && $request['page'] > 0?($request['page'] - 1 ) : 0;
@@ -342,6 +347,7 @@ class PrescriptionModel extends Model
                     'hms_invoice_particular.price',
                 ]);
             }])
+            ->with(['prescription_medicine'])
             ->first();
 
         return $entity;

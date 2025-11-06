@@ -57,6 +57,14 @@ class MedicineDosage
      */
     private $mode;
 
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="continue_mode", type="string", length=20, nullable=true,options={"default"="stat"})
+     * Stat|sos
+     */
+    private $continueMode;
+
 
     /**
      * @var float

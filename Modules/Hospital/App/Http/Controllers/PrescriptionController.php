@@ -26,6 +26,7 @@ use Modules\Hospital\App\Models\OPDModel;
 use Modules\Hospital\App\Models\ParticularModel;
 use Modules\Hospital\App\Models\ParticularModeModel;
 use Modules\Hospital\App\Models\PatientModel;
+use Modules\Hospital\App\Models\PatientPrescriptionMedicineModel;
 use Modules\Hospital\App\Models\PrescriptionModel;
 
 
@@ -130,11 +131,11 @@ class PrescriptionController extends Controller
         $data['json_content'] = json_encode($data);
         $data['prescribe_doctor_id'] = $domain['user_id'];
         $entity->update($data);
-        $return = PrescriptionModel::getShow($entity->id);
+        PatientPrescriptionMedicineModel::insertPatientMedicine($domain,$entity->id);
         HospitalSalesModel::insertMedicineDelivery($domain,$entity->id);
         InvoiceTransactionModel::insertInvestigations($domain,$entity->id);
         InvoiceContentDetailsModel::insertContentDetails($domain,$entity->id);
-
+        $return = PrescriptionModel::getShow($entity->id);
         $service = new JsonRequestResponse();
         return $service->returnJosnResponse($return);
 
