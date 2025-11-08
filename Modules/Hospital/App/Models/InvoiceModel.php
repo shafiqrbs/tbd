@@ -502,6 +502,7 @@ class InvoiceModel extends Model
                 'admit_department.name as admit_department_name',
                 'admit_doctor.name as admit_doctor_name',
                 'prescription.id as prescription_id',
+                'prescription.uid as prescription_uid',
                 'prescription_doctor.name as prescription_doctor_name',
                 'admission_patient.vital_chart_json as vital_chart_json',
                 'admission_patient.insulin_chart_json as insulin_chart_json',
