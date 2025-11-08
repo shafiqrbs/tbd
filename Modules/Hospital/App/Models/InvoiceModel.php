@@ -498,7 +498,7 @@ class InvoiceModel extends Model
                 'createdBy.username as created_by_user_name',
                 'createdBy.name as created_by_name',
                 'createdBy.id as created_by_id',
-                'room.name as room_name',
+                'room.display_name as room_name',
                 'patient_mode.name as mode_name',
                 'particular_payment_mode.name as payment_mode_name',
                 'hms_invoice.process as process',

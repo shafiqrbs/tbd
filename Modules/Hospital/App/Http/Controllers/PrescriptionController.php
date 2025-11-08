@@ -131,7 +131,8 @@ class PrescriptionController extends Controller
         $data['json_content'] = json_encode($data);
         $data['prescribe_doctor_id'] = $domain['user_id'];
         $entity->update($data);
-        $entity->invoice->update(['is_prescription' => 1]);
+        $weight = $data['weight'] ?? null;
+        $entity->invoice->update(['is_prescription' => 1,'weight' => $weight]);
         PatientPrescriptionMedicineModel::insertPatientMedicine($domain,$entity->id);
         HospitalSalesModel::insertMedicineDelivery($domain,$entity->id);
         InvoiceTransactionModel::insertInvestigations($domain,$entity->id);

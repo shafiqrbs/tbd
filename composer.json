@@ -30,7 +30,8 @@
         "spatie/laravel-query-builder": "^5.7",
         "symfony/doctrine-bridge": "^6.4",
         "tecnickcom/tcpdf": "^6.10",
-        "torann/geoip": "^3.0"
+        "torann/geoip": "^3.0",
+        "tymon/jwt-auth": "^2.2"
     },
 
     "require-dev": {
