@@ -547,6 +547,7 @@ class IpdModel extends Model
         return $entities;
     }
 
+
     public static function getVisitingRooms($domain)
     {
         $entities = ParticularModel::where([
@@ -579,7 +580,20 @@ class IpdModel extends Model
         return array('ipdRooms' => $entities ,'selectedRoom' => $selected);
     }
 
-
-
+    public static function patientChart($entity,$data)
+    {
+        $date = new \DateTime('now');
+        AdmissionPatientModel::updateOrCreate(
+            [
+                'hms_invoice_id'             => $entity,
+            ],
+            [
+                'vital_chart_json'       => json_encode($data['vital_chart_json']) ?? null,
+                'insulin_chart_json'       => json_encode($data['insulin_chart_json']) ?? null,
+                'updated_at'    => $date,
+                'created_at'    => $date,
+            ]
+        );
+    }
 
 }

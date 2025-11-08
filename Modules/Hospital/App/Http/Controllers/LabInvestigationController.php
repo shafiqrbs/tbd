@@ -103,6 +103,19 @@ class LabInvestigationController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
+    public function barcodeConfirm($id)
+    {
+        $service = new JsonRequestResponse();
+        InvoiceParticularModel::where('id', $id)->update([
+            'sample_collected_by_id' => $this->domain['user_id'],
+            'collection_date' => now(),
+        ]);
+        return  $service->returnJosnResponse('valid');
+    }
+
+    /**
+     * Show the form for editing the specified resource.
+     */
     public function report($id,$reportId)
     {
         $service = new JsonRequestResponse();
@@ -120,7 +133,7 @@ class LabInvestigationController extends Controller
         $service = new JsonRequestResponse();
         $invoiceParticular = InvoiceParticularModel::with(['reports','particular:id,slug,lab_room_id,is_custom_report,instruction,slug,category_id','particular.category:id,name','custom_report'])->find($id);
         $entity = InvoiceModel::getInvoiceBasicInfo($invoiceParticular->hms_invoice_id);
-        $data = ['entity'=>$entity,'invoiceParticular'=>$invoiceParticular];
+        $data = ['entity'=>$entity,'invoiceParticular' => $invoiceParticular];
         return  $service->returnJosnResponse($data);
     }
 

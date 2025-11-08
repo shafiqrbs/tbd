@@ -27,6 +27,22 @@ class StockTransferController extends Controller
         }
     }
 
+    public function index(Request $request)
+    {
+        $data = StockTransferModel::getRecords($request, $this->domain);
+        $response = new Response();
+        $response->headers->set('Content-Type', 'application/json');
+        $response->setContent(json_encode([
+            'message' => 'success',
+            'status' => ResponseAlias::HTTP_OK,
+            'total' => $data['count'],
+            'data' => $data['entities']
+        ]));
+        $response->setStatusCode(ResponseAlias::HTTP_OK);
+        return $response;
+    }
+
+
     /**
      * Store a newly created resource in storage.
      */
@@ -54,20 +70,6 @@ class StockTransferController extends Controller
         }
     }
 
-    public function index(Request $request)
-    {
-        $data = StockTransferModel::getRecords($request, $this->domain);
-        $response = new Response();
-        $response->headers->set('Content-Type', 'application/json');
-        $response->setContent(json_encode([
-            'message' => 'success',
-            'status' => ResponseAlias::HTTP_OK,
-            'total' => $data['count'],
-            'data' => $data['entities']
-        ]));
-        $response->setStatusCode(ResponseAlias::HTTP_OK);
-        return $response;
-    }
 
     /**
      * show the specified resource from storage.
@@ -133,10 +135,10 @@ class StockTransferController extends Controller
      */
     public function destroy($id)
     {
-        $findStockTransfer = StockTransferModel::find($id);
+        $findStockTransfer = StockTransferModel::where('uid',$id)->first();
         if ($findStockTransfer->process == "Created") {
             $findStockTransfer->delete();
-            return response()->json(['status' => 200, 'message' => 'Delete successfully.']);
+            return response()->json(['status' => 200, 'message' =>'Delete successfully.']);
         }
         return response()->json(['status' => 400, 'message' => 'Approved data']);
     }
@@ -147,7 +149,9 @@ class StockTransferController extends Controller
             DB::transaction(function () use ($id) {
 
                 //Load the stock transfer with related items
-                $findStockTransfer = StockTransferModel::with('stockTransferItems')->findOrFail($id);
+                $findStockTransfer = StockTransferModel::with('stockTransferItems')
+                    ->where('uid', $id)
+                    ->firstOrFail();
 
                 $fromWarehouse = $findStockTransfer->from_warehouse_id;
                 $toWarehouse = $findStockTransfer->to_warehouse_id;
@@ -238,6 +242,7 @@ class StockTransferController extends Controller
                 //Update stock transfer status
                 $findStockTransfer->update([
                     'process' => 'Approved',
+                    'approved_date' => new \DateTime('now'),
                     'approved_by_id' => $this->domain['user_id'],
                 ]);
             });

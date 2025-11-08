@@ -22,6 +22,25 @@ class StockTransfer
      */
     private $id;
 
+    /**
+     * @var string
+     *
+     * @ORM\Column(type="string", length=20, nullable=true)
+     */
+    private $uid;
+
+    /**
+     * @var string
+     * @ORM\Column(name="invoice", type="string", length=255, nullable=true)
+     */
+    private $invoice;
+
+    /**
+     * @var integer
+     *
+     * @ORM\Column(name="code", type="integer",  nullable=true)
+     */
+    private $code;
 
     /**
      * @ORM\ManyToOne(targetEntity="Modules\Inventory\App\Entities\Config")
@@ -49,6 +68,15 @@ class StockTransfer
      **/
     private  $approvedBy;
 
+    /**
+     * @ORM\ManyToOne(targetEntity="Modules\Core\App\Entities\User")
+     **/
+    private  $issuedBy;
+
+    /**
+     * @ORM\ManyToOne(targetEntity="Modules\Core\App\Entities\User")
+     **/
+    private  $receivedBy;
 
     /**
      * @var string
@@ -78,6 +106,24 @@ class StockTransfer
      * @ORM\Column(name="updated_at", type="datetime",nullable=true)
      */
     private $updatedAt;
+
+    /**
+     * @var \DateTime
+     * @ORM\Column(type="datetime",nullable=true)
+     */
+    private $approvedDate;
+
+    /**
+     * @var \DateTime
+     * @ORM\Column(type="datetime",nullable=true)
+     */
+    private $issuedDate;
+
+    /**
+     * @var \DateTime
+     * @ORM\Column(type="datetime",nullable=true)
+     */
+    private $receivedDate;
 
 
 

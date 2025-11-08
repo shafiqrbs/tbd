@@ -24,6 +24,12 @@ class Requisition
      */
     private $id;
 
+    /**
+     * @var string
+     *
+     * @ORM\Column(type="string", length=20, nullable=true)
+     */
+    private $uid;
 
     /**
      * @ORM\ManyToOne(targetEntity="Modules\Inventory\App\Entities\Config" , cascade={"detach","merge"} )

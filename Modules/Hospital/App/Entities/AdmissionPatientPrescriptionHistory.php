@@ -7,10 +7,10 @@ use Gedmo\Mapping\Annotation as Gedmo;
 /**
  * InvoiceParticular
  *
- * @ORM\Table( name = "hms_patient_prescription_history")
+ * @ORM\Table( name = "hms_admission_patient_prescription_history")
  * @ORM\Entity()
  */
-class PatientPrescriptionHistory
+class AdmissionPatientPrescriptionHistory
 {
     /**
      * @var integer
@@ -40,18 +40,6 @@ class PatientPrescriptionHistory
      **/
     private $createdBy;
 
-    /**
-     * @ORM\ManyToOne(targetEntity="Modules\Core\App\Entities\User")
-     * @ORM\JoinColumn(onDelete="CASCADE")
-     **/
-    private $prescribeDoctor;
-
-    /**
-     * @ORM\ManyToOne(targetEntity="Particular")
-     * @ORM\JoinColumn(onDelete="CASCADE")
-     **/
-    private $doctor;
-
 
     /**
      * @var $jsonContent
@@ -61,12 +49,6 @@ class PatientPrescriptionHistory
     private $jsonContent;
 
 
-    /**
-     * @var string
-     *
-     * @ORM\Column(name="process", type="string", length=30, nullable=true)
-     */
-    private $process ='In-progress';
 
      /**
      * @var \DateTime

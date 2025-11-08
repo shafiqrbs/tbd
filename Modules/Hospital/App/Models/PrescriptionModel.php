@@ -57,7 +57,7 @@ class PrescriptionModel extends Model
         return $this->hasMany(InvoiceParticularModel::class, 'hms_invoice_id');
     }
 
-     public function prescription_medicine()
+    public function prescription_medicine()
     {
         return $this->hasMany(PatientPrescriptionMedicineModel::class, 'hms_invoice_id');
     }

@@ -23,6 +23,12 @@ class Purchase
      */
     private $id;
 
+    /**
+     * @var string
+     *
+     * @ORM\Column(type="string", length=20, nullable=true)
+     */
+    private $uid;
 
     /**
      * @ORM\ManyToOne(targetEntity="Modules\Inventory\App\Entities\Config" , cascade={"detach","merge"} )
@@ -227,7 +233,7 @@ class Purchase
     private $updatedAt;
 
     /**
-     * @var \Date
+     * @var \DateTime
      * @ORM\Column(type="date", nullable=true)
      */
     private $invoiceDate;
@@ -239,7 +245,7 @@ class Purchase
     private  $receivedBy;
 
     /**
-     * @var \Date
+     * @var \DateTime
      * @ORM\Column(type="date", nullable=true)
      */
     private $receivedDate;

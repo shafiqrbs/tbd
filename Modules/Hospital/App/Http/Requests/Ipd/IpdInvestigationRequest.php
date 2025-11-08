@@ -1,6 +1,8 @@
 <?php
 
-namespace Modules\Hospital\App\Http\Ipd\Requests;
+namespace Modules\Hospital\App\Http\Requests\Ipd;
+
+
 
 
 use Illuminate\Foundation\Http\FormRequest;

@@ -18,6 +18,8 @@ use Modules\Hospital\App\Entities\Prescription;
 use Modules\Hospital\App\Http\Requests\IpdRequest;
 use Modules\Hospital\App\Http\Requests\OPDRequest;
 use Modules\Hospital\App\Http\Requests\ReferredRequest;
+use Modules\Hospital\App\Models\AdmissionPatientPrescriptionHistory;
+use Modules\Hospital\App\Models\AdmissionPatientPrescriptionHistoryModel;
 use Modules\Hospital\App\Models\HospitalConfigModel;
 use Modules\Hospital\App\Models\HospitalSalesModel;
 use Modules\Hospital\App\Models\InvoiceContentDetailsModel;
@@ -130,6 +132,7 @@ class IpdController extends Controller
         return $data;
     }
 
+
     /**
      * Show the form for editing the specified resource.
      */
@@ -213,6 +216,36 @@ class IpdController extends Controller
         $service = new JsonRequestResponse();
         return $service->returnJosnResponse($entity);
     }
+
+    /**
+     * Update the specified resource in storage.
+     */
+    public function patientChart(Request $request, $id)
+    {
+        $data = $request->all();
+        $entity = IpdModel::patientChart($id,$data);
+        $service = new JsonRequestResponse();
+        return $service->returnJosnResponse('success');
+    }
+
+    /**
+     * Show the specified resource.
+     */
+    public function efreshOrder($id)
+    {
+
+        $entity = InvoiceModel::where('uid',$id)->first();
+        if (!$entity){
+            $entity = 'not_found';
+        }
+        $prescription = PrescriptionModel::where('hms_invoice_id',$entity->id)->first();
+        $data = $prescription->json_content;
+        AdmissionPatientPrescriptionHistoryModel::insert($this->domain,$entity->id,$data);
+        $service = new JsonRequestResponse();
+        $data = $service->returnJosnResponse($entity);
+        return $data;
+    }
+
 
 
     /**

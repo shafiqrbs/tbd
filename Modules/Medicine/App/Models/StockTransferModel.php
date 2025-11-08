@@ -5,6 +5,8 @@ namespace Modules\Medicine\App\Models;
 use DateTime;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
+use Modules\AppsApi\App\Services\GeneratePatternCodeService;
+use Modules\Core\App\Models\UserModel;
 
 class StockTransferModel extends Model
 {
@@ -17,12 +19,27 @@ class StockTransferModel extends Model
         'config_id', 'from_warehouse_id', 'to_warehouse_id', 'created_by_id', 'notes', 'process', 'approved_by_id'
     ];
 
+    public static function generateUniqueCode($length = 12)
+    {
+        do {
+            // Generate a random 12-digit number
+            $code = str_pad(random_int(0, 999999999999), 12, '0', STR_PAD_LEFT);
+        } while (self::where('uid', $code)->exists());
+        return $code;
+    }
+
     public static function boot()
     {
         parent::boot();
         self::creating(function ($model) {
             $date = new DateTime("now");
             $model->created_at = $date;
+            $codes = self::invoiceEventListener($model);
+            $model->invoice = $codes['generateId'];
+            $model->code = $codes['code'];
+            if (empty($model->uid)) {
+                $model->uid = self::generateUniqueCode(12);
+            }
         });
 
         self::updating(function ($model) {
@@ -30,6 +47,17 @@ class StockTransferModel extends Model
             $model->updated_at = $date;
         });
     }
+
+    public static function invoiceEventListener($model): array
+    {
+        $patternCodeService = app(GeneratePatternCodeService::class);
+        return $patternCodeService->invoiceNo([
+            'config' => $model->config_id,
+            'table'  => 'inv_stock_transfer',
+            'prefix' => 'IND-',
+        ]);
+    }
+
 
 
     public function stockTransferItems()
@@ -44,6 +72,12 @@ class StockTransferModel extends Model
         $perPage = !empty($request['offset']) ? (int)$request['offset'] : 50;
         $skip = $page * $perPage;
 
+        $stores = UserModel::getUserActiveWarehouse($domain['user_id']);
+        $arrs = [];
+        foreach ($stores as $store):
+            $arrs[] = $store->id;
+        endforeach;
+
         // Base query
         $entities = self::where('inv_stock_transfer.config_id', $domain['config_id'])
             ->leftJoin('users as createdBy', 'createdBy.id', '=', 'inv_stock_transfer.created_by_id')
@@ -52,6 +86,8 @@ class StockTransferModel extends Model
             ->join('cor_warehouses as tw', 'tw.id', '=', 'inv_stock_transfer.to_warehouse_id')
             ->select([
                 'inv_stock_transfer.id',
+                'inv_stock_transfer.uid',
+                'inv_stock_transfer.invoice',
                 'inv_stock_transfer.config_id',
                 'inv_stock_transfer.from_warehouse_id',
                 'fw.name as from_warehouse',
@@ -97,9 +133,7 @@ class StockTransferModel extends Model
         }
 
         // 🏭 To warehouse filter
-        if (!empty($request['to_warehouse_id'])) {
-            $entities->where('inv_stock_transfer.to_warehouse_id', $request['to_warehouse_id']);
-        }
+        $entities->whereIn('inv_stock_transfer.to_warehouse_id', $arrs);
 
         // 📅 Date range filter
         if (!empty($request['start_date'])) {
@@ -127,7 +161,7 @@ class StockTransferModel extends Model
     }
     public static function getDetails($id)
     {
-        $entities = self::where('inv_stock_transfer.id',$id)
+        $entities = self::where('inv_stock_transfer.uid',$id)
             ->leftJoin('users as createdBy', 'createdBy.id', '=', 'inv_stock_transfer.created_by_id')
             ->leftJoin('users as approveBy', 'approveBy.id', '=', 'inv_stock_transfer.approved_by_id')
             ->join('cor_warehouses as fw', 'fw.id', '=', 'inv_stock_transfer.from_warehouse_id')

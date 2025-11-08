@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Modules\Core\App\Models\CustomerModel;
+use Modules\Hospital\App\Entities\PatientPrescriptionMedicineDailyHistory;
 use Modules\Inventory\App\Models\SalesModel;
 
 
@@ -96,6 +97,16 @@ class InvoiceModel extends Model
     public function children()
     {
         return $this->hasOne(InvoiceModel::class, 'parent_id');
+    }
+
+    public function prescription_medicine()
+    {
+        return $this->hasMany(PatientPrescriptionMedicineModel::class, 'hms_invoice_id');
+    }
+
+    public function prescription_medicine_history()
+    {
+        return $this->hasMany(AdmissionPatientPrescriptionHistoryModel::class, 'hms_invoice_id');
     }
 
     public static function getCustomerSearch($domain,$request)
@@ -358,7 +369,7 @@ class InvoiceModel extends Model
                     'hms_invoice_particular.quantity',
                     'hms_invoice_particular.price',
                 ]);
-            }])
+            }])->with(['prescription_medicine'])
             ->first();
 
         return $entity;
@@ -423,7 +434,7 @@ class InvoiceModel extends Model
                 'particular_payment_mode.slug as payment_mode_slug',
                 'hms_invoice.process as process',
                 'hms_invoice.referred_mode as referred_mode',
-            ])->with(['children:id'])->first();
+            ])->with(['children:id'])->with(['prescription_medicine'])->first();
 
         return $entity;
     }
@@ -436,6 +447,7 @@ class InvoiceModel extends Model
             ->leftjoin('cor_customers','cor_customers.id','=','hms_invoice.customer_id')
             ->leftjoin('users as createdBy','createdBy.id','=','hms_invoice.created_by_id')
             ->leftjoin('hms_prescription as prescription','prescription.hms_invoice_id','=','hms_invoice.id')
+            ->leftjoin('hms_admission_patient_details as admission_patient','admission_patient.hms_invoice_id','=','hms_invoice.id')
             ->leftjoin('users as prescription_doctor','prescription_doctor.id','=','prescription.created_by_id')
             ->leftjoin('hms_particular as room','room.id','=','hms_invoice.room_id')
             ->leftjoin('hms_particular_mode as patient_mode','patient_mode.id','=','hms_invoice.patient_mode_id')
@@ -491,6 +503,8 @@ class InvoiceModel extends Model
                 'admit_doctor.name as admit_doctor_name',
                 'prescription.id as prescription_id',
                 'prescription_doctor.name as prescription_doctor_name',
+                'admission_patient.vital_chart_json as vital_chart_json',
+                'admission_patient.insulin_chart_json as insulin_chart_json',
             ])
             ->with(['invoice_particular' => function ($query) {
                 $query->select([
@@ -512,7 +526,7 @@ class InvoiceModel extends Model
                     'hms_invoice_transaction.process',
                     DB::raw('DATE_FORMAT(hms_invoice_transaction.created_at, "%d-%m-%y") as created'),
                 ])->orderBy('hms_invoice_transaction.created_at','DESC');
-            }])
+            }])->with(['prescription_medicine'])->with('prescription_medicine_history')
             ->first();
 
         return $entity;

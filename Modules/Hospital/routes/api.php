@@ -165,6 +165,8 @@ Route::prefix('/hospital')->middleware([HeaderAuthenticationMiddleware::class])-
             'update' => 'ipd.update',
             'destroy' => 'ipd.destroy',
         ]);
+    Route::get('/ipd/efresh-order/{id}', [IpdController::class,'efreshOrder'])->name('ipd_efreshOrder');
+    Route::post('/ipd/patient-chart/{id}', [IpdController::class,'patientChart'])->name('ipd_data_process');
     Route::post('/ipd/data-process/{id}', [IpdController::class,'ipdDataProcess'])->name('ipd_data_process');
     Route::get('/ipd/transaction/{id}', [IpdController::class,'transaction'])->name('ipd_data_transaction');
 
@@ -194,6 +196,7 @@ Route::prefix('/hospital')->middleware([HeaderAuthenticationMiddleware::class])-
 
     Route::get('/epharma/barcode/{barcode}', [EpharamaController::class,'patientPrescription'])->name('patient_prescription');
     Route::prefix('lab-investigation')->name('lab-investigation.')->group(function () {
+        Route::get('/sample-confirm/{id}', [LabInvestigationController::class,'barcodeConfirm'])->name('barcodeConfirm_update');
         Route::get('test-reports', [LabInvestigationController::class, 'labReports'])->name('lab_reports');
         Route::apiResource('', LabInvestigationController::class)->parameters(['' => 'id']);
         Route::post('/report/inline-update/{id}', [LabInvestigationController::class,'inlineUpdate'])->name('inline_update');

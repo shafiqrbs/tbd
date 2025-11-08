@@ -32,12 +32,12 @@ class InvestigationMasterReport
     private $diagnosticReportFormats;
 
    /**
-     * @ORM\ManyToOne(targetEntity="Appstore\Bundle\HospitalBundle\Entity\Category")
+     * @ORM\ManyToOne(targetEntity="Category")
      **/
     private $category;
 
     /**
-     * @ORM\ManyToOne(targetEntity="Appstore\Bundle\HospitalBundle\Entity\Category")
+     * @ORM\ManyToOne(targetEntity="Category")
      **/
     private $department;
 

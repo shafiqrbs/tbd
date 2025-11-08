@@ -1,6 +1,6 @@
 <?php
 
-namespace Modules\Hospital\App\Http\Controllers;
+namespace Modules\Medicine\App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use Doctrine\ORM\EntityManagerInterface;

@@ -29,85 +29,33 @@ class AdmissionPatient
     private $hmsInvoice;
 
 
-    /**
-     * @ORM\ManyToOne(targetEntity="Modules\Core\App\Entities\Country")
-     * @ORM\JoinColumn(name="country_id", referencedColumnName="id", nullable=true, onDelete="SET NULL")
-     */
-    protected $country;
-
-
-     /**
-     * @ORM\ManyToOne(targetEntity="Modules\Core\App\Entities\Setting")
-     * @ORM\JoinColumn(name="religion_id", referencedColumnName="id", nullable=true, onDelete="SET NULL")
-     */
-    protected $religion;
-
-
      /**
      * @var string
      *
-     * @ORM\Column(type="text",  nullable =true)
+     * @ORM\Column( type="json",nullable = true)
      */
-    private $permanentAddress;
+    private $vitalChartJson;
 
 
     /**
      * @var string
      *
-     * @ORM\Column(type="string", length=100, nullable =true)
+     * @ORM\Column( type="json",nullable = true)
      */
-    private $fatherName;
+    private $insulinChartJson;
 
-    /**
-     * @var string
-     *
-     * @ORM\Column(type="string", length=100, nullable =true)
-     */
-    private $motherName;
-
-
-    /**
-     * @var string
-     *
-     * @ORM\Column(name="profession", type="string", length=100, nullable =true)
-     */
-    private $profession;
-
-
-    /**
-     * @var string
-     *
-     * @ORM\Column( type="string",length=100 , nullable = true)
-     */
-    private $maritalStatus;
-
-    /**
-     * @var string
-     *
-     * @ORM\Column( type="string",length=100 , nullable = true)
-     */
-    private $patientRelation;
-
-
-
-    /**
-     * @var string
-     *
-     * @ORM\Column(name="process", type="string", length=30, nullable=true)
-     */
-    private $process ='In-progress';
 
      /**
      * @var \DateTime
      * @Gedmo\Timestampable(on="create_at")
-     * @ORM\Column(name="created", type="datetime")
+     * @ORM\Column(name="created_at", type="datetime")
      */
     private $created;
 
     /**
      * @var \DateTime
      * @Gedmo\Timestampable(on="update_at")
-     * @ORM\Column(name="updated", type="datetime")
+     * @ORM\Column(name="updated_at", type="datetime")
      */
     private $updated;
 

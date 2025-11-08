@@ -38,12 +38,25 @@ class PurchaseModel extends Model
         'received_date',
     ];
 
+
+    public static function generateUniqueCode($length = 12)
+    {
+        do {
+            // Generate a random 12-digit number
+            $code = str_pad(random_int(0, 999999999999), 12, '0', STR_PAD_LEFT);
+        } while (self::where('uid', $code)->exists());
+        return $code;
+    }
+
     protected static function booted(): void
     {
         static::creating(function ($model) {
             $codes = self::salesEventListener($model);
             $model->invoice = $codes['generateId'];
             $model->code = $codes['code'];
+            if (empty($model->uid)) {
+                $model->uid = self::generateUniqueCode(12);
+            }
         });
     }
 
@@ -54,7 +67,7 @@ class PurchaseModel extends Model
         return $patternCodeService->invoiceNo([
             'config' => $model->config_id,
             'table'  => 'inv_purchase',
-            'prefix' => 'INV-',
+            'prefix' => 'GRN-',
         ]);
     }
 
@@ -122,6 +135,7 @@ class PurchaseModel extends Model
             ->leftjoin('cor_vendors', 'cor_vendors.id', '=', 'inv_purchase.vendor_id')
             ->select([
                 'inv_purchase.id',
+                'inv_purchase.uid',
                 DB::raw('DATE_FORMAT(inv_purchase.created_at, "%d-%m-%Y") as created'),
                 'inv_purchase.invoice as invoice',
                 'inv_purchase.received_by_id',
