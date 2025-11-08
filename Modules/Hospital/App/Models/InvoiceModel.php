@@ -160,6 +160,7 @@ class InvoiceModel extends Model
                 'hms_invoice.uid',
                 'hms_invoice.parent_id as parent_id',
                 'prescription.id as prescription_id',
+                'prescription.uid as prescription_uid',
                 'prescription.created_by_id as prescription_created_by_id',
                 'hms_invoice.invoice as invoice',
                 'hms_invoice.barcode  as barcode',

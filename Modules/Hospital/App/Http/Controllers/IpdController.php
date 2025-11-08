@@ -240,7 +240,7 @@ class IpdController extends Controller
         }
         $prescription = PrescriptionModel::where('hms_invoice_id',$entity->id)->first();
         $data = $prescription->json_content;
-        AdmissionPatientPrescriptionHistoryModel::insert($this->domain,$entity->id,$data);
+        AdmissionPatientPrescriptionHistoryModel::insert($this->domain,$entity->id,$prescription->id,$data);
         $service = new JsonRequestResponse();
         $data = $service->returnJosnResponse($entity);
         return $data;

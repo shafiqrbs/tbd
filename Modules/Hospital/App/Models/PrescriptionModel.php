@@ -217,7 +217,7 @@ class PrescriptionModel extends Model
         ])
             ->where(function ($query) use ($prescription) {
                 $query->where('hms_prescription.id', '<>', $prescription)
-                    ->orWhere('hms_prescription.uid', '<>', $prescription);
+                    ->where('hms_prescription.uid', '<>', $prescription);
             })
             ->join('hms_prescription','hms_prescription.hms_invoice_id','=','hms_invoice.id')
             ->leftjoin('hms_particular as vr','vr.id','=','hms_invoice.room_id')

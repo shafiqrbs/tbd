@@ -35,11 +35,12 @@ class AdmissionPatientPrescriptionHistoryModel extends Model
     }
 
 
-    public static function insert($domain,$entity,$data)
+    public static function insert($domain,$entity,$prescription,$data)
     {
         $date = new \DateTime('now');
         return self::query()->insert([
             'hms_invoice_id'  => $entity,
+            'prescription_id'  => $prescription,
             'created_by_id'   => $domain['user_id'],
             'json_content'    => $data ?? null,
             'updated_at'    => $date,
