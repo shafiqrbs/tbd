@@ -25,6 +25,7 @@ class StockItemModel extends Model
     {
         return $this->hasMany(CurrentStockModel::class, 'stock_item_id');
     }
+
     public static function getStockItemMatrix($domain, $request)
     {
         // --- Pagination
@@ -35,6 +36,7 @@ class StockItemModel extends Model
 
         // --- Base Query
         $query = self::with([
+            'product.category',
             'currentWarehouseStock' => function ($q) use ($domain) {
                 if (!empty($domain['config_id'])) {
                     $q->where('config_id', $domain['config_id']);
@@ -43,7 +45,7 @@ class StockItemModel extends Model
             }
         ])
             ->where('config_id', $domain['config_id'])
-            ->where('status', 1)
+            #->where('status', 1)
             ->where('is_delete', 0);
 
 
@@ -105,6 +107,7 @@ class StockItemModel extends Model
 
                 $data = [
                     'id' => $stock->id,
+                    'category_name' => $product->category->name ?? null,
                     'name' => $stock->display_name ?? $stock->name,
                     'product_id' => $product->id ?? null,
                     'product_code' => $product->product_code ?? null,
@@ -134,13 +137,22 @@ class StockItemModel extends Model
             ->get();
 
         // --- Response
+
         return [
-            'data' => $stockItems,
-            'warehouses' => $warehouses,
+
+            'data' => [
+                'data' => $stockItems,
+                'warehouses' => $warehouses,
+                'total' => $total,
+                'page' => $page + 1,
+                'perPage' => $perPage,
+            ],
             'total' => $total,
             'page' => $page + 1,
             'perPage' => $perPage,
+            'warehouses' => $warehouses,
         ];
     }
+
 
 }
