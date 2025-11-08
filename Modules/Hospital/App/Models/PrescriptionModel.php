@@ -41,6 +41,13 @@ class PrescriptionModel extends Model
         });
     }
 
+    public static function findByIdOrUid($id)
+    {
+        return self::where('id', $id)
+            ->orWhere('uid', $id)
+            ->first();
+    }
+
 
     public function invoice_details()
     {
