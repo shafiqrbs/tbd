@@ -207,8 +207,12 @@ class InvoiceModel extends Model
             if (!empty($request['prescription_mode'])) {
                 if ($request['prescription_mode'] === 'prescription') {
                     $entities = $entities->whereNotNull('prescription.id');
+                    $entities = $entities->where('hms_invoice.is_prescription',1);
                 } elseif ($request['prescription_mode'] === 'non-prescription') {
-                    $entities = $entities->whereNull('prescription.id');
+                    $entities = $entities->where(function ($query) {
+                        $query->whereNull('prescription.id')
+                            ->orWhere('hms_invoice.is_prescription', 0);
+                    });
                 }elseif(in_array($request['prescription_mode'],['room','admission','referred'])) {
                     $entities = $entities->where('hms_invoice.referred_mode',$request['prescription_mode']);
                 }

@@ -658,6 +658,13 @@ class Invoice
     private $isMedicineDelivered;
 
     /**
+     * @var boolean
+     *
+     * @ORM\Column(type="boolean", nullable=true, options={"default"="false"})
+     */
+    private $isPrescription;
+
+    /**
      * @var \DateTime
      *
      * @ORM\Column(type="datetime", nullable=true)

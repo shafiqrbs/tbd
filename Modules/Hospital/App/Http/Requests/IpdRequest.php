@@ -29,7 +29,8 @@ class IpdRequest extends FormRequest
             {
                 return [
                     'config_id' => 'integer|nullable',
-                    'hms_invoice_id' => 'integer|nullable',
+                    'hms_invoice_id' => 'string|nullable',
+                    'patient_mode' => 'string|nullable',
                     'room_id' => 'integer|nullable',
                 ];
             }

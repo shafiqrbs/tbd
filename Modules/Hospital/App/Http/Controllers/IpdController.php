@@ -78,8 +78,8 @@ class IpdController extends Controller
         $input = $request->validated();
         $parentInvoice = InvoiceModel::where('uid',$input['hms_invoice_id'])->first();
         DB::beginTransaction();
-
         try {
+
             $input['config_id'] = $domain['hms_config'];
             $input['parent_id'] = $parentInvoice->id;
             $input['customer_id'] = $parentInvoice->customer_id;

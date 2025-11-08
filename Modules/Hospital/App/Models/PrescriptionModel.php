@@ -69,6 +69,11 @@ class PrescriptionModel extends Model
         return $this->hasMany(PatientPrescriptionMedicineModel::class, 'hms_invoice_id');
     }
 
+    public function invoice()
+    {
+        return $this->belongsTo(InvoiceModel::class, 'hms_invoice_id');
+    }
+
     public static function getRecords($request,$domain)
     {
         $page =  isset($request['page']) && $request['page'] > 0?($request['page'] - 1 ) : 0;
@@ -207,11 +212,13 @@ class PrescriptionModel extends Model
     {
 
         $entities = InvoiceModel::where([
-            ['hms_invoice.config_id',$domain['hms_config']],
-            ['hms_invoice.customer_id',$id],
-            ['hms_prescription.id', '<>', $prescription]
-        ]
-        )
+            ['hms_invoice.config_id', $domain['hms_config']],
+            ['hms_invoice.customer_id', $id],
+        ])
+            ->where(function ($query) use ($prescription) {
+                $query->where('hms_prescription.id', '<>', $prescription)
+                    ->orWhere('hms_prescription.uid', '<>', $prescription);
+            })
             ->join('hms_prescription','hms_prescription.hms_invoice_id','=','hms_invoice.id')
             ->leftjoin('hms_particular as vr','vr.id','=','hms_invoice.room_id')
             ->leftjoin('users as createdBy','createdBy.id','=','hms_prescription.created_by_id')
@@ -273,9 +280,10 @@ class PrescriptionModel extends Model
     public static function getShow($id)
     {
 
-         $entity = self::where([
-            ['hms_prescription.id', '=', $id]
-        ])
+        $entity = self::where(function ($query) use ($id) {
+            $query->where('hms_prescription.id', '=', $id)
+                ->orWhere('hms_prescription.uid', '=', $id);
+        })
             ->join('hms_invoice','hms_invoice.id','=','hms_prescription.hms_invoice_id')
             ->leftjoin('hms_invoice_patient_referred','hms_invoice_patient_referred.hms_invoice_id','=','hms_invoice.id')
             ->leftjoin('hms_particular as referred_room','referred_room.id','=','hms_invoice_patient_referred.opd_room_id')
@@ -290,6 +298,7 @@ class PrescriptionModel extends Model
             ->leftjoin('hms_particular_mode as particular_payment_mode','particular_payment_mode.id','=','hms_invoice.patient_payment_mode_id')
             ->select([
                 'hms_prescription.id as id',
+                'hms_prescription.uid as prescription_uid',
                 'hms_invoice.id as invoice_id',
                 DB::raw('DATE_FORMAT(hms_invoice.updated_at, "%d-%m-%y %H:%i %p") as created'),
                 DB::raw('DATE_FORMAT(hms_invoice.appointment_date, "%d-%m-%y") as appointment'),
