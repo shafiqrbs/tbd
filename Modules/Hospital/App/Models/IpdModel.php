@@ -20,6 +20,13 @@ class IpdModel extends Model
 
     protected $fillable = [];
 
+    public static function findByIdOrUid($id)
+    {
+        return self::where('id', $id)
+            ->orWhere('uid', $id)
+            ->first();
+    }
+
     public static function generateUniqueCode($length = 12)
     {
         do {
@@ -160,7 +167,7 @@ class IpdModel extends Model
 
     public static function updateIpdInvoice($id,$data)
     {
-        $entity = self::find($id);
+        $entity = self::findByIdOrUid($id);
         if ($entity) {
             $entity->update([
                 'day' => $data['day'] ?? null,
@@ -186,7 +193,7 @@ class IpdModel extends Model
                 'comment' => $data['comment'] ?? null,
                 'process' =>  'admitted',
             ]);
-            self::updateIpdPatient($id,$data);
+            self::updateIpdPatient($entity->id,$data);
         }
         return $entity;
     }

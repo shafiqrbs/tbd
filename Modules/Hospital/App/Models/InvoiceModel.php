@@ -307,9 +307,11 @@ class InvoiceModel extends Model
 
     public static function getShow($id)
     {
-        $entity = self::where([
-            ['hms_invoice.id', '=', $id]
-        ])
+
+            $entity = self::where(function ($query) use ($id) {
+                $query->where('hms_invoice.id', '=', $id)
+                    ->orWhere('hms_invoice.uid', '=', $id);
+            })
             ->leftjoin('cor_customers','cor_customers.id','=','hms_invoice.customer_id')
             ->leftjoin('cor_locations','cor_locations.id','=','cor_customers.upazilla_id')
             ->leftjoin('inv_sales','inv_sales.id','=','hms_invoice.sales_id')
@@ -382,9 +384,10 @@ class InvoiceModel extends Model
 
     public static function getInvoiceBasicInfo($id)
     {
-        $entity = self::where([
-            ['hms_invoice.id', '=', $id]
-        ])
+        $entity = self::where(function ($query) use ($id) {
+            $query->where('hms_invoice.id', '=', $id)
+                ->orWhere('hms_invoice.uid', '=', $id);
+        })
             ->leftjoin('cor_customers','cor_customers.id','=','hms_invoice.customer_id')
             ->leftjoin('inv_sales','inv_sales.id','=','hms_invoice.sales_id')
             ->leftjoin('hms_prescription as prescription','prescription.hms_invoice_id','=','hms_invoice.id')
@@ -446,9 +449,10 @@ class InvoiceModel extends Model
 
     public static function getIpdShow($id)
     {
-        $entity = self::where([
-            ['hms_invoice.uid', '=', $id]
-        ])
+        $entity = self::where(function ($query) use ($id) {
+            $query->where('hms_invoice.id', '=', $id)
+                ->orWhere('hms_invoice.uid', '=', $id);
+        })
             ->leftjoin('cor_customers','cor_customers.id','=','hms_invoice.customer_id')
             ->leftjoin('users as createdBy','createdBy.id','=','hms_invoice.created_by_id')
             ->leftjoin('hms_prescription as prescription','prescription.hms_invoice_id','=','hms_invoice.id')
@@ -540,10 +544,10 @@ class InvoiceModel extends Model
 
     public static function getEditData($id,$domain)
     {
-        $entity = self::where([
-            ['hms_invoice.config_id', '=', $domain['config_id']],
-            ['hms_invoice.id', '=', $id]
-        ])
+            $entity = self::where(function ($query) use ($id) {
+                $query->where('hms_invoice.id', '=', $id)
+                    ->orWhere('hms_invoice.uid', '=', $id);
+            })
             ->leftjoin('cor_customers','cor_customers.id','=','hms_invoice.customer_id')
             ->leftjoin('inv_sales','inv_sales.id','=','hms_invoice.sales_id')
             ->leftjoin('users as createdBy','createdBy.id','=','hms_invoice.created_by_id')
