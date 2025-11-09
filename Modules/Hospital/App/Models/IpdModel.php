@@ -590,8 +590,8 @@ class IpdModel extends Model
     public static function patientChart($entity,$data)
     {
         $date = new \DateTime('now');
-        $vital_chart_json = (isset($data['vital_chart_json']) and json_encode($data['vital_chart_json']) ) ? json_encode($data['vital_chart_json']) : '';
-        $insulin_chart_json = (isset($data['insulin_chart_json']) and json_encode($data['insulin_chart_json'])) ? json_encode($data['vital_chart_json']) : '';
+        $vital_chart_json =  (isset($data['vital_chart_json']) and $data['vital_chart_json'] ) ? json_encode($data['vital_chart_json']) : null;
+        $insulin_chart_json = (isset($data['insulin_chart_json']) and $data['insulin_chart_json']) ? json_encode($data['insulin_chart_json']) : null;
         AdmissionPatientModel::updateOrCreate(
             [
                 'hms_invoice_id'             => $entity,
