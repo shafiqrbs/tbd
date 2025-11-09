@@ -223,7 +223,8 @@ class IpdController extends Controller
     public function patientChart(Request $request, $id)
     {
         $data = $request->all();
-        $entity = IpdModel::patientChart($id,$data);
+        $entity = InvoiceModel::where('uid',$id)->first();
+        IpdModel::patientChart($entity->id,$data);
         $service = new JsonRequestResponse();
         return $service->returnJosnResponse('success');
     }
