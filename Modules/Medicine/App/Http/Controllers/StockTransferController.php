@@ -9,7 +9,9 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
 use Modules\Core\App\Models\UserModel;
+use Modules\Inventory\App\Models\StockItemHistoryModel;
 use Modules\Medicine\App\Http\Requests\StockTransferRequest;
+use Modules\Medicine\App\Models\StockItemModel;
 use Modules\Medicine\App\Models\StockTransferModel;
 use Symfony\Component\HttpFoundation\Response as ResponseAlias;
 use Throwable;
@@ -30,6 +32,21 @@ class StockTransferController extends Controller
     public function index(Request $request)
     {
         $data = StockTransferModel::getRecords($request, $this->domain);
+        $response = new Response();
+        $response->headers->set('Content-Type', 'application/json');
+        $response->setContent(json_encode([
+            'message' => 'success',
+            'status' => ResponseAlias::HTTP_OK,
+            'total' => $data['count'],
+            'data' => $data['entities']
+        ]));
+        $response->setStatusCode(ResponseAlias::HTTP_OK);
+        return $response;
+    }
+
+    public function indexForCentral(Request $request)
+    {
+        $data = StockTransferModel::getRecordsForCentral($request, $this->domain);
         $response = new Response();
         $response->headers->set('Content-Type', 'application/json');
         $response->setContent(json_encode([
@@ -151,7 +168,11 @@ class StockTransferController extends Controller
                 //Load the stock transfer with related items
                 $findStockTransfer = StockTransferModel::with('stockTransferItems')
                     ->where('uid', $id)
-                    ->firstOrFail();
+                    ->first();
+
+                if (!$findStockTransfer) {
+                    return response()->json(['status' => 400, 'message' => 'Data not found.']);
+                }
 
                 $fromWarehouse = $findStockTransfer->from_warehouse_id;
                 $toWarehouse = $findStockTransfer->to_warehouse_id;
@@ -183,7 +204,7 @@ class StockTransferController extends Controller
                 }
 
                 //Loop through each stock item
-                foreach ($stockTransferItems as $stockTransferItem) {
+                /*foreach ($stockTransferItems as $stockTransferItem) {
                     $findStockItem = StockItemModel::find($stockTransferItem['stock_item_id']);
 
                     if (!$findStockItem) {
@@ -237,7 +258,7 @@ class StockTransferController extends Controller
                         stockItemId: $stockTransferItem['stock_item_id'],
                         quantity: $quantity
                     );
-                }
+                }*/
 
                 //Update stock transfer status
                 $findStockTransfer->update([

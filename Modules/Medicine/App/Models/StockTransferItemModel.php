@@ -3,6 +3,7 @@
 namespace Modules\Medicine\App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\DB;
 
 class StockTransferItemModel extends Model
@@ -29,5 +30,23 @@ class StockTransferItemModel extends Model
             $model->updated_at = $date;
         });
     }
+
+    // Each stock transfer item belongs to a transfer
+    public function stockTransfer()
+    {
+        return $this->belongsTo(StockTransferModel::class, 'stock_transfer_id');
+    }
+
+    // Change belongsTo → hasMany (multiple purchase items share same stock_item_id)
+    public function purchaseItems()
+    {
+        return $this->hasMany(PurchaseItemModel::class, 'stock_item_id', 'stock_item_id')
+            ->whereNotNull('expired_date')
+            ->where('expired_date', '>', now())
+            ->whereRaw('quantity > COALESCE(sales_quantity, 0)');
+    }
+
+
+
 
 }

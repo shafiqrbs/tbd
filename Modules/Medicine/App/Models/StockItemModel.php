@@ -4,6 +4,7 @@ namespace Modules\Medicine\App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Modules\Core\App\Models\UserWarehouseModel;
 use Modules\Core\App\Models\WarehouseModel;
 use Modules\Inventory\App\Models\CurrentStockModel;
 use Modules\Inventory\App\Models\ProductModel;
@@ -129,12 +130,14 @@ class StockItemModel extends Model
             });
 
         // --- All Active Warehouses for this domain
-        $warehouses = WarehouseModel::where('domain_id', $domain['domain_id'])
-            ->where('status', 1)
-            ->where('is_delete', 0)
-            ->select('id', 'name')
-            ->orderBy('name')
-            ->get();
+        $warehouses = UserWarehouseModel::join('cor_warehouses', 'cor_warehouses.id', '=', 'cor_user_warehouse.warehouse_id')
+                        ->where('cor_user_warehouse.user_id',$domain['user_id'])
+                        ->where('cor_user_warehouse.is_status', 1)
+                        ->where('cor_warehouses.status', 1)
+                        ->where('cor_warehouses.is_delete', 0)
+                        ->select('cor_warehouses.id', 'cor_warehouses.name')
+                        ->orderBy('cor_warehouses.name')
+                        ->get();
 
         // --- Response
 

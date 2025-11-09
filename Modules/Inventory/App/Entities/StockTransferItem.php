@@ -58,6 +58,12 @@ class StockTransferItem
 
     /**
      * @var integer
+     * @ORM\Column(name="request_quantity", type="integer",nullable=true)
+     */
+    private $requestQuantity;
+
+    /**
+     * @var integer
      * @ORM\Column(name="stock_quantity", type="integer",nullable=true)
      */
     private $stockQuantity;
