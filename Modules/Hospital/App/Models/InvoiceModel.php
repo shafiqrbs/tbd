@@ -454,6 +454,7 @@ class InvoiceModel extends Model
                 ->orWhere('hms_invoice.uid', '=', $id);
         })
             ->leftjoin('cor_customers','cor_customers.id','=','hms_invoice.customer_id')
+            ->leftjoin('cor_setting as religion','religion.id','=','cor_customers.religion_id')
             ->leftjoin('users as createdBy','createdBy.id','=','hms_invoice.created_by_id')
             ->leftjoin('hms_prescription as prescription','prescription.hms_invoice_id','=','hms_invoice.id')
             ->leftjoin('hms_admission_patient_details as admission_patient','admission_patient.hms_invoice_id','=','hms_invoice.id')
@@ -493,6 +494,7 @@ class InvoiceModel extends Model
                 'cor_customers.nid',
                 'cor_customers.identity_mode',
                 'cor_customers.address',
+                'religion.name as religion_name',
                 'cor_customers.permanent_address',
                 DB::raw('DATE_FORMAT(cor_customers.dob, "%m-%d-%Y") as dob'),
                 'cor_customers.identity_mode as identity_mode',
