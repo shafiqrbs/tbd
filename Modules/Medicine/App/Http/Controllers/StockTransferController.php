@@ -8,10 +8,12 @@ use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Validator;
 use Modules\Core\App\Models\UserModel;
 use Modules\Inventory\App\Models\StockItemHistoryModel;
 use Modules\Medicine\App\Http\Requests\StockTransferRequest;
 use Modules\Medicine\App\Models\StockItemModel;
+use Modules\Medicine\App\Models\StockTransferItemModel;
 use Modules\Medicine\App\Models\StockTransferModel;
 use Symfony\Component\HttpFoundation\Response as ResponseAlias;
 use Throwable;
@@ -58,6 +60,51 @@ class StockTransferController extends Controller
         $response->setStatusCode(ResponseAlias::HTTP_OK);
         return $response;
     }
+
+    public function inlineUpdate(Request $request , $id)
+    {
+        $input = $request->only(['transfer_item_id', 'field_name', 'field_value', 'stock_item_id']);
+
+        // ✅ Basic validation
+        $validator = Validator::make($input, [
+            'transfer_item_id' => 'required|integer',
+            'field_name'       => 'required|string|in:quantity,purchase_item_id',
+            'field_value'      => 'required',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => ResponseAlias::HTTP_BAD_REQUEST,
+                'message' => $validator->errors()->first(),
+            ], ResponseAlias::HTTP_BAD_REQUEST);
+        }
+
+        // ✅ Fetch the record
+        $item = StockTransferItemModel::find($input['transfer_item_id']);
+
+        if (!$item) {
+            return response()->json([
+                'status' => ResponseAlias::HTTP_NOT_FOUND,
+                'message' => 'Indent item not found',
+            ]);
+        }
+
+        // ✅ Update the field safely
+        $item->update([
+            $input['field_name'] => $input['field_value']
+        ]);
+
+        return response()->json([
+            'status' => ResponseAlias::HTTP_OK,
+            'message' => 'Indent item updated successfully',
+            'data' => [
+                'id' => $item->id,
+                'field' => $input['field_name'],
+                'value' => $input['field_value']
+            ]
+        ], ResponseAlias::HTTP_OK);
+    }
+
 
 
     /**
@@ -265,6 +312,135 @@ class StockTransferController extends Controller
                     'process' => 'Approved',
                     'approved_date' => new \DateTime('now'),
                     'approved_by_id' => $this->domain['user_id'],
+                ]);
+            });
+
+            // Success response (only runs if transaction committed)
+            return response()->json([
+                'status' => 200,
+                'message' => 'Stock transfer approved successfully.',
+            ]);
+
+        } catch (Throwable $e) {
+            // Auto rollback handled by DB::transaction()
+            logger()->error('Stock Transfer Approval Failed', [
+                'stock_transfer_id' => $id,
+                'error' => $e->getMessage(),
+            ]);
+
+            return response()->json([
+                'status' => 500,
+                'message' => 'Failed to approve stock transfer.',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
+    public function receive($id)
+    {
+        try {
+            DB::transaction(function () use ($id) {
+
+                //Load the stock transfer with related items
+                $findStockTransfer = StockTransferModel::with('stockTransferItems')
+                    ->where('uid', $id)
+                    ->first();
+
+                if (!$findStockTransfer) {
+                    return response()->json(['status' => 400, 'message' => 'Data not found.']);
+                }
+
+                $fromWarehouse = $findStockTransfer->from_warehouse_id;
+                $toWarehouse = $findStockTransfer->to_warehouse_id;
+
+                //Validate stock transfer state
+                if (
+                    !$fromWarehouse ||
+                    !$toWarehouse ||
+                    $fromWarehouse == $toWarehouse ||
+                    $findStockTransfer->process !== "Approved"
+                ) {
+                    throw new Exception('Invalid stock transfer details.');
+                }
+
+                $stockTransferItems = $findStockTransfer->stockTransferItems->map(function ($item) {
+                    return [
+                        'id' => $item->id,
+                        'config_id' => $item->config_id,
+                        'stock_item_id' => $item->stock_item_id,
+                        'purchase_item_id' => $item->purchase_item_id,
+                        'quantity' => $item->quantity,
+                        'uom' => $item->uom,
+                        'name' => $item->name,
+                    ];
+                });
+
+                if ($stockTransferItems->isEmpty()) {
+                    throw new Exception('No items found for this stock transfer.');
+                }
+
+                //Loop through each stock item
+                foreach ($stockTransferItems as $stockTransferItem) {
+                    $findStockItem = StockItemModel::find($stockTransferItem['stock_item_id']);
+
+                    if (!$findStockItem) {
+                        throw new Exception("Stock item not found: ID {$stockTransferItem['stock_item_id']}");
+                    }
+
+                    $purchasePrice = $findStockItem->purchase_price ?? 0;
+                    $salesPrice = $findStockItem->sales_price ?? 0;
+                    $quantity = $stockTransferItem['quantity'];
+
+                    // Stock Transfer IN (to destination warehouse)
+                    $dataForAdd = [
+                        'stock_transfer_id' => $id,
+                        'name' => $stockTransferItem['name'],
+                        'stock_transfer_item_id' => $stockTransferItem['id'],
+                        'config_id' => $stockTransferItem['config_id'],
+                        'warehouse_id' => $toWarehouse,
+                        'stock_item_id' => $stockTransferItem['stock_item_id'],
+                        'quantity' => $quantity,
+                        'purchase_price' => $purchasePrice,
+                        'sales_price' => $salesPrice,
+                        'sub_total' => $quantity * $purchasePrice,
+                    ];
+
+                    if (!StockItemHistoryModel::openingStockQuantity((object)$dataForAdd, 'stock-transfer-in', $this->domain)) {
+                        throw new Exception("Failed to record stock-transfer-in for item ID {$stockTransferItem['stock_item_id']}");
+                    }
+
+                    DailyStockService::maintainDailyStock(
+                        date: now()->toDateString(),
+                        field: 'stock_transfer_in',
+                        configId: $stockTransferItem['config_id'],
+                        warehouseId: $toWarehouse,
+                        stockItemId: $stockTransferItem['stock_item_id'],
+                        quantity: $quantity
+                    );
+
+                    // Stock Transfer OUT (from source warehouse)
+                    $dataForMinus = $dataForAdd;
+                    $dataForMinus['warehouse_id'] = $fromWarehouse;
+
+                    if (!StockItemHistoryModel::openingStockQuantity((object)$dataForMinus, 'stock-transfer-out', $this->domain)) {
+                        throw new Exception("Failed to record stock-transfer-out for item ID {$stockTransferItem['stock_item_id']}");
+                    }
+
+                    DailyStockService::maintainDailyStock(
+                        date: now()->toDateString(),
+                        field: 'stock_transfer_out',
+                        configId: $stockTransferItem['config_id'],
+                        warehouseId: $fromWarehouse,
+                        stockItemId: $stockTransferItem['stock_item_id'],
+                        quantity: $quantity
+                    );
+                }
+
+                //Update stock transfer status
+                $findStockTransfer->update([
+                    'process' => 'Received',
+                    'issued_date' => new \DateTime('now'),
+                    'received_date' => new \DateTime('now'),
+                    'received_by_id' => $this->domain['user_id'],
                 ]);
             });
 

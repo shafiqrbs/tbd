@@ -44,7 +44,9 @@ Route::prefix('/pharmacy')->middleware([HeaderAuthenticationMiddleware::class,Lo
 
     Route::prefix('stock-transfer')->name('stock-transfer.')->group(function () {
         Route::get('approve/{id}', [StockTransferController::class, 'approve']);
+        Route::get('receive/{id}', [StockTransferController::class, 'receive']);
         Route::get('central-index', [StockTransferController::class, 'indexForCentral']);
+        Route::patch('inline-update/{id}', [StockTransferController::class, 'inlineUpdate'])->name('inline_update');
         Route::apiResource('', StockTransferController::class)->parameters(['' => 'id']);
     });
 
