@@ -132,7 +132,7 @@ class AccountHeadModel extends Model
         $name = "{$entity['name']}";
         $parent = AccountingModel::find($config);
         if ($parent and $parent->account_product_group_id) {
-            self::create(
+            $group = self::create(
                 [
                     'name' => $name,
                     'display_name' => $name,
@@ -146,6 +146,7 @@ class AccountHeadModel extends Model
                 ]
             );
         }
+        return $group;
         //AccountJournalModel::insertCustomerJournalVoucher($entity);
     }
 

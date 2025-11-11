@@ -33,7 +33,7 @@ class AccountVoucherRequest extends FormRequest
                 return [
                     'name' => 'required|string',
                     'voucher_type_id' => 'required|integer',
-                    'ledger_account_head_id' => 'required|integer',
+                  //  'ledger_account_head_id' => 'required|integer',
                     'short_name' => 'required|string',
                     'short_code' => 'required|string',
                     'mode' => 'required|string',

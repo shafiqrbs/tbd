@@ -101,11 +101,10 @@ class SalesController extends Controller
             // Insert Sales Items
             SalesItemModel::insertSalesItems($sales, $input['items'],$this->domain['warehouse_id']);
 
-            // Fetch Sales Data for Response
-            $salesData = SalesModel::getShow($sales->id, $this->domain);
+
 
             // Customer Maintenance Logic (Auto Approval)
-            if(empty($input['customer_id']) and isset($input['customer_name']) and isset($input['customer_mobile'])) {
+            if(isset($input['customer_name']) and isset($input['customer_mobile'])) {
                 $findCustomer = CustomerModel::uniqueCustomerCheck($this->domain['domain_id'],$input['customer_mobile'],$input['customer_name']);
                 if(empty($findCustomer)){
                     $findCustomer = CustomerModel::insertSalesCustomer($this->domain,$input);
@@ -127,8 +126,9 @@ class SalesController extends Controller
             }else{
                 $findCustomer = CustomerModel::find($input['customer_id']);
             }
-
             $sales->update(['customer_id' => $findCustomer->id]);
+            // Fetch Sales Data for Response
+            $salesData = SalesModel::getShow($sales->id, $this->domain);
             $findInvConfig = ConfigSalesModel::where('config_id',$this->domain['inv_config'])->first();
             if ($findInvConfig->is_sales_auto_approved) {
                 $sales->update(['approved_by_id' => $this->domain['user_id'], 'process' => 'Approved']);

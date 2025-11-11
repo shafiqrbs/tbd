@@ -158,6 +158,7 @@ class StockTransferController extends Controller
         try {
             // Fetch stock transfer record safely
             $stockTransfer = StockTransferModel::lockForUpdate()->findOrFail($id);
+            $data['process'] = $stockTransfer->process;
 
             // Remove old items in one query
             $stockTransfer->stockTransferItems()->delete();
@@ -250,62 +251,6 @@ class StockTransferController extends Controller
                     throw new Exception('No items found for this stock transfer.');
                 }
 
-                //Loop through each stock item
-                /*foreach ($stockTransferItems as $stockTransferItem) {
-                    $findStockItem = StockItemModel::find($stockTransferItem['stock_item_id']);
-
-                    if (!$findStockItem) {
-                        throw new Exception("Stock item not found: ID {$stockTransferItem['stock_item_id']}");
-                    }
-
-                    $purchasePrice = $findStockItem->purchase_price ?? 0;
-                    $salesPrice = $findStockItem->sales_price ?? 0;
-                    $quantity = $stockTransferItem['quantity'];
-
-                    // Stock Transfer IN (to destination warehouse)
-                    $dataForAdd = [
-                        'stock_transfer_id' => $id,
-                        'name' => $stockTransferItem['name'],
-                        'stock_transfer_item_id' => $stockTransferItem['id'],
-                        'config_id' => $stockTransferItem['config_id'],
-                        'warehouse_id' => $toWarehouse,
-                        'stock_item_id' => $stockTransferItem['stock_item_id'],
-                        'quantity' => $quantity,
-                        'purchase_price' => $purchasePrice,
-                        'sales_price' => $salesPrice,
-                        'sub_total' => $quantity * $purchasePrice,
-                    ];
-
-                    if (!StockItemHistoryModel::openingStockQuantity((object)$dataForAdd, 'stock-transfer-in', $this->domain)) {
-                        throw new Exception("Failed to record stock-transfer-in for item ID {$stockTransferItem['stock_item_id']}");
-                    }
-
-                    DailyStockService::maintainDailyStock(
-                        date: now()->toDateString(),
-                        field: 'stock_transfer_in',
-                        configId: $stockTransferItem['config_id'],
-                        warehouseId: $toWarehouse,
-                        stockItemId: $stockTransferItem['stock_item_id'],
-                        quantity: $quantity
-                    );
-
-                    // Stock Transfer OUT (from source warehouse)
-                    $dataForMinus = $dataForAdd;
-                    $dataForMinus['warehouse_id'] = $fromWarehouse;
-
-                    if (!StockItemHistoryModel::openingStockQuantity((object)$dataForMinus, 'stock-transfer-out', $this->domain)) {
-                        throw new Exception("Failed to record stock-transfer-out for item ID {$stockTransferItem['stock_item_id']}");
-                    }
-
-                    DailyStockService::maintainDailyStock(
-                        date: now()->toDateString(),
-                        field: 'stock_transfer_out',
-                        configId: $stockTransferItem['config_id'],
-                        warehouseId: $fromWarehouse,
-                        stockItemId: $stockTransferItem['stock_item_id'],
-                        quantity: $quantity
-                    );
-                }*/
 
                 //Update stock transfer status
                 $findStockTransfer->update([
@@ -392,7 +337,7 @@ class StockTransferController extends Controller
 
                     // Stock Transfer IN (to destination warehouse)
                     $dataForAdd = [
-                        'stock_transfer_id' => $id,
+                        'stock_transfer_id' => $findStockTransfer->id,
                         'name' => $stockTransferItem['name'],
                         'stock_transfer_item_id' => $stockTransferItem['id'],
                         'config_id' => $stockTransferItem['config_id'],

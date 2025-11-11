@@ -5,6 +5,7 @@ namespace Modules\Accounting\App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 use Modules\AppsApi\App\Services\GeneratePatternCodeService;
+use Modules\Hospital\App\Models\CategoryModel;
 use Modules\Inventory\App\Models\PurchaseItemModel;
 use Modules\Inventory\App\Models\PurchaseModel;
 use Modules\Inventory\App\Models\SalesItemModel;
@@ -367,11 +368,13 @@ class AccountJournalModel extends Model
 
     public static function goodsInStock($journal,$journalItem,$purchase){
 
-
         $records = PurchaseItemModel::getProductGroupPrice($purchase);
-
         foreach ($records as $record){
             $head = AccountHeadModel::getAccountHeadWithParentPramValue('product_group_id',$record['product_group_id']);
+            if(empty($head)){
+                $group = CategoryModel::find($record['product_group_id']);
+                $head = AccountHeadModel::insertCategoryGroupLedger($journal->config_id,$group);
+            }
             if($head and $record['amount'] > 0){
                 $amount = $record['amount'];
                 $accountDebit['account_journal_id'] = $journal->id;
@@ -455,9 +458,11 @@ class AccountJournalModel extends Model
         if($journalItem and $discount > 0){
             self::salesDiscountEntry($config,$journal,$discount,$journalItem);
         }
+
         if($journalItem){
             self::salesReceivableEntry($journal, $entity, $journalItem);
         }
+
         if($payment > 0){
             $journalItem = self::salesReceivableCreditEntry($journal, $entity);
             if($journalItem){
@@ -490,22 +495,6 @@ class AccountJournalModel extends Model
 
     }
 
-    public static function salesDiscountEntry($config,$journal,$amount,$journalItem){
-
-        $head = AccountHeadModel::getAccountHeadWithParent($config->account_sales_discount_id);
-        if($head){
-            $accountDebit['account_journal_id'] = $journal->id;
-            $accountDebit['account_head_id'] = $head->parent_id;
-            $accountDebit['account_sub_head_id'] = $config->account_sales_discount_id;
-            $accountDebit['parent_id'] = $journalItem;
-            $accountDebit['amount'] = "{$amount}";
-            $accountDebit['debit'] = $amount;
-            $accountDebit['mode'] = 'debit';
-            $journalItem = AccountJournalItemModel::create($accountDebit);
-            self::journalOpeningClosing($journal,$journalItem);
-        }
-    }
-
     public static function salesReceivableEntry($journal,$entity,$journalItem){
 
         $amount = $entity->total;
@@ -515,6 +504,22 @@ class AccountJournalModel extends Model
             $accountDebit['account_journal_id'] = $journal->id;
             $accountDebit['account_head_id'] = $head->parent_id;
             $accountDebit['account_sub_head_id'] = $head->id;
+            $accountDebit['parent_id'] = $journalItem;
+            $accountDebit['amount'] = "{$amount}";
+            $accountDebit['debit'] = $amount;
+            $accountDebit['mode'] = 'debit';
+            $journalItem = AccountJournalItemModel::create($accountDebit);
+            self::journalOpeningClosing($journal,$journalItem);
+        }
+    }
+
+    public static function salesDiscountEntry($config,$journal,$amount,$journalItem){
+
+        $head = AccountHeadModel::getAccountHeadWithParent($config->account_sales_discount_id);
+        if($head){
+            $accountDebit['account_journal_id'] = $journal->id;
+            $accountDebit['account_head_id'] = $head->parent_id;
+            $accountDebit['account_sub_head_id'] = $config->account_sales_discount_id;
             $accountDebit['parent_id'] = $journalItem;
             $accountDebit['amount'] = "{$amount}";
             $accountDebit['debit'] = $amount;
@@ -584,6 +589,10 @@ class AccountJournalModel extends Model
         $records = SalesItemModel::getProductGroupPrice($entity->id);
         foreach ($records as $record){
             $head = AccountHeadModel::getAccountHeadWithParentPramValue('product_group_id',$record['product_group_id']);
+            if(empty($head)){
+                $group = CategoryModel::find($record['product_group_id']);
+                $head = AccountHeadModel::insertCategoryGroupLedger($journal->config_id,$group);
+            }
             if($head and $record['amount'] > 0){
                 $amount = $record['amount'];
                 $accountDebit['account_journal_id'] = $journal->id;
@@ -599,5 +608,6 @@ class AccountJournalModel extends Model
         }
 
     }
+
 }
 

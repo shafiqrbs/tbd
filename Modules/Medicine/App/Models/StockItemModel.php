@@ -130,6 +130,7 @@ class StockItemModel extends Model
             });
 
         // --- All Active Warehouses for this domain
+
         $warehouses = UserWarehouseModel::join('cor_warehouses', 'cor_warehouses.id', '=', 'cor_user_warehouse.warehouse_id')
                         ->where('cor_user_warehouse.user_id',$domain['user_id'])
                         ->where('cor_user_warehouse.is_status', 1)
