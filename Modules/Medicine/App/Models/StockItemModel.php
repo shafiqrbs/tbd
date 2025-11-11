@@ -86,7 +86,7 @@ class StockItemModel extends Model
 
         // --- Paginated Results
         $stockItems = $query
-            ->orderByDesc('id')
+            ->orderBy('name')
             ->skip($skip)
             ->take($perPage)
             ->get()
