@@ -152,10 +152,11 @@ class AccountJournalModel extends Model
                     configId: $journal->config_id,
                 );
 
-                $closing = $journalItem->mode === 'debit'
+                /*$closing = $journalItem->mode === 'debit'
                     ? $opening + $journalItem->amount
-                    : ($journalItem->mode === 'credit' ? $opening - $journalItem->amount : 0);
+                    : ($journalItem->mode === 'credit' ? $opening - $journalItem->amount : 0);*/
 
+                $closing = ($opening + ($journalItem->amount));
                 $journalItem->update([
                     'opening_amount' => $opening,
                     'closing_amount' => $closing,
