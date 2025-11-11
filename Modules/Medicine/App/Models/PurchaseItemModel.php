@@ -17,7 +17,7 @@ class PurchaseItemModel extends Model
     public $timestamps = true;
     protected $guarded = ['id'];
 
-    protected $fillable = [];
+    protected $fillable = ['warehouse_transfer_quantity'];
 
     public static function boot() {
 
@@ -52,5 +52,38 @@ class PurchaseItemModel extends Model
     {
         return $this->belongsTo(StockItemModel::class , 'stock_item_id');
     }
+
+    public static function remainingQuantity($id): int
+    {
+        $item = self::find($id, [
+            'quantity',
+            'sales_quantity',
+            'sales_return_quantity',
+            'sales_replace_quantity',
+            'purchase_return_quantity',
+            'damage_quantity',
+            'warehouse_transfer_quantity',
+        ]);
+
+        if (!$item) {
+            return 0;
+        }
+
+        $salesQuantity = $item->sales_quantity ?? 0;
+        $salesReplaceQuantity = $item->sales_replace_quantity ?? 0;
+        $damageQuantity = $item->damage_quantity ?? 0;
+        $warehouseTransferQuantity = $item->warehouse_transfer_quantity ?? 0;
+
+        $salesReturnQuantity = $item->sales_return_quantity ?? 0;
+        $purchaseReturnQuantity = $item->purchase_return_quantity ?? 0;
+
+        $minusQuantity = $salesQuantity + $salesReplaceQuantity + $damageQuantity + $warehouseTransferQuantity;
+        $plusQuantity = $salesReturnQuantity + $purchaseReturnQuantity;
+
+        $remainingQuantity = ($item->quantity ?? 0) + $plusQuantity - $minusQuantity;
+
+        return (int) $remainingQuantity;
+    }
+
 
 }

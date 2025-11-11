@@ -17,7 +17,7 @@ class StockTransferModel extends Model
     protected $guarded = ['id'];
 
     protected $fillable = [
-        'config_id', 'from_warehouse_id', 'to_warehouse_id', 'created_by_id', 'notes', 'process', 'approved_by_id','request_quantity','approved_date'
+        'config_id', 'from_warehouse_id', 'to_warehouse_id', 'created_by_id', 'notes', 'process', 'approved_by_id','request_quantity','approved_date','issued_date','received_date','received_by_id'
     ];
 
     public static function generateUniqueCode($length = 12)
@@ -310,7 +310,7 @@ class StockTransferModel extends Model
                         'warehouse_id'      => $p->warehouse_id,
                         'purchase_quantity' => $p->quantity,
                         'sales_quantity'    => $salesQty,
-                        'remain_quantity'   => $p->quantity - $salesQty,
+                        'remain_quantity'   => PurchaseItemModel::remainingQuantity($p->id),
                         'expired_date'      => $p->expired_date
                             ? Carbon::parse($p->expired_date)->format('d-M-Y')
                             : null,

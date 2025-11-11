@@ -77,56 +77,48 @@ class PurchaseItem
 
     /**
      * @var float
-     *
      * @ORM\Column(name="quantity", type="float",nullable=true)
      */
     private $quantity;
 
      /**
      * @var float
-     *
      * @ORM\Column( type="float",nullable=true)
      */
     private $openingQuantity;
 
     /**
      * @var integer
-     *
      * @ORM\Column(type="float",nullable=true)
      */
     private $salesQuantity = 0;
 
     /**
      * @var integer
-     *
      * @ORM\Column( type="float",nullable=true)
      */
     private $salesReturnQuantity;
 
     /**
      * @var integer
-     *
      * @ORM\Column( type="float",nullable=true)
      */
     private $salesReplaceQuantity;
 
     /**
      * @var integer
-     *
      * @ORM\Column(type="float",nullable=true)
      */
     private $purchaseReturnQuantity;
 
     /**
      * @var integer
-     *
      * @ORM\Column(type="float",nullable=true)
      */
     private $damageQuantity;
 
     /**
      * @var integer
-     *
      * @ORM\Column(type="float", nullable=true)
      */
     private $bonusQuantity = 0;
@@ -134,10 +126,15 @@ class PurchaseItem
 
     /**
      * @var integer
-     *
      * @ORM\Column( type="float",nullable=true)
      */
     private $remainingQuantity;
+
+    /**
+     * @var integer
+     * @ORM\Column( type="float",nullable=true)
+     */
+    private $warehouseTransferQuantity;
 
 
     /**
