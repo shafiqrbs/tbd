@@ -23,6 +23,13 @@ class InvoiceModel extends Model
     protected $fillable = [];
 
 
+    public static function findByIdOrUid($id)
+    {
+        return self::where('id', $id)
+            ->orWhere('uid', $id)
+            ->first();
+    }
+
     public static function generateUniqueCode($length = 12)
     {
         do {

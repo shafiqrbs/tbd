@@ -109,9 +109,8 @@ class InvoiceTransactionModel extends Model
     {
 
         $date =  new \DateTime("now");
-        $invoice = InvoiceModel::find($id);
+        $invoice = InvoiceModel::findByIdOrUid($id);
         $investigations = $data;
-
         if (!empty($investigations) && is_array($investigations)) {
             $invoiceTransaction = self::create(
                 [
@@ -326,10 +325,11 @@ class InvoiceTransactionModel extends Model
 
     public static function getInvoiceParticulars($id,$mode)
     {
-        $entity = self::where([
-            'hms_invoice.id' => $id,
-            'hms_invoice_transaction.mode' => $mode
-        ])
+        $entity = self::where([ 'hms_invoice_transaction.mode' => $mode])
+            ->where(function ($query) use ($id) {
+                $query->where('hms_invoice.id', '=', $id)
+                ->orWhere('hms_invoice.uid', '=', $id);
+            })
             ->join('hms_invoice', 'hms_invoice.id', '=', 'hms_invoice_transaction.hms_invoice_id')
             ->with(['invoiceParticular' => function ($query) {
                 $query->select([
@@ -351,9 +351,11 @@ class InvoiceTransactionModel extends Model
     public static function getMedicine($id)
     {
         $entity = self::where([
-            'hms_invoice.id' => $id,
             'hms_invoice_transaction.mode' => 'medicine'
-        ])
+        ])->where(function ($query) use ($id) {
+            $query->where('hms_invoice.id', '=', $id)
+                ->orWhere('hms_invoice.uid', '=', $id);
+        })
             ->join('hms_invoice', 'hms_invoice.id', '=', 'hms_invoice_transaction.hms_invoice_id')
             ->leftJoin('inv_sales', 'inv_sales.id', '=', 'hms_invoice_transaction.sale_id')
             ->with(['salesItems' => function ($query) {
