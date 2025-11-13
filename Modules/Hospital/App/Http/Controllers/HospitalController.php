@@ -121,10 +121,10 @@ class HospitalController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function storeUser()
+    public function storeUser(Request $request)
     {
         $domain = $this->domain;
-        $data = UserModel::getStoreUsers($domain['id']);
+        $data = UserModel::getStoreUsers($domain['id'],$request);
         $service = new JsonRequestResponse();
         return $service->returnJosnResponse($data);
     }

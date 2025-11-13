@@ -16,6 +16,7 @@ use Modules\Hospital\App\Http\Controllers\OpdController;
 use Modules\Hospital\App\Http\Controllers\ParticularController;
 use Modules\Hospital\App\Http\Controllers\ParticularModeController;
 use Modules\Hospital\App\Http\Controllers\ParticularTypeController;
+use Modules\Hospital\App\Http\Controllers\PatientWaiverController;
 use Modules\Hospital\App\Http\Controllers\PharmacyController;
 use Modules\Hospital\App\Http\Controllers\PrescriptionController;
 use Modules\Hospital\App\Http\Controllers\ProductController;
@@ -207,6 +208,11 @@ Route::prefix('/hospital')->middleware([HeaderAuthenticationMiddleware::class])-
     Route::prefix('billing')->name('billing')->group(function () {
         Route::apiResource('', BillingController::class)->parameters(['' => 'id']);
         Route::get('{id}/payment/{transactionId}', [BillingController::class, 'transaction'])->name('transaction');
+    });
+
+    Route::prefix('patient-waiver')->name('patient_waiver')->group(function () {
+        Route::apiResource('', PatientWaiverController::class)->parameters(['' => 'id']);
+        Route::get('{id}/', [PatientWaiverController::class, 'process'])->name('patient_waiver_process');
     });
 
     Route::prefix('reports')->middleware([HeaderAuthenticationMiddleware::class])->group(function() {

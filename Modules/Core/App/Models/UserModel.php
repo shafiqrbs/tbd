@@ -419,16 +419,26 @@ class UserModel extends Model
         );
     }
 
-    public static function getStoreUsers($domain)
+    public static function getStoreUsers($domain, $request = null)
     {
         $users = self::with(['user_warehouses' => function ($q) {
-            $q->select('cor_user_warehouse.id','cor_user_warehouse.user_id','cor_user_warehouse.warehouse_id');
+            $q->select('cor_user_warehouse.id', 'cor_user_warehouse.user_id', 'cor_user_warehouse.warehouse_id');
         }])
-            ->where('domain_id', $domain)
-            ->where('enabled', 1)
+            ->where('users.domain_id', $domain)
+            ->where('users.enabled', 1)
+            ->select('users.id', 'users.name', 'users.username')
+            ->orderBy('users.name', 'ASC');
 
-            ->select('users.id', 'users.name', 'users.username') // select user columns only
-            ->get()
+        // ✅ Apply optional filter
+        if (!empty($request['term'])) {
+            $users->where(function ($query) use ($request) {
+                $term = $request['term'];
+                $query->where('users.name', 'like', "%{$term}%")
+                    ->orWhere('users.username', 'like', "%{$term}%");
+            });
+        }
+        // ✅ Execute query and format output
+        return $users->get()
             ->map(function ($user) {
                 return [
                     'user_id'    => $user->id,
@@ -438,11 +448,9 @@ class UserModel extends Model
                         return [
                             'warehouse_id' => $wh->warehouse_id,
                         ];
-                    })->values(), // values() resets keys
+                    })->values(),
                 ];
             })->toArray();
-
-        return $users;
     }
 
     public static function getStoreUsers1($domain)

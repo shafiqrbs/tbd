@@ -171,6 +171,15 @@ class InvoiceParticular
      */
     private $process;
 
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(type="mode" , type="string", length=30,options={"default"="investigation"})
+     */
+    private $mode;
+
+
     /**
      * @var string
      *
@@ -239,6 +248,13 @@ class InvoiceParticular
      * @ORM\Column(name="status", type="boolean", nullable=true, options={"default"="false"})
      */
     private $status;
+
+    /**
+     * @var boolean
+     *
+     * @ORM\Column(name="is_invoice", type="boolean", nullable=true, options={"default"="false"})
+     */
+     private $isInvoice;
 
     /**
      * @var boolean

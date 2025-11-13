@@ -69,7 +69,7 @@ class InvoiceTransactionModel extends Model
         $jsonData = json_decode($prescription['json_content']);
         $investigations = ($jsonData->patient_report->patient_examination->investigation ?? []);
         if (!empty($investigations) && is_array($investigations)) {
-            $invoiceTransaction = self::updateOrCreate(
+            /*$invoiceTransaction = self::updateOrCreate(
                 [
                     'hms_invoice_id'               => $prescription->hms_invoice_id,
                     'prescription_id'              => $prescription->id,
@@ -80,8 +80,8 @@ class InvoiceTransactionModel extends Model
                     'updated_at'    => $date,
                     'created_at'    => $date,
                 ]
-            );
-            collect($investigations)->map(function ($investigation) use ($prescription,$invoiceTransaction,$date) {
+            );*/
+            collect($investigations)->map(function ($investigation) use ($prescription,$date) {
 
                 $particular = ParticularModel::find($investigation->id);
                 if($particular and $particular->is_available == 1){
@@ -89,11 +89,11 @@ class InvoiceTransactionModel extends Model
                         [
                             'hms_invoice_id'             => $prescription->hms_invoice_id,
                             'prescription_id'            => $prescription->id,
-                            'invoice_transaction_id'     => $invoiceTransaction->id,
                             'particular_id'              => $investigation->id,
                         ],
                         [
                             'name'      => $particular->name,
+                            'mode'      => 'investigation',
                             'quantity'      => 1,
                             'price'         => $particular->price ?? 0,
                             'updated_at'    => $date,
@@ -112,29 +112,19 @@ class InvoiceTransactionModel extends Model
         $invoice = InvoiceModel::findByIdOrUid($id);
         $investigations = $data;
         if (!empty($investigations) && is_array($investigations)) {
-            $invoiceTransaction = self::create(
-                [
-                    'hms_invoice_id' => $invoice->id,
-                    'created_by_id'    => $domain['user_id'],
-                    'mode' => 'investigation',
-                    'updated_at'    => $date,
-                    'created_at'    => $date,
-                ]
-            );
-
-            collect($investigations)->map(function ($investigation) use ($invoice,$invoiceTransaction,$date) {
+            collect($investigations)->map(function ($investigation) use ($invoice,$date) {
 
                 $particular = ParticularModel::find($investigation['id']);
                 if($particular){
                     InvoiceParticularModel::updateOrCreate(
                         [
                             'hms_invoice_id'             => $invoice->id,
-                            'invoice_transaction_id'     => $invoiceTransaction->id,
                             'particular_id'              => $particular->id,
                         ],
                         [
                             'name'      => $particular->name,
                             'quantity'      => 1,
+                            'mode' => 'investigation',
                             'price'         => $particular->price ?? 0,
                             'sub_total'         => $particular->price ?? 0,
                             'updated_at'    => $date,
@@ -143,8 +133,8 @@ class InvoiceTransactionModel extends Model
                     );
                 }
             })->toArray();
-            $amount = InvoiceParticularModel::where('invoice_transaction_id', $invoiceTransaction->id)->sum('sub_total');
-            $invoiceTransaction->update(['sub_total' => $amount , 'total' => $amount]);
+         //   $amount = InvoiceParticularModel::where('invoice_transaction_id', $invoiceTransaction->id)->sum('sub_total');
+        //    $invoiceTransaction->update(['sub_total' => $amount , 'total' => $amount]);
            // $amount = InvoiceParticularModel::where('hms_invoice_id', $invoice->id)->sum('sub_total');
           //  $invoice->update(['sub_total' => $amount , 'total' => $amount]);
 

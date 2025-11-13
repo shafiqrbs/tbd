@@ -4,7 +4,6 @@ use App\Http\Middleware\HeaderAuthenticationMiddleware;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Modules\Core\App\Http\Middleware\LogRequestResponse;
-use Modules\Inventory\App\Http\Controllers\BusinessModelController;
 use Modules\Inventory\App\Http\Controllers\CategoryGroupController;
 use Modules\Inventory\App\Http\Controllers\ConfigController;
 use Modules\Inventory\App\Http\Controllers\DiscountConfigController;
@@ -196,6 +195,7 @@ Route::prefix('/inventory')->middleware([HeaderAuthenticationMiddleware::class,L
         Route::get('check/invoice-mode', [PosController::class,'checkInvoiceMode'])->name('pos_check_invoice_mode');
         Route::post('inline-update', [PosController::class,'invoiceUpdate'])->name('pos_inline_update');
         Route::get('invoice-details', [PosController::class,'invoiceDetails'])->name('pos_invoice_details');
+        Route::post('data-process', [PosController::class,'posSalesProcess'])->name('pos_sales_process');
         Route::get('sales-complete/{id}', [PosController::class,'posSalesComplete'])->name('pos_sales_complete');
     });
 

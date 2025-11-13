@@ -51,6 +51,15 @@ class BillingModel extends Model
         );
     }
 
+    public function invoice_particular()
+    {
+        return $this->hasMany(
+            InvoiceParticularModel::class,
+            'hms_invoice_id',             // foreign key in hms_invoice_particular
+            'id'                          // local key in hms_invoice
+        );
+    }
+
     public function room()
     {
         return $this->hasOne(ParticularModel::class, 'id', 'room_id');
@@ -145,7 +154,7 @@ class BillingModel extends Model
     public static function getShow($id)
     {
         $entity = self::where([
-            ['hms_invoice.id', '=', $id]
+            ['hms_invoice.uid', '=', $id]
         ])
             ->leftjoin('cor_customers','cor_customers.id','=','hms_invoice.customer_id')
             ->leftjoin('users as createdBy','createdBy.id','=','hms_invoice.created_by_id')
@@ -191,7 +200,8 @@ class BillingModel extends Model
                 'createdBy.username as created_by_user_name',
                 'createdBy.name as created_by_name',
                 'createdBy.id as created_by_id',
-                'room.name as room_name',
+                'room.display_name as room_name',
+                'room.price as price',
                 'patient_mode.name as mode_name',
                 'particular_payment_mode.name as payment_mode_name',
                 'hms_invoice.process as process',
@@ -215,7 +225,18 @@ class BillingModel extends Model
                     'hms_invoice_transaction.amount',
                     'hms_invoice_transaction.process',
                     DB::raw('DATE_FORMAT(hms_invoice_transaction.created_at, "%d-%m-%y") as created'),
-                ])->whereIn('hms_invoice_transaction.mode', ['investigation', 'admission', 'room'])->orderBy('hms_invoice_transaction.created_at','DESC');
+                ])->where('hms_invoice_transaction.process','Done')->whereIn('hms_invoice_transaction.mode', ['investigation', 'admission', 'room'])->orderBy('hms_invoice_transaction.created_at','DESC');
+            }])
+             ->with(['invoice_particular' => function ($query) {
+                $query->select([
+                    'hms_invoice_particular.id as particular_id',
+                    'hms_invoice_particular.hms_invoice_id',
+                    'hms_invoice_particular.name',
+                    'hms_invoice_particular.price',
+                    'hms_invoice_particular.quantity',
+                    'hms_invoice_particular.sub_total',
+                    'hms_invoice_particular.process',
+                ])->where('hms_invoice_particular.is_invoice',false)->whereIn('hms_invoice_particular.mode', ['investigation'])->orderBy('hms_invoice_particular.created_at','DESC');
             }])
             ->first();
 

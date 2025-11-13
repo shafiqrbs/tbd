@@ -23,6 +23,7 @@ use Modules\Inventory\App\Models\InvoiceBatchModel;
 use Modules\Inventory\App\Models\InvoiceItemTempModel;
 use Modules\Inventory\App\Models\InvoiceTempModel;
 use Modules\Inventory\App\Models\ParticularModel;
+use Modules\Inventory\App\Models\PosSaleModel;
 use Modules\Inventory\App\Models\ProductModel;
 use Modules\Inventory\App\Models\PurchaseModel;
 use Modules\Inventory\App\Models\RequisitionItemModel;
@@ -478,5 +479,22 @@ class PosController extends Controller
                 'error' => $e->getMessage()
             ], 500);
         }
+    }
+
+    public function posSalesProcess(Request $request)
+    {
+        $domain = $this->domain;
+        $data = $request->all();
+        $input['content'] = json_encode($data['content']);
+        $input['config_id'] = $domain['config_id'];
+        $input['created_by_id'] = $domain['user_id'];
+        $input['process'] = 'new';
+        PosSaleModel::create($input);
+        return response()->json([
+            'status' => 200,
+            'success' => true,
+            'message' => 'Sales updated successfully.',
+            'data' => 'done',
+        ]);
     }
 }
