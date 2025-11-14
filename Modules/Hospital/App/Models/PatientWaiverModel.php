@@ -12,7 +12,7 @@ class PatientWaiverModel extends Model
 {
     use HasFactory;
 
-    protected $table = 'hms_prescription';
+    protected $table = 'hms_patient_waiver';
     public $timestamps = true;
     protected $guarded = ['id'];
 
@@ -49,31 +49,12 @@ class PatientWaiverModel extends Model
             ->first();
     }
 
-
-    public function invoice_details()
+    public function items()
     {
-        return $this->hasOne(InvoiceModel::class, 'id', 'hms_invoice_id');
+        return $this->hasMany(InvoiceParticularModel::class, 'patient_waiver_id');
     }
 
-    public function invoice_transaction()
-    {
-        return $this->hasOne(InvoiceTransactionModel::class, 'id', 'prescription_id');
-    }
 
-    public function invoice_particular()
-    {
-        return $this->hasMany(InvoiceParticularModel::class, 'hms_invoice_id');
-    }
-
-    public function prescription_medicine()
-    {
-        return $this->hasMany(PatientPrescriptionMedicineModel::class, 'hms_invoice_id');
-    }
-
-    public function invoice()
-    {
-        return $this->belongsTo(InvoiceModel::class, 'hms_invoice_id');
-    }
 
     public static function getRecords($request,$domain)
     {
@@ -81,19 +62,114 @@ class PatientWaiverModel extends Model
         $perPage = isset($request['offset']) && $request['offset'] != '' ? (int)$request['offset'] : 50;
         $skip = $page * $perPage;
 
+        $entitiesQuery = PatientWaiverModel::join('hms_invoice as hms_invoice', 'hms_patient_waiver.hms_invoice_id', '=', 'hms_invoice.id')
+            ->join('cor_customers as customer','customer.id','=','hms_invoice.customer_id')
+            ->join('hms_particular_mode as patient_mode','patient_mode.id','=','hms_invoice.patient_mode_id')
+            ->join('hms_particular_mode as patient_payment_mode','patient_payment_mode.id','=','hms_invoice.patient_payment_mode_id')
+            ->leftjoin('hms_particular as vr','vr.id','=','hms_invoice.room_id')
+            ->where('hms_invoice.config_id', $domain['hms_config'])
+            ->select([
+                'hms_patient_waiver.uid as uid',
+                'hms_invoice.id',
+                'customer.customer_id as patient_id',
+                'customer.health_id',
+                'customer.name',
+                'customer.mobile',
+                'customer.address',
+                DB::raw("CONCAT(UCASE(LEFT(customer.gender, 1)), LCASE(SUBSTRING(customer.gender, 2))) as gender"),
+                DB::raw('DATE_FORMAT(hms_invoice.created_at, "%d-%m-%Y %H:%i %p") as created_at'),
+                DB::raw('DATE_FORMAT(hms_invoice.admission_date, "%d-%m-%Y %H:%i %p") as admission_date'),
+                DB::raw('DATE_FORMAT(customer.dob, "%d-%M-%Y") as dob'),
+                'hms_invoice.process as process',
+                'hms_invoice.admission_day',
+                'hms_invoice.consume_day',
+                'hms_invoice.remaining_day',
+                'hms_invoice.total as total',
+                'hms_invoice.total as amount',
+                'vr.display_name as room_name',
+                'patient_mode.name as patient_mode_name',
+                'patient_payment_mode.name as patient_payment_mode_name',
+
+            ])->orderBy('hms_invoice.updated_at', 'DESC');
+
+        // ✅ Use clone for total count before skip/take
+        if (isset($request['mode']) && !empty($request['mode']) and $request['mode'] == "opd_investigation") {
+            $entitiesQuery = $entitiesQuery->where('hms_invoice.process', 'closed');
+            $entitiesQuery = $entitiesQuery->where('patient_mode.slug', 'opd');
+        }elseif (isset($request['mode']) && !empty($request['mode']) and $request['mode'] == "ipd_investigation") {
+            $entitiesQuery = $entitiesQuery->where('hms_invoice.process', 'admitted');
+            $entitiesQuery = $entitiesQuery->where('patient_mode.slug', 'ipd');
+        }elseif (isset($request['mode']) && !empty($request['mode']) and $request['mode'] == "ipd_room") {
+            $entitiesQuery = $entitiesQuery->where('hms_invoice.process', 'admitted');
+            $entitiesQuery = $entitiesQuery->where('patient_mode.slug', 'ipd');
+        }
+        $entities = $entitiesQuery
+            ->skip($skip)
+            ->take($perPage)
+            ->get();
+        $total  = $entities->count();
+        return [
+            'count' => $total,
+            'entities' => $entities
+        ];
+
+    }
+
+     public static function getInvoices($request,$domain)
+    {
+        $page = isset($request['page']) && $request['page'] > 0 ? ($request['page'] - 1) : 0;
+        $perPage = isset($request['offset']) && $request['offset'] != '' ? (int)$request['offset'] : 50;
+        $skip = $page * $perPage;
+
         $entitiesQuery = InvoiceParticularModel::join('hms_invoice as hms_invoice', 'hms_invoice_particular.hms_invoice_id', '=', 'hms_invoice.id')
+            ->join('cor_customers as customer','customer.id','=','hms_invoice.customer_id')
+            ->join('hms_particular_mode as patient_mode','patient_mode.id','=','hms_invoice.patient_mode_id')
+            ->join('hms_particular_mode as patient_payment_mode','patient_payment_mode.id','=','hms_invoice.patient_payment_mode_id')
+            ->leftjoin('hms_particular as vr','vr.id','=','hms_invoice.room_id')
             ->where('hms_invoice.config_id', $domain['hms_config'])
             ->select([
                 'hms_invoice_particular.hms_invoice_id',
                 'hms_invoice.id',
-                'hms_invoice.updated_at'
+                'hms_invoice.uid',
+                'customer.customer_id as patient_id',
+                'customer.health_id',
+                'customer.name',
+                'customer.mobile',
+                'customer.address',
+                DB::raw("CONCAT(UCASE(LEFT(customer.gender, 1)), LCASE(SUBSTRING(customer.gender, 2))) as gender"),
+                DB::raw('DATE_FORMAT(hms_invoice.created_at, "%d-%m-%Y %H:%i %p") as created_at'),
+                DB::raw('DATE_FORMAT(hms_invoice.admission_date, "%d-%m-%Y %H:%i %p") as admission_date'),
+                DB::raw('DATE_FORMAT(customer.dob, "%d-%M-%Y") as dob'),
+                'hms_invoice.process as process',
+                'hms_invoice.admission_day',
+                'hms_invoice.consume_day',
+                'hms_invoice.remaining_day',
+                'hms_invoice.total as total',
+                'hms_invoice.total as amount',
+                'vr.display_name as room_name',
+                'patient_mode.name as patient_mode_name',
+                'patient_payment_mode.name as patient_payment_mode_name',
+                'hms_invoice_particular.mode as mode',
+
             ])
             ->groupBy('hms_invoice_particular.hms_invoice_id')
             ->orderBy('hms_invoice.updated_at', 'DESC');
 
         // ✅ Use clone for total count before skip/take
         $total = (clone $entitiesQuery)->count(DB::raw('DISTINCT hms_invoice_particular.hms_invoice_id'));
-
+        if (isset($request['mode']) && !empty($request['mode']) and $request['mode'] == "opd_investigation") {
+            $entitiesQuery = $entitiesQuery->where('hms_invoice.process', 'closed');
+            $entitiesQuery = $entitiesQuery->where('patient_mode.slug', 'opd');
+            $entitiesQuery = $entitiesQuery->where('hms_invoice_particular.mode', 'investigation');
+        }elseif (isset($request['mode']) && !empty($request['mode']) and $request['mode'] == "ipd_investigation") {
+            $entitiesQuery = $entitiesQuery->where('hms_invoice.process', 'admitted');
+            $entitiesQuery = $entitiesQuery->where('patient_mode.slug', 'ipd');
+            $entitiesQuery = $entitiesQuery->where('hms_invoice_particular.mode', 'investigation');
+        }elseif (isset($request['mode']) && !empty($request['mode']) and $request['mode'] == "ipd_room") {
+            $entitiesQuery = $entitiesQuery->where('hms_invoice.process', 'admitted');
+            $entitiesQuery = $entitiesQuery->where('patient_mode.slug', 'ipd');
+            $entitiesQuery = $entitiesQuery->where('hms_invoice_particular.mode', 'room');
+        }
         $entities = $entitiesQuery
             ->skip($skip)
             ->take($perPage)
@@ -106,197 +182,88 @@ class PatientWaiverModel extends Model
 
     }
 
-    public static function getRecordsPatient($request,$domain)
+    public static function getInvoiceParticular($id,$mode)
     {
-        $page =  isset($request['page']) && $request['page'] > 0?($request['page'] - 1 ) : 0;
-        $perPage = isset($request['offset']) && $request['offset']!=''? (int)($request['offset']):50;
-        $skip = isset($page) && $page!=''? (int)$page * $perPage:0;
-
-        $entities = InvoiceModel::where([['hms_invoice.config_id',$domain['hms_config']]])
-            ->join('hms_prescription as prescription','prescription.hms_invoice_id','=','hms_invoice.id')
-            ->leftjoin('users as doctor','doctor.id','=','prescription.created_by_id')
-            ->leftjoin('hms_particular as vr','vr.id','=','hms_invoice.room_id')
-            ->leftjoin('users as createdBy','createdBy.id','=','hms_invoice.created_by_id')
-            ->join('cor_customers as customer','customer.id','=','hms_invoice.customer_id')
-            ->join('hms_particular_mode as patient_mode','patient_mode.id','=','hms_invoice.patient_mode_id')
-            ->join('hms_particular_mode as patient_payment_mode','patient_payment_mode.id','=','hms_invoice.patient_payment_mode_id')
-            ->leftJoin('hms_particular as admit_consultant', 'admit_consultant.id', '=', 'hms_invoice.admit_consultant_id')
-            ->leftJoin('hms_particular as admit_doctor', 'admit_doctor.id', '=', 'hms_invoice.admit_doctor_id')
-            ->leftJoin('hms_particular_mode as admit_unit', 'admit_unit.id', '=', 'hms_invoice.admit_unit_id')
-            ->leftJoin('hms_particular_mode as admit_department', 'admit_department.id', '=', 'hms_invoice.admit_department_id')
+        $entity = InvoiceParticularModel::join('hms_invoice', 'hms_invoice.id', '=', 'hms_invoice_particular.hms_invoice_id')
+            ->join('hms_particular', 'hms_particular.id', '=', 'hms_invoice_particular.particular_id')
+            ->where(function ($query) use ($id) {
+                $query->where('hms_invoice.id', '=', $id)
+                    ->orWhere('hms_invoice.uid', '=', $id);
+            })
+            ->where('hms_invoice_particular.mode', $mode)
+            ->where('hms_invoice_particular.process', 'New')
+            ->whereNull('hms_invoice_particular.invoice_transaction_id')
+            ->where('hms_invoice_particular.status', 0)
+            ->where('hms_particular.is_available', 1)
             ->select([
-                'hms_invoice.id',
-                'hms_invoice.parent_id as parent_id',
-                'prescription.id as prescription_id',
-                'prescription.created_by_id as prescription_created_by_id',
-                'hms_invoice.invoice as invoice',
-                'customer.customer_id as patient_id',
-                'customer.health_id',
-                'doctor.name as doctor_name',
-                'customer.name',
-                'customer.mobile',
-                'customer.address',
-                DB::raw("CONCAT(UCASE(LEFT(customer.gender, 1)), LCASE(SUBSTRING(customer.gender, 2))) as gender"),
-                DB::raw('DATE_FORMAT(hms_invoice.created_at, "%d-%m-%Y") as created_at'),
-                DB::raw('DATE_FORMAT(hms_invoice.appointment_date, "%d-%M-%Y") as appointment'),
-                DB::raw('DATE_FORMAT(customer.dob, "%d-%M-%Y") as dob'),
-                'hms_invoice.process as process',
-                'vr.name as visiting_room',
-                'patient_mode.name as patient_mode_name',
-                'patient_payment_mode.name as patient_payment_mode_name',
-                'patient_payment_mode.slug as patient_payment_mode_slug',
-                'createdBy.name as created_by',
-                'hms_invoice.sub_total as total',
-                'hms_invoice.referred_mode as referred_mode',
-                'prescription.diabetes as diabetes',
-                'prescription.blood_pressure as blood_pressure',
-                'prescription.weight as weight',
-                'prescription.height as height',
-                'admit_consultant.name as admit_consultant_name',
-                'admit_doctor.name as admit_doctor_name',
-                'admit_unit.name as admit_unit_name',
-                'admit_department.name as admit_department_name',
-            ]);
-        $entities = $entities->where('prescription.process','done');
-        if (isset($request['term']) && !empty($request['term'])){
-            $term = trim($request['term']);
-            $entities = $entities->where(function ($q) use ($term) {
-                $q->where('hms_invoice.invoice', 'LIKE', "%{$term}%")
-                    ->orWhere('customer.customer_id', 'LIKE', "%{$term}%")
-                    ->orWhere('customer.name', 'LIKE', "%{$term}%")
-                    ->orWhere('customer.mobile', 'LIKE', "%{$term}%")
-                    ->orWhere('customer.nid', 'LIKE', "%{$term}%")
-                    ->orWhere('customer.health_id', 'LIKE', "%{$term}%");
-            });
-        }
-        if (isset($request['patient_mode']) && !empty($request['patient_mode'])){
-            if ($request['patient_mode'] == 'ipd') {
-                $entities = $entities->where('patient_mode.slug', $request['patient_mode']);
-                $entities = $entities->where('hms_invoice.process','admitted');
-            } else {
-                $entities = $entities->where('patient_mode.slug', $request['patient_mode']);
-            }
-        }
+                'hms_invoice_particular.id',
+                'hms_invoice_particular.hms_invoice_id',
+                'hms_invoice_particular.particular_id',
+                'hms_invoice_particular.name as item_name',
+                'hms_invoice_particular.quantity',
+                DB::raw('COALESCE(hms_invoice_particular.price, 0) as price'),
+                DB::raw('COALESCE(hms_invoice_particular.sub_total, 0) as sub_total'),
 
-        if (isset($request['room_id']) && !empty($request['room_id'])){
-            $entities = $entities->where('hms_invoice.room_id',$request['room_id']);
-        }
-
-        if (isset($request['process']) && !empty($request['process'])){
-            $entities = $entities->where('hms_invoice.process',$request['process']);
-        }
-
-        if (isset($request['customer_id']) && !empty($request['customer_id'])){
-            $entities = $entities->where('hms_invoice.customer_id',$request['customer_id']);
-        }
-
-        if (isset($request['created']) && !empty($request['created'])){
-            $date = new \DateTime($request['created']);
-            $start_date = $date->format('Y-m-d 00:00:00');
-            $end_date = $date->format('Y-m-d 23:59:59');
-            $entities = $entities->whereBetween('hms_invoice.created_at',[$start_date, $end_date]);
-        }
-
-        $total  = $entities->count();
-        $entities = $entities->skip($skip)
-            ->take($perPage)
-            ->orderBy('hms_invoice.updated_at','DESC')
-            ->get();
-        $data = array('count'=>$total,'entities'=>$entities);
-        return $data;
-    }
-
-    public static function getShow($id)
-    {
-
-        $entity = self::where(function ($query) use ($id) {
-            $query->where('hms_prescription.id', '=', $id)
-                ->orWhere('hms_prescription.uid', '=', $id);
-        })
-            ->join('hms_invoice','hms_invoice.id','=','hms_prescription.hms_invoice_id')
-            ->leftjoin('hms_invoice_patient_referred','hms_invoice_patient_referred.hms_invoice_id','=','hms_invoice.id')
-            ->leftjoin('hms_particular as referred_room','referred_room.id','=','hms_invoice_patient_referred.opd_room_id')
-            ->leftjoin('users as doctor','doctor.id','=','hms_prescription.prescribe_doctor_id')
-            ->leftjoin('cor_user_profiles as profiles','profiles.id','=','doctor.id')
-            ->leftjoin('cor_setting as designation','designation.id','=','profiles.designation_id')
-            ->join('cor_customers','cor_customers.id','=','hms_invoice.customer_id')
-            ->leftjoin('inv_sales','inv_sales.id','=','hms_invoice.sales_id')
-            ->leftjoin('users as createdBy','createdBy.id','=','hms_invoice.created_by_id')
-            ->leftjoin('hms_particular as room','room.id','=','hms_invoice.room_id')
-            ->leftjoin('hms_particular_mode as patient_mode','patient_mode.id','=','hms_invoice.patient_mode_id')
-            ->leftjoin('hms_particular_mode as particular_payment_mode','particular_payment_mode.id','=','hms_invoice.patient_payment_mode_id')
-            ->select([
-                'hms_prescription.id as id',
-                'hms_prescription.uid as prescription_uid',
-                'hms_invoice.id as invoice_id',
-                DB::raw('DATE_FORMAT(hms_invoice.updated_at, "%d-%m-%y %H:%i %p") as created'),
-                DB::raw('DATE_FORMAT(hms_invoice.appointment_date, "%d-%m-%y") as appointment'),
-                'hms_invoice.invoice as invoice',
-                'hms_invoice.total as total',
-                'hms_invoice.barcode',
-                'hms_invoice.is_vital',
-                'hms_invoice.weight as weight',
-                'hms_invoice.height as height',
-                'hms_invoice.bp as bp',
-                'hms_invoice.oxygen  as oxygen',
-                'hms_invoice.temperature  as temperature',
-                'hms_invoice.sat_with_O2  as sat_with_O2',
-                'hms_invoice.sat_liter  as sat_liter',
-                'hms_invoice.sat_without_O2  as sat_without_O2',
-                'hms_invoice.respiration  as respiration',
-                'hms_invoice.pulse  as pulse',
-                'hms_invoice.comment',
-                'cor_customers.id as customer_id',
-                'cor_customers.name as name',
-                'cor_customers.mobile as mobile',
-                'hms_invoice.guardian_name as guardian_name',
-                'hms_invoice.guardian_mobile as guardian_mobile',
-                'cor_customers.customer_id as patient_id',
-                'cor_customers.health_id as health_id',
-                'cor_customers.gender as gender',
-                'hms_invoice.year as year',
-                'hms_invoice.month as month',
-                'hms_invoice.day as day',
-                'doctor.name as doctor_name','doctor.employee_id as employee_id',
-                DB::raw("CONCAT('".url('')."/uploads/core/user/signature/', profiles.signature_path) AS signature_path"),
-                'profiles.id as profiles_id',
-                'designation.name as designation_name',
-                'hms_prescription.blood_pressure as blood_pressure',
-                'hms_prescription.diabetes as diabetes',
-                'hms_prescription.json_content as json_content',
-                DB::raw('DATE_FORMAT(hms_prescription.follow_up_id, "%d-%m-%y") as follow_up_date'),
-                DB::raw('DATE_FORMAT(cor_customers.dob, "%d-%m-%y") as dob'),
-                'cor_customers.identity_mode as identity_mode',
-                'cor_customers.nid as nid',
-                'cor_customers.address as address',
-                'createdBy.username as created_by_user_name',
-                'createdBy.name as created_by_name',
-                'createdBy.id as created_by_id',
-                'room.name as room_name',
-                'patient_mode.name as mode_name',
-                'particular_payment_mode.name as payment_mode_name',
-                'hms_invoice.process as process',
-                'hms_invoice_patient_referred.id as patient_referred_id',
-                'hms_invoice_patient_referred.referred_mode as referred_mode',
-                'hms_invoice_patient_referred.hospital as referred_hospital',
-                'referred_room.name as referred_room',
-                'hms_invoice_patient_referred.comment as referred_comment',
-                'hms_invoice_patient_referred.json_content as referred_json_content',
             ])
-            ->with(['invoice_particular' => function ($query) {
-                $query->select([
-                    'hms_invoice_particular.id',
-                    'hms_invoice_particular.hms_invoice_id',
-                    'hms_invoice_particular.name as item_name',
-                    'hms_invoice_particular.quantity',
-                    'hms_invoice_particular.price',
-                ]);
-            }])
-            ->with(['prescription_medicine'])
-            ->first();
+            ->get();
 
         return $entity;
     }
+
+    public static function getInvoiceRoomParticular($id,$mode)
+    {
+        $entity = InvoiceParticularModel::join('hms_invoice', 'hms_invoice.id', '=', 'hms_invoice_particular.hms_invoice_id')
+            ->join('hms_particular', 'hms_particular.id', '=', 'hms_invoice_particular.particular_id')
+            ->where(function ($query) use ($id) {
+                $query->where('hms_invoice.id', '=', $id)
+                    ->orWhere('hms_invoice.uid', '=', $id);
+            })
+            ->where('hms_invoice_particular.mode', $mode)
+            ->where('hms_invoice_particular.process', 'New')
+            ->whereNull('hms_invoice_particular.invoice_transaction_id')
+            ->where('hms_invoice_particular.status', 0)
+            ->select([
+                'hms_invoice_particular.id',
+                'hms_invoice_particular.hms_invoice_id',
+                'hms_invoice_particular.particular_id',
+                'hms_invoice_particular.name as item_name',
+                'hms_invoice_particular.quantity',
+                DB::raw('COALESCE(hms_invoice_particular.price, 0) as price'),
+                DB::raw('COALESCE(hms_invoice_particular.sub_total, 0) as sub_total'),
+
+            ])
+            ->get();
+
+        return $entity;
+    }
+
+    public static function insertInvoiceTransaction($entity,$hms_invoice_id,$mode,$investigations)
+    {
+        $date =  new \DateTime("now");
+        if (!empty($investigations) && is_array($investigations)) {
+            $invoiceTransaction = InvoiceTransactionModel::updateOrCreate(
+                [
+                    'hms_invoice_id'=> $hms_invoice_id,
+                    'patient_waiver_id'=> $entity->id,
+                ],
+                [
+                    'created_by_id'=> $entity->created_by_id,
+                    'mode'    => $mode,
+                    'updated_at'    => $date,
+                    'created_at'    => $date,
+                ]
+            );
+            InvoiceParticularModel::where('hms_invoice_id', $invoiceTransaction->hms_invoice_id)
+                ->whereIn('id', $investigations)
+                ->update([
+                    'patient_waiver_id'      => $invoiceTransaction->patient_waiver_id,
+                    'invoice_transaction_id' => $invoiceTransaction->id,
+                    'price'                  => 0,
+                    'is_waver'               => 1,
+                ]);
+        }
+    }
+
 
 
 }

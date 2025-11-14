@@ -153,6 +153,26 @@ class ParticularModel extends Model
             ->get();
     }
 
+    public static function getParticularInvestigation($domain,$dropdownType)
+    {
+
+        $config =  $domain['hms_config'];
+        return DB::table('hms_particular')->where('hms_particular.config_id',$config)
+            ->join('hms_particular_type','hms_particular_type.id','=','hms_particular.particular_type_id')
+            ->join('hms_particular_master_type','hms_particular_master_type.id','=','hms_particular_type.particular_master_type_id')
+            ->where('hms_particular_master_type.slug',$dropdownType)
+            ->where('hms_particular.is_available', 1)
+            ->select([
+                'hms_particular.id',
+                'hms_particular.name',
+                'hms_particular.display_name',
+                'hms_particular.price',
+                'hms_particular.slug',
+            ])
+            ->orderBy('hms_particular.name','ASC')
+            ->get();
+    }
+
     public static function getTreatmentMedicine($domain,$request){
 
         $config =  $domain['hms_config'];

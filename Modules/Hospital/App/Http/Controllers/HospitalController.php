@@ -851,6 +851,17 @@ class HospitalController extends Controller
         return $service->returnJosnResponse($dropdown);
     }
 
+     /**
+     * dropdown the specified resource from storage.
+     */
+    public function investigationDropdown()
+    {
+        $domain = $this->domain;
+        $dropdown = ParticularModel::getParticularInvestigation($domain,'investigation');
+        $service = new JsonRequestResponse();
+        return $service->returnJosnResponse($dropdown);
+    }
+
     /**
      * dropdown the specified resource from storage.
      */

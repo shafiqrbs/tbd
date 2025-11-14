@@ -131,5 +131,29 @@ class InvoiceParticularModel extends Model
 
     }
 
+   public static function checkExistingWaiver($data)
+    {
+
+        // Reset all to 0 first
+        $entity = $data['hms_invoice_id'];
+        $array = json_decode($data['particular_ids'], true);
+
+        $query = self::where('hms_invoice_id', $entity)
+            ->whereIn('id', $array)
+            ->where('is_waver', 1);
+
+        $count = $query->count();
+        $availableIds = $query->pluck('id')->toArray();
+        $missingIds = array_diff($array, $availableIds);
+        return [
+            'count' => $count,
+            'available' => $availableIds,
+            'new' => $missingIds,
+        ];
+
+    }
+
+
+
 
 }

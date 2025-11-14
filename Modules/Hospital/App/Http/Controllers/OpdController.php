@@ -335,46 +335,6 @@ class OpdController extends Controller
         return $service->returnJosnResponse($entity);
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function patientWaver(Request $request, $id)
-    {
-        $data = $request->all();
-        $entity = InvoiceModel::where('uid',$id)->first();
-        $data['waiver_created_by_id']= $this->domain['user_id'];
-        $data['waiverComment']= $data['comment'] ?? null;
-        $entity->update($data);
-        InvoiceParticularModel::updateWaverParticular($entity->id,$data['particulars']);
-        $service = new JsonRequestResponse();
-        return $service->returnJosnResponse($entity);
-
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function patientWaverShow($id)
-    {
-        $service = new JsonRequestResponse();
-        $entity = InvoiceModel::where('uid',$id)->first();
-        return $service->returnJosnResponse($entity);
-    }
-
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function patientWaverApprove($id)
-    {
-        $service = new JsonRequestResponse();
-        $entity = InvoiceModel::where('uid',$id)->first();
-        $data['waver_approved_by_id'] = $this->domain['user_id'];
-        $entity->update($data);
-        return $service->returnJosnResponse($entity);
-
-    }
-
 
     /**
      * Update the specified resource in storage.

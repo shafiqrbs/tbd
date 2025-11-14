@@ -71,8 +71,7 @@ class BillingModel extends Model
         $perPage = isset($request['offset']) && $request['offset']!=''? (int)($request['offset']):50;
         $skip = isset($page) && $page!=''? (int)$page * $perPage:0;
 
-        $entities = InvoiceTransactionModel::where([['hms_invoice.config_id',$domain['hms_config']]])
-            ->join('hms_invoice as hms_invoice','hms_invoice.id','=','hms_invoice_transaction.hms_invoice_id')
+        $entities = InvoiceModel::where([['hms_invoice.config_id',$domain['hms_config']]])
             ->leftjoin('hms_prescription as prescription','prescription.hms_invoice_id','=','hms_invoice.id')
             ->leftjoin('users as doctor','doctor.id','=','prescription.created_by_id')
             ->leftjoin('hms_particular as vr','vr.id','=','hms_invoice.room_id')
@@ -81,8 +80,8 @@ class BillingModel extends Model
             ->join('hms_particular_mode as patient_mode','patient_mode.id','=','hms_invoice.patient_mode_id')
             ->select([
                 'hms_invoice.id',
-                'hms_invoice.barcode',
                 'hms_invoice.uid',
+                'hms_invoice.barcode',
                 'prescription.created_by_id as prescription_created_by_id',
                 'hms_invoice.invoice as invoice',
                 'customer.customer_id as patient_id',
@@ -90,6 +89,7 @@ class BillingModel extends Model
                 'customer.name',
                 'customer.mobile',
                 'patient_mode.name as patient_mode_name',
+                'patient_mode.slug as patient_mode_slug',
                 DB::raw("CONCAT(UCASE(LEFT(customer.gender, 1)), LCASE(SUBSTRING(customer.gender, 2))) as gender"),
                 DB::raw('DATE_FORMAT(hms_invoice.created_at, "%d-%m-%Y") as created_at'),
                 DB::raw('DATE_FORMAT(hms_invoice.admission_date, "%d-%m-%Y") as admission_date'),
@@ -122,9 +122,6 @@ class BillingModel extends Model
             $entities = $entities->where('hms_invoice.room_id',$request['room_id']);
         }
 
-        if (isset($request['process']) && !empty($request['process'])){
-            $entities = $entities->where('hms_invoice.process',$request['process']);
-        }
         if (isset($request['customer_id']) && !empty($request['customer_id'])){
             $entities = $entities->where('hms_invoice.customer_id',$request['customer_id']);
         }
@@ -141,7 +138,6 @@ class BillingModel extends Model
              $entities = $entities->whereBetween('hms_invoice.created_at',[$start_date, $end_date]);
          }*/
 
-        $entities->groupBy('hms_invoice_transaction.hms_invoice_id');
         $total  = $entities->count();
         $entities = $entities->skip($skip)
             ->take($perPage)
@@ -201,9 +197,11 @@ class BillingModel extends Model
                 'createdBy.name as created_by_name',
                 'createdBy.id as created_by_id',
                 'room.display_name as room_name',
-                'room.price as price',
+                'room.price as room_price',
                 'patient_mode.name as mode_name',
+                'patient_mode.slug as mode_slug',
                 'particular_payment_mode.name as payment_mode_name',
+                'patient_mode.slug as patient_mode_slug',
                 'hms_invoice.process as process',
                 'admit_consultant.name as admit_consultant_name',
                 'admit_unit.name as admit_unit_name',
@@ -213,6 +211,9 @@ class BillingModel extends Model
                 DB::raw('DATE_FORMAT(prescription.created_at, "%d-%m-%y") as prescription_created'),
                 'prescription_doctor.employee_id as prescription_doctor_id',
                 'prescription_doctor.name as prescription_doctor_name',
+                'hms_invoice.admission_day as room_admission_day',
+                'hms_invoice.consume_day as room_consume_day',
+                'hms_invoice.remaining_day as room_remaining_day',
             ])
             ->with(['invoice_transaction' => function ($query) {
                 $query->select([
