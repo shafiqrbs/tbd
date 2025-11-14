@@ -41,6 +41,12 @@ class InvoiceTransaction
      **/
     private $prescription;
 
+     /**
+     * @ORM\OneToOne(targetEntity="PatientWaiver")
+     * @ORM\JoinColumn(onDelete="CASCADE")
+     **/
+    private $patientWaiver;
+
     /**
      * @ORM\OneToOne(targetEntity="Modules\Inventory\App\Entities\Sales", cascade={"detach","merge"})
      * @ORM\JoinColumn(name="sale_id", referencedColumnName="id", onDelete="CASCADE")

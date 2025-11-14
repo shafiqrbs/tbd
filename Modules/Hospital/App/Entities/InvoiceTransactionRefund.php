@@ -39,8 +39,7 @@ class InvoiceTransactionRefund
      * @ORM\OneToOne(targetEntity="InvoiceTransaction")
      * @ORM\JoinColumn(onDelete="CASCADE")
      **/
-    private $prescription;
-
+    private $invoiceTransaction;
 
 
     /**

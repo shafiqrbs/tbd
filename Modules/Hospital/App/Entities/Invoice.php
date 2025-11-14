@@ -160,25 +160,6 @@ class Invoice
     private  $approvedBy;
 
 
-     /**
-     * @ORM\ManyToOne(targetEntity="Modules\Core\App\Entities\User")
-     * @ORM\JoinColumn(name="waiver_created_by_id", referencedColumnName="id", nullable=true)
-     **/
-    private  $waiverCreatedBy;
-
-    /**
-     * @ORM\ManyToOne(targetEntity="Modules\Core\App\Entities\User")
-     * @ORM\JoinColumn(name="waiver_approved_by_id", referencedColumnName="id", nullable=true)
-     **/
-    private  $waiverApprovedBy;
-
-    /**
-     * @var string
-     *
-     * @ORM\Column(type="text", nullable=true)
-     */
-    private $waiverComment;
-
 
     /**
      * @ORM\ManyToOne(targetEntity="Modules\Core\App\Entities\User")

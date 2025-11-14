@@ -7,11 +7,11 @@ use Gedmo\Mapping\Annotation as Gedmo;
 /**
  * InvoiceParticular
  *
- * @ORM\Table(name = "hms_invoice_particular_refund")
+ * @ORM\Table(name = "hms_invoice_transaction_refund_particular")
  * @ORM\Entity()
  */
 
-class InvoiceParticularRefund
+class InvoiceTransactionRefundParticular
 {
     /**
      * @var integer

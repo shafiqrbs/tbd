@@ -21,6 +21,13 @@ class PatientWaiver
      */
     private $id;
 
+    /**
+     * @var string
+     *
+     * @ORM\Column(type="string", length=20, nullable=true)
+     */
+    private $uid;
+
 
     /**
      * @ORM\ManyToOne(targetEntity="Invoice")
@@ -29,23 +36,46 @@ class PatientWaiver
     private $hmsInvoice;
 
 
-     /**
-     * @var string
-     *
-     * @ORM\Column( type="json",nullable = true)
+    /**
+     * @ORM\ManyToOne(targetEntity="Modules\Core\App\Entities\User")
+     * @ORM\JoinColumn(name="created_by_id", referencedColumnName="id", nullable=true)
+     **/
+    private  $createdBy;
+
+    /**
+     * @ORM\ManyToOne(targetEntity="Modules\Core\App\Entities\User")
+     * @ORM\JoinColumn(name="checked_by_id", referencedColumnName="id", nullable=true)
+     **/
+    private  $checkedBy;
+
+    /**
+     * @ORM\ManyToOne(targetEntity="Modules\Core\App\Entities\User")
+     * @ORM\JoinColumn(name="approved_by_id", referencedColumnName="id", nullable=true)
+     **/
+    private  $approvedBy;
+
+    /**
+     * @var \DateTime
+     * @ORM\Column(type="datetime", nullable=true)
      */
-    private $vitalChartJson;
+    private $checkedDate;
+
+    /**
+     * @var \DateTime
+     * @ORM\Column(type="datetime", nullable=true)
+     */
+    private $approvedDate;
 
 
     /**
      * @var string
      *
-     * @ORM\Column( type="json",nullable = true)
+     * @ORM\Column(type="text", nullable=true)
      */
-    private $insulinChartJson;
+    private $comment;
 
 
-     /**
+    /**
      * @var \DateTime
      * @Gedmo\Timestampable(on="create_at")
      * @ORM\Column(name="created_at", type="datetime")

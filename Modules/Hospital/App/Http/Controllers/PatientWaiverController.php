@@ -67,6 +67,45 @@ class PatientWaiverController extends Controller
         return $response;
     }
 
+    /**
+     * Remove the specified resource from storage.
+     */
+    public function process(Request $request , $id)
+    {
+        $mode = $request->get('mode');
+        $service = new JsonRequestResponse();
+        if($mode == 'room'){
+            $entity = PatientWaiverModel::getInvoiceRoomParticular($id,$mode);
+        }else{
+            $entity = PatientWaiverModel::getInvoiceParticular($id,$mode);
+        }
+        $data = $service->returnJosnResponse($entity);
+        return $data;
+
+    }
+
+    /**
+     * Store a newly created resource in storage.
+     */
+    public function store(Request $request)
+    {
+        $service = new JsonRequestResponse();
+        $input = $request->all();
+        $input['config_id'] = $this->domain['hms_config'];
+        $input['created_by_id'] = $this->domain['user_id'];
+        $input['hms_invoice_id'] = InvoiceModel::findByIdOrUid($input['hms_invoice_id'])->id;
+        $exist =  InvoiceParticularModel::checkExistingWaiver($input);
+        $count = count($exist['new']);
+        if($count > 0){
+            $entity = PatientWaiverModel::create($input);
+            PatientWaiverModel::insertInvoiceTransaction($entity,$input['hms_invoice_id'],$input['mode'],$exist['new']);
+            $data = $service->returnJosnResponse($entity);
+            return $data;
+        }
+        $data = $service->returnJosnResponse(null);
+        return $data;
+    }
+
 
 
     /**
@@ -75,57 +114,44 @@ class PatientWaiverController extends Controller
     public function show($id)
     {
         $service = new JsonRequestResponse();
-        $entity = BillingModel::getShow($id);
-        $data = $service->returnJosnResponse($entity);
-        return $data;
+        $entity = PatientWaiverModel::with('items')
+            ->where('uid', $id)
+            ->first();
+        return $service->returnJosnResponse($entity);
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function transaction($id,$reportId)
-    {
-        $service = new JsonRequestResponse();
-        $invoiceParticular = InvoiceTransactionModel::with(['items','createdDoctorInfo'])->find($reportId);
-        $data = $service->returnJosnResponse($invoiceParticular);
-        return $data;
-    }
+
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, $id)
+    public function approve(Request $request, $id)
     {
-        $domain = $this->domain;
         $data = $request->all();
-        $entity = InvoiceTransactionModel::find($id);
-        if($entity->process == "New"){
-            $data['amount'] = $data['amount'] ?? 0;
-            $data['process'] = 'Done';
-            $data['created_by_id'] = $domain['user_id'];
-            $data['approved_by_id'] = $domain['user_id'];
+        $date = now();
+        $entity = PatientWaiverModel::where('uid',$id)->first();
+        if(empty($entity->checked_by_id)){
+            $data['checked_by_id']= $this->domain['user_id'];
+            $data['checked_date'] = $date;
+        }elseif($entity->checked_by_id and empty($entity->approved_by_id)){
+            $data['approved_by_id']= $this->domain['user_id'];
+            $data['approved_date'] = $date;
         }
-        $data['comment'] = $data['comment'] ?? null;
         $entity->update($data);
-        InvoiceParticularModel::where('invoice_transaction_id', $id)->update(['status' => true]);
-        $amount = InvoiceTransactionModel::where('hms_invoice_id', $entity->hms_invoice_id)->where('process','Done')->sum('amount');
-        $total = InvoiceParticularModel::where('hms_invoice_id', $entity->hms_invoice_id)->where('status',true)->sum('sub_total');
-        InvoiceParticularModel::getCountBedRoom($entity->hms_invoice_id);
-        InvoiceModel::find($entity->hms_invoice_id)->update(['sub_total' => $total , 'total' => $total, 'amount' => $amount]);
+        if($entity->approved_by_id){
+            $transaction = InvoiceTransactionModel::where('patient_waiver_id', $entity->id);
+            $transaction->update([
+                'approved_by_id' => $this->domain['user_id'],
+                'process' => 'Done',
+                'sub_total' => 0,
+                'total' => 0,
+                'amount' => 0,
+            ]);
+        }
         $service = new JsonRequestResponse();
         return $service->returnJosnResponse($entity);
 
     }
-
-    public function inlineUpdate(Request $request,$id)
-    {
-        $input = $request->all();
-        $findParticular = InvoicePathologicalReportModel::find($id);
-        $findParticular->result = $input['result'];
-        $findParticular->save();
-        return response()->json(['success' => $findParticular]);
-    }
-
 
     /**
      * Remove the specified resource from storage.
@@ -133,9 +159,23 @@ class PatientWaiverController extends Controller
     public function destroy($id)
     {
         $service = new JsonRequestResponse();
-        PrescriptionModel::find($id)->delete();
-        $entity = ['message' => 'delete'];
-        return $service->returnJosnResponse($entity);
+        $entity = PatientWaiverModel::where('uid',$id)->first();
+        if($entity){
+            $items = InvoiceParticularModel::where('patient_waiver_id', $entity->id)->get();
+            foreach ($items as $item) {
+                $item->update([
+                    'patient_waiver_id'      => null,
+                    'invoice_transaction_id' => null,
+                    'price'                  => $item->estimate_price, // use its own field
+                    'is_waver'               => 0,
+                ]);
+            }
+            $entity->delete();
+            $data = ['message' => 'delete'];
+        }else{
+            $data = ['message' => 'invalid'];
+        }
+        return $service->returnJosnResponse($data);
     }
 
 }

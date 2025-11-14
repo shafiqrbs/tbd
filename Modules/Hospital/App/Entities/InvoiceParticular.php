@@ -48,6 +48,12 @@ class InvoiceParticular
      **/
     private $invoiceTransaction;
 
+    /**
+     * @ORM\ManyToOne(targetEntity="PatientWaiver")
+     * @ORM\JoinColumn(onDelete="CASCADE")
+     **/
+    private $patientWaiver;
+
 
     /**
      * @ORM\ManyToOne(targetEntity="InvoicePathologicalGroup")

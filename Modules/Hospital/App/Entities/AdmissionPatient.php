@@ -21,6 +21,13 @@ class AdmissionPatient
      */
     private $id;
 
+    /**
+     * @var string
+     *
+     * @ORM\Column(type="string", length=20, nullable=true)
+     */
+    private $uid;
+
 
     /**
      * @ORM\OneToOne(targetEntity="Invoice")
