@@ -60,6 +60,8 @@ class MedicineModel extends Model
 
         return $entities;
     }
+
+
     public static function getDosageDropdown($domain)
     {
         $entities = self::where([

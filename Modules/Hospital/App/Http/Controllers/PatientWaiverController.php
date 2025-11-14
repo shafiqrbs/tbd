@@ -67,6 +67,25 @@ class PatientWaiverController extends Controller
         return $response;
     }
 
+     /**
+     * Display a listing of the resource.
+     */
+    public function invoice(Request $request){
+
+        $domain = $this->domain;
+        $data = PatientWaiverModel::getInvoices($request,$domain);
+        $response = new Response();
+        $response->headers->set('Content-Type','application/json');
+        $response->setContent(json_encode([
+            'message' => 'success',
+            'status' => Response::HTTP_OK,
+            'total' => $data['count'],
+            'data' => $data['entities']
+        ]));
+        $response->setStatusCode(Response::HTTP_OK);
+        return $response;
+    }
+
     /**
      * Remove the specified resource from storage.
      */

@@ -29,6 +29,14 @@ class InvoiceParticular
     private $uid;
 
 
+     /**
+     * @var string
+     *
+     * @ORM\Column(type="string", length=20, nullable=true)
+     */
+    private $uniqueId;
+
+
     /**
      * @ORM\ManyToOne(targetEntity="Invoice")
      * @ORM\JoinColumn(onDelete="CASCADE")

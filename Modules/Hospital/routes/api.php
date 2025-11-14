@@ -40,6 +40,7 @@ Route::prefix('/hospital/select')->middleware([HeaderAuthenticationMiddleware::c
     Route::get('/location', [HospitalController::class,'locationDropdown'])->name('location_dropdown');
     Route::get('/category', [HospitalController::class,'categoryDropdown'])->name('category_dropdown');
     Route::get('/bymeal', [HospitalController::class,'mealDropdown'])->name('meal_dropdown');
+    Route::get('/investigation', [HospitalController::class,'investigationDropdown'])->name('investigation_dropdown');
     Route::get('/dosage', [HospitalController::class,'dosageDropdown'])->name('dosage_dropdown');
     Route::get('/particular-content', [HospitalController::class,'particularContentDropdown'])->name('particular_content_dropdown');
     Route::get('/module', [HospitalController::class,'particularModuleDropdown'])->name('particular_module_dropdown');
@@ -192,9 +193,6 @@ Route::prefix('/hospital')->middleware([HeaderAuthenticationMiddleware::class])-
             'update' => 'medicine.update',
             'destroy' => 'medicine.destroy',
         ]);
-
-
-
     Route::get('/epharma/barcode/{barcode}', [EpharamaController::class,'patientPrescription'])->name('patient_prescription');
     Route::prefix('lab-investigation')->name('lab-investigation.')->group(function () {
         Route::get('/sample-confirm/{id}', [LabInvestigationController::class,'barcodeConfirm'])->name('barcodeConfirm_update');
@@ -211,6 +209,7 @@ Route::prefix('/hospital')->middleware([HeaderAuthenticationMiddleware::class])-
     });
 
     Route::prefix('patient-waiver')->name('patient_waiver')->group(function () {
+        Route::get('invoice', [PatientWaiverController::class, 'invoice'])->name('patient_waiver_invoice');
         Route::apiResource('', PatientWaiverController::class)->parameters(['' => 'id']);
         Route::get('process/{id}', [PatientWaiverController::class, 'process'])->name('patient_waiver_process');
         Route::get('approve/{id}', [PatientWaiverController::class, 'approve'])->name('patient_waiver_process');

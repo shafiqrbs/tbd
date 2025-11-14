@@ -62,6 +62,65 @@ class PatientWaiverModel extends Model
         $perPage = isset($request['offset']) && $request['offset'] != '' ? (int)$request['offset'] : 50;
         $skip = $page * $perPage;
 
+        $entitiesQuery = PatientWaiverModel::join('hms_invoice as hms_invoice', 'hms_patient_waiver.hms_invoice_id', '=', 'hms_invoice.id')
+            ->join('cor_customers as customer','customer.id','=','hms_invoice.customer_id')
+            ->join('hms_particular_mode as patient_mode','patient_mode.id','=','hms_invoice.patient_mode_id')
+            ->join('hms_particular_mode as patient_payment_mode','patient_payment_mode.id','=','hms_invoice.patient_payment_mode_id')
+            ->leftjoin('hms_particular as vr','vr.id','=','hms_invoice.room_id')
+            ->where('hms_invoice.config_id', $domain['hms_config'])
+            ->select([
+                'hms_patient_waiver.uid as uid',
+                'hms_invoice.id',
+                'customer.customer_id as patient_id',
+                'customer.health_id',
+                'customer.name',
+                'customer.mobile',
+                'customer.address',
+                DB::raw("CONCAT(UCASE(LEFT(customer.gender, 1)), LCASE(SUBSTRING(customer.gender, 2))) as gender"),
+                DB::raw('DATE_FORMAT(hms_invoice.created_at, "%d-%m-%Y %H:%i %p") as created_at'),
+                DB::raw('DATE_FORMAT(hms_invoice.admission_date, "%d-%m-%Y %H:%i %p") as admission_date'),
+                DB::raw('DATE_FORMAT(customer.dob, "%d-%M-%Y") as dob'),
+                'hms_invoice.process as process',
+                'hms_invoice.admission_day',
+                'hms_invoice.consume_day',
+                'hms_invoice.remaining_day',
+                'hms_invoice.total as total',
+                'hms_invoice.total as amount',
+                'vr.display_name as room_name',
+                'patient_mode.name as patient_mode_name',
+                'patient_payment_mode.name as patient_payment_mode_name',
+
+            ])->orderBy('hms_invoice.updated_at', 'DESC');
+
+        // ✅ Use clone for total count before skip/take
+        if (isset($request['mode']) && !empty($request['mode']) and $request['mode'] == "opd_investigation") {
+            $entitiesQuery = $entitiesQuery->where('hms_invoice.process', 'closed');
+            $entitiesQuery = $entitiesQuery->where('patient_mode.slug', 'opd');
+        }elseif (isset($request['mode']) && !empty($request['mode']) and $request['mode'] == "ipd_investigation") {
+            $entitiesQuery = $entitiesQuery->where('hms_invoice.process', 'admitted');
+            $entitiesQuery = $entitiesQuery->where('patient_mode.slug', 'ipd');
+        }elseif (isset($request['mode']) && !empty($request['mode']) and $request['mode'] == "ipd_room") {
+            $entitiesQuery = $entitiesQuery->where('hms_invoice.process', 'admitted');
+            $entitiesQuery = $entitiesQuery->where('patient_mode.slug', 'ipd');
+        }
+        $entities = $entitiesQuery
+            ->skip($skip)
+            ->take($perPage)
+            ->get();
+        $total  = $entities->count();
+        return [
+            'count' => $total,
+            'entities' => $entities
+        ];
+
+    }
+
+     public static function getInvoices($request,$domain)
+    {
+        $page = isset($request['page']) && $request['page'] > 0 ? ($request['page'] - 1) : 0;
+        $perPage = isset($request['offset']) && $request['offset'] != '' ? (int)$request['offset'] : 50;
+        $skip = $page * $perPage;
+
         $entitiesQuery = InvoiceParticularModel::join('hms_invoice as hms_invoice', 'hms_invoice_particular.hms_invoice_id', '=', 'hms_invoice.id')
             ->join('cor_customers as customer','customer.id','=','hms_invoice.customer_id')
             ->join('hms_particular_mode as patient_mode','patient_mode.id','=','hms_invoice.patient_mode_id')
