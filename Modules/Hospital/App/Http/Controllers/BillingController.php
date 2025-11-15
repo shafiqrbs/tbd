@@ -116,7 +116,9 @@ class BillingController extends Controller
     {
         $domain = $this->domain;
         $data = $request->all();
-        $entity = InvoiceTransactionModel::find($id);
+        $entity = InvoiceTransactionModel::insertInvoiceTransaction($id,$data);
+        dd($data);
+
         if($entity->process == "New"){
             $data['amount'] = $data['amount'] ?? 0;
             $data['process'] = 'Done';

@@ -238,7 +238,7 @@ class BillingModel extends Model
             }])
              ->with(['invoice_particular' => function ($query) {
                 $query->select([
-                    'hms_invoice_particular.id as particular_id',
+                    'hms_invoice_particular.id',
                     'hms_invoice_particular.hms_invoice_id',
                     'hms_invoice_particular.name',
                     'hms_invoice_particular.price',

@@ -70,18 +70,6 @@ class InvoiceTransactionModel extends Model
         $jsonData = json_decode($prescription['json_content']);
         $investigations = ($jsonData->patient_report->patient_examination->investigation ?? []);
         if (!empty($investigations) && is_array($investigations)) {
-            /*$invoiceTransaction = self::updateOrCreate(
-                [
-                    'hms_invoice_id'               => $prescription->hms_invoice_id,
-                    'prescription_id'              => $prescription->id,
-                ],
-                [
-                    'created_by_id'    => $prescription->created_by_id,
-                    'mode'    => 'investigation',
-                    'updated_at'    => $date,
-                    'created_at'    => $date,
-                ]
-            );*/
             collect($investigations)->map(function ($investigation) use ($prescription,$uniqueId,$date) {
 
                 $particular = ParticularModel::find($investigation->id);
@@ -221,7 +209,6 @@ class InvoiceTransactionModel extends Model
         $date =  new \DateTime("now");
         $invoice = InvoiceModel::find($id);
         $items = $data;
-
         if (!empty($items) && is_array($items)) {
             $invoiceTransaction = self::create(
                 [
@@ -293,8 +280,6 @@ class InvoiceTransactionModel extends Model
             })->toArray();
         }
     }
-
-
 
     public function sales()
     {
@@ -379,6 +364,41 @@ class InvoiceTransactionModel extends Model
             )
             ->get();
         return $entity;
+    }
+
+    public static function insertInvoiceTransaction($entity,$data)
+    {
+        $date =  new \DateTime("now");
+        $hms_invoice_id =  $entity->id;
+        $investigations = json_decode($data['json_content']);
+        if (!empty($investigations) && is_array($investigations)) {
+            $invoiceTransaction = InvoiceTransactionModel::updateOrCreate(
+                [
+                    'hms_invoice_id'=> $hms_invoice_id,
+                ],
+                [
+                    'created_by_id'=> $entity->created_by_id,
+                    'mode'    => 'investigation',
+                    'updated_at'    => $date,
+                    'created_at'    => $date,
+                ]
+            );
+
+            if (!empty($investigations) && is_array($investigations)) {
+                collect($investigations)->map(function ($investigation) use ($hms_invoice_id,$invoiceTransaction,$date) {
+                    if($investigation['is_selected'] == true and $investigation['is_new'] == false){
+                        InvoiceParticularModel::where('hms_invoice_id', $invoiceTransaction->hms_invoice_id)
+                            ->where('id', $investigation[''])
+                            ->update([
+                                'invoice_transaction_id' => $invoiceTransaction->id,
+                                'price' => 0,
+                                'status' => 1,
+                            ]);
+                    }
+
+                }
+            }
+        }
     }
 
 
