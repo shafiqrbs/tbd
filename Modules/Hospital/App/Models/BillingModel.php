@@ -115,6 +115,14 @@ class BillingModel extends Model
             });
         }
 
+        if (isset($request['patient_mode']) && !empty($request['patient_mode'])){
+            if (is_array($request['patient_mode'])) {
+                $entities = $entities->whereIn('patient_mode.slug', $request['patient_mode']);
+            } else {
+                $entities = $entities->where('patient_mode.slug', $request['patient_mode']);
+            }
+        }
+
         if (isset($request['process']) && !empty($request['process'])){
             $entities = $entities->where('hms_invoice.process',$request['process']);
         }

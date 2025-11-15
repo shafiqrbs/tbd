@@ -70,17 +70,11 @@ class ParticularModel extends Model
             ->leftJoin('hms_particular_mode as paymentMode','paymentMode.id','=','hms_particular_details.payment_mode_id')
             ->leftJoin('hms_particular_mode as treatmentMode','treatmentMode.id','=','hms_particular_details.treatment_mode_id')
             ->leftJoin('hms_particular_mode as investigationGroup','investigationGroup.id','=','hms_particular_details.investigation_group_id')
+            ->leftJoin('hms_particular_mode as diagnosticRoom','diagnosticRoom.id','=','hms_particular.diagnostic_room_id')
+            ->leftJoin('hms_particular_mode as diagnosticDepartment','diagnosticDepartment.id','=','hms_particular.diagnostic_department_id')
             ->select([
-                'hms_particular.id',
+                'hms_particular.*',
                 'hms_particular.employee_id',
-                'hms_particular.name',
-                'hms_particular.display_name',
-                'hms_particular.slug',
-                'hms_particular.price',
-                'hms_particular.status',
-                'hms_particular.is_available',
-                'hms_particular.opd_referred',
-                'hms_particular.content',
                 'inv_category.name as category',
                 'room.name as room_name',
                 'patientType.name as patient_type_name',
@@ -97,6 +91,8 @@ class ParticularModel extends Model
                 'hms_particular_details.room_id as opd_room_id',
                 'hms_particular_details.store_id as store_id',
                 'hms_particular_details.report_format as report_format',
+                'diagnosticRoom.name as diagnostic_room',
+                'diagnosticDepartment.name as diagnostic_department',
             ]);
 
         if (!empty($request['term'])) {

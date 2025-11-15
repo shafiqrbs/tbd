@@ -189,7 +189,7 @@ class InvoiceParticular
     /**
      * @var string
      *
-     * @ORM\Column(type="mode" , type="string", length=30,options={"default"="investigation"})
+     * @ORM\Column(type="mode" , type="string", length=30)
      */
     private $mode;
 

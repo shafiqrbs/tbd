@@ -8,6 +8,7 @@ use Illuminate\Http\Response;
 use Modules\AppsApi\App\Services\JsonRequestResponse;
 
 use Modules\Core\App\Models\UserModel;
+use Modules\Hospital\App\Http\Requests\ParticularModeRequest;
 use Modules\Hospital\App\Models\ParticularModel;
 use Modules\Hospital\App\Models\ParticularModeModel;
 use Modules\Production\App\Http\Requests\SettingRequest;
@@ -47,13 +48,12 @@ class ParticularModeController extends Controller
      /**
      * Store a newly created resource in storage.
      */
-    public function store(SettingRequest $request)
+    public function store(ParticularModeRequest $request)
     {
         $service = new JsonRequestResponse();
         $input = $request->validated();
-        $getConfigId = SettingModel::getConfigId($this->domain['global_id']);
-        $input['config_id'] = $getConfigId;
-        $entity = SettingModel::create($input);
+        $input['config_id'] = $this->domain['hms_config'];
+        $entity = ParticularModeModel::create($input);
         $data = $service->returnJosnResponse($entity);
         return $data;
     }
@@ -64,7 +64,7 @@ class ParticularModeController extends Controller
     public function show($id)
     {
         $service = new JsonRequestResponse();
-        $entity = SettingModel::find($id);
+        $entity = ParticularModeModel::find($id);
         if (!$entity) {
             $entity = 'Data not found';
         }
@@ -77,7 +77,7 @@ class ParticularModeController extends Controller
      */
     public function edit($id)
     {
-        $entity = SettingModel::find($id);
+        $entity = ParticularModeModel::find($id);
         $status = $entity ? Response::HTTP_OK : Response::HTTP_NOT_FOUND;
         return response()->json([
             'message' => 'success',
@@ -91,14 +91,11 @@ class ParticularModeController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(SettingRequest $request, $id)
+    public function update(ParticularModeRequest $request, $id)
     {
         $data = $request->validated();
-        $entity = SettingModel::find($id);
-        $getConfigId = SettingModel::getConfigId($this->domain['global_id']);
-        $data['config_id'] = $getConfigId;
+        $entity = ParticularModeModel::find($id);
         $entity->update($data);
-
         $service = new JsonRequestResponse();
         return $service->returnJosnResponse($entity);
     }
@@ -109,38 +106,14 @@ class ParticularModeController extends Controller
     public function destroy($id)
     {
         $service = new JsonRequestResponse();
-        SettingModel::find($id)->delete();
+        $entity = ParticularModeModel::find($id);
+        if ($entity) {
+            $entity->update(['status' => false,'is_delete' => true]);
+        }
         $entity = ['message' => 'delete'];
         return $service->returnJosnResponse($entity);
     }
 
 
-    public function settingTypeDropdown()
-    {
-        $data = SettingTypeModel::getDropdown($this->domain);
-        $response = new Response();
-        $response->headers->set('Content-Type', 'application/json');
-        $response->setContent(json_encode([
-            'message' => 'success',
-            'status' => Response::HTTP_OK,
-            'data' => sizeof($data)>0 ? $data : []
-        ]));
-        $response->setStatusCode(Response::HTTP_OK);
-        return $response;
-    }
-
-    public function measurementInput()
-    {
-        $data = SettingModel::getMeasurementInputGenerate($this->domain['global_id']);
-        $response = new Response();
-        $response->headers->set('Content-Type', 'application/json');
-        $response->setContent(json_encode([
-            'message' => 'success',
-            'status' => Response::HTTP_OK,
-            'data' => sizeof($data)>0 ? $data : []
-        ]));
-        $response->setStatusCode(Response::HTTP_OK);
-        return $response;
-    }
 
 }

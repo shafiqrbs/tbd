@@ -66,6 +66,25 @@ class BillingController extends Controller
         return $response;
     }
 
+    /**
+     * Display a listing of the resource.
+     */
+    public function admission(Request $request){
+
+        $domain = $this->domain;
+        $data = BillingModel::getRecords($request,$domain);
+        $response = new Response();
+        $response->headers->set('Content-Type','application/json');
+        $response->setContent(json_encode([
+            'message' => 'success',
+            'status' => Response::HTTP_OK,
+            'total' => $data['count'],
+            'data' => $data['entities']
+        ]));
+        $response->setStatusCode(Response::HTTP_OK);
+        return $response;
+    }
+
 
 
     /**

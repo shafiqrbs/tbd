@@ -53,14 +53,19 @@ class Particular
     private $category;
 
     /**
-     * @ORM\ManyToOne(targetEntity="Particular", inversedBy="particularDepartments")
+     * @ORM\ManyToOne(targetEntity="Particular")
      **/
     private $department;
 
-     /**
-     * @ORM\ManyToOne(targetEntity="ParticularMode", inversedBy="particularDepartments")
+    /**
+     * @ORM\ManyToOne(targetEntity="ParticularMode")
      **/
-     private $labRoom;
+    private $diagnosticDepartment;
+
+     /**
+     * @ORM\ManyToOne(targetEntity="ParticularMode")
+     **/
+     private $diagnosticRoom;
 
     /**
      * @Gedmo\Blameable(on="create")

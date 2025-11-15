@@ -53,7 +53,8 @@ class ParticularModeModel extends Model
         $total  = $entity->count();
         $entities = $entity->skip($skip)
             ->take($perPage)
-            ->orderBy('id','DESC')
+            ->orderBy('hms_particular_module.name','ASC')
+            ->orderBy('hms_particular_mode.name','ASC')
             ->get();
 
         $data = array('count' => $total,'entities' => $entities);

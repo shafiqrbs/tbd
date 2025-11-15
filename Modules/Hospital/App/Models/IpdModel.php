@@ -135,6 +135,7 @@ class IpdModel extends Model
             [
                 'name'  => $roomRent->display_name,
                 'status'  => true,
+                'mode' => 'room',
                 'quantity'  => $minimumDaysRoomRent,
                 'price'     => $roomRent->price,
                 'sub_total' => ($roomRent->price * (int)$minimumDaysRoomRent),
@@ -150,6 +151,7 @@ class IpdModel extends Model
             [
                 'name'  => 'Admission Fee',
                 'status'  => true,
+                'mode' => 'admission',
                 'quantity'  => 1,
                 'price'     => $admissionFee->price,
                 'sub_total' => $admissionFee->price,

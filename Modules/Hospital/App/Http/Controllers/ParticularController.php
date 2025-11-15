@@ -135,7 +135,6 @@ class ParticularController extends Controller
         if($price){$data['price'] = $price; }
         if($name){$data['name'] = $name;}
         if(!empty($data)){ $entity->update($data);}
-
         ParticularDetailsModel::updateOrCreate(
             ['particular_id'    => $id]
         );
@@ -152,6 +151,14 @@ class ParticularController extends Controller
         }
         if (array_key_exists('is_available', $input)) {
             $findParticular->is_available = $findParticular->is_available ? 0:1;
+        }
+
+        if (array_key_exists('diagnostic_department_id', $input)) {
+            $findParticular->diagnostic_department_id = $input['diagnostic_department_id'];
+        }
+
+        if (array_key_exists('diagnostic_room_id', $input)) {
+            $findParticular->diagnostic_room_id = $input['diagnostic_room_id'];
         }
 
         if (array_key_exists('status', $input)) {

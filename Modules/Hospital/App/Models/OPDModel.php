@@ -124,12 +124,26 @@ class OPDModel extends Model
                 'created_by_id' => $data['created_by_id'] ?? null,
             ]
         );
+        $date =  new \DateTime("now");
+        $invoiceTransaction = InvoiceTransactionModel::create(
+                [
+                    'hms_invoice_id'   => $invoice->id,
+                    'created_by_id'    => $invoice->created_by_id,
+                    'mode'    => $data['patient_mode'],
+                    'updated_at'    => $date,
+                    'created_at'    => $date,
+                ]
+            );
 
         InvoiceParticularModel::create(
             [
                 'hms_invoice_id' => $invoice->id,
+                'invoice_transaction_id' => $invoiceTransaction->id,
                 'particular_id' => $particular->id ?? null,
+                'mode' => $data['patient_mode'],
                 'quantity' => 1,
+                'status' => 1,
+                'process' => 'Done',
                 'price' => $amount,
                 'sub_total' => $amount,
             ]
