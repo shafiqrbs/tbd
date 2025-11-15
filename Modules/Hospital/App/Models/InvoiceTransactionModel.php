@@ -388,7 +388,7 @@ class InvoiceTransactionModel extends Model
                 collect($investigations)->map(function ($investigation) use ($hms_invoice_id,$invoiceTransaction,$date) {
                     if($investigation['is_selected'] == true and $investigation['is_new'] == false){
                         InvoiceParticularModel::where('hms_invoice_id', $invoiceTransaction->hms_invoice_id)
-                            ->where('id', $investigation[''])
+                            ->where('id', $investigation['id'])
                             ->update([
                                 'invoice_transaction_id' => $invoiceTransaction->id,
                                 'price' => 0,
@@ -396,7 +396,7 @@ class InvoiceTransactionModel extends Model
                             ]);
                     }
 
-                }
+                })->toArray();
             }
         }
     }
