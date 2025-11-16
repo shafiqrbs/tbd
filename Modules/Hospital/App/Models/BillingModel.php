@@ -134,6 +134,8 @@ class BillingModel extends Model
             $entities = $entities->where('hms_invoice.customer_id',$request['customer_id']);
         }
 
+
+
         /*if (isset($request['created']) && !empty($request['created'])){
              $date = new \DateTime($request['created']);
              $start_date = $date->format('Y-m-d 00:00:00');
@@ -149,6 +151,7 @@ class BillingModel extends Model
         $total  = $entities->count();
         $entities = $entities->skip($skip)
             ->take($perPage)
+            ->groupBy('hms_invoice.id')
             ->orderBy('hms_invoice.updated_at','DESC')
             ->get();
         $data = array('count' => $total,'entities' => $entities);
@@ -246,7 +249,7 @@ class BillingModel extends Model
                     'hms_invoice_particular.quantity',
                     'hms_invoice_particular.sub_total',
                     'hms_invoice_particular.process',
-                ])->where('hms_invoice_particular.is_invoice',false)->whereIn('hms_invoice_particular.mode', ['investigation'])->orderBy('hms_invoice_particular.created_at','DESC');
+                ])->whereNull('hms_invoice_particular.invoice_transaction_id')->whereNull('hms_invoice_particular.patient_waiver_id')->where('hms_invoice_particular.status',0)->whereIn('hms_invoice_particular.mode', ['investigation'])->orderBy('hms_invoice_particular.created_at','DESC');
             }])
             ->first();
 

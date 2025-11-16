@@ -17,7 +17,19 @@ class PurchaseItemModel extends Model
     public $timestamps = true;
     protected $guarded = ['id'];
 
-    protected $fillable = ['warehouse_transfer_quantity'];
+    protected $fillable = [
+                'config_id',
+                'created_by_id',
+                'approved_by_id',
+                'warehouse_transfer_quantity',
+				"stock_item_id",
+				"purchase_id",
+				"name",
+				"quantity",
+				"production_date",
+				"expired_date",
+				"warehouse_id"
+        ];
 
     public static function boot() {
 

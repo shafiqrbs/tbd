@@ -167,7 +167,9 @@ class MedicineStockModel extends Model
         if (isset($request['term']) && !empty($request['term'])) {
             $products = $products->whereAny([
                 'inv_product.name',
-                'inv_category.name'
+                'inv_product.slug',
+                'inv_category.name',
+                'inv_category.slug'
             ], 'LIKE', '%'.$request['term'].'%');
         }
 

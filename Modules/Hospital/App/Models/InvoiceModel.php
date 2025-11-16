@@ -116,6 +116,28 @@ class InvoiceModel extends Model
         return $this->hasMany(AdmissionPatientPrescriptionHistoryModel::class, 'hms_invoice_id');
     }
 
+    public static function invoicePrescriptionProcess($entity){
+
+        if(empty($entity->referred_mode)){
+            $entity->update(['process' => 'done']);
+        }elseif($entity->referred_mode and $entity->referred_mode =='admission'){
+            $entity->update(['process' => 'closed']);
+        }elseif($entity->referred_mode and $entity->referred_mode =='other'){
+            $entity->update(['process' => 'done']);
+        }
+    }
+
+    public static function invoiceAdmissionProcess($entity){
+
+        if(empty($entity->referred_mode)){
+            $entity->update(['process' => 'done']);
+        }elseif($entity->referred_mode and $entity->referred_mode =='admission'){
+            $entity->update(['process' => 'closed']);
+        }elseif($entity->referred_mode and $entity->referred_mode =='other'){
+            $entity->update(['process' => 'done']);
+        }
+    }
+
     public static function getCustomerSearch($domain,$request)
     {
 

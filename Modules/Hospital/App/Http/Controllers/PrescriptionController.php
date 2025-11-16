@@ -133,6 +133,7 @@ class PrescriptionController extends Controller
         $data['process'] = 'done';
         $entity->update($data);
         $weight = $data['weight'] ?? null;
+        InvoiceModel::invoicePrescriptionProcess($entity->invoice);
         $entity->invoice->update(['is_prescription' => 1,'weight' => $weight]);
         PatientPrescriptionMedicineModel::insertPatientMedicine($domain,$entity->id);
         HospitalSalesModel::insertMedicineDelivery($domain,$entity->id);

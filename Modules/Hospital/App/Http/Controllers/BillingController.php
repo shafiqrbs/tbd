@@ -116,22 +116,12 @@ class BillingController extends Controller
     {
         $domain = $this->domain;
         $data = $request->all();
-        $entity = InvoiceTransactionModel::insertInvoiceTransaction($id,$data);
-        dd($data);
-
-        if($entity->process == "New"){
-            $data['amount'] = $data['amount'] ?? 0;
-            $data['process'] = 'Done';
-            $data['created_by_id'] = $domain['user_id'];
-            $data['approved_by_id'] = $domain['user_id'];
-        }
-        $data['comment'] = $data['comment'] ?? null;
-        $entity->update($data);
-        InvoiceParticularModel::where('invoice_transaction_id', $id)->update(['status' => true]);
-        $amount = InvoiceTransactionModel::where('hms_invoice_id', $entity->hms_invoice_id)->where('process','Done')->sum('amount');
-        $total = InvoiceParticularModel::where('hms_invoice_id', $entity->hms_invoice_id)->where('status',true)->sum('sub_total');
-        InvoiceParticularModel::getCountBedRoom($entity->hms_invoice_id);
-        InvoiceModel::find($entity->hms_invoice_id)->update(['sub_total' => $total , 'total' => $total, 'amount' => $amount]);
+        $entity = InvoiceModel::findByIdOrUid($id);
+        InvoiceTransactionModel::insertInvoiceTransaction($domain,$entity,$data);
+        $amount = InvoiceTransactionModel::where('hms_invoice_id', $entity->id)->where('process','Done')->sum('amount');
+        $total = InvoiceParticularModel::where('hms_invoice_id', $entity->id)->where('status',true)->sum('sub_total');
+        InvoiceParticularModel::getCountBedRoom($entity->id);
+        $entity->update(['sub_total' => $total , 'total' => $total, 'amount' => $amount]);
         $service = new JsonRequestResponse();
         return $service->returnJosnResponse($entity);
 

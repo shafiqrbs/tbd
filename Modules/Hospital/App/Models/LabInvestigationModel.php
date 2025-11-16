@@ -82,6 +82,7 @@ class LabInvestigationModel extends Model
             ->join('cor_customers as customer','customer.id','=','hms_invoice.customer_id')
             ->select([
                 'hms_invoice.id',
+                'hms_invoice.uid',
                 'prescription.created_by_id as prescription_created_by_id',
                 'hms_invoice.invoice as invoice',
                 'customer.customer_id as patient_id',
@@ -216,7 +217,7 @@ class LabInvestigationModel extends Model
     public static function getShow($id)
     {
         $entity = self::where([
-            ['hms_invoice.id', '=', $id]
+            ['hms_invoice.uid', '=', $id]
         ])
             ->leftjoin('cor_customers','cor_customers.id','=','hms_invoice.customer_id')
             ->leftjoin('users as createdBy','createdBy.id','=','hms_invoice.created_by_id')
@@ -291,7 +292,7 @@ class LabInvestigationModel extends Model
                             'items' => function ($query) {
                                 $query->select([
                                     'hms_invoice_particular.invoice_transaction_id as invoice_transaction_id',
-                                    'hms_invoice_particular.id as invoice_particular_id',
+                                    'hms_invoice_particular.uid as invoice_particular_id',
                                     'hms_invoice_particular.hms_invoice_id',
                                     'hms_invoice_particular.name as item_name',
                                     'hms_invoice_particular.quantity',
@@ -323,7 +324,7 @@ class LabInvestigationModel extends Model
 
     public static function generateReport($reportId)
     {
-         $entity = InvoiceParticularModel::with('particular')->find($reportId);
+         $entity = InvoiceParticularModel::with('particular')->where(['uid' => $reportId])->first();
          $date =  new \DateTime("now");
          if($entity->particular->is_custom_report == 1){
              InvoiceParticularTestReportModel::updateOrCreate(

@@ -55,8 +55,6 @@ class InvoiceTransactionModel extends Model
         return $this->hasMany(InvoiceParticularModel::class, 'invoice_transaction_id');
     }
 
-
-
     public function createdDoctorInfo()
     {
         return $this->hasOne(UserModel::class, 'id', 'created_by_id');
@@ -69,11 +67,21 @@ class InvoiceTransactionModel extends Model
         $uniqueId=  self::generateUniqueCode(12);
         $jsonData = json_decode($prescription['json_content']);
         $investigations = ($jsonData->patient_report->patient_examination->investigation ?? []);
+
+        $news = [];
+        foreach ($investigations as $investigation):
+            $news[] = $investigation->id;
+        endforeach;
+        InvoiceParticularModel::where([
+            'prescription_id' => $id,
+            'mode' => 'investigation'
+        ])->whereNotIn('particular_id', $news)->delete();
+
         if (!empty($investigations) && is_array($investigations)) {
             collect($investigations)->map(function ($investigation) use ($prescription,$uniqueId,$date) {
-
                 $particular = ParticularModel::find($investigation->id);
                 if($particular and $particular->is_available == 1){
+                  //  echo $particular->id.'----'.$particular->is_available.'<br>';
                     InvoiceParticularModel::updateOrCreate(
                         [
                             'hms_invoice_id'             => $prescription->hms_invoice_id,
@@ -81,7 +89,7 @@ class InvoiceTransactionModel extends Model
                             'particular_id'              => $investigation->id,
                         ],
                         [
-                            'uniqueId'      => $uniqueId,
+                            'unique_id'      => $uniqueId,
                             'name'      => $particular->name,
                             'mode'      => 'investigation',
                             'quantity'      => 1,
@@ -366,39 +374,74 @@ class InvoiceTransactionModel extends Model
         return $entity;
     }
 
-    public static function insertInvoiceTransaction($entity,$data)
+    public static function insertInvoiceTransaction($domain,$entity,$data)
     {
+
         $date =  new \DateTime("now");
         $hms_invoice_id =  $entity->id;
-        $investigations = json_decode($data['json_content']);
+        $investigations = $data['json_content'];
+        $total = $data['total'];
         if (!empty($investigations) && is_array($investigations)) {
-            $invoiceTransaction = InvoiceTransactionModel::updateOrCreate(
-                [
-                    'hms_invoice_id'=> $hms_invoice_id,
-                ],
-                [
-                    'created_by_id'=> $entity->created_by_id,
-                    'mode'    => 'investigation',
-                    'updated_at'    => $date,
-                    'created_at'    => $date,
-                ]
-            );
-
+            $invoiceTransaction = InvoiceTransactionModel::create([
+                'hms_invoice_id'=> $entity->id,
+                'created_by_id'=> $domain['user_id'],
+                'approved_by_id'=> $domain['user_id'],
+                'mode'    => 'investigation',
+                'sub_total'    => $total,
+                'total'    => $total,
+                'amount'    => $total,
+                'process'    => 'Done',
+                'updated_at'    => $date,
+                'created_at'    => $date,
+            ]);
             if (!empty($investigations) && is_array($investigations)) {
                 collect($investigations)->map(function ($investigation) use ($hms_invoice_id,$invoiceTransaction,$date) {
-                    if($investigation['is_selected'] == true and $investigation['is_new'] == false){
-                        InvoiceParticularModel::where('hms_invoice_id', $invoiceTransaction->hms_invoice_id)
-                            ->where('id', $investigation['id'])
+                    $particular = $investigation['particular_id'] ?? '';
+                    if (
+                        ($investigation['is_selected'] ?? false) == true &&
+                        $particular &&
+                        ($investigation['is_new'] ?? false) == false
+                    ) {
+                        InvoiceParticularModel::where('hms_invoice_id', $hms_invoice_id)
+                            ->where('id', $investigation['particular_id'])
                             ->update([
                                 'invoice_transaction_id' => $invoiceTransaction->id,
-                                'price' => 0,
                                 'status' => 1,
+                                'is_invoice' => 1,
                             ]);
+                    }elseif (
+                        ($investigation['is_selected'] ?? false) == true &&
+                        ($investigation['is_new'] ?? true) == true
+                    ) {
+
+                        $particular = ParticularModel::find($investigation['id']);
+                        if($particular){
+                            InvoiceParticularModel::updateOrCreate(
+                                [
+                                    'hms_invoice_id'             => $hms_invoice_id,
+                                    'particular_id'              => $particular->id,
+                                ],
+                                [
+                                    'invoice_transaction_id' => $invoiceTransaction->id,
+                                    'name'      => $particular->name,
+                                    'quantity'      => 1,
+                                    'status'      => 1,
+                                    'is_invoice' => 1,
+                                    'mode' => 'investigation',
+                                    'price'         => $particular->price ?? 0,
+                                    'estimate_price'         => $particular->price ?? 0,
+                                    'sub_total'         => $particular->price ?? 0,
+                                    'updated_at'    => $date,
+                                    'created_at'    => $date,
+                                ]
+                            );
+                        }
                     }
 
                 })->toArray();
             }
         }
+        return $entity;
     }
 
 

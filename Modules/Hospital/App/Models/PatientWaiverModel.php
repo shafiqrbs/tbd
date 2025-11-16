@@ -159,7 +159,7 @@ class PatientWaiverModel extends Model
         $total = (clone $entitiesQuery)->count(DB::raw('DISTINCT hms_invoice_particular.hms_invoice_id'));
         if (isset($request['mode']) && !empty($request['mode']) and $request['mode'] == "opd_investigation") {
             $entitiesQuery = $entitiesQuery->where('hms_invoice.process', 'closed');
-            $entitiesQuery = $entitiesQuery->where('patient_mode.slug', 'opd');
+            $entitiesQuery = $entitiesQuery->whereIn('patient_mode.slug', ['opd','emergency']);
             $entitiesQuery = $entitiesQuery->where('hms_invoice_particular.mode', 'investigation');
         }elseif (isset($request['mode']) && !empty($request['mode']) and $request['mode'] == "ipd_investigation") {
             $entitiesQuery = $entitiesQuery->where('hms_invoice.process', 'admitted');

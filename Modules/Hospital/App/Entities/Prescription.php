@@ -60,13 +60,6 @@ class Prescription
      private $prescribeDoctor;
 
     /**
-     * @ORM\ManyToOne(targetEntity="Particular")
-     * @ORM\JoinColumn(onDelete="CASCADE")
-     **/
-    private $doctor;
-
-
-    /**
      * @var \DateTime
      *
      * @ORM\Column(type="datetime", nullable=true)

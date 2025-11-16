@@ -106,7 +106,8 @@ class LabInvestigationController extends Controller
     public function barcodeConfirm($id)
     {
         $service = new JsonRequestResponse();
-        InvoiceParticularModel::where('id', $id)->update([
+        InvoiceParticularModel::where('uid', $id)->first()->update([
+            'sample_collected_name' => $this->domain['user_name'],
             'sample_collected_by_id' => $this->domain['user_id'],
             'collection_date' => now(),
         ]);
@@ -120,7 +121,7 @@ class LabInvestigationController extends Controller
     {
         $service = new JsonRequestResponse();
         LabInvestigationModel::generateReport($reportId);
-        $invoiceParticular = InvoiceParticularModel::with(['reports','particular:id,slug,lab_room_id,is_custom_report,instruction,slug','particular.category:id,name','custom_report'])->find($reportId);
+        $invoiceParticular = InvoiceParticularModel::with(['reports','particular:id,slug,diagnostic_department_id as diagnostic_department_id,diagnostic_room_id as diagnostic_room_id,is_custom_report,instruction,slug','particular.category:id,name','custom_report'])->where(['uid'=> $reportId])->first();
         $data = $service->returnJosnResponse($invoiceParticular);
         return $data;
     }
@@ -137,6 +138,8 @@ class LabInvestigationController extends Controller
         return  $service->returnJosnResponse($data);
     }
 
+
+
     /**
      * Update the specified resource in storage.
      */
@@ -144,7 +147,7 @@ class LabInvestigationController extends Controller
     {
         $domain = $this->domain;
         $data = $request->only(['json_content','comment']);
-        $entity = InvoiceParticularModel::find($id);
+        $entity = InvoiceParticularModel::where(['uid'=>$id])->first();
         if($entity->process == "New"){
             $data['process'] = 'In-progress';
             $data['assign_labuser_id'] = $domain['user_id'];
@@ -165,7 +168,7 @@ class LabInvestigationController extends Controller
         $data['comment'] = $data['comment'] ?? null;
         $entity->update($data);
         $service = new JsonRequestResponse();
-        return $service->returnJosnResponse($data['json_content']);
+        return $service->returnJosnResponse($entity);
 
     }
 

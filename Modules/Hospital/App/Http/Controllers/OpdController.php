@@ -223,7 +223,7 @@ class OpdController extends Controller
             ]
         );
         $invoiceInfo = InvoiceModel::getInvoiceBasicInfo($id);
-        if($invoiceInfo->payment_mode_slug == 'opd'){
+        if(in_array($invoiceInfo->payment_mode_slug,['opd','emergency']) ){
             InvoiceModel::where('id', $id)->update([
                 'process' => 'in-progress'
             ]);
