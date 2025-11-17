@@ -121,6 +121,41 @@ class MedicineStockModel extends Model
         return $entities;
 
     }
+    public static function getCategoryStockForScrolling($domain, $category, $request): array
+    {
+        $page = isset($request['page']) && $request['page'] > 0 ? ($request['page'] - 1) : 0;
+        $perPage = isset($request['offset']) && $request['offset'] != '' ? (int)$request['offset'] : 25;
+        $perPage = min($perPage, 100);
+        $skip = $page * $perPage;
+
+        // Build query
+        $entities = StockItemModel::where([
+            ['inv_stock.config_id', $domain['config_id']],
+            ['inv_product.is_delete', 0]
+        ])
+            ->where(function ($query) use ($category) {
+                $query->where('inv_product.category_id', '=', $category);
+            })
+            ->join('inv_product', 'inv_product.id', '=', 'inv_stock.product_id')
+            ->select([
+                'inv_stock.id as id',
+                'inv_stock.id as stock_item_id',
+                'inv_product.name as name',
+            ]);
+
+        // Get total count before pagination
+        $total = $entities->count();
+
+        // Apply pagination
+        $stockItems = $entities
+            ->orderBy('name')
+            ->skip($skip)
+            ->take($perPage)
+            ->get();
+
+        return ['data' => $stockItems, 'count' => $total];
+    }
+
 
     public static function getStockDropdown($domain,$term){
 

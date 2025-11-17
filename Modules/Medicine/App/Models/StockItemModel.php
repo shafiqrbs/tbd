@@ -5,9 +5,9 @@ namespace Modules\Medicine\App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Modules\Core\App\Models\UserWarehouseModel;
-use Modules\Core\App\Models\WarehouseModel;
 use Modules\Inventory\App\Models\CurrentStockModel;
 use Modules\Inventory\App\Models\ProductModel;
+
 class StockItemModel extends Model
 {
 
@@ -22,20 +22,18 @@ class StockItemModel extends Model
         return $this->belongsTo(ProductModel::class, 'product_id');
     }
 
-    public function currentWarehouseStock() :HasMany
+    public function currentWarehouseStock(): HasMany
     {
         return $this->hasMany(CurrentStockModel::class, 'stock_item_id');
     }
 
     public static function getStockItemMatrix($domain, $request)
     {
-        // --- Pagination
         $page = isset($request['page']) && $request['page'] > 0 ? ($request['page'] - 1) : 0;
         $perPage = isset($request['offset']) && $request['offset'] != '' ? (int)$request['offset'] : 25;
         $perPage = min($perPage, 100);
         $skip = $page * $perPage;
 
-        // --- Base Query
         $query = self::with([
             'product.category',
             'currentWarehouseStock' => function ($q) use ($domain) {
@@ -50,7 +48,6 @@ class StockItemModel extends Model
             ->where('is_delete', 0);
 
 
-        // --- Warehouse Stock Filter
         if (!empty($request['warehouse_id'])) {
             $warehouseId = $request['warehouse_id'];
 
@@ -62,14 +59,12 @@ class StockItemModel extends Model
             });
         }
 
-        // ---  Filter expire product only
         if (isset($request['is_expire']) && $request['is_expire']) {
             $query->whereHas('product', function ($q) {
                 $q->whereNotNull('expiry_duration');
             });
         }
 
-        // --- Filter term only
         if (!empty($request['term'])) {
             $term = $request['term'];
             $query->where(function ($q) use ($term) {
@@ -81,10 +76,8 @@ class StockItemModel extends Model
             });
         }
 
-        // --- Total Count (before pagination)
         $total = $query->count();
 
-        // --- Paginated Results
         $stockItems = $query
             ->orderBy('name')
             ->skip($skip)
@@ -129,18 +122,16 @@ class StockItemModel extends Model
                 return $data;
             });
 
-        // --- All Active Warehouses for this domain
 
         $warehouses = UserWarehouseModel::join('cor_warehouses', 'cor_warehouses.id', '=', 'cor_user_warehouse.warehouse_id')
-                        ->where('cor_user_warehouse.user_id',$domain['user_id'])
-                        ->where('cor_user_warehouse.is_status', 1)
-                        ->where('cor_warehouses.status', 1)
-                        ->where('cor_warehouses.is_delete', 0)
-                        ->select('cor_warehouses.id', 'cor_warehouses.name')
-                        ->orderBy('cor_warehouses.name')
-                        ->get();
+            ->where('cor_user_warehouse.user_id', $domain['user_id'])
+            ->where('cor_user_warehouse.is_status', 1)
+            ->where('cor_warehouses.status', 1)
+            ->where('cor_warehouses.is_delete', 0)
+            ->select('cor_warehouses.id', 'cor_warehouses.name')
+            ->orderBy('cor_warehouses.name')
+            ->get();
 
-        // --- Response
 
         return [
 

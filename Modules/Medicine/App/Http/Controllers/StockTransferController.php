@@ -4,6 +4,7 @@ namespace Modules\Medicine\App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Services\DailyStockService;
+use DateTime;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -99,7 +100,7 @@ class StockTransferController extends Controller
         if (!$findStockTransfer) {
             return response()->json(['status' => 400, 'message' => 'Data not found.']);
         }
-        return response()->json(['status' => 200, 'message' => 'Data found successfully.','data' => $findStockTransfer]);
+        return response()->json(['status' => 200, 'message' => 'Data found successfully.', 'data' => $findStockTransfer]);
     }
 
     public function update(StockTransferRequest $request, $id)
@@ -111,13 +112,9 @@ class StockTransferController extends Controller
 
         DB::beginTransaction();
         try {
-            // Fetch stock transfer record safely
             $stockTransfer = StockTransferModel::lockForUpdate()->findOrFail($id);
 
-            // Remove old items in one query
             $stockTransfer->stockTransferItems()->delete();
-
-            // Update parent record
             $stockTransfer->update($data);
 
             // Insert new transfer items if provided
@@ -132,7 +129,7 @@ class StockTransferController extends Controller
             DB::commit();
 
             return response()->json([
-                'status'  => 200,
+                'status' => 200,
                 'message' => 'Stock transfer updated successfully.',
             ]);
 
@@ -141,9 +138,9 @@ class StockTransferController extends Controller
             report($e);
 
             return response()->json([
-                'status'  => 500,
+                'status' => 500,
                 'message' => 'An error occurred while updating the stock transfer.',
-                'error'   => $e->getMessage(),
+                'error' => $e->getMessage(),
             ], 500);
         }
     }
@@ -154,10 +151,10 @@ class StockTransferController extends Controller
      */
     public function destroy($id)
     {
-        $findStockTransfer = StockTransferModel::where('uid',$id)->first();
+        $findStockTransfer = StockTransferModel::where('uid', $id)->first();
         if ($findStockTransfer->process == "Created") {
             $findStockTransfer->delete();
-            return response()->json(['status' => 200, 'message' =>'Delete successfully.']);
+            return response()->json(['status' => 200, 'message' => 'Delete successfully.']);
         }
         return response()->json(['status' => 400, 'message' => 'Approved data']);
     }
@@ -209,7 +206,7 @@ class StockTransferController extends Controller
                 //Update stock transfer status
                 $findStockTransfer->update([
                     'process' => 'Approved',
-                    'approved_date' => new \DateTime('now'),
+                    'approved_date' => new DateTime('now'),
                     'approved_by_id' => $this->domain['user_id'],
                 ]);
             });
@@ -374,15 +371,15 @@ class StockTransferController extends Controller
         }
     }
 
-    public function inlineUpdate(Request $request , $id)
+    public function inlineUpdate(Request $request, $id)
     {
         $input = $request->only(['transfer_item_id', 'field_name', 'field_value', 'stock_item_id']);
 
-        // ✅ Basic validation
+        // Basic validation
         $validator = Validator::make($input, [
             'transfer_item_id' => 'required|integer',
-            'field_name'       => 'required|string|in:quantity,purchase_item_id',
-            'field_value'      => 'required',
+            'field_name' => 'required|string|in:quantity,purchase_item_id',
+            'field_value' => 'required',
         ]);
 
         if ($validator->fails()) {
@@ -392,7 +389,7 @@ class StockTransferController extends Controller
             ], ResponseAlias::HTTP_BAD_REQUEST);
         }
 
-        // ✅ Fetch the record
+        // Fetch the record
         $item = StockTransferItemModel::find($input['transfer_item_id']);
 
         if (!$item) {
@@ -402,7 +399,7 @@ class StockTransferController extends Controller
             ]);
         }
 
-        // ✅ Update the field safely
+        // Update the field safely
         $item->update([
             $input['field_name'] => $input['field_value']
         ]);

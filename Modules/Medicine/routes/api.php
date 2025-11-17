@@ -34,7 +34,7 @@ Route::prefix('/medicine/select')->middleware([HeaderAuthenticationMiddleware::c
 });
 
 Route::post('/medicine/inline-update/{id}', [MedicineController::class,'medicineInlineUpdate'])->name('particular_inline_update');
-Route::prefix('/pharmacy')->middleware([HeaderAuthenticationMiddleware::class,LogRequestResponse::class,'auth:api'])->group(function() {
+Route::prefix('/pharmacy')->middleware([HeaderAuthenticationMiddleware::class,LogRequestResponse::class])->group(function() {
     Route::prefix('purchase')->name('purchase.')->group(function () {
         Route::get('approve/{id}', [PurchaseController::class, 'approve'])->name('approve');
         Route::get('receive/{id}', [PurchaseController::class, 'receive'])->name('receive');
@@ -66,6 +66,7 @@ Route::prefix('/pharmacy')->middleware([HeaderAuthenticationMiddleware::class,Lo
     Route::get('/stock/generic', [MedicineStockController::class,'generic'])->name('particular_inline_update');
     Route::get('/stock/search', [MedicineStockController::class,'stockDropdown'])->name('particular_inline_update');
     Route::get('/stock/category', [MedicineStockController::class,'stockCategory'])->name('stock_category');
+    Route::get('/stock/category/scrolling', [MedicineStockController::class,'stockCategoryForScrolling'])->name('stock_category_scrolling');
     Route::apiResource('stock',
         MedicineStockController::class)
         ->middleware([HeaderAuthenticationMiddleware::class])

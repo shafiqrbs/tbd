@@ -182,6 +182,22 @@ class MedicineStockController extends Controller
         return $service->returnJosnResponse($dropdown);
     }
 
+    public function stockCategoryForScrolling(Request $request)
+    {
+        $term = $request->get('category_id');
+        $data = MedicineStockModel::getCategoryStockForScrolling($this->domain,$term,$request);
+        $response = new Response();
+        $response->headers->set('Content-Type', 'application/json');
+        $response->setContent(json_encode([
+            'message' => 'success',
+            'status' => ResponseAlias::HTTP_OK,
+            'total' => $data['count'],
+            'data' => $data['data']
+        ]));
+        $response->setStatusCode(ResponseAlias::HTTP_OK);
+        return $response;
+    }
+
     /**
      * Remove the specified resource from storage.
      */
