@@ -20,6 +20,7 @@ use Modules\Hospital\App\Http\Controllers\PatientWaiverController;
 use Modules\Hospital\App\Http\Controllers\PharmacyController;
 use Modules\Hospital\App\Http\Controllers\PrescriptionController;
 use Modules\Hospital\App\Http\Controllers\ProductController;
+use Modules\Hospital\App\Http\Controllers\RefundController;
 use Modules\Hospital\App\Http\Controllers\ReportsController;
 use Modules\Hospital\App\Http\Controllers\SettingController;
 use Modules\Hospital\App\Http\Controllers\TreatmentMedicineController;
@@ -206,6 +207,11 @@ Route::prefix('/hospital')->middleware([HeaderAuthenticationMiddleware::class])-
     Route::prefix('billing')->name('billing')->group(function () {
         Route::apiResource('', BillingController::class)->parameters(['' => 'id']);
         Route::get('{id}/payment/{transactionId}', [BillingController::class, 'transaction'])->name('transaction');
+    });
+
+    Route::prefix('refund')->name('refund')->group(function () {
+        Route::apiResource('', RefundController::class)->parameters(['' => 'id']);
+        Route::get('{id}/payment/{transactionId}', [RefundController::class, 'transaction'])->name('transaction');
     });
 
     Route::prefix('patient-waiver')->name('patient_waiver')->group(function () {

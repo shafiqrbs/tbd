@@ -28,11 +28,6 @@ class InvoicePatientReferred
      */
     protected $config;
 
-    /**
-     * @ORM\ManyToOne(targetEntity="Modules\Core\App\Entities\User")
-     * @ORM\JoinColumn(name="created_by_id", referencedColumnName="id", nullable=true)
-     **/
-    private  $createdBy;
 
     /**
      * @ORM\OneToOne(targetEntity="Invoice", cascade={"detach","merge"})
@@ -41,18 +36,21 @@ class InvoicePatientReferred
     private $invoice;
 
     /**
-     * @ORM\ManyToOne(targetEntity="Prescription", cascade={"detach","merge"})
-     * @ORM\JoinColumn(name="prescription_id", referencedColumnName="id", onDelete="CASCADE")
+     * @ORM\ManyToOne(targetEntity="InvoiceTransaction", cascade={"detach","merge"})
+     * @ORM\JoinColumn(name="hms_invoice_transaction_id", referencedColumnName="id", onDelete="CASCADE")
      */
-    private $prescription;
+    private $invoiceTransaction;
+
 
     /**
-     * @ORM\ManyToOne(targetEntity="Particular")
+     * @ORM\ManyToOne(targetEntity="Modules\Core\App\Entities\User")
+     * @ORM\JoinColumn(name="created_by_id", referencedColumnName="id", nullable=true)
      **/
-    private  $assignDoctor;
+    private  $createdBy;
 
-     /**
-     * @ORM\ManyToOne(targetEntity="Particular")
+    /**
+     * @ORM\ManyToOne(targetEntity="Modules\Core\App\Entities\User")
+     * @ORM\JoinColumn(name="approved_by_id", referencedColumnName="id", nullable=true)
      **/
     private  $assignReferredDoctor;
 

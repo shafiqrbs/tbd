@@ -33,6 +33,7 @@ class CategoryRequest extends FormRequest
             case 'PATCH':
             {
                 return [
+                    'category_nature_id' => 'required|string',
                     'name' => 'required|string',
                     'status' => 'boolean|nullable',
                 ];

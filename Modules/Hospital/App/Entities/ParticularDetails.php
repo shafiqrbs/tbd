@@ -198,14 +198,6 @@ class ParticularDetails
     /**
      * @var string
      *
-     * @ORM\Column(name="sepcimen", type="string", length=255, nullable=true)
-     */
-    private $sepcimen;
-
-
-    /**
-     * @var string
-     *
      * @ORM\Column(name="content", type="text", nullable=true)
      */
     private $content;

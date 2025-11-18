@@ -121,7 +121,7 @@ class LabInvestigationController extends Controller
     {
         $service = new JsonRequestResponse();
         LabInvestigationModel::generateReport($reportId);
-        $invoiceParticular = InvoiceParticularModel::with(['reports','particular:id,slug,diagnostic_department_id as diagnostic_department_id,diagnostic_room_id as diagnostic_room_id,is_custom_report,instruction,slug','particular.category:id,name','custom_report'])->where(['uid'=> $reportId])->first();
+        $invoiceParticular = InvoiceParticularModel::with(['reports','particular:id,slug,diagnostic_department_id as diagnostic_department_id,diagnostic_room_id as diagnostic_room_id,is_custom_report,instruction,specimen,slug','particular.category:id,name','custom_report'])->where(['uid'=> $reportId])->first();
         $data = $service->returnJosnResponse($invoiceParticular);
         return $data;
     }
@@ -132,7 +132,7 @@ class LabInvestigationController extends Controller
     public function print($id)
     {
         $service = new JsonRequestResponse();
-        $invoiceParticular = InvoiceParticularModel::with(['reports','particular:id,slug,lab_room_id,is_custom_report,instruction,slug,category_id','particular.category:id,name','custom_report'])->find($id);
+        $invoiceParticular = InvoiceParticularModel::with(['reports','particular:id,slug,is_custom_report,instruction,slug,category_id,specimen','particular.category:id,name','custom_report'])->where(['uid'=>$id])->first();
         $entity = InvoiceModel::getInvoiceBasicInfo($invoiceParticular->hms_invoice_id);
         $data = ['entity'=>$entity,'invoiceParticular' => $invoiceParticular];
         return  $service->returnJosnResponse($data);

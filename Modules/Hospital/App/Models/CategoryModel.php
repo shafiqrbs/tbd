@@ -79,11 +79,11 @@ class CategoryModel extends Model
         return $query->get();
     }
 
-    public static function getCategoryHospitalDropdown($domain,$type = 'service')
+    public static function getCategoryHospitalDropdown($domain, $type = 'service')
     {
         $query = self::select(['inv_category.name', 'inv_category.slug', 'inv_category.id'])
-            ->leftjoin('inv_setting as p','p.id','=','inv_category.category_nature_id')
-            ->where([['inv_category.status', 1],['inv_category.config_id', $domain['config_id']],['p.slug', $type]])->whereNull('inv_category.is_private')->whereNotNull('parent');
+            ->join('inv_setting as p','p.id','=','inv_category.category_nature_id')
+            ->where([['inv_category.status', 1],['inv_category.config_id', $domain['config_id']],['p.slug','service']])->whereNull('inv_category.is_private')->whereNotNull('parent')->orderBy('inv_category.name','ASC');
         return $query->get();
     }
 
@@ -116,13 +116,16 @@ class CategoryModel extends Model
         }
 
         if (isset($request['term']) && !empty($request['term'])){
-            $categories = $categories->whereAny(['inv_category.name','inv_category.slug'],'LIKE','%'.$request['term'].'%');
+            $categories = $categories->whereAny(['inv_category.name','inv_category.slug','inv_setting.category','inv_setting.slug'],'LIKE','%'.$request['term'].'%');
         }
 
         if (isset($request['name']) && !empty($request['name'])){
             $categories = $categories->where('inv_category.name','LIKE','%'.$request['name'].'%');
         }
 
+        if (isset($request['category_nature']) && $request['category_nature']){
+           // $categories = $categories->where('inv_setting.slug',$request['category_nature']);
+        }
         if (isset($request['type']) && $request['type'] === 'category'){
             $categories = $categories->whereNotNull('inv_category.parent');
         }
@@ -134,7 +137,8 @@ class CategoryModel extends Model
         $total  = $categories->count();
         $entities = $categories->skip($skip)
             ->take($perPage)
-            ->orderBy('inv_category.name','DESC')
+            ->orderBy('inv_setting.name','ASC')
+            ->orderBy('inv_category.name','ASC')
             ->get();
 
         $data = array('count'=>$total,'entities'=>$entities);

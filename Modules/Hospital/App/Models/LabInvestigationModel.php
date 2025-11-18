@@ -285,9 +285,15 @@ class LabInvestigationModel extends Model
                         'hms_invoice_transaction.process',
                         'hms_invoice_transaction.total',
                         'hms_invoice_transaction.created_at'
-                    ])->where('hms_invoice_transaction.mode','investigation')
-                        ->where('hms_invoice_transaction.process','Done')->orderBy('hms_invoice_transaction.created_at','DESC')
-                        // include each transaction’s items
+                    ])
+                        ->where('hms_invoice_transaction.mode', 'investigation')
+                        ->where('hms_invoice_transaction.process', 'Done')
+                        ->whereHas('items', function ($itemQuery) {
+                            $itemQuery->join('hms_particular as hp', 'hp.id', '=', 'hms_invoice_particular.particular_id')
+                                ->where('hms_invoice_particular.status', 1)
+                                ->where('hp.is_available', 1);
+                        }, '>=', 1)
+                        ->orderBy('hms_invoice_transaction.created_at', 'DESC')
                         ->with([
                             'items' => function ($query) {
                                 $query->select([
@@ -307,16 +313,17 @@ class LabInvestigationModel extends Model
                                     'hms_invoice_particular.barcode',
                                     'hms_invoice_particular.uid',
                                     DB::raw('DATE_FORMAT(hms_invoice_particular.collection_date, "%d-%m-%Y") as collection_date'),
-                                ])->join('hms_particular as hms_particular','hms_particular.id','=','hms_invoice_particular.particular_id')
-                                    ->join('hms_particular_type as hms_particular_type','hms_particular_type.id','=','hms_particular.particular_type_id')
-                                    ->join('hms_particular_master_type','hms_particular_master_type.id','=','hms_particular_type.particular_master_type_id')
-                                    ->where('hms_particular_master_type.slug','investigation')
-                                    ->where('hms_invoice_particular.status',1)->where('hms_particular.is_available',1);
+                                ])
+                                    ->join('hms_particular as hms_particular', 'hms_particular.id', '=', 'hms_invoice_particular.particular_id')
+                                    ->join('hms_particular_type as hms_particular_type', 'hms_particular_type.id', '=', 'hms_particular.particular_type_id')
+                                    ->join('hms_particular_master_type', 'hms_particular_master_type.id', '=', 'hms_particular_type.particular_master_type_id')
+                                    ->where('hms_particular_master_type.slug', 'investigation')
+                                    ->where('hms_invoice_particular.status', 1)
+                                    ->where('hms_particular.is_available', 1);
                             }
                         ]);
                 }
             ])
-
             ->first();
 
         return $entity;

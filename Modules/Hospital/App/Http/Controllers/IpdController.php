@@ -83,7 +83,7 @@ class IpdController extends Controller
             $input['config_id'] = $domain['hms_config'];
             $input['parent_id'] = $parentInvoice->id;
             $input['customer_id'] = $parentInvoice->customer_id;
-            $input['created_by_id'] = $request->header('X-Api-User');
+            $input['created_by_id'] = $domain['user_id'];
             $patient_mode_id = ParticularModeModel::firstWhere([
                 ['slug', 'ipd'],
                 ['particular_module_id', 3],

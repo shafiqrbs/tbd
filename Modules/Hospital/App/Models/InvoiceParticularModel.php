@@ -133,7 +133,6 @@ class InvoiceParticularModel extends Model
 
    public static function checkExistingWaiver($data)
     {
-
         // Reset all to 0 first
         $entity = $data['hms_invoice_id'];
         $array = json_decode($data['particular_ids'], true);
@@ -150,8 +149,9 @@ class InvoiceParticularModel extends Model
             'available' => $availableIds,
             'new' => $missingIds,
         ];
-
     }
+
+
 
 
 

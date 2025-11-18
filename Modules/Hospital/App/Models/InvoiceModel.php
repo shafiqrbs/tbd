@@ -121,7 +121,7 @@ class InvoiceModel extends Model
         if(empty($entity->referred_mode)){
             $entity->update(['process' => 'done']);
         }elseif($entity->referred_mode and $entity->referred_mode =='admission'){
-            $entity->update(['process' => 'closed']);
+            $entity->update(['process' => 'ipd']);
         }elseif($entity->referred_mode and $entity->referred_mode =='other'){
             $entity->update(['process' => 'done']);
         }
@@ -132,7 +132,7 @@ class InvoiceModel extends Model
         if(empty($entity->referred_mode)){
             $entity->update(['process' => 'done']);
         }elseif($entity->referred_mode and $entity->referred_mode =='admission'){
-            $entity->update(['process' => 'closed']);
+            $entity->update(['process' => 'ipd']);
         }elseif($entity->referred_mode and $entity->referred_mode =='other'){
             $entity->update(['process' => 'done']);
         }

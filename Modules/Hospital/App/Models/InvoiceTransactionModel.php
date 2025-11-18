@@ -336,6 +336,33 @@ class InvoiceTransactionModel extends Model
         return $entity;
     }
 
+    public static function getInvoiceRefundParticulars($id,$transaction)
+    {
+        $entity = self::where(
+                ['hms_invoice_transaction.id' => $transaction]
+            )->where(function ($query) use ($id) {
+                $query->where('hms_invoice.id', '=', $id)
+                    ->orWhere('hms_invoice.uid', '=', $id);
+            })
+            ->join('hms_invoice', 'hms_invoice.id', '=', 'hms_invoice_transaction.hms_invoice_id')
+            ->with(['items' => function ($query) {
+                $query->select([
+                    'hms_invoice_particular.id',
+                    'hms_invoice_particular.invoice_transaction_id',
+                    'hms_invoice_particular.name',
+                    'hms_invoice_particular.quantity',
+                    'hms_invoice_particular.content',
+                    'hms_invoice_particular.price',
+                ])->where(['hms_invoice_particular.is_refund' => 0]);
+            }])
+            ->select(
+                'hms_invoice_transaction.id','hms_invoice_transaction.sub_total','hms_invoice_transaction.total','hms_invoice_transaction.process',
+                DB::raw('DATE_FORMAT(hms_invoice_transaction.updated_at, "%d-%m-%y") as created')
+            )
+            ->get()->first();
+        return $entity;
+    }
+
     public static function getMedicine($id)
     {
         $entity = self::where([
@@ -442,6 +469,37 @@ class InvoiceTransactionModel extends Model
             }
         }
         return $entity;
+    }
+
+    public static function insertAdmissionInvoiceTransaction($domain,$invoice,$data)
+    {
+
+        $amount = $data['total'];
+        $date =  new \DateTime("now");
+        $items = InvoiceTransactionModel::where(['hms_invoice_id' => $invoice->id,'process'=>'New'])->get();
+        collect($items)->map(function ($item) use ($domain,$invoice,$amount,$date) {
+            $transaction = InvoiceTransactionModel::find($item['id']);
+            if($transaction){
+                InvoiceTransactionModel::updateOrCreate(
+                    [
+                        'hms_invoice_id'             => $invoice->id,
+                        'id'     => $transaction->id,
+                    ],
+                    [
+                        'created_by_id'=> $domain['user_id'],
+                        'approved_by_id'=> $domain['user_id'],
+                        'mode'    => 'admission',
+                        'sub_total'    => $amount,
+                        'total'    => $amount,
+                        'amount'    => $amount,
+                        'process'    => 'Done',
+                        'updated_at'    => $date,
+                        'created_at'    => $date,
+                    ]
+                );
+            }
+        })->toArray();
+        $invoice->update(['sub_total' => $amount , 'total' => $amount, 'amount' => $amount, 'process' => 'admitted']);
     }
 
 

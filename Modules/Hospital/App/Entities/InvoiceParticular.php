@@ -57,6 +57,13 @@ class InvoiceParticular
     private $invoiceTransaction;
 
     /**
+     * @ORM\ManyToOne(targetEntity="InvoiceTransactionRefund")
+     * @ORM\JoinColumn(onDelete="CASCADE")
+     **/
+    private $invoiceTransactionRefund;
+
+
+    /**
      * @ORM\ManyToOne(targetEntity="PatientWaiver")
      * @ORM\JoinColumn(onDelete="CASCADE")
      **/
@@ -269,6 +276,21 @@ class InvoiceParticular
      * @ORM\Column(name="is_invoice", type="boolean", nullable=true, options={"default"="false"})
      */
      private $isInvoice;
+
+    /**
+     * @var boolean
+     *
+     * @ORM\Column(name="is_refund", type="boolean", nullable=true, options={"default"="false"})
+     */
+    private $isRefund;
+
+    /**
+     * @var float
+     *
+     * @ORM\Column(name="refund_amount", type="float", nullable=true)
+     */
+    private $refundAmount;
+
 
     /**
      * @var boolean

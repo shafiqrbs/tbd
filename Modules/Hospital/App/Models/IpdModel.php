@@ -193,7 +193,7 @@ class IpdModel extends Model
                 'blood_sugar' => $data['blood_sugar'] ?? null,
                 'blood_group' => $data['blood_group'] ?? null,
                 'comment' => $data['comment'] ?? null,
-                'process' =>  'admitted',
+                'process' =>  'billing',
             ]);
             self::updateIpdPatient($entity->id,$data);
         }

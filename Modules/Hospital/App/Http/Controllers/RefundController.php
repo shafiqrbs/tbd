@@ -13,6 +13,7 @@ use Modules\AppsApi\App\Services\JsonRequestResponse;
 use Modules\Core\App\Http\Requests\CustomerRequest;
 use Modules\Core\App\Models\CustomerModel;
 use Modules\Core\App\Models\UserModel;
+use Modules\Hospital\App\Entities\InvoiceTransactionRefund;
 use Modules\Hospital\App\Entities\Prescription;
 use Modules\Hospital\App\Http\Requests\OPDRequest;
 use Modules\Hospital\App\Http\Requests\PrescriptionRequest;
@@ -30,10 +31,10 @@ use Modules\Hospital\App\Models\ParticularModel;
 use Modules\Hospital\App\Models\ParticularModeModel;
 use Modules\Hospital\App\Models\PatientModel;
 use Modules\Hospital\App\Models\PrescriptionModel;
+use Modules\Hospital\App\Models\RefundModel;
 
 
-
-class BillingController extends Controller
+class RefundController extends Controller
 {
     protected $domain;
 
@@ -53,7 +54,7 @@ class BillingController extends Controller
     public function index(Request $request){
 
         $domain = $this->domain;
-        $data = BillingModel::getRecords($request,$domain);
+        $data = RefundModel::getRecords($request,$domain);
         $response = new Response();
         $response->headers->set('Content-Type','application/json');
         $response->setContent(json_encode([
@@ -65,26 +66,6 @@ class BillingController extends Controller
         $response->setStatusCode(Response::HTTP_OK);
         return $response;
     }
-
-    /**
-     * Display a listing of the resource.
-     */
-    public function admission(Request $request){
-
-        $domain = $this->domain;
-        $data = BillingModel::getRecords($request,$domain);
-        $response = new Response();
-        $response->headers->set('Content-Type','application/json');
-        $response->setContent(json_encode([
-            'message' => 'success',
-            'status' => Response::HTTP_OK,
-            'total' => $data['count'],
-            'data' => $data['entities']
-        ]));
-        $response->setStatusCode(Response::HTTP_OK);
-        return $response;
-    }
-
 
 
     /**
@@ -109,7 +90,7 @@ class BillingController extends Controller
     public function transaction($id,$reportId)
     {
         $service = new JsonRequestResponse();
-        $invoiceParticular = InvoiceTransactionModel::with(['items','createdDoctorInfo'])->find($reportId);
+        $invoiceParticular = InvoiceTransactionModel::getInvoiceRefundParticulars($id,$reportId);
         $data = $service->returnJosnResponse($invoiceParticular);
         return $data;
     }
@@ -122,16 +103,7 @@ class BillingController extends Controller
         $domain = $this->domain;
         $data = $request->all();
         $entity = InvoiceModel::findByIdOrUid($id);
-        if($entity->process == "billing"){
-            InvoiceTransactionModel::insertAdmissionInvoiceTransaction($domain,$entity,$data);
-        }else{
-            InvoiceTransactionModel::insertInvoiceTransaction($domain,$entity,$data);
-        }
-
-        $amount = InvoiceTransactionModel::where('hms_invoice_id', $entity->id)->where('process','Done')->sum('amount');
-        $total = InvoiceParticularModel::where('hms_invoice_id', $entity->id)->where('status',true)->sum('sub_total');
-        InvoiceParticularModel::getCountBedRoom($entity->id);
-        $entity->update(['sub_total' => $total , 'total' => $total, 'amount' => $amount]);
+        RefundModel::insertInvoiceTransaction($domain,$entity,$data);
         $service = new JsonRequestResponse();
         return $service->returnJosnResponse($entity);
 

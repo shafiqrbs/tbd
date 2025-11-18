@@ -120,6 +120,14 @@ class Particular
      */
     private $instruction;
 
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="specimen", type="text", nullable=true)
+     */
+    private $specimen;
+
     /**
      * @var string
      *
