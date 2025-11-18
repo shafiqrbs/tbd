@@ -5,18 +5,16 @@ namespace Modules\Medicine\App\Models;
 use Cviebrock\EloquentSluggable\Sluggable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\DB;
 use Modules\AppsApi\App\Services\GeneratePatternCodeService;
 use Modules\Inventory\App\Models\CategoryModel;
 use Modules\Inventory\App\Models\ProductGalleryModel;
-use Modules\Inventory\App\Models\ProductMeasurementModel;
 use Modules\Inventory\App\Models\SettingModel;
 use Modules\Inventory\App\Models\StockItemModel;
 
 class MedicineModel extends Model
 {
-    use HasFactory,Sluggable;
+    use Sluggable;
 
     protected $table = 'hms_medicine_details';
     public $timestamps = true;
@@ -155,9 +153,7 @@ class MedicineModel extends Model
         if (isset($request['term']) && !empty($request['term'])) {
             $products = $products->whereAny([
                 'inv_product.name',
-                'inv_product.alternative_name',
-                'inv_stock.display_name',
-                'inv_stock.bangla_name',
+                'hms_medicine_details.name',
                 'inv_category.name'
             ], 'LIKE', '%'.$request['term'].'%');
         }

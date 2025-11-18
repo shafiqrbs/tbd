@@ -6,15 +6,12 @@ use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Str;
 use Modules\Core\App\Models\CustomerModel;
-use Modules\Hospital\App\Entities\PatientPrescriptionMedicineDailyHistory;
 use Modules\Inventory\App\Models\SalesModel;
 
 
 class InvoiceModel extends Model
 {
-    use HasFactory;
 
     protected $table = 'hms_invoice';
     public $timestamps = true;

@@ -20,7 +20,7 @@ class MedicineStockInlineRequest extends FormRequest
      *
      * @return array<string, \Illuminate\Contracts\Validation\Rule|array|string>
      */
-    public function rules(): array
+    /*public function rules(): array
     {
 
         switch($this->method())
@@ -41,6 +41,27 @@ class MedicineStockInlineRequest extends FormRequest
             }
 
             default:break;
+        }
+    }*/
+
+    public function rules(): array
+    {
+        switch ($this->method()) {
+            case 'PUT':
+            case 'POST':
+                return [
+                    'category_id' => 'nullable',
+                    'product_name' => 'nullable|string',
+                    'opd_quantity' => 'nullable',
+                    'medicine_dosage_id' => 'nullable',
+                    'medicine_bymeal_id' => 'nullable',
+                    'admin_status' => 'nullable|boolean',
+                    'ipd_status' => 'nullable|boolean',
+                    'opd_status' => 'nullable|boolean',
+                ];
+
+            default:
+                return [];
         }
     }
 

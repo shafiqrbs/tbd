@@ -3,21 +3,30 @@
 namespace Modules\Hospital\App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Services\DailyStockService;
 use Doctrine\ORM\EntityManagerInterface;
+use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Http;
 use Modules\AppsApi\App\Services\JsonRequestResponse;
 
 use Modules\Core\App\Models\UserModel;
 
 use Modules\Hospital\App\Models\EpharmaModel;
 
+use Modules\Hospital\App\Models\HospitalConfigModel;
 use Modules\Hospital\App\Models\InvoiceModel;
 use Modules\Hospital\App\Models\InvoiceParticularModel;
 use Modules\Hospital\App\Models\InvoicePathologicalReportModel;
 
 use Modules\Hospital\App\Models\PrescriptionModel;
-
+use Modules\Inventory\App\Models\PurchaseItemModel;
+use Modules\Inventory\App\Models\SalesModel;
+use Modules\Inventory\App\Models\StockItemHistoryModel;
+use Symfony\Component\HttpFoundation\Response as ResponseAlias;
+use Throwable;
 
 
 class EpharamaController extends Controller
@@ -70,22 +79,108 @@ class EpharamaController extends Controller
     /**
      * Update the specified resource in storage.
      */
+
     public function update(Request $request, $id)
     {
         $domain = $this->domain;
-        $data = $request->all();
-        $entity = InvoiceModel::where('barcode',$id)->first();
-        if($entity->is_medicine_delivered != 1){
-            $data['is_medicine_delivered'] = 1;
-            $data['medicine_delivered_by_id'] = $domain['user_id'];
-            $data['medicine_delivered_comment'] = $data['comment'] ?? null;
-            $data['medicine_delivered_date'] = new \DateTime('now') ?? null;
-        }
-        $entity->update($data);
-        $service = new JsonRequestResponse();
-        return $service->returnJosnResponse($entity);
+        $input = $request->only(['comment']);
 
+        // --- Fetch invoice ---
+        $invoice = InvoiceModel::where('barcode', $id)->first();
+        if (!$invoice) {
+            return response()->json([
+                'message' => 'Invoice not found',
+                'status' => ResponseAlias::HTTP_NOT_FOUND
+            ], ResponseAlias::HTTP_NOT_FOUND);
+        }
+
+        // --- Fetch OPD warehouse ---
+        $opdWarehouseId = HospitalConfigModel::find($domain['hms_config'])?->opd_store_id;
+
+        if (empty($opdWarehouseId)) {
+            return response()->json([
+                'message' => 'OpdWarehouse not found',
+                'status' => ResponseAlias::HTTP_NOT_FOUND
+            ], ResponseAlias::HTTP_NOT_FOUND);
+        }
+
+        // --- Fetch Sales ---
+        $sales = SalesModel::with('salesItems')->find($invoice->sales_id);
+        if (!$sales) {
+            return response()->json([
+                'message' => 'Sales record not found',
+                'status' => ResponseAlias::HTTP_NOT_FOUND
+            ], ResponseAlias::HTTP_NOT_FOUND);
+        }
+
+        DB::beginTransaction();
+
+        try {
+            if ($invoice->is_medicine_delivered != 1) {
+                $invoice->update([
+                    'process' => 'Done',
+                    'is_medicine_delivered' => 1,
+                    'medicine_delivered_by_id' => $domain['user_id'],
+                    'medicine_delivered_comment' => $input['comment'] ?? null,
+                    'medicine_delivered_date' => now(),
+                ]);
+
+                foreach ($sales->salesItems as $item) {
+
+                    // Update warehouse + config
+                    $item->warehouse_id = $opdWarehouseId;
+                    $item->config_id = $domain['config_id'];
+                    $item->save();
+
+                    // Validate update
+                    if (!$item->warehouse_id) {
+                        throw new Exception("Warehouse update failed for item ID: {$item->id}");
+                    }
+
+                    //--- STOCK HISTORY
+                    StockItemHistoryModel::openingStockQuantity(
+                        $item,
+                        'sales',
+                        $domain
+                    );
+
+                    //----DAILY STOCK MAINTAIN
+                    DailyStockService::maintainDailyStock(
+                        date: now()->format('Y-m-d'),
+                        field: 'sales_quantity',
+                        configId: $domain['config_id'],
+                        warehouseId: $item->warehouse_id,
+                        stockItemId: $item->stock_item_id,
+                        quantity: $item->quantity
+                    );
+                }
+
+                $sales->update([
+                    'approved_by_id' => $this->domain['user_id'],
+                    'process' => 'Closed'
+                ]);
+            }
+
+            DB::commit();
+
+            return response()->json([
+                'message' => 'Updated successfully',
+                'status' => ResponseAlias::HTTP_OK
+            ], ResponseAlias::HTTP_OK);
+
+        } catch (Throwable $e) {
+
+            // Rollback everything on error
+            DB::rollBack();
+
+            return response()->json([
+                'message' => 'Failed to update',
+                'error' => $e->getMessage(),
+                'status' => ResponseAlias::HTTP_INTERNAL_SERVER_ERROR
+            ], ResponseAlias::HTTP_INTERNAL_SERVER_ERROR);
+        }
     }
+
 
     public function inlineUpdate(Request $request,$id)
     {
