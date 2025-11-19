@@ -418,12 +418,15 @@ class InvoiceModel extends Model
             ->leftjoin('inv_sales','inv_sales.id','=','hms_invoice.sales_id')
             ->leftjoin('hms_prescription as prescription','prescription.hms_invoice_id','=','hms_invoice.id')
             ->leftjoin('users as doctor','doctor.id','=','prescription.created_by_id')
+        //    ->leftjoin('cor_setting as designation','designation.id','=','doctor.designation_id')
             ->leftjoin('users as createdBy','createdBy.id','=','hms_invoice.created_by_id')
             ->leftjoin('hms_particular as room','room.id','=','hms_invoice.room_id')
             ->leftjoin('hms_particular_mode as patient_mode','patient_mode.id','=','hms_invoice.patient_mode_id')
             ->leftjoin('hms_particular_mode as particular_payment_mode','particular_payment_mode.id','=','hms_invoice.patient_payment_mode_id')
             ->leftJoin('hms_particular as admit_consultant', 'admit_consultant.id', '=', 'hms_invoice.admit_consultant_id')
             ->leftJoin('hms_particular as admit_doctor', 'admit_doctor.id', '=', 'hms_invoice.admit_doctor_id')
+          //  ->leftJoin('users as admit_doctor_user', 'admit_doctor_user.id', '=', 'admit_doctor.employee_id')
+          //  ->leftJoin('cor_setting as admit_doctor_designation', 'admit_doctor_designation.id', '=', 'admit_doctor_user.designation_id')
             ->leftJoin('hms_particular_mode as admit_unit', 'admit_unit.id', '=', 'hms_invoice.admit_unit_id')
             ->leftJoin('hms_particular_mode as admit_department', 'admit_department.id', '=', 'hms_invoice.admit_department_id')
             ->leftjoin('hms_invoice as invoice_parent','invoice_parent.id','=','hms_invoice.parent_id')
@@ -441,6 +444,9 @@ class InvoiceModel extends Model
                 'hms_invoice.total as total',
                 'admit_consultant.name as admit_consultant_name',
                 'admit_doctor.name as admit_doctor_name',
+             //   'admit_doctor_designation.name as admit_doctor_designation_name',
+                'doctor.name as prescription_doctor_name',
+               // 'designation.name as prescription_doctor_designation',
                 'admit_unit.name as admit_unit_name',
                 'admit_unit.slug as admit_unit_slug',
                 'admit_department.name as admit_department_name',
