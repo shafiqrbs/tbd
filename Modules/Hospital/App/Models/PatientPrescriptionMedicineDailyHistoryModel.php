@@ -47,9 +47,9 @@ class PatientPrescriptionMedicineDailyHistoryModel extends Model
 
         if (!empty($medicines) && is_array($medicines)) {
 
-            foreach ($medicines as $medicine) {
-                $exist = self::where(['prescription_medicine_id'=> $medicine['id'],'day_date' => $dayDate])->first();
-                if(empty($exist)){
+            //foreach ($medicines as $medicine) {
+               // $exist = self::where(['prescription_medicine_id'=> $medicine['id'],'day_date' => $dayDate])->first();
+               // if(empty($exist)){
                     // STEP 1: Create Sale
                     $sale = HospitalSalesModel::create([
                         'config_id' => $domain['inv_config'],
@@ -91,8 +91,8 @@ class PatientPrescriptionMedicineDailyHistoryModel extends Model
                             ]
                         );
                     }
-                }
-            }
+               // }
+            //}
         }
     }
 
