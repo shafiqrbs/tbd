@@ -559,7 +559,8 @@ class InvoiceModel extends Model
                     'hms_invoice_particular.quantity',
                     'hms_invoice_particular.price',
                     'hms_invoice_particular.sub_total',
-                ]);
+                    'hms_invoice_particular.process',
+                ])->where('hms_invoice_particular.mode','investigation');
             }])
             ->with(['invoice_transaction' => function ($query) {
                 $query->select([
@@ -665,8 +666,6 @@ class InvoiceModel extends Model
 
     public static function getOpdRooms($domain)
     {
-
-
         $date = new \DateTime();
         $start_date = $date->format('Y-m-d 00:00:00');
         $end_date   = $date->format('Y-m-d 23:59:59');

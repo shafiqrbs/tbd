@@ -80,6 +80,13 @@ class PatientPrescriptionMedicine
      */
     private $quantity;
 
+     /**
+     * @var string
+     *
+     * @ORM\Column(name="daily_quantity", type="string", length=100, nullable=true)
+     */
+    private $dailyQuantity;
+
     /**
      * @var string
      *
@@ -184,7 +191,6 @@ class PatientPrescriptionMedicine
      * @ORM\Column(name="end_date", type="datetime", nullable=true)
      */
     private $endDate;
-
 
 
     /**

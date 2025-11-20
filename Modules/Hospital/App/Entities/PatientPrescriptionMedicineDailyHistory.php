@@ -22,6 +22,12 @@ class PatientPrescriptionMedicineDailyHistory
     private $id;
 
     /**
+     * @ORM\ManyToOne(targetEntity="Invoice")
+     * @ORM\JoinColumn(name="hms_invoice_id",onDelete="CASCADE")
+     **/
+    private $invoice;
+
+    /**
      * @ORM\ManyToOne(targetEntity="Prescription")
      * @ORM\JoinColumn(onDelete="CASCADE")
      **/
@@ -29,23 +35,28 @@ class PatientPrescriptionMedicineDailyHistory
 
     /**
      * @ORM\ManyToOne(targetEntity="Modules\Inventory\App\Entities\StockItem")
+     * @ORM\JoinColumn(name="stock_id", referencedColumnName="id", nullable=true, onDelete="cascade")
+     **/
+    private $stock;
+
+    /**
+     * @ORM\ManyToOne(targetEntity="Modules\Core\App\Entities\Warehouse")
+     * @ORM\JoinColumn(name="warehouse_id", referencedColumnName="id", nullable=true, onDelete="cascade")
+     **/
+    private $warehouse;
+
+     /**
+     * @ORM\ManyToOne(targetEntity="Modules\Inventory\App\Entities\Sales")
+     * @ORM\JoinColumn(name="sales_id", referencedColumnName="id", nullable=true, onDelete="cascade")
+     **/
+    private $sale;
+
+    /**
+     * @ORM\ManyToOne(targetEntity="Modules\Inventory\App\Entities\SalesItem")
      * @ORM\JoinColumn(name="medicine_id", referencedColumnName="id", nullable=true, onDelete="cascade")
      **/
-    private $medicine;
+    private $saleItem;
 
-
-    /**
-     * @ORM\ManyToOne(targetEntity="Modules\Hospital\App\Entities\MedicineDosage")
-     * @ORM\JoinColumn(name="medicine_dosage_id", referencedColumnName="id", nullable=true, onDelete="cascade")
-     **/
-    private $medicineDosage;
-
-    /**
-     * @var string
-     *
-     * @ORM\Column(name="duration", type="string", length=100, nullable=true)
-     */
-    private $duration;
 
      /**
      * @var string
@@ -53,6 +64,7 @@ class PatientPrescriptionMedicineDailyHistory
      * @ORM\Column(name="quantity", type="string", length=100, nullable=true)
      */
     private $quantity;
+
 
     /**
      * @var string

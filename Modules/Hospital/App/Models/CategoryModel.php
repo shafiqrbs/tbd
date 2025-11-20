@@ -83,7 +83,7 @@ class CategoryModel extends Model
     {
         $query = self::select(['inv_category.name', 'inv_category.slug', 'inv_category.id'])
             ->join('inv_setting as p','p.id','=','inv_category.category_nature_id')
-            ->where([['inv_category.status', 1],['inv_category.config_id', $domain['config_id']],['p.slug','service']])->whereNull('inv_category.is_private')->whereNotNull('parent')->orderBy('inv_category.name','ASC');
+            ->where([['inv_category.status', 1],['inv_category.config_id', $domain['config_id']],['p.slug',$type]])->whereNull('inv_category.is_private')->whereNotNull('parent')->orderBy('inv_category.name','ASC');
         return $query->get();
     }
 

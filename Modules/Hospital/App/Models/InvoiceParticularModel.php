@@ -152,6 +152,40 @@ class InvoiceParticularModel extends Model
     }
 
 
+    public static function getGroupParticulars($id)
+    {
+        $rows = self::join('hms_invoice', 'hms_invoice.id', '=', 'hms_invoice_particular.hms_invoice_id')
+            ->where(['hms_invoice_particular.mode' => 'investigation'])
+            ->where(function ($query) use ($id) {
+                $query->where('hms_invoice.id', $id)
+                    ->orWhere('hms_invoice.uid', $id);
+            })
+            ->select([
+                'hms_invoice_particular.unique_id',
+                'hms_invoice_particular.id',
+                'hms_invoice_particular.invoice_transaction_id',
+                'hms_invoice_particular.name',
+                'hms_invoice_particular.content',
+                'hms_invoice_particular.price',
+                'hms_invoice_particular.quantity',
+                'hms_invoice_particular.status',
+                'hms_invoice_particular.process',
+            ])
+            ->orderBy('hms_invoice_particular.unique_id')
+            ->get()
+            ->groupBy('unique_id')
+            ->map(function ($group) {
+                return [
+                    'created' => $group->first()->unique_id,
+                    'items'     => $group->values(),  // child rows
+                ];
+            })
+            ->values();
+        return $rows;
+    }
+
+
+
 
 
 

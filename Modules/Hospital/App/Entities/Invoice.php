@@ -387,6 +387,13 @@ class Invoice
      */
     private $code;
 
+    /**
+     * @var integer
+     *
+     * @ORM\Column(name="card_no", type="integer",  nullable=true)
+     */
+    private $cardNo;
+
 
     /**
      * @var integer

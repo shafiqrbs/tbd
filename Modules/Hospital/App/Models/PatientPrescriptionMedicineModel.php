@@ -51,6 +51,7 @@ class PatientPrescriptionMedicineModel extends Model
                         $medicineStock = $medicineDetails->medicineStock;
                         $dose_details ='';
                         $dose_details_bn ='';
+                        $daily_quantity = 1;
                         $continue_mode = 'sos';
 
                         $dosage = $medicine->medicine_dosage_id ?? null;
@@ -59,6 +60,7 @@ class PatientPrescriptionMedicineModel extends Model
                             $dose_details = $dosage->name;
                             $dose_details_bn = $dosage->name_bn;
                             $continue_mode = $dosage->continue_mode;
+                            $daily_quantity = $dosage->daily_quantity;
                         }
 
                         $by_meal = '';
@@ -84,6 +86,7 @@ class PatientPrescriptionMedicineModel extends Model
                             'medicine_bymeal_id' => $medicine->medicine_bymeal_id ?? null,
                             'dose_details' => $dose_details,
                             'dose_details_bn' => $dose_details_bn,
+                            'daily_quantity' => $daily_quantity,
                             'by_meal' => $by_meal,
                             'by_meal_bn' => $by_meal_bn,
                             'continue_mode' => $continue_mode,
@@ -101,6 +104,7 @@ class PatientPrescriptionMedicineModel extends Model
 
                         $dose_details = '';
                         $dose_details_bn = '';
+                        $daily_quantity = 1;
                         $continue_mode = 'sos';
 
                         $dosage = $medicine->medicine_dosage_id ?? null;
@@ -109,6 +113,7 @@ class PatientPrescriptionMedicineModel extends Model
                             $dose_details = $dosage->name;
                             $dose_details_bn = $dosage->name_bn;
                             $continue_mode = $dosage->continue_mode;
+                            $daily_quantity = $dosage->quantity;
                         }
 
                         $by_meal = '';
@@ -136,6 +141,7 @@ class PatientPrescriptionMedicineModel extends Model
                             'by_meal' => $by_meal,
                             'by_meal_bn' => $by_meal_bn,
                             'continue_mode' => $continue_mode,
+                            'daily_quantity' => $daily_quantity,
                             'quantity' => 0,
                             'is_stock' => false,
                             'ipd_status' => false,
@@ -156,7 +162,7 @@ class PatientPrescriptionMedicineModel extends Model
                 'hms_invoice_id','prescription_id','company','medicine_name','generic',
                 'generic_id','medicine_id','stock_item_id','medicine_dosage_id',
                 'medicine_bymeal_id','dose_details','dose_details_bn','by_meal','by_meal_bn',
-                'continue_mode','quantity','is_stock','start_date'
+                'continue_mode','quantity','daily_quantity','is_stock','start_date'
             ];
             $insertData = collect($insertData)->map(function ($item) use ($requiredKeys) {
                 foreach ($requiredKeys as $key) {
@@ -196,7 +202,7 @@ class PatientPrescriptionMedicineModel extends Model
                     $dose_details = '';
                     $dose_details_bn = '';
                     $continue_mode = 'sos';
-
+                    $daily_quantity = 1;
                     // Dosage
                     if (!empty($medicine->medicine_dosage_id)) {
                         $dosage = MedicineDosageModel::find($medicine->medicine_dosage_id);
@@ -204,6 +210,7 @@ class PatientPrescriptionMedicineModel extends Model
                             $dose_details = $dosage->name;
                             $dose_details_bn = $dosage->name_bn;
                             $continue_mode = $dosage->continue_mode;
+                            $daily_quantity = $dosage->quantity;
                         }
                     }
 
@@ -235,6 +242,7 @@ class PatientPrescriptionMedicineModel extends Model
                             'medicine_bymeal_id' => $medicine->medicine_bymeal_id ?? null,
                             'dose_details' => $dose_details,
                             'dose_details_bn' => $dose_details_bn,
+                            'daily_quantity' => $daily_quantity,
                             'by_meal' => $by_meal,
                             'by_meal_bn' => $by_meal_bn,
                             'continue_mode' => $continue_mode,
@@ -261,6 +269,7 @@ class PatientPrescriptionMedicineModel extends Model
                             'medicine_bymeal_id' => $medicine->medicine_bymeal_id ?? null,
                             'dose_details' => $dose_details,
                             'dose_details_bn' => $dose_details_bn,
+                            'daily_quantity' => $daily_quantity,
                             'by_meal' => $by_meal,
                             'by_meal_bn' => $by_meal_bn,
                             'continue_mode' => $continue_mode,
@@ -284,7 +293,7 @@ class PatientPrescriptionMedicineModel extends Model
                 'hms_invoice_id','prescription_id','company','medicine_name','generic',
                 'generic_id','medicine_id','stock_item_id','medicine_dosage_id',
                 'medicine_bymeal_id','dose_details','dose_details_bn','by_meal','by_meal_bn',
-                'continue_mode','quantity','is_stock','start_date','created_at','updated_at'
+                'continue_mode','quantity','daily_quantity','is_stock','start_date','created_at','updated_at'
             ];
 
             $insertData = collect($insertData)->map(function ($item) use ($requiredKeys) {
@@ -303,7 +312,7 @@ class PatientPrescriptionMedicineModel extends Model
                 [ // Columns to update if exists
                     'company','generic','generic_id','medicine_id','stock_item_id',
                     'medicine_dosage_id','medicine_bymeal_id','dose_details','dose_details_bn',
-                    'by_meal','by_meal_bn','continue_mode','quantity','is_stock',
+                    'by_meal','by_meal_bn','continue_mode','quantity','daily_quantity','is_stock',
                     'start_date','updated_at'
                 ]
             );
@@ -317,6 +326,19 @@ class PatientPrescriptionMedicineModel extends Model
                 );
             }
         }
+    }
+
+    public static function getPatientIpdMedicine($id){
+
+        $rows = self::join('hms_invoice', 'hms_invoice.id', '=', 'hms_patient_prescription_medicine.hms_invoice_id')
+            ->where(function ($query) use ($id) {
+                $query->where('hms_invoice.id', $id)
+                    ->orWhere('hms_invoice.uid', $id);
+            })->where(['is_active'=> 1,'is_stock'=> 1])
+            ->select('hms_patient_prescription_medicine.*')
+            ->orderBy('hms_patient_prescription_medicine.medicine_name','ASC')
+            ->get();
+        return $rows;
     }
 
 

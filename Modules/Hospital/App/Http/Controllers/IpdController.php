@@ -32,6 +32,7 @@ use Modules\Hospital\App\Models\OPDModel;
 use Modules\Hospital\App\Models\ParticularModel;
 use Modules\Hospital\App\Models\ParticularModeModel;
 use Modules\Hospital\App\Models\PatientModel;
+use Modules\Hospital\App\Models\PatientPrescriptionMedicineModel;
 use Modules\Hospital\App\Models\PrescriptionModel;
 use function Symfony\Component\TypeInfo\null;
 
@@ -202,6 +203,8 @@ class IpdController extends Controller
         }
     }
 
+
+
     /**
      * Update the specified resource in storage.
      */
@@ -209,13 +212,15 @@ class IpdController extends Controller
     {
         $data = $request->all();
         if($data['mode'] == "medicine"){
-            $entity = InvoiceTransactionModel::getMedicine($id);
-        }else{
-            $entity = InvoiceTransactionModel::getInvoiceParticulars($id,$data['mode']);
+            $entity = PatientPrescriptionMedicineModel::getPatientIpdMedicine($id);
+        }elseif($data['mode'] == "investigation"){
+            $entity = InvoiceParticularModel::getGroupParticulars($id);
         }
         $service = new JsonRequestResponse();
         return $service->returnJosnResponse($entity);
     }
+
+
 
     /**
      * Update the specified resource in storage.

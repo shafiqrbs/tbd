@@ -110,8 +110,9 @@ class InvoiceTransactionModel extends Model
         $date =  new \DateTime("now");
         $invoice = InvoiceModel::findByIdOrUid($id);
         $investigations = $data;
+        $uniqueId = time();
         if (!empty($investigations) && is_array($investigations)) {
-            collect($investigations)->map(function ($investigation) use ($invoice,$date) {
+            collect($investigations)->map(function ($investigation) use ($invoice,$date,$uniqueId) {
 
                 $particular = ParticularModel::find($investigation['id']);
                 if($particular){
@@ -122,6 +123,7 @@ class InvoiceTransactionModel extends Model
                         ],
                         [
                             'name'      => $particular->name,
+                            'unique_id'      => $uniqueId,
                             'quantity'      => 1,
                             'mode' => 'investigation',
                             'price'         => $particular->price ?? 0,
@@ -326,6 +328,7 @@ class InvoiceTransactionModel extends Model
                     'hms_invoice_particular.name',
                     'hms_invoice_particular.content',
                     'hms_invoice_particular.price',
+                    'hms_invoice_particular.quantity',
                 ]);
             }])
             ->select(
