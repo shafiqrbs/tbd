@@ -331,16 +331,65 @@ class PatientPrescriptionMedicineModel extends Model
 
 
     public static function getPatientIpdMedicine($id){
+        $today = now()->toDateString();
 
         $rows = self::join('hms_invoice', 'hms_invoice.id', '=', 'hms_patient_prescription_medicine.hms_invoice_id')
+            ->leftJoin(
+                'hms_patient_prescription_medicine_daily_history',
+                function ($join) use ($today) {
+                    $join->on(
+                        'hms_patient_prescription_medicine_daily_history.prescription_medicine_id',
+                        '=',
+                        'hms_patient_prescription_medicine.id'
+                    )->whereDate(
+                        'hms_patient_prescription_medicine_daily_history.created_at',
+                        '=',
+                        $today
+                    );
+                }
+            )
+            // Only medicines that DO NOT have today's history
+            ->whereNull('hms_patient_prescription_medicine_daily_history.id')
+
             ->where(function ($query) use ($id) {
                 $query->where('hms_invoice.id', $id)
                     ->orWhere('hms_invoice.uid', $id);
-            })->where(['is_active'=> 1,'is_stock'=> 1])
+            })
+            ->where([
+                'hms_patient_prescription_medicine.is_active' => 1,
+                'hms_patient_prescription_medicine.is_stock' => 1
+            ])
+            ->select('hms_patient_prescription_medicine.*')
+            ->orderBy('hms_patient_prescription_medicine.medicine_name', 'ASC')
+            ->get();
+
+        return $rows;
+
+        /*$rows = self::join('hms_invoice', 'hms_invoice.id', '=', 'hms_patient_prescription_medicine.hms_invoice_id')
+            ->leftJoin(
+                'hms_patient_prescription_medicine_daily_history',
+                'hms_patient_prescription_medicine_daily_history.prescription_medicine_id',
+                '=',
+                'hms_patient_prescription_medicine.id'
+            )
+            ->where(function($query) {
+                $query->whereDate('hms_patient_prescription_medicine_daily_history.created_at', '!=', now()->toDateString())
+                    ->orWhereNull('hms_patient_prescription_medicine_daily_history.id');
+            })
+            ->where(function ($query) use ($id) {
+                $query->where('hms_invoice.id', $id)
+                    ->orWhere('hms_invoice.uid', $id);
+            })
+            ->where([
+                'hms_patient_prescription_medicine.is_active'=> 1,
+                'hms_patient_prescription_medicine.is_stock'=> 1
+            ])
             ->select('hms_patient_prescription_medicine.*')
             ->orderBy('hms_patient_prescription_medicine.medicine_name','ASC')
             ->get();
-        return $rows;
+
+        return $rows;*/
+
     }
 
 

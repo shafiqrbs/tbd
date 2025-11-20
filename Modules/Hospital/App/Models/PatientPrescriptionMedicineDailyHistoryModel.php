@@ -37,9 +37,8 @@ class PatientPrescriptionMedicineDailyHistoryModel extends Model
     }
 
 
-    public static function insertDailyMedicine($domain,$id,$data)
+    public static function insertDailyMedicine($domain,$id,$medicines,$warehouse_id)
     {
-        $medicines = $data;
         $invoice = InvoiceModel::findByIdOrUid($id);
         $date = now();
         $today = new \DateTime();
@@ -59,17 +58,20 @@ class PatientPrescriptionMedicineDailyHistoryModel extends Model
                     ]);
 
                     foreach ($medicines as $medicine) {
-
-                        if (!StockItemModel::find($medicine['stock_id'])) {
+                        $stockItem = StockItemModel::find($medicine['stock_id']);
+                        if (!$stockItem) {
                             continue;
                         }
 
                         // Create sales item and get ID
                         $saleItem = SalesItemModel::create([
                             'sale_id' => $sale->id,
+                            'name' => $stockItem->name,
                             'stock_item_id' => $medicine['stock_id'],
                             'quantity' => $medicine['quantity'] ?? 0,
                             'price' => $medicine['price'] ?? 0,
+                            'config_id' => $domain['inv_config'],
+                            'warehouse_id' => $warehouse_id,
                             'created_at' => $date,
                             'updated_at' => $date,
                         ]);
@@ -83,6 +85,7 @@ class PatientPrescriptionMedicineDailyHistoryModel extends Model
                             [
                                 'hms_invoice_id' => $invoice->id,
                                 'sale_item_id' => $saleItem->id,
+                                'warehouse_id' => $warehouse_id,
                                 'sale_id' => $sale->id,
                                 'stock_id' => $medicine['stock_id'],
                                 'quantity' => $medicine['quantity'] ?? 0,
@@ -91,6 +94,7 @@ class PatientPrescriptionMedicineDailyHistoryModel extends Model
                             ]
                         );
                     }
+                    return $sale->id;
                // }
             //}
         }

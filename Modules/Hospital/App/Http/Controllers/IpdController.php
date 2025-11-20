@@ -3,8 +3,10 @@
 namespace Modules\Hospital\App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Services\DailyStockService;
 use Carbon\Carbon;
 use Doctrine\ORM\EntityManagerInterface;
+use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
@@ -35,6 +37,9 @@ use Modules\Hospital\App\Models\PatientModel;
 use Modules\Hospital\App\Models\PatientPrescriptionMedicineDailyHistoryModel;
 use Modules\Hospital\App\Models\PatientPrescriptionMedicineModel;
 use Modules\Hospital\App\Models\PrescriptionModel;
+use Modules\Inventory\App\Models\SalesModel;
+use Modules\Inventory\App\Models\StockItemHistoryModel;
+use Symfony\Component\HttpFoundation\Response as ResponseAlias;
 use function Symfony\Component\TypeInfo\null;
 
 
@@ -190,8 +195,45 @@ class IpdController extends Controller
             if ($module == 'investigation') {
                 InvoiceTransactionModel::insertIpdInvestigations($domain, $id, $content);
             }
-            if ($module == 'issue-medicine') {
-                PatientPrescriptionMedicineDailyHistoryModel::insertDailyMedicine($domain, $id, $content);
+            if ($module == 'issue-medicine' && $request['warehouse_id']) {
+                $salesId = PatientPrescriptionMedicineDailyHistoryModel::insertDailyMedicine($domain, $id, $content , $request['warehouse_id']);
+                if ($salesId){
+                    $sales = SalesModel::with('salesItems')->find($salesId);
+                    if (!$sales) {
+                        return response()->json([
+                            'message' => 'Sales record not found',
+                            'status' => ResponseAlias::HTTP_NOT_FOUND
+                        ], ResponseAlias::HTTP_NOT_FOUND);
+                    }
+                    foreach ($sales->salesItems as $item) {
+                        // Validate update
+                        if (!$item->warehouse_id) {
+                            throw new Exception("Warehouse update failed for item ID: {$item->id}");
+                        }
+
+                        //--- STOCK HISTORY
+                        StockItemHistoryModel::openingStockQuantity(
+                            $item,
+                            'sales',
+                            $domain
+                        );
+
+                        //----DAILY STOCK MAINTAIN
+                        DailyStockService::maintainDailyStock(
+                            date: now()->format('Y-m-d'),
+                            field: 'sales_quantity',
+                            configId: $domain['config_id'],
+                            warehouseId: $item->warehouse_id,
+                            stockItemId: $item->stock_item_id,
+                            quantity: $item->quantity
+                        );
+                    }
+
+                    $sales->update([
+                        'approved_by_id' => $this->domain['user_id'],
+                        'process' => 'Closed'
+                    ]);
+                }
             }
             if ($module == 'room') {
                 InvoiceTransactionModel::insertIpdRoom($domain, $id, $content);
