@@ -189,6 +189,7 @@ class IpdModel extends Model
                 'sat_without_O2' => $data['sat_without_O2'] ?? null,
                 'respiration' => $data['respiration'] ?? null,
                 'bp' => $data['bp'] ?? null,
+                'card_no' => $data['card_no'] ?? null,
                 'weight' => $data['weight'] ?? null,
                 'blood_sugar' => $data['blood_sugar'] ?? null,
                 'blood_group' => $data['blood_group'] ?? null,

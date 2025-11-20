@@ -172,6 +172,7 @@ Route::prefix('/hospital')->middleware([HeaderAuthenticationMiddleware::class])-
     Route::post('/ipd/patient-chart/{id}', [IpdController::class,'patientChart'])->name('ipd_data_process');
     Route::post('/ipd/data-process/{id}', [IpdController::class,'ipdDataProcess'])->name('ipd_data_process');
     Route::get('/ipd/transaction/{id}', [IpdController::class,'transaction'])->name('ipd_data_transaction');
+    Route::get('/ipd/release/{id}/{mode}', [IpdController::class,'release'])->name('ipd_data_transaction');
 
     Route::apiResource('epharma',
         EpharamaController::class)
@@ -205,7 +206,9 @@ Route::prefix('/hospital')->middleware([HeaderAuthenticationMiddleware::class])-
     });
 
     Route::prefix('billing')->name('billing')->group(function () {
+        Route::get('/final-bill', [BillingController::class, 'findBill'])->name('find_bill');
         Route::apiResource('', BillingController::class)->parameters(['' => 'id']);
+        Route::get('{id}/final-bill', [BillingController::class, 'finalBillDetails'])->name('find_bill');
         Route::get('{id}/payment/{transactionId}', [BillingController::class, 'transaction'])->name('transaction');
     });
 

@@ -27,11 +27,12 @@ class PatientPrescriptionMedicineDailyHistory
      **/
     private $invoice;
 
+
     /**
-     * @ORM\ManyToOne(targetEntity="Prescription")
-     * @ORM\JoinColumn(onDelete="CASCADE")
+     * @ORM\ManyToOne(targetEntity="PatientPrescriptionMedicine")
+     * @ORM\JoinColumn(name="prescription_medicine_id", referencedColumnName="id", nullable=true, onDelete="cascade")
      **/
-    private $prescription;
+    private $prescriptionMedicine;
 
     /**
      * @ORM\ManyToOne(targetEntity="Modules\Inventory\App\Entities\StockItem")
@@ -47,13 +48,13 @@ class PatientPrescriptionMedicineDailyHistory
 
      /**
      * @ORM\ManyToOne(targetEntity="Modules\Inventory\App\Entities\Sales")
-     * @ORM\JoinColumn(name="sales_id", referencedColumnName="id", nullable=true, onDelete="cascade")
+     * @ORM\JoinColumn(name="sale_id", referencedColumnName="id", nullable=true, onDelete="cascade")
      **/
     private $sale;
 
     /**
-     * @ORM\ManyToOne(targetEntity="Modules\Inventory\App\Entities\SalesItem")
-     * @ORM\JoinColumn(name="medicine_id", referencedColumnName="id", nullable=true, onDelete="cascade")
+     * @ORM\OneToOne(targetEntity="Modules\Inventory\App\Entities\SalesItem")
+     * @ORM\JoinColumn(name="sale_item_id", referencedColumnName="id", nullable=true, onDelete="cascade")
      **/
     private $saleItem;
 
@@ -61,17 +62,17 @@ class PatientPrescriptionMedicineDailyHistory
      /**
      * @var string
      *
-     * @ORM\Column(name="quantity", type="string", length=100, nullable=true)
+     * @ORM\Column(name="day_date", type="string", length=40, nullable=true)
+     */
+    private $dayDate;
+
+    /**
+     * @var integer
+     *
+     * @ORM\Column(name="quantity", type="integer", length=4, nullable=true)
      */
     private $quantity;
 
-
-    /**
-     * @var string
-     *
-     * @ORM\Column(type="string", length=255, nullable=true)
-     */
-    private $medicineName;
 
     /**
      * @var boolean

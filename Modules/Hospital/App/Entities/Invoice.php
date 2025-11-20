@@ -147,6 +147,8 @@ class Invoice
     private $admitDepartment;
 
 
+
+
     /**
      * @ORM\ManyToOne(targetEntity="Modules\Core\App\Entities\User")
      * @ORM\JoinColumn(name="created_by_id", referencedColumnName="id", nullable=true)
@@ -188,6 +190,14 @@ class Invoice
      * @ORM\Column(name="weight", type="string",length=50, nullable = true)
      */
     private $weight;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="release_mode", type="string",length=100, nullable = true)
+     */
+    private $releaseMode;
+
 
     /**
      * @var string

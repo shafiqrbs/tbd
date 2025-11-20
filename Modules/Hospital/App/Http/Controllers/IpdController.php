@@ -32,6 +32,7 @@ use Modules\Hospital\App\Models\OPDModel;
 use Modules\Hospital\App\Models\ParticularModel;
 use Modules\Hospital\App\Models\ParticularModeModel;
 use Modules\Hospital\App\Models\PatientModel;
+use Modules\Hospital\App\Models\PatientPrescriptionMedicineDailyHistoryModel;
 use Modules\Hospital\App\Models\PatientPrescriptionMedicineModel;
 use Modules\Hospital\App\Models\PrescriptionModel;
 use function Symfony\Component\TypeInfo\null;
@@ -128,6 +129,10 @@ class IpdController extends Controller
         if (!$entity){
             $entity = 'not_found';
         }
+        $amount = InvoiceTransactionModel::where('hms_invoice_id', $entity->id)->where('process','Done')->sum('amount');
+        $total = InvoiceParticularModel::where('hms_invoice_id', $entity->id)->where('status',true)->sum('sub_total');
+        InvoiceParticularModel::getCountBedRoom($entity->id);
+        $entity->update(['sub_total'=>$total ,'total' => $total,'amount' => $amount]);
         $service = new JsonRequestResponse();
         $data = $service->returnJosnResponse($entity);
         return $data;
@@ -140,6 +145,18 @@ class IpdController extends Controller
     public function edit($id)
     {
 
+    }
+
+    /**
+     * Show the form for editing the specified resource.
+     */
+    public function release($id,$mode)
+    {
+        $entity = InvoiceModel::findByIdOrUid($id);
+        $entity->update(['release_mode'=>$mode]);
+        $service = new JsonRequestResponse();
+        $data = $service->returnJosnResponse($entity);
+        return $data;
     }
 
     /**
@@ -172,6 +189,9 @@ class IpdController extends Controller
             }
             if ($module == 'investigation') {
                 InvoiceTransactionModel::insertIpdInvestigations($domain, $id, $content);
+            }
+            if ($module == 'issue-medicine') {
+                PatientPrescriptionMedicineDailyHistoryModel::insertDailyMedicine($domain, $id, $content);
             }
             if ($module == 'room') {
                 InvoiceTransactionModel::insertIpdRoom($domain, $id, $content);

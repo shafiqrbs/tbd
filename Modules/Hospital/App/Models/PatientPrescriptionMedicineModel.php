@@ -328,6 +328,8 @@ class PatientPrescriptionMedicineModel extends Model
         }
     }
 
+
+
     public static function getPatientIpdMedicine($id){
 
         $rows = self::join('hms_invoice', 'hms_invoice.id', '=', 'hms_patient_prescription_medicine.hms_invoice_id')

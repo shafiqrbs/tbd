@@ -69,6 +69,27 @@ class BillingController extends Controller
     /**
      * Display a listing of the resource.
      */
+    public function findBill(Request $request){
+
+        $domain = $this->domain;
+        $data = BillingModel::getFinalBillRecords($request,$domain);
+        $response = new Response();
+        $response->headers->set('Content-Type','application/json');
+        $response->setContent(json_encode([
+            'message' => 'success',
+            'status' => Response::HTTP_OK,
+            'total' => $data['count'],
+            'data' => $data['entities']
+        ]));
+        $response->setStatusCode(Response::HTTP_OK);
+        return $response;
+    }
+
+
+
+    /**
+     * Display a listing of the resource.
+     */
     public function admission(Request $request){
 
         $domain = $this->domain;
@@ -156,6 +177,22 @@ class BillingController extends Controller
         PrescriptionModel::find($id)->delete();
         $entity = ['message' => 'delete'];
         return $service->returnJosnResponse($entity);
+    }
+
+    /**
+     * Show the specified resource.
+     *//**/
+    public function finalBillDetails($id)
+    {
+        $entity = InvoiceModel::findByIdOrUid($id);
+        $service = new JsonRequestResponse();
+        $amount = InvoiceTransactionModel::where('hms_invoice_id', $entity->id)->where('process','Done')->sum('amount');
+        $total = InvoiceParticularModel::where('hms_invoice_id', $entity->id)->where('status',true)->sum('sub_total');
+        InvoiceParticularModel::getCountBedRoom($entity->id);
+        $entity->update(['sub_total' => $total , 'total' => $total, 'amount' => $amount]);
+        $entity = BillingModel::getFinalBillShow($id);
+        $data = $service->returnJosnResponse($entity);
+        return $data;
     }
 
 }
