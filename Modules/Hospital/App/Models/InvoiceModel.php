@@ -841,18 +841,18 @@ class InvoiceModel extends Model
         $summary = self::where([['hms_invoice.config_id',$domain['hms_config']]])
             ->select([
                  DB::raw('COUNT(hms_invoice.id) as patient'),
-                 DB::raw('SUM(hms_invoice.total)'),
+                 DB::raw('SUM(hms_invoice.total) as total'),
             ]);
 
         if (isset($request['created_by_id']) && !empty($request['created_by_id'])){
             $summary = $summary->where('hms_invoice.created_by_id',$request['created_by_id']);
         }
-        if (isset($request['created']) && !empty($request['created'])){
-            $date = new \DateTime($request['created']);
-            $start_date = $date->format('Y-m-d 00:00:00');
-            $end_date = $date->format('Y-m-d 23:59:59');
-            $summary = $summary->whereBetween('hms_invoice.created_at',[$start_date, $end_date]);
+        if (!empty($request['created'])) {
+            $start = Carbon::parse($request['created'])->startOfDay();
+            $end   = Carbon::parse($request['created'])->endOfDay();
+            $summary->whereBetween('hms_invoice.created_at', [$start, $end]);
         }
+
         $summary = $summary->get();
 
         $userBase = self::where([['hms_invoice.config_id',$domain['hms_config']]])
