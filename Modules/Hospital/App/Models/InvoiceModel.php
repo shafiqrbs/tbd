@@ -560,6 +560,8 @@ class InvoiceModel extends Model
                     'hms_invoice_particular.price',
                     'hms_invoice_particular.sub_total',
                     'hms_invoice_particular.process',
+                    'hms_invoice_particular.is_waiver',
+                    'hms_invoice_particular.patient_waiver_id',
                 ])->where('hms_invoice_particular.mode','investigation');
             }])
             ->with(['invoice_transaction' => function ($query) {

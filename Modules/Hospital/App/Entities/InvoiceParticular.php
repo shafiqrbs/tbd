@@ -305,7 +305,7 @@ class InvoiceParticular
      *
      * @ORM\Column(type="boolean", nullable=true, options={"default"="false"})
      */
-     private $isWaver;
+     private $isWaiver;
 
     /**
      * @var boolean

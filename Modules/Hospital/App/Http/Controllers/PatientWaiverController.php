@@ -173,6 +173,19 @@ class PatientWaiverController extends Controller
     }
 
     /**
+     * Update the specified resource in storage.
+     */
+    public function print(Request $request, $id)
+    {
+
+        $entity = PatientWaiverModel::getWaiverDetails($id);
+        $service = new JsonRequestResponse();
+        return $service->returnJosnResponse($entity);
+
+    }
+
+
+    /**
      * Remove the specified resource from storage.
      */
     public function destroy($id)
@@ -186,7 +199,7 @@ class PatientWaiverController extends Controller
                     'patient_waiver_id'      => null,
                     'invoice_transaction_id' => null,
                     'price'                  => $item->estimate_price, // use its own field
-                    'is_waver'               => 0,
+                    'is_waiver'               => 0,
                 ]);
             }
             $entity->delete();

@@ -123,11 +123,11 @@ class InvoiceParticularModel extends Model
 
         // Reset all to 0 first
         $array = json_decode($data, true);
-        self::where('hms_invoice_id', $entity)->update(['is_waver' => 0]);
+        self::where('hms_invoice_id', $entity)->update(['is_waiver' => 0]);
         // Set only selected ones to 1
         self::where('hms_invoice_id', $entity)
             ->whereIn('id', $array)
-            ->update(['is_waver' => 1]);
+            ->update(['is_waiver' => 1]);
 
     }
 
@@ -135,11 +135,11 @@ class InvoiceParticularModel extends Model
     {
         // Reset all to 0 first
         $entity = $data['hms_invoice_id'];
-        $array = json_decode($data['particular_ids'], true);
+        $array = $data['particulars'];
 
         $query = self::where('hms_invoice_id', $entity)
             ->whereIn('id', $array)
-            ->where('is_waver', 1);
+            ->where('is_waiver', 1);
 
         $count = $query->count();
         $availableIds = $query->pluck('id')->toArray();

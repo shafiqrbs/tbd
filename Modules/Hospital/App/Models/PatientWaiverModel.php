@@ -54,7 +54,67 @@ class PatientWaiverModel extends Model
         return $this->hasMany(InvoiceParticularModel::class, 'patient_waiver_id');
     }
 
+    public function invoice_particular()
+    {
+        return $this->hasMany(InvoiceParticularModel::class, 'patient_waiver_id');
+    }
 
+
+
+
+    public static function getWaiverDetails($id)
+    {
+        $entity = self::join('hms_invoice as hms_invoice', 'hms_patient_waiver.hms_invoice_id', '=', 'hms_invoice.id')
+            ->leftjoin('users as checked_by','checked_by.id','=','hms_patient_waiver.checked_by_id')
+            ->leftjoin('users as approved_by','approved_by.id','=','hms_patient_waiver.approved_by_id')
+            ->leftjoin('users as created_by','created_by.id','=','hms_patient_waiver.created_by_id')
+            ->join('cor_customers as customer','customer.id','=','hms_invoice.customer_id')
+            ->join('hms_particular_mode as patient_mode','patient_mode.id','=','hms_invoice.patient_mode_id')
+            ->join('hms_particular_mode as patient_payment_mode','patient_payment_mode.id','=','hms_invoice.patient_payment_mode_id')
+            ->leftjoin('hms_particular as vr','vr.id','=','hms_invoice.room_id')
+            ->where('hms_patient_waiver.uid', $id)
+            ->select([
+                'hms_patient_waiver.id as id',
+                'hms_patient_waiver.uid as uid',
+                'hms_invoice.uid as invoice_uid',
+                'checked_by.name as checked_by_name',
+                'approved_by.name as approved_by_name',
+                'created_by.name as created_by_name',
+                'customer.customer_id as patient_id',
+                'customer.health_id',
+                'customer.name',
+                'customer.mobile',
+                'customer.address',
+                DB::raw("CONCAT(UCASE(LEFT(customer.gender, 1)), LCASE(SUBSTRING(customer.gender, 2))) as gender"),
+                DB::raw('DATE_FORMAT(hms_invoice.created_at, "%d-%m-%Y") as created_at'),
+                DB::raw('DATE_FORMAT(hms_invoice.admission_date, "%d-%m-%Y %H:%i %p") as admission_date'),
+                DB::raw('DATE_FORMAT(customer.dob, "%d-%M-%Y") as dob'),
+                'hms_invoice.process as process',
+                'hms_invoice.admission_day',
+                'hms_invoice.consume_day',
+                'hms_invoice.remaining_day',
+                'hms_invoice.total as total',
+                'hms_invoice.total as amount',
+                'vr.display_name as room_name',
+                'patient_mode.name as patient_mode_name',
+                'patient_payment_mode.name as patient_payment_mode_name',
+
+            ])->with(['invoice_particular' => function ($query) {
+                $query->select([
+                    'hms_invoice_particular.id',
+                    'hms_invoice_particular.patient_waiver_id',
+                    'hms_invoice_particular.name as item_name',
+                    'hms_invoice_particular.quantity',
+                    'hms_invoice_particular.price',
+                    'hms_invoice_particular.sub_total',
+                    'hms_invoice_particular.process',
+                    'hms_invoice_particular.is_waiver',
+                ]);
+            }])->first();
+        return $entity;
+
+
+    }
 
     public static function getRecords($request,$domain)
     {
@@ -63,6 +123,9 @@ class PatientWaiverModel extends Model
         $skip = $page * $perPage;
 
         $entitiesQuery = PatientWaiverModel::join('hms_invoice as hms_invoice', 'hms_patient_waiver.hms_invoice_id', '=', 'hms_invoice.id')
+            ->leftjoin('users as checked_by','checked_by.id','=','hms_patient_waiver.checked_by_id')
+            ->leftjoin('users as approved_by','approved_by.id','=','hms_patient_waiver.approved_by_id')
+            ->leftjoin('users as created_by','created_by.id','=','hms_patient_waiver.created_by_id')
             ->join('cor_customers as customer','customer.id','=','hms_invoice.customer_id')
             ->join('hms_particular_mode as patient_mode','patient_mode.id','=','hms_invoice.patient_mode_id')
             ->join('hms_particular_mode as patient_payment_mode','patient_payment_mode.id','=','hms_invoice.patient_payment_mode_id')
@@ -70,14 +133,17 @@ class PatientWaiverModel extends Model
             ->where('hms_invoice.config_id', $domain['hms_config'])
             ->select([
                 'hms_patient_waiver.uid as uid',
-                'hms_invoice.id',
+                'hms_invoice.uid as invoice_uid',
+                'checked_by.name as checked_by_name',
+                'approved_by.name as approved_by_name',
+                'created_by.name as created_by_name',
                 'customer.customer_id as patient_id',
                 'customer.health_id',
                 'customer.name',
                 'customer.mobile',
                 'customer.address',
                 DB::raw("CONCAT(UCASE(LEFT(customer.gender, 1)), LCASE(SUBSTRING(customer.gender, 2))) as gender"),
-                DB::raw('DATE_FORMAT(hms_invoice.created_at, "%d-%m-%Y %H:%i %p") as created_at'),
+                DB::raw('DATE_FORMAT(hms_invoice.created_at, "%d-%m-%Y") as created_at'),
                 DB::raw('DATE_FORMAT(hms_invoice.admission_date, "%d-%m-%Y %H:%i %p") as admission_date'),
                 DB::raw('DATE_FORMAT(customer.dob, "%d-%M-%Y") as dob'),
                 'hms_invoice.process as process',
@@ -115,7 +181,7 @@ class PatientWaiverModel extends Model
 
     }
 
-     public static function getInvoices($request,$domain)
+    public static function getInvoices($request,$domain)
     {
         $page = isset($request['page']) && $request['page'] > 0 ? ($request['page'] - 1) : 0;
         $perPage = isset($request['offset']) && $request['offset'] != '' ? (int)$request['offset'] : 50;
@@ -137,7 +203,7 @@ class PatientWaiverModel extends Model
                 'customer.mobile',
                 'customer.address',
                 DB::raw("CONCAT(UCASE(LEFT(customer.gender, 1)), LCASE(SUBSTRING(customer.gender, 2))) as gender"),
-                DB::raw('DATE_FORMAT(hms_invoice.created_at, "%d-%m-%Y %H:%i %p") as created_at'),
+                DB::raw('DATE_FORMAT(hms_invoice.created_at, "%d-%m-%Y") as created_at'),
                 DB::raw('DATE_FORMAT(hms_invoice.admission_date, "%d-%m-%Y %H:%i %p") as admission_date'),
                 DB::raw('DATE_FORMAT(customer.dob, "%d-%M-%Y") as dob'),
                 'hms_invoice.process as process',
@@ -174,7 +240,6 @@ class PatientWaiverModel extends Model
             ->skip($skip)
             ->take($perPage)
             ->get();
-
         return [
             'count' => $total,
             'entities' => $entities
@@ -258,8 +323,8 @@ class PatientWaiverModel extends Model
                 ->update([
                     'patient_waiver_id'      => $invoiceTransaction->patient_waiver_id,
                     'invoice_transaction_id' => $invoiceTransaction->id,
-                    'price'                  => 0,
-                    'is_waver'               => 1,
+                  //  'price'                  => 0,
+                    'is_waiver'               => 1,
                 ]);
         }
     }

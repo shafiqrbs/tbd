@@ -223,6 +223,7 @@ Route::prefix('/hospital')->middleware([HeaderAuthenticationMiddleware::class])-
         Route::apiResource('', PatientWaiverController::class)->parameters(['' => 'id']);
         Route::get('process/{id}', [PatientWaiverController::class, 'process'])->name('patient_waiver_process');
         Route::get('approve/{id}', [PatientWaiverController::class, 'approve'])->name('patient_waiver_process');
+        Route::get('print/{id}', [PatientWaiverController::class, 'print'])->name('patient_waiver_process');
     });
 
     Route::prefix('reports')->middleware([HeaderAuthenticationMiddleware::class])->group(function() {
