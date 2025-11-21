@@ -86,6 +86,7 @@ class EpharmaModel extends Model
                 'hms_prescription.id as prescription_id',
                 'hms_invoice.id as id',
                 'hms_invoice.uid as uid',
+                'hms_invoice.barcode as barcode',
                 'hms_invoice.is_medicine_delivered as is_medicine_delivered',
                 'customer.name',
                 'customer.mobile',
@@ -158,7 +159,8 @@ class EpharmaModel extends Model
                     'inv_sales_item.price',
                     'inv_sales_item.sub_total',
                     'inv_sales_item.bonus_quantity',
-                ]);
+                ])->where('inv_sales_item.quantity', '>', 0)
+                    ->orderBy('inv_sales_item.name', 'ASC');
             }
         ])
             ->leftJoin('cor_customers','cor_customers.id','=','hms_invoice.customer_id')

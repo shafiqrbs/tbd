@@ -73,7 +73,8 @@ class PatientWaiverController extends Controller
     public function invoice(Request $request){
 
         $domain = $this->domain;
-        $data = PatientWaiverModel::getInvoices($request,$domain);
+        $data = $request->all();
+        $data = PatientWaiverModel::getInvoices($data,$domain);
         $response = new Response();
         $response->headers->set('Content-Type','application/json');
         $response->setContent(json_encode([
@@ -125,8 +126,15 @@ class PatientWaiverController extends Controller
         return $data;
     }
 
-
-
+    /**
+     * Show the specified resource.
+     */
+    public function patientDetails($id)
+    {
+        $service = new JsonRequestResponse();
+        $entity = PatientWaiverModel::getPatientDetails($id);
+        return $service->returnJosnResponse($entity);
+    }
     /**
      * Show the specified resource.
      *//**/
@@ -138,8 +146,6 @@ class PatientWaiverController extends Controller
             ->first();
         return $service->returnJosnResponse($entity);
     }
-
-
 
     /**
      * Update the specified resource in storage.
