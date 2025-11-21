@@ -36,10 +36,10 @@ class InvoiceTransactionRefund
     private $hmsInvoice;
 
     /**
-     * @ORM\OneToOne(targetEntity="InvoiceTransaction")
+     * @ORM\ManyToOne(targetEntity="InvoiceTransaction")
      * @ORM\JoinColumn(onDelete="CASCADE")
      **/
-    private $invoiceTransaction;
+    private $hmsInvoiceTransaction;
 
 
     /**

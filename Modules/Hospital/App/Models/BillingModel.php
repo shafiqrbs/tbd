@@ -334,7 +334,12 @@ class BillingModel extends Model
                     'hms_invoice_particular.quantity',
                     'hms_invoice_particular.sub_total',
                     'hms_invoice_particular.process',
-                ])->whereNull('hms_invoice_particular.invoice_transaction_id')->whereNull('hms_invoice_particular.patient_waiver_id')->where('hms_invoice_particular.status',0)->whereIn('hms_invoice_particular.mode', ['investigation'])->orderBy('hms_invoice_particular.created_at','DESC');
+                ])->whereNull('hms_invoice_particular.invoice_transaction_id')
+                    ->whereNull('hms_invoice_particular.patient_waiver_id')
+                    ->where('hms_invoice_particular.status',0)
+                    ->where('hms_invoice_particular.is_available',1)
+                    ->whereIn('hms_invoice_particular.mode', ['investigation'])
+                    ->orderBy('hms_invoice_particular.name','ASC');
             }])
             ->first();
 

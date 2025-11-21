@@ -196,7 +196,7 @@ class InvoiceParticular
     /**
      * @var string
      *
-     * @ORM\Column(type="mode" , type="string", length=30)
+     * @ORM\Column(type="mode" , type="string", length=30, nullable=true)
      */
     private $mode;
 
@@ -285,6 +285,14 @@ class InvoiceParticular
     private $isRefund;
 
     /**
+     * @var integer
+     *
+     * @ORM\Column(name="refund_quantity", type="integer", nullable=true)
+     */
+    private $refundQuantity;
+
+
+     /**
      * @var float
      *
      * @ORM\Column(name="refund_amount", type="float", nullable=true)
@@ -298,6 +306,20 @@ class InvoiceParticular
      * @ORM\Column(type="boolean", nullable=true, options={"default"="false"})
      */
      private $isWaver;
+
+    /**
+     * @var boolean
+     *
+     * @ORM\Column(type="boolean", nullable=true, options={"default"="false"})
+     */
+    private $isAdmission;
+
+     /**
+     * @var boolean
+     *
+     * @ORM\Column(type="boolean", nullable=true, options={"default"="false"})
+     */
+    private $isAvailable;
 
      /**
      * @var \DateTime

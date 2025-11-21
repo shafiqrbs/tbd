@@ -126,7 +126,7 @@ class RefundModel extends Model
 
     public static function getShow($id)
     {
-        $entity = self::where([
+        $entity = InvoiceModel::where([
             ['hms_invoice.uid', '=', $id]
         ])
             ->leftjoin('cor_customers','cor_customers.id','=','hms_invoice.customer_id')
@@ -203,21 +203,8 @@ class RefundModel extends Model
                     'hms_invoice_transaction.amount',
                     'hms_invoice_transaction.process',
                     DB::raw('DATE_FORMAT(hms_invoice_transaction.created_at, "%d-%m-%y") as created'),
-                ])->where('hms_invoice_transaction.process','Done')->whereIn('hms_invoice_transaction.mode', ['investigation', 'admission', 'room'])->orderBy('hms_invoice_transaction.created_at','DESC');
-            }])
-             ->with(['invoice_particular' => function ($query) {
-                $query->select([
-                    'hms_invoice_particular.id',
-                    'hms_invoice_particular.id as particular_id',
-                    'hms_invoice_particular.hms_invoice_id',
-                    'hms_invoice_particular.name',
-                    'hms_invoice_particular.price',
-                    'hms_invoice_particular.quantity',
-                    'hms_invoice_particular.sub_total',
-                    'hms_invoice_particular.process',
-                ])->whereNull('hms_invoice_particular.invoice_transaction_id')->whereNull('hms_invoice_particular.patient_waiver_id')->where('hms_invoice_particular.status',0)->whereIn('hms_invoice_particular.mode', ['investigation'])->orderBy('hms_invoice_particular.created_at','DESC');
-            }])
-            ->first();
+                ])->where('hms_invoice_transaction.process','Done')->whereIn('hms_invoice_transaction.mode', ['investigation'])->orderBy('hms_invoice_transaction.created_at','DESC');
+            }])->first();
 
         return $entity;
     }
@@ -232,7 +219,7 @@ class RefundModel extends Model
         $mode = $data['mode'];
         $invoiceTransactionId = $data['transaction_id'];
         if (!empty($investigations) && is_array($investigations)) {
-            $invoiceTransaction = self::create([
+            $refundTransaction = self::create([
                 'hms_invoice_id'=> $entity->id,
                 'hms_invoice_transaction_id'=> $invoiceTransactionId,
                 'created_by_id'=> $domain['user_id'],
@@ -244,25 +231,18 @@ class RefundModel extends Model
                 'created_at'    => $date,
             ]);
             if (!empty($investigations) && is_array($investigations)) {
-                collect($investigations)->map(function ($investigation) use ($hms_invoice_id,$invoiceTransaction,$invoiceTransactionId,$date) {
+                collect($investigations)->map(function ($investigation) use ($refundTransaction,$invoiceTransactionId,$date) {
                     $particular = $investigation['id'] ?? '';
                     if (($investigation['is_selected'] ?? false) == true && $particular ) {
-                        InvoiceParticularModel::updateOrCreate(
-                            [
-                                'hms_invoice_id' => $hms_invoice_id,
-                                'invoice_transaction_id' => $invoiceTransactionId,
-                                'id' => $particular,
-                            ],
-                            [
-                                'invoice_transaction_refund_id' => $invoiceTransaction->id,
+                        InvoiceParticularModel::where('id', $particular)
+                            ->update([
+                                'invoice_transaction_refund_id' => $refundTransaction->id,
                                 'refund_quantity' => $investigation['quantity'],
                                 'status' => 1,
                                 'is_refund' => 1,
                                 'refund_amount' => $investigation['price'] ?? 0,
                                 'updated_at' => $date,
-                                'created_at' => $date,
-                            ]
-                        );
+                            ]);
                     }
 
                 })->toArray();

@@ -80,26 +80,25 @@ class InvoiceTransactionModel extends Model
         if (!empty($investigations) && is_array($investigations)) {
             collect($investigations)->map(function ($investigation) use ($prescription,$uniqueId,$date) {
                 $particular = ParticularModel::find($investigation->id);
-                if($particular and $particular->is_available == 1){
-                  //  echo $particular->id.'----'.$particular->is_available.'<br>';
-                    InvoiceParticularModel::updateOrCreate(
-                        [
-                            'hms_invoice_id'             => $prescription->hms_invoice_id,
-                            'prescription_id'            => $prescription->id,
-                            'particular_id'              => $investigation->id,
-                        ],
-                        [
-                            'unique_id'      => $uniqueId,
-                            'name'      => $particular->name,
-                            'mode'      => 'investigation',
-                            'quantity'      => 1,
-                            'price'         => $particular->price ?? 0,
-                            'estimate_price'         => $particular->price ?? 0,
-                            'updated_at'    => $date,
-                            'created_at'    => $date,
-                        ]
-                    );
-                }
+                InvoiceParticularModel::updateOrCreate(
+                    [
+                        'hms_invoice_id'             => $prescription->hms_invoice_id,
+                        'prescription_id'            => $prescription->id,
+                        'particular_id'              => $investigation->id,
+                    ],
+                    [
+                        'unique_id'      => $uniqueId,
+                        'name'      => $particular->name,
+                        'mode'      => 'investigation',
+                        'quantity'      => 1,
+                        'is_available'      => $particular->is_available,
+                        'price'         => $particular->price ?? 0,
+                        'estimate_price'         => $particular->price ?? 0,
+                        'sub_total'         => $particular->price ?? 0,
+                        'updated_at'    => $date,
+                        'created_at'    => $date,
+                    ]
+                );
             })->toArray();
         }
     }
@@ -123,6 +122,7 @@ class InvoiceTransactionModel extends Model
                         ],
                         [
                             'name'      => $particular->name,
+                            'is_available'      => $particular->is_available,
                             'unique_id'      => $uniqueId,
                             'quantity'      => 1,
                             'mode' => 'investigation',
@@ -356,7 +356,7 @@ class InvoiceTransactionModel extends Model
                     'hms_invoice_particular.quantity',
                     'hms_invoice_particular.content',
                     'hms_invoice_particular.price',
-                ])->where(['hms_invoice_particular.is_refund' => 0]);
+                ])->where(['hms_invoice_particular.is_refund' => 0,'hms_invoice_particular.process' => "New"]);
             }])
             ->select(
                 'hms_invoice_transaction.id','hms_invoice_transaction.sub_total','hms_invoice_transaction.total','hms_invoice_transaction.process',

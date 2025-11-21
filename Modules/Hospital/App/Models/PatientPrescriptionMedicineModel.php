@@ -60,7 +60,7 @@ class PatientPrescriptionMedicineModel extends Model
                             $dose_details = $dosage->name;
                             $dose_details_bn = $dosage->name_bn;
                             $continue_mode = $dosage->continue_mode;
-                            $daily_quantity = $dosage->daily_quantity;
+                            $daily_quantity = $dosage->quantity;
                         }
 
                         $by_meal = '';

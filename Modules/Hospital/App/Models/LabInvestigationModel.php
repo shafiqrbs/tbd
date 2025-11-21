@@ -165,6 +165,7 @@ class LabInvestigationModel extends Model
                 'hms_invoice_particular.process',
                 'inv_category.name as category_name',
                 'hms_invoice.id as invoice_id',
+                'hms_invoice.uid as invoice_uid',
                 'hms_invoice.invoice as invoice',
                 'customer.customer_id as patient_id',
                 'patient_mode.name as mode',
@@ -176,7 +177,10 @@ class LabInvestigationModel extends Model
                 'createdBy.name as created_by'
             ])
             ->where('hms_particular_master_type.slug', 'investigation')
-            ->where('hms_particular.is_available', 1);
+            ->whereNotNull('hms_invoice_particular.invoice_transaction_id')
+            ->where('hms_invoice_particular.is_available', 1)
+            ->where('hms_invoice_particular.mode','investigation')
+            ->where('hms_invoice_particular.status',1);
 
         if (isset($request['term']) && !empty($request['term'])){
             $term = trim($request['term']);

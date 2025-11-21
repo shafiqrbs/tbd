@@ -20,7 +20,12 @@ class ParticularModel extends Model
     protected $guarded = ['id'];
 
 
-    public function category()
+    public function particularType()
+    {
+        return $this->belongsTo(ParticularTypeModel::class, 'particular_type_id');
+    }
+
+     public function category()
     {
         return $this->belongsTo(CategoryModel::class, 'category_id');
     }

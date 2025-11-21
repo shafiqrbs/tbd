@@ -157,7 +157,7 @@ class IpdModel extends Model
                     'hms_invoice_particular.price',
                     'hms_invoice_particular.sub_total',
                     'hms_invoice_particular.process',
-                ]);
+                ])->where('is_admission',1);
             }])->first();
 
         return $entity;
@@ -222,6 +222,7 @@ class IpdModel extends Model
             [
                 'name'  => $roomRent->display_name,
                 'status'  => true,
+                'is_admission'  => true,
                 'mode' => 'room',
                 'quantity'  => $minimumDaysRoomRent,
                 'price'     => $roomRent->price,
@@ -238,6 +239,7 @@ class IpdModel extends Model
             [
                 'name'  => 'Admission Fee',
                 'status'  => true,
+                'is_admission'  => true,
                 'mode' => 'admission',
                 'quantity'  => 1,
                 'price'     => $admissionFee->price,

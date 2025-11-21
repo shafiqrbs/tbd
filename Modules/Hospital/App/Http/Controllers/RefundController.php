@@ -78,7 +78,7 @@ class RefundController extends Controller
         if($entity->process == 'billing'){
             $entity = BillingModel::getAdmissionBilling($id);
         }else{
-            $entity = BillingModel::getShow($id);
+            $entity = RefundModel::getShow($id);
         }
         $data = $service->returnJosnResponse($entity);
         return $data;
