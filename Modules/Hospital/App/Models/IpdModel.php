@@ -76,6 +76,93 @@ class IpdModel extends Model
     }
 
 
+    public static function getIpdAdmissionShow($id)
+    {
+        $entity = self::where(function ($query) use ($id) {
+            $query->where('hms_invoice.id', '=', $id)
+                ->orWhere('hms_invoice.uid', '=', $id);
+        })
+            ->leftjoin('cor_customers','cor_customers.id','=','hms_invoice.customer_id')
+            ->leftjoin('cor_setting as religion','religion.id','=','cor_customers.religion_id')
+            ->leftjoin('users as createdBy','createdBy.id','=','hms_invoice.created_by_id')
+            ->leftjoin('hms_prescription as prescription','prescription.hms_invoice_id','=','hms_invoice.id')
+            ->leftjoin('hms_admission_patient_details as admission_patient','admission_patient.hms_invoice_id','=','hms_invoice.id')
+            ->leftjoin('users as prescription_doctor','prescription_doctor.id','=','prescription.created_by_id')
+            ->leftjoin('hms_particular as room','room.id','=','hms_invoice.room_id')
+            ->leftjoin('hms_particular_mode as patient_mode','patient_mode.id','=','hms_invoice.patient_mode_id')
+            ->leftjoin('hms_particular as admit_consultant','admit_consultant.id','=','hms_invoice.admit_consultant_id')
+            ->leftjoin('hms_particular as admit_doctor','admit_doctor.id','=','hms_invoice.admit_doctor_id')
+            ->leftjoin('hms_particular_mode as admit_unit','admit_unit.id','=','hms_invoice.admit_unit_id')
+            ->leftjoin('hms_particular_mode as admit_department','admit_department.id','=','hms_invoice.admit_department_id')
+            ->leftjoin('hms_particular_mode as particular_payment_mode','particular_payment_mode.id','=','hms_invoice.patient_payment_mode_id')
+            ->leftjoin('hms_invoice as invoice_parent','invoice_parent.id','=','hms_invoice.parent_id')
+            ->leftjoin('hms_particular_mode as parent_patient_mode','parent_patient_mode.id','=','invoice_parent.patient_mode_id')
+            ->select([
+                'hms_invoice.*',
+                'parent_patient_mode.name as parent_patient_mode_name',
+                'parent_patient_mode.slug as parent_patient_mode_slug',
+                DB::raw('DATE_FORMAT(hms_invoice.updated_at, "%d-%m-%Y") as created'),
+                DB::raw('DATE_FORMAT(hms_invoice.appointment_date, "%d-%m-%Y") as appointment'),
+                'hms_invoice.invoice as invoice',
+                'hms_invoice.total as total',
+                'hms_invoice.comment',
+                'hms_invoice.guardian_name as guardian_name',
+                'hms_invoice.guardian_mobile as guardian_mobile',
+                'cor_customers.name as name',
+                'cor_customers.mobile as mobile',
+                'cor_customers.id as customer_id',
+                'cor_customers.customer_id as patient_id',
+                'cor_customers.health_id as health_id',
+                'cor_customers.gender as gender',
+                'cor_customers.father_name',
+                'cor_customers.mother_name',
+                'cor_customers.upazilla_id',
+                'cor_customers.country_id',
+                'cor_customers.profession',
+                'cor_customers.religion_id',
+                'cor_customers.nid',
+                'cor_customers.identity_mode',
+                'cor_customers.address',
+                'religion.name as religion_name',
+                'cor_customers.permanent_address',
+                DB::raw('DATE_FORMAT(cor_customers.dob, "%m-%d-%Y") as dob'),
+                'cor_customers.identity_mode as identity_mode',
+                'hms_invoice.year as year',
+                'hms_invoice.month as month',
+                'hms_invoice.day as day',
+                'createdBy.username as created_by_user_name',
+                'createdBy.name as created_by_name',
+                'createdBy.id as created_by_id',
+                'room.display_name as room_name',
+                'patient_mode.name as mode_name',
+                'particular_payment_mode.name as payment_mode_name',
+                'hms_invoice.process as process',
+                'admit_consultant.name as admit_consultant_name',
+                'admit_unit.name as admit_unit_name',
+                'admit_department.name as admit_department_name',
+                'admit_doctor.name as admit_doctor_name',
+                'prescription.id as prescription_id',
+                'prescription.uid as prescription_uid',
+                'prescription.json_content as json_content',
+                'prescription_doctor.name as prescription_doctor_name',
+                'admission_patient.vital_chart_json as vital_chart_json',
+                'admission_patient.insulin_chart_json as insulin_chart_json',
+            ])
+            ->with(['invoice_particular' => function ($query) {
+                $query->select([
+                    'hms_invoice_particular.id',
+                    'hms_invoice_particular.hms_invoice_id',
+                    'hms_invoice_particular.name as item_name',
+                    'hms_invoice_particular.quantity',
+                    'hms_invoice_particular.price',
+                    'hms_invoice_particular.sub_total',
+                    'hms_invoice_particular.process',
+                ]);
+            }])->first();
+
+        return $entity;
+    }
+
 
     public static function insertHmsInvoice($domain,$parent,$entity,$data)
     {

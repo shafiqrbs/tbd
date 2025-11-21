@@ -121,6 +121,7 @@ class OPDModel extends Model
                 'process' => 'New',
                 'sub_total' => $amount,
                 'total' => $amount,
+                'amount' => $amount,
                 'created_by_id' => $data['created_by_id'] ?? null,
             ]
         );

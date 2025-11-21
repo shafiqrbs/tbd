@@ -168,6 +168,7 @@ Route::prefix('/hospital')->middleware([HeaderAuthenticationMiddleware::class])-
             'update' => 'ipd.update',
             'destroy' => 'ipd.destroy',
         ]);
+    Route::get('/ipd/view/{id}', [IpdController::class, 'ipdAdmissionShow'])->name('find_bill');
     Route::get('/ipd/efresh-order/{id}', [IpdController::class,'efreshOrder'])->name('ipd_efreshOrder');
     Route::post('/ipd/patient-chart/{id}', [IpdController::class,'patientChart'])->name('ipd_data_process');
     Route::post('/ipd/data-process/{id}', [IpdController::class,'ipdDataProcess'])->name('ipd_data_process');

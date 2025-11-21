@@ -137,7 +137,27 @@ class IpdController extends Controller
         $amount = InvoiceTransactionModel::where('hms_invoice_id', $entity->id)->where('process','Done')->sum('amount');
         $total = InvoiceParticularModel::where('hms_invoice_id', $entity->id)->where('status',true)->sum('sub_total');
         InvoiceParticularModel::getCountBedRoom($entity->id);
-        $entity->update(['sub_total'=>$total ,'total' => $total,'amount' => $amount]);
+        $entity->update(['sub_total'=> $total ,'total' => $total,'amount' => $amount]);
+        $service = new JsonRequestResponse();
+        $data = $service->returnJosnResponse($entity);
+        return $data;
+    }
+
+    /**
+     * Show the specified resource.
+     */
+
+    public function ipdAdmissionShow($id)
+    {
+
+        $entity = IpdModel::getIpdAdmissionShow($id);
+        if (!$entity){
+            $entity = 'not_found';
+        }
+        $amount = InvoiceTransactionModel::where('hms_invoice_id', $entity->id)->where('process','Done')->sum('amount');
+        $total = InvoiceParticularModel::where('hms_invoice_id', $entity->id)->where('status',true)->sum('sub_total');
+        InvoiceParticularModel::getCountBedRoom($entity->id);
+        $entity->update(['sub_total'=> $total ,'total' => $total,'amount' => $amount]);
         $service = new JsonRequestResponse();
         $data = $service->returnJosnResponse($entity);
         return $data;

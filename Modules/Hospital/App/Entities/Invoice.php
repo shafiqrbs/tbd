@@ -385,6 +385,13 @@ class Invoice
     /**
      * @var integer
      *
+     * @ORM\Column(name="payment_day", type="integer",  nullable=true)
+     */
+    private $paymentDay;
+
+    /**
+     * @var integer
+     *
      * @ORM\Column(name="remaining_day", type="integer",  nullable=true)
      */
     private $remainingDay;

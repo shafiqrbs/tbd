@@ -102,8 +102,8 @@ class InvoiceParticularModel extends Model
         $currentDate = new \DateTime('now');
 
         $interval = $admissionDate->diff($currentDate);
-        $admissionDay = (int)$interval->days;
-
+        $dayCount  = (int)$interval->days;
+        $admissionDay = $dayCount == 0 ? 1 : $dayCount;
         $totalQuantity = DB::table('hms_invoice_particular')
             ->join('hms_particular', 'hms_particular.id', '=', 'hms_invoice_particular.particular_id')
             ->join('hms_particular_type', 'hms_particular_type.id', '=', 'hms_particular.particular_type_id')
@@ -114,7 +114,7 @@ class InvoiceParticularModel extends Model
             ->sum('hms_invoice_particular.quantity');
 
         $remainingDay = ($admissionDay - $totalQuantity);
-        $entity->update(['admission_day' => $admissionDay, 'consume_day' => $totalQuantity,'remaining_day' => $remainingDay]);
+        $entity->update(['admission_day' => $admissionDay, 'payment_day' => $totalQuantity, 'consume_day' => $totalQuantity,'remaining_day' => $remainingDay]);
         return $totalQuantity;
     }
 
