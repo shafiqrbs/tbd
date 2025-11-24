@@ -145,7 +145,7 @@ class OpdController extends Controller
                       //  'address'    => $input['address'] ?? null,
                         'dob'    => $dob ?? null,
                         'upazilla_id'    => $input['upazilla_id'] ?? null,
-                        'gender'    => $input['gender'] ?? null,
+                        'gender'    => $input['gender'] ?? 'male',
                         'identity_mode'    => $input['identity_mode'] ?? null,
                         'health_id'    => $input['health_id'] ?? null,
                         'nid'    => $input['identity'] ?? null,

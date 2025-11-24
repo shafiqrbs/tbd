@@ -51,6 +51,12 @@ class Sales
      **/
     private  $customer;
 
+     /**
+     * @ORM\ManyToOne(targetEntity="Modules\Core\App\Entities\Warehouse")
+      * @ORM\JoinColumn(name="warehouse_id", referencedColumnName="id", onDelete="SET NULL")
+     **/
+    private  $warehouse;
+
     /**
      * @ORM\ManyToOne(targetEntity="Modules\Core\App\Entities\Vendor")
      * @ORM\JoinColumn(onDelete="CASCADE")

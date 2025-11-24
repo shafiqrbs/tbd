@@ -169,6 +169,13 @@ class PatientPrescriptionMedicine
      *
      * @ORM\Column(type="boolean",options={"default"="false"})
      */
+    private $opdAdminStatus;
+
+    /**
+     * @var boolean
+     *
+     * @ORM\Column(type="boolean",options={"default"="false"})
+     */
     private $isActive;
 
     /**

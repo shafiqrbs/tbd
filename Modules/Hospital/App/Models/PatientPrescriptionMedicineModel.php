@@ -42,7 +42,9 @@ class PatientPrescriptionMedicineModel extends Model
         $config = $domain['inv_config'];
         $jsonData = json_decode($prescription['json_content']);
         $medicines = ($jsonData->medicines ?? []);
+
         if (!empty($medicines) && is_array($medicines)) {
+            PatientPrescriptionMedicineModel::where('prescription_id', $id)->forceDelete();
             $insertData = collect($jsonData->medicines)
                 ->map(function ($medicine) use ($prescription,$date) {
                     $medicineDetails = MedicineDetailsModel::find($medicine->medicine_id);
@@ -91,8 +93,10 @@ class PatientPrescriptionMedicineModel extends Model
                             'by_meal_bn' => $by_meal_bn,
                             'continue_mode' => $continue_mode,
                             'quantity' => $medicine->opd_quantity ?? 0,
+                            'opd_quantity' => $medicine->opd_quantity ?? 0,
                             'ipd_status' => $medicineStock->ipd_status,
                             'opd_status' => $medicineStock->opd_status,
+                            'opd_admin_status' => $medicineStock->admin_status,
                             'is_stock' => true,
                             'is_active' => $medicine->is_active ?? 1,
                             'start_date' => $date,
