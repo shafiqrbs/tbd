@@ -4,6 +4,7 @@ namespace Modules\Hospital\App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use Doctrine\ORM\EntityManagerInterface;
+use HttpResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -17,6 +18,7 @@ use Modules\Core\App\Models\LocationModel;
 use Modules\Core\App\Models\UserModel;
 use Modules\Core\App\Models\UserProfileModel;
 use Modules\Core\App\Models\UserWarehouseModel;
+use Modules\Core\App\Models\WarehouseModel;
 use Modules\Domain\App\Models\DomainModel;
 use Modules\Hospital\App\Models\CategoryModel;
 use Modules\Hospital\App\Models\HospitalConfigModel;
@@ -38,6 +40,7 @@ use Modules\Medicine\App\Models\MedicineGenericModel;
 use Modules\Production\App\Models\ProductionItems;
 use PhpOffice\PhpSpreadsheet\Exception;
 use PhpOffice\PhpSpreadsheet\Reader\Xlsx;
+use Symfony\Component\HttpFoundation\Response as ResponseAlias;
 use Throwable;
 
 class HospitalController extends Controller
@@ -134,34 +137,42 @@ class HospitalController extends Controller
      */
     public function storeUserInlineUpdate(Request $request, $id)
     {
-
-        $ids = $request->get('store_id');
-        $entity = UserModel::find($id);
-        if ($ids && is_array($ids) && $entity) {
-            // Remove warehouses that are not selected anymore
-            UserWarehouseModel::where('user_id', $id)
-                ->whereNotIn('warehouse_id', $ids)
-                ->delete();
-
-            // Insert or update warehouses in the list
-            foreach ($ids as $storeId) {
-                UserWarehouseModel::updateOrCreate(
-                    [
-                        'user_id' => $id,
-                        'warehouse_id' => $storeId,
-                    ],
-                    [
-                        'is_status' => true,
-                        'updated_at' => now(),
-                    ]
-                );
-            }
+        $warehouseId = $request->get('store_id');
+        $findUser = UserModel::find($id);
+        if (!$findUser){
+            return response()->json([
+                'status' => ResponseAlias::HTTP_NOT_FOUND,
+                'message' => 'User not found',
+                'success' => false
+            ],ResponseAlias::HTTP_NOT_FOUND);
         }
+
+        $findWarehouse = WarehouseModel::find($warehouseId);
+
+        if (!$findWarehouse){
+            return response()->json([
+                'status' => ResponseAlias::HTTP_NOT_FOUND,
+                'message' => 'Warehouse not found',
+                'success' => false
+            ],ResponseAlias::HTTP_NOT_FOUND);
+        }
+
+        UserWarehouseModel::updateOrCreate(
+            [
+                'user_id' => $id,
+            ],
+            [
+                'warehouse_id' => $warehouseId,
+                'is_status' => true,
+                'updated_at' => now(),
+            ]
+        );
+
         return response()->json([
+            'status' => ResponseAlias::HTTP_OK,
             'success' => true,
             'message' => 'success',
-            'data'    => $ids,
-        ]);
+        ],ResponseAlias::HTTP_OK);
     }
 
 

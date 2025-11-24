@@ -11,6 +11,7 @@ use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Modules\Core\App\Models\UserModel;
+use Modules\Core\App\Models\UserWarehouseModel;
 use Modules\Inventory\App\Models\StockItemHistoryModel;
 use Modules\Medicine\App\Http\Requests\StockTransferRequest;
 use Modules\Medicine\App\Models\PurchaseItemModel;
@@ -73,6 +74,7 @@ class StockTransferController extends Controller
         $input['process'] = "Created";
         $input['config_id'] = $this->domain['config_id'];
         $input['from_warehouse_id'] = $this->domain['warehouse_id'];
+        $input['to_warehouse_id'] = UserWarehouseModel::where('user_id', $this->domain['user_id'])->first()?->warehouse_id;
 
         DB::beginTransaction();
         try {

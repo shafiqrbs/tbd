@@ -22,7 +22,7 @@ class StockTransferRequest extends FormRequest
             'invoice_date' => 'nullable|date',
             'created_by_id' => 'nullable|integer',
             'issue_by_id' => 'nullable|integer',
-            'to_warehouse_id' => 'required|integer',
+            'to_warehouse_id' => 'nullable|integer',
             'notes' => 'nullable|string',
             'items' => 'required|array',
             'items*.id' => 'required',
