@@ -74,39 +74,46 @@ class InvoiceTransaction
 
 
     /**
-     * @var string
+     * @var float
      *
      * @ORM\Column(name="discount", type="decimal", nullable=true)
      */
     private $discount;
 
     /**
-     * @var string
+     * @var float
      *
      * @ORM\Column(name="amount", type="decimal", nullable=true)
      */
     private $amount;
 
     /**
-     * @var string
+     * @var float
      *
      * @ORM\Column(name="sub_total", type="decimal", nullable=true)
      */
     private $subTotal= 0;
 
      /**
-     * @var string
+     * @var float
      *
      * @ORM\Column(name="total", type="decimal", nullable=true)
      */
     private $total= 0;
 
     /**
-     * @var string
+     * @var float
      *
      * @ORM\Column(name="vat", type="decimal", nullable=true)
      */
     private $vat;
+
+     /**
+     * @var float
+     *
+     * @ORM\Column(name="report_complete", type="decimal", nullable=true)
+     */
+    private $reportComplete;
 
     /**
      * @var string

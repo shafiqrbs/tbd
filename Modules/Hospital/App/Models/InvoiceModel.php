@@ -222,6 +222,7 @@ class InvoiceModel extends Model
             $term = trim($request['term']);
             $entities = $entities->where(function ($q) use ($term) {
                 $q->where('hms_invoice.invoice', 'LIKE', "%{$term}%")
+                    ->orWhere('hms_invoice.uid', 'LIKE', "%{$term}%")
                     ->orWhere('customer.customer_id', 'LIKE', "%{$term}%")
                     ->orWhere('customer.name', 'LIKE', "%{$term}%")
                     ->orWhere('customer.mobile', 'LIKE', "%{$term}%")

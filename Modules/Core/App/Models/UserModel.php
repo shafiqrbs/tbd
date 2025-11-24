@@ -136,6 +136,7 @@ class UserModel extends Model
             'dom_domain.id as domain_id',
             'users.id as user_id',
             'users.name as user_name',
+            'users.user_group as user_group',
             'inv_config.id as config_id',
             'inv_config.id as inv_config',
             'acc_config.id as acc_config',

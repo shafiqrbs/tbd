@@ -179,6 +179,16 @@ class BillingController extends Controller
         return $service->returnJosnResponse($entity);
     }
 
+     /**
+     * Remove the specified resource from storage.
+     */
+    public function print($id)
+    {
+        $service = new JsonRequestResponse();
+        $entity = InvoiceTransactionModel::showInvoiceData($id);
+        return $service->returnJosnResponse($entity);
+    }
+
     /**
      * Show the specified resource.
      *//**/

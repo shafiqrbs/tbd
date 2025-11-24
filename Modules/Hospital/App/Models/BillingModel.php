@@ -107,6 +107,7 @@ class BillingModel extends Model
             $term = trim($request['term']);
             $entities = $entities->where(function ($q) use ($term) {
                 $q->where('hms_invoice.invoice', 'LIKE', "%{$term}%")
+                    ->orWhere('hms_invoice.uid', 'LIKE', "%{$term}%")
                     ->orWhere('customer.customer_id', 'LIKE', "%{$term}%")
                     ->orWhere('customer.name', 'LIKE', "%{$term}%")
                     ->orWhere('customer.mobile', 'LIKE', "%{$term}%")
@@ -136,9 +137,7 @@ class BillingModel extends Model
             $entities = $entities->where('hms_invoice.customer_id',$request['customer_id']);
         }
 
-
-
-        /*if (isset($request['created']) && !empty($request['created'])){
+        if (isset($request['created']) && !empty($request['created'])){
              $date = new \DateTime($request['created']);
              $start_date = $date->format('Y-m-d 00:00:00');
              $end_date = $date->format('Y-m-d 23:59:59');
@@ -148,7 +147,7 @@ class BillingModel extends Model
              $start_date = $date->format('Y-m-d 00:00:00');
              $end_date = $date->format('Y-m-d 23:59:59');
              $entities = $entities->whereBetween('hms_invoice.created_at',[$start_date, $end_date]);
-         }*/
+         }
 
         $total  = $entities->count();
         $entities = $entities->skip($skip)

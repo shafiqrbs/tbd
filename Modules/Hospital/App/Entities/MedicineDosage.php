@@ -28,6 +28,12 @@ class MedicineDosage
     private $config;
 
     /**
+     * @ORM\ManyToOne(targetEntity="Modules\Core\App\Entities\User")
+     * @ORM\JoinColumn(name="created_by_id", referencedColumnName="id", nullable=true, onDelete="cascade")
+     **/
+    private  $createdBy;
+
+    /**
      * @var string
      *
      * @ORM\Column(name="name", type="string", length=255, nullable=true)
@@ -100,6 +106,13 @@ class MedicineDosage
      * @ORM\Column(type="boolean",options={"default"="true"})
      */
     private $status;
+
+    /**
+     * @var boolean
+     *
+     * @ORM\Column(type="boolean",options={"default"="false"})
+     */
+    private $isPrivate;
 
     /**
      * @var boolean

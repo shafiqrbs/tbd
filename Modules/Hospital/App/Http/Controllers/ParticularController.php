@@ -66,6 +66,9 @@ class ParticularController extends Controller
             ['particular_master_type_id', $masterId],
         ])->first();
         $input['particular_type_id'] = $type->id;
+        if($this->domain['user_group'] == "user"){
+            $input['created_by_id'] =  $this->domain['user_id'];
+        }
         $entity = ParticularModel::create($input);
         if($masterType->slug == 'bed'){
              ParticularDetailsModel::insertBed($entity,$input);
@@ -234,6 +237,9 @@ class ParticularController extends Controller
             ['particular_master_type_id', $masterId],
         ])->first();
         $input['particular_type_id'] = $type->id;
+        if($this->domain['user_group'] == "user"){
+            $input['created_by_id'] =  $this->domain['user_id'];
+        }
         $entity->update($input);
         if($masterType->slug == 'bed'){
             ParticularDetailsModel::insertBed($entity,$input);

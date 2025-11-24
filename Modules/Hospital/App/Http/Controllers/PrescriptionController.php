@@ -109,7 +109,7 @@ class PrescriptionController extends Controller
     public function vitalCheck($id)
     {
         $service = new JsonRequestResponse();
-        $entity = PrescriptionModel::find($id);
+        $entity = PrescriptionModel::findByIdOrUid($id);
         $invoice = InvoiceModel::find($entity->hms_invoice_id);
         $vital = $invoice->is_vital == 0 ? 1 : 0;
         $invoice->update([

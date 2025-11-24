@@ -208,6 +208,7 @@ Route::prefix('/hospital')->middleware([HeaderAuthenticationMiddleware::class])-
 
     Route::prefix('billing')->name('billing')->group(function () {
         Route::get('/final-bill', [BillingController::class, 'findBill'])->name('find_bill');
+        Route::get('print/{id}', [BillingController::class, 'print'])->name('print');
         Route::apiResource('', BillingController::class)->parameters(['' => 'id']);
         Route::get('{id}/final-bill', [BillingController::class, 'finalBillDetails'])->name('find_bill');
         Route::get('{id}/payment/{transactionId}', [BillingController::class, 'transaction'])->name('transaction');

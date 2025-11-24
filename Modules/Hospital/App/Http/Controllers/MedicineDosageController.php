@@ -60,6 +60,10 @@ class MedicineDosageController extends Controller
         $config = $this->domain['hms_config'];
         $input = $request->validated();
         $input['config_id'] = $config;
+        if($this->domain['user_group'] == "user"){
+            $input['created_by_id'] =  $this->domain['user_id'];
+            $input['is_private'] = 1;
+        }
         $entity = MedicineDosageModel::create($input);
         $service = new JsonRequestResponse();
         $data = $service->returnJosnResponse($entity);
