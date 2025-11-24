@@ -128,5 +128,73 @@ class HospitalSalesModel extends Model
         }
     }
 
+    public static function insertMedicineIssue($domain,$id)
+    {
+        $prescription = PrescriptionModel::with(['invoice_details:id,customer_id as customer_id'])->find($id);
+        $date =  new \DateTime("now");
+        $config = $domain['inv_config'];
+        $hospitalConfig = HospitalConfigModel::where(['id'=> $domain['hms_config']])->first();
+        $medicines = PatientPrescriptionMedicineModel::where(['prescription_id'=> $id])->get();
+
+        if (!empty($medicines)) {
+            if (empty($prescription->sale_id)) {
+
+                $insertData['config_id'] = $config;
+                $insertData['warehouse_id'] = $hospitalConfig->opd_store_id;
+                $insertData['customer_id'] = $prescription->invoice_details->customer_id ?? null;
+                $sales = self::create($insertData);
+                $insertData = collect($medicines)
+                    ->map(function ($medicine) use ($sales, $date) {
+                        if($medicine->stock_item_id && $medicine->opd_quantity > 0 && $medicine->opd_status == 1){
+                            return [
+                                'sale_id' => $sales->id,
+                                'name' => $medicine->generic ?? null, // notice key: medicine_name not medicineName
+                                'stock_item_id' => $medicine->stock_item_id ?? null,
+                                'quantity' => $medicine->opd_quantity ?? 0,
+                                'created_at' => $date,
+                                'updated_at' => $date,
+                            ];
+                        }
+                        return null; // explicit
+                    })
+                    ->filter() // ✅ remove nulls
+                    ->values() // ✅ reset array keys (important for upsert)
+                    ->toArray();
+                SalesItemModel::upsert(
+                    $insertData,
+                    ['sale_id', 'name'], // unique keys
+                    ['stock_item_id', 'quantity', 'price', 'updated_at'] // update columns
+                );
+
+            } else {
+                SalesItemModel::where('sale_id', $prescription->sale_id)->forceDelete();
+                $sales = self::find($prescription->sale_id);
+                collect($medicines)->map(function ($medicine) use ($sales, $date) {
+                    if($medicine->stock_item_id && $medicine->opd_quantity > 0 && $medicine->opd_status == 1){
+                        SalesItemModel::updateOrCreate(
+                            [
+                                'sale_id' => $sales->id,
+                                'stock_item_id' =>  $medicine->stock_item_id ?? null,
+                                // unique keys
+                            ],
+                            [
+                                'name' => $medicine->generic ?? null,
+                                'quantity' => $medicine->quantity ?? 0,
+                                'updated_at' => $date,
+                                'created_at' => $date,
+                            ]
+                        );
+                    }
+                })->toArray();
+            }
+            InvoiceModel::where('id', $prescription->invoice_details->id)
+                ->update(['sales_id' => $sales->id]);
+            PrescriptionModel::where('id', $prescription->id)
+                ->update(['sale_id' => $sales->id]);
+        }
+    }
+
+
+
 
 }
