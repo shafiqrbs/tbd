@@ -96,6 +96,7 @@ class ParticularModel extends Model
                 'hms_particular_details.room_id as opd_room_id',
                 'hms_particular_details.store_id as store_id',
                 'hms_particular_details.report_format as report_format',
+                'hms_particular_details.opd_room_ids as opd_room_ids',
                 'diagnosticRoom.name as diagnostic_room',
                 'diagnosticDepartment.name as diagnostic_department',
             ]);

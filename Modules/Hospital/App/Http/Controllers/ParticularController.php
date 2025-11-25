@@ -164,6 +164,7 @@ class ParticularController extends Controller
             $findParticular->diagnostic_room_id = $input['diagnostic_room_id'];
         }
 
+
         if (array_key_exists('status', $input)) {
             $findParticular->status = $findParticular->status ? 0:1;
         }
@@ -179,6 +180,10 @@ class ParticularController extends Controller
             if (array_key_exists('opd_room_id', $input)) {
                 $updateDetails['room_id'] = $input['opd_room_id'];
             }
+            if (array_key_exists('opd_room_ids', $input)) {
+                $updateDetails->opd_room_ids = json_encode($input['opd_room_ids']);
+            }
+
 
             if (array_key_exists('store_id', $input)) {
                 $updateDetails['store_id'] = $input['store_id'];
@@ -187,6 +192,7 @@ class ParticularController extends Controller
             if (array_key_exists('unit_id', $input)) {
                 $updateDetails['unit_id'] = $input['unit_id'];
             }
+
 
             if (array_key_exists('report_format', $input)) {
                 $updateDetails['report_format'] = $findParticular->report_format ? 0:1;

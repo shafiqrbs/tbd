@@ -134,13 +134,19 @@ class ParticularDetails
      */
     private $quantity = 1;
 
-
     /**
      * @var integer
      *
      * @ORM\Column( type="integer", nullable=true)
      */
     private $openingQuantity;
+
+    /**
+     * @var $opdRoomIds
+     *
+     * @ORM\Column(type="json",nullable = true)
+     */
+    private $opdRoomIds;
 
     /**
      * @var integer

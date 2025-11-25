@@ -33,7 +33,7 @@ class InvoicePathologicalReport
 
     /**
      * @ORM\ManyToOne(targetEntity="InvestigationReportFormat")
-     * @ORM\JoinColumn(referencedColumnName="id")
+     * @ORM\JoinColumn(referencedColumnName="id", onDelete="SET NULL")
      **/
     private $investigationReportFormat;
 
