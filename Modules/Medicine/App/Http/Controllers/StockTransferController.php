@@ -343,7 +343,8 @@ class StockTransferController extends Controller
                             // Insufficient remaining quantity → mark as zero and continue
                             StockTransferItemModel::find($stockTransferItemId)?->update(['quantity' => 0]);
                         }
-
+                        $findStockTransferItem = StockTransferItemModel::find($stockTransferItemId);
+                        $findStockTransferItem->update(['stock_quantity' => $purchaseItemRemainQuantity]);
                     } else {
                         // Missing purchase_item_id → mark as zero and continue
                         StockTransferItemModel::find($stockTransferItemId)?->update(['quantity' => 0]);
