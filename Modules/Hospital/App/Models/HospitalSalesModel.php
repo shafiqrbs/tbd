@@ -135,7 +135,6 @@ class HospitalSalesModel extends Model
         $config = $domain['inv_config'];
         $hospitalConfig = HospitalConfigModel::where(['id'=> $domain['hms_config']])->first();
         $medicines = PatientPrescriptionMedicineModel::where(['prescription_id'=> $id])->get();
-
         if (!empty($medicines)) {
             if (empty($prescription->sale_id)) {
 

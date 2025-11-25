@@ -49,7 +49,6 @@ class PatientPrescriptionMedicineModel extends Model
                 ->map(function ($medicine) use ($prescription,$date) {
                     $medicineDetails = MedicineDetailsModel::find($medicine->medicine_id);
                     if ($medicineDetails) {
-
                         $medicineStock = $medicineDetails->medicineStock;
                         $dose_details ='';
                         $dose_details_bn ='';

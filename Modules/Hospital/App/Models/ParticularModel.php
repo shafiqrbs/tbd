@@ -177,6 +177,7 @@ class ParticularModel extends Model
     public static function getTreatmentMedicine($domain,$request){
 
         $config =  $domain['hms_config'];
+
         $entity = self::where('hms_particular.config_id',$config)
             ->join('hms_particular_type','hms_particular_type.id','=','hms_particular.particular_type_id')
             ->join('hms_particular_master_type','hms_particular_master_type.id','=','hms_particular_type.particular_master_type_id')
@@ -194,6 +195,62 @@ class ParticularModel extends Model
         if (isset($request['treatment_mode']) && !empty($request['treatment_mode'])){
             $entity = $entity->where('treatmentMode.slug',$request['treatment_mode']);
         }
+        $entity = $entity->where(function ($q) use ($domain) {
+            $q->where('hms_particular.created_by_id', $domain['user_id'])
+                ->orWhereNull('hms_particular.created_by_id');
+        });
+
+        if (isset($request['created_by_id']) && !empty($request['created_by_id'])){
+            $entity = $entity->where('hms_particular.created_by_id',$request['created_by_id']);
+        }
+
+        $entities = $entity->get()->map(function ($item) {
+            // Transform nested relations
+            $item->treatmentMedicineFormat = $item->treatmentMedicineFormat->map(function ($format) {
+                return [
+                    'id'  => $format->medicine_id ?? null,
+                    'medicine_id'  => $format->medicine_id ?? null,
+                    'medicine_name'  => $format->id ?? null,
+                    'generic'  => $format->generic ?? null,
+                    'duration'  => $format->duration ?? null,
+                    'quantity'  => $format->quantity ?? null,
+                    'medicine_dosage_id'  => $format->medicineDosage->id ?? null,
+                    'dosage' => $format->medicineDosage->name ?? null,
+                    'dosage_quantity' => $format->medicineDosage->quantity ?? null,
+                    'medicine_bymeal_id' => $format->medicineBymeal->id ?? null,
+                    'by_meal' => $format->medicineBymeal->name ?? null,
+                ];
+            });
+
+            return $item;
+        });
+        return $entities;
+
+    }
+
+    public static function getUserTreatmentMedicine($domain,$request){
+
+        $config =  $domain['hms_config'];
+
+        $entity = self::where('hms_particular.config_id',$config)
+            ->join('hms_particular_type','hms_particular_type.id','=','hms_particular.particular_type_id')
+            ->join('hms_particular_master_type','hms_particular_master_type.id','=','hms_particular_type.particular_master_type_id')
+            ->leftJoin('hms_particular_details','hms_particular_details.particular_id','=','hms_particular.id')
+            ->leftJoin('hms_particular_mode as treatmentMode','treatmentMode.id','=','hms_particular_details.treatment_mode_id')
+            ->select([
+                'hms_particular.id',
+                'hms_particular.name',
+                'treatmentMode.name as  treatment_mode_name',
+            ]);
+
+        if (isset($request['particular_type']) && !empty($request['particular_type'])){
+            $entity = $entity->where('hms_particular_master_type.slug',$request['particular_type']);
+        }
+        if (isset($request['treatment_mode']) && !empty($request['treatment_mode'])){
+            $entity = $entity->where('treatmentMode.slug',$request['treatment_mode']);
+        }
+        $entity = $entity->where('hms_particular.created_by_id', $domain['user_id']);
+
         $entities = $entity->get()->map(function ($item) {
             // Transform nested relations
             $item->treatmentMedicineFormat = $item->treatmentMedicineFormat->map(function ($format) {

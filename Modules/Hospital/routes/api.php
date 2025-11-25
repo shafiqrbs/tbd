@@ -129,7 +129,7 @@ Route::prefix('/hospital')->middleware([HeaderAuthenticationMiddleware::class])-
                 'update' => 'treatment.update',
                 'destroy' => 'treatment.destroy',
             ]);
-
+        Route::get('/treatment-user', [TreatmentMedicineController::class,'getUserTreatmentMedicine'])->name('getUser_treatment_medicine');
         Route::apiResource('dosage', MedicineDosageController::class)
             ->middleware([HeaderAuthenticationMiddleware::class])
             ->names([

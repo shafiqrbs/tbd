@@ -43,6 +43,16 @@ class TreatmentMedicineController extends Controller
         return $data;
     }
 
+    public function getUserTreatmentMedicine(Request $request)
+    {
+        $data = ParticularModel::getUserTreatmentMedicine($this->domain,$request);
+        $response = new Response();
+        $response->headers->set('Content-Type', 'application/json');
+        $service = new JsonRequestResponse();
+        $data = $service->returnJosnResponse($data);
+        return $data;
+    }
+
      /**
      * Store a newly created resource in storage.
      */
