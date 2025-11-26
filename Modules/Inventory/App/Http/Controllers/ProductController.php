@@ -276,6 +276,47 @@ class ProductController extends Controller
             ]);
         }
     }
+    public function productInlineUpdate(Request $request, $id)
+    {
+        $fieldName = $request['field_name'];
+        $value = $request['value'];
+
+        if (!$fieldName || !$value) {
+            return response()->json([
+                'status' => ResponseAlias::HTTP_BAD_REQUEST,
+                'success' => false,
+                'message' => 'Field name or value is required.'
+            ],ResponseAlias::HTTP_BAD_REQUEST);
+        }
+
+        $product = ProductModel::find($id);
+
+        if (!$product) {
+            return response()->json([
+                'status' => ResponseAlias::HTTP_NOT_FOUND,
+                'success' => false,
+                'message' => 'Product not found.'
+            ],ResponseAlias::HTTP_NOT_FOUND);
+        }
+
+        try {
+            if ($fieldName == 'expiry_duration'){
+                $product->update(['expiry_duration' => $value]);
+            }
+
+            return response()->json([
+                'message' => 'Status updated successfully.',
+                'status' => ResponseAlias::HTTP_OK
+            ], ResponseAlias::HTTP_OK);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => ResponseAlias::HTTP_INTERNAL_SERVER_ERROR,
+                'success' => false,
+                'message' => 'An error occurred while updating status.',
+                'error' => $e->getMessage()
+            ],ResponseAlias::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
 
 
     public function stockItem()

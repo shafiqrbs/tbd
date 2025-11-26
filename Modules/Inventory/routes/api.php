@@ -65,7 +65,7 @@ Route::prefix('/inventory')->middleware([HeaderAuthenticationMiddleware::class,L
     Route::apiResource('/product', ProductController::class);
 
     Route::prefix('/product')->group(function() {
-
+        Route::post('inline-update/{product}', [ProductController::class,'productInlineUpdate'])->name('product_inline_update');
         Route::get('/status/inline-update/{id}', [ProductController::class,'productStatusInlineUpdate'])->name('product_status_inline_update');
         Route::prefix('/measurement')->group(function() {
             Route::post('', [ProductController::class,'measurementAdded'])->name('product_measurement_added');
