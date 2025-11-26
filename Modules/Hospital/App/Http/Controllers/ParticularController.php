@@ -50,6 +50,15 @@ class ParticularController extends Controller
         return $response;
     }
 
+    public function indexRxEmergency()
+    {
+
+        $data = ParticularModel::getParticularRxEmergencyDropdown($this->domain, 'rx-emergency');
+        $service = new JsonRequestResponse();
+        $response = $service->returnJosnResponse($data);
+        return $response;
+    }
+
      /**
      * Store a newly created resource in storage.
      */

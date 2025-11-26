@@ -134,8 +134,28 @@ class ParticularModel extends Model
 
         $data = array('count'=>$total,'entities' => $entities);
         return $data;
+    }
 
+    public static function getParticularRxEmergencyDropdown($domain,$dropdownType)
+    {
 
+        $config =  $domain['hms_config'];
+        $entity =  DB::table('hms_particular')->where('hms_particular.config_id',$config)
+            ->join('hms_particular_type','hms_particular_type.id','=','hms_particular.particular_type_id')
+            ->join('hms_particular_master_type','hms_particular_master_type.id','=','hms_particular_type.particular_master_type_id')
+            ->where('hms_particular_master_type.slug',$dropdownType)
+            ->select([
+                'hms_particular.id',
+                'hms_particular.name',
+                'hms_particular.slug',
+                'hms_particular.content',
+            ])->orderBy('hms_particular.ordering','ASC');
+        $entity = $entity->where(function ($q) use ($domain) {
+            $q->where('hms_particular.created_by_id', $domain['user_id'])
+                ->orWhereNull('hms_particular.created_by_id');
+        });
+        $data = $entity->get();
+        return $data;
     }
 
     public static function getParticularContentDropdown($domain,$dropdownType)
@@ -203,10 +223,6 @@ class ParticularModel extends Model
             $q->where('hms_particular.created_by_id', $domain['user_id'])
                 ->orWhereNull('hms_particular.created_by_id');
         });
-
-        if (isset($request['created_by_id']) && !empty($request['created_by_id'])){
-            $entity = $entity->where('hms_particular.created_by_id',$request['created_by_id']);
-        }
 
         $entities = $entity->get()->map(function ($item) {
             // Transform nested relations

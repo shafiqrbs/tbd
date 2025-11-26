@@ -81,6 +81,7 @@ Route::prefix('/hospital')->middleware([HeaderAuthenticationMiddleware::class])-
     Route::post('/core/store-user/inline-update/{id}', [HospitalController::class,'storeUserInlineUpdate'])->name('storeUserInlineUpdate');
     Route::prefix('core')->middleware([HeaderAuthenticationMiddleware::class])->group(function() {
         Route::get('/user-import', [HospitalController::class,'userImport'])->name('user-import');
+        Route::get('/particular/rxemergency', [ParticularController::class,'indexRxEmergency'])->name('index_rx_emergency');
         Route::apiResource('particular', ParticularController::class)
             ->middleware([HeaderAuthenticationMiddleware::class])
             ->names([
@@ -92,7 +93,6 @@ Route::prefix('/hospital')->middleware([HeaderAuthenticationMiddleware::class])-
             ]);
         Route::post('/particular/inline-update/{id}', [ParticularController::class,'particularInlineUpdate'])->name('particular_inline_update');
         Route::post('/particular/ordering', [ParticularController::class,'updateOrdering'])->name('particular_ordering_update');
-
         Route::apiResource('particular-type', ParticularTypeController::class)
             ->middleware([HeaderAuthenticationMiddleware::class])
             ->names([
