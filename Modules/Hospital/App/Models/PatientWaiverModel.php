@@ -329,6 +329,19 @@ class PatientWaiverModel extends Model
 
             ])->orderBy('hms_invoice.updated_at', 'DESC');
 
+        if (isset($request['term']) && !empty($request['term'])){
+            $term = trim($request['term']);
+            $entitiesQuery = $entitiesQuery->where(function ($q) use ($term) {
+                $q->where('hms_invoice.invoice', 'LIKE', "%{$term}%")
+                    ->orWhere('hms_invoice.uid', 'LIKE', "%{$term}%")
+                    ->orWhere('customer.customer_id', 'LIKE', "%{$term}%")
+                    ->orWhere('customer.name', 'LIKE', "%{$term}%")
+                    ->orWhere('customer.mobile', 'LIKE', "%{$term}%")
+                    ->orWhere('customer.nid', 'LIKE', "%{$term}%")
+                    ->orWhere('customer.health_id', 'LIKE', "%{$term}%");
+            });
+        }
+
         // ✅ Use clone for total count before skip/take
         if (isset($request['mode']) && !empty($request['mode']) and $request['mode'] == "opd_investigation") {
             $entitiesQuery = $entitiesQuery->where('hms_invoice.process', 'closed');
@@ -390,6 +403,19 @@ class PatientWaiverModel extends Model
 
         // ✅ Use clone for total count before skip/take
 
+        if (isset($request['term']) && !empty($request['term'])){
+            $term = trim($request['term']);
+            $entitiesQuery = $entitiesQuery->where(function ($q) use ($term) {
+                $q->where('hms_invoice.invoice', 'LIKE', "%{$term}%")
+                    ->orWhere('hms_invoice.uid', 'LIKE', "%{$term}%")
+                    ->orWhere('customer.customer_id', 'LIKE', "%{$term}%")
+                    ->orWhere('customer.name', 'LIKE', "%{$term}%")
+                    ->orWhere('customer.mobile', 'LIKE', "%{$term}%")
+                    ->orWhere('customer.nid', 'LIKE', "%{$term}%")
+                    ->orWhere('customer.health_id', 'LIKE', "%{$term}%");
+            });
+        }
+
         if (isset($request['mode']) && !empty($request['mode']) and $request['mode'] == "opd_investigation") {
             $entitiesQuery = $entitiesQuery->where('hms_invoice.process', 'closed');
             $entitiesQuery = $entitiesQuery->whereIn('patient_mode.slug', ['opd','emergency']);
@@ -400,6 +426,7 @@ class PatientWaiverModel extends Model
             $entitiesQuery = $entitiesQuery->where('hms_invoice.process', 'admitted');
             $entitiesQuery = $entitiesQuery->where('patient_mode.slug', 'ipd');
         }
+
         $entities = $entitiesQuery
             ->skip($skip)
             ->take($perPage)

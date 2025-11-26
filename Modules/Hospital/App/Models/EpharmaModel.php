@@ -188,7 +188,7 @@ class EpharmaModel extends Model
                 'createdBy.id as created_by_id',
                 'hms_invoice.process as process_id',
             ])
-            ->where('hms_invoice.barcode', $id)
+            ->where('hms_invoice.barcode', trim($id))
             ->where('is_medicine_delivered', '!=', 1)
             ->first();
 
