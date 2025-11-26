@@ -184,7 +184,7 @@ class ProductionBatchModel extends Model
 
         $stockHistories = StockItemHistoryModel::select([
             'stock_item_id',
-            $isWarehouse ? 'warehouse_closing_quantity' : 'closing_quantity',
+            'closing_quantity',
         ])
             ->whereIn('stock_item_id', $materialIds)
             ->when($isWarehouse, fn($q) => $q->where('warehouse_id', $entity->warehouse_id))
@@ -199,7 +199,7 @@ class ProductionBatchModel extends Model
                 $materialId = $expense->material_id;
 
                 $expense->stock_quantity = (float)(
-                    $stockHistories[$materialId]->{$isWarehouse ? 'warehouse_closing_quantity' : 'closing_quantity'}
+                    $stockHistories[$materialId]->{'closing_quantity'}
                     ?? 0.0
                 );
 
