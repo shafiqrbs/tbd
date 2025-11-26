@@ -19,6 +19,9 @@ class ParticularModel extends Model
     public $timestamps = true;
     protected $guarded = ['id'];
 
+    protected $casts = [
+        'opd_room_ids' => 'array',
+    ];
 
     public function particularType()
     {

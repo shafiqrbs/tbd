@@ -131,12 +131,11 @@ class ParticularController extends Controller
     {
         $input = $request->validated();
         $entity = ParticularModel::find($id);
-
         $data = array();
         $name = (isset($input['name']) and $input['name']) ? $input['name']:'';
         $price = (isset($input['price']) and $input['price']) ? $input['price']:0;
         if($price){$data['price'] = $price; }
-        if($name){$data['name'] = $name;}
+        if($name){$data['name'] = $name; }
         if(!empty($data)){ $entity->update($data);}
         ParticularDetailsModel::updateOrCreate(
             ['particular_id'    => $id]
@@ -181,9 +180,8 @@ class ParticularController extends Controller
                 $updateDetails['room_id'] = $input['opd_room_id'];
             }
             if (array_key_exists('opd_room_ids', $input)) {
-                $updateDetails->opd_room_ids = json_encode($input['opd_room_ids']);
+                $updateDetails['opd_room_ids'] = $input['opd_room_ids'];
             }
-
 
             if (array_key_exists('store_id', $input)) {
                 $updateDetails['store_id'] = $input['store_id'];
