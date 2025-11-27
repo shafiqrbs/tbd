@@ -687,7 +687,7 @@ class StockItemModel extends Model
 
                 $data = [
                     'id' => $stock->id,
-                    'name' => $stock->display_name ?? $stock->name,
+                    'name' => $stock->name ?? $stock->name,
                     'category_name' => $product->category->name ?? null,
                     'product_id' => $product->id ?? null,
                     'product_code' => $product->product_code ?? null,
@@ -712,7 +712,7 @@ class StockItemModel extends Model
 
                 return $data;
             });
-        
+
         // --- All Active Warehouses for this domain
         $warehouses = WarehouseModel::where('domain_id', $domain['domain_id'])
             ->where('status', 1)
