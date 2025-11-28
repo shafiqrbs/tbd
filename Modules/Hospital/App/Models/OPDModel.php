@@ -101,6 +101,7 @@ class OPDModel extends Model
                 'config_id' => $hmsConfig->id,
                 'invoice' => $invoice,
                 'code' => $code,
+                'invoice_mode' => $data['patient_mode'],
                 'customer_id' => $entity->id,
                 'referred_doctor_id' => $data['referred_doctor_id'] ?? null,
                 'assign_doctor_id' => $data['assign_doctor_id'] ?? null,

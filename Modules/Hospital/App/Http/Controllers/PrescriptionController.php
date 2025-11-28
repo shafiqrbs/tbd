@@ -135,7 +135,11 @@ class PrescriptionController extends Controller
         $weight = $data['weight'] ?? null;
         InvoiceModel::invoicePrescriptionProcess($entity->invoice);
         $entity->invoice->update(['is_prescription' => 1,'weight' => $weight]);
-        PatientPrescriptionMedicineModel::insertPatientMedicine($domain,$entity->id);
+        if($entity->invoice->invoice_mode == "ipd"){
+            PatientPrescriptionMedicineModel::insertIpdPatientMedicine($domain,$entity->id);
+        }else{
+            PatientPrescriptionMedicineModel::insertPatientMedicine($domain,$entity->id);
+        }
         HospitalSalesModel::insertMedicineIssue($domain,$entity->id);
         InvoiceTransactionModel::insertInvestigations($domain,$entity->id);
         InvoiceContentDetailsModel::insertContentDetails($domain,$entity->id);
