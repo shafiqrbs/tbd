@@ -148,6 +148,13 @@ class ParticularDetails
      */
     private $opdRoomIds;
 
+     /**
+     * @var $diagnosticRoomIds
+     *
+     * @ORM\Column(type="json",nullable = true)
+     */
+    private $diagnosticRoomIds;
+
     /**
      * @var integer
      *

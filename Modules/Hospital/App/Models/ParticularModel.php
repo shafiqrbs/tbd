@@ -21,7 +21,9 @@ class ParticularModel extends Model
 
     protected $casts = [
         'opd_room_ids' => 'array',
+        'diagnostic_room_ids' => 'array',
     ];
+
 
     public function particularType()
     {
@@ -100,6 +102,7 @@ class ParticularModel extends Model
                 'hms_particular_details.store_id as store_id',
                 'hms_particular_details.report_format as report_format',
                 'hms_particular_details.opd_room_ids as opd_room_ids',
+                'hms_particular_details.diagnostic_room_ids as diagnostic_room_ids',
                 'diagnosticRoom.name as diagnostic_room',
                 'diagnosticDepartment.name as diagnostic_department',
             ]);

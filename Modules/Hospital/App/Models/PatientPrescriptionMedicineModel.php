@@ -337,8 +337,6 @@ class PatientPrescriptionMedicineModel extends Model
                     $item
                 );
             }
-
-
         }
     }
 
