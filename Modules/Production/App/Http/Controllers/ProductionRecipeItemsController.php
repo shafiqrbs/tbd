@@ -185,30 +185,116 @@ class ProductionRecipeItemsController extends Controller
 
     public function updateProcess(Request $request)
     {
-        $response = new Response();
+        DB::beginTransaction();
 
-        $getProductionItems = ProductionItems::find($request->get('pro_item_id'));
+        try {
 
-        if (!$getProductionItems){
-            $response->setContent(json_encode([
-                'message' => 'Production item not found',
-                'status' => Response::HTTP_NOT_FOUND
-            ]));
-            $response->setStatusCode(Response::HTTP_OK);
-            return $response;
+            $item = ProductionItems::find($request->get('pro_item_id'));
+
+            if (!$item) {
+                DB::rollBack();
+                return response()->json([
+                    'message' => 'Production item not found'
+                ], 404);
+            }
+
+            if ($request->get('process') === 'approved') {
+                $this->updateProductionPrice($item);
+            }
+
+            $item->update([
+                'process' => $request->get('process')
+            ]);
+
+            DB::commit();
+
+            return response()->json([
+                'status' => 200,
+                'message' => 'success',
+            ]);
+
+        } catch (\Exception $e) {
+
+            DB::rollBack();
+
+            return response()->json([
+                'message' => 'Failed to update',
+                'error' => $e->getMessage(),
+            ], 500);
         }
-        $getProductionItems->update([
-            'process' => $request->get('process')
-        ]);
-        $response->headers->set('Content-Type', 'application/json');
-        $response->setContent(json_encode([
-            'status' => Response::HTTP_OK,
-            'message' => 'success',
-        ]));
-        $response->setStatusCode(Response::HTTP_OK);
-        return $response;
     }
 
+    private function updateProductionPrice(ProductionItems $item)
+    {
+        $elements = ProductionElements::where('production_item_id', $item->id)->get();
+
+        foreach ($elements as $element) {
+
+            $material = StockItemModel::find($element->material_id);
+
+            if ($material) {
+
+                $price = $material->average_price ?? $material->purchase_price;
+
+                $element->update([
+                    'purchase_price' => $price,
+                    'price'          => $price,
+                    'sub_total'      => $price * $element->quantity,
+                ]);
+
+                // Recalculate wastage after price change
+                if ($element->wastage_quantity > 0) {
+                    $element->wastage_amount = $element->wastage_quantity * $price;
+                    $element->save();
+                }
+            }
+        }
+
+        $totalValueAdded = ProductionValueAdded::where('production_item_id', $item->id)->sum('amount');
+
+        $total = ProductionElements::where('production_item_id', $item->id)
+            ->where('status', 1)
+            ->selectRaw("
+            SUM(sub_total) as sub,
+            SUM(wastage_amount) as waste_amount,
+            SUM(quantity) as qty,
+            SUM(wastage_quantity) as waste_qty
+        ")
+            ->first();
+
+        if ($total && $total->sub > 0) {
+
+            $item->material_amount         = $total->sub;
+            $item->material_quantity       = $total->qty;
+            $item->waste_material_quantity = $total->waste_qty;
+            $item->waste_amount            = $total->waste_amount;
+            $item->value_added_amount      = $totalValueAdded;
+
+            $item->sub_total = round(
+                $total->sub +
+                $total->waste_amount +
+                $totalValueAdded
+            );
+
+            $item->price = round(
+                $total->sub +
+                $total->waste_amount +
+                $totalValueAdded
+            );
+
+            $item->quantity = $total->qty + $total->waste_qty;
+
+        } else {
+
+            $item->material_amount = 0;
+            $item->material_quantity = 0;
+            $item->waste_material_quantity = 0;
+            $item->waste_amount = 0;
+            $item->sub_total = 0;
+        }
+
+        $item->save();
+    }
 
     public function amendmentProcess(Request $request, $id)
     {

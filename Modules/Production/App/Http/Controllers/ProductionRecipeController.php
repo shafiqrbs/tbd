@@ -11,9 +11,13 @@ use Illuminate\Support\Facades\DB;
 use Modules\AppsApi\App\Services\JsonRequestResponse;
 use Modules\Core\App\Models\UserModel;
 use Modules\Inventory\App\Entities\StockItem;
+use Modules\Inventory\App\Models\StockItemModel;
 use Modules\Production\App\Entities\ProductionElement;
 use Modules\Production\App\Entities\ProductionItem;
+use Modules\Production\App\Http\Requests\ProductionRecipeRequest;
+use Modules\Production\App\Models\ProductionConfig;
 use Modules\Production\App\Models\ProductionElements;
+use Modules\Production\App\Models\ProductionItems;
 use Modules\Production\App\Models\ProductionValueAdded;
 use Modules\Production\App\Models\SettingModel;
 
@@ -58,12 +62,102 @@ class ProductionRecipeController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request, EntityManager $em)
+    /*public function store(Request $request, EntityManager $em)
     {
         $data = $request->all();
         $em->getRepository(ProductionElement::class)->insertProductionElement($data,$this->domain);
+    }*/
+
+    public function store(ProductionRecipeRequest $request)
+    {
+        DB::beginTransaction();
+
+        try {
+
+            $input = $request->validated();
+
+            $materialId        = $input['inv_stock_id'] ?? null;
+            $productionItemId  = $input['item_id'] ?? null;
+            $quantity          = $input['quantity'] ?? 0;
+            $wastagePercent    = $input['percent'] ?? null;
+
+            $productionItem = ProductionItems::find($productionItemId);
+            $material       = StockItemModel::find($materialId);
+            $config         = ProductionConfig::find($this->domain['pro_config']);
+
+            if (!$productionItem || !$material) {
+                return response()->json(['error' => 'Invalid data'], 422);
+            }
+
+            $price = $material->average_price ?? $material->purchase_price;
+
+            $exist = ProductionElements::where('production_item_id', $productionItemId)
+                ->where('material_id', $materialId)
+                ->first();
+
+            if (!$exist) {
+
+                $element = new ProductionElements([
+                    'production_item_id' => $productionItem->id,
+                    'material_id'        => $material->id,
+                    'quantity'           => $quantity,
+                    'purchase_price'      => $price,
+                    'price'               => $price,
+                    'sub_total'           => $price * $quantity,
+                    'config_id'           => $config->id,
+                    'status'              => 1,
+                ]);
+
+                // Apply wastage rules
+                if ($wastagePercent) {
+                    $this->applyWastage($element, $wastagePercent);
+                } elseif ($productionItem->waste_percent) {
+                    $this->applyWastage($element, $productionItem->waste_percent);
+                }
+
+                $element->save();
+
+            } else {
+
+                $exist->quantity        = $quantity;
+                $exist->price           = $price;
+                $exist->purchase_price  = $price;
+                $exist->sub_total       = $price * $quantity;
+
+                if ($wastagePercent) {
+                    $this->applyWastage($exist, $wastagePercent);
+                }
+
+                $exist->save();
+                $element = $exist;
+            }
+
+            DB::commit();
+
+            return response()->json([
+                'message' => 'Success',
+                'data'    => $element
+            ]);
+
+        } catch (\Exception $e) {
+
+            DB::rollback();
+
+            return response()->json([
+                'error' => 'Failed to save',
+                'details' => $e->getMessage()
+            ], 500);
+        }
     }
 
+
+    private function applyWastage($element, $percent)
+    {
+        $wasteQty = ($element->quantity * $percent) / 100;
+        $element->wastage_percent = $percent;
+        $element->wastage_quantity = $wasteQty;
+        $element->wastage_amount = $wasteQty * $element->price;
+    }
     /**
      * Show the specified resource.
      */

@@ -2,26 +2,29 @@
 
 namespace Modules\Production\App\Models;
 
-
-use Cviebrock\EloquentSluggable\Sluggable;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Support\Facades\DB;
-use Modules\Inventory\App\Entities\Product;
 use Modules\Inventory\App\Entities\StockItem;
-use Modules\Inventory\App\Models\ProductModel;
 use Modules\Inventory\App\Models\StockItemModel;
+use Modules\Production\App\Entities\ProductionItem;
 
 
 class ProductionElements extends Model
 {
-    use HasFactory;
-
     protected $table = 'pro_element';
     public $timestamps = true;
     protected $guarded = ['id'];
-    protected $fillable = [
 
+    protected $fillable = [
+        'production_item_id',
+        'material_id',
+        'config_id',
+        'quantity',
+        'price',
+        'sub_total',
+        'wastage_percent',
+        'wastage_quantity',
+        'wastage_amount',
+        'status'
     ];
 
 
@@ -41,6 +44,16 @@ class ProductionElements extends Model
     public function invStock()
     {
         return $this->belongsTo(StockItemModel::class, 'material_id','id');
+    }
+
+    public function productionItem()
+    {
+        return $this->belongsTo(ProductionItem::class);
+    }
+
+    public function material()
+    {
+        return $this->belongsTo(StockItem::class, 'material_id');
     }
 
 
