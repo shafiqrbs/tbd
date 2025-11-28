@@ -192,6 +192,10 @@ class ParticularController extends Controller
                 $updateDetails['opd_room_ids'] = $input['opd_room_ids'];
             }
 
+            if (array_key_exists('diagnostic_room_ids', $input)) {
+                $updateDetails['diagnostic_room_ids'] = $input['diagnostic_room_ids'];
+            }
+
             if (array_key_exists('store_id', $input)) {
                 $updateDetails['store_id'] = $input['store_id'];
             }
