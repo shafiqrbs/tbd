@@ -344,10 +344,10 @@ class PatientWaiverModel extends Model
 
         // ✅ Use clone for total count before skip/take
         if (isset($request['mode']) && !empty($request['mode']) and $request['mode'] == "opd_investigation") {
-            $entitiesQuery = $entitiesQuery->where('hms_invoice.process', 'closed');
-            $entitiesQuery = $entitiesQuery->where('patient_mode.slug', 'opd');
+            $entitiesQuery = $entitiesQuery->whereIn('hms_invoice.process', ['closed','done']);
+            $entitiesQuery = $entitiesQuery->whereIn('patient_mode.slug', ['opd','emergency']);
         }elseif (isset($request['mode']) && !empty($request['mode']) and $request['mode'] == "ipd_investigation") {
-            $entitiesQuery = $entitiesQuery->where('hms_invoice.process', 'admitted');
+            $entitiesQuery = $entitiesQuery->whereIn('hms_invoice.process', ['admitted', 'done']);
             $entitiesQuery = $entitiesQuery->where('patient_mode.slug', 'ipd');
         }elseif (isset($request['mode']) && !empty($request['mode']) and $request['mode'] == "ipd_room") {
             $entitiesQuery = $entitiesQuery->where('hms_invoice.process', 'admitted');
@@ -417,7 +417,7 @@ class PatientWaiverModel extends Model
         }
 
         if (isset($request['mode']) && !empty($request['mode']) and $request['mode'] == "opd_investigation") {
-            $entitiesQuery = $entitiesQuery->where('hms_invoice.process', 'closed');
+            $entitiesQuery = $entitiesQuery->whereIn('hms_invoice.process', ['closed','done']);
             $entitiesQuery = $entitiesQuery->whereIn('patient_mode.slug', ['opd','emergency']);
         }elseif (isset($request['mode']) && !empty($request['mode']) and $request['mode'] == "ipd_investigation") {
             $entitiesQuery = $entitiesQuery->whereIn('hms_invoice.process', ['admitted', 'done']);

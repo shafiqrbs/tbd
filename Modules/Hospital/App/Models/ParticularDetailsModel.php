@@ -25,6 +25,10 @@ class ParticularDetailsModel extends Model
         parent::boot();
     }
 
+    protected $casts = [
+        'opd_room_ids' => 'array',
+        'diagnostic_room_ids' => 'array',
+    ];
 
     public function patientMode()
     {
