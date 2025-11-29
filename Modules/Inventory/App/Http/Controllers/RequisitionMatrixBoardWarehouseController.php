@@ -818,7 +818,6 @@ class   RequisitionMatrixBoardWarehouseController extends Controller
             $materialService = app(\App\Services\Production\ProductionMaterialService::class);
             $materialService->updateFullMaterialProcess($id);
 
-//            ProductionBatchModel::productionToMaterialUpdateFullProcess(batchId: $id);
             ProductionBatchModel::generateProductionToVendorRequisition($this->domain->toArray(), $id, $findProductionBatch);
 
             DB::commit();
