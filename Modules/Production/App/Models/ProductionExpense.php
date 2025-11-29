@@ -28,6 +28,12 @@ class ProductionExpense extends Model
         'sales_price'
     ];
 
+    public function element()
+    {
+        // link to production_elements via production_element_id
+        return $this->belongsTo(ProductionElements::class, 'production_element_id', 'id');
+    }
+
 
     public static function boot() {
         parent::boot();

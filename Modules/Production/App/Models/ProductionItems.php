@@ -92,6 +92,16 @@ class ProductionItems extends Model
         return $this->hasMany(ProductionItemAmendmentModel::class, 'production_item_id');
     }
 
+    public function elements()
+    {
+        return $this->hasMany(ProductionElements::class, 'production_item_id', 'id');
+    }
+
+    public function valueAdded()
+    {
+        return $this->hasMany(ProductionValueAdded::class, 'production_item_id', 'id');
+    }
+
 
     public static function insertUpdate($configId,$itemId,$warehouseId){
 

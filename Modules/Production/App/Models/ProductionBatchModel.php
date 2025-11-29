@@ -7,6 +7,7 @@ use DateTime;
 use Exception;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
@@ -348,7 +349,6 @@ class ProductionBatchModel extends Model
         $vendorIds = $inQuery->keys();
         $vendors = VendorModel::whereIn('id', $vendorIds)->get()->keyBy('id');
         $configs = ConfigModel::whereIn('domain_id', $vendors->pluck('sub_domain_id'))->get()->keyBy('domain_id');
-
         $now = Carbon::now();
 
         foreach ($inQuery as $vendorId => $items) {
@@ -691,5 +691,112 @@ class ProductionBatchModel extends Model
             ]
         ];
     }
+
+    #PRODUCTION START NOW CONVERT INTO SERVICE & REMOVE THIS IF SERVICE IS OKAY
+    /*public static function productionToMaterialUpdateFullProcess($batchId)
+    {
+        $findBatch = self::find($batchId);
+        $findBatchItems = $findBatch->batchItems;
+        foreach ($findBatchItems as $batchItem) {
+            $findProductionItem = ProductionItems::find($batchItem->production_item_id);
+            self::updateProductionRawMaterialPrice( item: $findProductionItem);
+            self::updateProductionExpensePurchase(
+                productionBatchItemId: $batchItem->id,
+                productionItemId: $batchItem->production_item_id
+            );
+
+            $batchItem->update([
+                'price' => $findProductionItem?->sub_total ?? 0,
+            ]);
+        }
+    }
+
+    private static function updateProductionRawMaterialPrice(ProductionItems $item)
+    {
+        $elements = ProductionElements::where('production_item_id', $item->id)->get();
+        foreach ($elements as $element) {
+
+            $material = StockItemModel::find($element->material_id);
+
+            if ($material) {
+
+                $price = $material->average_price ?? $material->purchase_price;
+
+                $element->update([
+                    'purchase_price' => $price,
+                    'price'          => $price,
+                    'sub_total'      => $price * $element->quantity,
+                ]);
+
+                // Recalculate wastage after price change
+                if ($element->wastage_quantity > 0) {
+                    $element->wastage_amount = $element->wastage_quantity * $price;
+                    $element->save();
+                }
+            }
+        }
+
+        $totalValueAdded = ProductionValueAdded::where('production_item_id', $item->id)->sum('amount');
+
+        $total = ProductionElements::where('production_item_id', $item->id)
+            ->where('status', 1)
+            ->selectRaw("
+            SUM(sub_total) as sub,
+            SUM(wastage_amount) as waste_amount,
+            SUM(quantity) as qty,
+            SUM(wastage_quantity) as waste_qty
+        ")
+            ->first();
+
+        if ($total && $total->sub > 0) {
+
+            $item->material_amount         = $total->sub;
+            $item->material_quantity       = $total->qty;
+            $item->waste_material_quantity = $total->waste_qty;
+            $item->waste_amount            = $total->waste_amount;
+            $item->value_added_amount      = $totalValueAdded;
+
+            $item->sub_total = round(
+                $total->sub +
+                $total->waste_amount +
+                $totalValueAdded
+            );
+
+            $item->price = round(
+                $total->sub +
+                $total->waste_amount +
+                $totalValueAdded
+            );
+
+            $item->quantity = $total->qty + $total->waste_qty;
+
+        } else {
+
+            $item->material_amount = 0;
+            $item->material_quantity = 0;
+            $item->waste_material_quantity = 0;
+            $item->waste_amount = 0;
+            $item->sub_total = 0;
+        }
+
+        $item->save();
+    }
+    private static function updateProductionExpensePurchase($productionBatchItemId,$productionItemId)
+    {
+        $findBatchItemsWiseExpenses = ProductionExpense::where('production_item_id', $productionItemId)
+            ->where('production_batch_item_id', $productionBatchItemId)
+            ->get();
+
+        foreach ($findBatchItemsWiseExpenses as $item) {
+            $rawMaretialPurchasePrice = ProductionElements::where('production_item_id', $productionItemId)->where('id', $item['production_element_id'])->first()?->purchase_price ?? 0;
+            $item->update([
+                'purchase_price' => $rawMaretialPurchasePrice,
+            ]);
+        }
+    }*/
+
+    #PRODUCTION STOP NOW CONVERT INTO SERVICE & REMOVE THIS IF SERVICE IS OKAY
+
+
 
 }

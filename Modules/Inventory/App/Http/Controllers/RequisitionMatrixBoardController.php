@@ -811,6 +811,10 @@ class   RequisitionMatrixBoardController extends Controller
                 ]);
             }
 
+            // realtime raw material stock item average price calculate with pro_element , pro_item , pro_expense , pro_batch_items,
+            $materialService = app(\App\Services\Production\ProductionMaterialService::class);
+            $materialService->updateFullMaterialProcess($id);
+
             ProductionBatchModel::generateProductionToVendorRequisition($this->domain->toArray(), $id, $findProductionBatch);
 
             DB::commit();

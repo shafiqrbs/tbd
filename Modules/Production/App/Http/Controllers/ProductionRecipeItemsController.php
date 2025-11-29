@@ -270,17 +270,15 @@ class ProductionRecipeItemsController extends Controller
             $item->waste_amount            = $total->waste_amount;
             $item->value_added_amount      = $totalValueAdded;
 
-            $item->sub_total = round(
+            $item->sub_total =
                 $total->sub +
                 $total->waste_amount +
-                $totalValueAdded
-            );
+                $totalValueAdded;
 
-            $item->price = round(
+            $item->price =
                 $total->sub +
                 $total->waste_amount +
-                $totalValueAdded
-            );
+                $totalValueAdded;
 
             $item->quantity = $total->qty + $total->waste_qty;
 

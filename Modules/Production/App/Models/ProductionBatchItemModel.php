@@ -17,6 +17,7 @@ class ProductionBatchItemModel extends Model
         'receive_quantity',
         'issue_quantity',
         'damage_quantity',
+        'price',
         'warehouse_id'
     ];
 
@@ -38,13 +39,17 @@ class ProductionBatchItemModel extends Model
     {
         return $this->hasMany(ProductionElements::class, 'production_item_id','production_item_id');
     }
+    public function productionItem()
+    {
+        return $this->belongsTo(ProductionItems::class, 'production_item_id', 'id');
+    }
 
     public function productionExpenses()
     {
         return $this->hasMany(ProductionExpense::class, 'production_batch_item_id','id');
     }
 
-    public function productionItem()
+    public function productionIssue()
     {
         return $this->belongsTo(ProductionIssueModel::class, 'production_item_id', 'id');
     }

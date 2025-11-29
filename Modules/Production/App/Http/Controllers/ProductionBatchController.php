@@ -131,6 +131,10 @@ class ProductionBatchController extends Controller
                 ProductionExpense::insert($productionExpenses); // Batch insert
             }
 
+            // realtime raw material stock item average price calculate with pro_element , pro_item , pro_expense , pro_batch_items,
+            $materialService = app(\App\Services\Production\ProductionMaterialService::class);
+            $materialService->updateFullMaterialProcess($batch->id);
+
             DB::commit(); // Commit transaction
 
             // Return success response
@@ -375,6 +379,10 @@ class ProductionBatchController extends Controller
                     'status' => ResponseAlias::HTTP_NOT_FOUND
                 ], ResponseAlias::HTTP_NOT_FOUND);
             }
+
+            // realtime raw material stock item average price calculate with pro_element , pro_item , pro_expense , pro_batch_items,
+            $materialService = app(\App\Services\Production\ProductionMaterialService::class);
+            $materialService->updateFullMaterialProcess($id);
 
             // get batch item
             foreach ($batch->batchItems as $batchItem) {

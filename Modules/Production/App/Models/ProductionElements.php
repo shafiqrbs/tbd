@@ -19,6 +19,7 @@ class ProductionElements extends Model
         'material_id',
         'config_id',
         'quantity',
+        'purchase_price',
         'price',
         'sub_total',
         'wastage_percent',
@@ -46,14 +47,14 @@ class ProductionElements extends Model
         return $this->belongsTo(StockItemModel::class, 'material_id','id');
     }
 
+    public function material()
+    {
+        return $this->belongsTo(StockItemModel::class, 'material_id', 'id');
+    }
+
     public function productionItem()
     {
         return $this->belongsTo(ProductionItem::class);
-    }
-
-    public function material()
-    {
-        return $this->belongsTo(StockItem::class, 'material_id');
     }
 
 
