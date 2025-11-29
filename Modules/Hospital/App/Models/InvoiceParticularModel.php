@@ -106,13 +106,10 @@ class InvoiceParticularModel extends Model
         $admissionDay = $dayCount == 0 ? 1 : $dayCount;
         $totalQuantity = DB::table('hms_invoice_particular')
             ->join('hms_particular', 'hms_particular.id', '=', 'hms_invoice_particular.particular_id')
-            ->join('hms_particular_type', 'hms_particular_type.id', '=', 'hms_particular.particular_type_id')
-            ->join('hms_particular_master_type', 'hms_particular_master_type.id', '=', 'hms_particular_type.particular_master_type_id')
             ->where('hms_invoice_particular.hms_invoice_id', $id)
             ->where('hms_invoice_particular.status', 1)
-            ->whereIn('hms_particular_master_type.slug', ['bed', 'cabin'])
+            ->whereIn('hms_invoice_particular.mode', ['room'])
             ->sum('hms_invoice_particular.quantity');
-
         $remainingDay = ($admissionDay - $totalQuantity);
         $entity->update(['admission_day' => $admissionDay, 'payment_day' => $totalQuantity, 'consume_day' => $totalQuantity,'remaining_day' => $remainingDay]);
         return $totalQuantity;

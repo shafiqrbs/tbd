@@ -303,6 +303,11 @@ class InvoiceModel extends Model
             $entities = $entities->where('hms_invoice.room_id',$request['room_id']);
         }
 
+        if ($request->filled('room_ids') && is_array($request['room_ids'])) {
+            $intNumbers = array_map('intval', $request['room_ids']);
+            $entities = $entities->whereIn('hms_invoice.room_id', $intNumbers);
+        }
+
         if (isset($request['created_by_id']) && !empty($request['created_by_id'])){
             $entities = $entities->where('hms_invoice.created_by_id',$request['created_by_id']);
         }

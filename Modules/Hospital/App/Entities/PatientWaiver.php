@@ -74,6 +74,13 @@ class PatientWaiver
      */
     private $comment;
 
+    /**
+     * @var string
+     *
+     * @ORM\Column(type="string", nullable=true, length=20)
+     */
+    private $mode;
+
 
     /**
      * @var \DateTime
