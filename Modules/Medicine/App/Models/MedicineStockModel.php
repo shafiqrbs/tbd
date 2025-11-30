@@ -143,6 +143,12 @@ class MedicineStockModel extends Model
                 'inv_product.name as name',
             ]);
 
+        if ($request->filled('term')) {
+            $search = $request->term;
+            $entities->where('inv_stock.name', 'LIKE', "%{$search}%");
+        }
+
+
         // Get total count before pagination
         $total = $entities->count();
 
