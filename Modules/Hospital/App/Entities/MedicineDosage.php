@@ -71,13 +71,26 @@ class MedicineDosage
      */
     private $continueMode;
 
-
     /**
      * @var float
      *
      * @ORM\Column(name="quantity", type="integer", nullable=true)
      */
     private $quantity;
+
+    /**
+     * @var float
+     *
+     * @ORM\Column(name="duration", type="string", nullable=true)
+     */
+    private $duration;
+
+    /**
+     * @var float
+     *
+     * @ORM\Column(name="duration_mode", type="string", nullable=true)
+     */
+    private $durationMode;
 
     /**
      * @var int

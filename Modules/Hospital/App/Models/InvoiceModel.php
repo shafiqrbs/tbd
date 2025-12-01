@@ -686,6 +686,7 @@ class InvoiceModel extends Model
             ['hms_particular.config_id', $domain['hms_config']],
             ['hms_particular_master_type.slug', 'opd-room'],
             ['hms_particular.status', 1],
+            ['hms_particular.is_opd', 1],
             ['hms_particular.id', '!=', $emergencyRoomId],
             ['hms_particular.opd_referred', '<>', 1]
         ])
@@ -796,6 +797,7 @@ class InvoiceModel extends Model
             ['hms_particular.config_id', $domain['hms_config']],
             ['hms_particular_master_type.slug', 'opd-room'],
             ['hms_particular.status', 1],
+            ['hms_particular.is_opd', 1],
             ['hms_particular.opd_referred', '<>', 1]
         ])
             ->leftJoin('hms_invoice', function($join) use ($start_date, $end_date) {

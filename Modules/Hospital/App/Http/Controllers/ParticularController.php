@@ -172,10 +172,14 @@ class ParticularController extends Controller
             $findParticular->diagnostic_room_id = $input['diagnostic_room_id'];
         }
 
+        if (array_key_exists('is_opd', $input)) {
+            $findParticular->is_opd = $findParticular->is_opd ? 0:1;
+        }
 
         if (array_key_exists('status', $input)) {
             $findParticular->status = $findParticular->status ? 0:1;
         }
+
         $findParticular->save();
 
         if ($findParticular->particularDetails) {

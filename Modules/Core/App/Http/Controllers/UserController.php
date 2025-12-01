@@ -167,7 +167,6 @@ class UserController extends Controller
                 $data['path'] = $profileImage;
             }
         }
-
         if ($request->file('digital_signature')) {
             $digitalSign = $this->processFileUpload($request->file('digital_signature'), 'uploads/core/user/signature');
             if ($digitalSign) {

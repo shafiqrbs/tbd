@@ -49,7 +49,6 @@ class UserRequest extends FormRequest
                         'email',
                         Rule::unique('Modules\Core\App\Entities\User', 'email')  // Ensure using `users` table
                     ],
-                    'password' => 'required|min:6',
                     'employee_group_id' => 'required',
                     'employee_id' => 'nullable',
                     'designation_id' => 'integer|nullable',
@@ -57,6 +56,7 @@ class UserRequest extends FormRequest
                     'dob' => 'string|nullable',
                     'gender' => 'string|nullable',
                     'address' => 'string|nullable',
+                    'password' => 'required|min:6',
                     'confirm_password' => 'required|same:password',
                 ];
             }
@@ -94,6 +94,8 @@ class UserRequest extends FormRequest
                     'employee_group_id' => 'required',
                     'access_control_role' => 'nullable|array',
                     'android_control_role' => 'nullable|array',
+                    'password' => 'required|min:6',
+                    'confirm_password' => 'required|same:password',
                 ];
             }
             default:
