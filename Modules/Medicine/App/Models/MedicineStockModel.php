@@ -124,7 +124,7 @@ class MedicineStockModel extends Model
         return $entities;
 
     }
-/*    public static function getCategoryStockForScrolling($domain, $category, $request): array
+    public static function getCategoryStockForScrollingForWorkorder($domain, $category, $request): array
     {
         $page = isset($request['page']) && $request['page'] > 0 ? ($request['page'] - 1) : 0;
         $perPage = isset($request['offset']) && $request['offset'] != '' ? (int)$request['offset'] : 25;
@@ -163,7 +163,7 @@ class MedicineStockModel extends Model
             ->get();
 
         return ['data' => $stockItems, 'count' => $total];
-    }*/
+    }
 
     public static function getCategoryStockForScrolling($domain, $category, $request)
     {
