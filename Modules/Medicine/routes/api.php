@@ -67,6 +67,7 @@ Route::prefix('/pharmacy')->middleware([HeaderAuthenticationMiddleware::class,Lo
     Route::get('/stock/search', [MedicineStockController::class,'stockDropdown'])->name('particular_inline_update');
     Route::get('/stock/category', [MedicineStockController::class,'stockCategory'])->name('stock_category');
     Route::get('/stock/category/scrolling', [MedicineStockController::class,'stockCategoryForScrolling'])->name('stock_category_scrolling');
+    Route::get('/stock-item/history', [MedicineStockController::class,'stockItemHistory'])->name('stock_item_history');
     Route::apiResource('stock',
         MedicineStockController::class)
         ->middleware([HeaderAuthenticationMiddleware::class])

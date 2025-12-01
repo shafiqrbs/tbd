@@ -9,7 +9,9 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Modules\AppsApi\App\Services\JsonRequestResponse;
 use Modules\Core\App\Models\UserModel;
+use Modules\Inventory\App\Models\StockItemHistoryModel;
 use Modules\Medicine\App\Http\Requests\MedicineStockInlineRequest;
+use Modules\Medicine\App\Models\MedicineStockItemHistoryModel;
 use Modules\Medicine\App\Models\StockItemModel;
 use Modules\Medicine\App\Models\ProductModel;
 use Modules\Inventory\App\Models\CategoryModel;
@@ -298,6 +300,43 @@ class MedicineStockController extends Controller
         $service = new JsonRequestResponse();
         return $service->returnJosnResponse($data);
     }
+
+    public function stockItemHistory(Request $request)
+    {
+        $params = $request->only(['warehouse_id', 'stock_item_id', 'start_date', 'end_date','page','offset']);
+
+        $stockItemId = $params['stock_item_id'] ?? null;
+        $startDate   = $params['start_date'] ?? null;
+
+        if (!$params['warehouse_id']) {
+            $params['warehouse_id'] = $this->domain['warehouse_id'];
+        }
+        if (!$stockItemId) {
+            return response([
+                'result' => false,
+                'message' => 'Stock item missing.',
+                'status' => ResponseAlias::HTTP_BAD_REQUEST
+            ]);
+        }
+        if (!$startDate) {
+            return response([
+                'result' => false,
+                'message' => 'Date missing.',
+                'status' => ResponseAlias::HTTP_BAD_REQUEST
+            ]);
+        }
+
+        $items = MedicineStockItemHistoryModel::getStockItemHistory($params,$this->domain);
+
+        return response([
+            'result' => true,
+            'message' => 'Stock item history.',
+            'status' => ResponseAlias::HTTP_OK,
+            'total' => $items['count'],
+            'data' => $items['items']
+        ]);
+    }
+
 
 
 }

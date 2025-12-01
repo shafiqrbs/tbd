@@ -8,6 +8,9 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\DB;
 use Modules\AppsApi\App\Services\GeneratePatternCodeService;
+use Modules\Core\App\Models\UserModel;
+use Modules\Core\App\Models\UserWarehouseModel;
+use Modules\Core\App\Models\WarehouseModel;
 use Modules\Hospital\App\Models\MedicineDetailsModel;
 use Modules\Hospital\App\Models\MedicineDosageModel;
 use Modules\Inventory\App\Entities\Particular;
@@ -121,7 +124,7 @@ class MedicineStockModel extends Model
         return $entities;
 
     }
-    public static function getCategoryStockForScrolling($domain, $category, $request): array
+/*    public static function getCategoryStockForScrolling($domain, $category, $request): array
     {
         $page = isset($request['page']) && $request['page'] > 0 ? ($request['page'] - 1) : 0;
         $perPage = isset($request['offset']) && $request['offset'] != '' ? (int)$request['offset'] : 25;
@@ -160,7 +163,98 @@ class MedicineStockModel extends Model
             ->get();
 
         return ['data' => $stockItems, 'count' => $total];
+    }*/
+
+    public static function getCategoryStockForScrolling($domain, $category, $request)
+    {
+        $page = isset($request['page']) && $request['page'] > 0 ? ($request['page'] - 1) : 0;
+        $perPage = isset($request['offset']) && $request['offset'] != '' ? (int)$request['offset'] : 25;
+        $perPage = min($perPage, 100);
+        $skip = $page * $perPage;
+
+        // Default warehouse ID
+        $store = WarehouseModel::where('domain_id', $domain['domain_id'])
+            ->where('is_default', 1)
+            ->first();
+
+        $userWarehouseId = [$store->id];
+
+        $query = StockItemModel::with([
+            'product.category',
+            'currentWarehouseStock' => function ($q) use ($domain, $userWarehouseId, $request) {
+
+                $q->whereIn('warehouse_id', $userWarehouseId)
+                    ->where('quantity', '!=', 0)
+                    ->with('warehouse:id,name');
+
+                if (!empty($request['warehouse_id'])) {
+                    $q->where('warehouse_id', $request['warehouse_id']);
+                }
+
+                if (!empty($domain['config_id'])) {
+                    $q->where('config_id', $domain['config_id']);
+                }
+            }
+        ])
+            ->where('config_id', $domain['config_id'])
+            ->where('is_delete', 0)
+            ->whereHas('currentWarehouseStock', function ($q) use ($userWarehouseId, $request) {
+                $q->whereIn('warehouse_id', $userWarehouseId)
+                    ->where('quantity', '!=', 0);
+
+                if (!empty($request['warehouse_id'])) {
+                    $q->where('warehouse_id', $request['warehouse_id']);
+                }
+            });
+
+        if (!empty($category)) {
+            $query->whereHas('product', function ($q) use ($category) {
+                $q->where('category_id', $category);
+            });
+        }
+
+        // Keyword search
+        if ($request->filled('term')) {
+            $search = $request->term;
+            $query->where('inv_stock.name', 'LIKE', "%{$search}%");
+        }
+
+        $query->orderBy('name', 'asc');
+
+        // Total count before pagination
+        $total = $query->count();
+
+        // Fetch paginated data
+        $stockItems = $query->skip($skip)->take($perPage)->get()
+            ->map(function ($stock) {
+
+                $product = $stock->product;
+
+                $warehouseQuantities = [];
+                foreach ($stock->currentWarehouseStock as $s) {
+                    if (!empty($s->warehouse) && $s->quantity != 0) {
+                        $warehouseQuantities[$s->warehouse->id] = [
+                            'name' => $s->warehouse->name,
+                            'quantity' => $s->quantity,
+                        ];
+                    }
+                }
+
+                return [
+                    'id' => $stock->id,
+                    'stock_item_id' => $stock->id,
+                    'category_name' => $product->category->name ?? null,
+                    'name' => $stock->display_name ?? $stock->name,
+                    'warehouses' => $warehouseQuantities,
+                ];
+            });
+
+        return [
+            'data' => $stockItems,
+            'count' => $total,
+        ];
     }
+
 
 
     public static function getStockDropdown($domain,$term){
