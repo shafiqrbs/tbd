@@ -103,7 +103,7 @@ class BillingModel extends Model
                 'hms_invoice.remaining_day as remaining_day',
             ]);
 
-        if (isset($request['term']) && !empty($request['term'])){
+       if (isset($request['term']) && !empty($request['term'])){
             $term = trim($request['term']);
             $entities = $entities->where(function ($q) use ($term) {
                 $q->where('hms_invoice.invoice', 'LIKE', "%{$term}%")
@@ -116,26 +116,27 @@ class BillingModel extends Model
             });
         }
 
-        if (isset($request['patient_mode']) && !empty($request['patient_mode'])){
-            if (is_array($request['patient_mode'])) {
-                $entities = $entities->whereIn('patient_mode.slug', $request['patient_mode']);
-            } else {
-                $entities = $entities->where('patient_mode.slug', $request['patient_mode']);
-            }
-        }
-        if (isset($request['admission_billing']) && !empty($request['admission_billing'])){
-            $entities = $entities->whereIn('hms_invoice.process', ['billing']);
-        }else{
-            $entities = $entities->whereIn('hms_invoice.process', ['done','admitted']);
-        }
+               if (isset($request['patient_mode']) && !empty($request['patient_mode'])){
+                   if (is_array($request['patient_mode'])) {
+                       $entities = $entities->whereIn('patient_mode.slug', $request['patient_mode']);
+                   } else {
+                       $entities = $entities->where('patient_mode.slug', $request['patient_mode']);
+                   }
+               }
 
-        if (isset($request['room_id']) && !empty($request['room_id'])){
-            $entities = $entities->where('hms_invoice.room_id',$request['room_id']);
-        }
+      if (isset($request['admission_billing']) && !empty($request['admission_billing'])){
+          $entities = $entities->whereIn('hms_invoice.process', ['billing']);
+      }else{
+          $entities = $entities->whereIn('hms_invoice.process', ['done','closed','admitted']);
+      }
+        /*
+           if (isset($request['room_id']) && !empty($request['room_id'])){
+               $entities = $entities->where('hms_invoice.room_id',$request['room_id']);
+           }
 
-        if (isset($request['customer_id']) && !empty($request['customer_id'])){
-            $entities = $entities->where('hms_invoice.customer_id',$request['customer_id']);
-        }
+           if (isset($request['customer_id']) && !empty($request['customer_id'])){
+               $entities = $entities->where('hms_invoice.customer_id',$request['customer_id']);
+           }*/
 
        /* if (isset($request['created']) && !empty($request['created'])){
              $date = new \DateTime($request['created']);
