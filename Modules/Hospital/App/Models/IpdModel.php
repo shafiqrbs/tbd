@@ -186,6 +186,7 @@ class IpdModel extends Model
                 'guardian_mobile' => $parent->guardian_mobile ?? null,
                 'admit_consultant_id' => $config->consultant_by_id ?? null,
                 'process' => 'confirmed',
+                'invoice_mode' => 'ipd',
                 'sub_total' => $amount,
                 'total' => $amount,
             ]);

@@ -12,6 +12,7 @@ use Modules\AppsApi\App\Services\JsonRequestResponse;
 use Modules\Core\App\Models\CustomerModel;
 use Modules\Core\App\Models\UserModel;
 use Modules\Hospital\App\Models\InvoiceModel;
+use Modules\Hospital\App\Models\ReportModel;
 use Modules\Inventory\App\Models\CategoryModel;
 
 class ReportsController extends Controller
@@ -62,6 +63,50 @@ class ReportsController extends Controller
     public function monthlyPatientModeSummary(Request $request){
 
         $data = InvoiceModel::getSummary($this->domain,$request);
+        $service = new JsonRequestResponse();
+        $data = $service->returnJosnResponse($data);
+        return $data;
+    }
+
+    /**
+     * Display a listing of the resource.
+     */
+    public function patientCollection(Request $request){
+
+        $data = ReportModel::getPatientCollections($this->domain,$request);
+        $service = new JsonRequestResponse();
+        $data = $service->returnJosnResponse($data);
+        return $data;
+    }
+
+    /**
+     * Display a listing of the resource.
+     */
+    public function patientTicket(Request $request){
+
+        $data = ReportModel::getPatientTickets($this->domain,$request);
+        $service = new JsonRequestResponse();
+        $data = $service->returnJosnResponse($data);
+        return $data;
+    }
+
+    /**
+     * Display a listing of the resource.
+     */
+    public function summaryInvestigation(Request $request){
+
+        $data = ReportModel::serviceBaseInvestigation($this->domain,$request);
+        $service = new JsonRequestResponse();
+        $data = $service->returnJosnResponse($data);
+        return $data;
+    }
+
+    /**
+     * Display a listing of the resource.
+     */
+    public function summaryGroupInvestigation(Request $request){
+
+        $data = ReportModel::serviceBaseGroupInvestigation($this->domain,$request);
         $service = new JsonRequestResponse();
         $data = $service->returnJosnResponse($data);
         return $data;

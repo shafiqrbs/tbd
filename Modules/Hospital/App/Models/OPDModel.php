@@ -132,6 +132,10 @@ class OPDModel extends Model
                     'hms_invoice_id'   => $invoice->id,
                     'created_by_id'    => $invoice->created_by_id,
                     'mode'    => $data['patient_mode'],
+                    'amount'    => $amount,
+                    'sub_total'    => $amount,
+                    'total'    => $amount,
+                    'process'    => 'Done',
                     'updated_at'    => $date,
                     'created_at'    => $date,
                 ]

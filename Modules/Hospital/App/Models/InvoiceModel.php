@@ -316,7 +316,7 @@ class InvoiceModel extends Model
             $entities = $entities->where('hms_invoice.customer_id',$request['customer_id']);
         }
 
-        /*if (isset($request['created']) && !empty($request['created'])){
+        if (isset($request['created']) && !empty($request['created'])){
             $date = new \DateTime($request['created']);
             $start_date = $date->format('Y-m-d 00:00:00');
             $end_date = $date->format('Y-m-d 23:59:59');
@@ -326,7 +326,7 @@ class InvoiceModel extends Model
             $start_date = $date->format('Y-m-d 00:00:00');
             $end_date = $date->format('Y-m-d 23:59:59');
             $entities = $entities->whereBetween('hms_invoice.created_at',[$start_date, $end_date]);
-        }*/
+        }
 
         $total  = $entities->count();
         $entities = $entities->skip($skip)
