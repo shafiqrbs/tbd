@@ -79,16 +79,16 @@ class MedicineDosage
     private $quantity;
 
     /**
-     * @var float
+     * @var string
      *
-     * @ORM\Column(name="duration", type="string", nullable=true)
+     * @ORM\Column(name="duration", type="string", options={"default"="1"})
      */
     private $duration;
 
     /**
      * @var float
      *
-     * @ORM\Column(name="duration_mode", type="string", nullable=true)
+     * @ORM\Column(name="duration_mode", type="string",options={"default"="day"})
      */
     private $durationMode;
 
