@@ -208,6 +208,13 @@ class Particular
      */
     private $opdReferred;
 
+    /**
+     * @var boolean
+     *
+     * @ORM\Column(type="boolean",options={"default"="false"})
+     */
+    private $isOpd;
+
 
     /**
      * Get id

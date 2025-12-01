@@ -37,6 +37,8 @@ class MedicineDosageRequest extends FormRequest
                     'dosage_form' => 'string|nullable',
                     'quantity' => 'integer|nullable',
                     'instruction' => 'string|nullable',
+                    'duration' => 'string|nullable',
+                    'duration_mode' => 'string|nullable',
                     'is_private' => 'boolean|nullable',
                 ];
             }
@@ -53,6 +55,8 @@ class MedicineDosageRequest extends FormRequest
                     'quantity' => 'integer|nullable',
                     'instruction' => 'string|nullable',
                     'is_private' => 'boolean|nullable',
+                    'duration' => 'string|nullable',
+                    'duration_mode' => 'string|nullable',
                 ];
             }
 
