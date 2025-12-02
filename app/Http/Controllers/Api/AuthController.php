@@ -49,6 +49,50 @@ final class AuthController extends Controller
             'data' => $payload,
         ]);
     }
+    public function loginTB(UserLoginRequest $request): JsonResponse
+    {
+        $data = $request->validated();
+
+        $user = User::where('username', $data['username'])->first();
+
+        if (! $user || ! password_verify($data['password'], $user->password)) {
+            return new JsonResponse([
+                'status' => 401,
+                'message' => 'Invalid credentials',
+            ]);
+        }
+
+        // Generate JWT token manually
+        $token = JWTAuth::fromUser($user);
+
+        // Fetch additional data
+        $payload = [
+            'token' => $token,
+        ];
+
+        return response()
+            ->json([
+                'message' => 'Login successful',
+                'data' => $payload
+            ])
+            ->cookie(
+                'access_token',
+                $token,
+                60,       // 60 minutes
+                '/',      // path
+                null,     // domain
+                true,     // secure
+                true,     // httpOnly
+                false,
+                'Strict'  // sameSite
+            );
+
+        /*return new JsonResponse([
+            'status' => 200,
+            'message' => 'Login successful',
+            'data' => $payload,
+        ]);*/
+    }
 
     public function logout(): JsonResponse
     {
