@@ -179,6 +179,10 @@ class ParticularController extends Controller
             $findParticular->is_opd = $findParticular->is_opd ? 0:1;
         }
 
+         if (array_key_exists('is_custom_report', $input)) {
+            $findParticular->is_custom_report = $findParticular->is_custom_report ? 0:1;
+        }
+
         if (array_key_exists('status', $input)) {
             $findParticular->status = $findParticular->status ? 0:1;
         }

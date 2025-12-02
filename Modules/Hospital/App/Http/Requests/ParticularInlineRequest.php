@@ -37,6 +37,7 @@ class ParticularInlineRequest extends FormRequest
                     'diagnostic_room_ids' => 'nullable',
                     'store_id' => 'nullable',
                     'status' => 'nullable',
+                    'is_custom_report' => 'nullable',
                     'is_opd' => 'nullable',
                     'is_available' => 'nullable',
                     'report_format' => 'nullable',

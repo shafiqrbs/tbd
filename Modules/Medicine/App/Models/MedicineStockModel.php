@@ -336,6 +336,8 @@ class MedicineStockModel extends Model
     public static function getGenericRecords($request, $domain)
     {
 
+        $sortBy =  isset($request['sortBy']) && $request['sortBy'] ? $request['sortBy'] : 'name';
+        $orderBy =  isset($request['order']) && $request['order'] ? $request['order'] : 'ASC';
         $page = isset($request['page']) && $request['page'] > 0 ? ($request['page'] - 1) : 0;
         $perPage = isset($request['offset']) && $request['offset'] != '' ? (int)($request['offset']) : 100;
         $skip = isset($page) && $page != '' ? (int)$page * $perPage : 0;
@@ -345,6 +347,7 @@ class MedicineStockModel extends Model
             ->leftjoin('inv_category', 'inv_category.id', '=', 'inv_product.category_id')
             ->leftjoin('inv_particular', 'inv_particular.id', '=', 'inv_product.unit_id')
             ->leftjoin('inv_setting', 'inv_setting.id', '=', 'inv_product.product_type_id')
+            ->leftjoin('hms_medicine_dosage', 'hms_medicine_dosage.id', '=', 'hms_medicine_stock.medicine_dosage_id')
             ->join('inv_stock', 'inv_stock.id', '=', 'hms_medicine_stock.stock_item_id')
             ->select([
                 'hms_medicine_stock.id as id',
@@ -391,12 +394,20 @@ class MedicineStockModel extends Model
         if (isset($request['product_type_id']) && !empty($request['product_type_id'])) {
             $products = $products->where('inv_product.product_type_id', $request['product_type_id']);
         }
-        $total = $products->count();
-        $entities = $products->skip($skip)
-            ->take($perPage)
-            ->orderBy('inv_category.name', 'ASC')
-            ->orderBy('inv_product.name', 'ASC')
-            ->get();
+
+        $total  = $products->count();
+        $entities = $products->skip($skip)->take($perPage);
+        if ($sortBy == "category_id"){
+            $entities = $entities->orderBy("inv_category.name",$orderBy);
+        }elseif ($sortBy == "medicine_dosage_id"){
+            $entities = $entities->orderBy("hms_medicine_dosage.name",$orderBy);
+        }elseif ($sortBy == "product_name"){
+            $entities = $entities->orderBy("inv_product.name",$orderBy);
+        }else{
+            $entities = $entities->orderBy("hms_medicine_stock.{$sortBy}",$orderBy);
+        }
+        $entities = $entities->get();
+
         $data = array('count' => $total, 'entities' => $entities);
         return $data;
     }
