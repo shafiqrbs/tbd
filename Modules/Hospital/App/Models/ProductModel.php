@@ -131,6 +131,8 @@ class ProductModel extends Model
                 'hms_medicine_stock.medicine_dosage_id',
                 'hms_medicine_stock.medicine_bymeal_id',
                 'hms_medicine_stock.opd_quantity',
+                'hms_medicine_stock.duration',
+                'hms_medicine_stock.duration_mode',
             ])
             ->orderBy('hms_medicine_details.name', 'ASC')
             ->take(100)

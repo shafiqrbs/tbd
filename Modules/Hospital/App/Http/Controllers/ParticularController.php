@@ -160,6 +160,9 @@ class ParticularController extends Controller
         if (array_key_exists('opd_referred', $input)) {
             $findParticular->opd_referred = $findParticular->opd_referred ? 0:1;
         }
+        if (array_key_exists('ordering', $input)) {
+            $findParticular->ordering =  $input['ordering'];
+        }
         if (array_key_exists('is_available', $input)) {
             $findParticular->is_available = $findParticular->is_available ? 0:1;
         }

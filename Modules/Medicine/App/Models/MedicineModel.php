@@ -144,10 +144,11 @@ class MedicineModel extends Model
                 'dosage.name as doses_details',
                 'hms_medicine_details.doses_form',
                 'bymeal.name as by_meal',
-                'hms_medicine_stock.duration_day',
                 'hms_medicine_stock.medicine_dosage_id',
                 'hms_medicine_stock.medicine_bymeal_id',
                 'hms_medicine_stock.opd_quantity',
+                'hms_medicine_stock.duration',
+                'hms_medicine_stock.duration_mode',
             ]);
 
         if (isset($request['term']) && !empty($request['term'])) {

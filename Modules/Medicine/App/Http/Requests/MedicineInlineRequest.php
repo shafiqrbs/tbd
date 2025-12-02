@@ -39,6 +39,8 @@ class MedicineInlineRequest extends FormRequest
                     'admin_status' => 'nullable',
                     'ipd_status' => 'nullable',
                     'opd_status' => 'nullable',
+                    'duration' => 'nullable',
+                    'duration_mode' => 'nullable',
                 ];
             }
 

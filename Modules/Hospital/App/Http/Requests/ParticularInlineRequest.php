@@ -44,6 +44,7 @@ class ParticularInlineRequest extends FormRequest
                     'investigation_group_id' => 'nullable',
                     'diagnostic_department_id' => 'nullable',
                     'diagnostic_room_id' => 'nullable',
+                    'ordering' => 'nullable',
                     'price' => 'nullable',
 
 

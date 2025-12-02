@@ -198,6 +198,12 @@ class MedicineStockController extends Controller
         if (array_key_exists('medicine_bymeal_id', $input)) {
             $updateDetails['medicine_bymeal_id'] = $input['medicine_bymeal_id'];
         }
+        if (array_key_exists('duration', $input)) {
+            $updateDetails['duration'] = $input['duration'];
+        }
+        if (array_key_exists('duration_mode', $input)) {
+            $updateDetails['duration_mode'] = $input['duration_mode'];
+        }
 
         if (array_key_exists('admin_status', $input)) {
             $updateDetails['admin_status'] = $input['admin_status'] ? 1 : 0;

@@ -69,6 +69,19 @@ class MedicineStock
      */
     private $durationDay;
 
+    /**
+     * @var integer
+     *
+     * @ORM\Column(name="duration", type="integer", options={"default"="1"})
+     */
+    private $duration;
+
+    /**
+     * @var float
+     *
+     * @ORM\Column(name="duration_mode", type="string", options={"default"="Day"})
+     */
+    private $durationMode;
 
     /**
      * @var int

@@ -58,6 +58,8 @@ class MedicineStockInlineRequest extends FormRequest
                     'admin_status' => 'nullable|boolean',
                     'ipd_status' => 'nullable|boolean',
                     'opd_status' => 'nullable|boolean',
+                    'duration' => 'nullable',
+                    'duration_mode' => 'nullable',
                 ];
 
             default:
