@@ -34,12 +34,12 @@ final class AuthController extends Controller
         $token = JWTAuth::fromUser($user);
 
         // Fetch additional data
-        $warehouse = UserWarehouseModel::getUserActiveWarehouse($user->id);
-        $productionItems = StockItemHistoryModel::getUserWarehouseProductionItem($user->id);
+//        $warehouse = UserWarehouseModel::getUserActiveWarehouse($user->id);
+//        $productionItems = StockItemHistoryModel::getUserWarehouseProductionItem($user->id);
 
         $payload = [
-            'user_warehouse' => $warehouse ?? [],
-            'production_item' => $productionItems ?? [],
+//            'user_warehouse' => $warehouse ?? [],
+//            'production_item' => $productionItems ?? [],
             'token' => $token,
         ];
 
