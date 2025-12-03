@@ -43,7 +43,7 @@ class ParticularMatrixModel extends Model
                     $query->select('hms_particular.*') // ⚠️ include foreign key for relation
                     ->where('hms_particular.config_id', $config)
                     ->groupBy('hms_particular.name','hms_particular.particular_type_id')
-                    ->orderBY('hms_particular.name');
+                    ->orderBY('hms_particular.ordering','ASC');
                 }
             ]);
         $total  = $entities->count();
