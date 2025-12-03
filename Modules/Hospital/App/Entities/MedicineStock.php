@@ -79,7 +79,7 @@ class MedicineStock
     /**
      * @var float
      *
-     * @ORM\Column(name="duration_mode", type="string", options={"default"="Day"})
+     * @ORM\Column(name="duration_mode", type="string",  nullable=true)
      */
     private $durationMode;
 
