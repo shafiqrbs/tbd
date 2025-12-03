@@ -42,6 +42,7 @@ class ParticularMatrixModel extends Model
                 'particularType.particulars' => function ($query) use ($config) {
                     $query->select('hms_particular.*') // ⚠️ include foreign key for relation
                     ->where('hms_particular.config_id', $config)
+                    ->where('hms_particular.status', 1)
                     ->groupBy('hms_particular.name','hms_particular.particular_type_id')
                     ->orderBY('hms_particular.ordering','ASC');
                 }
