@@ -328,6 +328,7 @@ class BillingModel extends Model
                 $query->select([
                     'hms_invoice_particular.id',
                     'hms_invoice_particular.id as particular_id',
+                    'hms_invoice_particular.particular_id as particular_investigation_id',
                     'hms_invoice_particular.hms_invoice_id',
                     'hms_invoice_particular.name',
                     'hms_invoice_particular.price',
@@ -339,6 +340,7 @@ class BillingModel extends Model
                     ->where('hms_invoice_particular.status',0)
                     ->where('hms_invoice_particular.is_available',1)
                     ->whereIn('hms_invoice_particular.mode', ['investigation'])
+                    ->groupBy('hms_invoice_particular.particular_id')
                     ->orderBy('hms_invoice_particular.name','ASC');
             }])
             ->first();

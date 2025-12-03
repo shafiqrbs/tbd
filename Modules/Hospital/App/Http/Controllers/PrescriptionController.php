@@ -141,8 +141,8 @@ class PrescriptionController extends Controller
             $entity->invoice->update(['process' => 'closed','is_prescription' => 1,'weight' => $weight]);
             PatientPrescriptionMedicineModel::insertPatientMedicine($domain,$entity->id);
         }
-        HospitalSalesModel::insertMedicineIssue($domain,$entity->id);
         InvoiceTransactionModel::insertInvestigations($domain,$entity->id);
+        HospitalSalesModel::insertMedicineIssue($domain,$entity->id);
         InvoiceContentDetailsModel::insertContentDetails($domain,$entity->id);
         $return = PrescriptionModel::getShow($entity->id);
         $service = new JsonRequestResponse();

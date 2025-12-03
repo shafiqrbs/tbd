@@ -169,6 +169,9 @@ class InvoiceModel extends Model
 
     public static function getRecords($request,$domain)
     {
+        $sortBy =  isset($request['sortBy']) && $request['sortBy'] ? $request['sortBy'] : 'name';
+        $orderBy =  isset($request['order']) && $request['order'] ? $request['order'] : 'ASC';
+
         $page =  isset($request['page']) && $request['page'] > 0?($request['page'] - 1 ) : 0;
         $perPage = isset($request['offset']) && $request['offset']!=''? (int)($request['offset']):50;
         $skip = isset($page) && $page!=''? (int)$page * $perPage:0;
@@ -329,10 +332,17 @@ class InvoiceModel extends Model
         }
 
         $total  = $entities->count();
-        $entities = $entities->skip($skip)
-            ->take($perPage)
-            ->orderBy('hms_invoice.updated_at','DESC')
-            ->get();
+        $entities = $entities->skip($skip)->take($perPage);
+
+
+        if ($sortBy == "visiting_room"){
+            $entities = $entities->orderBy("vr.name",$orderBy);
+        }elseif ($sortBy == "gender"){
+            $entities = $entities->orderBy("customer.gender",$orderBy);
+        }else{
+            $entities = $entities->orderBy("hms_invoice.{$sortBy}",$orderBy);
+        }
+        $entities = $entities->get();
         $data = array('count'=>$total,'entities'=>$entities);
         return $data;
     }

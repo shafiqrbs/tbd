@@ -61,7 +61,7 @@ class PrescriptionModel extends Model
 
     public function invoice_particular()
     {
-        return $this->hasMany(InvoiceParticularModel::class, 'hms_invoice_id');
+        return $this->hasMany(InvoiceParticularModel::class, 'prescription_id');
     }
 
     public function prescription_medicine()
@@ -354,15 +354,7 @@ class PrescriptionModel extends Model
                 'hms_invoice_patient_referred.comment as referred_comment',
                 'hms_invoice_patient_referred.json_content as referred_json_content',
             ])
-            ->with(['invoice_particular' => function ($query) {
-                $query->select([
-                    'hms_invoice_particular.id',
-                    'hms_invoice_particular.hms_invoice_id',
-                    'hms_invoice_particular.name as item_name',
-                    'hms_invoice_particular.quantity',
-                    'hms_invoice_particular.price',
-                ]);
-            }])
+            ->with(['invoice_particular'])
             ->with(['prescription_medicine'])
             ->first();
 

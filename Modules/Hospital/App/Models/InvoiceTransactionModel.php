@@ -67,7 +67,6 @@ class InvoiceTransactionModel extends Model
         $uniqueId=  self::generateUniqueCode(12);
         $jsonData = json_decode($prescription['json_content']);
         $investigations = ($jsonData->patient_report->patient_examination->investigation ?? []);
-
         $news = [];
         foreach ($investigations as $investigation):
             $news[] = $investigation->id;
@@ -76,7 +75,6 @@ class InvoiceTransactionModel extends Model
             'prescription_id' => $id,
             'mode' => 'investigation'
         ])->whereNotIn('particular_id', $news)->delete();
-
         if (!empty($investigations) && is_array($investigations)) {
             collect($investigations)->map(function ($investigation) use ($prescription,$uniqueId,$date) {
                 $particular = ParticularModel::find($investigation->id);
@@ -112,7 +110,6 @@ class InvoiceTransactionModel extends Model
         $uniqueId = time();
         if (!empty($investigations) && is_array($investigations)) {
             collect($investigations)->map(function ($investigation) use ($invoice,$date,$uniqueId) {
-
                 $particular = ParticularModel::find($investigation['id']);
                 if($particular){
                     InvoiceParticularModel::updateOrCreate(

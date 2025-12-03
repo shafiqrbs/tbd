@@ -72,7 +72,7 @@ class MedicineStock
     /**
      * @var integer
      *
-     * @ORM\Column(name="duration", type="integer", options={"default"="1"})
+     * @ORM\Column(name="duration", type="integer", nullable=true)
      */
     private $duration;
 
