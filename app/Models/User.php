@@ -57,8 +57,6 @@ class User extends Authenticatable implements JWTSubject
     public function getJWTCustomClaims(): array
     {
         $accessRole = DB::table('cor_user_role')->where('user_id', $this->id)->first();
-        $warehouse = UserWarehouseModel::getUserActiveWarehouse($this->id);
-        $configData = DomainModel::domainHospitalConfig($this->domain_id);
 
         return [
             'id' => $this->id,
@@ -70,8 +68,6 @@ class User extends Authenticatable implements JWTSubject
             'domain_id' => $this->domain_id,
             'access_control_role' => $accessRole?->access_control_role ?? null,
             'android_control_role' => $accessRole?->android_control_role ?? null,
-            'user_warehouse' => $warehouse,
-            'hospital_config' => $configData
         ];
     }
 

@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Modules\Core\App\Http\Requests\UserLoginRequest;
 use Modules\Core\App\Models\UserWarehouseModel;
+use Modules\Domain\App\Models\DomainModel;
 use Modules\Inventory\App\Models\StockItemHistoryModel;
 use Tymon\JWTAuth\Facades\JWTAuth;
 
@@ -66,32 +67,20 @@ final class AuthController extends Controller
         $token = JWTAuth::fromUser($user);
 
         // Fetch additional data
+        $warehouse = UserWarehouseModel::getUserActiveWarehouse($user->id);
+        $configData = DomainModel::domainHospitalConfig($user->domain_id);
+
         $payload = [
+            'user_warehouse' => $warehouse ?? [],
+            'hospital_config' => $configData ?? [],
             'token' => $token,
         ];
 
-        return response()
-            ->json([
-                'message' => 'Login successful',
-                'data' => $payload
-            ])
-            ->cookie(
-                'access_token',
-                $token,
-                60,       // 60 minutes
-                '/',      // path
-                null,     // domain
-                true,     // secure
-                true,     // httpOnly
-                false,
-                'Strict'  // sameSite
-            );
-
-        /*return new JsonResponse([
+        return new JsonResponse([
             'status' => 200,
             'message' => 'Login successful',
             'data' => $payload,
-        ]);*/
+        ]);
     }
 
     public function logout(): JsonResponse
