@@ -8,6 +8,9 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
+use Modules\Core\App\Models\UserWarehouseModel;
+use Modules\Domain\App\Models\DomainModel;
+use Modules\Hospital\App\Http\Controllers\HospitalController;
 use Tymon\JWTAuth\Contracts\JWTSubject;
 
 

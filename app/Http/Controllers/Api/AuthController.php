@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Modules\Core\App\Http\Requests\UserLoginRequest;
 use Modules\Core\App\Models\UserWarehouseModel;
+use Modules\Domain\App\Models\DomainModel;
 use Modules\Inventory\App\Models\StockItemHistoryModel;
 use Tymon\JWTAuth\Facades\JWTAuth;
 
@@ -34,12 +35,44 @@ final class AuthController extends Controller
         $token = JWTAuth::fromUser($user);
 
         // Fetch additional data
-        $warehouse = UserWarehouseModel::getUserActiveWarehouse($user->id);
-        $productionItems = StockItemHistoryModel::getUserWarehouseProductionItem($user->id);
+//        $warehouse = UserWarehouseModel::getUserActiveWarehouse($user->id);
+//        $productionItems = StockItemHistoryModel::getUserWarehouseProductionItem($user->id);
 
         $payload = [
-            'user_warehouse' => $warehouse ?? [],
-            'production_item' => $productionItems ?? [],
+//            'user_warehouse' => $warehouse ?? [],
+//            'production_item' => $productionItems ?? [],
+            'token' => $token,
+        ];
+
+        return new JsonResponse([
+            'status' => 200,
+            'message' => 'Login successful',
+            'data' => $payload,
+        ]);
+    }
+    public function loginTB(UserLoginRequest $request): JsonResponse
+    {
+        $data = $request->validated();
+
+        $user = User::where('username', $data['username'])->first();
+
+        if (! $user || ! password_verify($data['password'], $user->password)) {
+            return new JsonResponse([
+                'status' => 401,
+                'message' => 'Invalid credentials',
+            ]);
+        }
+
+        // Generate JWT token manually
+        $token = JWTAuth::fromUser($user);
+
+        // Fetch additional data
+//        $warehouse = UserWarehouseModel::getUserActiveWarehouse($user->id);
+        $configData = DomainModel::domainHospitalConfig($user->id);
+
+        $payload = [
+//            'user_warehouse' => $warehouse ?? [],
+            'hospital_config' => $configData ?? [],
             'token' => $token,
         ];
 

@@ -37,7 +37,7 @@ use Modules\Hospital\App\Http\Controllers\TreatmentMedicineController;
     |
 */
 
-Route::prefix('/hospital/select')->middleware([HeaderAuthenticationMiddleware::class])->group(function() {
+Route::prefix('/hospital/select')->middleware([HeaderAuthenticationMiddleware::class,'auth:api'])->group(function() {
     Route::get('/location', [HospitalController::class,'locationDropdown'])->name('location_dropdown');
     Route::get('/category', [HospitalController::class,'categoryDropdown'])->name('category_dropdown');
     Route::get('/bymeal', [HospitalController::class,'mealDropdown'])->name('meal_dropdown');
@@ -58,9 +58,8 @@ Route::prefix('/hospital/select')->middleware([HeaderAuthenticationMiddleware::c
     Route::get('/medicine-generic', [HospitalController::class,'medicineGenericDropdown'])->name('medicine_generic_dropdown');
 });
 
-Route::prefix('/hospital')->middleware([HeaderAuthenticationMiddleware::class])->group(function() {
+Route::prefix('/hospital')->middleware([HeaderAuthenticationMiddleware::class,'auth:api'])->group(function() {
     Route::get('/config', [HospitalController::class,'domainHospitalConfig'])->name('domain_hospital_config');
-    Route::get('/hms-config', [HospitalController::class,'domainHmsConfig'])->name('domain_hms_config');
     Route::get('/patient-search', [HospitalController::class,'patientSearch'])->name('patient_search');
     Route::get('/room-cabin', [HospitalController::class,'roomCabin'])->name('patient_search');
     Route::get('/medicine-import', [HospitalController::class,'insertUpazilaDistrict'])->name('insert_medicine_stock');
