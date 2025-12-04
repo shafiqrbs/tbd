@@ -2,13 +2,18 @@
 
 namespace Modules\Domain\App\Models;
 
+use App\Models\User;
 use Cviebrock\EloquentSluggable\Sluggable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Modules\Accounting\App\Models\AccountingModel;
+use Modules\Core\App\Models\UserModel;
 use Modules\Hospital\App\Models\HospitalConfigModel;
+use Modules\Hospital\App\Models\MedicineModel;
+use Modules\Hospital\App\Models\ParticularMatrixModel;
+use Modules\Hospital\App\Models\ParticularModel;
 use Modules\Inventory\App\Models\ConfigModel;
 use Modules\NbrVatTax\App\Models\NbrVatConfigModel;
 use Modules\Production\App\Models\ProductionConfig;
@@ -137,20 +142,26 @@ class DomainModel extends Model
 
     }
 
-    public static function domainHospitalConfig($domain)
+    public static function domainHospitalConfig($userId)
     {
-        return self::with(['accountConfig',
-            'accountConfig.capital_investment','accountConfig.account_cash','accountConfig.account_bank','accountConfig.account_mobile','accountConfig.account_user','accountConfig.account_vendor','accountConfig.account_customer','accountConfig.account_product_group','accountConfig.account_category',
-            'accountConfig.voucher_stock_opening','accountConfig.voucher_purchase','accountConfig.voucher_sales','accountConfig.voucher_purchase_return','accountConfig.voucher_stock_reconciliation',
-            'inventoryConfig','hospitalConfig','inventoryConfig.configPurchase','inventoryConfig.configSales','inventoryConfig.configProduct','inventoryConfig.configDiscount','inventoryConfig.configVat','inventoryConfig.businessModel',
-            'inventoryConfig.currency',
+        $domain = UserModel::getUserData($userId);
+
+        $records = [];
+        $records['entity'] = self::with(['hospitalConfig',
             'hospitalConfig.admission_fee:id,name as admission_fee_name,price as admission_fee_price',
             'hospitalConfig.opd_ticket_fee:id,name as opd_ticket_fee_name,price as opd_ticket_fee_price',
             'hospitalConfig.emergency_fee:id,name as emergency_fee_name,price as emergency_fee_price',
             'hospitalConfig.ot_fee:id,name as ot_fee_name,price as ot_fee_price',
             'hospitalConfig.shareHealth',
         ])->find($domain);
+        $records['user_info'] = ParticularModel::with('particularDetails:id,opd_room_id,particular_id,opd_room_ids,opd_referred')->where('employee_id',$userId)->first();
+        $records['particular_matrix'] = ParticularMatrixModel::getRecords($domain);
+        $records['byMeals'] = MedicineModel::getMealDropdown($domain);;
+        $records['dosages'] = MedicineModel::getDosageDropdown($domain);;
+        $records['particular_matrix'] = ParticularMatrixModel::getRecords($domain);
+        return $records;
     }
+
 
 
     public static function boot()
@@ -256,6 +267,7 @@ class DomainModel extends Model
         return $data;
 
     }
+
 
 
 }

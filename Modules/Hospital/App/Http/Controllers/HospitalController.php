@@ -64,32 +64,9 @@ class HospitalController extends Controller
 
     public function domainHospitalConfig()
     {
-        $entity = DomainModel::domainHospitalConfig($this->domain['global_id']);
+        $entity = DomainModel::domainHospitalConfig($this->domain['user_id']);
         $service = new JsonRequestResponse();
         return $service->returnJosnResponse($entity);
-
-    }
-
-    public function domainHmsConfig()
-    {
-
-        $domain = $this->domain['global_id'];
-        $userID = $this->domain['user_id'];
-        $records = [];
-        $records['entity'] = DomainModel::with(['hospitalConfig',
-            'hospitalConfig.admission_fee:id,name as admission_fee_name,price as admission_fee_price',
-            'hospitalConfig.opd_ticket_fee:id,name as opd_ticket_fee_name,price as opd_ticket_fee_price',
-            'hospitalConfig.emergency_fee:id,name as emergency_fee_name,price as emergency_fee_price',
-            'hospitalConfig.ot_fee:id,name as ot_fee_name,price as ot_fee_price',
-            'hospitalConfig.shareHealth',
-        ])->find($domain);
-        $records['user_info'] = ParticularModel::with('particularDetails:id,opd_room_id,particular_id,opd_room_ids,opd_referred')->where('employee_id',$userID)->first();
-        $records['particular_matrix'] = ParticularMatrixModel::getRecords($this->domain);
-        $records['byMeals'] = MedicineModel::getMealDropdown($this->domain);;
-        $records['dosages'] = MedicineModel::getDosageDropdown($this->domain);;
-        $records['particular_matrix'] = ParticularMatrixModel::getRecords($this->domain);
-        $service = new JsonRequestResponse();
-        return $service->returnJosnResponse($records);
 
     }
 
