@@ -51,7 +51,7 @@ class ReportsController extends Controller
      */
     public function dailySummary(Request $request){
 
-        $data = InvoiceModel::getSummary($this->domain,$request);
+        $data = ReportModel::getSummary($this->domain,$request);
         $service = new JsonRequestResponse();
         $data = $service->returnJosnResponse($data);
         return $data;
@@ -62,7 +62,7 @@ class ReportsController extends Controller
      */
     public function monthlyPatientModeSummary(Request $request){
 
-        $data = InvoiceModel::getSummary($this->domain,$request);
+        $data = ReportModel::getSummary($this->domain,$request);
         $service = new JsonRequestResponse();
         $data = $service->returnJosnResponse($data);
         return $data;

@@ -26,21 +26,24 @@ class ParticularMatrixModel extends Model
     {
         $config = $domain['hms_config'];
         $entities = self::select(
-            'hms_particular_mode_matrix.*',
+            'hms_particular_mode_matrix.id',
+            'hms_particular_mode_matrix.particular_type_id',
+            'hms_particular_mode_matrix.ordering',
             'hms_particular_mode.name as mode_name',
-            'hms_particular_mode.slug as mode_slug'
-        )
-            ->join(
-                'hms_particular_mode',
-                'hms_particular_mode.id',
-                '=',
-                'hms_particular_mode_matrix.particular_mode_id'
-            )
+            'hms_particular_mode.slug as mode_slug')
+            ->join('hms_particular_mode','hms_particular_mode.id','=','hms_particular_mode_matrix.particular_mode_id')
             ->where('hms_particular_mode_matrix.config_id', $config)
             ->orderBy('hms_particular_mode_matrix.ordering', 'ASC')
             ->with([
                 'particularType.particulars' => function ($query) use ($config) {
-                    $query->select('hms_particular.*') // ⚠️ include foreign key for relation
+                    $query->select(
+                        'hms_particular.id',
+                        'hms_particular.particular_type_id',
+                        'hms_particular.display_name',
+                        'hms_particular.price',
+                        'hms_particular.name',
+                        'hms_particular.slug'
+                    ) // ⚠️ include foreign key for relation
                     ->where('hms_particular.config_id', $config)
                     ->where('hms_particular.status', 1)
                     ->groupBy('hms_particular.name','hms_particular.particular_type_id')

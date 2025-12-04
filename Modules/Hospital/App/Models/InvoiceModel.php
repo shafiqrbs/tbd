@@ -367,7 +367,7 @@ class InvoiceModel extends Model
             ->leftjoin('hms_particular_mode as parent_patient_mode','parent_patient_mode.id','=','invoice_parent.patient_mode_id')
             ->select([
                 'hms_invoice.*',
-                DB::raw('DATE_FORMAT(hms_invoice.updated_at, "%d-%m-%y") as created'),
+                DB::raw('DATE_FORMAT(hms_invoice.created_at, "%d-%m-%y") as created'),
                 DB::raw('DATE_FORMAT(hms_invoice.appointment_date, "%d-%m-%y") as appointment'),
                 'hms_invoice.invoice as invoice',
                 'parent_patient_mode.name as parent_patient_mode_name',
@@ -450,7 +450,7 @@ class InvoiceModel extends Model
 
             ->select([
                 'hms_invoice.id as invoice_id',
-                DB::raw('DATE_FORMAT(hms_invoice.updated_at, "%d-%m-%y") as created'),
+                DB::raw('DATE_FORMAT(hms_invoice.created_at, "%d-%m-%y") as created'),
                 DB::raw('DATE_FORMAT(hms_invoice.appointment_date, "%d-%m-%y") as appointment'),
                 'hms_invoice.invoice as invoice',
                 'hms_invoice.parent_id as parent_id',
@@ -520,7 +520,7 @@ class InvoiceModel extends Model
                 'hms_invoice.*',
                 'parent_patient_mode.name as parent_patient_mode_name',
                 'parent_patient_mode.slug as parent_patient_mode_slug',
-                DB::raw('DATE_FORMAT(hms_invoice.updated_at, "%d-%m-%Y") as created'),
+                DB::raw('DATE_FORMAT(hms_invoice.created_at, "%d-%m-%Y") as created'),
                 DB::raw('DATE_FORMAT(hms_invoice.appointment_date, "%d-%m-%Y") as appointment'),
                 'hms_invoice.invoice as invoice',
                 'hms_invoice.total as total',
@@ -611,7 +611,7 @@ class InvoiceModel extends Model
             ->select([
                 'hms_invoice.id as id',
                 'hms_invoice.id as invoice_id',
-                DB::raw('DATE_FORMAT(hms_invoice.updated_at, "%d-%m-%Y") as created'),
+                DB::raw('DATE_FORMAT(hms_invoice.created_at, "%d-%m-%Y") as created'),
                 DB::raw('DATE_FORMAT(hms_invoice.appointment, "%d-%M-%Y") as created_date'),
                 'inv_sales.invoice as invoice',
                 'hms_invoice.total as total',
@@ -855,130 +855,7 @@ class InvoiceModel extends Model
         return $entities;
     }
 
-    public static function getSummary($domain,$request){
 
-
-        $summary = self::where([['hms_invoice.config_id',$domain['hms_config']]])
-            ->select([
-                 DB::raw('COUNT(hms_invoice.id) as patient'),
-                 DB::raw('SUM(hms_invoice.total) as total'),
-            ]);
-
-        if (isset($request['created_by_id']) && !empty($request['created_by_id'])){
-            $summary = $summary->where('hms_invoice.created_by_id',$request['created_by_id']);
-        }
-        if (!empty($request['created'])) {
-            $start = Carbon::parse($request['created'])->startOfDay();
-            $end   = Carbon::parse($request['created'])->endOfDay();
-            $summary->whereBetween('hms_invoice.created_at', [$start, $end]);
-        }
-
-        $summary = $summary->get();
-
-        $userBase = self::where([['hms_invoice.config_id',$domain['hms_config']]])
-            ->join('users as createdBy','createdBy.id','=','hms_invoice.created_by_id')
-            ->select([
-                DB::raw('hms_invoice.created_by_id as created_by_id'),
-                DB::raw('createdBy.name as name'),
-                DB::raw('COUNT(hms_invoice.id) as patient'),
-                DB::raw('SUM(hms_invoice.total) as total'),
-            ]);
-
-        if (isset($request['created_by_id']) && !empty($request['created_by_id'])){
-            $userBase = $userBase->where('hms_invoice.created_by_id',$request['created_by_id']);
-        }
-        if (isset($request['created']) && !empty($request['created'])){
-            $date = new \DateTime($request['created']);
-            $start_date = $date->format('Y-m-d 00:00:00');
-            $end_date = $date->format('Y-m-d 23:59:59');
-            $userBase = $userBase->whereBetween('hms_invoice.created_at',[$start_date, $end_date]);
-        }
-        $userBase->groupBy('hms_invoice.created_by_id');
-        $userBase = $userBase->get();
-
-        $roomBase = self::where([['hms_invoice.config_id',$domain['hms_config']]])
-            ->join('hms_particular as room','room.id','=','hms_invoice.room_id')
-            ->select([
-                DB::raw('room.name as name'),
-                DB::raw('COUNT(hms_invoice.id) as patient'),
-                DB::raw('SUM(hms_invoice.total) as total'),
-            ]);
-
-        if (isset($request['created_by_id']) && !empty($request['created_by_id'])){
-            $roomBase = $roomBase->where('hms_invoice.created_by_id',$request['created_by_id']);
-        }
-        if (isset($request['created']) && !empty($request['created'])){
-            $date = new \DateTime($request['created']);
-            $start_date = $date->format('Y-m-d 00:00:00');
-            $end_date = $date->format('Y-m-d 23:59:59');
-            $roomBase = $roomBase->whereBetween('hms_invoice.created_at',[$start_date, $end_date]);
-        }
-        $roomBase->groupBy('room.name');
-        $roomBase = $roomBase->get();
-
-
-        $paymentMode = self::where([['hms_invoice.config_id',$domain['hms_config']]])
-            ->leftjoin('hms_particular_mode as particular_payment_mode','particular_payment_mode.id','=','hms_invoice.patient_payment_mode_id')
-            ->select([
-                DB::raw('particular_payment_mode.name as name'),
-                DB::raw('COUNT(hms_invoice.id) as patient'),
-                DB::raw('SUM(hms_invoice.total) as total'),
-            ]);
-
-        if (isset($request['created_by_id']) && !empty($request['created_by_id'])){
-            $paymentMode = $paymentMode->where('hms_invoice.created_by_id',$request['created_by_id']);
-        }
-        if (isset($request['created']) && !empty($request['created'])){
-            $date = new \DateTime($request['created']);
-            $start_date = $date->format('Y-m-d 00:00:00');
-            $end_date = $date->format('Y-m-d 23:59:59');
-            $paymentMode = $paymentMode->whereBetween('hms_invoice.created_at',[$start_date, $end_date]);
-        }
-        $paymentMode->groupBy('particular_payment_mode.name');
-        $paymentMode = $paymentMode->get();
-
-        $patientMode = self::where([['hms_invoice.config_id',$domain['hms_config']]])
-            ->leftjoin('hms_particular_mode as patient_mode','patient_mode.id','=','hms_invoice.patient_mode_id')
-            ->select([
-                DB::raw('patient_mode.name as name'),
-                DB::raw('COUNT(hms_invoice.id) as patient'),
-                DB::raw('SUM(hms_invoice.total) as total'),
-            ]);
-
-        if (isset($request['created_by_id']) && !empty($request['created_by_id'])){
-            $patientMode = $patientMode->where('hms_invoice.created_by_id',$request['created_by_id']);
-        }
-        if (isset($request['created']) && !empty($request['created'])){
-            $date = new \DateTime($request['created']);
-            $start_date = $date->format('Y-m-d 00:00:00');
-            $end_date = $date->format('Y-m-d 23:59:59');
-            $patientMode = $patientMode->whereBetween('hms_invoice.created_at',[$start_date, $end_date]);
-        }
-        $patientMode->groupBy('patient_mode.name');
-        $patientMode = $patientMode->get();
-
-        $doctorMode = self::where([['hms_invoice.config_id',$domain['hms_config']]])
-            ->join('hms_prescription as prescription','prescription.hms_invoice_id','=','hms_invoice.id')
-            ->join('users as doctor','doctor.id','=','prescription.created_by_id')
-            ->join('hms_particular_mode as patient_mode','patient_mode.id','=','hms_invoice.patient_mode_id')
-            ->select([
-                DB::raw('doctor.name as name'),
-                DB::raw('COUNT(hms_invoice.id) as patient'),
-                DB::raw('SUM(hms_invoice.total) as total'),
-            ]);
-
-        if (isset($request['created']) && !empty($request['created'])){
-            $date = new \DateTime($request['created']);
-            $start_date = $date->format('Y-m-d 00:00:00');
-            $end_date = $date->format('Y-m-d 23:59:59');
-            $doctorMode = $doctorMode->whereBetween('hms_invoice.created_at',[$start_date, $end_date]);
-        }
-        $doctorMode->groupBy('doctor.id');
-        $doctorMode = $doctorMode->get();
-
-        $records =['summary'=>$summary,'userBase'=>$userBase,'roomBase'=>$roomBase,'paymentMode'=>$paymentMode,'patientMode'=>$patientMode,'doctorMode'=>$doctorMode];
-        return $records;
-    }
 
 
 

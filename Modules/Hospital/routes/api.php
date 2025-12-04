@@ -60,6 +60,7 @@ Route::prefix('/hospital/select')->middleware([HeaderAuthenticationMiddleware::c
 
 Route::prefix('/hospital')->middleware([HeaderAuthenticationMiddleware::class])->group(function() {
     Route::get('/config', [HospitalController::class,'domainHospitalConfig'])->name('domain_hospital_config');
+    Route::get('/hms-config', [HospitalController::class,'domainHmsConfig'])->name('domain_hms_config');
     Route::get('/patient-search', [HospitalController::class,'patientSearch'])->name('patient_search');
     Route::get('/room-cabin', [HospitalController::class,'roomCabin'])->name('patient_search');
     Route::get('/medicine-import', [HospitalController::class,'insertUpazilaDistrict'])->name('insert_medicine_stock');
@@ -234,6 +235,8 @@ Route::prefix('/hospital')->middleware([HeaderAuthenticationMiddleware::class])-
         Route::get('/summary-investigation', [ReportsController::class,'summaryInvestigation'])->name('report_patient_ticket');
         Route::get('/patient-collection', [ReportsController::class,'patientCollection'])->name('report_patient_ticket');
         Route::get('/patient-ticket', [ReportsController::class,'patientTicket'])->name('report_patient_ticket');
+        Route::get('/master-data-users', [ReportsController::class,'reportUser'])->name('dashboard_daily_summary');
+
     });
 
     });

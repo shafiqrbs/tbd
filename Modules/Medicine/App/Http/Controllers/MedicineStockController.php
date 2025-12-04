@@ -95,6 +95,7 @@ class MedicineStockController extends Controller
         $medicineStock['opd_quantity'] = $input['opd_quantity'];
         $medicineStock['medicine_dosage_id'] = $input['medicine_dosage_id'] ?? null;
         $medicineStock['medicine_bymeal_id'] = $input['medicine_bymeal_id'] ?? null;
+        $medicineStock['duration_mode_id'] = $input['duration_mode_id'] ?? null;
         $medicineStock['opd_status'] = true;
         $medicineStock['ipd_status'] = true;
         $medicineStock = MedicineStockModel::create($medicineStock);
@@ -201,8 +202,8 @@ class MedicineStockController extends Controller
         if (array_key_exists('duration', $input)) {
             $updateDetails['duration'] = $input['duration'];
         }
-        if (array_key_exists('duration_mode', $input)) {
-            $updateDetails['duration_mode'] = $input['duration_mode'];
+        if (array_key_exists('duration_mode_id', $input)) {
+            $updateDetails['duration_mode_id'] = $input['duration_mode_id'];
         }
 
         if (array_key_exists('admin_status', $input)) {

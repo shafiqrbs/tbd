@@ -24,6 +24,7 @@ class ParticularModeRequest extends FormRequest
             {
                 return [
                     'name' => 'required|string|max:255',
+                    'name_bn' => 'required|string|max:255',
                     'short_code' => 'string|max:255',
                     'particular_module_id' => 'required|integer',
                 ];
@@ -34,6 +35,7 @@ class ParticularModeRequest extends FormRequest
             {
                 return [
                     'name' => 'required|string|max:255',
+                    'name_bn' => 'required|string|max:255',
                     'short_code' => 'string|max:255',
                     'particular_module_id' => 'required|integer',
                 ];

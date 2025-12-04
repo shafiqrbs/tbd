@@ -300,7 +300,7 @@ class PrescriptionModel extends Model
                 'hms_prescription.id as id',
                 'hms_prescription.uid as prescription_uid',
                 'hms_invoice.id as invoice_id',
-                DB::raw('DATE_FORMAT(hms_invoice.updated_at, "%d-%m-%y %H:%i %p") as created'),
+                DB::raw('DATE_FORMAT(hms_invoice.created_at, "%d-%m-%y %H:%i %p") as created'),
                 DB::raw('DATE_FORMAT(hms_invoice.appointment_date, "%d-%m-%y") as appointment'),
                 'hms_invoice.invoice as invoice',
                 'hms_invoice.total as total',

@@ -368,7 +368,7 @@ class MedicineStockModel extends Model
                 'hms_medicine_stock.duration_day',
                 'hms_medicine_stock.status',
                 'hms_medicine_stock.duration',
-                'hms_medicine_stock.duration_mode',
+                'hms_medicine_stock.duration_mode_id',
 
             ]);
 

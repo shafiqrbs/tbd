@@ -48,6 +48,11 @@ class MedicineStock
     private $medicineDosage;
 
     /**
+     * @ORM\ManyToOne(targetEntity="ParticularMode")
+     **/
+    private $durationMode;
+
+    /**
      * @ORM\ManyToOne(targetEntity="MedicineDosage")
      * @ORM\JoinColumn(referencedColumnName="id", nullable=true, onDelete="cascade")
      **/
@@ -76,12 +81,6 @@ class MedicineStock
      */
     private $duration;
 
-    /**
-     * @var float
-     *
-     * @ORM\Column(name="duration_mode", type="string",  nullable=true)
-     */
-    private $durationMode;
 
     /**
      * @var int

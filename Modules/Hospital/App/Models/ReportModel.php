@@ -140,7 +140,6 @@ class ReportModel extends Model
         $roomBase->groupBy('room.name');
         $roomBase = $roomBase->get();
 
-
         $paymentMode = self::where([['hms_invoice.config_id',$domain['hms_config']]])
             ->leftjoin('hms_particular_mode as particular_payment_mode','particular_payment_mode.id','=','hms_invoice.patient_payment_mode_id')
             ->select([
@@ -200,7 +199,8 @@ class ReportModel extends Model
         $doctorMode->groupBy('doctor.id');
         $doctorMode = $doctorMode->get();
 
-        $records =['summary'=>$summary,'userBase'=>$userBase,'roomBase'=>$roomBase,'paymentMode'=>$paymentMode,'patientMode'=>$patientMode,'doctorMode'=>$doctorMode];
+        $services =self::serviceBaseInvestigation($domain,$request);
+        $records =['summary'=>$summary,'userBase'=>$userBase,'roomBase'=>$roomBase,'paymentMode'=>$paymentMode,'patientMode'=>$patientMode,'doctorMode'=>$doctorMode,'services'=>$services];
         return $records;
     }
 
@@ -286,10 +286,11 @@ class ReportModel extends Model
                 'hms_invoice_particular.price as amount'
             ]);
 
-        if (isset($request['created']) && !empty($request['created'])){
-            $date = new \DateTime($request['created']);
-            $start_date = $date->format('Y-m-d 00:00:00');
-            $end_date = $date->format('Y-m-d 23:59:59');
+        if (isset($request['start_date']) && !empty($request['start_date'])){
+            $start_date = new \DateTime($request['start_date']);
+            $end_date = new \DateTime($request['end_date']);
+            $start_date = $start_date->format('Y-m-d 00:00:00');
+            $end_date = $end_date->format('Y-m-d 23:59:59');
             $entities = $entities->whereBetween('hms_invoice.created_at',[$start_date, $end_date]);
         }else{
             $date = new \DateTime();
@@ -297,7 +298,7 @@ class ReportModel extends Model
             $end_date = $date->format('Y-m-d 23:59:59');
             $entities = $entities->whereBetween('hms_invoice.created_at',[$start_date, $end_date]);
         }
-        $entities = $entities->orderBy('hms_invoice.updated_at','DESC')
+        $entities = $entities->orderBy('hms_invoice.created_at','ASC')
             ->get();
         return $entities;
     }
@@ -333,12 +334,13 @@ class ReportModel extends Model
     public static function serviceBaseInvestigation($domain,$request)
     {
         $entities = InvoiceParticularModel::where([['hms_invoice.config_id',$domain['hms_config']]])
-            ->whereIn('mode',['room'])
+            ->whereIn('mode',['investigation'])
+            ->where('hms_invoice_particular.status',1)
             ->leftjoin('hms_invoice as hms_invoice','hms_invoice.id','=','hms_invoice_particular.hms_invoice_id')
             ->leftjoin('hms_particular as hms_particular','hms_particular.id','=','hms_invoice_particular.particular_id')
             ->select([
                 DB::raw('COUNT(hms_invoice_particular.id) as total_count'),
-                DB::raw('SUM(hms_invoice_particular.sub_total) as total_amount'),
+                DB::raw('SUM(hms_invoice_particular.sub_total) as total'),
                 'hms_particular.display_name as name',
             ])->groupBy('particular_id');
         if (isset($request['created']) && !empty($request['created'])){
