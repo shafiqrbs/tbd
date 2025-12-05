@@ -41,7 +41,23 @@ class ParticularModuleModel extends Model
         return $entities;
 
 
+    }
 
+    public static function getParentChild()
+    {
+        $entities = self::select(
+            'hms_particular_module.id',
+            'hms_particular_module.name',
+            'hms_particular_module.slug'
+        )
+            ->orderBy('hms_particular_module.name', 'ASC')
+            ->with(['modes']);
+        $entities = $entities->get();
+        $records = [];
+        foreach ($entities as $entity):
+            $records[$entity->slug] = $entity;
+        endforeach;
+        return $records;
     }
 
 

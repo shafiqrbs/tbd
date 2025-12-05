@@ -14,6 +14,8 @@ use Modules\Hospital\App\Models\HospitalConfigModel;
 use Modules\Hospital\App\Models\MedicineModel;
 use Modules\Hospital\App\Models\ParticularMatrixModel;
 use Modules\Hospital\App\Models\ParticularModel;
+use Modules\Hospital\App\Models\ParticularModeModel;
+use Modules\Hospital\App\Models\ParticularModuleModel;
 use Modules\Inventory\App\Models\ConfigModel;
 use Modules\NbrVatTax\App\Models\NbrVatConfigModel;
 use Modules\Production\App\Models\ProductionConfig;
@@ -147,18 +149,24 @@ class DomainModel extends Model
         $domain = UserModel::getUserData($userId);
 
         $records = [];
-        $records['entity'] = self::with(['hospitalConfig',
+        $records['config'] = self::with(['hospitalConfig',
             'hospitalConfig.admission_fee:id,name as admission_fee_name,price as admission_fee_price',
             'hospitalConfig.opd_ticket_fee:id,name as opd_ticket_fee_name,price as opd_ticket_fee_price',
             'hospitalConfig.emergency_fee:id,name as emergency_fee_name,price as emergency_fee_price',
             'hospitalConfig.ot_fee:id,name as ot_fee_name,price as ot_fee_price',
             'hospitalConfig.shareHealth',
-        ])->find($domain);
-        $records['user_info'] = ParticularModel::with('particularDetails:id,opd_room_id,particular_id,opd_room_ids,opd_referred')->where('employee_id',$userId)->first();
-        $records['particular_matrix'] = ParticularMatrixModel::getRecords($domain);
-        $records['byMeals'] = MedicineModel::getMealDropdown($domain);;
-        $records['dosages'] = MedicineModel::getDosageDropdown($domain);;
-        $records['particular_matrix'] = ParticularMatrixModel::getRecords($domain);
+        ])->find($domain->id);
+        $records['userInfo'] = ParticularModel::with('particularDetails:id,opd_room_id,particular_id,opd_room_ids,opd_referred')->where('employee_id',$userId)->first();
+        $records['particularMatrix'] = ParticularMatrixModel::getRecords($domain);
+        $records['byMeals'] = MedicineModel::getMealDropdown($domain);
+        $records['dosages'] = MedicineModel::getDosageDropdown($domain);
+        $records['particularModules'] = ParticularModuleModel::getParentChild();
+        $records['particularModes'] = ParticularModeModel::getParticularModuleDropdown('operation');
+        $records['durationModes'] = ParticularModeModel::getParticularModuleDropdown('medicine-duration-mode');
+        $records['advices'] = ParticularModel::getParticularDropdown($domain,'advise');
+        $records['religions'] = \Modules\Core\App\Models\SettingModel::getSettingDropdown($domain,'religion');
+        $records['designations'] = \Modules\Core\App\Models\SettingModel::getSettingDropdown($domain,'designation');
+        $records['departments'] = \Modules\Core\App\Models\SettingModel::getSettingDropdown($domain,'department');
         return $records;
     }
 
