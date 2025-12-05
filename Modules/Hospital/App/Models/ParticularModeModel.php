@@ -73,6 +73,7 @@ class ParticularModeModel extends Model
             ->select([
                 'hms_particular_mode.id',
                 'hms_particular_mode.name',
+                'hms_particular_mode.name_bn',
                 'hms_particular_mode.slug',
             ])
             ->where([
