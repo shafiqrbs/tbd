@@ -9,6 +9,9 @@ return [
         'http://localhost:5173',
         'http://127.0.0.1:5173',
         'http://www.tbd.local',
+        'https://health.poskeeper.com',
+        'https://hms.tbhsd.gov.bd'
+
     ],
 
     'allowed_origins_patterns' => [],
