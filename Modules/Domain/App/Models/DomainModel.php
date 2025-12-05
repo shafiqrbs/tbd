@@ -162,14 +162,12 @@ class DomainModel extends Model
         $records['dosages'] = MedicineModel::getDosageDropdown($domain);
         $records['particularModules'] = ParticularModuleModel::getParentChild();
         $records['particularModes'] = ParticularModeModel::getParticularModuleDropdown('operation');
-        $records['durationModes'] = ParticularModeModel::getParticularModuleDropdown('medicine-duration-mode');
-        $records['advices'] = ParticularModel::getParticularDropdown($domain,'advise');
-        $records['religions'] = \Modules\Core\App\Models\SettingModel::getSettingDropdown($domain,'religion');
-        $records['designations'] = \Modules\Core\App\Models\SettingModel::getSettingDropdown($domain,'designation');
-        $records['departments'] = \Modules\Core\App\Models\SettingModel::getSettingDropdown($domain,'department');
+        $records['advices'] = ParticularModel::getParticularDropdown($domain,'advice');
+        $records['religions'] = \Modules\Core\App\Models\SettingModel::getSettingDropdown('religion',$domain->id);
+        $records['designations'] = \Modules\Core\App\Models\SettingModel::getSettingDropdown('designation',$domain->id);
+        $records['departments'] = \Modules\Core\App\Models\SettingModel::getSettingDropdown('department',$domain->id);
         return $records;
     }
-
 
 
     public static function boot()

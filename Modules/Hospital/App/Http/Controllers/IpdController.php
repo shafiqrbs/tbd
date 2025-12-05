@@ -77,6 +77,25 @@ class IpdController extends Controller
     }
 
     /**
+     * Display a listing of the resource.
+     */
+    public function ipdConfirm(Request $request){
+        $domain = $this->domain;
+        $data = InvoiceModel::getIpdConfirmRecords($request,$domain);
+        $response = new Response();
+        $response->headers->set('Content-Type','application/json');
+        $response->setContent(json_encode([
+            'message'   => 'success',
+            'status'    => Response::HTTP_OK,
+            'total'     => $data['count'],
+            'data'      => $data['entities']
+        ]));
+        $response->setStatusCode(Response::HTTP_OK);
+        return $response;
+    }
+
+
+    /**
      * Store a newly created resource in storage.
      */
     public function store(IpdRequest $request)
