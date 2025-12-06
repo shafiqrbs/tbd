@@ -51,7 +51,7 @@ class ReportsController extends Controller
      */
     public function dailySummary(Request $request){
 
-        $data = ReportModel::getSummary($this->domain,$request);
+        $data = ReportModel::getInvoiceSummary($this->domain,$request);
         $service = new JsonRequestResponse();
         $data = $service->returnJosnResponse($data);
         return $data;

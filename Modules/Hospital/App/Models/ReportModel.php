@@ -190,17 +190,30 @@ class ReportModel extends Model
                 DB::raw('SUM(hms_invoice.total) as total'),
             ]);
 
-        if (isset($request['created']) && !empty($request['created'])){
+        /*if (isset($request['created']) && !empty($request['created'])){
             $date = new \DateTime($request['created']);
             $start_date = $date->format('Y-m-d 00:00:00');
             $end_date = $date->format('Y-m-d 23:59:59');
             $doctorMode = $doctorMode->whereBetween('hms_invoice.created_at',[$start_date, $end_date]);
-        }
+        }*/
+
         $doctorMode->groupBy('doctor.id');
         $doctorMode = $doctorMode->get();
 
         $services =self::serviceBaseInvestigation($domain,$request);
         $records =['summary'=>$summary,'userBase'=>$userBase,'roomBase'=>$roomBase,'paymentMode'=>$paymentMode,'patientMode'=>$patientMode,'doctorMode'=>$doctorMode,'services'=>$services];
+        return $records;
+    }
+
+    public static function getInvoiceSummary($domain,$request){
+
+        $summary =self::summaryCollection($domain,$request);
+        $invoiceMode =self::invoiceModeCollection($domain,$request);
+        $patientMode =self::patientModeBaseCollection($domain,$request);
+        $userBase =self::userBaseCollection($domain,$request);
+        $serviceGroups =self::serviceBaseGroupInvestigation($domain,$request);
+        $services =self::serviceBaseInvestigation($domain,$request);
+        $records =['summary'=>$summary,'invoiceMode'=>$invoiceMode,'userBase'=>$userBase,'patientMode'=>$patientMode,'serviceGroups'=>$serviceGroups,'services'=>$services];
         return $records;
     }
 
@@ -298,44 +311,180 @@ class ReportModel extends Model
             $end_date = $date->format('Y-m-d 23:59:59');
             $entities = $entities->whereBetween('hms_invoice.created_at',[$start_date, $end_date]);
         }
+        if (isset($request['patient_mode']) && !empty($request['patient_mode']) && $request['patient_mode'] !== 'all'){
+            $entities = $entities->where('hms_invoice.invoice_mode', $request['patient_mode']);
+        }
         $entities = $entities->orderBy('hms_invoice.created_at','ASC')
             ->get();
         return $entities;
     }
 
-    public static function serviceBaseGroupInvestigation($domain,$request)
+    public static function summaryCollection($domain,$request)
     {
         $entities = InvoiceParticularModel::where([['hms_invoice.config_id',$domain['hms_config']]])
-            ->whereIn('mode',['room'])
-            ->leftjoin('hms_invoice as hms_invoice','hms_invoice.id','=','hms_invoice_particular.hms_invoice_id')
-            ->leftjoin('hms_particular as hms_particular','hms_particular.id','=','hms_invoice_particular.particular_id')
-            ->leftjoin('hms_particular_type as hms_particular_type','hms_particular_type.id','=','hms_particular.particular_type_id')
+            ->where('hms_invoice_particular.status',1)
+            ->join('hms_invoice as hms_invoice','hms_invoice.id','=','hms_invoice_particular.hms_invoice_id')
+            ->join('hms_invoice_transaction as hms_invoice_transaction','hms_invoice_transaction.id','=','hms_invoice_particular.invoice_transaction_id')
             ->select([
                 DB::raw('COUNT(hms_invoice_particular.id) as total_count'),
-                DB::raw('SUM(hms_invoice_particular.sub_total) as total_amount'),
-                'hms_particular_type.name as name',
-            ])->groupBy('hms_particular.particular_type_id');
-        if (isset($request['created']) && !empty($request['created'])){
-            $date = new \DateTime($request['created']);
-            $start_date = $date->format('Y-m-d 00:00:00');
-            $end_date = $date->format('Y-m-d 23:59:59');
-            $entities = $entities->whereBetween('hms_invoice.created_at',[$start_date, $end_date]);
+                DB::raw('SUM(hms_invoice_particular.sub_total) as total'),
+            ]);
+
+        if (isset($request['created_by_id']) && !empty($request['created_by_id'])){
+            $entities = $entities->where('hms_invoice.created_by_id',$request['created_by_id']);
+        }
+        if (isset($request['start_date']) && !empty($request['end_date'])){
+            $start_date = new \DateTime($request['start_date']);
+            $end_date = new \DateTime($request['end_date']);
+            $start_date = $start_date->format('Y-m-d 00:00:00');
+            $end_date = $end_date->format('Y-m-d 23:59:59');
+            $entities = $entities->whereBetween('hms_invoice_transaction.created_at',[$start_date, $end_date]);
         }else{
             $date = new \DateTime();
             $start_date = $date->format('Y-m-d 00:00:00');
             $end_date = $date->format('Y-m-d 23:59:59');
-            $entities = $entities->whereBetween('hms_invoice.created_at',[$start_date, $end_date]);
+            $entities = $entities->whereBetween('hms_invoice_transaction.created_at',[$start_date, $end_date]);
         }
-        $entities = $entities->orderBy('hms_particular.name','ASC')
-            ->get();
+        $entities = $entities->get();
         return $entities;
     }
+
+    public static function invoiceModeCollection($domain,$request)
+    {
+        $entities = InvoiceParticularModel::where([['hms_invoice.config_id',$domain['hms_config']]])
+            ->where('hms_invoice_particular.status',1)
+            ->join('hms_invoice as hms_invoice','hms_invoice.id','=','hms_invoice_particular.hms_invoice_id')
+            ->join('hms_invoice_transaction as hms_invoice_transaction','hms_invoice_transaction.id','=','hms_invoice_particular.invoice_transaction_id')
+            ->select([
+                DB::raw('SUM(hms_invoice_particular.sub_total) as total'),
+                'hms_invoice_particular.mode as name',
+            ])->groupBy('hms_invoice_particular.mode');
+
+        if (isset($request['created_by_id']) && !empty($request['created_by_id'])){
+            $entities = $entities->where('hms_invoice.created_by_id',$request['created_by_id']);
+        }
+        if (isset($request['start_date']) && isset($request['end_date'])){
+            $start_date = new \DateTime($request['start_date']);
+            $end_date = new \DateTime($request['end_date']);
+            $start_date = $start_date->format('Y-m-d 00:00:00');
+            $end_date = $end_date->format('Y-m-d 23:59:59');
+            $entities = $entities->whereBetween('hms_invoice_transaction.created_at',[$start_date, $end_date]);
+        }else{
+            $date = new \DateTime();
+            $start_date = $date->format('Y-m-d 00:00:00');
+            $end_date = $date->format('Y-m-d 23:59:59');
+            $entities = $entities->whereBetween('hms_invoice_transaction.created_at',[$start_date, $end_date]);
+        }
+        $entities = $entities->get();
+        return $entities;
+    }
+
+
+    public static function patientModeBaseCollection($domain,$request)
+    {
+
+        $entities = InvoiceParticularModel::where([['hms_invoice.config_id',$domain['hms_config']]])
+            ->whereIn('hms_invoice_particular.mode',['opd','emergency','ipd'])
+            ->where('hms_invoice_particular.status',1)
+            ->join('hms_invoice as hms_invoice','hms_invoice.id','=','hms_invoice_particular.hms_invoice_id')
+            ->join('hms_invoice_transaction as hms_invoice_transaction','hms_invoice_transaction.id','=','hms_invoice_particular.invoice_transaction_id')
+            ->select([
+                DB::raw('COUNT(hms_invoice_particular.id) as patient'),
+                DB::raw('SUM(hms_invoice_particular.sub_total) as total'),
+                'hms_invoice_particular.mode as name',
+            ])->groupBy('hms_invoice_particular.mode');
+
+        if (isset($request['created_by_id']) && !empty($request['created_by_id'])){
+            $entities = $entities->where('hms_invoice.created_by_id',$request['created_by_id']);
+        }
+        if (isset($request['start_date']) && isset($request['end_date'])){
+            $start_date = new \DateTime($request['start_date']);
+            $end_date = new \DateTime($request['end_date']);
+            $start_date = $start_date->format('Y-m-d 00:00:00');
+            $end_date = $end_date->format('Y-m-d 23:59:59');
+            $entities = $entities->whereBetween('hms_invoice_transaction.created_at',[$start_date, $end_date]);
+        }else{
+            $date = new \DateTime();
+            $start_date = $date->format('Y-m-d 00:00:00');
+            $end_date = $date->format('Y-m-d 23:59:59');
+            $entities = $entities->whereBetween('hms_invoice_transaction.created_at',[$start_date, $end_date]);
+        }
+        $entities = $entities->get();
+        return $entities;
+    }
+
+
+    public static function userBaseCollection($domain,$request)
+    {
+        $entities = InvoiceParticularModel::where([['hms_invoice.config_id',$domain['hms_config']]])
+            ->where('hms_invoice_particular.status',1)
+            ->join('hms_invoice as hms_invoice','hms_invoice.id','=','hms_invoice_particular.hms_invoice_id')
+            ->join('hms_invoice_transaction as hms_invoice_transaction','hms_invoice_transaction.id','=','hms_invoice_particular.invoice_transaction_id')
+            ->join('users as createdBy','createdBy.id','=','hms_invoice_transaction.created_by_id')
+            ->select([
+                DB::raw('COUNT(hms_invoice_particular.id) as total_count'),
+                DB::raw('SUM(hms_invoice_particular.sub_total) as total'),
+                'createdBy.name as name',
+            ]);
+
+        if (isset($request['created_by_id']) && !empty($request['created_by_id'])){
+            $entities = $entities->where('hms_invoice_transaction.created_by_id',$request['created_by_id']);
+        }
+        if (isset($request['start_date']) && isset($request['end_date'])){
+            $start_date = new \DateTime($request['start_date']);
+            $end_date = new \DateTime($request['end_date']);
+            $start_date = $start_date->format('Y-m-d 00:00:00');
+            $end_date = $end_date->format('Y-m-d 23:59:59');
+            $entities = $entities->whereBetween('hms_invoice_transaction.created_at',[$start_date, $end_date]);
+        }else{
+            $date = new \DateTime();
+            $start_date = $date->format('Y-m-d 00:00:00');
+            $end_date = $date->format('Y-m-d 23:59:59');
+            $entities = $entities->whereBetween('hms_invoice_transaction.created_at',[$start_date, $end_date]);
+        }
+        $entities->groupBy('hms_invoice_transaction.created_by_id');
+        $rows = $entities->get();
+        return $rows;
+    }
+
+
+    public static function serviceBaseGroupInvestigation($domain,$request)
+    {
+        $entities = InvoiceParticularModel::where([['hms_invoice.config_id',$domain['hms_config']]])
+            ->whereIn('hms_invoice_particular.mode',['investigation'])
+            ->where('hms_invoice_particular.status',1)
+            ->join('hms_invoice as hms_invoice','hms_invoice.id','=','hms_invoice_particular.hms_invoice_id')
+            ->join('hms_invoice_transaction as hms_invoice_transaction','hms_invoice_transaction.id','=','hms_invoice_particular.invoice_transaction_id')
+            ->leftjoin('hms_particular as hms_particular','hms_particular.id','=','hms_invoice_particular.particular_id')
+            ->join('inv_category as inv_category','inv_category.id','=','hms_particular.category_id')
+            ->select([
+                DB::raw('COUNT(hms_invoice_particular.id) as total_count'),
+                DB::raw('SUM(hms_invoice_particular.sub_total) as total'),
+                'inv_category.name as name',
+            ])->groupBy('inv_category.id');
+        if (isset($request['start_date']) && isset($request['end_date'])){
+            $start_date = new \DateTime($request['start_date']);
+            $end_date = new \DateTime($request['end_date']);
+            $start_date = $start_date->format('Y-m-d 00:00:00');
+            $end_date = $end_date->format('Y-m-d 23:59:59');
+            $entities = $entities->whereBetween('hms_invoice_transaction.created_at',[$start_date, $end_date]);
+        }else{
+            $date = new \DateTime();
+            $start_date = $date->format('Y-m-d 00:00:00');
+            $end_date = $date->format('Y-m-d 23:59:59');
+            $entities = $entities->whereBetween('hms_invoice_transaction.created_at',[$start_date, $end_date]);
+        }
+        $entities = $entities->orderBy('inv_category.name','ASC')->get();
+        return $entities;
+    }
+
 
     public static function serviceBaseInvestigation($domain,$request)
     {
         $entities = InvoiceParticularModel::where([['hms_invoice.config_id',$domain['hms_config']]])
-            ->whereIn('mode',['investigation'])
+            ->whereIn('hms_invoice_particular.mode',['investigation'])
             ->where('hms_invoice_particular.status',1)
+            ->leftjoin('hms_invoice_transaction as hms_invoice_transaction','hms_invoice_transaction.id','=','hms_invoice_particular.invoice_transaction_id')
             ->leftjoin('hms_invoice as hms_invoice','hms_invoice.id','=','hms_invoice_particular.hms_invoice_id')
             ->leftjoin('hms_particular as hms_particular','hms_particular.id','=','hms_invoice_particular.particular_id')
             ->select([
@@ -343,16 +492,17 @@ class ReportModel extends Model
                 DB::raw('SUM(hms_invoice_particular.sub_total) as total'),
                 'hms_particular.display_name as name',
             ])->groupBy('particular_id');
-        if (isset($request['created']) && !empty($request['created'])){
-            $date = new \DateTime($request['created']);
-            $start_date = $date->format('Y-m-d 00:00:00');
-            $end_date = $date->format('Y-m-d 23:59:59');
-            $entities = $entities->whereBetween('hms_invoice.created_at',[$start_date, $end_date]);
+        if (isset($request['start_date']) && isset($request['end_date'])){
+            $start_date = new \DateTime($request['start_date']);
+            $end_date = new \DateTime($request['end_date']);
+            $start_date = $start_date->format('Y-m-d 00:00:00');
+            $end_date = $end_date->format('Y-m-d 23:59:59');
+            $entities = $entities->whereBetween('hms_invoice_transaction.created_at',[$start_date, $end_date]);
         }else{
             $date = new \DateTime();
             $start_date = $date->format('Y-m-d 00:00:00');
             $end_date = $date->format('Y-m-d 23:59:59');
-            $entities = $entities->whereBetween('hms_invoice.created_at',[$start_date, $end_date]);
+            $entities = $entities->whereBetween('hms_invoice_transaction.created_at',[$start_date, $end_date]);
         }
         $entities = $entities->orderBy('hms_particular.name','ASC')
             ->get();

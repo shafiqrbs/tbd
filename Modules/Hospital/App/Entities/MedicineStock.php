@@ -66,6 +66,13 @@ class MedicineStock
      */
     private $dosesForm;
 
+    /**
+     * @var string
+     *
+     * @ORM\Column(type="string", length=200, nullable=true)
+     */
+    private $durationModeOld;
+
 
      /**
      * @var integer

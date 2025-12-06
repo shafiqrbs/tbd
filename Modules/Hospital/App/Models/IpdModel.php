@@ -222,7 +222,7 @@ class IpdModel extends Model
             ],
             [
                 'name'  => $roomRent->display_name,
-                'status'  => true,
+                'status'  => 0,
                 'is_admission'  => true,
                 'mode' => 'room',
                 'quantity'  => $minimumDaysRoomRent,
@@ -239,9 +239,9 @@ class IpdModel extends Model
             ],
             [
                 'name'  => 'Admission Fee',
-                'status'  => true,
+                'status'  => 0,
                 'is_admission'  => true,
-                'mode' => 'admission',
+                'mode' => 'ipd',
                 'quantity'  => 1,
                 'price'     => $admissionFee->price,
                 'sub_total' => $admissionFee->price,
