@@ -341,13 +341,13 @@ class MedicineStockController extends Controller
                 'status' => ResponseAlias::HTTP_BAD_REQUEST
             ]);
         }
-        if (!$startDate) {
+        /*if (!$startDate) {
             return response([
                 'result' => false,
                 'message' => 'Date missing.',
                 'status' => ResponseAlias::HTTP_BAD_REQUEST
             ]);
-        }
+        }*/
 
         $items = MedicineStockItemHistoryModel::getStockItemHistory($params,$this->domain);
 

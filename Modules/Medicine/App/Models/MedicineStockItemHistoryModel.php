@@ -51,9 +51,14 @@ class MedicineStockItemHistoryModel extends Model
         $skip = isset($page) && $page != '' ? (int)$page * $perPage : 0;
 
         // prepare date range
-        $endDate = !empty($params['end_date']) ? $params['end_date'] : $params['start_date'];
-        $startDate = Carbon::parse($params['start_date'])->startOfDay();
-        $endDate = Carbon::parse($endDate)->endOfDay();
+        $rawStart = $params['start_date'] ?? null;
+        $rawEnd   = $params['end_date'] ?? null;
+
+        $startDate = $rawStart ? Carbon::parse($rawStart)->startOfDay() : null;
+
+        $endDate = $rawEnd
+            ? Carbon::parse($rawEnd)->endOfDay()
+            : ($rawStart ? Carbon::parse($rawStart)->endOfDay() : null);
 
         // main query builder
         $stockItems = self::join('inv_stock','inv_stock.id','=','inv_stock_item_history.stock_item_id')
@@ -63,7 +68,9 @@ class MedicineStockItemHistoryModel extends Model
                 ['inv_stock_item_history.stock_item_id', $params['stock_item_id']],
                 ['inv_stock_item_history.warehouse_id', $params['warehouse_id']],
             ])
-            ->whereBetween('inv_stock_item_history.created_at', [$startDate, $endDate])
+            ->when(!empty($startDate) && !empty($endDate), function ($query) use ($startDate, $endDate) {
+                return $query->whereBetween('inv_stock_item_history.created_at', [$startDate, $endDate]);
+            })
             ->select([
                 'inv_stock_item_history.id',
                 'cor_warehouses.name as warehouse_name',

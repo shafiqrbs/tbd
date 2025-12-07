@@ -102,7 +102,7 @@ class UserWarehouseModel extends Model
             ->where('cor_user_warehouse.is_status',true)
             ->join('cor_warehouses','cor_warehouses.id','=','cor_user_warehouse.warehouse_id')
             ->select([
-                'cor_user_warehouse.id',
+                'cor_user_warehouse.warehouse_id as id',
                 'cor_user_warehouse.is_status as status',
                 'cor_user_warehouse.user_id',
                 'cor_warehouses.name as warehouse_name',

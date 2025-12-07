@@ -67,11 +67,11 @@ final class AuthController extends Controller
         $token = JWTAuth::fromUser($user);
 
         // Fetch additional data
-//        $warehouse = UserWarehouseModel::getUserActiveWarehouse($user->id);
+        $warehouse = UserWarehouseModel::getUserActiveWarehouse($user->id);
         $configData = DomainModel::domainHospitalConfig($user->id);
 
         $payload = [
-//            'user_warehouse' => $warehouse ?? [],
+            'user_warehouse' => $warehouse ?? [],
             'hospital_config' => $configData ?? [],
             'token' => $token,
         ];
