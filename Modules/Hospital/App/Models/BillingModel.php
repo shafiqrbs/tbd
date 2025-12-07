@@ -416,7 +416,7 @@ class BillingModel extends Model
                     'hms_invoice_particular.quantity',
                     'hms_invoice_particular.sub_total',
                     'hms_invoice_particular.process',
-                ])->where('hms_invoice_particular.status',1)->whereIn('hms_invoice_particular.mode', ['admission','room'])->orderBy('hms_invoice_particular.created_at','DESC');
+                ])->whereIn('hms_invoice_particular.mode', ['admission','ipd','room'])->orderBy('hms_invoice_particular.created_at','DESC');
             }])
             ->first();
 
