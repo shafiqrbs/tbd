@@ -11,8 +11,10 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Modules\Accounting\App\Models\AccountingModel;
 use Modules\Core\App\Models\UserModel;
 use Modules\Hospital\App\Models\HospitalConfigModel;
+use Modules\Hospital\App\Models\InvoiceModel;
 use Modules\Hospital\App\Models\MedicineDosageModel;
 use Modules\Hospital\App\Models\MedicineModel;
+use Modules\Hospital\App\Models\OPDModel;
 use Modules\Hospital\App\Models\ParticularMatrixModel;
 use Modules\Hospital\App\Models\ParticularModel;
 use Modules\Hospital\App\Models\ParticularModeModel;
@@ -164,6 +166,7 @@ class DomainModel extends Model
         $records['particularModules'] = ParticularModuleModel::getParentChild();
         $records['particularModes'] = ParticularModeModel::getParticularModuleDropdown('operation');
         $records['advices'] = ParticularModel::getAdviceDropdown($domain,'advice');
+        $records['opdReferredRooms'] = InvoiceModel::getOpdReferredRooms($domain);
         $records['religions'] = \Modules\Core\App\Models\SettingModel::getSettingDropdown('religion',$domain->id);
         $records['designations'] = \Modules\Core\App\Models\SettingModel::getSettingDropdown('designation',$domain->id);
         $records['departments'] = \Modules\Core\App\Models\SettingModel::getSettingDropdown('department',$domain->id);
