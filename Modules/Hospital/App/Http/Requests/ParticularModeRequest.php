@@ -23,9 +23,9 @@ class ParticularModeRequest extends FormRequest
             case 'POST':
             {
                 return [
-                    'name' => 'required|string|max:255',
-                    'name_bn' => 'required|string|max:255',
-                    'short_code' => 'string|max:255',
+                    'name' => 'required|string|nullable|max:255',
+                    'name_bn' => 'string|nullable|max:255',
+                    'short_code' => 'string|nullable|max:255',
                     'particular_module_id' => 'required|integer',
                 ];
             }
@@ -34,9 +34,9 @@ class ParticularModeRequest extends FormRequest
             case 'PATCH':
             {
                 return [
-                    'name' => 'required|string|max:255',
-                    'name_bn' => 'required|string|max:255',
-                    'short_code' => 'string|max:255',
+                    'name' => 'required|nullable|string|max:255',
+                    'name_bn' => 'string|nullable|max:255',
+                    'short_code' => 'string|nullable|max:255',
                     'particular_module_id' => 'required|integer',
                 ];
             }

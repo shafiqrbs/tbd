@@ -332,6 +332,26 @@ class ParticularModel extends Model
             ->get();
     }
 
+    public static function getAdviceDropdown($domain,$dropdownType)
+    {
+        $config = $domain['hms_config'];
+        return DB::table('hms_particular')
+            ->join('hms_particular_type','hms_particular_type.id','=','hms_particular.particular_type_id')
+            ->join('hms_particular_master_type','hms_particular_master_type.id','=','hms_particular_type.particular_master_type_id')
+            ->select([
+                'hms_particular.id',
+                'hms_particular.name',
+                'hms_particular.content'
+            ])
+            ->where([
+                ['hms_particular.config_id',$config],
+                ['hms_particular_master_type.slug',$dropdownType],
+                ['hms_particular.status',1]
+            ])
+            ->orderBy('hms_particular.name')
+            ->get();
+    }
+
     public static function doctorNurseStaff($domain,$userGroup)
     {
 
