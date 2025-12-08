@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Support\Facades\DB;
 use Modules\AppsApi\App\Services\GeneratePatternCodeService;
 use Modules\Core\App\Models\CustomerModel;
+use Modules\Hospital\App\Entities\ParticularMode;
 use Ramsey\Collection\Collection;
 
 class TreatmentMedicineModel extends Model
@@ -28,6 +29,11 @@ class TreatmentMedicineModel extends Model
     public function medicineBymeal()
     {
         return $this->hasOne(MedicineDosageModel::class, 'id', 'medicine_bymeal_id');
+    }
+
+    public function durationMode()
+    {
+        return $this->hasOne(ParticularModeModel::class, 'id', 'duration_mode_id');
     }
 
 }

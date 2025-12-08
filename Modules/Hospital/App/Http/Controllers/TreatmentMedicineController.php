@@ -66,8 +66,12 @@ class TreatmentMedicineController extends Controller
         $medicine = MedicineDetailsModel::find($medicineId);
         $dosage_id = $medicine->medicineStock->medicine_dosage_id ?? null;
         $medicine_bymeal_id = $medicine->medicineStock->medicine_bymeal_id ?? null;
+        $duration_mode_id = $medicine->medicineStock->duration_mode_id ?? null;
         $input['medicine_dosage_id'] = $dosage_id;
         $input['medicine_bymeal_id'] = $medicine_bymeal_id;
+        $input['duration_mode_id'] = $duration_mode_id;
+        $input['opd_quantity'] = $medicine->medicineStock->opd_quantity;
+        $input['generic_id'] = $medicine->medicineStock->product_id;
         $entity = TreatmentMedicineModel::create($input);
         $service = new JsonRequestResponse();
         $data = $service->returnJosnResponse($entity);
@@ -81,7 +85,7 @@ class TreatmentMedicineController extends Controller
     public function show($id)
     {
 
-        $entity = ParticularModel::with(['treatmentMedicineFormat','treatmentMedicineFormat.medicineDosage','treatmentMedicineFormat.medicineBymeal'])->find($id);
+        $entity = ParticularModel::with(['treatmentMedicineFormat','treatmentMedicineFormat.medicineDosage','treatmentMedicineFormat.medicineBymeal','treatmentMedicineFormat.durationMode'])->find($id);
         if (!$entity) {
             $entity = 'Data not found';
         }

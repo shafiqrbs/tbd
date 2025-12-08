@@ -245,10 +245,13 @@ class ParticularModel extends Model
                     'duration'  => $format->duration ?? null,
                     'quantity'  => $format->quantity ?? null,
                     'medicine_dosage_id'  => $format->medicineDosage->id ?? null,
+                    'medicine_duration_mode_id'  => $format->durationMode->id ?? null,
                     'dosage' => $format->medicineDosage->name ?? null,
+                    'dosage_bn' => $format->medicineDosage->name_bn ?? null,
                     'dosage_quantity' => $format->medicineDosage->quantity ?? null,
                     'medicine_bymeal_id' => $format->medicineBymeal->id ?? null,
                     'by_meal' => $format->medicineBymeal->name ?? null,
+                    'by_meal_bn' => $format->medicineBymeal->name_bn ?? null,
                 ];
             });
 
@@ -283,21 +286,7 @@ class ParticularModel extends Model
 
         $entities = $entity->get()->map(function ($item) {
             // Transform nested relations
-            $item->treatmentMedicineFormat = $item->treatmentMedicineFormat->map(function ($format) {
-                return [
-                    'id'  => $format->medicine_id ?? null,
-                    'medicine_id'  => $format->medicine_id ?? null,
-                    'medicine_name'  => $format->id ?? null,
-                    'generic'  => $format->generic ?? null,
-                    'duration'  => $format->duration ?? null,
-                    'quantity'  => $format->quantity ?? null,
-                    'medicine_dosage_id'  => $format->medicineDosage->id ?? null,
-                    'dosage' => $format->medicineDosage->name ?? null,
-                    'dosage_quantity' => $format->medicineDosage->quantity ?? null,
-                    'medicine_bymeal_id' => $format->medicineBymeal->id ?? null,
-                    'by_meal' => $format->medicineBymeal->name ?? null,
-                ];
-            });
+            $item->treatmentMedicineFormat;
 
             return $item;
         });

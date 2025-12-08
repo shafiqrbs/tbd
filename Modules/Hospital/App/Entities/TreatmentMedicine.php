@@ -49,6 +49,14 @@ class TreatmentMedicine
     private $medicineBymeal;
 
 
+
+     /**
+     * @ORM\ManyToOne(targetEntity="ParticularMode")
+     * @ORM\JoinColumn(name="duration_mode_id", referencedColumnName="id", nullable=true, onDelete="cascade")
+     **/
+    private $durationMode;
+
+
     /**
      * @ORM\ManyToOne(targetEntity="MedicineDetails")
      * @ORM\JoinColumn(name="medicine_id", referencedColumnName="id", nullable=true, onDelete="cascade")
@@ -62,6 +70,15 @@ class TreatmentMedicine
      * @ORM\Column(name="generic", type="string", length=255, nullable=true)
      */
     private $generic;
+
+
+
+    /**
+     * @var integer
+     *
+     * @ORM\Column(name="generic_id", type="integer", nullable=true)
+     */
+    private $genericId;
 
 
     /**
@@ -115,6 +132,14 @@ class TreatmentMedicine
      * @ORM\Column(name="quantity", type="integer", nullable=true)
      */
     private $quantity;
+
+
+     /**
+     * @var float
+     *
+     * @ORM\Column(name="opd_quantity", type="integer", nullable=true)
+     */
+    private $opdQuantity;
 
 
     /**
