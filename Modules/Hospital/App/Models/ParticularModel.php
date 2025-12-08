@@ -135,6 +135,8 @@ class ParticularModel extends Model
         $entities = $entity->skip($skip)->take($perPage);
         if ($sortBy == "particular_type_name"){
             $entities = $entities->orderBy("hms_particular_type.name",$orderBy);
+        }elseif ($sortBy == "report_format"){
+            $entities = $entities->orderBy("hms_particular_details.report_format",$orderBy);
         }else{
             $entities = $entities->orderBy("hms_particular.{$sortBy}",$orderBy);
         }
