@@ -694,6 +694,7 @@ class StockItemModel extends Model
                     'expiry_duration' => $product->expiry_duration ? $product->expiry_duration . ' days' : null,
                     'unit_name' => $product->unit->name ?? null,
                     'quantity' => $stock->quantity,
+                    'average_price' => round($stock->average_price, 2),
                     'sales_price' => round($stock->sales_price, 2),
                     'purchase_price' => round($stock->purchase_price, 2),
                     'barcode' => $stock->barcode,

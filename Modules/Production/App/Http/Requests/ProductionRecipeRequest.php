@@ -31,7 +31,7 @@ class ProductionRecipeRequest extends FormRequest
             {
                 return [
                     'inv_stock_id' => 'required|integer',
-                    'quantity' => 'required|integer',
+                    'quantity' => 'required',
                     'percent' => 'nullable',
                     'item_id' => 'required|integer',
                 ];
