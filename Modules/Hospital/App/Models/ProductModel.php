@@ -123,7 +123,7 @@ class ProductModel extends Model
                 'hms_medicine_details.id as product_id',
                 'hms_medicine_details.name as product_name',
                 'inv_product.name as generic',
-                'inv_product.name as generic_id',
+                'inv_product.id as generic_id',
                 'hms_medicine_details.company',
                 'hms_medicine_details.formulation',
                 'dosage.name as doses_details',
