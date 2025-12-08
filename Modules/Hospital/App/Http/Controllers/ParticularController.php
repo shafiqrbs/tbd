@@ -215,7 +215,6 @@ class ParticularController extends Controller
                 $updateDetails['unit_id'] = $input['unit_id'];
             }
 
-
             if (array_key_exists('report_format', $input)) {
                 $updateDetails['report_format'] = $findParticular->report_format ? 0:1;
             }

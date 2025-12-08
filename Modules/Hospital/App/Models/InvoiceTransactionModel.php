@@ -509,13 +509,13 @@ class InvoiceTransactionModel extends Model
             if($transaction){
                 InvoiceTransactionModel::updateOrCreate(
                     [
-                        'hms_invoice_id'             => $invoice->id,
+                        'hms_invoice_id' => $invoice->id,
                         'id'     => $transaction->id,
                     ],
                     [
                         'created_by_id'=> $domain['user_id'],
                         'approved_by_id'=> $domain['user_id'],
-                        'mode'    => 'admission',
+                        'mode'    => 'ipd',
                         'sub_total'    => $amount,
                         'total'    => $amount,
                         'amount'    => $amount,
@@ -605,7 +605,8 @@ class InvoiceTransactionModel extends Model
                     'diagnostic_room.name as diagnostic_room_name',
                 ])->leftjoin('hms_particular as hms_particular','hms_particular.id','=','hms_invoice_particular.particular_id')
                     ->leftjoin('hms_particular_mode as diagnostic_room','diagnostic_room.id','=','hms_particular.diagnostic_room_id')
-                    ->where('hms_invoice_particular.mode','investigation');
+                   ;
+                //->where('hms_invoice_particular.mode','investigation');
             }])->first();
         return $entity;
     }
