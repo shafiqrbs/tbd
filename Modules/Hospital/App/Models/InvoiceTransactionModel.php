@@ -495,7 +495,7 @@ class InvoiceTransactionModel extends Model
                 })->toArray();
             }
         }
-        return $entity;
+        return $invoiceTransaction->id;
     }
 
     public static function insertAdmissionInvoiceTransaction($domain,$invoice,$data)

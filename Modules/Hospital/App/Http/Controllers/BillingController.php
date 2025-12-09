@@ -144,17 +144,17 @@ class BillingController extends Controller
         $data = $request->all();
         $entity = InvoiceModel::findByIdOrUid($id);
         if($entity->process == "billing"){
-            InvoiceTransactionModel::insertAdmissionInvoiceTransaction($domain,$entity,$data);
+            $transactionId = InvoiceTransactionModel::insertAdmissionInvoiceTransaction($domain,$entity,$data);
         }else{
-            InvoiceTransactionModel::insertInvoiceTransaction($domain,$entity,$data);
+           $transactionId =  InvoiceTransactionModel::insertInvoiceTransaction($domain,$entity,$data);
         }
-
         $amount = InvoiceTransactionModel::where('hms_invoice_id', $entity->id)->where('process','Done')->sum('amount');
         $total = InvoiceParticularModel::where('hms_invoice_id', $entity->id)->where('status',true)->sum('sub_total');
         InvoiceParticularModel::getCountBedRoom($entity->id);
         $entity->update(['sub_total' => $total , 'total' => $total, 'amount' => $amount]);
+        $invoice = InvoiceTransactionModel::showInvoiceData($transactionId);
         $service = new JsonRequestResponse();
-        return $service->returnJosnResponse($entity);
+        return $service->returnJosnResponse($invoice);
 
     }
 
