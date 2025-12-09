@@ -306,6 +306,12 @@ class OpdController extends Controller
         $entity = InvoiceModel::find($id);
         $patient = PatientModel::find($entity->customer_id);
         $entity->update($data);
+        $dob = (isset($data['dob']) and $data['dob']) ? $data['dob'] : null;
+        if($dob =="invalid" || $dob == null){
+            $dob = null;
+        }else{
+            $dob = new \DateTime($data['dob']);
+        }
         $patient->update($data);
         $invoice = InvoiceModel::getShow($id);
         $service = new JsonRequestResponse();

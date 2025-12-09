@@ -108,7 +108,7 @@ class ProductionItems extends Model
         self::updateOrCreate(
             ['item_id' => $itemId,'config_id'=> $configId], // condition
             [
-                'warehouse_id' => $warehouseId,
+                //'warehouse_id' => $warehouseId,
                 'status'       => 1,
                 'is_delete'     => 0
             ]
