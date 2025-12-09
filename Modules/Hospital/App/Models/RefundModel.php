@@ -47,7 +47,8 @@ class RefundModel extends Model
         $page =  isset($request['page']) && $request['page'] > 0?($request['page'] - 1 ) : 0;
         $perPage = isset($request['offset']) && $request['offset']!=''? (int)($request['offset']):50;
         $skip = isset($page) && $page!=''? (int)$page * $perPage:0;
-        $entities = InvoiceModel::where([['hms_invoice.config_id',$domain['hms_config']]])
+        $entities = InvoiceTransactionModel::where([['hms_invoice.config_id',$domain['hms_config']]])
+            ->join('hms_invoice as hms_invoice','hms_invoice.id','=','hms_invoice_transaction.hms_invoice_id')
             ->leftjoin('hms_particular as vr','vr.id','=','hms_invoice.room_id')
             ->leftjoin('users as createdBy','createdBy.id','=','hms_invoice.created_by_id')
             ->join('cor_customers as customer','customer.id','=','hms_invoice.customer_id')
@@ -94,25 +95,19 @@ class RefundModel extends Model
                 $entities = $entities->where('patient_mode.slug', $request['patient_mode']);
             }
         }
-        $entities = $entities->whereIn('hms_invoice.process', ['done','admitted']);
+        $entities = $entities->whereIn('hms_invoice.process', ['New','done','close','admitted']);
         if (isset($request['customer_id']) && !empty($request['customer_id'])){
             $entities = $entities->where('hms_invoice.customer_id',$request['customer_id']);
         }
 
-        /*
-         if (isset($request['created']) && !empty($request['created'])){
-             $date = new \DateTime($request['created']);
-             $start_date = $date->format('Y-m-d 00:00:00');
-             $end_date = $date->format('Y-m-d 23:59:59');
-             $entities = $entities->whereBetween('hms_invoice.created_at',[$start_date, $end_date]);
-         }else{
-             $date = new \DateTime();
-             $start_date = $date->format('Y-m-d 00:00:00');
-             $end_date = $date->format('Y-m-d 23:59:59');
-             $entities = $entities->whereBetween('hms_invoice.created_at',[$start_date, $end_date]);
-         }
-
-        */
+        if (isset($request['created'])) {
+            $date = !empty($request['created'])
+                ? new \DateTime($request['created'])
+                : new \DateTime();
+            $start_date = $date->format('Y-m-d 00:00:00');
+            $end_date = $date->format('Y-m-d 23:59:59');
+            $entities = $entities->whereBetween('hms_invoice.created_at', [$start_date, $end_date]);
+        }
 
         $total  = $entities->count();
         $entities = $entities->skip($skip)

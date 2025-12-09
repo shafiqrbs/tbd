@@ -147,6 +147,13 @@ class InvoiceModel extends Model
                 'customer.customer_id as patient_id',
                 'customer.health_id',
                 'customer.nid as nid',
+                'customer.gender as gender',
+                DB::raw('DATE_FORMAT(customer.dob, "%d-%M-%Y") as dob'),
+                'customer.gender',
+                'hms_invoice.year as year',
+                'hms_invoice.month as month',
+                'hms_invoice.day as day',
+                'customer.upazilla_id',
                 'hms_invoice.invoice as invoice',
                 'customer.name as name',
                 'customer.mobile as mobile',
@@ -896,6 +903,7 @@ class InvoiceModel extends Model
             ['hms_particular.config_id', $domain['hms_config']],
             ['hms_particular_master_type.slug', 'opd-room'],
             ['hms_particular.status', 1],
+            ['hms_particular.is_opd', 1],
             ['hms_particular.id', '!=', $emergencyRoomId],
             ['hms_particular.opd_referred', '<>', 1]
         ])
