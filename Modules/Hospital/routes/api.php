@@ -21,6 +21,7 @@ use Modules\Hospital\App\Http\Controllers\PharmacyController;
 use Modules\Hospital\App\Http\Controllers\PrescriptionController;
 use Modules\Hospital\App\Http\Controllers\ProductController;
 use Modules\Hospital\App\Http\Controllers\RefundController;
+use Modules\Hospital\App\Http\Controllers\RefundHistoryController;
 use Modules\Hospital\App\Http\Controllers\ReportsController;
 use Modules\Hospital\App\Http\Controllers\SettingController;
 use Modules\Hospital\App\Http\Controllers\TreatmentMedicineController;
@@ -72,6 +73,7 @@ Route::prefix('/hospital')->middleware([HeaderAuthenticationMiddleware::class,'a
     Route::get('/setting/matrix', [HospitalController::class,'settingMatrix'])->name('particular_module_dropdown');
     Route::get('/setting', [SettingController::class,'particularModuleDropdown'])->name('particular_module_dropdown');
     Route::get('visiting-room', [OpdController::class,'getVisitingRooms'])->name('getVisitingRooms');
+    Route::get('doctor-room', [OpdController::class,'getDoctorRooms'])->name('getDoctorRooms');
     Route::get('send-to-prescription/{id}', [OpdController::class,'sendPrescription'])->name('send_prescription');
     Route::post('/opd/referred/{id}', [OpdController::class,'referred'])->name('prescription_referred');
     Route::get('/core/particular/doctor-nurse', [ParticularController::class, 'doctorNurseStaff'])->name('particular.doctorNurseStaff');
@@ -217,7 +219,15 @@ Route::prefix('/hospital')->middleware([HeaderAuthenticationMiddleware::class,'a
 
     Route::prefix('refund')->name('refund')->group(function () {
         Route::apiResource('', RefundController::class)->parameters(['' => 'id']);
+        Route::get('print/{id}', [RefundController::class, 'print'])->name('print');
         Route::get('{id}/payment/{transactionId}', [RefundController::class, 'transaction'])->name('transaction');
+    });
+
+    Route::prefix('refund-history')->name('refund_refund')->group(function () {
+        Route::get('approve/{id}', [RefundHistoryController::class, 'approve'])->name('approve');
+        Route::get('print/{id}', [RefundHistoryController::class, 'print'])->name('print');
+        Route::apiResource('', RefundHistoryController::class)->parameters(['' => 'id']);
+
     });
 
     Route::prefix('patient-waiver')->name('patient_waiver')->group(function () {

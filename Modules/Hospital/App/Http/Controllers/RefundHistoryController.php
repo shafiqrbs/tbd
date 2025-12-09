@@ -34,7 +34,7 @@ use Modules\Hospital\App\Models\PrescriptionModel;
 use Modules\Hospital\App\Models\RefundModel;
 
 
-class RefundController extends Controller
+class RefundHistoryController extends Controller
 {
     protected $domain;
 
@@ -54,25 +54,6 @@ class RefundController extends Controller
     public function index(Request $request){
 
         $domain = $this->domain;
-        $data = RefundModel::getRecords($request,$domain);
-        $response = new Response();
-        $response->headers->set('Content-Type','application/json');
-        $response->setContent(json_encode([
-            'message' => 'success',
-            'status' => Response::HTTP_OK,
-            'total' => $data['count'],
-            'data' => $data['entities']
-        ]));
-        $response->setStatusCode(Response::HTTP_OK);
-        return $response;
-    }
-
-    /**
-     * Display a listing of the resource.
-     */
-    public function history(Request $request){
-
-        $domain = $this->domain;
         $data = RefundModel::getHistory($request,$domain);
         $response = new Response();
         $response->headers->set('Content-Type','application/json');
@@ -86,65 +67,18 @@ class RefundController extends Controller
         return $response;
     }
 
-
     /**
      * Show the specified resource.
      *//**/
     public function show($id)
     {
         $service = new JsonRequestResponse();
-        $entity = InvoiceModel::findByIdOrUid($id);
-        if($entity->process == 'billing'){
-            $entity = BillingModel::getAdmissionBilling($id);
-        }else{
-            $entity = RefundModel::getShow($id);
-        }
+        $entity = RefundModel::getShowHistory($id);
         $data = $service->returnJosnResponse($entity);
         return $data;
     }
 
-    /**
-     * Show the specified resource.
-     *//**/
-    public function approve($id)
-    {
-        $userId = $this->domain['user_id'];
-        $service = new JsonRequestResponse();
-        $entity = RefundModel::getShowHistory($id);
-        $entity->update([
-            'process' => 'Done',
-            'approved_by_id' => $userId
-        ]);
-        $success = ['message' => 'success'];
-        $data = $service->returnJosnResponse($success);
-        return $data;
-    }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function transaction($id,$reportId)
-    {
-        $service = new JsonRequestResponse();
-        $invoiceParticular = InvoiceTransactionModel::getInvoiceRefundParticulars($id,$reportId);
-        $data = $service->returnJosnResponse($invoiceParticular);
-        return $data;
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, $id)
-    {
-        $domain = $this->domain;
-        $data = $request->all();
-        $entity = InvoiceModel::findByIdOrUid($id);
-        $refundId = RefundModel::insertInvoiceTransaction($domain,$entity,$data);
-        $service = new JsonRequestResponse();
-        $refund  = RefundModel::showInvoiceData($refundId);
-        return $service->returnJosnResponse($refund);
-
-    }
 
     public function print($id)
     {
@@ -153,15 +87,22 @@ class RefundController extends Controller
         return $service->returnJosnResponse($entity);
     }
 
-    public function inlineUpdate(Request $request,$id)
+    /**
+     * Show the specified resource.
+     */
+    public function approve($id)
     {
-        $input = $request->all();
-        $findParticular = InvoicePathologicalReportModel::find($id);
-        $findParticular->result = $input['result'];
-        $findParticular->save();
-        return response()->json(['success' => $findParticular]);
+        $userId = $this->domain['user_id'];
+        $service = new JsonRequestResponse();
+        $entity = RefundModel::find($id);
+        $entity->update([
+            'process' => 'Done',
+            'approved_by_id' => $userId
+        ]);
+        $success = ['message' => 'success'];
+        $data = $service->returnJosnResponse($success);
+        return $data;
     }
-
 
     /**
      * Remove the specified resource from storage.

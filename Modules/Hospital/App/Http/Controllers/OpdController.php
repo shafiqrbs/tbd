@@ -75,6 +75,18 @@ class OpdController extends Controller
     }
 
     /**
+     * Display a listing of the resource.
+     */
+
+    public function getDoctorRooms(Request $request){
+        $domain = $this->domain;
+        $data = InvoiceModel::getAllOpdRooms($domain);
+        $service = new JsonRequestResponse();
+        $data = $service->returnJosnResponse($data);
+        return $data;
+    }
+
+    /**
      * Show the form for editing the specified resource.
      */
     public function referred(ReferredRequest $request,$id)
@@ -306,12 +318,6 @@ class OpdController extends Controller
         $entity = InvoiceModel::find($id);
         $patient = PatientModel::find($entity->customer_id);
         $entity->update($data);
-        $dob = (isset($data['dob']) and $data['dob']) ? $data['dob'] : null;
-        if($dob =="invalid" || $dob == null){
-            $dob = null;
-        }else{
-            $dob = new \DateTime($data['dob']);
-        }
         $patient->update($data);
         $invoice = InvoiceModel::getShow($id);
         $service = new JsonRequestResponse();

@@ -81,6 +81,11 @@ class InvoiceModel extends Model
         return $this->hasMany(InvoiceTransactionModel::class, 'hms_invoice_id');
     }
 
+     public function invoice_transaction_refund()
+    {
+        return $this->hasMany(RefundModel::class, 'hms_invoice_id');
+    }
+
     public function room()
     {
         return $this->hasOne(ParticularModel::class, 'id', 'room_id');
@@ -177,7 +182,7 @@ class InvoiceModel extends Model
     public static function getRecords($request,$domain)
     {
         $sortBy =  isset($request['sortBy']) && $request['sortBy'] ? $request['sortBy'] : 'created_at';
-        $orderBy =  isset($request['order']) && $request['order'] ? $request['order'] : 'ASC';
+        $orderBy =  isset($request['order']) && $request['order'] ? $request['order'] : 'DESC';
 
         $page =  isset($request['page']) && $request['page'] > 0?($request['page'] - 1 ) : 0;
         $perPage = isset($request['offset']) && $request['offset']!=''? (int)($request['offset']):50;
@@ -245,11 +250,10 @@ class InvoiceModel extends Model
             if (!empty($request['prescription_mode'])) {
                 if ($request['prescription_mode'] === 'prescription') {
                     $entities = $entities->whereNotNull('prescription.id');
-                    $entities = $entities->where('hms_invoice.is_prescription',1);
+                 //   $entities = $entities->where('hms_invoice.is_prescription',1);
                 } elseif ($request['prescription_mode'] === 'non-prescription') {
                     $entities = $entities->where(function ($query) {
-                        $query->whereNull('prescription.id')
-                            ->orWhere('hms_invoice.is_prescription', 0);
+                        $query->whereNull('prescription.id');
                     });
                 }elseif(in_array($request['prescription_mode'],['room','admission','referred'])) {
                     $entities = $entities->where('hms_invoice.referred_mode',$request['prescription_mode']);
@@ -343,8 +347,10 @@ class InvoiceModel extends Model
             $entities = $entities->orderBy("vr.name",$orderBy);
         }elseif ($sortBy == "gender"){
             $entities = $entities->orderBy("customer.gender",$orderBy);
+            $entities = $entities->orderBy("vr.name",'ASC');
         }else{
             $entities = $entities->orderBy("hms_invoice.{$sortBy}",$orderBy);
+            $entities = $entities->orderBy("vr.name",'ASC');
         }
         $entities = $entities->get();
         $data = array('count'=>$total,'entities'=>$entities);
@@ -857,6 +863,8 @@ class InvoiceModel extends Model
             ->select([
                 'hms_particular.id as id',
                 'hms_particular.name',
+                'hms_particular.opd_referred',
+                'hms_particular.is_opd',
                 DB::raw('COUNT(hms_invoice.id) as invoice_count')
             ])
             ->groupBy('hms_particular.id', 'hms_particular.name')
