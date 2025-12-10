@@ -213,6 +213,7 @@ class ReportModel extends Model
         $userBase =self::userBaseCollection($domain,$request);
         $serviceGroups =self::serviceBaseGroupInvestigation($domain,$request);
         $services =self::serviceBaseInvestigation($domain,$request);
+        $services =self::serviceBaseInvestigation($domain,$request);
         $records =['summary'=>$summary,'invoiceMode'=>$invoiceMode,'userBase'=>$userBase,'patientMode'=>$patientMode,'serviceGroups'=>$serviceGroups,'services'=>$services];
         return $records;
     }

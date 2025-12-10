@@ -67,25 +67,6 @@ class RefundController extends Controller
         return $response;
     }
 
-    /**
-     * Display a listing of the resource.
-     */
-    public function history(Request $request){
-
-        $domain = $this->domain;
-        $data = RefundModel::getHistory($request,$domain);
-        $response = new Response();
-        $response->headers->set('Content-Type','application/json');
-        $response->setContent(json_encode([
-            'message' => 'success',
-            'status' => Response::HTTP_OK,
-            'total' => $data['count'],
-            'data' => $data['entities']
-        ]));
-        $response->setStatusCode(Response::HTTP_OK);
-        return $response;
-    }
-
 
     /**
      * Show the specified resource.
@@ -103,22 +84,6 @@ class RefundController extends Controller
         return $data;
     }
 
-    /**
-     * Show the specified resource.
-     *//**/
-    public function approve($id)
-    {
-        $userId = $this->domain['user_id'];
-        $service = new JsonRequestResponse();
-        $entity = RefundModel::getShowHistory($id);
-        $entity->update([
-            'process' => 'Done',
-            'approved_by_id' => $userId
-        ]);
-        $success = ['message' => 'success'];
-        $data = $service->returnJosnResponse($success);
-        return $data;
-    }
 
     /**
      * Show the form for editing the specified resource.

@@ -420,7 +420,8 @@ class RefundModel extends Model
         $entity = self::join('hms_invoice as hms_invoice', 'hms_invoice_transaction_refund.hms_invoice_id', '=', 'hms_invoice.id')
             ->leftjoin('cor_customers','cor_customers.id','=','hms_invoice.customer_id')
             ->leftjoin('cor_setting as religion','religion.id','=','cor_customers.religion_id')
-            ->leftjoin('users as createdBy','createdBy.id','=','hms_invoice.created_by_id')
+            ->leftjoin('users as createdBy','createdBy.id','=','hms_invoice_transaction_refund.created_by_id')
+            ->leftjoin('users as approvedBy','approvedBy.id','=','hms_invoice_transaction_refund.approved_by_id')
             ->leftjoin('hms_prescription as prescription','prescription.hms_invoice_id','=','hms_invoice.id')
             ->leftjoin('hms_admission_patient_details as admission_patient','admission_patient.hms_invoice_id','=','hms_invoice.id')
             ->leftjoin('users as prescription_doctor','prescription_doctor.id','=','prescription.created_by_id')
@@ -467,6 +468,7 @@ class RefundModel extends Model
                 'cor_customers.identity_mode as identity_mode',
                 'createdBy.username as created_by_user_name',
                 'createdBy.name as created_by_name',
+                'approvedBy.name as approved_by_name',
                 'createdBy.id as created_by_id',
                 'room.display_name as room_name',
                 'patient_mode.name as mode_name',
