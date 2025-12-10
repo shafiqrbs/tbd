@@ -188,14 +188,14 @@ class RefundModel extends Model
                 : new \DateTime();
             $start_date = $date->format('Y-m-d 00:00:00');
             $end_date = $date->format('Y-m-d 23:59:59');
-            $entities = $entities->whereBetween('hms_invoice.created_at', [$start_date, $end_date]);
+            $entities = $entities->whereBetween('hms_invoice_transaction_refund.created_at', [$start_date, $end_date]);
         }
 
         $total  = $entities->count();
         $entities = $entities->skip($skip)
             ->take($perPage)
             ->groupBy('hms_invoice.id')
-            ->orderBy('hms_invoice.updated_at','DESC')
+            ->orderBy('hms_invoice_transaction_refund.updated_at','DESC')
             ->get();
         $data = array('count' => $total,'entities' => $entities);
         return $data;
@@ -480,7 +480,7 @@ class RefundModel extends Model
             ->with(['items' => function ($query) use($id) {
                 $query->select([
                     'hms_invoice_particular.id',
-                    'hms_invoice_particular.invoice_transaction_id',
+                    'hms_invoice_particular.invoice_transaction_refund_id',
                     'hms_invoice_particular.name as item_name',
                     'hms_invoice_particular.quantity',
                     'hms_invoice_particular.price',
@@ -489,8 +489,7 @@ class RefundModel extends Model
                     'diagnostic_room.name as diagnostic_room_name',
                 ])->leftjoin('hms_particular as hms_particular','hms_particular.id','=','hms_invoice_particular.particular_id')
                     ->leftjoin('hms_particular_mode as diagnostic_room','diagnostic_room.id','=','hms_particular.diagnostic_room_id')
-                ;
-                //->where('hms_invoice_particular.mode','investigation');
+                ->where('hms_invoice_particular.is_refund',1);
             }])->first();
         return $entity;
     }
