@@ -93,6 +93,7 @@ class AccountJournalModel extends Model
         $page = isset($request['page']) && $request['page'] > 0 ? ($request['page'] - 1) : 0;
         $perPage = isset($request['offset']) && $request['offset'] != '' ? (int)($request['offset']) : 0;
         $skip = isset($page) && $page != '' ? (int)$page * $perPage : 0;
+        $isBranch = isset($request['is_branch']) && $request['is_branch'] == true ? true : false;
 
         $entity = self::where('acc_journal.config_id', $domain['acc_config'])
             ->join('acc_voucher','acc_voucher.id','=','acc_journal.voucher_id')
@@ -132,9 +133,15 @@ class AccountJournalModel extends Model
             }]);
 
         if (isset($request['term']) && !empty($request['term'])) {
-            $entity = $entity->whereAny(
-                ['acc_journal.name', 'acc_journal.slug'], 'LIKE', '%' . $request['term'] . '%');
+            $entity = $entity->whereAny(['acc_journal.name', 'acc_journal.slug'], 'LIKE', '%' . $request['term'] . '%');
         }
+
+        if ($isBranch){
+            $entity = $entity->whereNotNull('acc_journal.branch_id');
+        }else{
+            $entity = $entity->whereNull('acc_journal.branch_id');
+        }
+
         $total = $entity->count();
         $entities = $entity->skip($skip)
             ->take($perPage)

@@ -37,6 +37,7 @@ class AccountJournalRequest extends FormRequest
                 'debit' => 'required|integer',
                 'credit' => 'required|integer',
                 'voucher_id' => 'required|integer',
+                'branch_id' => 'nullable|integer',
                 'items' => 'required|array|min:2',
                 'items.*.id' => 'required|integer',
                 'items.*.mode' => 'required|in:debit,credit',

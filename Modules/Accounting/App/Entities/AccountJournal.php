@@ -29,6 +29,12 @@ class AccountJournal
     private $id;
 
     /**
+     * @ORM\ManyToOne(targetEntity="Modules\Domain\App\Entities\GlobalOption", cascade={"persist", "remove"})
+     * @ORM\JoinColumn(onDelete="CASCADE")
+     **/
+    private $branch;
+
+    /**
      * @ORM\ManyToOne(targetEntity="Config", cascade={"persist", "remove"})
      * @ORM\JoinColumn(onDelete="CASCADE")
      **/
