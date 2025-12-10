@@ -65,6 +65,16 @@ class CustomerModel extends Model
         return $data;
     }
 
+    public static function getAllPatients($domain)
+    {
+        return self::where('status', 1)->where('domain_id',$domain)
+            ->select('cor_customers.name')
+            ->distinct()
+            ->orderBy('cor_customers.name', 'ASC')
+            ->get()
+            ->toArray();
+    }
+
     public function location(): BelongsTo
     {
         return $this->belongsTo(LocationModel::class);
