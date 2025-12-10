@@ -3,6 +3,7 @@
 use App\Http\Middleware\HeaderAuthenticationMiddleware;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use Modules\Core\App\Http\Middleware\LogRequestResponse;
 use Modules\Hospital\App\Http\Controllers\BillingController;
 use Modules\Hospital\App\Http\Controllers\CategoryController;
 use Modules\Hospital\App\Http\Controllers\EpharamaController;
@@ -38,7 +39,7 @@ use Modules\Hospital\App\Http\Controllers\TreatmentMedicineController;
     |
 */
 
-Route::prefix('/hospital/select')->middleware([HeaderAuthenticationMiddleware::class,'auth:api'])->group(function() {
+Route::prefix('/hospital/select')->middleware([HeaderAuthenticationMiddleware::class,'auth:api',LogRequestResponse::class])->group(function() {
     Route::get('/location', [HospitalController::class,'locationDropdown'])->name('location_dropdown');
     Route::get('/category', [HospitalController::class,'categoryDropdown'])->name('category_dropdown');
     Route::get('/bymeal', [HospitalController::class,'mealDropdown'])->name('meal_dropdown');
@@ -59,7 +60,7 @@ Route::prefix('/hospital/select')->middleware([HeaderAuthenticationMiddleware::c
     Route::get('/medicine-generic', [HospitalController::class,'medicineGenericDropdown'])->name('medicine_generic_dropdown');
 });
 
-Route::prefix('/hospital')->middleware([HeaderAuthenticationMiddleware::class,'auth:api'])->group(function() {
+Route::prefix('/hospital')->middleware([HeaderAuthenticationMiddleware::class,'auth:api',LogRequestResponse::class])->group(function() {
     Route::get('/config', [HospitalController::class,'domainHospitalConfig'])->name('domain_hospital_config');
     Route::get('/patient-search', [HospitalController::class,'patientSearch'])->name('patient_search');
     Route::get('/room-cabin', [HospitalController::class,'roomCabin'])->name('patient_search');

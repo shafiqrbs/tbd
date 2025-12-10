@@ -46,9 +46,9 @@ class InvoiceParticularTestReport
 
 
      /**
-     * @var string
+     * @var text
      *
-     * @ORM\Column(type="string", nullable=true)
+     * @ORM\Column(type="text", nullable=true)
      */
      private $findings;
 
@@ -125,7 +125,7 @@ class InvoiceParticularTestReport
     /**
      * @var string
      *
-     * @ORM\Column(type="string", nullable=true)
+     * @ORM\Column(type="text", nullable=true)
      */
      private $impression;
 
@@ -133,7 +133,7 @@ class InvoiceParticularTestReport
     /**
      * @var string
      *
-     * @ORM\Column(type="string", nullable=true)
+     * @ORM\Column(type="text", nullable=true)
      */
      private $trachea;
 
@@ -141,21 +141,21 @@ class InvoiceParticularTestReport
     /**
      * @var string
      *
-     * @ORM\Column(type="string", nullable=true)
+     * @ORM\Column(type="text", nullable=true)
      */
      private $diaphragm;
 
     /**
      * @var string
      *
-     * @ORM\Column(type="string", nullable=true)
+     * @ORM\Column(type="text", nullable=true)
      */
      private $lungs;
 
     /**
      * @var string
      *
-     * @ORM\Column(type="string", nullable=true)
+     * @ORM\Column(type="text", nullable=true)
      */
      private $bonyThorax;
 

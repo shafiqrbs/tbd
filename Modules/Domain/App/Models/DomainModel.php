@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Modules\Accounting\App\Models\AccountingModel;
+use Modules\Core\App\Models\CustomerModel;
 use Modules\Core\App\Models\UserModel;
 use Modules\Hospital\App\Models\HospitalConfigModel;
 use Modules\Hospital\App\Models\InvoiceModel;
@@ -167,6 +168,7 @@ class DomainModel extends Model
         $records['particularModes'] = ParticularModeModel::getParticularModuleDropdown('operation');
         $records['advices'] = ParticularModel::getAdviceDropdown($domain,'advice');
         $records['opdReferredRooms'] = InvoiceModel::getOpdReferredRooms($domain);
+        $records['patients'] = CustomerModel::getAllPatients($domain->id);
         $records['religions'] = \Modules\Core\App\Models\SettingModel::getSettingDropdown('religion',$domain->id);
         $records['designations'] = \Modules\Core\App\Models\SettingModel::getSettingDropdown('designation',$domain->id);
         $records['departments'] = \Modules\Core\App\Models\SettingModel::getSettingDropdown('department',$domain->id);
