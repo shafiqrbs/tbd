@@ -178,6 +178,13 @@ class Particular
      */
     private $isCustomReport;
 
+    /**
+     * @var boolean
+     *
+     * @ORM\Column(type="boolean",options={"default"="false"})
+     */
+    private $isReportFormat;
+
 
     /**
      * @var boolean
