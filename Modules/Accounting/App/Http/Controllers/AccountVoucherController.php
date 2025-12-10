@@ -138,6 +138,18 @@ class AccountVoucherController extends Controller
     }
 
 
+    public function lastVoucherDate(Request $request)
+    {
+        $data = AccountVoucherModel::getLastVoucherDate($request,$this->domain);
+        return response()->json([
+            'status' => 200,
+            'success' => true,
+            'message' => 'Voucher last date',
+            'data' => $data,
+        ]);
+    }
+
+
     public function statusUpdate($id)
     {
         $findVoucher = AccountVoucherModel::find($id);

@@ -250,6 +250,12 @@ class AccountVoucherModel extends Model
             ->orderBy('acc_voucher.name', 'ASC')
             ->get();
     }
+    public static function getLastVoucherDate($request, $domain)
+    {
+        $lastDate = AccountJournalModel::where('config_id',$domain['acc_config'])->latest()->first();
+        return $lastDate?->issue_date ?? null;
+
+    }
 
     public static function resetVoucher($domain)
     {

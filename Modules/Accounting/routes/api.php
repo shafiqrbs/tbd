@@ -61,6 +61,7 @@ Route::prefix('/accounting')->middleware([HeaderAuthenticationMiddleware::class,
 
     Route::get('/account-ledger-reset', [AccountHeadController::class,'resetAccountLedgerHead'])->name('account_head_reset');
 
+    Route::get('/voucher/last-date', [AccountVoucherController::class,'lastVoucherDate'])->name('account_voucher_last_date');
     Route::get('/voucher/wise-ledger-details', [AccountVoucherController::class,'accountVoucherWiseLedger'])->name('account_voucher_wise_ledger');
     Route::post('/voucher/update-heads', [AccountVoucherController::class, 'updateVoucherHeads'])->name('account_voucher_update_heads');
     Route::get('/voucher/status-update/{id}', [AccountVoucherController::class, 'statusUpdate'])->name('account_voucher_update_status');
