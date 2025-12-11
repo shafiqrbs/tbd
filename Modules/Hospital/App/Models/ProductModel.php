@@ -146,6 +146,42 @@ class ProductModel extends Model
 
     }
 
+    public static function getMedicineLocalDropdown($domain){
+
+        $config =  $domain['hms_config'];
+        $entities = MedicineDetailsModel::where('hms_medicine_details.config_id', $config)
+            ->leftjoin('hms_medicine_stock', 'hms_medicine_stock.id', '=', 'hms_medicine_details.medicine_stock_id')
+            ->leftjoin('inv_product', 'hms_medicine_stock.product_id', '=', 'inv_product.id')
+            ->leftjoin('hms_medicine_dosage as dosage', 'dosage.id', '=', 'hms_medicine_stock.medicine_dosage_id')
+            ->leftjoin('hms_medicine_dosage as bymeal', 'bymeal.id', '=', 'hms_medicine_stock.medicine_bymeal_id')
+            ->leftjoin('hms_particular_mode as hms_particular_mode', 'hms_particular_mode.id', '=', 'hms_medicine_stock.duration_mode_id')
+            ->select([
+                'hms_medicine_details.id as id',
+                'hms_medicine_details.id as product_id',
+                'hms_medicine_details.name as product_name',
+                'inv_product.name as generic',
+                'inv_product.id as generic_id',
+                'hms_medicine_details.company',
+                'hms_medicine_details.formulation',
+                'dosage.name as doses_details',
+                'hms_medicine_details.doses_form',
+                'bymeal.name as by_meal',
+                'hms_medicine_stock.duration_day',
+                'hms_medicine_stock.medicine_dosage_id',
+                'hms_medicine_stock.medicine_bymeal_id',
+                'hms_medicine_stock.opd_quantity',
+                'hms_medicine_stock.duration',
+                'hms_particular_mode.id as duration_mode_id',
+                'hms_particular_mode.name as duration_mode',
+                'hms_particular_mode.name_bn as duration_mode_bn',
+            ])
+            ->orderBy('hms_medicine_details.name', 'ASC')
+            ->get();
+
+        return $entities;
+
+    }
+
     public static function getRecords($request, $domain)
     {
 

@@ -120,6 +120,10 @@ class MedicineController extends Controller
                 $updateDetails['duration_mode'] = $input['duration_mode'];
             }
 
+            if (array_key_exists('status', $input)) {
+                $updateDetails['status'] = $input['status'] ? 0:1;
+            }
+
             if (array_key_exists('admin_status', $input)) {
                 $updateDetails['admin_status'] = $input['admin_status'] ? 0:1;
             }

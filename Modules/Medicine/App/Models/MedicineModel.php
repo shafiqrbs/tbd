@@ -144,6 +144,7 @@ class MedicineModel extends Model
                 'hms_medicine_details.formulation',
                 'dosage.name as doses_details',
                 'hms_medicine_details.doses_form',
+                'hms_medicine_details.status',
                 'bymeal.name as by_meal',
                 'hms_medicine_stock.medicine_dosage_id',
                 'hms_medicine_stock.medicine_bymeal_id',

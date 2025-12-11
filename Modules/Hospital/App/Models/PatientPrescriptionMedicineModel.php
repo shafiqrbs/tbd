@@ -35,6 +35,23 @@ class PatientPrescriptionMedicineModel extends Model
         });
     }
 
+    public static function getMedicineLocalDropdown($domain)
+    {
+        $rows = self::join(
+            'hms_prescription',
+            'hms_prescription.id',
+            '=',
+            'hms_patient_prescription_medicine.prescription_id'
+        )
+            ->where('hms_prescription.created_by_id', $domain['user_id'])
+            ->whereNull('hms_patient_prescription_medicine.medicine_id')
+            ->select('hms_patient_prescription_medicine.*')
+            ->orderBy('hms_patient_prescription_medicine.medicine_name', 'ASC')
+            ->get();
+        return $rows;
+
+    }
+
     public static function insertPatientMedicine($domain,$id)
     {
         $prescription = PrescriptionModel::find($id);

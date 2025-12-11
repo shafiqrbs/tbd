@@ -20,6 +20,8 @@ use Modules\Hospital\App\Models\ParticularMatrixModel;
 use Modules\Hospital\App\Models\ParticularModel;
 use Modules\Hospital\App\Models\ParticularModeModel;
 use Modules\Hospital\App\Models\ParticularModuleModel;
+use Modules\Hospital\App\Models\PatientPrescriptionMedicineModel;
+use Modules\Hospital\App\Models\ProductModel;
 use Modules\Inventory\App\Models\ConfigModel;
 use Modules\NbrVatTax\App\Models\NbrVatConfigModel;
 use Modules\Production\App\Models\ProductionConfig;
@@ -169,6 +171,8 @@ class DomainModel extends Model
         $records['advices'] = ParticularModel::getAdviceDropdown($domain,'advice');
         $records['opdReferredRooms'] = InvoiceModel::getOpdReferredRooms($domain);
         $records['patients'] = CustomerModel::getAllPatients($domain->id);
+        $records['medicines'] = ProductModel::getMedicineLocalDropdown($domain);
+        $records['localMedicines'] = PatientPrescriptionMedicineModel::getMedicineLocalDropdown($domain);
         $records['religions'] = \Modules\Core\App\Models\SettingModel::getSettingDropdown('religion',$domain->id);
         $records['designations'] = \Modules\Core\App\Models\SettingModel::getSettingDropdown('designation',$domain->id);
         $records['departments'] = \Modules\Core\App\Models\SettingModel::getSettingDropdown('department',$domain->id);

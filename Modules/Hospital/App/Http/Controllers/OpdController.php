@@ -154,13 +154,14 @@ class OpdController extends Controller
                         'domain_id' => $this->domain['global_id'],
                         'name'      => $input['name'] ?? null,
                         'mobile'    => $input['mobile'] ?? null,
-                      //  'address'    => $input['address'] ?? null,
+                        'address'    => $input['address'] ?? null,
                         'dob'    => $dob ?? null,
                         'upazilla_id'    => $input['upazilla_id'] ?? null,
                         'gender'    => $input['gender'] ?? 'male',
                         'identity_mode'    => $input['identity_mode'] ?? null,
                         'health_id'    => $input['health_id'] ?? null,
                         'nid'    => $input['identity'] ?? null,
+                        'country_id'    => $input['country_id'] ?? 19,
                     ]
                 );
             }
