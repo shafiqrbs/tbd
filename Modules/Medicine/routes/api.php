@@ -69,6 +69,8 @@ Route::prefix('/pharmacy')->middleware([HeaderAuthenticationMiddleware::class,Lo
     Route::get('/stock/category/scrolling', [MedicineStockController::class,'stockCategoryForScrolling'])->name('stock_category_scrolling');
     Route::get('/stock/category/scrolling/workorder', [MedicineStockController::class,'stockCategoryForScrollingForWorkorder'])->name('stock_category_scrolling_workorder');
     Route::get('/stock-item/history', [MedicineStockController::class,'stockItemHistory'])->name('stock_item_history');
+    Route::get('/medicine-issue-report', [MedicineStockController::class,'medicineIssueReport'])->name('medicine_issue_report');
+    Route::get('/medicine-summery-report', [MedicineStockController::class,'medicineSummeryReport'])->name('medicine_summery_report');
     Route::apiResource('stock',
         MedicineStockController::class)
         ->middleware([HeaderAuthenticationMiddleware::class])

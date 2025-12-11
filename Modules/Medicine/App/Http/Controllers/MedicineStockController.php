@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Modules\AppsApi\App\Services\JsonRequestResponse;
 use Modules\Core\App\Models\UserModel;
+use Modules\Hospital\App\Models\HospitalSalesModel;
 use Modules\Inventory\App\Models\StockItemHistoryModel;
 use Modules\Medicine\App\Http\Requests\MedicineStockInlineRequest;
 use Modules\Medicine\App\Models\MedicineStockItemHistoryModel;
@@ -350,6 +351,54 @@ class MedicineStockController extends Controller
         }*/
 
         $items = MedicineStockItemHistoryModel::getStockItemHistory($params,$this->domain);
+
+        return response([
+            'result' => true,
+            'message' => 'Stock item history.',
+            'status' => ResponseAlias::HTTP_OK,
+            'total' => $items['count'],
+            'data' => $items['items']
+        ]);
+    }
+
+    public function medicineIssueReport(Request $request)
+    {
+        $params = $request->only(['warehouse_id', 'stock_item_id', 'start_date', 'end_date','page','offset']);
+
+
+        if (!$params['start_date']) {
+            return response([
+                'result' => false,
+                'message' => 'Start date missing.',
+                'status' => ResponseAlias::HTTP_BAD_REQUEST
+            ]);
+        }
+
+        $items = HospitalSalesModel::getMedicineIssueDetails($params,$this->domain);
+
+        return response([
+            'result' => true,
+            'message' => 'Stock item history.',
+            'status' => ResponseAlias::HTTP_OK,
+            'total' => $items['count'],
+            'data' => $items['items']
+        ]);
+    }
+
+    public function medicineSummeryReport(Request $request)
+    {
+        $params = $request->only(['warehouse_id', 'start_date', 'end_date','page','offset']);
+
+
+        if (!$params['start_date']) {
+            return response([
+                'result' => false,
+                'message' => 'Start date missing.',
+                'status' => ResponseAlias::HTTP_BAD_REQUEST
+            ]);
+        }
+
+        $items = HospitalSalesModel::getMedicineSummeryDetails($params,$this->domain);
 
         return response([
             'result' => true,
