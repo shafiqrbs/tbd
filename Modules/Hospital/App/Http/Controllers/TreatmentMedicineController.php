@@ -62,16 +62,15 @@ class TreatmentMedicineController extends Controller
         $config = $this->domain['hms_config'];
         $input = $request->validated();
         $input['config_id'] = $config;
-        $medicineId = $input['medicine_id'];
-        $medicine = MedicineDetailsModel::find($medicineId);
-        $dosage_id = $medicine->medicineStock->medicine_dosage_id ?? null;
-        $medicine_bymeal_id = $medicine->medicineStock->medicine_bymeal_id ?? null;
-        $duration_mode_id = $medicine->medicineStock->duration_mode_id ?? null;
-        $input['medicine_dosage_id'] = $dosage_id;
-        $input['medicine_bymeal_id'] = $medicine_bymeal_id;
-        $input['duration_mode_id'] = $duration_mode_id;
-        $input['opd_quantity'] = $medicine->medicineStock->opd_quantity;
-        $input['generic_id'] = $medicine->medicineStock->product_id;
+        $medicineId = $input['medicine_id'] ?? null;
+        if($medicineId){
+            $medicine = MedicineDetailsModel::find($medicineId);
+            $input['opd_quantity'] = $medicine->medicineStock->opd_quantity;
+            $input['generic_id'] = $medicine->medicineStock->product_id;
+            $input['generic'] = $medicine->medicineStock->product->name;
+        }else{
+            $input['medicine_name'] = $input['generic'];
+        }
         $entity = TreatmentMedicineModel::create($input);
         $service = new JsonRequestResponse();
         $data = $service->returnJosnResponse($entity);

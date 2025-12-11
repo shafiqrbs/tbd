@@ -88,6 +88,7 @@ class IpdModel extends Model
             ->leftjoin('hms_prescription as prescription','prescription.hms_invoice_id','=','hms_invoice.id')
             ->leftjoin('hms_admission_patient_details as admission_patient','admission_patient.hms_invoice_id','=','hms_invoice.id')
             ->leftjoin('users as prescription_doctor','prescription_doctor.id','=','prescription.created_by_id')
+            ->leftjoin('users as admittedBy','admittedBy.id','=','hms_invoice.admitted_by_id')
             ->leftjoin('hms_particular as room','room.id','=','hms_invoice.room_id')
             ->leftjoin('hms_particular_mode as patient_mode','patient_mode.id','=','hms_invoice.patient_mode_id')
             ->leftjoin('hms_particular as admit_consultant','admit_consultant.id','=','hms_invoice.admit_consultant_id')
@@ -133,6 +134,7 @@ class IpdModel extends Model
                 'createdBy.username as created_by_user_name',
                 'createdBy.name as created_by_name',
                 'createdBy.id as created_by_id',
+                'admittedBy.name as admitted_by_name',
                 'room.display_name as room_name',
                 'patient_mode.name as mode_name',
                 'particular_payment_mode.name as payment_mode_name',
@@ -205,7 +207,7 @@ class IpdModel extends Model
             [
                 'invoice_id' => $entity->id,
                 'created_by_id'    => $entity->created_by_id,
-                'mode' => 'admission',
+                'mode' => 'ipd',
                 'updated_at'    => $date,
                 'created_at'    => $date,
             ]

@@ -216,7 +216,7 @@ class InvoiceModel extends Model
                 DB::raw('DATE_FORMAT(hms_invoice.appointment_date, "%d-%M-%Y") as appointment'),
                 DB::raw('DATE_FORMAT(hms_invoice.admission_date, "%d-%M-%Y") as admission_date'),
                 DB::raw('DATE_FORMAT(customer.dob, "%d-%M-%Y") as dob'),
-                'hms_invoice.process as process',
+                DB::raw("CONCAT(UCASE(LEFT(hms_invoice.process, 1)), LCASE(SUBSTRING(hms_invoice.process, 2))) as process"),
                 'vr.name as visiting_room',
                 'vr.display_name as room_name',
                 'patient_mode.name as patient_mode_name',
@@ -266,8 +266,8 @@ class InvoiceModel extends Model
                 $entities = $entities->where('hms_invoice.process','ipd');
                 $entities = $entities->where('hms_invoice.referred_mode', $request['referred_mode'])
                     ->whereNull('hms_invoice.parent_id')->whereDoesntHave('children');
-            } elseif ($request['ipd_mode'] === 'confirmed') {
-                $entities = $entities->where('hms_invoice.process','confirmed');
+            } elseif ($request['ipd_mode'] === 'admission') {
+                $entities = $entities->whereIn('hms_invoice.process',['confirmed','billing']);
                 $entities = $entities->whereNotNull('hms_invoice.parent_id');
             } elseif ($request['ipd_mode'] === 'admitted') {
                 $entities = $entities->where('hms_invoice.process','admitted');
@@ -310,7 +310,11 @@ class InvoiceModel extends Model
         }
 
         if (isset($request['process']) && !empty($request['process'])){
-            $entities = $entities->where('hms_invoice.process',$request['process']);
+            if (is_array($request['process'])) {
+                $entities = $entities->whereIn('hms_invoice.process', $request['process']);
+            } else {
+                $entities = $entities->where('hms_invoice.process', $request['process']);
+            }
         }
 
         if (isset($request['room_id']) && !empty($request['room_id'])){
@@ -394,7 +398,7 @@ class InvoiceModel extends Model
                 DB::raw('DATE_FORMAT(hms_invoice.appointment_date, "%d-%M-%Y") as appointment'),
                 DB::raw('DATE_FORMAT(hms_invoice.admission_date, "%d-%M-%Y") as admission_date'),
                 DB::raw('DATE_FORMAT(customer.dob, "%d-%M-%Y") as dob'),
-                'hms_invoice.process as process',
+                DB::raw("CONCAT(UCASE(LEFT(hms_invoice.process, 1)), LCASE(SUBSTRING(hms_invoice.process, 2))) as process"),
                 'vr.name as visiting_room',
                 'vr.display_name as room_name',
                 'patient_mode.name as patient_mode_name',
@@ -694,6 +698,7 @@ class InvoiceModel extends Model
             ->leftjoin('cor_customers','cor_customers.id','=','hms_invoice.customer_id')
             ->leftjoin('cor_setting as religion','religion.id','=','cor_customers.religion_id')
             ->leftjoin('users as createdBy','createdBy.id','=','hms_invoice.created_by_id')
+            ->leftjoin('users as admittedBy','admittedBy.id','=','hms_invoice.admitted_by_id')
             ->leftjoin('hms_prescription as prescription','prescription.hms_invoice_id','=','hms_invoice.id')
             ->leftjoin('hms_admission_patient_details as admission_patient','admission_patient.hms_invoice_id','=','hms_invoice.id')
             ->leftjoin('users as prescription_doctor','prescription_doctor.id','=','prescription.created_by_id')
@@ -741,6 +746,7 @@ class InvoiceModel extends Model
                 'hms_invoice.day as day',
                 'createdBy.username as created_by_user_name',
                 'createdBy.name as created_by_name',
+                'admittedBy.name as admitted_by_name',
                 'createdBy.id as created_by_id',
                 'room.display_name as room_name',
                 'patient_mode.name as mode_name',

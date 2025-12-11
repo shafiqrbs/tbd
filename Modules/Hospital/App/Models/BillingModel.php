@@ -403,7 +403,7 @@ class BillingModel extends Model
                     'hms_invoice_transaction.amount',
                     'hms_invoice_transaction.process',
                     DB::raw('DATE_FORMAT(hms_invoice_transaction.created_at, "%d-%m-%y") as created'),
-                ])->where('hms_invoice_transaction.process','New')->whereIn('hms_invoice_transaction.mode', ['admission'])->orderBy('hms_invoice_transaction.created_at','DESC');
+                ])->where('hms_invoice_transaction.process','New')->whereIn('hms_invoice_transaction.mode', ['ipd'])->orderBy('hms_invoice_transaction.created_at','DESC');
             }])
             ->with(['invoice_particular' => function ($query) {
                 $query->select([
@@ -415,7 +415,7 @@ class BillingModel extends Model
                     'hms_invoice_particular.quantity',
                     'hms_invoice_particular.sub_total',
                     'hms_invoice_particular.process',
-                ])->whereIn('hms_invoice_particular.mode', ['admission','ipd','room'])->orderBy('hms_invoice_particular.created_at','DESC');
+                ])->whereIn('hms_invoice_particular.mode', ['admission','ipd','room'])->where('status',0)->orderBy('hms_invoice_particular.created_at','DESC');
             }])
             ->first();
 
