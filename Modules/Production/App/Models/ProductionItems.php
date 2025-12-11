@@ -105,7 +105,7 @@ class ProductionItems extends Model
 
     public static function insertUpdate($configId,$itemId,$warehouseId){
 
-        $item = self::updateOrCreate(
+        self::updateOrCreate(
             ['item_id' => $itemId,'config_id'=> $configId], // condition
             [
                 //'warehouse_id' => $warehouseId,
@@ -113,7 +113,6 @@ class ProductionItems extends Model
                 'is_delete'     => 0
             ]
         );
-        dd($item);
     }
 
 
