@@ -169,14 +169,15 @@ class IpdController extends Controller
     public function ipdAdmissionShow($id)
     {
 
-        $entity = IpdModel::getIpdAdmissionShow($id);
-        if (!$entity){
+        $invoice = IpdModel::findByIdOrUid($id);
+        if (!$invoice){
             $entity = 'not_found';
         }
-        $amount = InvoiceTransactionModel::where('hms_invoice_id', $entity->id)->where('process','Done')->sum('amount');
-        $total = InvoiceParticularModel::where('hms_invoice_id', $entity->id)->where('status',true)->sum('sub_total');
-        InvoiceParticularModel::getCountBedRoom($entity->id);
-        $entity->update(['sub_total'=> $total ,'total' => $total,'amount' => $amount]);
+        $amount = InvoiceTransactionModel::where('hms_invoice_id', $invoice->id)->where('process','Done')->sum('amount');
+        $total = InvoiceParticularModel::where('hms_invoice_id', $invoice->id)->where('status',1)->sum('sub_total');
+        InvoiceParticularModel::getCountBedRoom($invoice->id);
+        $invoice->update(['sub_total'=> $total ,'total' => $total,'amount' => $amount]);
+        $entity = IpdModel::getIpdAdmissionShow($invoice->id);
         $service = new JsonRequestResponse();
         $data = $service->returnJosnResponse($entity);
         return $data;
@@ -210,7 +211,9 @@ class IpdController extends Controller
     {
 
        // $data = $request->validated();
+        $user = $this->domain['user_id'];
         $data = $request->all();
+        $data['admitted_by_id'] = $user;
         IpdModel::updateIpdInvoice($id,$data);
         $entity = InvoiceModel::getIpdShow($id);
         $service = new JsonRequestResponse();

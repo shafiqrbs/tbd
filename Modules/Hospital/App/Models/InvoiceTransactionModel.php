@@ -503,30 +503,30 @@ class InvoiceTransactionModel extends Model
 
         $amount = $data['total'];
         $date =  new \DateTime("now");
-        $items = InvoiceTransactionModel::where(['hms_invoice_id' => $invoice->id,'process'=>'New'])->get();
-        collect($items)->map(function ($item) use ($domain,$invoice,$amount,$date) {
-            $transaction = InvoiceTransactionModel::find($item['id']);
-            if($transaction){
-                InvoiceTransactionModel::updateOrCreate(
-                    [
-                        'hms_invoice_id' => $invoice->id,
-                        'id'     => $transaction->id,
-                    ],
-                    [
-                        'created_by_id'=> $domain['user_id'],
-                        'approved_by_id'=> $domain['user_id'],
-                        'mode'    => 'ipd',
-                        'sub_total'    => $amount,
-                        'total'    => $amount,
-                        'amount'    => $amount,
-                        'process'    => 'Done',
-                        'updated_at'    => $date,
-                        'created_at'    => $date,
-                    ]
-                );
-            }
-        })->toArray();
-        $invoice->update(['sub_total' => $amount , 'total' => $amount, 'amount' => $amount, 'process' => 'admitted']);
+        $transaction = InvoiceTransactionModel::where([
+            'hms_invoice_id' => $invoice->id,
+            'process'        => 'New',
+            'mode'           => 'ipd'
+        ])->first();
+        if($transaction){
+            InvoiceTransactionModel::updateOrCreate(
+                [
+                    'hms_invoice_id' => $invoice->id,
+                    'id'     => $transaction->id,
+                ],
+                [
+                    'created_by_id'=> $domain['user_id'],
+                    'approved_by_id'=> $domain['user_id'],
+                    'amount'    => $transaction->total,
+                    'process'    => 'Done',
+                    'updated_at'    => $date,
+                    'created_at'    => $date,
+                ]
+            );
+            InvoiceParticularModel::where('invoice_transaction_id', $transaction->id)->update(['status' => 1,'is_invoice' => 1]);
+            $invoice->update(['sub_total' => $amount , 'total' => $amount, 'amount' => $amount, 'process' => 'admitted']);
+        }
+
     }
 
 

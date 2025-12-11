@@ -181,6 +181,12 @@ class Invoice
      **/
     private  $deletedBy;
 
+    /**
+     * @ORM\ManyToOne(targetEntity="Modules\Core\App\Entities\User")
+     * @ORM\JoinColumn(name="admitted_by_id", referencedColumnName="id", nullable=true)
+     **/
+    private  $admittedBy;
+
 
     /**
      * @var string

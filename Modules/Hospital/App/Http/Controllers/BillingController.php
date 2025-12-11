@@ -24,6 +24,7 @@ use Modules\Hospital\App\Models\InvoiceModel;
 use Modules\Hospital\App\Models\InvoiceParticularModel;
 use Modules\Hospital\App\Models\InvoicePathologicalReportModel;
 use Modules\Hospital\App\Models\InvoiceTransactionModel;
+use Modules\Hospital\App\Models\IpdModel;
 use Modules\Hospital\App\Models\LabInvestigationModel;
 use Modules\Hospital\App\Models\OPDModel;
 use Modules\Hospital\App\Models\ParticularModel;
@@ -144,15 +145,16 @@ class BillingController extends Controller
         $data = $request->all();
         $entity = InvoiceModel::findByIdOrUid($id);
         if($entity->process == "billing"){
-            $transactionId = InvoiceTransactionModel::insertAdmissionInvoiceTransaction($domain,$entity,$data);
+            InvoiceTransactionModel::insertAdmissionInvoiceTransaction($domain,$entity,$data);
+            $invoice = IpdModel::getIpdAdmissionShow($id);
         }else{
            $transactionId =  InvoiceTransactionModel::insertInvoiceTransaction($domain,$entity,$data);
+            $invoice = InvoiceTransactionModel::showInvoiceData($transactionId);
         }
         $amount = InvoiceTransactionModel::where('hms_invoice_id', $entity->id)->where('process','Done')->sum('amount');
         $total = InvoiceParticularModel::where('hms_invoice_id', $entity->id)->where('status',true)->sum('sub_total');
         InvoiceParticularModel::getCountBedRoom($entity->id);
         $entity->update(['sub_total' => $total , 'total' => $total, 'amount' => $amount]);
-        $invoice = InvoiceTransactionModel::showInvoiceData($transactionId);
         $service = new JsonRequestResponse();
         return $service->returnJosnResponse($invoice);
 
