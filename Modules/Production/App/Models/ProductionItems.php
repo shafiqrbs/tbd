@@ -105,7 +105,7 @@ class ProductionItems extends Model
 
     public static function insertUpdate($configId,$itemId,$warehouseId){
 
-        self::updateOrCreate(
+        $item = self::updateOrCreate(
             ['item_id' => $itemId,'config_id'=> $configId], // condition
             [
                 //'warehouse_id' => $warehouseId,
@@ -113,6 +113,7 @@ class ProductionItems extends Model
                 'is_delete'     => 0
             ]
         );
+        dd($item);
     }
 
 
@@ -174,7 +175,7 @@ class ProductionItems extends Model
             ->leftjoin('inv_particular','inv_particular.id','=','inv_product.unit_id')
             ->join('inv_category','inv_category.id','=','inv_product.category_id')
             ->join('inv_setting','inv_setting.id','=','inv_product.product_type_id')
-            ->join('cor_warehouses','cor_warehouses.id','=','pro_item.warehouse_id')
+            ->leftjoin('cor_warehouses','cor_warehouses.id','=','pro_item.warehouse_id')
             ->select([
                 'pro_item.id',
                 'inv_stock.name as product_name',

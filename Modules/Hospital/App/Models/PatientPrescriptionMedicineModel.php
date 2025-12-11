@@ -47,6 +47,7 @@ class PatientPrescriptionMedicineModel extends Model
             ->whereNull('hms_patient_prescription_medicine.medicine_id')
             ->select('hms_patient_prescription_medicine.*')
             ->orderBy('hms_patient_prescription_medicine.medicine_name', 'ASC')
+            ->groupBy('hms_patient_prescription_medicine.medicine_name')
             ->get();
         return $rows;
 
