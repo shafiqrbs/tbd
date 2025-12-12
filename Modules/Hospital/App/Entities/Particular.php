@@ -40,6 +40,12 @@ class Particular
      **/
     private $particularType;
 
+    /**
+     * @ORM\ManyToOne(targetEntity="ParticularMode")
+     * @ORM\JoinColumn(name="financial_service_id", referencedColumnName="id", nullable=true, onDelete="cascade")
+     **/
+    private $financialService;
+
      /**
      * @ORM\ManyToOne(targetEntity="InvestigationMasterReport")
      * @ORM\JoinColumn(name="investigation_report_id", referencedColumnName="id", nullable=true, onDelete="cascade")

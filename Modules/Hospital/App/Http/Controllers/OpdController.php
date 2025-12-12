@@ -97,9 +97,9 @@ class OpdController extends Controller
         if ($entity && isset($input['referred_mode'])) {
             $input['hms_invoice_id'] = $id;
             $input['created_by_id'] =  $this->domain['user_id'];
-            $prescription = PrescriptionModel::where('hms_invoice_id', $id)->first();
-            $prescription->update(['referred_by_id' => $this->domain['user_id']]);
             if($opd_room_id){
+                $prescription = PrescriptionModel::where('hms_invoice_id', $id)->first();
+                $prescription->update(['referred_by_id' => $this->domain['user_id']]);
                 $input['json_content'] =  $prescription['json_content'];
                 $input['prescription_id'] =  $prescription['id'];
             }

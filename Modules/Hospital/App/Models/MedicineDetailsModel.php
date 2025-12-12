@@ -37,4 +37,13 @@ class MedicineDetailsModel extends Model
     {
         return $this->belongsTo(MedicineStockModel::class, 'medicine_stock_id');
     }
+
+    public function prescription_medicine()
+    {
+        return $this->hasMany(
+            PatientPrescriptionMedicineModel::class,
+            'medicine_id',     // foreign key on patient prescription table
+            'id'               // local key on medicine_details table
+        );
+    }
 }

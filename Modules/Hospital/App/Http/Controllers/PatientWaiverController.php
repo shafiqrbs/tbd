@@ -159,12 +159,13 @@ class PatientWaiverController extends Controller
             $data['checked_by_id']= $this->domain['user_id'];
             $data['checked_date'] = $date;
         }elseif($entity->checked_by_id and empty($entity->approved_by_id)){
-            $data['approved_by_id']= $this->domain['user_id'];
-            $data['approved_date'] = $date;
+              $data['approved_by_id']= $this->domain['user_id'];
+              $data['approved_date'] = $date;
         }
         $entity->update($data);
+        $transaction = InvoiceTransactionModel::where('patient_waiver_id', $entity->id)->first();
         if($entity->approved_by_id){
-            $transaction = InvoiceTransactionModel::where('patient_waiver_id', $entity->id);
+            $transaction = InvoiceTransactionModel::where('patient_waiver_id', $entity->id)->first();
             $transaction->update([
                 'approved_by_id' => $this->domain['user_id'],
                 'process' => 'Done',
@@ -172,9 +173,10 @@ class PatientWaiverController extends Controller
                 'total' => 0,
                 'amount' => 0,
             ]);
+            InvoiceParticularModel::where('patient_waiver_id', $entity->id)->update(['price' => 0,'sub_total' => 0,'status' => 1,'is_invoice' => 1]);
         }
         $service = new JsonRequestResponse();
-        return $service->returnJosnResponse($entity);
+        return $service->returnJosnResponse($transaction);
 
     }
 

@@ -50,7 +50,6 @@ class PatientPrescriptionMedicineModel extends Model
             ->groupBy('hms_patient_prescription_medicine.medicine_name')
             ->get();
         return $rows;
-
     }
 
     public static function insertPatientMedicine($domain,$id)

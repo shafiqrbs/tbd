@@ -206,7 +206,9 @@ class MedicineStockController extends Controller
         if (array_key_exists('duration_mode_id', $input)) {
             $updateDetails['duration_mode_id'] = $input['duration_mode_id'];
         }
-
+        if (array_key_exists('status', $input)) {
+            $updateDetails['status'] = $input['status'] ? 1 : 0;
+        }
         if (array_key_exists('admin_status', $input)) {
             $updateDetails['admin_status'] = $input['admin_status'] ? 1 : 0;
         }

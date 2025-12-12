@@ -105,6 +105,8 @@ class ProductModel extends Model
         return $this->hasMany(ProductMeasurementModel::class, 'product_id');
     }
 
+
+
     public static function getMedicineDropdown($domain,$term){
 
         $config =  $domain['hms_config'];
@@ -112,7 +114,7 @@ class ProductModel extends Model
             ->where(function ($query) use ($term) {
                 $query->where('hms_medicine_details.name', 'LIKE', '%' . trim($term) . '%')
                     ->orWhere('inv_product.name', 'LIKE', '%' . trim($term) . '%');
-            })
+            })->where('hms_medicine_details.status',1)
             ->leftjoin('hms_medicine_stock', 'hms_medicine_stock.id', '=', 'hms_medicine_details.medicine_stock_id')
             ->leftjoin('inv_product', 'hms_medicine_stock.product_id', '=', 'inv_product.id')
             ->leftjoin('hms_medicine_dosage as dosage', 'dosage.id', '=', 'hms_medicine_stock.medicine_dosage_id')
@@ -149,7 +151,8 @@ class ProductModel extends Model
     public static function getMedicineLocalDropdown($domain){
 
         $config =  $domain['hms_config'];
-        $entities = MedicineDetailsModel::where('hms_medicine_details.config_id', $config)
+        $user =  $domain['user_id'];
+        $entities = MedicineDetailsModel::where('hms_medicine_details.config_id', $config)->where('hms_medicine_details.status',1)
             ->leftjoin('hms_medicine_stock', 'hms_medicine_stock.id', '=', 'hms_medicine_details.medicine_stock_id')
             ->leftjoin('inv_product', 'hms_medicine_stock.product_id', '=', 'inv_product.id')
             ->leftjoin('hms_medicine_dosage as dosage', 'dosage.id', '=', 'hms_medicine_stock.medicine_dosage_id')
@@ -175,6 +178,13 @@ class ProductModel extends Model
                 'hms_particular_mode.name as duration_mode',
                 'hms_particular_mode.name_bn as duration_mode_bn',
             ])
+            ->withCount([
+            'prescription_medicine as prescription_count' => function ($q) use($user) {
+                $q->join('hms_prescription', 'hms_prescription.id', '=', 'hms_patient_prescription_medicine.prescription_id')
+                    ->where('hms_prescription.created_by_id', $user);  // example filter
+            }
+            ])
+            ->orderBy('prescription_count', 'DESC')
             ->orderBy('hms_medicine_details.name', 'ASC')
             ->get();
 

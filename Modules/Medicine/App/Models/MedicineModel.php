@@ -90,7 +90,7 @@ class MedicineModel extends Model
             ->where(function ($query) use ($term) {
                 $query->where('hms_medicine_details.name', 'LIKE', '%' . trim($term) . '%')
                     ->orWhere('inv_product.name', 'LIKE', '%' . trim($term) . '%');
-            })
+            })->where('status',1)
             ->leftjoin('hms_medicine_stock', 'hms_medicine_stock.id', '=', 'hms_medicine_details.medicine_stock_id')
             ->leftjoin('inv_product', 'hms_medicine_stock.product_id', '=', 'inv_product.id')
             ->leftjoin('hms_medicine_dosage as dosage', 'dosage.id', '=', 'hms_medicine_stock.medicine_dosage_id')

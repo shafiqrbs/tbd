@@ -171,6 +171,10 @@ class ParticularController extends Controller
             $findParticular->diagnostic_department_id = $input['diagnostic_department_id'];
         }
 
+        if (array_key_exists('financial_service_id', $input)) {
+            $findParticular->financial_service_id = $input['financial_service_id'];
+        }
+
         if (array_key_exists('diagnostic_room_id', $input)) {
             $findParticular->diagnostic_room_id = $input['diagnostic_room_id'];
         }

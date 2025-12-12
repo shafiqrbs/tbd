@@ -59,6 +59,12 @@ class PatientWaiverModel extends Model
         return $this->hasMany(InvoiceParticularModel::class, 'patient_waiver_id');
     }
 
+
+    public function transaction()
+    {
+        return $this->hasOne(InvoiceTransactionModel::class, 'id', 'patient_waiver_id');
+    }
+
     public static function getPatientDetails($id)
     {
         $entity = InvoiceModel::where(function ($query) use ($id) {
@@ -314,7 +320,7 @@ class PatientWaiverModel extends Model
                 'customer.mobile',
                 'customer.address',
                 DB::raw("CONCAT(UCASE(LEFT(customer.gender, 1)), LCASE(SUBSTRING(customer.gender, 2))) as gender"),
-                DB::raw('DATE_FORMAT(hms_invoice.created_at, "%d-%m-%Y") as created_at'),
+                DB::raw('DATE_FORMAT(hms_invoice.updated_at, "%d-%m-%Y") as created_at'),
                 DB::raw('DATE_FORMAT(hms_invoice.admission_date, "%d-%m-%Y %H:%i %p") as admission_date'),
                 DB::raw('DATE_FORMAT(customer.dob, "%d-%M-%Y") as dob'),
                 'hms_invoice.process as process',
@@ -352,6 +358,14 @@ class PatientWaiverModel extends Model
         }elseif (isset($request['mode']) && !empty($request['mode']) and $request['mode'] == "ipd_room") {
             $entitiesQuery = $entitiesQuery->where('hms_invoice.process', 'admitted');
             $entitiesQuery = $entitiesQuery->where('patient_mode.slug', 'ipd');
+        }
+        if (isset($request['created']) and !empty($request['created'])) {
+            $date = !empty($request['created'])
+                ? new \DateTime($request['created'])
+                : new \DateTime();
+            $start_date = $date->format('Y-m-d 00:00:00');
+            $end_date = $date->format('Y-m-d 23:59:59');
+            $entitiesQuery = $entitiesQuery->whereBetween('hms_invoice.updated_at', [$start_date, $end_date]);
         }
         $entities = $entitiesQuery
             ->skip($skip)

@@ -113,6 +113,10 @@ class BillingModel extends Model
                         ->orWhere('customer.health_id', 'LIKE', "%{$term}%");
                 });
             }
+
+            if (isset($request['admission_billing']) && !empty($request['admission_billing']) && $request['admission_billing'] == 'billing') {
+                $entities = $entities->whereNotNull('parent_id');
+            }
             if (isset($request['patient_mode']) && !empty($request['patient_mode'])) {
                 if (is_array($request['patient_mode'])) {
                     $entities = $entities->whereIn('patient_mode.slug', $request['patient_mode']);

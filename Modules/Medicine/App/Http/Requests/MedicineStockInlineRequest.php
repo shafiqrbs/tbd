@@ -56,6 +56,7 @@ class MedicineStockInlineRequest extends FormRequest
                     'medicine_dosage_id' => 'nullable',
                     'medicine_bymeal_id' => 'nullable',
                     'admin_status' => 'nullable|boolean',
+                    'status' => 'nullable|boolean',
                     'ipd_status' => 'nullable|boolean',
                     'opd_status' => 'nullable|boolean',
                     'duration' => 'nullable',

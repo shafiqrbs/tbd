@@ -334,7 +334,7 @@ class InvoiceModel extends Model
             $entities = $entities->where('hms_invoice.customer_id',$request['customer_id']);
         }
 
-        if (isset($request['created'])) {
+        if (isset($request['created']) and !empty($request['created'])) {
             $date = !empty($request['created'])
                 ? new \DateTime($request['created'])
                 : new \DateTime();

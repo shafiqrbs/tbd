@@ -44,9 +44,11 @@ class ParticularInlineRequest extends FormRequest
                     'opd_referred' => 'nullable',
                     'investigation_group_id' => 'nullable',
                     'diagnostic_department_id' => 'nullable',
+                    'financial_service_id' => 'nullable',
                     'diagnostic_room_id' => 'nullable',
                     'ordering' => 'nullable',
                     'price' => 'nullable',
+
 
 
                 ];
