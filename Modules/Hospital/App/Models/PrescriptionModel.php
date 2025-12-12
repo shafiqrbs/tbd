@@ -299,6 +299,8 @@ class PrescriptionModel extends Model
             ->select([
                 'hms_prescription.id as id',
                 'hms_prescription.uid as prescription_uid',
+                'hms_prescription.referred_by_id as referred_by_id',
+                'hms_prescription.prescribe_doctor_id as prescribe_doctor_id',
                 'hms_invoice.id as invoice_id',
                 DB::raw('DATE_FORMAT(hms_invoice.created_at, "%d-%m-%y %H:%i %p") as created'),
                 DB::raw('DATE_FORMAT(hms_invoice.appointment_date, "%d-%m-%y") as appointment'),
@@ -335,7 +337,7 @@ class PrescriptionModel extends Model
                 'hms_prescription.blood_pressure as blood_pressure',
                 'hms_prescription.diabetes as diabetes',
                 'hms_prescription.json_content as json_content',
-                DB::raw('DATE_FORMAT(hms_prescription.follow_up_id, "%d-%m-%y") as follow_up_date'),
+                'hms_prescription.follow_up_id as follow_up_date',
                 DB::raw('DATE_FORMAT(cor_customers.dob, "%d-%m-%y") as dob'),
                 'cor_customers.identity_mode as identity_mode',
                 'cor_customers.nid as nid',

@@ -130,6 +130,7 @@ class PrescriptionController extends Controller
         $entity = PrescriptionModel::findByIdOrUid($id);
         $data['json_content'] = json_encode($data);
         $data['prescribe_doctor_id'] = $domain['user_id'];
+        $data['follow_up_id'] = $data['follow_up_date'];
         $data['process'] = 'done';
         $entity->update($data);
         $weight = $data['weight'] ?? null;

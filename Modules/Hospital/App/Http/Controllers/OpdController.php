@@ -97,8 +97,9 @@ class OpdController extends Controller
         if ($entity && isset($input['referred_mode'])) {
             $input['hms_invoice_id'] = $id;
             $input['created_by_id'] =  $this->domain['user_id'];
+            $prescription = PrescriptionModel::where('hms_invoice_id', $id)->first();
+            $prescription->update(['referred_by_id' => $this->domain['user_id']]);
             if($opd_room_id){
-                $prescription = PrescriptionModel::where('hms_invoice_id', $id)->first();
                 $input['json_content'] =  $prescription['json_content'];
                 $input['prescription_id'] =  $prescription['id'];
             }
@@ -108,13 +109,18 @@ class OpdController extends Controller
                 ],
                 $input // fields to update if exists OR create if not
             );
+
             if($input['referred_mode'] == "room"){
                 $entity->forceFill([
                     'referred_mode' => $input['referred_mode'], 'room_id' => $opd_room_id,'process' => 'in-progress',
                 ])->save();
+            }elseif($input['referred_mode'] == "hospital"){
+                $entity->forceFill([
+                    'referred_mode' => $input['referred_mode'],'process' => 'hospital','process' => 'hospital',
+                ])->save();
             }else{
                 $entity->forceFill([
-                    'referred_mode' => $input['referred_mode'], 'room_id' => $opd_room_id,'process' => 'ipd',
+                    'referred_mode' => $input['referred_mode'],'process' => 'ipd',
                 ])->save();
             }
 

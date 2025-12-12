@@ -124,8 +124,8 @@ class InvoiceModel extends Model
             $entity->update(['process' => 'done']);
         }elseif($entity->referred_mode and $entity->referred_mode =='admission'){
             $entity->update(['process' => 'ipd']);
-        }elseif($entity->referred_mode and $entity->referred_mode =='other'){
-            $entity->update(['process' => 'done']);
+        }elseif($entity->referred_mode and $entity->referred_mode =='hospital'){
+            $entity->update(['process' => 'hospital']);
         }
     }
 
@@ -255,7 +255,7 @@ class InvoiceModel extends Model
                     $entities = $entities->where(function ($query) {
                         $query->whereNull('prescription.id');
                     });
-                }elseif(in_array($request['prescription_mode'],['room','admission','referred'])) {
+                }elseif(in_array($request['prescription_mode'],['room','admission','hospital'])) {
                     $entities = $entities->where('hms_invoice.referred_mode',$request['prescription_mode']);
                 }
             }

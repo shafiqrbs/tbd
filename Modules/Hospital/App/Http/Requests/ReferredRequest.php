@@ -31,6 +31,7 @@ class ReferredRequest extends FormRequest
             {
                 return [
                     'comment'       => 'nullable|string',
+                    'referred_by_id'   => 'nullable|integer',
                     'opd_room_id'   => 'nullable|integer',
                     'referred_id'   => 'nullable|integer',
                     'referred_mode' => 'nullable|string',

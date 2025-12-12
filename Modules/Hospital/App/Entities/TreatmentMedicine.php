@@ -127,6 +127,14 @@ class TreatmentMedicine
 
 
     /**
+     * @var integer
+     *
+     * @ORM\Column(name="ordering", type="integer", nullable=true)
+     */
+    private $ordering;
+
+
+    /**
      * @var float
      *
      * @ORM\Column(name="quantity", type="integer", nullable=true)

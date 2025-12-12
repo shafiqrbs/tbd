@@ -159,7 +159,11 @@ class Invoice
      **/
     private  $approvedBy;
 
-
+    /**
+     * @ORM\ManyToOne(targetEntity="Modules\Core\App\Entities\User")
+     * @ORM\JoinColumn(onDelete="CASCADE")
+     **/
+    private $referredBy;
 
     /**
      * @ORM\ManyToOne(targetEntity="Modules\Core\App\Entities\User")

@@ -88,6 +88,14 @@ class PatientPrescriptionMedicine
     private $dailyQuantity;
 
     /**
+     * @var integer
+     *
+     * @ORM\Column(name="ordering", type="integer", nullable=true)
+     */
+    private $ordering;
+
+
+    /**
      * @var string
      *
      * @ORM\Column(type="string", length=255, nullable=true)

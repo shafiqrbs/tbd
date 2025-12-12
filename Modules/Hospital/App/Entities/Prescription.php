@@ -57,12 +57,19 @@ class Prescription
      * @ORM\ManyToOne(targetEntity="Modules\Core\App\Entities\User")
      * @ORM\JoinColumn(onDelete="CASCADE")
      **/
+     private $referredBy;
+
+     /**
+     * @ORM\ManyToOne(targetEntity="Modules\Core\App\Entities\User")
+     * @ORM\JoinColumn(onDelete="CASCADE")
+     **/
      private $prescribeDoctor;
 
+
     /**
-     * @var \DateTime
+     * @var string
      *
-     * @ORM\Column(type="datetime", nullable=true)
+     * @ORM\Column( type="string",nullable = true)
      */
     private $followUpId;
 
