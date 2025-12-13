@@ -319,6 +319,7 @@ class PatientPrescriptionMedicineModel extends Model
                             'ipd_status' => false,
                             'opd_status' => false,
                             'is_active' => $medicine->is_active ?? 1,
+                            'order' => $medicine->order ?? 100,
                             'start_date' => $date,
                             'created_at' => $date,
                             'updated_at' => $date,
