@@ -604,13 +604,100 @@ class InvoiceTransactionModel extends Model
                     'hms_invoice_particular.process',
                     'diagnostic_room.name as diagnostic_room_name',
                 ])->leftjoin('hms_particular as hms_particular','hms_particular.id','=','hms_invoice_particular.particular_id')
-                    ->leftjoin('hms_particular_mode as diagnostic_room','diagnostic_room.id','=','hms_particular.diagnostic_room_id')
-                   ;
+                    ->leftjoin('hms_particular_mode as diagnostic_room','diagnostic_room.id','=','hms_particular.diagnostic_room_id');
                 //->where('hms_invoice_particular.mode','investigation');
             }])->first();
         return $entity;
     }
 
+    public static function finalBillClosing($domain,$entity){
 
+        InvoiceParticularModel::getCountBedRoom($entity->id);
+        $particular = ParticularModel::find($entity->room_id);
+        $date =  new \DateTime("now");
+        if($entity->remaining_day > 0 ){
+            $receivable = ($entity->remaining_day * $particular->price ?? 0);
+            $invoiceTransaction = InvoiceTransactionModel::create([
+                'hms_invoice_id'=> $entity->id,
+                'created_by_id'=> $domain['user_id'],
+                'approved_by_id'=> $domain['user_id'],
+                'mode'    => 'bill',
+                'sub_total'    => $receivable,
+                'total'    => $receivable,
+                'amount'    => $receivable,
+                'process'    => 'Done',
+                'updated_at'    => $date,
+                'created_at'    => $date,
+            ]);
+            InvoiceParticularModel::updateOrCreate(
+                [
+                    'hms_invoice_id'             => $entity->id,
+                    'invoice_transaction_id' => $invoiceTransaction->id
+                ],
+                [
+                    'particular_id'      => $particular->id,
+                    'name'      => $particular->name,
+                    'quantity'      => $entity->remaining_day,
+                    'status'      => 1,
+                    'is_invoice' => 1,
+                    'mode' => 'room',
+                    'price'         => $particular->price ?? 0,
+                    'estimate_price'         => $particular->price ?? 0,
+                    'sub_total'         => ($particular->price * $entity->remaining_day) ?? 0,
+                    'updated_at'    => $date,
+                    'created_at'    => $date,
+                ]
+            );
+        }else{
 
+            $lastTransaction = $entity->invoice_transaction()
+                ->latest('id')
+                ->first();
+            self::finalBillRefund($domain,$entity,$lastTransaction,$particular);
+
+        }
+
+    }
+
+    public static function finalBillRefund($domain,$entity,$lastTransaction,$particular)
+    {
+        $date =  new \DateTime("now");
+        $invoiceTransactionId = $lastTransaction->id;
+        $quantity = abs($entity->remaining_day);
+        $total = ($particular->price * abs($entity->remaining_day));
+        if ($lastTransaction) {
+                $refundTransaction = RefundModel::updateOrCreate(
+                    [
+                        'mode' => 'bill',
+                        'hms_invoice_id' => $entity->id,
+                        'hms_invoice_transaction_id' => $invoiceTransactionId,
+                    ],
+                    [
+                        'created_by_id' => $domain['user_id'],
+                        'mode' => 'bill',
+                        'total' => $total,
+                        'amount' => $total,
+                        'process' => 'In-progress',
+                        'updated_at' => $date,
+                        'created_at' => $date,
+                    ]
+                );
+                InvoiceParticularModel::updateOrCreate(
+                    [
+                        'particular_id' => $particular->id,
+                        'hms_invoice_id' => $entity->id,
+                        'invoice_transaction_id' => $invoiceTransactionId,
+                    ],
+                    [
+                        'invoice_transaction_refund_id' => $refundTransaction->id,
+                        'refund_quantity' => $quantity,
+                        'status' => 1,
+                        'is_refund' => 1,
+                        'refund_amount' => $total ?? 0,
+                        'updated_at' => $date,
+                    ]
+                );
+        }
+        return false;
+    }
 }

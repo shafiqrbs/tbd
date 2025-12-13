@@ -169,6 +169,7 @@ class DomainModel extends Model
         $records['particularModules'] = ParticularModuleModel::getParentChild();
         $records['particularModes'] = ParticularModeModel::getParticularModuleDropdown('operation');
         $records['advices'] = ParticularModel::getAdviceDropdown($domain,'advice');
+        $records['diseasesProfile'] = ParticularModel::getAdviceDropdown($domain,'diseases-profile');
         $records['opdReferredRooms'] = InvoiceModel::getOpdReferredRooms($domain);
         $records['patients'] = CustomerModel::getAllPatients($domain->id);
         $records['medicines'] = ProductModel::getMedicineLocalDropdown($domain);

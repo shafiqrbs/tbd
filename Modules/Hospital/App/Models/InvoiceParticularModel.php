@@ -103,7 +103,7 @@ class InvoiceParticularModel extends Model
 
         $interval = $admissionDate->diff($currentDate);
         $dayCount  = (int)$interval->days;
-        $admissionDay = $dayCount == 0 ? 1 : $dayCount;
+        $admissionDay = ($dayCount == 0) ? 1 : $dayCount;
         $totalQuantity = DB::table('hms_invoice_particular')
             ->join('hms_particular', 'hms_particular.id', '=', 'hms_invoice_particular.particular_id')
             ->where('hms_invoice_particular.hms_invoice_id', $id)

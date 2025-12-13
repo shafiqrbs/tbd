@@ -73,75 +73,74 @@ class LabInvestigationModel extends Model
         $page =  isset($request['page']) && $request['page'] > 0?($request['page'] - 1 ) : 0;
         $perPage = isset($request['offset']) && $request['offset']!=''? (int)($request['offset']):50;
         $skip = isset($page) && $page!=''? (int)$page * $perPage:0;
-        $total = 0;
-        $entities=[];
-        if ((isset($request['term']) && !empty($request['term'])) || isset($request['created'])) {
+        $entities = self::where([['hms_invoice.config_id', $domain['hms_config']]])
+            ->leftjoin('hms_prescription as prescription', 'prescription.hms_invoice_id', '=', 'hms_invoice.id')
+            ->leftjoin('users as doctor', 'doctor.id', '=', 'prescription.created_by_id')
+            ->leftjoin('hms_particular as vr', 'vr.id', '=', 'hms_invoice.room_id')
+            ->leftjoin('users as createdBy', 'createdBy.id', '=', 'hms_invoice.created_by_id')
+            ->join('cor_customers as customer', 'customer.id', '=', 'hms_invoice.customer_id')
+            ->select([
+                'hms_invoice.id',
+                'hms_invoice.uid',
+                'prescription.created_by_id as prescription_created_by_id',
+                'hms_invoice.invoice as invoice',
+                'customer.customer_id as patient_id',
+                'doctor.name as doctor_name',
+                'customer.name',
+                'customer.mobile',
+                DB::raw("CONCAT(UCASE(LEFT(customer.gender, 1)), LCASE(SUBSTRING(customer.gender, 2))) as gender"),
+                DB::raw('DATE_FORMAT(hms_invoice.created_at, "%d-%m-%Y") as created_at'),
+                'hms_invoice.process as process',
+                'vr.name as visiting_room',
+                'createdBy.name as created_by',
+                'hms_invoice.sub_total as total',
 
-            $entities = self::where([['hms_invoice.config_id', $domain['hms_config']]])
-                ->leftjoin('hms_prescription as prescription', 'prescription.hms_invoice_id', '=', 'hms_invoice.id')
-                ->leftjoin('users as doctor', 'doctor.id', '=', 'prescription.created_by_id')
-                ->leftjoin('hms_particular as vr', 'vr.id', '=', 'hms_invoice.room_id')
-                ->leftjoin('users as createdBy', 'createdBy.id', '=', 'hms_invoice.created_by_id')
-                ->join('cor_customers as customer', 'customer.id', '=', 'hms_invoice.customer_id')
-                ->select([
-                    'hms_invoice.id',
-                    'hms_invoice.uid',
-                    'prescription.created_by_id as prescription_created_by_id',
-                    'hms_invoice.invoice as invoice',
-                    'customer.customer_id as patient_id',
-                    'doctor.name as doctor_name',
-                    'customer.name',
-                    'customer.mobile',
-                    DB::raw("CONCAT(UCASE(LEFT(customer.gender, 1)), LCASE(SUBSTRING(customer.gender, 2))) as gender"),
-                    DB::raw('DATE_FORMAT(hms_invoice.created_at, "%d-%m-%Y") as created_at'),
-                    'hms_invoice.process as process',
-                    'vr.name as visiting_room',
-                    'createdBy.name as created_by',
-                    'hms_invoice.sub_total as total',
+            ])->whereHas('invoice_particular', function ($query) {
+                $query->join('hms_particular', 'hms_particular.id', '=', 'hms_invoice_particular.particular_id')
+                    ->join('hms_particular_type', 'hms_particular_type.id', '=', 'hms_particular.particular_type_id')
+                    ->join('hms_particular_master_type', 'hms_particular_master_type.id', '=', 'hms_particular_type.particular_master_type_id')
+                    ->where('hms_particular_master_type.slug', 'investigation')
+                    ->where('hms_particular.is_available', 1);
+            });/*->withCount([
+                'invoice_particular as particular_count' => function ($q) {
+                    $q->where('hms_invoice_particular.is_available', 1);  // example filter
+                }
+            ])->having('particular_count', '>', 0);*/
 
-                ])->whereHas('invoice_particular', function ($query) {
-                    $query->join('hms_particular', 'hms_particular.id', '=', 'hms_invoice_particular.particular_id')
-                        ->join('hms_particular_type', 'hms_particular_type.id', '=', 'hms_particular.particular_type_id')
-                        ->join('hms_particular_master_type', 'hms_particular_master_type.id', '=', 'hms_particular_type.particular_master_type_id')
-                        ->where('hms_particular_master_type.slug', 'investigation')
-                        ->where('hms_particular.is_available', 1);
-                });
-
-            if (isset($request['term']) && !empty($request['term'])) {
-                $term = trim($request['term']);
-                $entities = $entities->where(function ($q) use ($term) {
-                    $q->where('hms_invoice.invoice', 'LIKE', "%{$term}%")
-                        ->orWhere('hms_invoice.uid', 'LIKE', "%{$term}%")
-                        ->orWhere('customer.customer_id', 'LIKE', "%{$term}%")
-                        ->orWhere('customer.name', 'LIKE', "%{$term}%")
-                        ->orWhere('customer.mobile', 'LIKE', "%{$term}%")
-                        ->orWhere('customer.nid', 'LIKE', "%{$term}%")
-                        ->orWhere('customer.health_id', 'LIKE', "%{$term}%");
-                });
-            }
-
-            if (isset($request['process']) && !empty($request['process'])) {
-                $entities = $entities->where('hms_invoice.process', $request['process']);
-            }
-            if (isset($request['customer_id']) && !empty($request['customer_id'])) {
-                $entities = $entities->where('hms_invoice.customer_id', $request['customer_id']);
-            }
-
-            if (isset($request['created'])) {
-                $date = !empty($request['created'])
-                    ? new \DateTime($request['created'])
-                    : new \DateTime();
-                $start_date = $date->format('Y-m-d 00:00:00');
-                $end_date = $date->format('Y-m-d 23:59:59');
-                $entities = $entities->whereBetween('hms_invoice.created_at', [$start_date, $end_date]);
-            }
-
-            $total = $entities->count();
-            $entities = $entities->skip($skip)
-                ->take($perPage)
-                ->orderBy('hms_invoice.updated_at', 'DESC')
-                ->get();
+        if (isset($request['term']) && !empty($request['term'])) {
+            $term = trim($request['term']);
+            $entities = $entities->where(function ($q) use ($term) {
+                $q->where('hms_invoice.invoice', 'LIKE', "%{$term}%")
+                    ->orWhere('hms_invoice.uid', 'LIKE', "%{$term}%")
+                    ->orWhere('customer.customer_id', 'LIKE', "%{$term}%")
+                    ->orWhere('customer.name', 'LIKE', "%{$term}%")
+                    ->orWhere('customer.mobile', 'LIKE', "%{$term}%")
+                    ->orWhere('customer.nid', 'LIKE', "%{$term}%")
+                    ->orWhere('customer.health_id', 'LIKE', "%{$term}%");
+            });
         }
+
+        if (isset($request['process']) && !empty($request['process'])) {
+            $entities = $entities->where('hms_invoice.process', $request['process']);
+        }
+        if (isset($request['customer_id']) && !empty($request['customer_id'])) {
+            $entities = $entities->where('hms_invoice.customer_id', $request['customer_id']);
+        }
+
+        if (isset($request['created']) and !empty($request['created'])) {
+            $date = !empty($request['created'])
+                ? new \DateTime($request['created'])
+                : new \DateTime();
+            $start_date = $date->format('Y-m-d 00:00:00');
+            $end_date = $date->format('Y-m-d 23:59:59');
+            $entities = $entities->whereBetween('hms_invoice.created_at', [$start_date, $end_date]);
+        }
+      //  $total = (clone $entities)->count('hms_invoice.id');
+        $total = $entities->count();
+        $entities = $entities->skip($skip)
+            ->take($perPage)
+            ->orderBy('hms_invoice.updated_at', 'DESC')
+            ->get();
         $data = array('count'=>$total,'entities'=>$entities);
         return $data;
     }

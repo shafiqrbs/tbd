@@ -63,7 +63,7 @@ class IpdController extends Controller
     public function index(Request $request){
         $domain = $this->domain;
         InvoiceParticularModel::getPatientCountBedRoom($domain);
-        $data = InvoiceModel::getRecords($request,$domain);
+        $data = IpdModel::getRecords($request,$domain);
         $response = new Response();
         $response->headers->set('Content-Type','application/json');
         $response->setContent(json_encode([

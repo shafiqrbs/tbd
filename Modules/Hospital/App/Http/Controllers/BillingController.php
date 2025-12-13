@@ -196,12 +196,10 @@ class BillingController extends Controller
      *//**/
     public function finalBillDetails($id)
     {
+        $domain = $this->domain;
         $entity = InvoiceModel::findByIdOrUid($id);
         $service = new JsonRequestResponse();
-        $amount = InvoiceTransactionModel::where('hms_invoice_id', $entity->id)->where('process','Done')->sum('amount');
-        $total = InvoiceParticularModel::where('hms_invoice_id', $entity->id)->where('status',true)->sum('sub_total');
-        InvoiceParticularModel::getCountBedRoom($entity->id);
-        $entity->update(['sub_total' => $total , 'total' => $total, 'amount' => $amount]);
+        InvoiceTransactionModel::finalBillClosing($domain,$entity);
         $entity = BillingModel::getFinalBillShow($id);
         $data = $service->returnJosnResponse($entity);
         return $data;

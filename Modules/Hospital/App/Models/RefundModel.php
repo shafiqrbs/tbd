@@ -280,7 +280,15 @@ class RefundModel extends Model
                     'hms_invoice_transaction.amount',
                     'hms_invoice_transaction.process',
                     DB::raw('DATE_FORMAT(hms_invoice_transaction.created_at, "%d-%m-%y") as created'),
-                ])->where('hms_invoice_transaction.process','Done')->whereIn('hms_invoice_transaction.mode', ['investigation'])->orderBy('hms_invoice_transaction.created_at','DESC');
+                ]) ->withCount([
+                    'invoiceParticular as particular_count' => function ($q) {
+                        $q->where('hms_invoice_particular.process', 'New')
+                            ->where('hms_invoice_particular.mode', 'investigation')
+                            ->whereNull('hms_invoice_particular.is_refund');
+                    }
+                ])->where('hms_invoice_transaction.process','Done')
+                    ->whereIn('hms_invoice_transaction.mode', ['investigation'])
+                    ->orderBy('hms_invoice_transaction.created_at','DESC');
             }])->first();
 
         return $entity;
@@ -495,6 +503,9 @@ class RefundModel extends Model
             }])->first();
         return $entity;
     }
+
+
+
 
 
 

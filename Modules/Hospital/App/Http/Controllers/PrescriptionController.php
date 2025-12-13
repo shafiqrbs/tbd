@@ -130,11 +130,12 @@ class PrescriptionController extends Controller
         $entity = PrescriptionModel::findByIdOrUid($id);
         $data['json_content'] = json_encode($data);
         $data['prescribe_doctor_id'] = $domain['user_id'];
-        $data['follow_up_id'] = $data['follow_up_date'];
+        $data['follow_up_id'] = (isset($data['follow_up_date']) and $data['follow_up_date']) ? $data['follow_up_date'] :'';
         $data['process'] = 'done';
         $entity->update($data);
         $weight = $data['weight'] ?? null;
         InvoiceModel::invoicePrescriptionProcess($entity->invoice);
+        $entity->invoice->invoice_mode;
         if($entity->invoice->invoice_mode == "ipd"){
             $entity->invoice->update(['is_prescription' => 1,'weight' => $weight]);
             PatientPrescriptionMedicineModel::insertIpdPatientMedicine($domain,$entity->id);

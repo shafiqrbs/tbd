@@ -11,6 +11,7 @@ use Modules\Core\App\Models\CustomerModel;
 use Modules\Inventory\App\Models\SalesItemModel;
 use Modules\Inventory\App\Models\StockItemModel;
 use Ramsey\Collection\Collection;
+use function Illuminate\Database\Eloquent\Factories\forEachSequence;
 
 class PatientPrescriptionMedicineModel extends Model
 {
@@ -212,6 +213,7 @@ class PatientPrescriptionMedicineModel extends Model
         $jsonData = json_decode($prescription['json_content']);
         $medicines = ($jsonData->medicines ?? []);
 
+
         if (!empty($medicines) && is_array($medicines)) {
             $insertData = collect($jsonData->medicines)
                 ->map(function ($medicine) use ($prescription,$date) {
@@ -253,7 +255,6 @@ class PatientPrescriptionMedicineModel extends Model
                             'stock_item_id' => $medicineStock->stock_item_id ?? null,
                             'medicine_dosage_id' => $medicine->medicine_dosage_id ?? null,
                             'medicine_bymeal_id' => $medicine->medicine_bymeal_id ?? null,
-                            'order' => $medicine->order ?? 100,
                             'dose_details' => $dose_details,
                             'dose_details_bn' => $dose_details_bn,
                             'daily_quantity' => $daily_quantity,
@@ -267,6 +268,7 @@ class PatientPrescriptionMedicineModel extends Model
                             'opd_admin_status' => $medicineStock->admin_status,
                             'is_stock' => true,
                             'is_active' => $medicine->is_active ?? 1,
+                            'order' => $medicine->order ?? 100,
                             'start_date' => $date,
                             'created_at' => $date,
                             'updated_at' => $date,
@@ -388,7 +390,8 @@ class PatientPrescriptionMedicineModel extends Model
                 'id' => $medicine->id,
             ],
             [
-                'is_active' => (isset($medicine->is_active) and $medicine->is_active) ? $medicine->is_active:1,
+                'is_active' => $medicine->is_active == 1 ? 1 : 0,
+                'order' => $medicine->order ?? 100,
                 'daily_quantity' => $daily_quantity,
                 'medicine_dosage_id' => $medicine->medicine_dosage_id ?? null,
                 'medicine_bymeal_id' => $medicine->medicine_bymeal_id ?? null,
