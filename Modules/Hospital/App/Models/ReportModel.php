@@ -582,7 +582,7 @@ class ReportModel extends Model
             ? (new \DateTime($request['end_date']))->format('Y-m-d 23:59:59')
             : (new \DateTime())->format('Y-m-d 23:59:59');
 
-        return InvoiceParticularModel::where('hms_invoice.config_id', $domain['hms_config'])
+        return InvoiceParticularModel::where('hi.config_id', $domain['hms_config'])
             ->where('hms_invoice_particular.mode', 'investigation')
 
             ->leftJoin(
