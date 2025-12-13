@@ -386,7 +386,7 @@ class PatientPrescriptionMedicineModel extends Model
                 'id' => $medicine->id,
             ],
             [
-                'is_active' => $medicine->is_active,
+                'is_active' => (isset($medicine->is_active) and $medicine->is_active) ? $medicine->is_active:1,
                 'daily_quantity' => $daily_quantity,
                 'medicine_dosage_id' => $medicine->medicine_dosage_id ?? null,
                 'medicine_bymeal_id' => $medicine->medicine_bymeal_id ?? null,

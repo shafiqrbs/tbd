@@ -110,6 +110,7 @@ class IpdController extends Controller
             $input['parent_id'] = $parentInvoice->id;
             $input['customer_id'] = $parentInvoice->customer_id;
             $input['created_by_id'] = $domain['user_id'];
+            $input['process'] = 'done';
             $patient_mode_id = ParticularModeModel::firstWhere([
                 ['slug', 'ipd'],
                 ['particular_module_id', 3],

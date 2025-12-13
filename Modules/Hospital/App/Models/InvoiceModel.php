@@ -263,7 +263,7 @@ class InvoiceModel extends Model
 
         if (isset($request['ipd_mode']) && !empty($request['ipd_mode'])){
             if ($request['ipd_mode'] === 'new' and !empty($request['referred_mode']) and $request['referred_mode']) {
-                $entities = $entities->where('hms_invoice.process','ipd');
+                $entities = $entities->whereIn('hms_invoice.process',['ipd','closed']);
                 $entities = $entities->where('hms_invoice.referred_mode', $request['referred_mode'])
                     ->whereNull('hms_invoice.parent_id')->whereDoesntHave('children');
             } elseif ($request['ipd_mode'] === 'admission') {

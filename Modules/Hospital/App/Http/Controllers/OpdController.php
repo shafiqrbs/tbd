@@ -116,7 +116,7 @@ class OpdController extends Controller
                 ])->save();
             }elseif($input['referred_mode'] == "hospital"){
                 $entity->forceFill([
-                    'referred_mode' => $input['referred_mode'],'process' => 'hospital','process' => 'hospital',
+                    'referred_mode' => $input['referred_mode'],'process' => 'hospital'
                 ])->save();
             }else{
                 $entity->forceFill([
