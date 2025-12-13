@@ -616,14 +616,12 @@ class ReportModel extends Model
                 // total service count
                 DB::raw('SUM(CASE
                 WHEN hms_invoice_particular.status = 1
-                 AND hms_invoice_particular.is_refund = 0
                  AND hit.created_at BETWEEN "' . $start . '" AND "' . $end . '"
                 THEN 1 ELSE 0 END) AS total_count'),
 
                 // total service amount count
                 DB::raw('SUM(CASE
                 WHEN hms_invoice_particular.status = 1
-                 AND hms_invoice_particular.is_refund = 0
                  AND hit.created_at BETWEEN "' . $start . '" AND "' . $end . '"
                 THEN hms_invoice_particular.sub_total ELSE 0 END) AS total'),
 
