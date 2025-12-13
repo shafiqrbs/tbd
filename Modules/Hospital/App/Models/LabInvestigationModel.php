@@ -79,6 +79,18 @@ class LabInvestigationModel extends Model
             ->leftjoin('hms_particular as vr', 'vr.id', '=', 'hms_invoice.room_id')
             ->leftjoin('users as createdBy', 'createdBy.id', '=', 'hms_invoice.created_by_id')
             ->join('cor_customers as customer', 'customer.id', '=', 'hms_invoice.customer_id')
+            ->whereExists(function ($q) {
+                $q->select(DB::raw(1))
+                    ->from('hms_invoice_particular')
+                    ->where('mode','investigation')
+                    ->where('status',1)
+                    ->where('is_invoice',1)
+                    ->where('is_available',1)
+                    ->whereColumn(
+                        'hms_invoice_particular.hms_invoice_id',
+                        'hms_invoice.id'
+                    );
+            })
             ->select([
                 'hms_invoice.id',
                 'hms_invoice.uid',
@@ -95,18 +107,7 @@ class LabInvestigationModel extends Model
                 'createdBy.name as created_by',
                 'hms_invoice.sub_total as total',
 
-            ])->whereHas('invoice_particular', function ($query) {
-                $query->join('hms_particular', 'hms_particular.id', '=', 'hms_invoice_particular.particular_id')
-                    ->join('hms_particular_type', 'hms_particular_type.id', '=', 'hms_particular.particular_type_id')
-                    ->join('hms_particular_master_type', 'hms_particular_master_type.id', '=', 'hms_particular_type.particular_master_type_id')
-                    ->where('hms_particular_master_type.slug', 'investigation')
-                    ->where('hms_particular.is_available', 1);
-            });
-            /*->withCount([
-                'invoice_particular as particular_count' => function ($q) {
-                    $q->where('hms_invoice_particular.is_available', 1);  // example filter
-                }
-            ])->having('particular_count', '>', 0);*/
+            ]);
 
         if (isset($request['term']) && !empty($request['term'])) {
             $term = trim($request['term']);
