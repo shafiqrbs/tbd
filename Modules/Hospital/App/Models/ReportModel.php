@@ -584,7 +584,7 @@ class ReportModel extends Model
 
         return InvoiceParticularModel::where('hi.config_id', $domain['hms_config'])
             ->where('hms_invoice_particular.mode', 'investigation')
-            ->where('hit.staus',1)
+            ->where('hms_invoice_particular.status',1)
 
             ->leftJoin(
                 'hms_invoice_transaction as hit',
