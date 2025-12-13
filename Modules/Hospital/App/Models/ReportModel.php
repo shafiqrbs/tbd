@@ -664,7 +664,6 @@ class ReportModel extends Model
 
             ->where('hi.config_id', $domain['hms_config'])
             ->where('hms_invoice_particular.mode', 'investigation')
-            ->where('hms_invoice_particular.status', 1)
 
             ->select([
                 'hp.display_name as name',
@@ -693,22 +692,24 @@ class ReportModel extends Model
             ])
 
             ->groupBy('hms_invoice_particular.particular_id', 'hp.display_name')
+
             ->havingRaw('
-                (
-                    SUM(CASE
-                        WHEN hms_invoice_particular.status = 1
-                         AND hit.created_at BETWEEN ? AND ?
-                        THEN 1 ELSE 0 END) > 0
-                )
-                OR
-                (
-                    SUM(CASE
-                        WHEN hms_invoice_particular.is_refund = 1
-                         AND hms_invoice_particular.invoice_transaction_refund_id IS NOT NULL
-                         AND hitr.created_at BETWEEN ? AND ?
-                        THEN 1 ELSE 0 END) > 0
-                )
-            ', [$start, $end, $start, $end])
+            (
+                SUM(CASE
+                    WHEN hms_invoice_particular.status = 1
+                     AND hms_invoice_particular.is_refund = 0
+                     AND hit.created_at BETWEEN ? AND ?
+                    THEN 1 ELSE 0 END) > 0
+            )
+            OR
+            (
+                SUM(CASE
+                    WHEN hms_invoice_particular.is_refund = 1
+                     AND hms_invoice_particular.invoice_transaction_refund_id IS NOT NULL
+                     AND hitr.created_at BETWEEN ? AND ?
+                    THEN 1 ELSE 0 END) > 0
+            )
+        ', [$start, $end, $start, $end])
 
             ->orderBy('hp.display_name', 'ASC')
             ->get();
