@@ -458,12 +458,12 @@ class ReportModel extends Model
             ->join('hms_invoice as hms_invoice','hms_invoice.id','=','hms_invoice_particular.hms_invoice_id')
             ->join('hms_invoice_transaction as hms_invoice_transaction','hms_invoice_transaction.id','=','hms_invoice_particular.invoice_transaction_id')
             ->leftjoin('hms_particular as hms_particular','hms_particular.id','=','hms_invoice_particular.particular_id')
-            ->join('particular_mode as particular_mode','particular_mode.id','=','hms_particular.financial_service_id')
+            ->join('hms_particular_mode as particular_mode','particular_mode.id','=','hms_particular.financial_service_id')
             ->select([
                 DB::raw('COUNT(hms_invoice_particular.id) as total_count'),
                 DB::raw('SUM(hms_invoice_particular.sub_total) as total'),
                 'particular_mode.name as name',
-            ])->groupBy('inv_category.id');
+            ])->groupBy('particular_mode.id');
         if (isset($request['start_date']) && isset($request['end_date'])){
             $start_date = new \DateTime($request['start_date']);
             $end_date = new \DateTime($request['end_date']);

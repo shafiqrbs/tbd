@@ -101,7 +101,8 @@ class LabInvestigationModel extends Model
                     ->join('hms_particular_master_type', 'hms_particular_master_type.id', '=', 'hms_particular_type.particular_master_type_id')
                     ->where('hms_particular_master_type.slug', 'investigation')
                     ->where('hms_particular.is_available', 1);
-            });/*->withCount([
+            });
+            /*->withCount([
                 'invoice_particular as particular_count' => function ($q) {
                     $q->where('hms_invoice_particular.is_available', 1);  // example filter
                 }
