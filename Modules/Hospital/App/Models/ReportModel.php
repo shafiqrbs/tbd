@@ -572,7 +572,7 @@ class ReportModel extends Model
         return $entities;
     }
 
-    public static function serviceBaseInvestigationbk($domain, $request)
+    public static function serviceBaseInvestigation($domain, $request)
     {
         $start = !empty($request['start_date'])
             ? (new \DateTime($request['start_date']))->format('Y-m-d 00:00:00')
@@ -582,35 +582,13 @@ class ReportModel extends Model
             ? (new \DateTime($request['end_date']))->format('Y-m-d 23:59:59')
             : (new \DateTime())->format('Y-m-d 23:59:59');
 
-        return InvoiceParticularModel::where('hi.config_id', $domain['hms_config'])
+        return InvoiceParticularModel::query()
+            ->leftJoin('hms_invoice as hi', 'hi.id', '=', 'hms_invoice_particular.hms_invoice_id')
+            ->leftJoin('hms_invoice_transaction as hit', 'hit.id', '=', 'hms_invoice_particular.invoice_transaction_id')
+            ->leftJoin('hms_invoice_transaction_refund as hitr', 'hitr.id', '=', 'hms_invoice_particular.invoice_transaction_refund_id')
+            ->leftJoin('hms_particular as hp', 'hp.id', '=', 'hms_invoice_particular.particular_id')
+            ->where('hi.config_id', $domain['hms_config'])
             ->where('hms_invoice_particular.mode', 'investigation')
-            ->where('hms_invoice_particular.status',1)
-
-            ->leftJoin(
-                'hms_invoice_transaction as hit',
-                'hit.id',
-                '=',
-                'hms_invoice_particular.invoice_transaction_id'
-            )
-            ->leftJoin(
-                'hms_invoice_transaction_refund as hitr',
-                'hitr.id',
-                '=',
-                'hms_invoice_particular.invoice_transaction_refund_id'
-            )
-            ->leftJoin(
-                'hms_invoice as hi',
-                'hi.id',
-                '=',
-                'hms_invoice_particular.hms_invoice_id'
-            )
-            ->leftJoin(
-                'hms_particular as hp',
-                'hp.id',
-                '=',
-                'hms_invoice_particular.particular_id'
-            )
-
             ->select([
                 'hp.display_name as name',
 
@@ -626,7 +604,7 @@ class ReportModel extends Model
                  AND hit.created_at BETWEEN "' . $start . '" AND "' . $end . '"
                 THEN hms_invoice_particular.sub_total ELSE 0 END) AS total'),
 
-                // total refund count
+                // refund count
                 DB::raw('SUM(CASE
                 WHEN hms_invoice_particular.is_refund = 1
                  AND hms_invoice_particular.invoice_transaction_refund_id IS NOT NULL
@@ -641,79 +619,15 @@ class ReportModel extends Model
                 THEN hms_invoice_particular.sub_total ELSE 0 END) AS total_refund_amount'),
             ])
             ->groupBy('hms_invoice_particular.particular_id', 'hp.display_name')
+            ->havingRaw('SUM(CASE
+                WHEN hms_invoice_particular.status = 1
+                 AND hms_invoice_particular.is_refund = 0
+                 AND hit.created_at BETWEEN ? AND ?
+                THEN 1 ELSE 0 END) > 0', [$start, $end])
             ->orderBy('hp.display_name', 'ASC')
             ->get();
     }
 
-    public static function serviceBaseInvestigation($domain, $request)
-    {
-        $start = !empty($request['start_date'])
-            ? (new \DateTime($request['start_date']))->format('Y-m-d 00:00:00')
-            : (new \DateTime())->format('Y-m-d 00:00:00');
-
-        $end = !empty($request['end_date'])
-            ? (new \DateTime($request['end_date']))->format('Y-m-d 23:59:59')
-            : (new \DateTime())->format('Y-m-d 23:59:59');
-
-        return InvoiceParticularModel::query()
-
-            ->leftJoin('hms_invoice as hi', 'hi.id', '=', 'hms_invoice_particular.hms_invoice_id')
-            ->leftJoin('hms_invoice_transaction as hit', 'hit.id', '=', 'hms_invoice_particular.invoice_transaction_id')
-            ->leftJoin('hms_invoice_transaction_refund as hitr', 'hitr.id', '=', 'hms_invoice_particular.invoice_transaction_refund_id')
-            ->leftJoin('hms_particular as hp', 'hp.id', '=', 'hms_invoice_particular.particular_id')
-
-            ->where('hi.config_id', $domain['hms_config'])
-            ->where('hms_invoice_particular.mode', 'investigation')
-
-            ->select([
-                'hp.display_name as name',
-
-                DB::raw('SUM(CASE
-                WHEN hms_invoice_particular.status = 1
-                 AND hit.created_at BETWEEN "' . $start . '" AND "' . $end . '"
-                THEN 1 ELSE 0 END) AS total_count'),
-
-                DB::raw('SUM(CASE
-                WHEN hms_invoice_particular.status = 1
-                 AND hit.created_at BETWEEN "' . $start . '" AND "' . $end . '"
-                THEN hms_invoice_particular.sub_total ELSE 0 END) AS total'),
-
-                DB::raw('SUM(CASE
-                WHEN hms_invoice_particular.is_refund = 1
-                 AND hms_invoice_particular.invoice_transaction_refund_id IS NOT NULL
-                 AND hitr.created_at BETWEEN "' . $start . '" AND "' . $end . '"
-                THEN 1 ELSE 0 END) AS total_refund_count'),
-
-                DB::raw('SUM(CASE
-                WHEN hms_invoice_particular.is_refund = 1
-                 AND hms_invoice_particular.invoice_transaction_refund_id IS NOT NULL
-                 AND hitr.created_at BETWEEN "' . $start . '" AND "' . $end . '"
-                THEN hms_invoice_particular.sub_total ELSE 0 END) AS total_refund_amount'),
-            ])
-
-            ->groupBy('hms_invoice_particular.particular_id', 'hp.display_name')
-
-            ->havingRaw('
-            (
-                SUM(CASE
-                    WHEN hms_invoice_particular.status = 1
-                     AND hms_invoice_particular.is_refund = 0
-                     AND hit.created_at BETWEEN ? AND ?
-                    THEN 1 ELSE 0 END) > 0
-            )
-            OR
-            (
-                SUM(CASE
-                    WHEN hms_invoice_particular.is_refund = 1
-                     AND hms_invoice_particular.invoice_transaction_refund_id IS NOT NULL
-                     AND hitr.created_at BETWEEN ? AND ?
-                    THEN 1 ELSE 0 END) > 0
-            )
-        ', [$start, $end, $start, $end])
-
-            ->orderBy('hp.display_name', 'ASC')
-            ->get();
-    }
 
 
 
