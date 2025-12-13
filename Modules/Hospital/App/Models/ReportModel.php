@@ -511,7 +511,7 @@ class ReportModel extends Model
     }
 
 
-    public static function serviceBaseInvestigation($domain,$request)
+    public static function serviceBaseInvestigation1($domain,$request)
     {
         $entities = InvoiceParticularModel::where([['hms_invoice.config_id',$domain['hms_config']]])
             ->whereIn('hms_invoice_particular.mode',['investigation'])
@@ -551,8 +551,8 @@ class ReportModel extends Model
             ->leftjoin('hms_invoice as hms_invoice','hms_invoice.id','=','hms_invoice_particular.hms_invoice_id')
             ->leftjoin('hms_particular as hms_particular','hms_particular.id','=','hms_invoice_particular.particular_id')
             ->select([
-                DB::raw('COUNT(hms_invoice_particular.id) as total_count'),
-                DB::raw('SUM(hms_invoice_particular.sub_total) as total'),
+                DB::raw('COUNT(hms_invoice_particular.id) as total_refund_count'),
+                DB::raw('SUM(hms_invoice_particular.sub_total) as total_refund_amount'),
                 'hms_particular.display_name as name',
             ])->groupBy('particular_id');
         if (isset($request['start_date']) && isset($request['end_date'])){
@@ -571,5 +571,80 @@ class ReportModel extends Model
             ->get();
         return $entities;
     }
+
+    public static function serviceBaseInvestigation($domain, $request)
+    {
+        $start = !empty($request['start_date'])
+            ? (new \DateTime($request['start_date']))->format('Y-m-d 00:00:00')
+            : (new \DateTime())->format('Y-m-d 00:00:00');
+
+        $end = !empty($request['end_date'])
+            ? (new \DateTime($request['end_date']))->format('Y-m-d 23:59:59')
+            : (new \DateTime())->format('Y-m-d 23:59:59');
+
+        return InvoiceParticularModel::where('hms_invoice.config_id', $domain['hms_config'])
+            ->where('hms_invoice_particular.mode', 'investigation')
+
+            ->leftJoin(
+                'hms_invoice_transaction as hit',
+                'hit.id',
+                '=',
+                'hms_invoice_particular.invoice_transaction_id'
+            )
+            ->leftJoin(
+                'hms_invoice_transaction_refund as hitr',
+                'hitr.id',
+                '=',
+                'hms_invoice_particular.invoice_transaction_refund_id'
+            )
+            ->leftJoin(
+                'hms_invoice as hi',
+                'hi.id',
+                '=',
+                'hms_invoice_particular.hms_invoice_id'
+            )
+            ->leftJoin(
+                'hms_particular as hp',
+                'hp.id',
+                '=',
+                'hms_invoice_particular.particular_id'
+            )
+
+            ->select([
+                'hp.display_name as name',
+
+                // total service count
+                DB::raw('SUM(CASE
+                WHEN hms_invoice_particular.status = 1
+                 AND hms_invoice_particular.is_refund = 0
+                 AND hit.created_at BETWEEN "' . $start . '" AND "' . $end . '"
+                THEN 1 ELSE 0 END) AS total_count'),
+
+                // total service amount count
+                DB::raw('SUM(CASE
+                WHEN hms_invoice_particular.status = 1
+                 AND hms_invoice_particular.is_refund = 0
+                 AND hit.created_at BETWEEN "' . $start . '" AND "' . $end . '"
+                THEN hms_invoice_particular.sub_total ELSE 0 END) AS total'),
+
+                // total refund count
+                DB::raw('SUM(CASE
+                WHEN hms_invoice_particular.is_refund = 1
+                 AND hms_invoice_particular.invoice_transaction_refund_id IS NOT NULL
+                 AND hitr.created_at BETWEEN "' . $start . '" AND "' . $end . '"
+                THEN 1 ELSE 0 END) AS total_refund_count'),
+
+                // total refund amount count
+                DB::raw('SUM(CASE
+                WHEN hms_invoice_particular.is_refund = 1
+                 AND hms_invoice_particular.invoice_transaction_refund_id IS NOT NULL
+                 AND hitr.created_at BETWEEN "' . $start . '" AND "' . $end . '"
+                THEN hms_invoice_particular.sub_total ELSE 0 END) AS total_refund_amount'),
+            ])
+            ->groupBy('hms_invoice_particular.particular_id', 'hp.display_name')
+            ->orderBy('hp.display_name', 'ASC')
+            ->get();
+    }
+
 
 }
