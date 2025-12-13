@@ -66,7 +66,8 @@ class PrescriptionModel extends Model
 
     public function prescription_medicine()
     {
-        return $this->hasMany(PatientPrescriptionMedicineModel::class, 'prescription_id');
+        return $this->hasMany(PatientPrescriptionMedicineModel::class, 'prescription_id')
+            ->orderBy('order', 'ASC');
     }
 
     public function invoice()

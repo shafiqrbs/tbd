@@ -90,9 +90,9 @@ class PatientPrescriptionMedicine
     /**
      * @var integer
      *
-     * @ORM\Column(name="ordering", type="integer", nullable=true)
+     * @ORM\Column(name="order", type="integer", nullable=true)
      */
-    private $ordering;
+    private $order;
 
 
     /**

@@ -118,6 +118,7 @@ class BillingModel extends Model
                 $entities = $entities->whereNotNull('parent_id');
                 $entities = $entities->where('hms_invoice.process','billing');
             }
+
             if (isset($request['patient_mode']) && !empty($request['patient_mode'])) {
                 if (is_array($request['patient_mode'])) {
                     $entities = $entities->whereIn('patient_mode.slug', $request['patient_mode']);
@@ -125,6 +126,7 @@ class BillingModel extends Model
                     $entities = $entities->where('patient_mode.slug', $request['patient_mode']);
                 }
             }
+
             if (isset($request['created'])) {
                 $date = !empty($request['created'])
                     ? new \DateTime($request['created'])
