@@ -253,7 +253,7 @@ class PatientPrescriptionMedicineModel extends Model
                             'stock_item_id' => $medicineStock->stock_item_id ?? null,
                             'medicine_dosage_id' => $medicine->medicine_dosage_id ?? null,
                             'medicine_bymeal_id' => $medicine->medicine_bymeal_id ?? null,
-                            'order' => $medicine->order ?? null,
+                            'order' => $medicine->order ?? 100,
                             'dose_details' => $dose_details,
                             'dose_details_bn' => $dose_details_bn,
                             'daily_quantity' => $daily_quantity,
