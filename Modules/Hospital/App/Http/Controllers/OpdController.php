@@ -149,7 +149,7 @@ class OpdController extends Controller
             }else{
                 $dob = new \DateTime($input['dob']);
             }
-            $exist = PatientModel::where(['name' => $input['name']],['mobile' => $input['mobile']])->first();
+            $exist = PatientModel::where(['name'=> $input['name'],'mobile' => $input['mobile']])->first();
             if($exist){
                 $entity = $exist;
             }else{

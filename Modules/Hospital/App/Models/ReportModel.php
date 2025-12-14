@@ -214,7 +214,8 @@ class ReportModel extends Model
         $serviceGroups =self::serviceBaseGroupInvestigation($domain,$request);
         $services =self::serviceBaseInvestigation($domain,$request);
         $financialServices =self::financialServiceGroupInvestigation($domain,$request);
-        $records =['summary'=>$summary,'invoiceMode'=>$invoiceMode,'userBase'=>$userBase,'patientMode'=>$patientMode,'serviceGroups'=>$serviceGroups,'services'=>$services,'financialServices' => $financialServices];
+        $filter = ['start_date'=>$request['start_date'],'end_date'=>$request['end_date']];
+        $records =['filter' => $filter,'summary'=>$summary,'invoiceMode'=>$invoiceMode,'userBase'=>$userBase,'patientMode'=>$patientMode,'serviceGroups'=>$serviceGroups,'services'=>$services,'financialServices' => $financialServices];
         return $records;
     }
 
