@@ -258,195 +258,86 @@ class HospitalSalesModel extends Model
             ->orderBy('inv_sales_item.id', 'DESC')
             ->get();
     }
+    
     public static function getMedicineSummeryDetails($params, $domain)
     {
-        $page = isset($params['page']) && $params['page'] > 0 ? ($params['page'] - 1) : 0;
+        $page    = isset($params['page']) && $params['page'] > 0 ? ($params['page'] - 1) : 0;
         $perPage = isset($params['offset']) && $params['offset'] != '' ? (int)$params['offset'] : 0;
-        $skip = $page * $perPage;
+        $skip    = $page * $perPage;
 
         $warehouseId = $params['warehouse_id'] ?? null;
-        $rawStart = $params['start_date'] ?? null;
-        $rawEnd   = $params['end_date'] ?? $rawStart;
+        $rawStart    = $params['start_date'] ?? null;
+        $rawEnd      = $params['end_date'] ?? $rawStart;
 
         $startDate = $rawStart ? Carbon::parse($rawStart)->startOfDay() : null;
         $endDate   = $rawEnd   ? Carbon::parse($rawEnd)->endOfDay() : null;
 
-        $query = DailyStockModel::where('inv_daily_stock.config_id', $domain['config_id'])
-            ->leftJoin('cor_warehouses', 'inv_daily_stock.warehouse_id', '=', 'cor_warehouses.id')
-            ->when($warehouseId, fn($q) => $q->where('inv_daily_stock.warehouse_id', $warehouseId))
-            ->when($startDate && $endDate, fn($q) =>
-            $q->whereBetween('inv_daily_stock.created_at', [$startDate, $endDate])
+        $query = DB::table('inv_stock_item_history')
+            ->leftJoin('cor_warehouses', 'inv_stock_item_history.warehouse_id', '=', 'cor_warehouses.id')
+            ->where('inv_stock_item_history.config_id', $domain['config_id'])
+            ->when($warehouseId, fn ($q) =>
+                $q->where('inv_stock_item_history.warehouse_id', $warehouseId)
+            )
+            ->when($startDate && $endDate, fn ($q) =>
+                $q->whereBetween('inv_stock_item_history.created_at', [$startDate, $endDate])
             )
             ->selectRaw("
             warehouse_id,
-            cor_warehouses.name AS warehouse_name,
             stock_item_id,
-            item_name AS name,
+            item_name as name,
+            cor_warehouses.name AS warehouse_name,
 
-            -- first row opening quantity
+            /* Opening Quantity: previous closing before start date */
             (
-                SELECT ds_open.opening_quantity
-                FROM inv_daily_stock AS ds_open
-                WHERE ds_open.stock_item_id = inv_daily_stock.stock_item_id
-                  AND ds_open.warehouse_id = inv_daily_stock.warehouse_id
-                  AND ds_open.created_at BETWEEN ? AND ?
-                ORDER BY ds_open.created_at ASC
+                SELECT ih_open.closing_quantity
+                FROM inv_stock_item_history AS ih_open
+                WHERE ih_open.stock_item_id = inv_stock_item_history.stock_item_id
+                  AND ih_open.warehouse_id = inv_stock_item_history.warehouse_id
+                  AND ih_open.created_at < ?
+                ORDER BY ih_open.id DESC
                 LIMIT 1
             ) AS opening_quantity,
 
-            -- total_in_quantity adjusted if opening_quantity = 0
-            IF(
-                (
-                    SELECT ds_open.opening_quantity
-                    FROM inv_daily_stock AS ds_open
-                    WHERE ds_open.stock_item_id = inv_daily_stock.stock_item_id
-                      AND ds_open.warehouse_id = inv_daily_stock.warehouse_id
-                      AND ds_open.created_at BETWEEN ? AND ?
-                    ORDER BY ds_open.created_at ASC
-                    LIMIT 1
-                ) = 0,
-                SUM(total_in_quantity) - SUM(opening_quantity),
-                SUM(total_in_quantity)
+            /* Total IN */
+            SUM(
+                CASE
+                    WHEN quantity > 0 THEN quantity
+                    ELSE 0
+                END
             ) AS total_in_quantity,
 
-            SUM(total_out_quantity) AS total_out_quantity,
+            /* Total OUT */
+            ABS(SUM(
+                CASE
+                    WHEN quantity < 0 THEN quantity
+                    ELSE 0
+                END
+            )) AS total_out_quantity,
 
-            -- closing quantity: last row in date range
+            /* Closing Quantity: last row in date range */
             (
-                SELECT ds_close.closing_quantity
-                FROM inv_daily_stock AS ds_close
-                WHERE ds_close.stock_item_id = inv_daily_stock.stock_item_id
-                  AND ds_close.warehouse_id = inv_daily_stock.warehouse_id
-                  AND ds_close.created_at BETWEEN ? AND ?
-                ORDER BY ds_close.created_at DESC
+                SELECT ih_close.closing_quantity
+                FROM inv_stock_item_history AS ih_close
+                WHERE ih_close.stock_item_id = inv_stock_item_history.stock_item_id
+                  AND ih_close.warehouse_id = inv_stock_item_history.warehouse_id
+                  AND ih_close.created_at BETWEEN ? AND ?
+                ORDER BY ih_close.id DESC
                 LIMIT 1
             ) AS closing_quantity
         ", [
-                $startDate, $endDate, // opening_quantity
-                $startDate, $endDate, // total_in_quantity adjusted
+                $startDate,           // opening_quantity
                 $startDate, $endDate  // closing_quantity
             ])
-            ->groupBy('warehouse_id', 'cor_warehouses.name', 'stock_item_id', 'item_name')
-            ->orderBy('warehouse_id')
-            ->orderBy('stock_item_id');
-
-        // Pagination
-        if ($params['page'] && $params['offset']) {
-            $total = (clone $query)->count();
-            $items = $query->skip($skip)->take($perPage)->get();
-
-            return [
-                'count' => $total,
-                'items' => $items,
-            ];
-        }
-
-        return $query->get();
-    }
-
-    public static function getMedicineSummeryDetailsBk($params, $domain)
-    {
-        $page = isset($params['page']) && $params['page'] > 0 ? ($params['page'] - 1) : 0;
-        $perPage = isset($params['offset']) && $params['offset'] != '' ? (int)$params['offset'] : 0;
-        $skip = $page * $perPage;
-
-        $warehouseId = $params['warehouse_id'] ?? null;
-        $rawStart = $params['start_date'] ?? null;
-        $rawEnd   = $params['end_date'] ?? $rawStart;
-
-        $startDate = $rawStart ? Carbon::parse($rawStart)->startOfDay() : null;
-        $endDate   = $rawEnd   ? Carbon::parse($rawEnd)->endOfDay() : null;
-
-        $query = DailyStockModel::where('inv_daily_stock.config_id', $domain['config_id'])
-            ->leftJoin('cor_warehouses', 'inv_daily_stock.warehouse_id', '=', 'cor_warehouses.id')
-            ->when($warehouseId, fn($q) => $q->where('inv_daily_stock.warehouse_id', $warehouseId))
-            ->when($startDate && $endDate, fn($q) =>
-            $q->whereBetween('inv_daily_stock.created_at', [$startDate, $endDate])
+            ->groupBy(
+                'warehouse_id',
+                'stock_item_id',
+                'item_name'
             )
-            ->selectRaw("
-            warehouse_id,
-            cor_warehouses.name AS warehouse_name,
-            stock_item_id,
-            item_name,
-
-            -- opening quantity: first row in date range
-            (
-                SELECT ds_open.opening_quantity
-                FROM inv_daily_stock AS ds_open
-                WHERE ds_open.stock_item_id = inv_daily_stock.stock_item_id
-                  AND ds_open.warehouse_id = inv_daily_stock.warehouse_id
-                  AND ds_open.created_at BETWEEN ? AND ?
-                ORDER BY ds_open.created_at ASC
-                LIMIT 1
-            ) AS opening_quantity,
-
-            -- total_in_quantity adjusted if opening_quantity = 0
-            IF(
-                (
-                    SELECT ds_open.opening_quantity
-                    FROM inv_daily_stock AS ds_open
-                    WHERE ds_open.stock_item_id = inv_daily_stock.stock_item_id
-                      AND ds_open.warehouse_id = inv_daily_stock.warehouse_id
-                      AND ds_open.created_at BETWEEN ? AND ?
-                    ORDER BY ds_open.created_at ASC
-                    LIMIT 1
-                ) = 0,
-                SUM(total_in_quantity) - SUM(opening_quantity),
-                SUM(total_in_quantity)
-            ) AS total_in_quantity,
-
-            SUM(total_out_quantity) AS total_out_quantity,
-
-            -- closing quantity: last row in date range
-            (
-                SELECT ds_close.closing_quantity
-                FROM inv_daily_stock AS ds_close
-                WHERE ds_close.stock_item_id = inv_daily_stock.stock_item_id
-                  AND ds_close.warehouse_id = inv_daily_stock.warehouse_id
-                  AND ds_close.created_at BETWEEN ? AND ?
-                ORDER BY ds_close.created_at DESC
-                LIMIT 1
-            ) AS closing_quantity,
-
-            -- total closing = opening + adjusted total_in - total_out
-            (
-                (
-                    SELECT ds_open.opening_quantity
-                    FROM inv_daily_stock AS ds_open
-                    WHERE ds_open.stock_item_id = inv_daily_stock.stock_item_id
-                      AND ds_open.warehouse_id = inv_daily_stock.warehouse_id
-                      AND ds_open.created_at BETWEEN ? AND ?
-                    ORDER BY ds_open.created_at ASC
-                    LIMIT 1
-                )
-                + IF(
-                    (
-                        SELECT ds_open.opening_quantity
-                        FROM inv_daily_stock AS ds_open
-                        WHERE ds_open.stock_item_id = inv_daily_stock.stock_item_id
-                          AND ds_open.warehouse_id = inv_daily_stock.warehouse_id
-                          AND ds_open.created_at BETWEEN ? AND ?
-                        ORDER BY ds_open.created_at ASC
-                        LIMIT 1
-                    ) = 0,
-                    SUM(total_in_quantity) - SUM(opening_quantity),
-                    SUM(total_in_quantity)
-                )
-                - SUM(total_out_quantity)
-            ) AS total_closing_quantity
-        ", [
-                $startDate, $endDate, // opening_quantity
-                $startDate, $endDate, // total_in_quantity adjusted
-                $startDate, $endDate, // closing_quantity
-                $startDate, $endDate, // total_closing opening
-                $startDate, $endDate  // total_closing total_in adjusted
-            ])
-            ->groupBy('warehouse_id', 'cor_warehouses.name', 'stock_item_id', 'item_name')
             ->orderBy('warehouse_id')
             ->orderBy('stock_item_id');
 
-        // Pagination
-        if ($params['page'] && $params['offset']) {
+        /** Pagination */
+        if (!empty($params['page']) && !empty($params['offset'])) {
             $total = (clone $query)->count();
             $items = $query->skip($skip)->take($perPage)->get();
 
