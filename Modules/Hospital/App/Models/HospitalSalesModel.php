@@ -258,7 +258,7 @@ class HospitalSalesModel extends Model
             ->orderBy('inv_sales_item.id', 'DESC')
             ->get();
     }
-    
+
     public static function getMedicineSummeryDetails($params, $domain)
     {
         $page    = isset($params['page']) && $params['page'] > 0 ? ($params['page'] - 1) : 0;
