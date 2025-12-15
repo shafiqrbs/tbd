@@ -85,7 +85,6 @@ class LabInvestigationModel extends Model
                     ->where('mode','investigation')
                     ->where('status',1)
                     ->where('is_invoice',1)
-                    ->where('is_available',1)
                     ->whereColumn(
                         'hms_invoice_particular.hms_invoice_id',
                         'hms_invoice.id'
@@ -109,18 +108,17 @@ class LabInvestigationModel extends Model
 
             ]);
 
-        if (isset($request['term']) && !empty($request['term'])) {
 
+
+        if (isset($request['term']) && !empty($request['term'])) {
             $term = trim($request['term']);
-            $numeric = preg_replace('/\D+/', '', $term);
-            $entities = $entities->where(function ($q) use ($term, $numeric) {
-                $q->where('hms_invoice.invoice', 'LIKE', "%{$term}%")
-                    ->orWhere('hms_invoice.uid', 'LIKE', "%{$term}%");
-                if ($numeric !== '') {
-                    $q->orWhere('hms_invoice.invoice', 'LIKE', "%{$numeric}%")
-                        ->orWhere('customer.customer_id', 'LIKE', "%{$numeric}%");
-                }
+//            dd($term);
+            $entities = $entities->where(function ($q) use ($term) {
+                $q->where('hms_invoice.invoice', 'LIKE', "%{$term}%");
+//                    ->orWhere('hms_invoice.uid', 'LIKE', "%{$term}%")
+//                    ->orWhere('customer.customer_id', 'LIKE', "%{$term}%");
             });
+
         }
 
         if (isset($request['process']) && !empty($request['process'])) {
