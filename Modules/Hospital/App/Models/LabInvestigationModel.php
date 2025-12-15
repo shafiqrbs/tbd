@@ -110,15 +110,16 @@ class LabInvestigationModel extends Model
             ]);
 
         if (isset($request['term']) && !empty($request['term'])) {
+
             $term = trim($request['term']);
-            $entities = $entities->where(function ($q) use ($term) {
+            $numeric = preg_replace('/\D+/', '', $term);
+            $entities = $entities->where(function ($q) use ($term, $numeric) {
                 $q->where('hms_invoice.invoice', 'LIKE', "%{$term}%")
-                    ->orWhere('hms_invoice.uid', 'LIKE', "%{$term}%")
-                    ->orWhere('customer.customer_id', 'LIKE', "%{$term}%")
-                    ->orWhere('customer.name', 'LIKE', "%{$term}%")
-                    ->orWhere('customer.mobile', 'LIKE', "%{$term}%")
-                    ->orWhere('customer.nid', 'LIKE', "%{$term}%")
-                    ->orWhere('customer.health_id', 'LIKE', "%{$term}%");
+                    ->orWhere('hms_invoice.uid', 'LIKE', "%{$term}%");
+                if ($numeric !== '') {
+                    $q->orWhere('hms_invoice.invoice', 'LIKE', "%{$numeric}%")
+                        ->orWhere('customer.customer_id', 'LIKE', "%{$numeric}%");
+                }
             });
         }
 

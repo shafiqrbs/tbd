@@ -6,10 +6,14 @@ use Gedmo\Mapping\Annotation as Gedmo;
 
 /**
  * Invoice
- *
- * @ORM\Table( name ="hms_invoice")
+ * @ORM\Table(name="hms_invoice" , indexes={
+ *     @ORM\Index(name="allowIndex", columns={"uid"}),
+ *     @ORM\Index(name="customerIdIndex", columns={"invoice"}),
+ * })
  * @ORM\Entity()
  */
+
+
 class Invoice
 {
     /**
