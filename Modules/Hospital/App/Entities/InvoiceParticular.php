@@ -312,6 +312,13 @@ class InvoiceParticular
      *
      * @ORM\Column(type="boolean", nullable=true, options={"default"="false"})
      */
+     private $isWaiverApprove;
+
+    /**
+     * @var boolean
+     *
+     * @ORM\Column(type="boolean", nullable=true, options={"default"="false"})
+     */
     private $isAdmission;
 
      /**

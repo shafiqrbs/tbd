@@ -156,11 +156,13 @@ class PatientWaiverController extends Controller
         $date = now();
         $entity = PatientWaiverModel::where('uid',$id)->first();
         if(empty($entity->checked_by_id)){
-            $data['checked_by_id']= $this->domain['user_id'];
+           // $data['checked_by_id']= $this->domain['user_id'];
             $data['checked_date'] = $date;
+            PatientWaiverModel::updateInvoiceTransaction($entity->id,$data);
         }elseif($entity->checked_by_id and empty($entity->approved_by_id)){
-              $data['approved_by_id']= $this->domain['user_id'];
-              $data['approved_date'] = $date;
+            PatientWaiverModel::updateInvoiceTransaction($entity->id,$data);
+            $data['approved_by_id']= $this->domain['user_id'];
+            $data['approved_date'] = $date;
         }
         $entity->update($data);
         $transaction = InvoiceTransactionModel::where('patient_waiver_id', $entity->id)->first();

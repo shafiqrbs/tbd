@@ -8,6 +8,7 @@ return [
     'allowed_origins' => [
         'http://localhost:5173',
         'http://127.0.0.1:5173',
+        'http://192.168.20.222',
         'http://www.tbd.local',
         'https://health.poskeeper.com',
         'https://hms.tbhsd.gov.bd',

@@ -141,7 +141,9 @@ class PatientWaiverModel extends Model
                     'hms_invoice_particular.sub_total',
                     'hms_invoice_particular.process',
                     'hms_invoice_particular.is_waiver',
+                    'hms_invoice_particular.is_waiver_approve',
                 ])->where('hms_invoice_particular.mode','investigation')
+                    ->where('hms_invoice_particular.is_invoice', 0)
                   ->whereNull('hms_invoice_particular.patient_waiver_id');
             }])->first();
         return $entity;
@@ -282,6 +284,7 @@ class PatientWaiverModel extends Model
                     'hms_invoice_particular.sub_total',
                     'hms_invoice_particular.process',
                     'hms_invoice_particular.is_waiver',
+                    'hms_invoice_particular.is_waiver_approve',
                     'diagnostic_room.name as diagnostic_room_name',
                 ])->leftjoin('hms_particular as hms_particular','hms_particular.id','=','hms_invoice_particular.particular_id')
                 ->leftjoin('hms_particular_mode as diagnostic_room','diagnostic_room.id','=','hms_particular.diagnostic_room_id')
@@ -413,6 +416,16 @@ class PatientWaiverModel extends Model
                 'patient_mode.name as patient_mode_name',
                 'patient_payment_mode.name as patient_payment_mode_name'
             ])
+            ->whereExists(function ($q) {
+                $q->select(DB::raw(1))
+                    ->from('hms_invoice_particular')
+                    ->where('mode','investigation')
+                    ->where('status',0)
+                    ->whereColumn(
+                        'hms_invoice_particular.hms_invoice_id',
+                        'hms_invoice.id'
+                    );
+            })
             ->orderBy('hms_invoice.updated_at', 'DESC');
 
         // ✅ Use clone for total count before skip/take
@@ -529,9 +542,18 @@ class PatientWaiverModel extends Model
                 ->update([
                     'patient_waiver_id'      => $invoiceTransaction->patient_waiver_id,
                     'invoice_transaction_id' => $invoiceTransaction->id,
-                  //  'price'                  => 0,
                     'is_waiver'               => 1,
+                    'is_waiver_approve'       => 1,
                 ]);
+        }
+    }
+
+    public static function updateInvoiceTransaction($entity,$data)
+    {
+        $investigations = $data['ids'];
+        if (!empty($investigations) && is_array($investigations)) {
+            InvoiceParticularModel::where('patient_waiver_id', $entity)->update(['is_waiver_approve'=> 0]);
+            InvoiceParticularModel::where('patient_waiver_id', $entity)->whereIn('id', $investigations)->update(['is_waiver_approve'=> 1]);
         }
     }
 
