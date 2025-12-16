@@ -94,8 +94,8 @@ class UserRequest extends FormRequest
                     'employee_group_id' => 'required',
                     'access_control_role' => 'nullable|array',
                     'android_control_role' => 'nullable|array',
-                    'password' => 'required|min:6',
-                    'confirm_password' => 'required|same:password',
+                    'password' => 'nullable|min:6',
+                    'confirm_password' => 'required_with:password|same:password',
                 ];
             }
             default:
