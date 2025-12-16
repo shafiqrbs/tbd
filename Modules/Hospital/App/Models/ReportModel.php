@@ -210,12 +210,23 @@ class ReportModel extends Model
         $summary =self::summaryCollection($domain,$request);
         $invoiceMode =self::invoiceModeCollection($domain,$request);
         $patientMode =self::patientModeBaseCollection($domain,$request);
+        $patientServiceMode =self::patientServiceModeBaseCollection($domain,$request);
         $userBase =self::userBaseCollection($domain,$request);
         $serviceGroups =self::serviceBaseGroupInvestigation($domain,$request);
         $services =self::serviceBaseInvestigation($domain,$request);
         $financialServices =self::financialServiceGroupInvestigation($domain,$request);
         $filter = ['start_date'=>$request['start_date'],'end_date'=>$request['end_date']];
-        $records =['filter' => $filter,'summary'=>$summary,'invoiceMode'=>$invoiceMode,'userBase'=>$userBase,'patientMode'=>$patientMode,'serviceGroups'=>$serviceGroups,'services'=>$services,'financialServices' => $financialServices];
+        $records =[
+            'filter' => $filter,
+            'summary' => $summary,
+            'invoiceMode' => $invoiceMode,
+            'userBase' => $userBase,
+            'patientMode' => $patientMode,
+            'patientServiceMode' => $patientServiceMode,
+            'serviceGroups' => $serviceGroups,
+            'services' => $services,
+            'financialServices' => $financialServices
+        ];
         return $records;
     }
 
@@ -398,6 +409,39 @@ class ReportModel extends Model
                 'hms_invoice_particular.mode as name',
             ])->groupBy('hms_invoice_particular.mode');
 
+        if (isset($request['created_by_id']) && !empty($request['created_by_id'])){
+            $entities = $entities->where('hms_invoice.created_by_id',$request['created_by_id']);
+        }
+        if (isset($request['start_date']) && isset($request['end_date'])){
+            $start_date = new \DateTime($request['start_date']);
+            $end_date = new \DateTime($request['end_date']);
+            $start_date = $start_date->format('Y-m-d 00:00:00');
+            $end_date = $end_date->format('Y-m-d 23:59:59');
+            $entities = $entities->whereBetween('hms_invoice_transaction.created_at',[$start_date, $end_date]);
+        }else{
+            $date = new \DateTime();
+            $start_date = $date->format('Y-m-d 00:00:00');
+            $end_date = $date->format('Y-m-d 23:59:59');
+            $entities = $entities->whereBetween('hms_invoice_transaction.created_at',[$start_date, $end_date]);
+        }
+        $entities = $entities->get();
+        return $entities;
+    }
+
+    public static function patientServiceModeBaseCollection($domain,$request)
+    {
+
+        $entities = InvoiceParticularModel::where([['hms_invoice.config_id',$domain['hms_config']]])
+            ->whereIn('hms_invoice_particular.mode',['opd','emergency'])
+            ->where('hms_invoice_particular.status',1)
+            ->join('hms_invoice as hms_invoice','hms_invoice.id','=','hms_invoice_particular.hms_invoice_id')
+            ->join('hms_particular_mode as hms_particular_mode','hms_invoice.patient_payment_mode_id','=','hms_particular_mode.id')
+            ->join('hms_invoice_transaction as hms_invoice_transaction','hms_invoice_transaction.id','=','hms_invoice_particular.invoice_transaction_id')
+            ->select([
+                DB::raw('COUNT(hms_invoice_particular.id) as patient'),
+                DB::raw('SUM(hms_invoice_particular.sub_total) as total'),
+                'hms_particular_mode.name as name',
+            ])->groupBy('hms_particular_mode.name');
         if (isset($request['created_by_id']) && !empty($request['created_by_id'])){
             $entities = $entities->where('hms_invoice.created_by_id',$request['created_by_id']);
         }

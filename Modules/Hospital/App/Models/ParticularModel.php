@@ -364,9 +364,9 @@ class ParticularModel extends Model
                         [
                             'config_id'             => $domain->hms_config,
                             'employee_id'           => $user->id,
-                            'particular_type_id'    => $parent->id,
                         ],
                         [
+                            'particular_type_id'    => $parent->id,
                             'name'      => $user->name,
                             'display_name'      => $user->name,
                             'updated_at'    => $date,

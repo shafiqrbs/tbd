@@ -13,6 +13,7 @@ use Modules\Hospital\App\Models\MedicineDosageModel;
 use Modules\Hospital\App\Models\ProductModel;
 use Modules\Inventory\App\Models\CategoryModel;
 use Modules\Medicine\App\Http\Requests\MedicineInlineRequest;
+use Modules\Medicine\App\Http\Requests\MedicineRequest;
 use Modules\Medicine\App\Models\MedicineCompanyModel;
 use Modules\Medicine\App\Models\MedicineDetailsModel;
 use Modules\Medicine\App\Models\MedicineGenericModel;
@@ -69,7 +70,43 @@ class MedicineController extends Controller
         return $response;
     }
 
+    /**
+     * Store a newly created resource in storage.
+     */
+    public function store(MedicineRequest $request)
+    {
+        $service = new JsonRequestResponse();
+        $input = $request->validated();
+        $medicineStock = MedicineDetailsModel::create($input);
+        $data = $service->returnJosnResponse($medicineStock);
+        return $data;
+    }
 
+    /**
+     * Store a newly created resource in storage.
+     */
+    public function update(MedicineRequest $request,$id)
+    {
+        $service = new JsonRequestResponse();
+        $input = $request->validated();
+        $medicineStock = MedicineDetailsModel::find($id);
+        $data = $service->returnJosnResponse($medicineStock);
+        return $data;
+    }
+
+    /**
+     * Show the specified resource.
+     */
+    public function show($id)
+    {
+        $service = new JsonRequestResponse();
+        $entity = MedicineDetailsModel::find($id);
+        if (!$entity){
+            $entity = 'Data not found';
+        }
+        $data = $service->returnJosnResponse($entity);
+        return $data;
+    }
 
     /**
      * Show the specified resource for edit.

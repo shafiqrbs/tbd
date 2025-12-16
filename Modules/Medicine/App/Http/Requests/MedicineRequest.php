@@ -6,7 +6,7 @@ use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\DB;
 use Modules\Inventory\App\Entities\Product;
 
-class StockRequest extends FormRequest
+class MedicineRequest extends FormRequest
 {
     public function authorize(): bool
     {
@@ -52,17 +52,10 @@ class StockRequest extends FormRequest
     {
         $validator->after(function ($validator) {
 
-            $stockId = $this->route('stock'); // apiResource param
-
-            $exists = DB::table('hms_medicine_stock')
-                ->join(
-                    'inv_product',
-                    'inv_product.id',
-                    '=',
-                    'hms_medicine_stock.product_id'
-                )
-                ->where('inv_product.name', $this->name)
-                ->where('hms_medicine_stock.id', '!=', $stockId) // exclude self
+            $stockId = $this->route('id'); // apiResource param
+            $exists = DB::table('hms_medicine_details')
+                ->where('hms_medicine_details.name', $this->name)
+                ->where('hms_medicine_details.id', '!=', $stockId) // exclude self
                 ->exists();
 
             if ($exists) {

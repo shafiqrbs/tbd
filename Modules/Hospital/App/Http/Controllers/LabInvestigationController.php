@@ -94,8 +94,9 @@ class LabInvestigationController extends Controller
      *//**/
     public function show($id)
     {
+        $domain = $this->domain;
         $service = new JsonRequestResponse();
-        $entity = LabInvestigationModel::getShow($id);
+        $entity = LabInvestigationModel::getShow($domain,$id);
         $data = $service->returnJosnResponse($entity);
         return $data;
     }

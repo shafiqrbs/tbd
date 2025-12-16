@@ -70,6 +70,7 @@ class LabInvestigationModel extends Model
 
     public static function getRecords($request,$domain)
     {
+        $rooms =  isset($request['room_ids']) && $request['room_ids'] ? $request['room_ids'] : 0;
         $page =  isset($request['page']) && $request['page'] > 0?($request['page'] - 1 ) : 0;
         $perPage = isset($request['offset']) && $request['offset']!=''? (int)($request['offset']):50;
         $skip = isset($page) && $page!=''? (int)$page * $perPage:0;
@@ -79,12 +80,14 @@ class LabInvestigationModel extends Model
             ->leftjoin('hms_particular as vr', 'vr.id', '=', 'hms_invoice.room_id')
             ->leftjoin('users as createdBy', 'createdBy.id', '=', 'hms_invoice.created_by_id')
             ->join('cor_customers as customer', 'customer.id', '=', 'hms_invoice.customer_id')
-            ->whereExists(function ($q) {
+            ->whereExists(function ($q) use($rooms){
                 $q->select(DB::raw(1))
                     ->from('hms_invoice_particular')
-                    ->where('mode','investigation')
-                    ->where('status',1)
-                    ->where('is_invoice',1)
+                    ->join('hms_particular','hms_particular.id','=','hms_invoice_particular.particular_id')
+                    ->where('hms_invoice_particular.mode','investigation')
+                    ->where('hms_invoice_particular.status',1)
+                    ->whereIn('diagnostic_room_id',$rooms)
+                    ->where('hms_invoice_particular.is_invoice',1)
                     ->whereColumn(
                         'hms_invoice_particular.hms_invoice_id',
                         'hms_invoice.id'
@@ -105,18 +108,14 @@ class LabInvestigationModel extends Model
                 'vr.name as visiting_room',
                 'createdBy.name as created_by',
                 'hms_invoice.sub_total as total',
-
             ]);
-
-
 
         if (isset($request['term']) && !empty($request['term'])) {
             $term = trim($request['term']);
-//            dd($term);
             $entities = $entities->where(function ($q) use ($term) {
-                $q->where('hms_invoice.invoice', 'LIKE', "%{$term}%");
-//                    ->orWhere('hms_invoice.uid', 'LIKE', "%{$term}%")
-//                    ->orWhere('customer.customer_id', 'LIKE', "%{$term}%");
+                $q->where('hms_invoice.invoice', 'LIKE', "%{$term}%")
+                    ->orWhere('hms_invoice.uid', 'LIKE', "%{$term}%")
+                    ->orWhere('customer.customer_id', 'LIKE', "%{$term}%");
             });
 
         }
@@ -226,8 +225,12 @@ class LabInvestigationModel extends Model
         return $data;
     }
 
-    public static function getShow($id)
+    public static function getShow($domain,$id)
     {
+
+        $userId = $domain['user_id'];
+        $rooms = ParticularModel::where('employee_id',$userId)->first();
+        $roomIds = ($rooms->particularDetails->diagnostic_room_ids);
         $entity = self::where([
             ['hms_invoice.uid', '=', $id]
         ])
@@ -289,7 +292,7 @@ class LabInvestigationModel extends Model
                 'prescription_doctor.name as prescription_doctor_name',
             ])
             ->with([
-                'invoice_transaction' => function ($query) {
+                'invoice_transaction' => function ($query) use($roomIds) {
                     $query->select([
                         'hms_invoice_transaction.id',
                         'hms_invoice_transaction.hms_invoice_id',
@@ -300,14 +303,15 @@ class LabInvestigationModel extends Model
                     ])
                         ->where('hms_invoice_transaction.mode', 'investigation')
                         ->where('hms_invoice_transaction.process', 'Done')
-                        ->whereHas('items', function ($itemQuery) {
+                        ->whereHas('items', function ($itemQuery) use($roomIds) {
                             $itemQuery->join('hms_particular as hp', 'hp.id', '=', 'hms_invoice_particular.particular_id')
                                 ->where('hms_invoice_particular.status', 1)
+                                ->whereIn('hp.diagnostic_room_id',$roomIds)
                                 ->where('hp.is_available', 1);
                         }, '>=', 1)
                         ->orderBy('hms_invoice_transaction.created_at', 'DESC')
                         ->with([
-                            'items' => function ($query) {
+                            'items' => function ($query) use($roomIds){
                                 $query->select([
                                     'hms_invoice_particular.invoice_transaction_id as invoice_transaction_id',
                                     'hms_invoice_particular.uid as invoice_particular_id',
@@ -331,6 +335,7 @@ class LabInvestigationModel extends Model
                                     ->join('hms_particular_master_type', 'hms_particular_master_type.id', '=', 'hms_particular_type.particular_master_type_id')
                                     ->where('hms_particular_master_type.slug', 'investigation')
                                     ->where('hms_invoice_particular.status', 1)
+                                    ->whereIn('hms_particular.diagnostic_room_id',$roomIds)
                                     ->where('hms_particular.is_available', 1);
                             }
                         ]);

@@ -162,7 +162,7 @@ class DomainModel extends Model
             'hospitalConfig.ot_fee:id,name as ot_fee_name,price as ot_fee_price',
             'hospitalConfig.shareHealth',
         ])->find($domain->id);
-        $records['userInfo'] = ParticularModel::with('particularDetails:id,opd_room_id,particular_id,opd_room_ids,opd_referred')->where('employee_id',$userId)->first();
+        $records['userInfo'] = ParticularModel::with('particularDetails:id,opd_room_id,particular_id,opd_room_ids,diagnostic_room_ids,opd_referred')->where('employee_id',$userId)->first();
         $records['particularMatrix'] = ParticularMatrixModel::getRecords($domain);
         $records['byMeals'] = MedicineDosageModel::getMedicineDosageDropdown($domain,'Bymeal');
         $records['dosages'] = MedicineDosageModel::getMedicineDosageDropdown($domain,'Dosage');
