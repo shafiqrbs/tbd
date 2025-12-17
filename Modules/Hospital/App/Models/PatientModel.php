@@ -243,4 +243,15 @@ class PatientModel extends Model
     {
         return self::where([['name', $name], ['mobile', $mobile], ['domain_id', $domain]])->first();
     }
+
+    public static function uniqueCustomerKey($domain,$data)
+    {
+
+        $name   = preg_replace('/\s+/', '', strtolower(trim($data['name'])));
+        $mobile = trim($data['mobile']);
+        $age    = (int) $data['year'];
+        $uniqueKey = $domain . '_' . $name . '_' . $mobile . '_' . $age;
+        return $uniqueKey;
+
+    }
 }

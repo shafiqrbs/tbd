@@ -111,6 +111,13 @@ class Customer
      */
     private $customerId;
 
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="customer_unique_key", type="string",  nullable=true)
+     */
+    private $customerUniqueKey;
+
      /**
      * @var string
      *

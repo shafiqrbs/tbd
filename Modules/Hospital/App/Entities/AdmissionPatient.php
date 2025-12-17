@@ -35,6 +35,34 @@ class AdmissionPatient
      **/
     private $hmsInvoice;
 
+    /**
+     * @ORM\ManyToOne(targetEntity="Modules\Core\App\Entities\User")
+     * @ORM\JoinColumn(name="created_by_id", referencedColumnName="id", nullable=true)
+     **/
+    private  $createdBy;
+
+    /**
+     * @ORM\ManyToOne(targetEntity="Modules\Core\App\Entities\User")
+     * @ORM\JoinColumn(name="approved_by_id", referencedColumnName="id", nullable=true)
+     **/
+    private  $approvedBy;
+
+
+    /**
+     * @var string
+     *
+     * @ORM\Column( type="string",nullable = true)
+     */
+    private $changeMode;
+
+
+    /**
+     * @var string
+     *
+     * @ORM\Column( type="text",nullable = true)
+     */
+    private $comment;
+
 
      /**
      * @var string

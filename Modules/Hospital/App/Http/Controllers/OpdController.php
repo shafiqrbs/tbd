@@ -149,7 +149,8 @@ class OpdController extends Controller
             }else{
                 $dob = new \DateTime($input['dob']);
             }
-            $exist = PatientModel::where(['name'=> $input['name'],'mobile' => $input['mobile']])->first();
+            $uniqueKey = PatientModel::uniqueCustomerKey($this->domain['global_id'],$input);
+            $exist = PatientModel::where(['customer_unique_key' => $uniqueKey])->first();
             if($exist){
                 $entity = $exist;
             }else{
@@ -158,10 +159,12 @@ class OpdController extends Controller
                     ['id' => $customerId ?? null],
                     [
                         'domain_id' => $this->domain['global_id'],
+                        'customer_unique_key' => $uniqueKey ?? null,
                         'name'      => $input['name'] ?? null,
                         'mobile'    => $input['mobile'] ?? null,
                         'address'    => $input['address'] ?? null,
                         'dob'    => $dob ?? null,
+                        'age'    => $input['year'] ?? null,
                         'upazilla_id'    => $input['upazilla_id'] ?? null,
                         'gender'    => $input['gender'] ?? 'male',
                         'identity_mode'    => $input['identity_mode'] ?? null,

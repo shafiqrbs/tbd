@@ -196,6 +196,18 @@ class IpdController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
+    public function admissionChange($id,$mode)
+    {
+        $entity = InvoiceModel::findByIdOrUid($id);
+        $entity->update(['release_mode'=>$mode]);
+        $service = new JsonRequestResponse();
+        $data = $service->returnJosnResponse($entity);
+        return $data;
+    }
+
+    /**
+     * Show the form for editing the specified resource.
+     */
     public function release($id,$mode)
     {
         $entity = InvoiceModel::findByIdOrUid($id);
@@ -210,7 +222,6 @@ class IpdController extends Controller
      */
     public function update(Request $request, $id)
     {
-
        // $data = $request->validated();
         $user = $this->domain['user_id'];
         $data = $request->all();
@@ -220,6 +231,7 @@ class IpdController extends Controller
         $service = new JsonRequestResponse();
         return $service->returnJosnResponse($entity);
     }
+
 
     /**
     * Update the specified resource in storage.
