@@ -155,18 +155,14 @@ class InvoiceModel extends Model
                 'customer.gender as gender',
                 DB::raw('DATE_FORMAT(customer.dob, "%d-%M-%Y") as dob'),
                 'customer.gender',
-                'hms_invoice.year as year',
-                'hms_invoice.month as month',
-                'hms_invoice.day as day',
+                'customer.age as year',
                 'customer.upazilla_id',
-                'hms_invoice.invoice as invoice',
+                'customer.address',
                 'customer.name as name',
                 'customer.mobile as mobile',
             ]);
         $entities = $entities->where(function ($q) use ($term) {
-            $q->where('hms_invoice.invoice', 'LIKE', "%{$term}%")
-                ->orWhere('customer.customer_id', 'LIKE', "%{$term}%")
-                ->orWhere('customer.name', 'LIKE', "%{$term}%")
+            $q->where('customer.customer_id', 'LIKE', "%{$term}%")
                 ->orWhere('customer.mobile', 'LIKE', "%{$term}%")
                 ->orWhere('customer.nid', 'LIKE', "%{$term}%")
                 ->orWhere('customer.health_id', 'LIKE', "%{$term}%");

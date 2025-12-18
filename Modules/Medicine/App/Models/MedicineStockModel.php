@@ -124,6 +124,23 @@ class MedicineStockModel extends Model
         return $entities;
 
     }
+
+    public static function getMedicineDropdown($domain,$term){
+
+        $config =  $domain['hms_config'];
+        $entities = self::where('hms_medicine_stock.config_id', $config)
+            ->where(function ($query) use ($term) {
+                $query->where('inv_product.name', 'LIKE', '%' . trim($term) . '%');
+            })->join('inv_product', 'hms_medicine_stock.product_id', '=', 'inv_product.id')
+            ->select(['hms_medicine_stock.id as id','inv_product.name as product_name'])
+            ->orderBy('inv_product.name', 'ASC')
+            ->take(100)
+            ->get();
+
+        return $entities;
+
+    }
+
     public static function getCategoryStockForScrollingForWorkorder($domain, $category, $request): array
     {
         $page = isset($request['page']) && $request['page'] > 0 ? ($request['page'] - 1) : 0;

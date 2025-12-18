@@ -37,6 +37,7 @@ use Modules\Inventory\App\Models\PurchaseItemModel;
 use Modules\Inventory\App\Models\SettingModel;
 use Modules\Inventory\App\Models\StockItemModel;
 use Modules\Medicine\App\Models\MedicineGenericModel;
+use Modules\Medicine\App\Models\MedicineStockModel;
 use Modules\Production\App\Models\ProductionItems;
 use PhpOffice\PhpSpreadsheet\Exception;
 use PhpOffice\PhpSpreadsheet\Reader\Xlsx;
@@ -304,6 +305,20 @@ class HospitalController extends Controller
         $domain = $this->domain;
         $term = $request->get('term');
         $dropdown = ProductModel::getMedicineDropdown($domain,$term);
+        $service = new JsonRequestResponse();
+        return $service->returnJosnResponse($dropdown);
+
+    }
+
+
+     /**
+     * Show the form for editing the specified resource.
+     */
+    public function medicineStockDropdown(Request $request)
+    {
+        $domain = $this->domain;
+        $term = $request->get('term');
+        $dropdown = MedicineStockModel::getMedicineDropdown($domain,$term);
         $service = new JsonRequestResponse();
         return $service->returnJosnResponse($dropdown);
 

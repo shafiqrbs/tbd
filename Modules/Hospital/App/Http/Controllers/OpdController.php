@@ -143,48 +143,22 @@ class OpdController extends Controller
         DB::beginTransaction();
         try {
             $input['domain_id'] = $this->domain['global_id'];
-            $dob = (isset($input['dob']) and $input['dob']) ? $input['dob'] : null;
-            if($dob =="invalid" || $dob == null){
-                $dob = null;
-            }else{
-                $dob = new \DateTime($input['dob']);
-            }
             $uniqueKey = PatientModel::uniqueCustomerKey($this->domain['global_id'],$input);
-            $exist = PatientModel::where(['customer_unique_key' => $uniqueKey])->first();
-            if($exist){
-                $entity = $exist;
-            }else{
-                $customerId = (isset($input['customer_id']) and $input['customer_id']) ? $input['customer_id'] : '';
-                $entity = PatientModel::updateOrCreate(
-                    ['id' => $customerId ?? null],
-                    [
-                        'domain_id' => $this->domain['global_id'],
-                        'customer_unique_key' => $uniqueKey ?? null,
-                        'name'      => $input['name'] ?? null,
-                        'mobile'    => $input['mobile'] ?? null,
-                        'address'    => $input['address'] ?? null,
-                        'dob'    => $dob ?? null,
-                        'age'    => $input['year'] ?? null,
-                        'upazilla_id'    => $input['upazilla_id'] ?? null,
-                        'gender'    => $input['gender'] ?? 'male',
-                        'identity_mode'    => $input['identity_mode'] ?? null,
-                        'health_id'    => $input['health_id'] ?? null,
-                        'nid'    => $input['identity'] ?? null,
-                        'country_id'    => $input['country_id'] ?? 19,
-                    ]
-                );
-            }
+            $patient = PatientModel::where(['customer_unique_key' => $uniqueKey])->first();
+            $entity = self::createOrUpdatePatient($input, $this->domain, $uniqueKey, $patient);
             $invConfig = $this->domain['inv_config'];
             $hmsConfig = $this->domain['hms_config'];
             $config = HospitalConfigModel::find($hmsConfig);
             if($entity){
                 $invoiceId = OPDModel::insertHmsInvoice($invConfig,$config, $entity,$input);
             }
-            $accountingConfig = AccountingModel::where('id', $this->domain['acc_config'])->first();
-            $ledgerExist = AccountHeadModel::where('customer_id', $entity->id)->first();
-            if (empty($ledgerExist)) {
-               AccountHeadModel::insertCustomerLedger($accountingConfig, $entity);
-            }
+            /*
+                $accountingConfig = AccountingModel::where('id', $this->domain['acc_config'])->first();
+                $ledgerExist = AccountHeadModel::where('customer_id', $entity->id)->first();
+                if (empty($ledgerExist)) {
+                   AccountHeadModel::insertCustomerLedger($accountingConfig, $entity);
+                }
+            */
             DB::commit();
             $getNextOpdRoom = InvoiceModel::getNextOpdRoom($this->domain);
             $invoice = InvoiceModel::getShow($invoiceId);
@@ -211,6 +185,36 @@ class OpdController extends Controller
             return $response;
         }
 
+    }
+
+    public static function createOrUpdatePatient(array $input, $domain, $uniqueKey = null, $patient = null)
+    {
+        $dob = null;
+        if (!empty($input['dob']) && $input['dob'] !== 'invalid') {
+            $dob = new \DateTime($input['dob']);
+        }
+        $data = [
+            'domain_id'           => $domain['global_id'],
+            'customer_unique_key' => $uniqueKey,
+            'name'                => $input['name'] ?? null,
+            'mobile'              => $input['mobile'] ?? null,
+            'address'             => $input['address'] ?? null,
+            'dob'                 => $dob,
+            'age'                 => $input['year'] ?? null,
+            'upazilla_id'         => $input['upazilla_id'] ?? null,
+            'gender'              => $input['gender'] ?? 'male',
+            'identity_mode'       => $input['identity_mode'] ?? null,
+            'health_id'           => $input['health_id'] ?? null,
+            'nid'                 => $input['identity'] ?? null,
+            'country_id'          => $input['country_id'] ?? 19,
+        ];
+
+        if ($patient) {
+            $patient->update($data);
+            return $patient;
+        }
+
+        return PatientModel::create($data);
     }
 
     /**

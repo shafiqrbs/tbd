@@ -282,7 +282,7 @@ class ReportModel extends Model
     {
 
         $entities = InvoiceParticularModel::where([['hms_invoice.config_id',$domain['hms_config']]])
-            ->whereIn('mode',['opd','emergency','admission'])
+            ->whereIn('mode',['opd','emergency','ipd'])
             ->leftjoin('hms_invoice as hms_invoice','hms_invoice.id','=','hms_invoice_particular.hms_invoice_id')
             ->leftjoin('users as createdBy','createdBy.id','=','hms_invoice.created_by_id')
             ->join('cor_customers as customer','customer.id','=','hms_invoice.customer_id')
@@ -432,7 +432,7 @@ class ReportModel extends Model
     {
 
         $entities = InvoiceParticularModel::where([['hms_invoice.config_id',$domain['hms_config']]])
-            ->whereIn('hms_invoice_particular.mode',['opd','emergency'])
+            ->whereIn('hms_invoice_particular.mode',['opd','emergency','ipd'])
             ->where('hms_invoice_particular.status',1)
             ->join('hms_invoice as hms_invoice','hms_invoice.id','=','hms_invoice_particular.hms_invoice_id')
             ->join('hms_particular_mode as hms_particular_mode','hms_invoice.patient_payment_mode_id','=','hms_particular_mode.id')
