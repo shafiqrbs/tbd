@@ -152,13 +152,6 @@ class OpdController extends Controller
             if($entity){
                 $invoiceId = OPDModel::insertHmsInvoice($invConfig,$config, $entity,$input);
             }
-            /*
-                $accountingConfig = AccountingModel::where('id', $this->domain['acc_config'])->first();
-                $ledgerExist = AccountHeadModel::where('customer_id', $entity->id)->first();
-                if (empty($ledgerExist)) {
-                   AccountHeadModel::insertCustomerLedger($accountingConfig, $entity);
-                }
-            */
             DB::commit();
             $getNextOpdRoom = InvoiceModel::getNextOpdRoom($this->domain);
             $invoice = InvoiceModel::getShow($invoiceId);

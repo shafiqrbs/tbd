@@ -20,6 +20,7 @@ use Modules\Hospital\App\Entities\Prescription;
 use Modules\Hospital\App\Http\Requests\IpdRequest;
 use Modules\Hospital\App\Http\Requests\OPDRequest;
 use Modules\Hospital\App\Http\Requests\ReferredRequest;
+use Modules\Hospital\App\Models\AdmissionPatientModel;
 use Modules\Hospital\App\Models\AdmissionPatientPrescriptionHistory;
 use Modules\Hospital\App\Models\AdmissionPatientPrescriptionHistoryModel;
 use Modules\Hospital\App\Models\HospitalConfigModel;
@@ -81,7 +82,7 @@ class IpdController extends Controller
      */
     public function ipdConfirm(Request $request){
         $domain = $this->domain;
-        $data = InvoiceModel::getIpdConfirmRecords($request,$domain);
+        $data = IpdModel::getIpdConfirmRecords($request,$domain);
         $response = new Response();
         $response->headers->set('Content-Type','application/json');
         $response->setContent(json_encode([
@@ -196,13 +197,54 @@ class IpdController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function admissionChange($id,$mode)
+    public function admissionRevised(Request $request,$id)
     {
+        $domain = $this->domain;
+        $input = $request->all();
         $entity = InvoiceModel::findByIdOrUid($id);
-        $entity->update(['release_mode'=>$mode]);
+        $changeMode = in_array($input['change_mode'] ?? '', ['change','change_day','cancel'])
+            ? $input['change_mode']
+            : 'change';
+        AdmissionPatientModel::updateOrCreate(
+            ['hms_invoice_id' => $entity->id],
+            [
+                'approved_by_id' => $domain['user_id'],
+                'change_mode'   => $changeMode ?? 'change',
+                'comment'       => $input['comment'] ?? null,
+            ]
+        );
         $service = new JsonRequestResponse();
         $data = $service->returnJosnResponse($entity);
         return $data;
+
+
+    }
+
+    /**
+     * Show the form for editing the specified resource.
+     */
+    public function admissionChange(Request $request,$id)
+    {
+        $domain = $this->domain;
+        $input = $request->all();
+        $entity = InvoiceModel::findByIdOrUid($id);
+        $changeMode = in_array($input['change_mode'] ?? '', ['change','day_change','cancel'])
+            ? $input['change_mode']
+            : 'change';
+        AdmissionPatientModel::updateOrCreate(
+            ['hms_invoice_id' => $entity->id],
+            [
+                'created_by_id' => $domain['user_id'],
+                'change_mode'   => $changeMode ?? 'change',
+                'comment'       => $input['comment'] ?? null,
+            ]
+        );
+        $entity->update(['process'=> 'revised']);
+        $service = new JsonRequestResponse();
+        $data = $service->returnJosnResponse($entity);
+        return $data;
+
+
     }
 
     /**

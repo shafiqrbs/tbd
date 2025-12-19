@@ -104,7 +104,10 @@ class IpdModel extends Model
     {
         return $this->hasOne(OpdModel::class, 'id', 'patient_mode_id');
     }
-
+    public function children()
+    {
+        return $this->hasOne(InvoiceModel::class, 'parent_id');
+    }
 
     public static function getRecords($request,$domain)
     {
@@ -200,6 +203,9 @@ class IpdModel extends Model
             } elseif ($request['ipd_mode'] === 'admitted') {
                 $entities = $entities->where('hms_invoice.process','admitted');
                 $entities = $entities->whereNotNull('hms_invoice.parent_id');
+            } elseif ($request['ipd_mode'] === 'revised') {
+                $entities = $entities->where('hms_invoice.process','revised');
+                $entities = $entities->whereNotNull('hms_invoice.parent_id');
             }
             $entities
                 ->leftJoin('hms_particular as admit_consultant', 'admit_consultant.id', '=', 'hms_invoice.admit_consultant_id')
@@ -283,6 +289,188 @@ class IpdModel extends Model
         }else{
             $entities = $entities->orderBy("hms_invoice.{$sortBy}",$orderBy);
             $entities = $entities->orderBy("vr.name",'ASC');
+        }
+        $entities = $entities->get();
+        $data = array('count'=>$total,'entities'=>$entities);
+        return $data;
+    }
+
+    public static function getIpdConfirmRecords($request,$domain)
+    {
+        $sortBy =  isset($request['sortBy']) && $request['sortBy'] ? $request['sortBy'] : 'updated_at';
+        $orderBy =  isset($request['order']) && $request['order'] ? $request['order'] : 'ASC';
+
+        $page =  isset($request['page']) && $request['page'] > 0?($request['page'] - 1 ) : 0;
+        $perPage = isset($request['offset']) && $request['offset']!=''? (int)($request['offset']):50;
+        $skip = isset($page) && $page!=''? (int)$page * $perPage:0;
+
+        $entities = self::where([['hms_invoice.config_id',$domain['hms_config']]])
+            ->leftjoin('hms_prescription as prescription','prescription.hms_invoice_id','=','hms_invoice.id')
+            ->leftjoin('users as doctor','doctor.id','=','prescription.created_by_id')
+            ->leftjoin('hms_particular as vr','vr.id','=','hms_invoice.room_id')
+            ->leftjoin('users as createdBy','createdBy.id','=','hms_invoice.created_by_id')
+            ->join('cor_customers as customer','customer.id','=','hms_invoice.customer_id')
+            ->join('hms_particular_mode as patient_mode','patient_mode.id','=','hms_invoice.patient_mode_id')
+            ->join('hms_particular_mode as patient_payment_mode','patient_payment_mode.id','=','hms_invoice.patient_payment_mode_id')
+            ->select([
+                'hms_invoice.id',
+                'hms_invoice.uid',
+                'hms_invoice.parent_id as parent_id',
+                'prescription.id as prescription_id',
+                'prescription.uid as prescription_uid',
+                'prescription.created_by_id as prescription_created_by_id',
+                'hms_invoice.invoice as invoice',
+                'hms_invoice.barcode  as barcode',
+                'customer.customer_id as patient_id',
+                'customer.health_id',
+                'doctor.name as doctor_name',
+                'customer.name',
+                'customer.mobile',
+                'customer.address',
+                DB::raw("CONCAT(UCASE(LEFT(customer.gender, 1)), LCASE(SUBSTRING(customer.gender, 2))) as gender"),
+                DB::raw('DATE_FORMAT(hms_invoice.updated_at, "%d %b %Y, %h:%i %p") as created_at'),
+                DB::raw('DATE_FORMAT(hms_invoice.appointment_date, "%d-%M-%Y") as appointment'),
+                DB::raw('DATE_FORMAT(hms_invoice.admission_date, "%d-%M-%Y") as admission_date'),
+                DB::raw('DATE_FORMAT(customer.dob, "%d-%M-%Y") as dob'),
+                DB::raw("CONCAT(UCASE(LEFT(hms_invoice.process, 1)), LCASE(SUBSTRING(hms_invoice.process, 2))) as process"),
+                'vr.name as visiting_room',
+                'vr.display_name as room_name',
+                'patient_mode.name as patient_mode_name',
+                'patient_payment_mode.name as patient_payment_mode_name',
+                'patient_payment_mode.slug as patient_payment_mode_slug',
+                'createdBy.name as created_by',
+                'hms_invoice.sub_total as total',
+                'hms_invoice.amount as amount',
+                'hms_invoice.referred_mode as referred_mode',
+                'prescription.diabetes as diabetes',
+                'prescription.blood_pressure as blood_pressure',
+                'hms_invoice.admission_day as admission_day',
+                'hms_invoice.consume_day as consume_day',
+                'hms_invoice.remaining_day as remaining_day',
+            ]);
+
+        if (isset($request['term']) && !empty($request['term'])){
+            $term = trim($request['term']);
+            $entities = $entities->where(function ($q) use ($term) {
+                $q->where('hms_invoice.invoice', 'LIKE', "%{$term}%")
+                    ->orWhere('hms_invoice.uid', 'LIKE', "%{$term}%")
+                    ->orWhere('customer.customer_id', 'LIKE', "%{$term}%")
+                    ->orWhere('customer.name', 'LIKE', "%{$term}%")
+                    ->orWhere('customer.mobile', 'LIKE', "%{$term}%")
+                    ->orWhere('customer.nid', 'LIKE', "%{$term}%")
+                    ->orWhere('customer.health_id', 'LIKE', "%{$term}%");
+            });
+        }
+
+        if (isset($request['prescription_mode']) && !empty($request['prescription_mode'])){
+            if (!empty($request['prescription_mode'])) {
+                if ($request['prescription_mode'] === 'prescription') {
+                    $entities = $entities->whereNotNull('prescription.id');
+                    $entities = $entities->where('hms_invoice.is_prescription',1);
+                } elseif ($request['prescription_mode'] === 'non-prescription') {
+                    $entities = $entities->where(function ($query) {
+                        $query->whereNull('prescription.id')
+                            ->orWhere('hms_invoice.is_prescription', 0);
+                    });
+                }elseif(in_array($request['prescription_mode'],['room','admission','referred'])) {
+                    $entities = $entities->where('hms_invoice.referred_mode',$request['prescription_mode']);
+                }
+            }
+        }
+
+        if (isset($request['ipd_mode']) && !empty($request['ipd_mode'])){
+
+            if ($request['ipd_mode'] === 'new' and !empty($request['referred_mode']) and $request['referred_mode']) {
+                $entities = $entities->whereIn('hms_invoice.process',['ipd','closed']);
+                $entities = $entities->where('hms_invoice.referred_mode', $request['referred_mode'])
+                    ->whereNull('hms_invoice.parent_id')->whereDoesntHave('children');
+            } elseif ($request['ipd_mode'] === 'admission') {
+                $entities = $entities->whereIn('hms_invoice.process',['confirmed','billing']);
+                $entities = $entities->whereNotNull('hms_invoice.parent_id');
+            } elseif ($request['ipd_mode'] === 'admitted') {
+                $entities = $entities->where('hms_invoice.process','admitted');
+                $entities = $entities->whereNotNull('hms_invoice.parent_id');
+            } elseif ($request['ipd_mode'] === 'revised') {
+                $entities = $entities->where('hms_invoice.process','revised');
+                $entities = $entities->whereNotNull('hms_invoice.parent_id');
+            }
+
+            $entities
+                ->leftJoin('hms_particular as admit_consultant', 'admit_consultant.id', '=', 'hms_invoice.admit_consultant_id')
+                ->leftJoin('hms_particular as admit_doctor', 'admit_doctor.id', '=', 'hms_invoice.admit_doctor_id')
+                ->leftJoin('hms_particular_mode as admit_unit', 'admit_unit.id', '=', 'hms_invoice.admit_unit_id')
+                ->leftJoin('hms_particular_mode as admit_department', 'admit_department.id', '=', 'hms_invoice.admit_department_id')
+                ->addSelect([
+                    'admit_consultant.name as admit_consultant_name',
+                    'admit_doctor.name as admit_doctor_name',
+                    'admit_unit.name as admit_unit_name',
+                    'admit_department.name as admit_department_name',
+                ]);
+        }
+        if (isset($request['patient_mode']) && !empty($request['patient_mode'])){
+            if (is_array($request['patient_mode'])) {
+                $entities = $entities->whereIn('patient_mode.slug', $request['patient_mode']);
+            } else {
+                $entities = $entities->where('patient_mode.slug', $request['patient_mode']);
+            }
+        }
+        if (isset($request['is_vital']) && !empty($request['is_vital'])){
+            $entities = $entities ->addSelect([
+                'hms_invoice.weight as weight',
+                'hms_invoice.height as height',
+                'hms_invoice.bp  as bp',
+                'hms_invoice.oxygen  as oxygen',
+                'hms_invoice.temperature  as temperature',
+                'hms_invoice.sat_with_O2  as sat_with_O2',
+                'hms_invoice.sat_without_O2  as sat_without_O2',
+                'hms_invoice.sat_liter  as sat_liter',
+                'hms_invoice.respiration  as respiration',
+                'hms_invoice.pulse  as pulse',
+            ]);
+            $entities = $entities->where('hms_invoice.is_vital',1);
+            $entities = $entities->whereIn('hms_invoice.process', ['New','In-progress']);
+        }
+
+        if (isset($request['process']) && !empty($request['process'])){
+            $entities = $entities->where('hms_invoice.process',$request['process']);
+        }
+
+        if (isset($request['room_id']) && !empty($request['room_id'])){
+            $entities = $entities->where('hms_invoice.room_id',$request['room_id']);
+        }
+
+        if ($request->filled('room_ids') && is_array($request['room_ids'])) {
+            $intNumbers = array_map('intval', $request['room_ids']);
+            $entities = $entities->whereIn('hms_invoice.room_id', $intNumbers);
+        }
+
+        if (isset($request['created_by_id']) && !empty($request['created_by_id'])){
+            $entities = $entities->where('hms_invoice.created_by_id',$request['created_by_id']);
+        }
+
+        if (isset($request['customer_id']) && !empty($request['customer_id'])){
+            $entities = $entities->where('hms_invoice.customer_id',$request['customer_id']);
+        }
+
+        if (isset($request['created']) and !empty($request['created'])) {
+            $date = !empty($request['created'])
+                ? new \DateTime($request['created'])
+                : new \DateTime();
+            $start_date = $date->format('Y-m-d 00:00:00');
+            $end_date = $date->format('Y-m-d 23:59:59');
+            $entities = $entities->whereBetween('hms_invoice.updated_at', [$start_date, $end_date]);
+        }
+
+        $total  = $entities->count();
+        $entities = $entities->skip($skip)->take($perPage);
+
+
+        if ($sortBy == "visiting_room"){
+            $entities = $entities->orderBy("vr.name",$orderBy);
+        }elseif ($sortBy == "gender"){
+            $entities = $entities->orderBy("customer.gender",$orderBy);
+        }else{
+            $entities = $entities->orderBy("hms_invoice.{$sortBy}",$orderBy);
         }
         $entities = $entities->get();
         $data = array('count'=>$total,'entities'=>$entities);
