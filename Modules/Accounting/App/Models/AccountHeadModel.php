@@ -633,9 +633,9 @@ class AccountHeadModel extends Model
 
         $parts = [];
         if ($entity->bank->name) { $parts[] = $entity->bank->name; }
-        if ($entity) { $parts[] = $entity->name; }
+       // if ($entity) { $parts[] = $entity->name; }
         if ($entity->account_number) { $parts[] = $entity->account_number; }
-        if ($entity->branch_name) { $parts[] = $entity->branch_name; }
+       // if ($entity->branch_name) { $parts[] = $entity->branch_name; }
         $implode = implode(' ', $parts);
         $displayName = "{$implode}";
 
@@ -687,8 +687,8 @@ class AccountHeadModel extends Model
             if ($entity->account_number) { $parts[] = $entity->account_number; }
             if ($entity->branch_name) { $parts[] = $entity->branch_name; }
         }elseif($methodSlug == 'mobile-banking'){
-            if ($entity->mobile) { $parts[] = $entity->mobile; }
             if ($entity) { $parts[] = $entity->name; }
+            if ($entity->mobile) { $parts[] = $entity->mobile; }
         }else{
             if ($entity) { $parts[] = $entity->name; }
         }
@@ -727,7 +727,8 @@ class AccountHeadModel extends Model
 
     public static function insertCustomerAccount($config, $entity)
     {
-        $name = "{$entity->mobile}-{$entity->name}";
+      //  $name = "{$entity->mobile}-{$entity->name}";
+        $name = "{$entity->name}";
 
         $head = AccountHeadModel::updateOrCreate(
             [
@@ -758,7 +759,8 @@ class AccountHeadModel extends Model
 
     public static function insertVendorAccount($config, $entity)
     {
-        $name = "{$entity->mobile}-{$entity->company_name}";
+       // $name = "{$entity->mobile}-{$entity->company_name}";
+        $name = "{$entity->company_name}";
         $head = AccountHeadModel::updateOrCreate(
             [
                 'vendor_id' => $entity->id,

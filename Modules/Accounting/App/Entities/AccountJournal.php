@@ -191,8 +191,8 @@ class AccountJournal
 
 
     /**
-     * @var integer
-     * @ORM\Column(name="ref_no", type="integer",  nullable=true)
+     * @var string
+     * @ORM\Column(name="ref_no", type="string",  nullable=true)
      */
     private $refNo;
 

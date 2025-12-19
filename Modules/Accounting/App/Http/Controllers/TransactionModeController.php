@@ -164,6 +164,13 @@ class TransactionModeController extends Controller
             $data['path'] = $path;
         }
         $entity->update($data);
+        $config = ConfigModel::findOrFail($this->domain['acc_config']);
+        if($entity->method->slug == 'bank'){
+            $displayName = AccountHeadModel::insertTransactionBankAccount($config, $entity);
+        }else{
+            $displayName = AccountHeadModel::insertTransactionAccount($config, $entity);
+        }
+        $entity->update(['display_name' => $displayName]);
         if ($data['is_selected']) {
             $this->updateIsSelected($entity->id);
         }
