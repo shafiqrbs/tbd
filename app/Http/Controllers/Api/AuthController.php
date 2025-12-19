@@ -68,11 +68,9 @@ final class AuthController extends Controller
 
         // Fetch additional data
         $warehouse = UserWarehouseModel::getUserActiveWarehouse($user->id);
-        $configData = DomainModel::domainHospitalConfig($user->id);
 
         $payload = [
             'user_warehouse' => $warehouse ?? [],
-            'hospital_config' => $configData ?? [],
             'token' => $token,
         ];
 

@@ -17,8 +17,6 @@ use Modules\Core\App\Models\SettingTypeModel;
 use Modules\Core\App\Models\UserModel;
 use Modules\Core\App\Models\WarehouseModel;
 use Modules\Domain\App\Models\DomainModel;
-use Modules\Hospital\App\Models\HospitalConfigModel;
-use Modules\Hospital\App\Models\ShareHealthModel;
 use Modules\Inventory\App\Entities\Config;
 use Modules\Inventory\App\Models\ConfigDiscountModel;
 use Modules\Inventory\App\Models\ConfigModel;
@@ -49,7 +47,7 @@ class DomainConfigController extends Controller
         $entity = DomainModel::with(['accountConfig',
             'accountConfig.capital_investment','accountConfig.account_cash','accountConfig.account_bank','accountConfig.account_mobile','accountConfig.account_user','accountConfig.account_vendor','accountConfig.account_customer','accountConfig.account_product_group','accountConfig.account_category',
             'accountConfig.voucher_stock_opening','accountConfig.voucher_purchase','accountConfig.voucher_sales','accountConfig.voucher_purchase_return','accountConfig.voucher_stock_reconciliation',
-            'productionConfig','gstConfig','inventoryConfig','hospitalConfig','inventoryConfig.configPurchase','inventoryConfig.configSales','inventoryConfig.configProduct','inventoryConfig.configDiscount','inventoryConfig.configVat','inventoryConfig.businessModel','inventoryConfig.currency'
+            'productionConfig','gstConfig','inventoryConfig','inventoryConfig.configPurchase','inventoryConfig.configSales','inventoryConfig.configProduct','inventoryConfig.configDiscount','inventoryConfig.configVat','inventoryConfig.businessModel','inventoryConfig.currency'
         ])->find($this
             ->domain['global_id']);
         $service = new JsonRequestResponse();
@@ -62,27 +60,12 @@ class DomainConfigController extends Controller
         $entity = DomainModel::with(['accountConfig',
             'accountConfig.capital_investment','accountConfig.account_cash','accountConfig.account_bank','accountConfig.account_mobile','accountConfig.account_user','accountConfig.account_vendor','accountConfig.account_customer','accountConfig.account_product_group','accountConfig.account_category',
             'accountConfig.voucher_stock_opening','accountConfig.voucher_purchase','accountConfig.voucher_sales','accountConfig.voucher_purchase_return','accountConfig.voucher_stock_reconciliation',
-            'productionConfig','gstConfig','inventoryConfig','hospitalConfig','inventoryConfig.configPurchase','inventoryConfig.configSales','inventoryConfig.configProduct','inventoryConfig.configDiscount','inventoryConfig.configVat','inventoryConfig.businessModel',
+            'productionConfig','gstConfig','inventoryConfig','inventoryConfig.configPurchase','inventoryConfig.configSales','inventoryConfig.configProduct','inventoryConfig.configDiscount','inventoryConfig.configVat','inventoryConfig.businessModel',
             'inventoryConfig.currency'
         ])->find($id);
         return $entity;
     }
 
-    public function domainHospitalConfigById($id)
-    {
-        $entity = DomainModel::with(['accountConfig',
-            'accountConfig.capital_investment','accountConfig.account_cash','accountConfig.account_bank','accountConfig.account_mobile','accountConfig.account_user','accountConfig.account_vendor','accountConfig.account_customer','accountConfig.account_product_group','accountConfig.account_category',
-            'accountConfig.voucher_stock_opening','accountConfig.voucher_purchase','accountConfig.voucher_sales','accountConfig.voucher_purchase_return','accountConfig.voucher_stock_reconciliation',
-             'inventoryConfig','hospitalConfig','inventoryConfig.configPurchase','inventoryConfig.configSales','inventoryConfig.configProduct','inventoryConfig.configDiscount','inventoryConfig.configVat','inventoryConfig.businessModel',
-            'inventoryConfig.currency',
-            'hospitalConfig.admission_fee:id,name as admission_fee_name,price as admission_fee_price',
-            'hospitalConfig.opd_ticket_fee:id,name as opd_ticket_fee_name,price as opd_ticket_fee_price',
-            'hospitalConfig.emergency_fee:id,name as emergency_fee_name,price as emergency_fee_price',
-            'hospitalConfig.ot_fee:id,name as ot_fee_name,price as ot_fee_price',
-            'hospitalConfig.shareHealth',
-        ])->find($id);
-        return $entity;
-    }
 
     public function domainConfigurationForm(Request $request,$id)
     {
@@ -459,114 +442,6 @@ class DomainConfigController extends Controller
             ], ResponseAlias::HTTP_NOT_FOUND);
         } catch (\Exception $e) {
             DB::rollBack();
-            return response()->json([
-                'message' => 'Operation failed: ' . $e->getMessage(),
-                'error'   => $e->getMessage(),
-                'status'  => ResponseAlias::HTTP_INTERNAL_SERVER_ERROR
-            ], ResponseAlias::HTTP_INTERNAL_SERVER_ERROR);
-        }
-    }
-
-    public function hospitalConfig(Request $request,$id)
-    {
-        $entity = HospitalConfigModel::updateOrCreate([
-            'domain_id' => $id,
-        ]);
-        ShareHealthModel::updateOrCreate(
-            [
-                'config_id' => $entity->id,
-            ],
-            [
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]
-        );
-        DB::beginTransaction();
-        try {
-
-            $domain = UserModel::getDomainData($id);
-            HospitalConfigModel::investigationMasterReport($domain);
-
-            $entity->update($request->all());
-            DB::commit();
-
-            $service = new JsonRequestResponse();
-            $return = $service->returnJosnResponse($this->domainHospitalConfigById($id));
-            return $return;
-
-        } catch (ModelNotFoundException $e) {
-            DB::rollBack();
-
-            return response()->json([
-                'message' => $e->getMessage(),
-                'status'  => ResponseAlias::HTTP_NOT_FOUND
-            ], ResponseAlias::HTTP_NOT_FOUND);
-
-        } catch (\Exception $e) {
-            DB::rollBack();
-
-            return response()->json([
-                'message' => 'Operation failed: ' . $e->getMessage(),
-                'error'   => $e->getMessage(),
-                'status'  => ResponseAlias::HTTP_INTERNAL_SERVER_ERROR
-            ], ResponseAlias::HTTP_INTERNAL_SERVER_ERROR);
-        }
-    }
-
-    public function hospitalResetConfig(Request $request,$id)
-    {
-
-        $entity = HospitalConfigModel::updateOrCreate([
-            'domain_id' => $id,
-        ]);
-
-        // Handle Warehouse
-        WarehouseModel::updateOrCreate(
-            [
-                'domain_id' => $id,
-                'name' => 'Central',
-                'is_default' => 1,
-            ],
-            [
-                'mobile' => $entity->mobile,
-                'address' => $entity->address,
-                'status' => true,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]
-        );
-        ShareHealthModel::updateOrCreate(
-            [
-                'config_id' => $entity->id,
-            ],
-            [
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]
-        );
-
-        DB::beginTransaction();
-        try {
-
-            $domain = UserModel::getDomainData($id);
-            HospitalConfigModel::resetMasterData($domain);
-            HospitalConfigModel::investigationMasterReport($domain);
-            DB::commit();
-            $service = new JsonRequestResponse();
-            $return = $service->returnJosnResponse($this->domainHospitalConfigById($id));
-            return $return;
-
-        } catch (ModelNotFoundException $e) {
-            DB::rollBack();
-
-            return response()->json([
-                'message' => 'Resource not found',
-                'status'  => ResponseAlias::HTTP_NOT_FOUND
-            ], ResponseAlias::HTTP_NOT_FOUND);
-
-        } catch (\Exception $e) {
-            DB::rollBack();
-
             return response()->json([
                 'message' => 'Operation failed: ' . $e->getMessage(),
                 'error'   => $e->getMessage(),

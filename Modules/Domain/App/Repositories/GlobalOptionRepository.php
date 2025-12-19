@@ -1,32 +1,7 @@
 <?php
 
 namespace Modules\Domain\App\Repositories;
-
-use Appstore\Bundle\AccountingBundle\Entity\AccountingConfig;
-use Appstore\Bundle\BusinessBundle\Entity\BusinessConfig;
-use Appstore\Bundle\DoctorPrescriptionBundle\Entity\DpsConfig;
-use Appstore\Bundle\DomainUserBundle\Entity\Customer;
-use Appstore\Bundle\HospitalBundle\Entity\HospitalConfig;
-use Appstore\Bundle\InventoryBundle\Entity\InventoryConfig;
-use Appstore\Bundle\MedicineBundle\Entity\MedicineConfig;
-use Appstore\Bundle\RestaurantBundle\Entity\RestaurantConfig;
-use Core\UserBundle\Entity\Profile;
-use Core\UserBundle\Entity\User;
 use Doctrine\ORM\EntityRepository;
-use Gregwar\Image\Image;
-use Setting\Bundle\AppearanceBundle\Entity\Menu;
-use Setting\Bundle\AppearanceBundle\Entity\MenuGrouping;
-use Setting\Bundle\AppearanceBundle\Entity\TemplateCustomize;
-use Setting\Bundle\ContentBundle\Entity\ContactPage;
-use Setting\Bundle\ContentBundle\Entity\HomePage;
-use Setting\Bundle\ContentBundle\Entity\Page;
-use Setting\Bundle\ToolBundle\Entity\AdsTool;
-use Setting\Bundle\ToolBundle\Entity\AppModule;
-use Setting\Bundle\ToolBundle\Entity\Designation;
-use Setting\Bundle\ToolBundle\Entity\FooterSetting;
-use Setting\Bundle\ToolBundle\Entity\GlobalOption;
-use Setting\Bundle\ToolBundle\Entity\MobileIcon;
-use Setting\Bundle\ToolBundle\Entity\SiteSetting;
 
 /**
  * GlobalOptionRepository
@@ -479,50 +454,6 @@ class GlobalOptionRepository extends EntityRepository
             $this->_em->persist($config);
         }
 
-        $inventory = $this->_em->getRepository('InventoryBundle:InventoryConfig')->findOneBy(array('globalOption'=>$globalOption));
-        if(empty($inventory)){
-            $config = new InventoryConfig();
-            $config->setGlobalOption($globalOption);
-            $this->_em->persist($config);
-        }
-
-
-
-        $hospital = $this->_em->getRepository('HospitalBundle:HospitalConfig')->findOneBy(array('globalOption'=>$globalOption));
-        if(empty($hospital)){
-            $config = new HospitalConfig();
-            $config->setGlobalOption($globalOption);
-            $this->_em->persist($config);
-        }
-
-
-        $restaurantConfig = $this->_em->getRepository('RestaurantBundle:RestaurantConfig')->findOneBy(array('globalOption'=>$globalOption));
-        if(empty($restaurantConfig)){
-            $config = new RestaurantConfig();
-            $config->setGlobalOption($globalOption);
-            $this->_em->persist($config);
-        }
-
-        $dpsConfig = $this->_em->getRepository('DoctorPrescriptionBundle:DpsConfig')->findOneBy(array('globalOption'=>$globalOption));
-        if(empty($dpsConfig)){
-            $config = new DpsConfig();
-            $config->setGlobalOption($globalOption);
-            $this->_em->persist($config);
-        }
-
-        $medicineConfig = $this->_em->getRepository('MedicineBundle:MedicineConfig')->findOneBy(array('globalOption'=>$globalOption));
-        if(empty($medicineConfig)){
-            $config = new MedicineConfig();
-            $config->setGlobalOption($globalOption);
-            $this->_em->persist($config);
-        }
-
-        $businessConfig = $this->_em->getRepository('BusinessBundle:BusinessConfig')->findOneBy(array('globalOption'=>$globalOption));
-        if(empty($businessConfig)){
-            $config = new BusinessConfig();
-            $config->setGlobalOption($globalOption);
-            $this->_em->persist($config);
-        }
 
     }
 
