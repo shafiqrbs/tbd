@@ -117,6 +117,7 @@ Route::prefix('/accounting')->middleware([HeaderAuthenticationMiddleware::class,
 
 Route::prefix('/accounting/report')->middleware([HeaderAuthenticationMiddleware::class,LogRequestResponse::class])->group(function() {
     Route::get('/dashboard', [ReportController::class,'dashboard'])->name('dashboard');
+    Route::get('/income-expense', [ReportController::class,'incomeExpense'])->name('income-expense');
 });
 
 Route::get('ledger-report/download/{type}', [AccountHeadController::class,'generateFileDownload']);

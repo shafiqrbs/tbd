@@ -622,7 +622,68 @@ class AccountJournalItemModel extends Model
                 ]);
     }
 
+    public static function getIncomeExpense(array $params, $domain)
+    {
+        // Get configured account IDs
+        $accountArrayIds = ConfigModel::where('domain_id', $domain['domain_id'])
+            ->first(['account_cash_id', 'account_bank_id', 'account_mobile_id'])
+            ?->toArray() ?? [];
+        $accountArrayIds = array_values($accountArrayIds);
 
+        // Get account info (to use as dynamic columns)
+        $accounts = DB::table('acc_head as acc')
+            ->join('acc_head as parent', 'parent.id', '=', 'acc.parent_id')
+            ->select('acc.id', 'acc.name', 'acc.display_name', 'parent.name as parent_name')
+            ->whereIn('acc.parent_id', $accountArrayIds)
+            ->where('acc.config_id', $domain['acc_config'])
+            ->get();
+
+        // Get journal items aggregated by sub-head and branch
+        $results = DB::table('acc_journal_item as item')
+            ->join('acc_head as head', 'head.id', '=', 'item.account_sub_head_id')
+            ->join('acc_journal as journal', 'journal.id', '=', 'item.account_journal_id')
+            ->join('acc_voucher as voucher', 'voucher.id', '=', 'journal.voucher_id')
+            ->join('acc_master_voucher as master', 'master.id', '=', 'voucher.master_voucher_id')
+            ->join('dom_domain as branch', 'branch.id', '=', 'journal.branch_id')
+            ->select(
+                'item.account_sub_head_id',
+                'head.name as sub_head_name',
+                'branch.name as branch_name',
+                DB::raw('SUM(item.debit) as total_debit')
+            )
+            ->whereIn('item.account_head_id', $accountArrayIds)
+            ->where('master.short_name', 'CV')
+            ->when(isset($params['start_date']) && isset($params['end_date']), function($query) use ($params) {
+                $query->whereBetween('item.created_at', [$params['start_date'], $params['end_date']]);
+            })
+            ->groupBy('item.account_sub_head_id', 'head.name', 'branch.name')
+            ->get();
+
+        $outletSales = [];
+        $branches = $results->pluck('branch_name')->unique();
+
+        foreach ($branches as $branchName) {
+            $row = ['outlet' => $branchName];
+
+            foreach ($accounts as $acc) {
+                // Sum total_debit for this account in this branch
+                $row[$acc->id] = $results
+                    ->where('branch_name', $branchName)
+                    ->where('account_sub_head_id', $acc->id)
+                    ->sum('total_debit') ?? 0;
+            }
+
+            // Total across all accounts
+            $row['total'] = array_sum(array_filter($row, 'is_numeric'));
+
+            $outletSales[] = $row;
+        }
+
+        return [
+            'accounts' => $accounts,
+            'outletSales' => $outletSales,
+        ];
+    }
 
 }
 
