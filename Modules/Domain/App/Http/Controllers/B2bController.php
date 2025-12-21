@@ -646,6 +646,7 @@ class B2bController extends Controller
         $baseStockData = [
 //            'purchase_price' => $findSubDomain->purchase_percent? $salesPrice * ((100 - $findSubDomain->purchase_percent) / 100) : 0.0,
             'purchase_price' => $purchasePrice,
+            'average_price' => $purchasePrice,
             'sales_price' => $salesPrice ?? 0.0,
             'min_quantity' => $parentStock->min_quantity ?? 0.0,
         ];
@@ -790,12 +791,13 @@ class B2bController extends Controller
                 $updates[] = [
                     'id' => $product->id,
                     'purchase_price' => $purchasePrice,
+                    'average_price' => $purchasePrice,
                     'sales_price' => $salesPrice
                 ];
             }
 
             // Batch update
-            StockItemModel::upsert($updates, ['id'], ['purchase_price', 'sales_price']);
+            StockItemModel::upsert($updates, ['id'], ['purchase_price', 'average_price', 'sales_price']);
             $findCategoryMatrix->update(['not_process'=>0]);
             DB::commit();
 
@@ -1063,17 +1065,19 @@ class B2bController extends Controller
                         $salesPrice = $product->parentStock->sales_price * ($modifier / 100);
                         $purchasePrice = $product->parentStock->sales_price * ($purchaseModifier / 100);
 
+                        $averagePrice = $product->average_price && $product->average_price > 0 ? $product->average_price : $purchasePrice;
                         // Upsert single product
                         StockItemModel::upsert([
                             [
                                 'id' => $product->id,
                                 'sales_price' => $salesPrice,
                                 'purchase_price' => $purchasePrice,
+                                'average_price' => $averagePrice,
                                 'name' => $product->parentStock->name,
                                 'display_name' => $product->parentStock->display_name,
                                 'bangla_name' => $product->parentStock->bangla_name,
                             ]
-                        ], ['id'], ['sales_price', 'purchase_price', 'name', 'display_name', 'bangla_name']);
+                        ], ['id'], ['sales_price', 'purchase_price', 'average_price', 'name', 'display_name', 'bangla_name']);
                     });
 
                     $successCount++;

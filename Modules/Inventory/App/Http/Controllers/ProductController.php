@@ -119,6 +119,7 @@ class ProductController extends Controller
                 $stockItem->uom             = $unitName;
 
                 $stockItem->purchase_price  = $data['purchase_price'] ?? 0.0;
+                $stockItem->average_price   = $data['purchase_price'] ?? 0;
                 $stockItem->price           = $data['sales_price'] ?? 0.0;
                 $stockItem->sales_price     = $data['sales_price'] ?? 0.0;
                 $stockItem->sku             = $data['sku'] ?? null;
