@@ -277,6 +277,7 @@ class AccountHeadController extends Controller
             ->find($ledgerId);
 
         $data = $processed['ledgerItems'] ?? [];
+        $openingData = $processed['opening_info'] ?? [];
 
         // Report headers
         $headers = [
@@ -289,7 +290,7 @@ class AccountHeadController extends Controller
 
         // ✅ Insert Opening Balance row BEFORE any entries
         if (!empty($data)) {
-            $firstOpening = floatval($data[0]['opening_amount'] ?? 0);
+            $firstOpening = floatval($openingData['opening_balance'] ?? 0);
 
             $cumulativeRows[] = [
                 // Empty values for data cells since we’ll custom render it
@@ -303,13 +304,13 @@ class AccountHeadController extends Controller
                 'Particulars'  => '',
 
                 // Text for left-side cell
-                'Debit'   => 'Previous Opening Balance',
+                'Debit'   => 'Previous Opening Balance '.$openingData['opening_date'] ?? null,
 
                 // Display value on right in "Closing"
                 'Credit'  => '',
                 'Closing' => number_format(abs($firstOpening), 2),
 
-                // 👇 Meta fields
+                // Meta fields
                 '__colspan' => 10,                           // left cell colspan
                 '__style'   => [
                     'bold' => true,
@@ -349,7 +350,9 @@ class AccountHeadController extends Controller
                 'Particulars'   => $item['description'] ?? '',
                 'Debit'         => $mode === 'Debit' ? number_format(abs($amount), 2) : '',
                 'Credit'        => $mode === 'Credit' ? number_format(abs($amount), 2) : '',
-                'Closing'       => number_format(abs($closing), 2),
+                'Closing'       => $closing < 0
+                    ? '(' . number_format(abs($closing), 2) . ')'
+                    : number_format($closing, 2),
             ];
         }
 
