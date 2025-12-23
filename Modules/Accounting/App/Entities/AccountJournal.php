@@ -237,8 +237,7 @@ class AccountJournal
 
     /**
      * @var \DateTime
-     * @Gedmo\Timestampable(on="create")
-     * @ORM\Column(name="issue_date", type="date", nullable=true)
+     * @ORM\Column(name="issue_date", type="date",nullable=true)
      */
     private $issueDate;
 

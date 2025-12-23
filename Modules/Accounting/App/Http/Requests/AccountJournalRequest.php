@@ -32,7 +32,7 @@ class AccountJournalRequest extends FormRequest
         {
             return [
                 'ref_no' => 'nullable|string',
-                'issue_date' => 'nullable|date',
+                'issue_date' => 'required|date',
                 'description' => 'string|nullable',
                 'debit' => 'required|integer',
                 'credit' => 'required|integer',

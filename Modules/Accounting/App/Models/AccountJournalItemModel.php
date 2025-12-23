@@ -37,6 +37,7 @@ class AccountJournalItemModel extends Model
         'mode',
         'opening_amount',
         'closing_amount',
+        'issue_date'
     ];
 
     public static function boot()
@@ -190,6 +191,7 @@ class AccountJournalItemModel extends Model
             'bank_id' => $bankInfo['bank_id'] ?? null,
             'branch_name' => $bankInfo['branch_name'] ?? null,
             'received_from' => $bankInfo['received_from'] ?? null,
+            'issue_date' => $journal->issue_date,
         ];
     }
 
@@ -492,7 +494,7 @@ class AccountJournalItemModel extends Model
             ->when(
                 !empty($params['start_date']) && !empty($params['end_date']),
                 function ($query) use ($params) {
-                    $query->whereBetween('acc_journal.created_at', [
+                    $query->whereBetween('acc_journal.issue_date', [
                         Carbon::parse($params['start_date'])->startOfDay(),
                         Carbon::parse($params['end_date'])->endOfDay(),
                     ]);
@@ -587,7 +589,7 @@ class AccountJournalItemModel extends Model
             ->whereNotNull('acc_journal.approved_by_id')
             ->when(!empty($params['start_date']), function ($query) use ($params) {
                 $query->whereDate(
-                    'acc_journal_item.created_at',
+                    'acc_journal_item.issue_date',
                     '<',
                     Carbon::parse($params['start_date'])->startOfDay()
                 );
@@ -597,12 +599,12 @@ class AccountJournalItemModel extends Model
                 'acc_journal_item.id',
                 'ledger.name as ledger_name',
                 'acc_journal_item.closing_amount as opening_amount',
-                DB::raw('DATE_FORMAT(acc_journal_item.created_at, "%d-%m-%Y") as created_date')
+                DB::raw('DATE_FORMAT(acc_journal_item.issue_date, "%d-%m-%Y") as issue_date')
             ])
             ->first();
 
         $openingBalance = $openingBalanceRow?->opening_amount ?? 0;
-        $openingDate = $openingBalanceRow?->created_date ?? null;
+        $openingDate = $openingBalanceRow?->issue_date ?? null;
         $openingLedgerName = $findLedger?->name ?? null;
 
         return [

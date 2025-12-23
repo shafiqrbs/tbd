@@ -95,6 +95,17 @@ class AccountJournalModel extends Model
         $skip = isset($page) && $page != '' ? (int)$page * $perPage : 0;
         $isBranch = isset($request['is_branch']) && $request['is_branch'] == true ? true : false;
 
+        $firstPendingId = self::where('acc_journal.config_id', $domain['acc_config'])
+            ->where('acc_journal.process', 'Created')
+            ->whereNull('acc_journal.approved_by_id')
+            ->when($isBranch, function ($q) {
+                $q->whereNotNull('acc_journal.branch_id');
+            }, function ($q) {
+                $q->whereNull('acc_journal.branch_id');
+            })
+            ->min('acc_journal.id');
+
+
         $entity = self::where('acc_journal.config_id', $domain['acc_config'])
             ->join('acc_voucher','acc_voucher.id','=','acc_journal.voucher_id')
             ->join('users','users.id','=','acc_journal.created_by_id')
@@ -116,6 +127,10 @@ class AccountJournalModel extends Model
                 'acc_voucher.mode as voucher_mode',
                 'users.name as created_by_name',
                 'approve.name as approve_by_name',
+                DB::raw("CASE
+                    WHEN acc_journal.id = {$firstPendingId} THEN 1
+                    ELSE 0
+                END as can_approve")
             ])
             ->with(['journalItems' => function ($query) {
                 $query->select([

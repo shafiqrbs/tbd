@@ -256,6 +256,12 @@ class AccountJournalItem
     private $updatedAt;
 
     /**
+     * @var \DateTime
+     * @ORM\Column(name="issue_date", type="date",nullable=true)
+     */
+    private $issueDate;
+
+    /**
      * @return int
      */
     public function getId()
