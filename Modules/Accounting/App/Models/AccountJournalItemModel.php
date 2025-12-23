@@ -596,7 +596,7 @@ class AccountJournalItemModel extends Model
             ->select([
                 'acc_journal_item.id',
                 'ledger.name as ledger_name',
-                'acc_journal_item.opening_amount',
+                'acc_journal_item.closing_amount as opening_amount',
                 DB::raw('DATE_FORMAT(acc_journal_item.created_at, "%d-%m-%Y") as created_date')
             ])
             ->first();
