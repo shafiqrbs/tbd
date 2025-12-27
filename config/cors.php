@@ -11,9 +11,6 @@ return [
         'http://127.0.0.1:5173',
         'http://192.168.20.222',
         'http://192.168.20.222:8080',
-        'http://www.tbd.local',
-        'https://health.poskeeper.com',
-        'https://hms.tbhsd.gov.bd',
         'https://sandra.poskeeper.com',
         'https://pos.poskeeper.com'
 
