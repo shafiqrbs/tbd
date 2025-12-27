@@ -7,7 +7,7 @@ return [
 
     'allowed_origins' => [
         'http://localhost:5173',
-        'http://localhost:300',
+        'http://localhost:3000',
         'http://127.0.0.1:5173',
         'http://192.168.20.222',
         'http://192.168.20.222:8080',
