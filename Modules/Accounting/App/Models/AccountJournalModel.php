@@ -5,7 +5,7 @@ namespace Modules\Accounting\App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 use Modules\AppsApi\App\Services\GeneratePatternCodeService;
-use Modules\Hospital\App\Models\CategoryModel;
+use Modules\Inventory\App\Models\CategoryModel;
 use Modules\Inventory\App\Models\PurchaseItemModel;
 use Modules\Inventory\App\Models\PurchaseModel;
 use Modules\Inventory\App\Models\SalesItemModel;
@@ -104,6 +104,7 @@ class AccountJournalModel extends Model
                 $q->whereNull('acc_journal.branch_id');
             })
             ->min('acc_journal.id');
+        $firstPendingId = $firstPendingId ?? 0;
 
 
         $entity = self::where('acc_journal.config_id', $domain['acc_config'])

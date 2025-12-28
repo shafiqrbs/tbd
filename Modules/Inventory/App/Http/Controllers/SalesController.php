@@ -378,7 +378,7 @@ class SalesController extends Controller
                     }
                 }
 
-                $getSales->update(['is_domain_sales_completed'=> 1,'approved_by_id'=>$this->domain['user_id'],'process' => 'In-progress','child_purchase_id'=>$purchase->id]);
+                $getSales->update(['is_domain_sales_completed'=> 1,'approved_by_id'=>$this->domain['user_id'],'process' => 'Approved','child_purchase_id'=>$purchase->id]);
                 // Manege stock
                 if (sizeof($getSales->salesItems)>0){
                     foreach ($getSales->salesItems as $item){
@@ -403,7 +403,7 @@ class SalesController extends Controller
                 }
 
                 // accounting journal entry
-               // AccountJournalModel::insertSalesAccountJournal($this->domain,$getSales->id);
+                AccountJournalModel::insertSalesAccountJournal($this->domain,$getSales->id);
             }
 
             DB::commit();
