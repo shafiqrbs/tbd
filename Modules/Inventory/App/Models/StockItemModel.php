@@ -576,7 +576,7 @@ class StockItemModel extends Model
         return $averagePrice;
     }
 
-    public static function getStockItemMatrix($domain, $request)
+    public static function getStockItemMatrix($domain, $request, $dataFor = "FOR_LIST_SHOW")
     {
         // --- Pagination
         $page = isset($request['page']) && $request['page'] > 0 ? ($request['page'] - 1) : 0;
@@ -661,14 +661,17 @@ class StockItemModel extends Model
         }
 
         // --- Total Count (before pagination)
-        $total = $query->count();
+        $total = 0;
+        if ($dataFor == "FOR_LIST_SHOW") {
+            $total = $query->count();
+        }
 
         // --- Paginated Results
-        $stockItems = $query
-            ->orderByDesc('id')
-            ->skip($skip)
-            ->take($perPage)
-            ->get()
+        $stockItems = $query->orderByDesc('id');
+            if ($dataFor == "FOR_LIST_SHOW") {
+                $stockItems = $stockItems->skip($skip)->take($perPage);
+            }
+            $stockItems = $stockItems->get()
             ->map(function ($stock) use ($request) {
                 $product = $stock->product;
 

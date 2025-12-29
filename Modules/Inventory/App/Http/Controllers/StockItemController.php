@@ -353,6 +353,29 @@ class StockItemController extends Controller
         ], ResponseAlias::HTTP_OK);
     }
 
+    public function stockItemMatrixGeneratePdfXlsx(Request $request,$fileType)
+    {
+        $reportFormat = $request->report_format;
+        if (!$reportFormat){
+            return response()->json([
+                'message' => 'Report format not set',
+                'status' => ResponseAlias::HTTP_BAD_REQUEST
+            ],ResponseAlias::HTTP_BAD_REQUEST);
+        }
+        $data = StockItemModel::getStockItemMatrix($this->domain, $request->all(), 'FOR_REPORT');
+        $itemsData = $data['data'] ?? [];
+        $allWarehouses = $data['warehouses'] ?? [];
+        dump($fileType,$reportFormat,$itemsData,$allWarehouses);
+
+        /*return response()->json([
+            'message' => 'success',
+            'status' => ResponseAlias::HTTP_OK,
+            'total' => $data['total'],
+            'data' => $data['data'],
+            'warehouses' => $data['warehouses']
+        ], ResponseAlias::HTTP_OK);*/
+    }
+
     public function productForRecipe()
     {
         $service = new JsonRequestResponse();
