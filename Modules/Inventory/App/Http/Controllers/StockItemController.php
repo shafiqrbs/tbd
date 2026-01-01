@@ -23,7 +23,14 @@ use Modules\Inventory\App\Models\StockItemModel;
 use Modules\Inventory\App\Models\StockItemPriceMatrixModel;
 use Modules\Inventory\App\Repositories\StockItemRepository;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Style\Alignment;
+use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
+use PhpOffice\PhpSpreadsheet\Writer\Pdf\Mpdf;
+use PhpOffice\PhpSpreadsheet\Worksheet\PageSetup;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
+use PhpOffice\PhpSpreadsheet\Style\Border;
+use PhpOffice\PhpSpreadsheet\Style\Fill;
+
 use Symfony\Component\HttpFoundation\Response as ResponseAlias;
 
 class StockItemController extends Controller
@@ -353,7 +360,7 @@ class StockItemController extends Controller
         ], ResponseAlias::HTTP_OK);
     }
 
-    public function stockItemMatrixGeneratePdfXlsx(Request $request,$fileType)
+    /*public function stockItemMatrixGeneratePdfXlsx(Request $request,$fileType)
     {
         $reportFormat = $request->report_format;
         if (!$reportFormat){
@@ -364,36 +371,43 @@ class StockItemController extends Controller
         }
         $data = StockItemModel::getStockItemMatrix($this->domain, $request->all(), 'FOR_REPORT');
         $itemsData = $data['data'] ?? [];
-        $allWarehouses = $data['warehouses'] ?? [];
-        dump($fileType,$reportFormat,$itemsData,$allWarehouses);
+        $allWarehouses = $data['warehouses']->toArray() ?? [];
 
-        /*return response()->json([
-            'message' => 'success',
-            'status' => ResponseAlias::HTTP_OK,
-            'total' => $data['total'],
-            'data' => $data['data'],
-            'warehouses' => $data['warehouses']
-        ], ResponseAlias::HTTP_OK);*/
+        if (count($itemsData) < 0){
+            return response()->json([
+                'message' => 'No items found',
+                'status' => ResponseAlias::HTTP_NOT_FOUND
+            ],ResponseAlias::HTTP_NOT_FOUND);
+        }
+
+        $fileData = [];
+        if ($fileType === 'xlsx'){
+            if ($reportFormat === 'stock'){
+                $fileData = $this->stockReportXlsxGenerate($itemsData);
+            }
+        }elseif ($fileType === 'pdf'){
+            if ($reportFormat === 'stock'){
+                $fileData = $this->stockReportPdfGenerate($itemsData);
+            }
+        }
+
+        return response([
+            'file_name' => $fileData['file_name'],
+            'file_url' => $fileData['file_url'],
+            'result' => true,
+            'status' => 200,
+        ]);
     }
 
-    public function productForRecipe()
-    {
-        $service = new JsonRequestResponse();
-        $data = StockItemModel::getProductForRecipe($this->domain);
-        return $service->returnJosnResponse($data);
-    }
-
-    /*public function stockItemXlsxGenerate()
+    private function stockReportXlsxGenerate( $itemsData)
     {
         try {
             $spreadsheet = new Spreadsheet();
             $sheet = $spreadsheet->getActiveSheet();
 
-            // Fetch data from the database
-            $stockData = ProductModel::getStockDataFormDownload($this->domain);
-            // Define headers and the corresponding fields manually
-            $headers = ['ProductID', 'ProductName', 'CategoryName', 'UnitName','StockQuantity'];
-            $fields = ['id', 'product_name', 'category_name', 'unit_name','quantity'];
+            // Define headers and fields
+            $headers = ['S/N','Category', 'Name', 'Unit', 'Product Code', 'Barcode','Product nature','Sales Price','Purchase Price','Average Price','Quantity'];
+            $fields = ['id', 'category_name', 'name', 'unit_name', 'product_code','barcode','product_nature','sales_price','purchase_price','average_price','quantity'];
 
             // Write headers to the first row
             $sheet->fromArray($headers, null, 'A1');
@@ -402,14 +416,18 @@ class StockItemController extends Controller
             $headerStyleArray = [
                 'font' => ['bold' => true],
             ];
-            $sheet->getStyle('A1:' . chr(64 + count($headers)) . '1')->applyFromArray($headerStyleArray);
+            // Dynamically set style for all header cells
+            $columnRange = 'A1:' . chr(64 + count($headers)) . '1'; // e.g., A1:E1
+            $sheet->getStyle($columnRange)->applyFromArray($headerStyleArray);
 
             // Set the data rows
             $rowIndex = 2;
-            foreach ($stockData as $row) {
+            foreach ($itemsData as $row) {
                 $colIndex = 'A'; // Start from column A
                 foreach ($fields as $field) {
-                    if (property_exists($row, $field)) {
+                    if (is_array($row) && array_key_exists($field, $row)) {
+                        $sheet->setCellValue($colIndex . $rowIndex, $row[$field]);
+                    } elseif (is_object($row) && property_exists($row, $field)) {
                         $sheet->setCellValue($colIndex . $rowIndex, $row->{$field});
                     } else {
                         $sheet->setCellValue($colIndex . $rowIndex, '');
@@ -420,24 +438,96 @@ class StockItemController extends Controller
             }
 
             // Auto-size columns
-            $colCount = count($headers);
-            for ($col = 1; $col <= $colCount; $col++) {
-                $sheet->getColumnDimension(chr(64 + $col))->setAutoSize(true);
+            foreach (range('A', chr(64 + count($headers))) as $columnID) {
+                $sheet->getColumnDimension($columnID)->setAutoSize(true);
             }
 
-            // Generate the file
-            $fileName = 'stock-item-data.xlsx';
-            $tempFilePath = storage_path($fileName);
+            // Save the file
+            $directory = storage_path('exports');
+            if (!file_exists($directory)) {
+                mkdir($directory, 0755, true); // Create directory if it doesn't exist
+            }
+            $fileName = 'stock-item-data-'.date('d-m-y').'.xlsx';
+            $tempFilePath = $directory . '/' . $fileName;
             $writer = new Xlsx($spreadsheet);
             $writer->save($tempFilePath);
 
-            return response([
-                'filename' => $fileName,
-                'result' => true,
-                'status' => 200
-            ]);
+            // Return file path as response
+            return [
+                'file_name' => $fileName,
+                'file_url' => url("storage/exports/{$fileName}"),
+            ];
+
         } catch (\Exception $e) {
-            // Catch any exceptions and handle errors
+            // Handle errors gracefully
+            return response([
+                'error' => $e->getMessage(),
+                'result' => false,
+                'status' => 500,
+            ]);
+        }
+    }
+    private function stockReportPdfGenerate( $itemsData)
+    {
+        try {
+            $spreadsheet = new Spreadsheet();
+            $sheet = $spreadsheet->getActiveSheet();
+
+            // Define headers and fields
+            $headers = ['S/N','Category', 'Name', 'Unit', 'Product Code', 'Barcode','Product nature','Sales Price','Purchase Price','Average Price','Quantity'];
+            $fields = ['id', 'category_name', 'name', 'unit_name', 'product_code','barcode','product_nature','sales_price','purchase_price','average_price','quantity'];
+
+            // Write headers to the first row
+            $sheet->fromArray($headers, null, 'A1');
+
+            // Make headers bold
+            $headerStyleArray = [
+                'font' => ['bold' => true],
+            ];
+            // Dynamically set style for all header cells
+            $columnRange = 'A1:' . chr(64 + count($headers)) . '1'; // e.g., A1:E1
+            $sheet->getStyle($columnRange)->applyFromArray($headerStyleArray);
+
+            // Set the data rows
+            $rowIndex = 2;
+            foreach ($itemsData as $row) {
+                $colIndex = 'A'; // Start from column A
+                foreach ($fields as $field) {
+                    if (is_array($row) && array_key_exists($field, $row)) {
+                        $sheet->setCellValue($colIndex . $rowIndex, $row[$field]);
+                    } elseif (is_object($row) && property_exists($row, $field)) {
+                        $sheet->setCellValue($colIndex . $rowIndex, $row->{$field});
+                    } else {
+                        $sheet->setCellValue($colIndex . $rowIndex, '');
+                    }
+                    $colIndex++;
+                }
+                $rowIndex++;
+            }
+
+            // Auto-size columns
+            foreach (range('A', chr(64 + count($headers))) as $columnID) {
+                $sheet->getColumnDimension($columnID)->setAutoSize(true);
+            }
+
+            // Save the file
+            $directory = storage_path('exports');
+            if (!file_exists($directory)) {
+                mkdir($directory, 0755, true); // Create directory if it doesn't exist
+            }
+            $fileName = 'stock-item-data-'.date('d-m-y').'.xlsx';
+            $tempFilePath = $directory . '/' . $fileName;
+            $writer = new Xlsx($spreadsheet);
+            $writer->save($tempFilePath);
+
+            // Return file path as response
+            return [
+                'file_name' => $fileName,
+                'file_url' => url("storage/exports/{$fileName}"),
+            ];
+
+        } catch (\Exception $e) {
+            // Handle errors gracefully
             return response([
                 'error' => $e->getMessage(),
                 'result' => false,
@@ -445,6 +535,563 @@ class StockItemController extends Controller
             ]);
         }
     }*/
+
+    public function stockItemMatrixGeneratePdfXlsx(Request $request, $fileType)
+    {
+        $reportFormat = $request->report_format;
+
+        if (!$reportFormat) {
+            return response()->json([
+                'message' => 'Report format not set',
+                'status'  => ResponseAlias::HTTP_BAD_REQUEST
+            ], ResponseAlias::HTTP_BAD_REQUEST);
+        }
+
+        $data = StockItemModel::getStockItemMatrix(
+            $this->domain,
+            $request->all(),
+            'FOR_REPORT'
+        );
+
+        $itemsData = $data['data'] ?? [];
+        $warehouses = $data['warehouses'] ?? [];
+
+        if (count($itemsData) === 0) {
+            return response()->json([
+                'message' => 'No items found',
+                'status'  => ResponseAlias::HTTP_NOT_FOUND
+            ], ResponseAlias::HTTP_NOT_FOUND);
+        }
+//        dump($fileType,$reportFormat);
+        if ($fileType === 'xlsx' && $reportFormat === 'stock') {
+            $fileData = $this->stockReportXlsxGenerate($itemsData);
+        } elseif ($fileType === 'xlsx' && $reportFormat === 'stock-matrix') {
+            $fileData = $this->stockMatrixReportXlsxGenerate($itemsData,$warehouses);
+        } elseif ($fileType === 'pdf' && $reportFormat === 'stock') {
+            $fileData = $this->stockReportPdfGenerate($itemsData);
+        } elseif ($fileType === 'pdf' && $reportFormat === 'stock-matrix') {
+            $fileData = $this->stockMatrixReportPdfGenerate($itemsData,$warehouses);
+        } else {
+            return response()->json([
+                'message' => 'Invalid file type',
+                'status'  => ResponseAlias::HTTP_BAD_REQUEST
+            ], ResponseAlias::HTTP_BAD_REQUEST);
+        }
+
+        return response()->json([
+            'file_name' => $fileData['file_name'],
+            'file_url'  => $fileData['file_url'],
+            'result'    => true,
+            'status'    => 200
+        ]);
+    }
+
+    /**
+     * XLSX GENERATOR
+     */
+    private function stockReportXlsxGenerate($itemsData)
+    {
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+
+        // ===== REPORT HEADER =====
+        $sheet->mergeCells('A1:K1');
+        $sheet->setCellValue('A1', 'STOCK ITEM REPORT');
+        $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(16);
+        $sheet->getStyle('A1')->getAlignment()->setHorizontal('center');
+
+        $sheet->mergeCells('A2:K2');
+        $sheet->setCellValue('A2', 'Generated Date: ' . date('d-m-Y'));
+        $sheet->getStyle('A2')->getAlignment()->setHorizontal('center');
+
+        // ===== TABLE HEADER =====
+        $headers = [
+            'S/N','Category','Name','Unit','Product Code','Barcode',
+            'Product Nature','Sales Price','Purchase Price','Average Price','Quantity'
+        ];
+
+        $fields = [
+            'category_name','name','unit_name','product_code','barcode',
+            'product_nature','sales_price','purchase_price','average_price','quantity'
+        ];
+
+        $sheet->fromArray($headers, null, 'A4');
+
+        $sheet->getStyle('A4:K4')->applyFromArray([
+            'font' => ['bold' => true],
+            'fill' => [
+                'fillType' => Fill::FILL_SOLID,
+                'startColor' => ['rgb' => 'E5E7EB']
+            ],
+            'borders' => [
+                'allBorders' => ['borderStyle' => Border::BORDER_THIN]
+            ]
+        ]);
+
+        // ===== TABLE DATA =====
+        $rowIndex = 5;
+        $sn = 1;
+
+        foreach ($itemsData as $row) {
+            $sheet->setCellValue('A'.$rowIndex, $sn++);
+
+            $col = 'B';
+            foreach ($fields as $field) {
+                $sheet->setCellValue(
+                    $col.$rowIndex,
+                    is_array($row) ? ($row[$field] ?? '') : ($row->{$field} ?? '')
+                );
+                $col++;
+            }
+            $rowIndex++;
+        }
+
+        // ===== TABLE BORDERS =====
+        $lastRow = $rowIndex - 1;
+        $sheet->getStyle("A4:K{$lastRow}")->getBorders()
+            ->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
+
+        foreach (range('A','K') as $col) {
+            $sheet->getColumnDimension($col)->setAutoSize(true);
+        }
+
+        $directory = storage_path('exports');
+        if (!file_exists($directory)) {
+            mkdir($directory, 0755, true);
+        }
+
+        $fileName = 'stock-item-report-'.date('d-m-Y').'.xlsx';
+        (new Xlsx($spreadsheet))->save($directory.'/'.$fileName);
+
+        return [
+            'file_name' => $fileName,
+            'file_url'  => url("storage/exports/{$fileName}")
+        ];
+    }
+
+
+
+    /**
+     * XLSX GENERATOR
+     */
+    private function stockMatrixReportXlsxGenerate($itemsData,$warehouses)
+    {
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+
+        // ===== REPORT HEADER =====
+        $sheet->mergeCells('A1:M1');
+        $sheet->setCellValue('A1', 'STOCK MATRIX ITEM REPORT');
+        $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(16);
+        $sheet->getStyle('A1')->getAlignment()->setHorizontal('center');
+
+        $sheet->mergeCells('A2:M2');
+        $sheet->setCellValue('A2', 'Generated Date: ' . date('d-m-Y'));
+        $sheet->getStyle('A2')->getAlignment()->setHorizontal('center');
+
+        // ===== PRODUCT FIELDS =====
+        $fixedHeaders = [
+            'S/N','Category','Name','Unit','Product Code','Barcode',
+            'Product Nature','Sales Price','Purchase Price','Average Price'
+        ];
+
+        $fixedFields = [
+            'category_name','name','unit_name','product_code','barcode',
+            'product_nature','sales_price','purchase_price','average_price'
+        ];
+
+        // ===== DYNAMIC WAREHOUSE HEADERS =====
+        $allWarehouses = [];
+        if (!empty($warehouses)) {
+            foreach ($warehouses as $wh) {
+                $allWarehouses[$wh['name']] = $wh['name'];
+            }
+        }
+        $allWarehouses = array_values($allWarehouses); // unique warehouse names
+
+        // ===== FINAL HEADERS =====
+        $headers = array_merge($fixedHeaders, $allWarehouses, ['Quantity']);
+
+        // Write headers
+        $sheet->fromArray($headers, null, 'A4');
+
+        // Style headers
+        $sheet->getStyle('A4:' . chr(64 + count($headers)) . '4')->applyFromArray([
+            'font' => ['bold' => true],
+            'fill' => [
+                'fillType' => Fill::FILL_SOLID,
+                'startColor' => ['rgb' => 'E5E7EB']
+            ],
+            'borders' => ['allBorders' => ['borderStyle' => Border::BORDER_THIN]]
+        ]);
+
+        // ===== TABLE DATA =====
+        $rowIndex = 5;
+        $sn = 1;
+
+        foreach ($itemsData as $item) {
+            $sheet->setCellValue('A'.$rowIndex, $sn++);
+
+            // Fixed fields
+            $col = 'B';
+            foreach ($fixedFields as $field) {
+                $sheet->setCellValue(
+                    $col.$rowIndex,
+                    is_array($item) ? ($item[$field] ?? '') : ($item->{$field} ?? '')
+                );
+                $col++;
+            }
+
+            // Warehouse quantities
+            $warehouseQtys = [];
+            foreach ($allWarehouses as $whName) {
+                $qty = 0;
+                if (!empty($item['warehouses'])) {
+                    foreach ($item['warehouses'] as $wh) {
+                        if ($wh['name'] == $whName) $qty = $wh['quantity'];
+                    }
+                }
+                $sheet->setCellValue($col.$rowIndex, $qty);
+                $warehouseQtys[] = $qty;
+                $col++;
+            }
+
+            // Total quantity = sum of warehouse quantities
+            $sheet->setCellValue($col.$rowIndex, array_sum($warehouseQtys));
+
+            $rowIndex++;
+        }
+
+        // ===== BORDERS =====
+        $lastRow = $rowIndex - 1;
+        $sheet->getStyle('A4:' . chr(64 + count($headers)) . $lastRow)
+            ->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
+
+        // Auto size columns
+        foreach (range('A', chr(64 + count($headers))) as $col) {
+            $sheet->getColumnDimension($col)->setAutoSize(true);
+        }
+
+        // ===== SAVE FILE =====
+        $directory = storage_path('exports');
+        if (!file_exists($directory)) mkdir($directory, 0755, true);
+
+        $fileName = 'stock-item-matrix-report-'.date('d-m-Y').'.xlsx';
+        (new Xlsx($spreadsheet))->save($directory.'/'.$fileName);
+
+        return [
+            'file_name' => $fileName,
+            'file_url'  => url("storage/exports/{$fileName}")
+        ];
+    }
+
+    /**
+     * PDF GENERATOR
+     */
+    private function stockReportPdfGenerate($itemsData)
+    {
+        try {
+            $spreadsheet = new Spreadsheet();
+            $sheet = $spreadsheet->getActiveSheet();
+
+            /* ================= HEADER ================= */
+            $sheet->mergeCells('A1:K1');
+            $sheet->setCellValue('A1', 'STOCK ITEM REPORT');
+            $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(16);
+            $sheet->getStyle('A1')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+
+            $sheet->mergeCells('A2:K2');
+            $sheet->setCellValue('A2', 'Generated Date: ' . date('d-m-Y'));
+            $sheet->getStyle('A2')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+
+            /* ================= TABLE HEADER ================= */
+            $headers = [
+                'S/N','Category','Name','Unit','Product Code','Barcode',
+                'Product Nature','Sales Price','Purchase Price','Average Price','Quantity'
+            ];
+
+            $headerRow = 4;
+            $sheet->fromArray($headers, null, "A{$headerRow}");
+
+            $sheet->getStyle("A{$headerRow}:K{$headerRow}")->applyFromArray([
+                'font' => ['bold' => true],
+                'alignment' => [
+                    'horizontal' => Alignment::HORIZONTAL_CENTER,
+                    'vertical'   => Alignment::VERTICAL_CENTER,
+                    'wrapText'   => true,
+                ],
+                'fill' => [
+                    'fillType' => Fill::FILL_SOLID,
+                    'startColor' => ['rgb' => 'E5E7EB'],
+                ],
+                'borders' => [
+                    'allBorders' => ['borderStyle' => Border::BORDER_THIN],
+                ],
+            ]);
+
+            $sheet->getRowDimension($headerRow)->setRowHeight(26);
+
+            /* ================= DATA ================= */
+            $rowIndex = $headerRow + 1;
+            $sn = 1;
+
+            foreach ($itemsData as $row) {
+                $get = function ($key) use ($row) {
+                    return is_array($row) ? ($row[$key] ?? '') : ($row->{$key} ?? '');
+                };
+
+                $sheet->setCellValue("A{$rowIndex}", $sn++);
+                $sheet->setCellValue("B{$rowIndex}", $get('category_name'));
+                $sheet->setCellValue("C{$rowIndex}", $get('name'));
+                $sheet->setCellValue("D{$rowIndex}", $get('unit_name'));
+                $sheet->setCellValue("E{$rowIndex}", $get('product_code'));
+                $sheet->setCellValue("F{$rowIndex}", $get('barcode'));
+                $sheet->setCellValue("G{$rowIndex}", $get('product_nature'));
+
+                // Numeric columns
+                $sheet->setCellValue("H{$rowIndex}", (float) $get('sales_price'));
+                $sheet->setCellValue("I{$rowIndex}", (float) $get('purchase_price'));
+                $sheet->setCellValue("J{$rowIndex}", (float) $get('average_price'));
+                $sheet->setCellValue("K{$rowIndex}", (float) $get('quantity'));
+
+                $sheet->getRowDimension($rowIndex)->setRowHeight(22);
+                $rowIndex++;
+            }
+
+            $lastRow = $rowIndex - 1;
+
+            /* ================= ALIGNMENT ================= */
+            $sheet->getStyle("A{$headerRow}:G{$lastRow}")->getAlignment()
+                ->setHorizontal(Alignment::HORIZONTAL_LEFT)
+                ->setVertical(Alignment::VERTICAL_CENTER)
+                ->setWrapText(true);
+
+            $sheet->getStyle("H{$headerRow}:K{$lastRow}")->getAlignment()
+                ->setHorizontal(Alignment::HORIZONTAL_RIGHT)
+                ->setVertical(Alignment::VERTICAL_CENTER);
+
+            /* ================= CONDITIONAL NUMBER FORMAT ================= */
+            $numericCols = ['H','I','J','K'];
+            foreach ($numericCols as $col) {
+                foreach (range($headerRow + 1, $lastRow) as $rowNum) {
+                    $value = $sheet->getCell("{$col}{$rowNum}")->getValue();
+                    if (is_numeric($value)) {
+                        $format = (floor($value) == $value)
+                            ? NumberFormat::FORMAT_NUMBER
+                            : NumberFormat::FORMAT_NUMBER_00;
+                        $sheet->getStyle("{$col}{$rowNum}")->getNumberFormat()->setFormatCode($format);
+                    }
+                }
+            }
+
+            /* ================= BORDERS ================= */
+            $sheet->getStyle("A{$headerRow}:K{$lastRow}")
+                ->getBorders()->getAllBorders()
+                ->setBorderStyle(Border::BORDER_THIN);
+
+            /* ================= PAGE SETUP ================= */
+            $sheet->getPageSetup()
+                ->setOrientation(PageSetup::ORIENTATION_LANDSCAPE)
+                ->setPaperSize(PageSetup::PAPERSIZE_A4);
+
+            foreach (range('A','K') as $col) {
+                $sheet->getColumnDimension($col)->setAutoSize(true);
+            }
+
+            /* ================= SAVE ================= */
+            $directory = storage_path('exports');
+            if (!file_exists($directory)) {
+                mkdir($directory, 0755, true);
+            }
+
+            $fileName = 'stock-item-report-' . date('d-m-Y') . '.pdf';
+
+            // Use Mpdf writer to save PDF
+            $writer = new Mpdf($spreadsheet);
+            $writer->save($directory.'/'.$fileName);
+
+            return [
+                'file_name' => $fileName,
+                'file_url'  => url("storage/exports/{$fileName}")
+            ];
+
+        } catch (\Exception $e) {
+            return [
+                'error' => $e->getMessage(),
+                'result' => false,
+                'status' => 500
+            ];
+        }
+    }
+
+    private function stockMatrixReportPdfGenerate($itemsData,$warehouses)
+    {
+        try {
+            $spreadsheet = new Spreadsheet();
+            $sheet = $spreadsheet->getActiveSheet();
+
+            /* ================= HEADER ================= */
+            $sheet->mergeCells('A1:Z1'); // Z large enough for dynamic columns
+            $sheet->setCellValue('A1', 'STOCK MATRIX ITEM REPORT');
+            $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(16);
+            $sheet->getStyle('A1')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+
+            $sheet->mergeCells('A2:Z2');
+            $sheet->setCellValue('A2', 'Generated Date: ' . date('d-m-Y'));
+            $sheet->getStyle('A2')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+
+            /* ================= HEADERS ================= */
+            $fixedHeaders = [
+                'S/N','Category','Name','Unit','Product Code','Barcode',
+                'Product Nature','Sales Price','Purchase Price','Average Price'
+            ];
+            $fixedFields = [
+                'category_name','name','unit_name','product_code','barcode',
+                'product_nature','sales_price','purchase_price','average_price'
+            ];
+
+            // Collect unique warehouse names
+            $allWarehouses = [];
+            if (!empty($warehouses)) {
+                foreach ($warehouses as $wh) {
+                    $allWarehouses[$wh['name']] = $wh['name'];
+                }
+            }
+            $allWarehouses = array_values($allWarehouses);
+
+            $headers = array_merge($fixedHeaders, $allWarehouses, ['Quantity']);
+
+            $headerRow = 4;
+            $sheet->fromArray($headers, null, "A{$headerRow}");
+
+            // Style headers
+            $sheet->getStyle("A{$headerRow}:" . chr(64 + count($headers)) . "{$headerRow}")->applyFromArray([
+                'font' => ['bold' => true],
+                'alignment' => [
+                    'horizontal' => Alignment::HORIZONTAL_CENTER,
+                    'vertical' => Alignment::VERTICAL_CENTER,
+                    'wrapText' => true,
+                ],
+                'fill' => [
+                    'fillType' => Fill::FILL_SOLID,
+                    'startColor' => ['rgb' => 'E5E7EB']
+                ],
+                'borders' => [
+                    'allBorders' => ['borderStyle' => Border::BORDER_THIN]
+                ]
+            ]);
+
+            /* ================= DATA ================= */
+            $rowIndex = $headerRow + 1;
+            $sn = 1;
+
+            foreach ($itemsData as $item) {
+                $sheet->setCellValue("A{$rowIndex}", $sn++);
+
+                // Fixed fields
+                $col = 'B';
+                foreach ($fixedFields as $field) {
+                    $sheet->setCellValue(
+                        "{$col}{$rowIndex}",
+                        is_array($item) ? ($item[$field] ?? '') : ($item->{$field} ?? '')
+                    );
+                    $col++;
+                }
+
+                // Warehouse quantities
+                $warehouseQtys = [];
+                foreach ($allWarehouses as $whName) {
+                    $qty = 0;
+                    if (!empty($item['warehouses'])) {
+                        foreach ($item['warehouses'] as $wh) {
+                            if ($wh['name'] == $whName) $qty = $wh['quantity'];
+                        }
+                    }
+                    $sheet->setCellValue("{$col}{$rowIndex}", $qty);
+                    $warehouseQtys[] = $qty;
+                    $col++;
+                }
+
+                // Total quantity
+                $sheet->setCellValue("{$col}{$rowIndex}", array_sum($warehouseQtys));
+
+                $rowIndex++;
+            }
+
+            $lastRow = $rowIndex - 1;
+
+            /* ================= ALIGNMENT ================= */
+            $sheet->getStyle("A{$headerRow}:G{$lastRow}")->getAlignment()
+                ->setHorizontal(Alignment::HORIZONTAL_LEFT)
+                ->setVertical(Alignment::VERTICAL_CENTER)
+                ->setWrapText(true);
+
+            $numericCols = array_merge(range('H', 'J'), range('K', chr(64 + count($headers))));
+            foreach ($numericCols as $col) {
+                for ($r = $headerRow + 1; $r <= $lastRow; $r++) {
+                    $sheet->getStyle("{$col}{$r}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
+                }
+            }
+
+            // Conditional number format
+            foreach (range($headerRow + 1, $lastRow) as $rowNum) {
+                // Numeric fields: H..last column
+                $colIndex = 8; // column H
+                for ($c = 0; $c < count($headers) - 7; $c++, $colIndex++) {
+                    $colLetter = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($colIndex);
+                    $value = $sheet->getCell("{$colLetter}{$rowNum}")->getValue();
+                    if (is_numeric($value)) {
+                        $format = (floor($value) == $value)
+                            ? NumberFormat::FORMAT_NUMBER
+                            : NumberFormat::FORMAT_NUMBER_00;
+                        $sheet->getStyle("{$colLetter}{$rowNum}")->getNumberFormat()->setFormatCode($format);
+                    }
+                }
+            }
+
+            /* ================= BORDERS ================= */
+            $sheet->getStyle("A{$headerRow}:" . chr(64 + count($headers)) . "{$lastRow}")
+                ->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
+
+            /* ================= PAGE SETUP ================= */
+            $sheet->getPageSetup()
+                ->setOrientation(PageSetup::ORIENTATION_LANDSCAPE)
+                ->setPaperSize(PageSetup::PAPERSIZE_A4);
+
+            // Auto size columns
+            foreach (range('A', chr(64 + count($headers))) as $col) {
+                $sheet->getColumnDimension($col)->setAutoSize(true);
+            }
+
+            /* ================= SAVE PDF ================= */
+            $directory = storage_path('exports');
+            if (!file_exists($directory)) mkdir($directory, 0755, true);
+
+            $fileName = 'stock-matrix-report-' . date('d-m-Y') . '.pdf';
+
+            $writer = new Mpdf($spreadsheet);
+            $writer->save($directory.'/'.$fileName);
+
+            return [
+                'file_name' => $fileName,
+                'file_url'  => url("storage/exports/{$fileName}")
+            ];
+
+        } catch (\Exception $e) {
+            return [
+                'error' => $e->getMessage(),
+                'result' => false,
+                'status' => 500
+            ];
+        }
+    }
+
+    public function productForRecipe()
+    {
+        $service = new JsonRequestResponse();
+        $data = StockItemModel::getProductForRecipe($this->domain);
+        return $service->returnJosnResponse($data);
+    }
 
     public function stockItemXlsxGenerate()
     {
@@ -528,12 +1175,30 @@ class StockItemController extends Controller
         }
     }
 
-    public function stockItemDownload()
+    public function stockItemDownload(Request $request)
     {
-        $fileName = 'stock-item-data' . '.xlsx';
+        $fileName = $request->query('file_name');
+
+        if (!$fileName) {
+            return response()->json([
+                'message' => 'File name is required'
+            ], 400);
+        }
+
         $filePath = storage_path('exports/'.$fileName);
-        return response()->download($filePath, $fileName)->deleteFileAfterSend(true);
+
+        if (!file_exists($filePath)) {
+            return response()->json([
+                'message' => 'File not found',
+                'path' => $filePath
+            ], 404);
+        }
+
+        return response()->download($filePath, $fileName)
+            ->deleteFileAfterSend(true);
     }
+
+
 
     public function stockItemHistory(Request $request)
     {
