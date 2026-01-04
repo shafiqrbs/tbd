@@ -29,6 +29,7 @@ class B2bCategoryWiseProductRequest extends FormRequest
             {
                 return [
                     'percent_mode' => 'required',
+                    'purchase_mode' => 'required',
                     'mrp_percent' => 'required',
                     'purchase_percent' => 'required',
                     'bonus_percent' => 'nullable',

@@ -16,6 +16,7 @@ class SubDomainModel extends Model
         'status',
         'domain_type',
         'percent_mode',
+        'purchase_mode',
         'bonus_percent',
         'purchase_percent',
         'sales_target_amount',
@@ -60,6 +61,7 @@ class SubDomainModel extends Model
             'dom_sub_domain.bonus_percent',
             'dom_sub_domain.sales_target_amount',
             'dom_sub_domain.percent_mode',
+            'dom_sub_domain.purchase_mode',
             'dom_sub_domain.status'
         ])->join('dom_domain as d','d.id','=','dom_sub_domain.sub_domain_id')
             ->leftjoin('inv_config','inv_config.domain_id','=','dom_sub_domain.sub_domain_id')
@@ -78,6 +80,7 @@ class SubDomainModel extends Model
             'dom_sub_domain.status',
             'dom_sub_domain.domain_type',
             'dom_sub_domain.percent_mode',
+            'dom_sub_domain.purchase_mode',
             'dom_sub_domain.bonus_percent',
             'dom_sub_domain.sales_target_amount',
             'dom_sub_domain.mrp_percent',
@@ -91,6 +94,7 @@ class SubDomainModel extends Model
                     'inv_b2b_category_price_matrix.domain_category_id',
                     'inv_b2b_category_price_matrix.sub_domain_category_id',
                     'inv_b2b_category_price_matrix.percent_mode',
+                    'inv_b2b_category_price_matrix.purchase_mode',
                     'inv_b2b_category_price_matrix.status',
                     'inv_b2b_category_price_matrix.mrp_percent',
                     'inv_b2b_category_price_matrix.purchase_percent',

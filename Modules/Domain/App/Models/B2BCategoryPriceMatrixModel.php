@@ -21,6 +21,7 @@ class B2BCategoryPriceMatrixModel extends Model
         'sales_target_amount',
         'bonus_percent',
         'purchase_percent',
+        'purchase_mode',
         'mrp_percent',
         'not_process',
     ];

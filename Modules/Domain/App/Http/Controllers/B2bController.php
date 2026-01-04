@@ -12,7 +12,6 @@ use Illuminate\Support\Str;
 use Modules\Accounting\App\Models\AccountHeadModel;
 use Modules\Accounting\App\Models\AccountingModel;
 use Modules\AppsApi\App\Services\GeneratePatternCodeService;
-use Modules\AppsApi\App\Services\JsonRequestResponse;
 use Modules\Core\App\Models\CustomerModel;
 use Modules\Core\App\Models\SettingModel;
 use Modules\Core\App\Models\SettingTypeModel;
@@ -186,6 +185,10 @@ class B2bController extends Controller
 
                 case 'percent_mode':
                     $finaCategoryMatrix->update(['percent_mode' => $value,'not_process'=>1]);
+                    break;
+
+                case 'purchase_mode':
+                    $finaCategoryMatrix->update(['purchase_mode' => $value,'not_process'=>1]);
                     break;
 
                 case 'purchase_percent':
@@ -453,6 +456,7 @@ class B2bController extends Controller
                     'sub_domain_category_id' => $subDomainCategory->id,
                     'created_by_id' => $this->domain['user_id'],
                     'percent_mode' => $inputData['percent_mode'],
+                    'purchase_mode' => $inputData['purchase_mode'],
                     'status' => 1,
                     'sales_target_amount' => $inputData['sales_target_amount'],
                     'bonus_percent' => $inputData['bonus_percent'],
@@ -636,7 +640,7 @@ class B2bController extends Controller
         $modifier = ($findSubDomain->percent_mode == 'Increase')
             ? (100 + $findSubDomain->mrp_percent)
             : (100 - $findSubDomain->mrp_percent);
-        $purchaseModifier = ($findSubDomain->percent_mode == 'Increase')
+        $purchaseModifier = ($findSubDomain->purchase_mode == 'Increase')
             ? (100 + $findSubDomain->purchase_percent)
             : (100 - $findSubDomain->purchase_percent);
 
@@ -644,7 +648,6 @@ class B2bController extends Controller
         $purchasePrice = $parentStock->sales_price * ($purchaseModifier / 100);
 
         $baseStockData = [
-//            'purchase_price' => $findSubDomain->purchase_percent? $salesPrice * ((100 - $findSubDomain->purchase_percent) / 100) : 0.0,
             'purchase_price' => $purchasePrice,
             'average_price' => $purchasePrice,
             'sales_price' => $salesPrice ?? 0.0,
@@ -780,7 +783,7 @@ class B2bController extends Controller
                     ? (100 + $findCategoryMatrix->mrp_percent)
                     : (100 - $findCategoryMatrix->mrp_percent);
 
-                $purchaseModifier = ($findCategoryMatrix->percent_mode == 'Increase')
+                $purchaseModifier = ($findCategoryMatrix->purchase_mode == 'Increase')
                     ? (100 + $findCategoryMatrix->purchase_percent)
                     : (100 - $findCategoryMatrix->purchase_percent);
 
@@ -889,6 +892,7 @@ class B2bController extends Controller
                     'matrix.mrp_percent',
                     'matrix.purchase_percent',
                     'matrix.percent_mode',
+                    'matrix.purchase_mode',
                     'matrix.sub_domain_id as b2b_id',
                 ]);
             if (isset($request['term']) && !empty($request['term'])){
@@ -1058,7 +1062,7 @@ class B2bController extends Controller
                             ? (100 + $matrix->mrp_percent)
                             : (100 - $matrix->mrp_percent);
 
-                        $purchaseModifier = $matrix->percent_mode === 'Increase'
+                        $purchaseModifier = $matrix->purchase_mode === 'Increase'
                             ? (100 + $matrix->purchase_percent)
                             : (100 - $matrix->purchase_percent);
 
@@ -1116,8 +1120,6 @@ class B2bController extends Controller
     public function domainStock(Request $request)
     {
         dump($this->domain['domain_id']);
-//        dump($this->domain['config_id']);
-
 
         $page =  isset($request['page']) && $request['page'] > 0?($request['page'] - 1 ) : 0;
         $perPage = isset($request['offset']) && $request['offset']!=''? (int)($request['offset']):0;
@@ -1126,9 +1128,7 @@ class B2bController extends Controller
         try {
             // Validate inputs and find required models
             $findSubDomainsIds = SubDomainModel::where('domain_id',$this->domain['domain_id'])->pluck('id')->toArray();
-            dump($findSubDomainsIds);
             $findCategoryMatrix = B2BStockPriceMatrixModel::whereIn('sub_domain_id', $findSubDomainsIds)->get()->toArray();
-            dump($findCategoryMatrix);
 
             /*// Get base products query
             $products = StockItemModel::join('inv_product', 'inv_product.id', '=', 'inv_stock.product_id')

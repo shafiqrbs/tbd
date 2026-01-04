@@ -50,6 +50,12 @@ class SubDomain
      */
     private $percentMode;
 
+     /**
+     * @var float
+     * @ORM\Column(name="purchase_mode",type="string" , nullable=true)
+     */
+    private $purchaseMode;
+
     /**
      * @var float
      *

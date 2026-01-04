@@ -29,6 +29,7 @@ class B2bDomainWiseCategoryRequest extends FormRequest
             {
                 return [
                     'percent_mode' => 'required|in:Increase,Decrease',
+                    'purchase_mode' => 'required|in:Increase,Decrease',
                     'mrp_percent' => 'required',
                     'purchase_percent' => 'required',
                     'bonus_percent' => 'nullable',
