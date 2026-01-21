@@ -2,38 +2,29 @@
 
 namespace Modules\Inventory\App\Http\Controllers;
 
+use App\Enums\PosSaleProcess;
 use App\Http\Controllers\Controller;
+use App\Jobs\ProcessPosSalesJob;
+use App\Jobs\ProcessSingleSaleJob;
 use Exception;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
-use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
-use Modules\AppsApi\App\Services\JsonRequestResponse;
 use Modules\Core\App\Models\CustomerModel;
 use Modules\Core\App\Models\SettingTypeModel;
 use Modules\Core\App\Models\UserModel;
-use Modules\Core\App\Models\VendorModel;
 use Modules\Domain\App\Models\DomainModel;
-use Modules\Inventory\App\Http\Requests\RequisitionRequest;
+use Modules\Inventory\App\Http\Requests\PosSalesProcessRequest;
 use Modules\Inventory\App\Models\ConfigModel;
-use Modules\Inventory\App\Models\InvoiceBatchItemModel;
-use Modules\Inventory\App\Models\InvoiceBatchModel;
 use Modules\Inventory\App\Models\InvoiceItemTempModel;
 use Modules\Inventory\App\Models\InvoiceTempModel;
 use Modules\Inventory\App\Models\ParticularModel;
 use Modules\Inventory\App\Models\PosSaleModel;
-use Modules\Inventory\App\Models\ProductModel;
-use Modules\Inventory\App\Models\PurchaseModel;
-use Modules\Inventory\App\Models\RequisitionItemModel;
-use Modules\Inventory\App\Models\RequisitionMatrixBoardModel;
-use Modules\Inventory\App\Models\RequisitionModel;
 use Modules\Inventory\App\Models\SalesItemModel;
 use Modules\Inventory\App\Models\SalesModel;
 use Modules\Inventory\App\Models\StockItemHistoryModel;
 use Modules\Inventory\App\Models\StockItemModel;
-use Modules\Utility\App\Models\SettingModel;
 use Symfony\Component\HttpFoundation\Response as ResponseAlias;
 
 class PosController extends Controller
@@ -481,20 +472,57 @@ class PosController extends Controller
         }
     }
 
-    public function posSalesProcess(Request $request)
+    public function posSalesProcess(PosSalesProcessRequest $request)
     {
+        $validated = $request->validated();
+
         $domain = $this->domain;
-        $data = $request->all();
-        $input['content'] = json_encode($data['content']);
-        $input['config_id'] = $domain['config_id'];
-        $input['created_by_id'] = $domain['user_id'];
-        $input['process'] = 'new';
-        PosSaleModel::create($input);
+
+        // Prevent duplicate pending/processing batches
+        $exists = PosSaleModel::where('device_id', $validated['device_id'])
+            ->where('sync_batch_id', $validated['sync_batch_id'])
+            ->whereIn('process', [PosSaleProcess::PENDING, PosSaleProcess::PROCESSING])
+            ->exists();
+
+        if ($exists) {
+            return response()->json([
+                'status'  => ResponseAlias::HTTP_OK,
+                'success' => true,
+                'message' => 'Batch already received.',
+            ]);
+        }
+
+        // Create sync record
+        $sync = PosSaleModel::create([
+            'device_id'      => $validated['device_id'],
+            'sync_batch_id'  => $validated['sync_batch_id'],
+            'config_id'      => $domain['config_id'],
+            'created_by_id'  => $domain['user_id'],
+            'content'        => $validated['content']
+        ]);
+
+        // Prepare domain array for job
+        $domainArray = [
+            'acc_config'    => $domain['acc_config'],
+            'domain_id'     => $domain['domain_id'],
+            'config_id'     => $domain['config_id'],
+            'user_id'       => $domain['user_id'],
+            'inv_config'    => $domain['inv_config'],
+            'warehouse_id'  => $domain['warehouse_id'],
+            'is_auto_approve' => $domain['is_sales_auto_approved'] ?? false,
+        ];
+
+        // Dispatch
+        ProcessPosSalesJob::dispatch($sync->id, $domainArray);
+
+
         return response()->json([
-            'status' => 200,
+            'status'  => ResponseAlias::HTTP_CREATED,
             'success' => true,
-            'message' => 'Sales updated successfully.',
-            'data' => 'done',
+            'message' => 'Sales sync queued successfully.',
         ]);
     }
+
+
+
 }

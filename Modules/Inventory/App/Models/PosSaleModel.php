@@ -2,35 +2,33 @@
 
 namespace Modules\Inventory\App\Models;
 
-
-use Cviebrock\EloquentSluggable\Sluggable;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\DB;
-
+use App\Enums\PosSaleProcess;
 
 class PosSaleModel extends Model
 {
-
     protected $table = 'inv_pos_sales';
-    public $timestamps = true;
-    protected $guarded = ['id'];
-    protected $fillable = [];
 
+    protected $fillable = [
+        'config_id',
+        'created_by_id',
+        'content',
+        'process',
+        'status',
+        'device_id',
+        'sync_batch_id'
+    ];
 
+    protected $casts = [
+        'process' => PosSaleProcess::class,
+        'content' => 'array',
+    ];
 
-    public static function boot() {
-        parent::boot();
-        self::creating(function ($model) {
-            $date =  new \DateTime("now");
-            $model->created_at = $date;
-            $model->status = false;
-        });
-
-        self::updating(function ($model) {
-            $date =  new \DateTime("now");
-            $model->updated_at = $date;
+    protected static function booted()
+    {
+        static::creating(function ($model) {
+            $model->status  = true;
+            $model->process = PosSaleProcess::PENDING;
         });
     }
-
-
 }

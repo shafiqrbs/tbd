@@ -29,10 +29,20 @@ class PosSales
      **/
     private  $config;
 
+    /**
+     * @var string
+     * @ORM\Column( type="string",nullable = true)
+     */
+    private $deviceId;
 
     /**
      * @var string
-     *
+     * @ORM\Column( type="string",nullable = true)
+     */
+    private $syncBatchId;
+
+    /**
+     * @var string
      * @ORM\Column( type="json",nullable = true)
      */
     private $content;
@@ -45,15 +55,13 @@ class PosSales
 
     /**
      * @var boolean
-     *
-     * @ORM\Column(name="process", type="string",length=20, nullable=true, options={"default"="new"})
+     * @ORM\Column(name="process", type="string",length=20, options={"default"="new"})
      */
     private $process;
 
     /**
      * @var boolean
-     *
-     * @ORM\Column(name="status", type="boolean", nullable=true, options={"default"="false"})
+     * @ORM\Column(name="status", type="boolean", options={"default"="false"})
      */
     private $status;
 

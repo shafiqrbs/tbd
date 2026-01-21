@@ -35,6 +35,7 @@ class SalesModel extends Model
         'discount_type',
         'payment',
         'invoice_date',
+        'invoice',
         'narration',
         'process',
         'transaction_mode_id',
