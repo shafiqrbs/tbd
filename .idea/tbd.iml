@@ -8,6 +8,31 @@
       <sourceFolder url="file://$MODULE_DIR$/app" isTestSource="false" packagePrefix="App\" />
       <sourceFolder url="file://$MODULE_DIR$/database/seeders" isTestSource="false" packagePrefix="Database\Seeders\" />
       <sourceFolder url="file://$MODULE_DIR$/spec" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/Modules/AppsApi/" isTestSource="false" packagePrefix="Modules\AppsApi\" />
+      <sourceFolder url="file://$MODULE_DIR$/Modules/AppsApi/app" isTestSource="false" packagePrefix="Modules\AppsApi\App\" />
+      <sourceFolder url="file://$MODULE_DIR$/Modules/AppsApi/database/factories" isTestSource="false" packagePrefix="Modules\AppsApi\Database\Factories\" />
+      <sourceFolder url="file://$MODULE_DIR$/Modules/AppsApi/database/seeders" isTestSource="false" packagePrefix="Modules\AppsApi\Database\Seeders\" />
+      <sourceFolder url="file://$MODULE_DIR$/Modules/AppsApi/tests" isTestSource="true" packagePrefix="Modules\AppsApi\Tests\" />
+      <sourceFolder url="file://$MODULE_DIR$/Modules/Core/" isTestSource="false" packagePrefix="Modules\Core\" />
+      <sourceFolder url="file://$MODULE_DIR$/Modules/Core/app" isTestSource="false" packagePrefix="Modules\Core\App\" />
+      <sourceFolder url="file://$MODULE_DIR$/Modules/Core/database/factories" isTestSource="false" packagePrefix="Modules\Core\Database\Factories\" />
+      <sourceFolder url="file://$MODULE_DIR$/Modules/Core/database/seeders" isTestSource="false" packagePrefix="Modules\Core\Database\Seeders\" />
+      <sourceFolder url="file://$MODULE_DIR$/Modules/Core/tests" isTestSource="true" packagePrefix="Modules\Core\Tests\" />
+      <sourceFolder url="file://$MODULE_DIR$/Modules/Domain/" isTestSource="false" packagePrefix="Modules\Domain\" />
+      <sourceFolder url="file://$MODULE_DIR$/Modules/Domain/app" isTestSource="false" packagePrefix="Modules\Domain\App\" />
+      <sourceFolder url="file://$MODULE_DIR$/Modules/Domain/database/factories" isTestSource="false" packagePrefix="Modules\Domain\Database\Factories\" />
+      <sourceFolder url="file://$MODULE_DIR$/Modules/Domain/database/seeders" isTestSource="false" packagePrefix="Modules\Domain\Database\Seeders\" />
+      <sourceFolder url="file://$MODULE_DIR$/Modules/Domain/tests" isTestSource="true" packagePrefix="Modules\Domain\Tests\" />
+      <sourceFolder url="file://$MODULE_DIR$/Modules/Inventory/" isTestSource="false" packagePrefix="Modules\Inventory\" />
+      <sourceFolder url="file://$MODULE_DIR$/Modules/Inventory/app" isTestSource="false" packagePrefix="Modules\Inventory\App\" />
+      <sourceFolder url="file://$MODULE_DIR$/Modules/Inventory/database/factories" isTestSource="false" packagePrefix="Modules\Inventory\Database\Factories\" />
+      <sourceFolder url="file://$MODULE_DIR$/Modules/Inventory/database/seeders" isTestSource="false" packagePrefix="Modules\Inventory\Database\Seeders\" />
+      <sourceFolder url="file://$MODULE_DIR$/Modules/Inventory/tests" isTestSource="true" packagePrefix="Modules\Inventory\Tests\" />
+      <sourceFolder url="file://$MODULE_DIR$/Modules/Utility/" isTestSource="false" packagePrefix="Modules\Utility\" />
+      <sourceFolder url="file://$MODULE_DIR$/Modules/Utility/app" isTestSource="false" packagePrefix="Modules\Utility\App\" />
+      <sourceFolder url="file://$MODULE_DIR$/Modules/Utility/database/factories" isTestSource="false" packagePrefix="Modules\Utility\Database\Factories\" />
+      <sourceFolder url="file://$MODULE_DIR$/Modules/Utility/database/seeders" isTestSource="false" packagePrefix="Modules\Utility\Database\Seeders\" />
+      <sourceFolder url="file://$MODULE_DIR$/Modules/Utility/tests" isTestSource="true" packagePrefix="Modules\Utility\Tests\" />
       <excludeFolder url="file://$MODULE_DIR$/storage/app" />
       <excludeFolder url="file://$MODULE_DIR$/storage/framework" />
       <excludeFolder url="file://$MODULE_DIR$/storage/proxies" />
@@ -183,6 +208,7 @@
       <excludeFolder url="file://$MODULE_DIR$/vendor/tymon/jwt-auth" />
       <excludeFolder url="file://$MODULE_DIR$/vendor/vlucas/phpdotenv" />
       <excludeFolder url="file://$MODULE_DIR$/vendor/voku/portable-ascii" />
+      <excludeFolder url="file://$MODULE_DIR$/storage/exports" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />

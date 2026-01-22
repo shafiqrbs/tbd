@@ -15,6 +15,8 @@ class PosSaleModel extends Model
         'content',
         'process',
         'status',
+        'failed',
+        'total',
         'device_id',
         'sync_batch_id'
     ];

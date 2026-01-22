@@ -478,21 +478,19 @@ class PosController extends Controller
 
         $domain = $this->domain;
 
-        // Prevent duplicate pending/processing batches
-        $exists = PosSaleModel::where('device_id', $validated['device_id'])
+        $alreadyExists = PosSaleModel::where('device_id', $validated['device_id'])
             ->where('sync_batch_id', $validated['sync_batch_id'])
             ->whereIn('process', [PosSaleProcess::PENDING, PosSaleProcess::PROCESSING])
             ->exists();
 
-        if ($exists) {
+        if ($alreadyExists) {
             return response()->json([
-                'status'  => ResponseAlias::HTTP_OK,
+                'status'  => 200,
                 'success' => true,
-                'message' => 'Batch already received.',
+                'message' => 'Batch already received'
             ]);
         }
 
-        // Create sync record
         $sync = PosSaleModel::create([
             'device_id'      => $validated['device_id'],
             'sync_batch_id'  => $validated['sync_batch_id'],
@@ -501,27 +499,25 @@ class PosController extends Controller
             'content'        => $validated['content']
         ]);
 
-        // Prepare domain array for job
         $domainArray = [
-            'acc_config'    => $domain['acc_config'],
-            'domain_id'     => $domain['domain_id'],
-            'config_id'     => $domain['config_id'],
-            'user_id'       => $domain['user_id'],
-            'inv_config'    => $domain['inv_config'],
-            'warehouse_id'  => $domain['warehouse_id'],
-            'is_auto_approve' => $domain['is_sales_auto_approved'] ?? false,
+            'acc_config'        => $domain['acc_config'],
+            'domain_id'         => $domain['domain_id'],
+            'config_id'         => $domain['config_id'],
+            'user_id'           => $domain['user_id'],
+            'inv_config'        => $domain['inv_config'],
+            'warehouse_id'      => $domain['warehouse_id'],
+            'is_auto_approve'   => $domain['is_sales_auto_approved'] ?? false,
         ];
 
-        // Dispatch
         ProcessPosSalesJob::dispatch($sync->id, $domainArray);
 
-
         return response()->json([
-            'status'  => ResponseAlias::HTTP_CREATED,
+            'status'  => 201,
             'success' => true,
             'message' => 'Sales sync queued successfully.',
         ]);
     }
+
 
 
 

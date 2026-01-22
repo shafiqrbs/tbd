@@ -8,6 +8,7 @@ enum PosSaleProcess: string
     case PROCESSING = 'processing';
     case COMPLETED  = 'completed';
     case FAILED     = 'failed';
+    case COMPLETE_PARTIALLY     = 'completed_partially';
 
     /**
      * Optional: for validation rules

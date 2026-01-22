@@ -80,5 +80,20 @@ class PosSales
     private $updatedAt;
 
 
+
+    /**
+     * @var integer
+     * @ORM\Column( type="integer",nullable = true)
+     */
+    private $total;
+
+
+    /**
+     * @var integer
+     * @ORM\Column( type="integer",nullable = true)
+     */
+    private $failed;
+
+
 }
 
