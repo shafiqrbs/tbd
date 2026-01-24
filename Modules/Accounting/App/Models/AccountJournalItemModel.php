@@ -673,7 +673,43 @@ class AccountJournalItemModel extends Model
             ->whereIn('acc.parent_id', $accountArrayIds)
             ->where('acc.config_id', $domain['acc_config'])
             ->get();
+        // receive data
+        $receivedData = self::getAllReceivedBalance($accountArrayIds,$params,$accounts);
+        // expense data
+        $expenseResults = self::getAllExpenseBalance($accountArrayIds,$params,$accounts);
 
+        // summary data
+        $receivedMap = self::getReceivedSummary($accountArrayIds, $params);
+        $paymentMap  = self::getPaymentSummary($accountArrayIds, $params);
+        $openingMap  = self::getOpeningBalance($accountArrayIds, $params);
+
+        $summaryData = [];
+
+        foreach ($accounts as $acc) {
+            $opening  = (float) ($openingMap[$acc->id] ?? 0);
+            $received = (float) ($receivedMap[$acc->id] ?? 0);
+            $payment  = (float) ($paymentMap[$acc->id] ?? 0);
+
+            $summaryData[] = [
+                'desc'     => $acc->display_name ?? $acc->name,
+                'opening'  => $opening,
+                'received' => $received,
+                'payment'  => $payment,
+                'amount'   => $opening + $received - $payment,
+            ];
+        }
+
+
+        return [
+            'accounts' => $accounts,
+            'outletSales' => $receivedData,
+            'outletExpense' => $expenseResults,
+            'summaryData' => $summaryData,
+        ];
+    }
+
+    private static function getAllReceivedBalance(array $accountArrayIds, array $params, $accounts)
+    {
         // Get journal items aggregated by sub-head and branch
         $results = DB::table('acc_journal_item as item')
             ->join('acc_head as head', 'head.id', '=', 'item.account_sub_head_id')
@@ -689,13 +725,15 @@ class AccountJournalItemModel extends Model
             )
             ->whereIn('item.account_head_id', $accountArrayIds)
             ->where('master.short_name', 'CV')
+            ->whereNotNull('journal.approved_by_id')
             ->when(isset($params['start_date']) && isset($params['end_date']), function ($query) use ($params) {
                 $query->whereBetween('item.created_at', [$params['start_date'], $params['end_date']]);
             })
             ->groupBy('item.account_sub_head_id', 'head.name', 'branch.name')
             ->get();
 
-        $outletSales = [];
+
+        $outletReceive = [];
         $branches = $results->pluck('branch_name')->unique();
 
         foreach ($branches as $branchName) {
@@ -712,14 +750,96 @@ class AccountJournalItemModel extends Model
             // Total across all accounts
             $row['total'] = array_sum(array_filter($row, 'is_numeric'));
 
-            $outletSales[] = $row;
+            $outletReceive[] = $row;
         }
-
-        return [
-            'accounts' => $accounts,
-            'outletSales' => $outletSales,
-        ];
+        return $outletReceive ?? [];
     }
+    private static function getAllExpenseBalance(array $accountArrayIds, array $params, $accounts)
+    {
+        $expenseResults = DB::table('acc_journal_item as item')
+            ->join('acc_head as head', 'head.id', '=', 'item.account_sub_head_id')
+            ->join('acc_journal as journal', 'journal.id', '=', 'item.account_journal_id')
+            ->join('acc_voucher as voucher', 'voucher.id', '=', 'journal.voucher_id')
+            ->join('acc_master_voucher as master', 'master.id', '=', 'voucher.master_voucher_id')
+            ->leftJoin('dom_domain as branch', 'branch.id', '=', 'journal.branch_id')
+            ->select(
+                'item.account_sub_head_id',
+                'head.name as sub_head_name',
+                'branch.name as branch_name',
+                DB::raw('SUM(item.credit) as amount')
+            )
+            ->whereIn('item.account_head_id', $accountArrayIds)
+            ->where('item.mode', 'credit')
+            ->whereNotNull('journal.approved_by_id')
+            ->where('master.short_name', 'CPV')
+            ->when(isset($params['start_date']) && isset($params['end_date']), function ($query) use ($params) {
+                $query->whereBetween('item.created_at', [$params['start_date'], $params['end_date']]);
+            })
+            ->groupBy('item.account_sub_head_id', 'head.name')
+            ->get()->toArray();
+        return $expenseResults ?? [];
+    }
+
+    private static function getReceivedSummary(array $accountArrayIds, array $params)
+    {
+        return DB::table('acc_journal_item as item')
+            ->select(
+                'item.account_sub_head_id',
+                DB::raw('SUM(item.debit) as received')
+            )
+            ->join('acc_journal as journal', 'journal.id', '=', 'item.account_journal_id')
+            ->join('acc_voucher as voucher', 'voucher.id', '=', 'journal.voucher_id')
+            ->join('acc_master_voucher as master', 'master.id', '=', 'voucher.master_voucher_id')
+            ->whereIn('item.account_head_id', $accountArrayIds)
+            ->where('master.short_name', 'CV')
+            ->whereNotNull('journal.approved_by_id')
+            ->when(isset($params['start_date']) && isset($params['end_date']), function ($q) use ($params) {
+                $q->whereBetween('item.created_at', [$params['start_date'], $params['end_date']]);
+            })
+            ->groupBy('item.account_sub_head_id')
+            ->pluck('received', 'account_sub_head_id');
+    }
+
+    private static function getPaymentSummary(array $accountArrayIds, array $params)
+    {
+        return DB::table('acc_journal_item as item')
+            ->select(
+                'item.account_sub_head_id',
+                DB::raw('SUM(item.credit) as payment')
+            )
+            ->join('acc_journal as journal', 'journal.id', '=', 'item.account_journal_id')
+            ->join('acc_voucher as voucher', 'voucher.id', '=', 'journal.voucher_id')
+            ->join('acc_master_voucher as master', 'master.id', '=', 'voucher.master_voucher_id')
+            ->whereIn('item.account_head_id', $accountArrayIds)
+            ->where('master.short_name', 'CPV')
+            ->whereNotNull('journal.approved_by_id')
+            ->when(isset($params['start_date']) && isset($params['end_date']), function ($q) use ($params) {
+                $q->whereBetween('item.created_at', [$params['start_date'], $params['end_date']]);
+            })
+            ->groupBy('item.account_sub_head_id')
+            ->pluck('payment', 'account_sub_head_id');
+    }
+
+    private static function getOpeningBalance(array $accountArrayIds, array $params)
+    {
+        return DB::table('acc_journal_item as item')
+            ->select(
+                'item.account_sub_head_id',
+                'item.closing_amount as opening',
+//                DB::raw('SUM(item.debit - item.credit) as opening')
+            )
+            ->join('acc_journal as journal', 'journal.id', '=', 'item.account_journal_id')
+            ->whereIn('item.account_head_id', $accountArrayIds)
+            ->whereNotNull('journal.approved_by_id')
+            ->when(isset($params['start_date']), function ($q) use ($params) {
+                $q->where('item.created_at', '<', $params['start_date']);
+            })
+            ->groupBy('item.account_sub_head_id')
+            ->pluck('opening', 'account_sub_head_id');
+    }
+
+
+
 
 }
 

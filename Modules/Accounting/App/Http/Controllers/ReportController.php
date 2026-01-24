@@ -90,7 +90,10 @@ class ReportController extends Controller
             'status' => true,
             'message' => 'Income Expense',
             'data' => [
-                'receive' => $receivedData,
+                'ledgers' => $receivedData['accounts'],
+                'receives' => $receivedData['outletSales'],
+                'expenses' => $receivedData['outletExpense'],
+                'summary' => $receivedData['summaryData'],
             ]
         ], ResponseAlias::HTTP_OK);
     }
