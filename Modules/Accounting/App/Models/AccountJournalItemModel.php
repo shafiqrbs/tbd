@@ -754,31 +754,42 @@ class AccountJournalItemModel extends Model
         }
         return $outletReceive ?? [];
     }
-    private static function getAllExpenseBalance(array $accountArrayIds, array $params, $accounts)
+
+    private static function getAllExpenseBalance(array $accountArrayIds, array $params): array
     {
-        $expenseResults = DB::table('acc_journal_item as item')
-            ->join('acc_head as head', 'head.id', '=', 'item.account_sub_head_id')
+        return DB::table('acc_journal_item as item')
+            ->join('acc_journal_item as parent', 'parent.id', '=', 'item.parent_id')
+            ->join('acc_head as parent_head', 'parent_head.id', '=', 'parent.account_sub_head_id')
             ->join('acc_journal as journal', 'journal.id', '=', 'item.account_journal_id')
             ->join('acc_voucher as voucher', 'voucher.id', '=', 'journal.voucher_id')
             ->join('acc_master_voucher as master', 'master.id', '=', 'voucher.master_voucher_id')
             ->leftJoin('dom_domain as branch', 'branch.id', '=', 'journal.branch_id')
             ->select(
                 'item.account_sub_head_id',
-                'head.name as sub_head_name',
+                'parent_head.name as sub_head_name',
                 'branch.name as branch_name',
-                DB::raw('SUM(item.credit) as amount')
+                DB::raw('SUM(parent.debit) as amount')
             )
             ->whereIn('item.account_head_id', $accountArrayIds)
             ->where('item.mode', 'credit')
             ->whereNotNull('journal.approved_by_id')
             ->where('master.short_name', 'CPV')
-            ->when(isset($params['start_date']) && isset($params['end_date']), function ($query) use ($params) {
-                $query->whereBetween('item.created_at', [$params['start_date'], $params['end_date']]);
-            })
-            ->groupBy('item.account_sub_head_id', 'head.name')
-            ->get()->toArray();
-        return $expenseResults ?? [];
+            ->when(
+                !empty($params['start_date']) && !empty($params['end_date']),
+                fn ($q) => $q->whereBetween('item.created_at', [
+                    $params['start_date'],
+                    $params['end_date'],
+                ])
+            )
+            ->groupBy(
+                'item.account_sub_head_id',
+                'parent_head.name',
+                'branch.name'
+            )
+            ->get()
+            ->toArray();
     }
+
 
     private static function getReceivedSummary(array $accountArrayIds, array $params)
     {
