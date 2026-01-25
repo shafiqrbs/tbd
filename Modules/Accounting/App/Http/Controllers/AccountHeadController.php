@@ -72,6 +72,7 @@ class AccountHeadController extends Controller
     {
         $data = $request->validated();
         $data['config_id'] = $this->domain['acc_config'];
+        $data['display_name'] = $data['name'];
         $entity = AccountHeadModel::create($data);
         AccountHeadDetailsModel::updateOrCreate([
             'account_head_id' => $entity->id,

@@ -32,7 +32,7 @@ class AccountHeadRequest extends FormRequest
             {
                 return [
                     'name' => 'required|string',
-                    'code' => 'required',
+                    'code' => 'string|nullable',
                     'head_group' => 'required|string',
                     'mother_account_id' => 'integer|nullable',
                     'parent_id' => 'integer|nullable',
