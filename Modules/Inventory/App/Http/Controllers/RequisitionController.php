@@ -128,12 +128,10 @@ class RequisitionController extends Controller
                         'created_at' => now(),
                     ];
                 }
-
-                dump($itemsToInsert);
-
-                /*if (!empty($itemsToInsert)) {
+                
+                if (!empty($itemsToInsert)) {
                     RequisitionItemModel::insert($itemsToInsert);
-                }*/
+                }
             }
 
             $requisition->update(['sub_total' => $total, 'total' => $total]);
