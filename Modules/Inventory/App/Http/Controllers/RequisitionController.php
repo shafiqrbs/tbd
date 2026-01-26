@@ -97,7 +97,11 @@ class RequisitionController extends Controller
                 foreach ($input['items'] as $val) {
                     $customerStockItem = StockItemModel::find($val['product_id']);
                     if (!$customerStockItem) {
-                        throw new \Exception("Stock item not found");
+                        throw new \Exception("Customer Stock item not found");
+                    }
+                    $vendorStockItem = StockItemModel::find($customerStockItem->parent_stock_item);
+                    if (!$vendorStockItem) {
+                        throw new \Exception("Vendor Stock item not found ".$customerStockItem->name);
                     }
 
                     $findProduct = ProductModel::find($customerStockItem->product_id);
@@ -125,9 +129,11 @@ class RequisitionController extends Controller
                     ];
                 }
 
-                if (!empty($itemsToInsert)) {
+                dump($itemsToInsert);
+
+                /*if (!empty($itemsToInsert)) {
                     RequisitionItemModel::insert($itemsToInsert);
-                }
+                }*/
             }
 
             $requisition->update(['sub_total' => $total, 'total' => $total]);
