@@ -849,6 +849,60 @@ class AccountJournalItemModel extends Model
             ->pluck('opening', 'account_sub_head_id');
     }
 
+    public static function getVoucherEntryReconciliationItems(array $params, object $domain)
+    {
+        $accountArrayIds = ConfigModel::where('domain_id', $domain['domain_id'])
+            ->first(['account_cash_id', 'account_bank_id', 'account_mobile_id'])
+            ?->toArray() ?? [];
+
+        $accountArrayIds = array_values($accountArrayIds);
+
+        $data = DB::table('acc_journal_item as item')
+            ->select(
+                'item.id',
+                'item.id as journal_item_id',
+                'journal.id as journal_id',
+                'journal.invoice_no',
+                'journal.process',
+                'journal.approved_by_id',
+                'item.account_head_id',
+                'head.name as head_name',
+                'item.account_sub_head_id',
+                'sub_head.name as sub_head_name',
+                'item.mode',
+                'item.credit',
+                'item.debit',
+                'item.parent_id',
+//                'item.amount',
+            )
+            ->join('acc_journal as journal', 'journal.id', '=', 'item.account_journal_id')
+            ->join('acc_head as head', 'head.id', '=', 'item.account_head_id')
+            ->join('acc_head as sub_head', 'sub_head.id', '=', 'item.account_sub_head_id')
+//            ->whereNotIn('item.account_head_id', $accountArrayIds)
+            ->whereNotNull('item.parent_id')
+
+            ->when(!empty($params['start_date']), fn ($q) =>
+            $q->whereDate('item.created_at', $params['start_date'])
+            )
+
+            ->when(!empty($params['branch_id']), fn ($q) =>
+            $q->where('journal.branch_id', $params['branch_id'])
+            )
+
+            ->when(!empty($params['head_id']), fn ($q) =>
+            $q->where('item.account_head_id', $params['head_id'])
+            )
+
+            ->get()
+            ->map(function ($row) {
+                $row->mode = $row->mode === 'credit' ? 'debit' : 'credit';
+                $row->amount = $row->mode === 'credit' ? $row->debit : $row->credit;
+                return $row;
+            });
+
+        return $data;
+    }
+
 
 
 

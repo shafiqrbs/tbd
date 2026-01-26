@@ -28,6 +28,7 @@ use Modules\Inventory\App\Models\ConfigSalesModel;
 use Modules\Inventory\App\Models\SalesItemModel;
 use Modules\Inventory\App\Models\SalesModel;
 use Modules\Inventory\App\Models\StockItemHistoryModel;
+use Symfony\Component\HttpFoundation\Response as ResponseAlias;
 use Throwable;
 
 
@@ -229,6 +230,187 @@ class AccountVoucherEntryController extends Controller
             ], 500);
         }
     }
+
+    public function reconciliationItems(Request $request)
+    {
+        $params = $request->only(['start_date', 'branch_id','head_id']);
+        $getItems = AccountJournalItemModel::getVoucherEntryReconciliationItems($params, $this->domain);
+        if (count($getItems) > 0) {
+            return response()->json([
+                'status'  => ResponseAlias::HTTP_OK,
+                'success' => true,
+                'message' => 'Reconciliation items retrieved.',
+                'data' => $getItems
+            ], ResponseAlias::HTTP_OK);
+        }else{
+            return response()->json([
+                'status'  => ResponseAlias::HTTP_NOT_FOUND,
+                'success' => false,
+                'message' => 'Reconciliation items not found.',
+            ],ResponseAlias::HTTP_NOT_FOUND);
+        }
+    }
+
+    public function reconciliationItemsInlineUpdate(Request $request)
+    {
+        $input = $request->only(['journal_item_id','journal_id','amount']);
+
+        return DB::transaction(function () use ($input) {
+
+            $findJournalItem = AccountJournalItemModel::find($input['journal_item_id']);
+            if (!$findJournalItem) {
+                return response()->json([
+                    'status'  => 404,
+                    'success' => false,
+                    'message' => 'Journal item not found.',
+                ]);
+            }
+
+            // ---------------- Update child item ----------------
+            $amount = abs($input['amount']); // always positive
+
+            if ($findJournalItem->mode === 'credit') {
+                $findJournalItem->update([
+                    'amount' => -$amount,
+                    'credit' => $amount,
+                ]);
+            } else {
+                $findJournalItem->update([
+                    'amount' => $amount,
+                    'debit' => $amount,
+                    'credit' => 0,
+                ]);
+            }
+
+            // ---------------- Update parent item ----------------
+            if ($findJournalItem->parent_id) {
+                $sumChildAmount = AccountJournalItemModel::where('parent_id', $findJournalItem->parent_id)
+                    ->sum(DB::raw('ABS(amount)')); // sum absolute values
+
+                $findParentItem = AccountJournalItemModel::find($findJournalItem->parent_id);
+                if (!$findParentItem) {
+                    return response()->json([
+                        'status'  => 404,
+                        'success' => false,
+                        'message' => 'Parent item not found.'
+                    ]);
+                }
+
+                if ($findParentItem->mode === 'credit') {
+                    $findParentItem->update([
+                        'amount' => -$sumChildAmount,
+                        'credit' => $sumChildAmount,
+                        'debit' => 0,
+                    ]);
+                } else {
+                    $findParentItem->update([
+                        'amount' => $sumChildAmount,
+                        'debit' => $sumChildAmount,
+                        'credit' => 0,
+                    ]);
+                }
+            }
+
+            // ---------------- Update journal totals ----------------
+            $findJournal = AccountJournalModel::find($findJournalItem->account_journal_id);
+            if (!$findJournal) {
+                return response()->json([
+                    'status'  => 404,
+                    'success' => false,
+                    'message' => 'Journal not found.'
+                ]);
+            }
+
+            $findJournal->update([
+                'debit' => $sumChildAmount,
+                'credit' => $sumChildAmount,
+            ]);
+
+            return response()->json([
+                'status'  => ResponseAlias::HTTP_OK,
+                'success' => true,
+                'message' => 'Reconciliation items updated successfully.',
+            ],ResponseAlias::HTTP_OK);
+        });
+    }
+
+    public function reconciliationItemsApprove(Request $request)
+    {
+        $ids = $request->ids;
+        if (empty($ids)) {
+            return response()->json([
+                'status'  => ResponseAlias::HTTP_NOT_FOUND,
+                'success' => false,
+                'message' => 'No reconciliation items found.'
+            ]);
+        }
+
+        $journals = AccountJournalModel::with('journalItems')->whereIn('id', $ids)->get();
+
+        if ($journals->isEmpty()) {
+            return response()->json([
+                'status'  => 404,
+                'success' => false,
+                'message' => 'Journals not found.',
+            ]);
+        }
+
+        DB::beginTransaction();
+
+        try {
+            foreach ($journals as $journal) {
+                if ($journal->journalItems->isEmpty()) {
+                    throw new \Exception("No journal items found for journal ID: {$journal->id}");
+                }
+
+                foreach ($journal->journalItems as $journalItem) {
+                    // manage journal opening & closing quantity
+                    AccountJournalModel::journalOpeningClosing($journal, $journalItem);
+
+                    // for daily ledger maintain
+                    DailyLedger::dailyLedgerManage(
+                        configId: $journal->config_id,
+                        accountHeadId: $journalItem->account_head_id,
+                        accountSubHeadId: $journalItem->account_sub_head_id,
+                        debit: $journalItem->debit,
+                        credit: $journalItem->credit,
+                        openingAmount: $journalItem->opening_amount
+                    );
+                }
+
+                // update journal as approved
+                $journal->update([
+                    'approved_by_id' => $this->domain['user_id'] ?? null,
+                    'process'        => 'Approved',
+                    'approved_date'  => now()
+                ]);
+            }
+
+            DB::commit();
+
+            return response()->json([
+                'status'  => 200,
+                'success' => true,
+                'message' => 'All selected journals approved successfully.',
+            ]);
+        } catch (Throwable $e) {
+            DB::rollBack();
+
+            logger()->error('Account journal approval failed', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+
+            return response()->json([
+                'status'  => 500,
+                'success' => false,
+                'message' => 'An error occurred while processing approval.',
+                'error'   => $e->getMessage(),
+            ], 500);
+        }
+    }
+
+
 
 
 }

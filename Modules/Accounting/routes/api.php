@@ -102,7 +102,17 @@ Route::prefix('/accounting')->middleware([HeaderAuthenticationMiddleware::class,
             'destroy' => 'accounting.setting.destroy'
         ]);
 
-    Route::get('/voucher-entry/approve/{id}', [AccountVoucherEntryController::class,'accountVoucherApprove'])->name('account_voucher_approve');
+    Route::prefix('voucher-entry')->group(function() {
+        Route::prefix('reconciliation')->group(function() {
+            Route::get('items', [AccountVoucherEntryController::class,'reconciliationItems']);
+            Route::post('inline-update', [AccountVoucherEntryController::class,'reconciliationItemsInlineUpdate']);
+            Route::post('approve', [AccountVoucherEntryController::class,'reconciliationItemsApprove']);
+        });
+        Route::get('approve/{id}', [AccountVoucherEntryController::class,'accountVoucherApprove'])
+            ->name('account_voucher_approve');
+
+    });
+
     Route::apiResource('/voucher-entry', AccountVoucherEntryController::class)
         ->middleware([HeaderAuthenticationMiddleware::class])
         ->parameters(['setting' => 'accounting.setting'])
