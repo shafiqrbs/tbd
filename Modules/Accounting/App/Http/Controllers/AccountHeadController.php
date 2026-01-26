@@ -409,5 +409,16 @@ class AccountHeadController extends Controller
         ]);
     }
 
+    public function statusUpdate($id)
+    {
+        $findVoucher = AccountHeadModel::find($id);
+        $findVoucher->update(['status' => $findVoucher->status == 1 ? 0 : 1]);
+        return response()->json([
+            'status' => 200,
+            'success' => true,
+            'message' => 'Update Status Successfully',
+        ]);
+    }
+
 
 }

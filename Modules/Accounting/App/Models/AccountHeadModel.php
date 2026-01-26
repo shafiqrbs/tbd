@@ -272,7 +272,7 @@ class AccountHeadModel extends Model
             $skip = ($currentPage - 1) * $perPage;
 
             // Base query
-            $query = self::where('acc_head.config_id', $domain['acc_config'])
+            $query = self::where('acc_head.config_id', $domain['acc_config'])->where('acc_head.is_delete',0)
                 ->leftJoin('acc_head as parent', 'parent.id', '=', 'acc_head.parent_id')
                 ->leftJoin('acc_setting as mother', 'acc_head.mother_account_id', '=', 'mother.id')
                 ->select([
@@ -282,6 +282,7 @@ class AccountHeadModel extends Model
                     'acc_head.slug',
                     'acc_head.code',
                     'acc_head.is_private',
+                    'acc_head.status',
                     'acc_head.amount',
                     'parent.name as parent_name',
                     'mother.name as mother_name'
@@ -302,7 +303,7 @@ class AccountHeadModel extends Model
             }
 
             // Status filter
-            $query->where('acc_head.status', 1);
+          //  $query->where('acc_head.status', 1);
 
             // Get total count before pagination
             $total = $query->count();

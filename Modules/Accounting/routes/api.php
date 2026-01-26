@@ -45,6 +45,7 @@ Route::prefix('/accounting')->middleware([HeaderAuthenticationMiddleware::class,
 
     Route::post('/transaction-mode-update/{id}', [TransactionModeController::class,'update'])->name('transaction-mode.update-customize');
     Route::apiResource('/transaction-mode', TransactionModeController::class)->middleware([HeaderAuthenticationMiddleware::class]);
+    Route::get('/account-head/status-update/{id}', [AccountHeadController::class, 'statusUpdate'])->name('account_voucher_update_status');
     Route::apiResource('/account-head', AccountHeadController::class)->middleware([HeaderAuthenticationMiddleware::class]);
 
     Route::get('/account-head-outstanding', [AccountHeadController::class,'accountHeadOutstanding'])->name('account_head_outstanding');

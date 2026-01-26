@@ -184,6 +184,13 @@ class AccountHead
      */
     private $isCreditDateCheckVoucherEntry= false;
 
+    /**
+     * @var boolean
+     *
+     * @ORM\Column(type="boolean",options={"default"="0"})
+     */
+    private $isDelete;
+
      /**
      * @var integer
      *
@@ -229,10 +236,9 @@ class AccountHead
     /**
      * @var boolean
      *
-     * @ORM\Column(name="status", type="boolean", nullable=true)
+     * @ORM\Column(type="boolean",options={"default"="0"})
      */
     private $status = true;
-
 
 
     /**

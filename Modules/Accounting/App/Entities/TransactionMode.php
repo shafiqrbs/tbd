@@ -129,7 +129,7 @@ class TransactionMode
 
 
      /**
-     * @var float
+     * @var boolean
      *
      * @ORM\Column(type="boolean",options={"default"="0"})
      */
@@ -139,9 +139,16 @@ class TransactionMode
     /**
      * @var boolean
      *
-     * @ORM\Column(name="status", type="boolean")
+     * @ORM\Column(type="boolean",options={"default"="0"})
      */
-    private $status = true;
+    private $status;
+
+    /**
+     * @var boolean
+     *
+     * @ORM\Column(type="boolean",options={"default"="0"})
+     */
+    private $isDelete;
 
     /**
      * @ORM\ManyToOne(targetEntity="Modules\Accounting\App\Entities\Setting", cascade={"persist", "remove"})
@@ -200,7 +207,7 @@ class TransactionMode
     /**
      * @var boolean
      *
-     * @ORM\Column(type="boolean", nullable=true)
+     * @ORM\Column(type="boolean",options={"default"="0"})
      */
     private $isPrivate = false;
 

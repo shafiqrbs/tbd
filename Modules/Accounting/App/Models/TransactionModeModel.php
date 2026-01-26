@@ -87,7 +87,7 @@ class TransactionModeModel extends Model
         $perPage = isset($request['offset']) && $request['offset']!=''? (int)($request['offset']):0;
         $skip = isset($page) && $page!=''? (int)$page * $perPage:0;
 
-        $tramsactionsMode = self::where('acc_transaction_mode.config_id',$domain['acc_config'])
+        $tramsactionsMode = self::where('acc_transaction_mode.config_id',$domain['acc_config'])->where('acc_transaction_mode.is_delete',0)
             ->leftjoin('acc_setting as method','method.id','=','acc_transaction_mode.method_id')
             ->leftjoin('uti_settings as authorized','authorized.id','=','acc_transaction_mode.authorised_mode_id')
             ->leftjoin('uti_settings as account_type','account_type.id','=','acc_transaction_mode.account_mode_id')

@@ -184,7 +184,18 @@ class TransactionModeController extends Controller
     public function destroy($id)
     {
         $service = new JsonRequestResponse();
-        DomainModel::find($id)->delete();
+        TransactionModeModel::where('id', $id)
+            ->update([
+                'is_delete' => 1,
+                'status'    => 1
+            ]);
+        DB::transaction(function () use ($id) {
+            AccountHeadModel::where('account_id', $id)
+                ->update([
+                    'is_delete' => 1,
+                    'status'    => 1
+                ]);
+        });
         $entity = ['message'=>'delete'];
         $data = $service->returnJosnResponse($entity);
         return $data;
