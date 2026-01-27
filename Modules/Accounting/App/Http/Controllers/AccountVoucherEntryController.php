@@ -363,27 +363,29 @@ class AccountVoucherEntryController extends Controller
                     throw new \Exception("No journal items found for journal ID: {$journal->id}");
                 }
 
-                foreach ($journal->journalItems as $journalItem) {
-                    // manage journal opening & closing quantity
-                    AccountJournalModel::journalOpeningClosing($journal, $journalItem);
+                if (!$journal->approved_by_id) {
+                    foreach ($journal->journalItems as $journalItem) {
+                        // manage journal opening & closing quantity
+                        AccountJournalModel::journalOpeningClosing($journal, $journalItem);
 
-                    // for daily ledger maintain
-                    DailyLedger::dailyLedgerManage(
-                        configId: $journal->config_id,
-                        accountHeadId: $journalItem->account_head_id,
-                        accountSubHeadId: $journalItem->account_sub_head_id,
-                        debit: $journalItem->debit,
-                        credit: $journalItem->credit,
-                        openingAmount: $journalItem->opening_amount
-                    );
+                        // for daily ledger maintain
+                        DailyLedger::dailyLedgerManage(
+                            configId: $journal->config_id,
+                            accountHeadId: $journalItem->account_head_id,
+                            accountSubHeadId: $journalItem->account_sub_head_id,
+                            debit: $journalItem->debit,
+                            credit: $journalItem->credit,
+                            openingAmount: $journalItem->opening_amount
+                        );
+                    }
+
+                    // update journal as approved
+                    $journal->update([
+                        'approved_by_id' => $this->domain['user_id'] ?? null,
+                        'process' => 'Approved',
+                        'approved_date' => now()
+                    ]);
                 }
-
-                // update journal as approved
-                $journal->update([
-                    'approved_by_id' => $this->domain['user_id'] ?? null,
-                    'process'        => 'Approved',
-                    'approved_date'  => now()
-                ]);
             }
 
             DB::commit();
