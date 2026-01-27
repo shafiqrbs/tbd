@@ -710,6 +710,7 @@ class AccountJournalItemModel extends Model
 
     private static function getAllReceivedBalance(array $accountArrayIds, array $params, $accounts)
     {
+//        dump($params);
         // Get journal items aggregated by sub-head and branch
         $results = DB::table('acc_journal_item as item')
             ->join('acc_head as head', 'head.id', '=', 'item.account_sub_head_id')
@@ -727,7 +728,10 @@ class AccountJournalItemModel extends Model
             ->where('master.short_name', 'CV')
             ->whereNotNull('journal.approved_by_id')
             ->when(isset($params['start_date']) && isset($params['end_date']), function ($query) use ($params) {
-                $query->whereBetween('item.created_at', [$params['start_date'], $params['end_date']]);
+                $query->whereBetween('item.created_at', [
+                    Carbon::parse($params['start_date'])->startOfDay(),
+                    Carbon::parse($params['end_date'])->endOfDay(),
+                ]);
             })
             ->groupBy('item.account_sub_head_id', 'head.name', 'branch.name')
             ->get();
@@ -774,13 +778,12 @@ class AccountJournalItemModel extends Model
             ->where('item.mode', 'credit')
             ->whereNotNull('journal.approved_by_id')
             ->where('master.short_name', 'CPV')
-            ->when(
-                !empty($params['start_date']) && !empty($params['end_date']),
-                fn ($q) => $q->whereBetween('item.created_at', [
-                    $params['start_date'],
-                    $params['end_date'],
-                ])
-            )
+            ->when(isset($params['start_date']) && isset($params['end_date']), function ($query) use ($params) {
+                $query->whereBetween('item.created_at', [
+                    Carbon::parse($params['start_date'])->startOfDay(),
+                    Carbon::parse($params['end_date'])->endOfDay(),
+                ]);
+            })
             ->groupBy(
                 'item.account_sub_head_id',
                 'parent_head.name',
@@ -804,8 +807,11 @@ class AccountJournalItemModel extends Model
             ->whereIn('item.account_head_id', $accountArrayIds)
             ->where('master.short_name', 'CV')
             ->whereNotNull('journal.approved_by_id')
-            ->when(isset($params['start_date']) && isset($params['end_date']), function ($q) use ($params) {
-                $q->whereBetween('item.created_at', [$params['start_date'], $params['end_date']]);
+            ->when(isset($params['start_date']) && isset($params['end_date']), function ($query) use ($params) {
+                $query->whereBetween('item.created_at', [
+                    Carbon::parse($params['start_date'])->startOfDay(),
+                    Carbon::parse($params['end_date'])->endOfDay(),
+                ]);
             })
             ->groupBy('item.account_sub_head_id')
             ->pluck('received', 'account_sub_head_id');
@@ -824,8 +830,11 @@ class AccountJournalItemModel extends Model
             ->whereIn('item.account_head_id', $accountArrayIds)
             ->where('master.short_name', 'CPV')
             ->whereNotNull('journal.approved_by_id')
-            ->when(isset($params['start_date']) && isset($params['end_date']), function ($q) use ($params) {
-                $q->whereBetween('item.created_at', [$params['start_date'], $params['end_date']]);
+            ->when(isset($params['start_date']) && isset($params['end_date']), function ($query) use ($params) {
+                $query->whereBetween('item.created_at', [
+                    Carbon::parse($params['start_date'])->startOfDay(),
+                    Carbon::parse($params['end_date'])->endOfDay(),
+                ]);
             })
             ->groupBy('item.account_sub_head_id')
             ->pluck('payment', 'account_sub_head_id');
@@ -842,8 +851,11 @@ class AccountJournalItemModel extends Model
             ->join('acc_journal as journal', 'journal.id', '=', 'item.account_journal_id')
             ->whereIn('item.account_head_id', $accountArrayIds)
             ->whereNotNull('journal.approved_by_id')
-            ->when(isset($params['start_date']), function ($q) use ($params) {
-                $q->where('item.created_at', '<', $params['start_date']);
+            ->when(isset($params['start_date']) && isset($params['end_date']), function ($query) use ($params) {
+                $query->whereBetween('item.created_at', [
+                    Carbon::parse($params['start_date'])->startOfDay(),
+                    Carbon::parse($params['end_date'])->endOfDay(),
+                ]);
             })
             ->groupBy('item.account_sub_head_id')
             ->pluck('opening', 'account_sub_head_id');
