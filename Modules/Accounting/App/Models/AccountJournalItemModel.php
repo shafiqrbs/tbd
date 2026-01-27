@@ -716,7 +716,7 @@ class AccountJournalItemModel extends Model
             ->join('acc_head as head', 'head.id', '=', 'item.account_sub_head_id')
             ->join('acc_journal as journal', 'journal.id', '=', 'item.account_journal_id')
             ->join('acc_voucher as voucher', 'voucher.id', '=', 'journal.voucher_id')
-            ->join('acc_master_voucher as master', 'master.id', '=', 'voucher.master_voucher_id')
+//            ->join('acc_master_voucher as master', 'master.id', '=', 'voucher.master_voucher_id')
             ->join('dom_domain as branch', 'branch.id', '=', 'journal.branch_id')
             ->select(
                 'item.account_sub_head_id',
@@ -725,6 +725,7 @@ class AccountJournalItemModel extends Model
                 DB::raw('SUM(item.debit) as total_debit')
             )
             ->whereIn('item.account_head_id', $accountArrayIds)
+            ->whereIn('voucher.voucher_type_id', [25])
 //            ->where('master.short_name', 'CV')
             ->whereNotNull('journal.approved_by_id')
             ->when(isset($params['start_date']) && isset($params['end_date']), function ($query) use ($params) {
