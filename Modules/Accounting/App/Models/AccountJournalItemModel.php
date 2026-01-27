@@ -878,7 +878,7 @@ class AccountJournalItemModel extends Model
             ->join('acc_journal as journal', 'journal.id', '=', 'item.account_journal_id')
             ->join('acc_head as head', 'head.id', '=', 'item.account_head_id')
             ->join('acc_head as sub_head', 'sub_head.id', '=', 'item.account_sub_head_id')
-//            ->whereNotIn('item.account_head_id', $accountArrayIds)
+            ->whereNotIn('item.account_head_id', $accountArrayIds)
             ->whereNotNull('item.parent_id')
 
             ->when(!empty($params['start_date']), fn ($q) =>
