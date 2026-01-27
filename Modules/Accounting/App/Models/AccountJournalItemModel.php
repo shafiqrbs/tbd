@@ -725,7 +725,7 @@ class AccountJournalItemModel extends Model
                 DB::raw('SUM(item.debit) as total_debit')
             )
             ->whereIn('item.account_head_id', $accountArrayIds)
-            ->where('master.short_name', 'CV')
+//            ->where('master.short_name', 'CV')
             ->whereNotNull('journal.approved_by_id')
             ->when(isset($params['start_date']) && isset($params['end_date']), function ($query) use ($params) {
                 $query->whereBetween('item.created_at', [
@@ -777,7 +777,7 @@ class AccountJournalItemModel extends Model
             ->whereIn('item.account_head_id', $accountArrayIds)
             ->where('item.mode', 'credit')
             ->whereNotNull('journal.approved_by_id')
-            ->where('master.short_name', 'CPV')
+//            ->where('master.short_name', 'CPV')
             ->when(isset($params['start_date']) && isset($params['end_date']), function ($query) use ($params) {
                 $query->whereBetween('item.created_at', [
                     Carbon::parse($params['start_date'])->startOfDay(),
