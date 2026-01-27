@@ -851,11 +851,8 @@ class AccountJournalItemModel extends Model
             ->join('acc_journal as journal', 'journal.id', '=', 'item.account_journal_id')
             ->whereIn('item.account_head_id', $accountArrayIds)
             ->whereNotNull('journal.approved_by_id')
-            ->when(isset($params['start_date']) && isset($params['end_date']), function ($query) use ($params) {
-                $query->whereBetween('item.created_at', [
-                    Carbon::parse($params['start_date'])->startOfDay(),
-                    Carbon::parse($params['end_date'])->endOfDay(),
-                ]);
+            ->when(isset($params['start_date']), function ($q) use ($params) {
+                $q->where('item.created_at', '<', $params['start_date']);
             })
             ->groupBy('item.account_sub_head_id')
             ->pluck('opening', 'account_sub_head_id');
