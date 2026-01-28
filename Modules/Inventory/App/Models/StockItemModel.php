@@ -335,7 +335,21 @@ class StockItemModel extends Model
 
     public static function getPosStockItem($domain)
     {
-        return self::with(['product.measurement.unit', 'product.unit', 'product.category', 'product.setting', 'product.images','multiplePrice.priceUnitName'])
+        return self::with(
+            [
+                'product.measurement.unit',
+                'product.unit',
+                'product.category',
+                'product.setting',
+                'product.images',
+                'multiplePrice.priceUnitName',
+                'purchaseItemForSales' => function ($q) use ($domain) {
+                    $q->whereNotNull('expired_date')
+                        ->where('expired_date', '>', now()) // only not expired
+                        ->whereRaw('quantity > COALESCE(sales_quantity, 0)');
+                }
+            ]
+        )
             ->where('inv_stock.config_id', $domain['config_id'])
             ->whereHas('product.setting', function ($query) {
                 $query->whereIn('slug', [
@@ -345,7 +359,6 @@ class StockItemModel extends Model
             ->where('inv_stock.status', 1)
             ->orderByDesc('inv_stock.name')
             ->get()
-
             ->map(function($stock) {
                 $product = $stock->product;
                 return [
@@ -367,6 +380,19 @@ class StockItemModel extends Model
                     'barcode'           => $stock->barcode,
                     'product_nature'    => $product->setting->slug ?? null,
                     'feature_image'     => optional(optional($product)->images)->feature_image ?? null,
+                    'purchase_item_for_sales' => optional(optional($stock)->purchaseItemForSales)->map(function ($s) {
+                        $salesQty = $s->sales_quantity ?? 0; // if null → 0
+                        return [
+                            'id'                => $s->id,
+                            'warehouse_id'      => $s->warehouse_id,
+                            'purchase_quantity' => $s->quantity,
+                            'sales_quantity'    => $salesQty,
+                            'remain_quantity'   => $s->quantity - $salesQty,
+                            'expired_date'      => $s->expired_date
+                                ? Carbon::parse($s->expired_date)->format('d-M-Y')
+                                : null,
+                        ];
+                    }),
                     'multi_price' => optional(optional($stock)->multiplePrice)->map(function ($m) {
                         return [
                             'id'                => $m->id,
