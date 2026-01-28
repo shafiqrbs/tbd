@@ -686,6 +686,7 @@ class AccountJournalItemModel extends Model
         $summaryData = [];
 
         foreach ($accounts as $acc) {
+
             $opening  = (float) ($openingMap[$acc->id] ?? 0);
             $received = (float) ($receivedMap[$acc->id] ?? 0);
             $payment  = (float) ($paymentMap[$acc->id] ?? 0);
@@ -712,11 +713,11 @@ class AccountJournalItemModel extends Model
     {
 //        dump($params);
         // Get journal items aggregated by sub-head and branch
+
         $results = DB::table('acc_journal_item as item')
             ->join('acc_head as head', 'head.id', '=', 'item.account_sub_head_id')
             ->join('acc_journal as journal', 'journal.id', '=', 'item.account_journal_id')
             ->join('acc_voucher as voucher', 'voucher.id', '=', 'journal.voucher_id')
-//            ->join('acc_master_voucher as master', 'master.id', '=', 'voucher.master_voucher_id')
             ->join('dom_domain as branch', 'branch.id', '=', 'journal.branch_id')
             ->select(
                 'item.account_sub_head_id',
@@ -726,7 +727,6 @@ class AccountJournalItemModel extends Model
             )
             ->whereIn('item.account_head_id', $accountArrayIds)
             ->whereIn('voucher.voucher_type_id', [25])
-//            ->where('master.short_name', 'CV')
             ->whereNotNull('journal.approved_by_id')
             ->when(isset($params['start_date']) && isset($params['end_date']), function ($query) use ($params) {
                 $query->whereBetween('item.created_at', [
@@ -763,22 +763,20 @@ class AccountJournalItemModel extends Model
     private static function getAllExpenseBalance(array $accountArrayIds, array $params): array
     {
         return DB::table('acc_journal_item as item')
-            ->join('acc_journal_item as parent', 'parent.id', '=', 'item.parent_id')
-            ->join('acc_head as parent_head', 'parent_head.id', '=', 'parent.account_sub_head_id')
+            ->join('acc_head as ledger', 'ledger.id', '=', 'item.account_sub_head_id')
             ->join('acc_journal as journal', 'journal.id', '=', 'item.account_journal_id')
             ->join('acc_voucher as voucher', 'voucher.id', '=', 'journal.voucher_id')
-            ->join('acc_master_voucher as master', 'master.id', '=', 'voucher.master_voucher_id')
             ->leftJoin('dom_domain as branch', 'branch.id', '=', 'journal.branch_id')
             ->select(
                 'item.account_sub_head_id',
-                'parent_head.name as sub_head_name',
+                'ledger.name as sub_head_name',
                 'branch.name as branch_name',
-                DB::raw('SUM(parent.debit) as amount')
+                DB::raw('SUM(item.debit) as amount')
             )
-            ->whereIn('item.account_head_id', $accountArrayIds)
-            ->where('item.mode', 'credit')
+            ->whereNotIn('item.account_head_id', $accountArrayIds)
+            ->where('item.mode', 'debit')
+            ->whereIn('voucher.voucher_type_id', [26])
             ->whereNotNull('journal.approved_by_id')
-//            ->where('master.short_name', 'CPV')
             ->when(isset($params['start_date']) && isset($params['end_date']), function ($query) use ($params) {
                 $query->whereBetween('item.created_at', [
                     Carbon::parse($params['start_date'])->startOfDay(),
@@ -787,13 +785,12 @@ class AccountJournalItemModel extends Model
             })
             ->groupBy(
                 'item.account_sub_head_id',
-                'parent_head.name',
+                'ledger.name',
                 'branch.name'
             )
             ->get()
             ->toArray();
     }
-
 
     private static function getReceivedSummary(array $accountArrayIds, array $params)
     {
@@ -803,10 +800,7 @@ class AccountJournalItemModel extends Model
                 DB::raw('SUM(item.debit) as received')
             )
             ->join('acc_journal as journal', 'journal.id', '=', 'item.account_journal_id')
-            ->join('acc_voucher as voucher', 'voucher.id', '=', 'journal.voucher_id')
-            ->join('acc_master_voucher as master', 'master.id', '=', 'voucher.master_voucher_id')
             ->whereIn('item.account_head_id', $accountArrayIds)
-            ->where('master.short_name', 'CV')
             ->whereNotNull('journal.approved_by_id')
             ->when(isset($params['start_date']) && isset($params['end_date']), function ($query) use ($params) {
                 $query->whereBetween('item.created_at', [
@@ -826,10 +820,7 @@ class AccountJournalItemModel extends Model
                 DB::raw('SUM(item.credit) as payment')
             )
             ->join('acc_journal as journal', 'journal.id', '=', 'item.account_journal_id')
-            ->join('acc_voucher as voucher', 'voucher.id', '=', 'journal.voucher_id')
-            ->join('acc_master_voucher as master', 'master.id', '=', 'voucher.master_voucher_id')
             ->whereIn('item.account_head_id', $accountArrayIds)
-            ->where('master.short_name', 'CPV')
             ->whereNotNull('journal.approved_by_id')
             ->when(isset($params['start_date']) && isset($params['end_date']), function ($query) use ($params) {
                 $query->whereBetween('item.created_at', [
@@ -846,8 +837,7 @@ class AccountJournalItemModel extends Model
         return DB::table('acc_journal_item as item')
             ->select(
                 'item.account_sub_head_id',
-                'item.closing_amount as opening',
-//                DB::raw('SUM(item.debit - item.credit) as opening')
+                'item.closing_amount as opening'
             )
             ->join('acc_journal as journal', 'journal.id', '=', 'item.account_journal_id')
             ->whereIn('item.account_head_id', $accountArrayIds)

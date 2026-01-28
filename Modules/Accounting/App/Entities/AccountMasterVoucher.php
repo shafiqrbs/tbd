@@ -26,7 +26,7 @@ class AccountMasterVoucher
 
     /**
      * @ORM\ManyToOne(targetEntity="Setting")
-     * @ORM\JoinColumn(name="voucher_type_id", referencedColumnName="id", nullable=true, onDelete="cascade")
+     * @ORM\JoinColumn(name="voucher_type_id", referencedColumnName="id", nullable=true,onDelete="SET NULL")
      **/
     private $voucherType;
 
