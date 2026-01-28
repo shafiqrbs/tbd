@@ -75,6 +75,13 @@ class AccountVoucherEntryController extends Controller
         $input['created_by_id'] = $this->domain['user_id'];
         $input['process'] = "Created";
 
+        if (empty($input['branch_id'])){
+            $input['branch_id'] = $this->domain['domain_id'];
+            $input['is_branch'] = false;
+        }else{
+            $input['is_branch'] = true;
+        }
+
         // Start Database Transaction to Ensure Data Consistency
         DB::beginTransaction();
 
@@ -117,7 +124,7 @@ class AccountVoucherEntryController extends Controller
     public function show($id)
     {
         $service = new JsonRequestResponse();
-        $entity = SettingModel::find($id);
+        $entity = AccountJournalModel::show($id);
         if (!$entity){
             $entity = 'Data not found';
         }
@@ -158,8 +165,16 @@ class AccountVoucherEntryController extends Controller
     public function destroy($id)
     {
         $service = new JsonRequestResponse();
-        SettingModel::find($id)->delete();
-        $entity = ['message'=>'delete'];
+        $findJournal = AccountJournalModel::find($id);
+        if ($findJournal->approved_by_id){
+            return response()->json([
+                'status' => 200,
+                'success' => true,
+                'message' => 'Journal already approved & not deleted.',
+            ]);
+        }
+        $findJournal->delete();
+        $entity = ['message'=>'Journal delete success.'];
         $data = $service->returnJosnResponse($entity);
         return $data;
     }

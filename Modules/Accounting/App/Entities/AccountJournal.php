@@ -105,6 +105,13 @@ class AccountJournal
      */
     private $isSignature = false;
 
+
+    /**
+     * @var boolean
+     * @ORM\Column(type="boolean")
+     */
+    private $isBranch = false;
+
     /**
      * @var integer
      * @ORM\Column(type="integer",nullable=true)

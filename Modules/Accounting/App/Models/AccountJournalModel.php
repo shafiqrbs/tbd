@@ -110,10 +110,13 @@ class AccountJournalModel extends Model
         $entity = self::where('acc_journal.config_id', $domain['acc_config'])
             ->join('acc_voucher','acc_voucher.id','=','acc_journal.voucher_id')
             ->join('users','users.id','=','acc_journal.created_by_id')
+            ->leftjoin('dom_domain','dom_domain.id','=','acc_journal.branch_id')
             ->leftjoin('users as approve','approve.id','=','acc_journal.approved_by_id')
             ->select([
                 'acc_journal.id',
+                'dom_domain.name as branch_name',
                 'acc_journal.voucher_id',
+                'acc_journal.approved_by_id',
                 'acc_journal.created_by_id',
                 'acc_journal.process',
                 'acc_journal.amount as amount',
@@ -153,9 +156,9 @@ class AccountJournalModel extends Model
         }
 
         if ($isBranch){
-            $entity = $entity->whereNotNull('acc_journal.branch_id');
+            $entity = $entity->where('acc_journal.is_branch',1);
         }else{
-            $entity = $entity->whereNull('acc_journal.branch_id');
+            $entity = $entity->where('acc_journal.is_branch',0);
         }
 
         $total = $entity->count();
@@ -166,6 +169,47 @@ class AccountJournalModel extends Model
 
         $data = array('count' => $total, 'entities' => $entities);
         return $data;
+    }
+    public static function show($id)
+    {
+        $entity = self::where('acc_journal.id', $id)
+            ->join('acc_voucher','acc_voucher.id','=','acc_journal.voucher_id')
+            ->join('users','users.id','=','acc_journal.created_by_id')
+            ->leftjoin('dom_domain','dom_domain.id','=','acc_journal.branch_id')
+            ->leftjoin('users as approve','approve.id','=','acc_journal.approved_by_id')
+            ->select([
+                'acc_journal.id',
+                'dom_domain.name as branch_name',
+                'acc_journal.voucher_id',
+                'acc_journal.created_by_id',
+                'acc_journal.process',
+                'acc_journal.amount as amount',
+                'acc_journal.debit',
+                'acc_journal.credit',
+                'acc_journal.description',
+                DB::raw('DATE_FORMAT(acc_journal.created_at, "%d-%m-%Y") as created'),
+                DB::raw('DATE_FORMAT(acc_journal.issue_date, "%d-%m-%Y") as issue_date'),
+                'acc_journal.invoice_no',
+                'acc_journal.ref_no',
+                'acc_voucher.name as voucher_name',
+                'acc_voucher.mode as voucher_mode',
+                'users.name as created_by_name',
+                'approve.name as approve_by_name',
+            ])
+            ->with(['journalItems' => function ($query) {
+                $query->select([
+                    'acc_journal_item.id',
+                    'acc_journal_item.account_journal_id',
+                    'acc_journal_item.account_sub_head_id',
+                    'acc_journal_item.amount',
+                    'acc_journal_item.debit',
+                    'acc_journal_item.credit',
+                    'acc_head.name as ledger_name',
+                    'parent_head.name as head_name',
+                ])->join('acc_head','acc_head.id','=','acc_journal_item.account_sub_head_id')
+                    ->join('acc_head as parent_head','parent_head.id','=','acc_journal_item.account_head_id');
+            }])->first();
+        return $entity;
     }
 
     public static function journalOpeningClosing($journal,$journalItem)

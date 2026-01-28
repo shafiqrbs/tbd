@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Modules\Accounting\App\Models\AccountHeadMasterModel;
 use Modules\Accounting\App\Models\AccountHeadModel;
+use Modules\Accounting\App\Models\AccountJournalItemModel;
 use Modules\Accounting\App\Models\AccountVoucherModel;
 use Modules\Accounting\App\Models\SettingModel;
 use Modules\Accounting\App\Models\SettingTypeModel;
@@ -86,6 +87,13 @@ class AccountingController extends Controller
     {
         $mode = $request->get('dropdown-type');
         $dropdown = AccountHeadModel::getAccountHeadDropdown($this->domain,$mode);
+        $service = new JsonRequestResponse();
+        return $service->returnJosnResponse($dropdown);
+    }
+    public function accountHeadForReconciliationDropdown(Request $request)
+    {
+        $mode = $request->get('dropdown-type');
+        $dropdown = AccountJournalItemModel::getAccountHeadForJournalItemReconciliation();
         $service = new JsonRequestResponse();
         return $service->returnJosnResponse($dropdown);
     }
