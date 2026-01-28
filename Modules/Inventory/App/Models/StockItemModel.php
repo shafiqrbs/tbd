@@ -383,8 +383,7 @@ class StockItemModel extends Model
                     'purchase_item_for_sales' => optional(optional($stock)->purchaseItemForSales)->map(function ($s) {
                         $salesQty = $s->sales_quantity ?? 0; // if null → 0
                         return [
-                            'id'                => $s->id,
-                            'warehouse_id'      => $s->warehouse_id,
+                            'purchase_item_id'  => $s->id,
                             'purchase_quantity' => $s->quantity,
                             'sales_quantity'    => $salesQty,
                             'remain_quantity'   => $s->quantity - $salesQty,
