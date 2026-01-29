@@ -903,9 +903,10 @@ class AccountJournalItemModel extends Model
         return $data;
     }
 
-    public static function getAccountHeadForJournalItemReconciliation()
+    public static function getAccountHeadForJournalItemReconciliation($domain)
     {
         return self::join('acc_head', 'acc_head.id', '=', 'acc_journal_item.account_head_id')
+            ->where('acc_head.config_id',$domain["acc_config"])
             ->select(
                 'acc_journal_item.account_head_id as id',
                 'acc_head.name as head_name'

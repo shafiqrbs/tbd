@@ -93,7 +93,7 @@ class AccountingController extends Controller
     public function accountHeadForReconciliationDropdown(Request $request)
     {
         $mode = $request->get('dropdown-type');
-        $dropdown = AccountJournalItemModel::getAccountHeadForJournalItemReconciliation();
+        $dropdown = AccountJournalItemModel::getAccountHeadForJournalItemReconciliation($this->domain);
         $service = new JsonRequestResponse();
         return $service->returnJosnResponse($dropdown);
     }
