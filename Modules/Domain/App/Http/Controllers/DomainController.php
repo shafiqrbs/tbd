@@ -16,6 +16,7 @@ use Modules\Accounting\App\Entities\AccountVoucher;
 use Modules\Accounting\App\Entities\TransactionMode;
 use Modules\Accounting\App\Models\AccountHeadModel;
 use Modules\Accounting\App\Models\AccountingModel;
+use Modules\Accounting\App\Models\AccountJournalModel;
 use Modules\Accounting\App\Models\AccountVoucherModel;
 use Modules\Accounting\App\Models\TransactionModeModel;
 use Modules\AppsApi\App\Services\GeneratePatternCodeService;
@@ -44,6 +45,7 @@ use Modules\Inventory\App\Models\ConfigSalesModel;
 use Modules\Inventory\App\Models\ConfigVatModel;
 use Modules\Inventory\App\Models\PurchaseItemModel;
 use Modules\Inventory\App\Models\PurchaseModel;
+use Modules\Inventory\App\Models\RequisitionModel;
 use Modules\Inventory\App\Models\SalesModel;
 use Modules\Inventory\App\Models\StockItemHistoryModel;
 use Modules\Inventory\App\Models\StockItemInventoryHistoryModel;
@@ -612,8 +614,6 @@ class DomainController extends Controller
             return response()->json(['message' => 'Inventory config not found', 'status' => Response::HTTP_NOT_FOUND], Response::HTTP_NOT_FOUND);
         }
 
-
-
        /* // Delete purchases and related data using chunking
         PurchaseModel::with('purchaseItems.stock.stockItemHistory')
             ->where('config_id', $allConfigId['inv_config'])
@@ -653,10 +653,14 @@ class DomainController extends Controller
         SalesModel::where('config_id', $invConfig)->delete();
         PurchaseItemModel::where('config_id', $invConfig)->delete();
         PurchaseModel::where('config_id', $invConfig)->delete();
-
+        RequisitionModel::where('customer_config_id', $invConfig)->delete();
 
         // Bulk update stock item quantities
-        StockItemModel::where('config_id', $allConfigId['inv_config'])->update(['quantity' => 0]);
+        StockItemModel::where('config_id',$invConfig)->update(['quantity' => 0]);
+
+        $accConfig = $allConfigId['acc_config'];
+        AccountJournalModel::where('config_id', $accConfig)->delete();
+        AccountHeadModel::where('config_id', $accConfig)->update(['amount' => 0 , 'opening_balance' => 0, 'debit' => 0, 'credit' => 0]);
         return response()->json(['message' => 'Domain reset successfully', 'status' => Response::HTTP_OK], Response::HTTP_OK);
     }
 
@@ -843,36 +847,6 @@ class DomainController extends Controller
             ProductionConfig::updateOrCreate([
                 'domain_id' => $entity->id,
             ]);
-
-            /*$getProductType = UtilitySettingModel::getEntityDropdown('product-type');
-            if (count($getProductType) > 0) {
-                // If no inventory config found, return JSON response.
-                if (!$config) {
-                    DB::rollBack();
-                    $response = new Response();
-                    $response->headers->set('Content-Type', 'application/json');
-                    $response->setContent(json_encode([
-                        'message' => 'Inventory config not found',
-                        'status' => Response::HTTP_NOT_FOUND,
-                    ]));
-                    $response->setStatusCode(Response::HTTP_OK);
-                    return $response;
-                }
-
-                // Loop through each product type and either find or create inventory setting.
-                foreach ($getProductType as $type) {
-                    // If the inventory setting is not found, create a new one.
-                    InventorySettingModel::create([
-                        'config_id' => $config->id,
-                        'setting_id' => $type->id,
-                        'name' => $type->name,
-                        'slug' => $type->slug,
-                        'parent_slug' => 'product-type',
-                        'is_production' => in_array($type->slug,
-                            ['post-production', 'mid-production', 'pre-production']) ? 1 : 0,
-                    ]);
-                }
-            }*/
 
             TransactionModeModel::updateOrCreate([
                 'config_id' => $accountingConfig->id],[

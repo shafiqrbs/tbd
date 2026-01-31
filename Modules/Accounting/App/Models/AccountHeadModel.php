@@ -180,8 +180,8 @@ class AccountHeadModel extends Model
         if ($accountHead) {
             $head = self::create(
                 [
-                    'name' => $name,
-                    'display_name' => $entity['name'],
+                    'name' => $entity['name'],
+                    'display_name' => $name,
                     'parent_id' => $accountHead,
                     'customer_id' => $entity['id'],
                     'level' => '3',
@@ -209,8 +209,8 @@ class AccountHeadModel extends Model
         $name = "{$entity['mobile']}-{$entity['company_name']}";
         self::create(
             [
-                'name' => $name,
-                'display_name' => $entity['company_name'],
+                'display_name' => $name,
+                'name' => $entity['company_name'],
                 'parent_id'    => $config->account_vendor_id ?? null, // assuming this is an ID
                 'level' => '3',
                 'vendor_id' => $entity->id,
@@ -647,8 +647,8 @@ class AccountHeadModel extends Model
                'config_id' => $config->id,
            ],
            [
-               'name' => $displayName,
-               'display_name' => $displayName,
+               'name' => $entity->name,
+               'display_name' => $entity->name,
                'slug' => $entity->slug,
                'parent_id' =>  $config->account_bank_id ??null, // Assuming $parent is a model
                'head_group' => 'ledger',
@@ -702,8 +702,8 @@ class AccountHeadModel extends Model
                'config_id' => $config->id,
            ],
            [
-               'name' => $displayName,
-               'display_name' => $displayName,
+               'name' => $entity->name,
+               'display_name' => $entity->name,
                'slug' => $entity->slug,
                'parent_id' => $parent??null, // Assuming $parent is a model
                'head_group' => 'ledger',
