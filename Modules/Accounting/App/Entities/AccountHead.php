@@ -97,7 +97,7 @@ class AccountHead
 
     /**
      * @ORM\ManyToOne(targetEntity="Setting")
-     * @ORM\JoinColumn(onDelete="CASCADE")
+     * @ORM\JoinColumn(onDelete="SET NULL")
      **/
     private $motherAccount;
 
@@ -190,6 +190,12 @@ class AccountHead
      * @ORM\Column(type="boolean",options={"default"="0"})
      */
     private $isDelete;
+
+    /**
+     * @ORM\OneToOne(targetEntity="Modules\Core\App\Entities\User")
+     * @ORM\JoinColumn(name="deleted_by_id", referencedColumnName="id", nullable=true, onDelete="SET NULL")
+     **/
+    private  $deletedBy;
 
      /**
      * @var integer

@@ -379,6 +379,7 @@ class PosController extends Controller
 
     public function posSalesComplete(int $id)
     {
+        $domain = $this->domain;
         $findInvoice = InvoiceTempModel::find($id);
         if (!$findInvoice || $findInvoice->is_active==0) {
             return response()->json([
@@ -386,9 +387,15 @@ class PosController extends Controller
                 'message' => 'Invoice not found',
             ], ResponseAlias::HTTP_NOT_FOUND);
         }
+        $customer = CustomerModel::where([
+            'domain_id' => $this->domain['id'],
+            'Name' => 'Default',
+            'mobile' => $domain['license_no'],
+            'is_default_customer' => 1
+        ])->first();
 
         $input['config_id'] = $this->domain['config_id'];
-        $input['customer_id'] = $findInvoice->customer_id;
+        $input['customer_id'] = $customer->id;
         $input['created_by_id'] = $this->domain['user_id'];
         $input['sales_by_id'] = $findInvoice->sales_by_id;
         $input['sub_total'] = $findInvoice->sub_total;

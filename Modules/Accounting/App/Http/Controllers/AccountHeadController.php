@@ -11,6 +11,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Log;
 use Modules\Accounting\App\Entities\AccountHead;
@@ -223,8 +224,14 @@ class AccountHeadController extends Controller
      */
     public function destroy($id)
     {
+        $user = $this->domain;
         $service = new JsonRequestResponse();
-        AccountHeadModel::find($id)->delete();
+        AccountHeadModel::where('id', $id)
+            ->update([
+                'is_delete' => 1,
+                'status'    => 1,
+                'deleted_by_id'    => $user['user_id']
+            ]);
         $entity = ['message'=>'delete'];
         $data = $service->returnJosnResponse($entity);
         return $data;

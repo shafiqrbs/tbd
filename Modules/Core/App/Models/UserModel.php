@@ -134,6 +134,7 @@ class UserModel extends Model
             'dom_domain.id as id',
             'dom_domain.id as global_id',
             'dom_domain.id as domain_id',
+            'dom_domain.license_no as license_no',
             'users.id as user_id',
             'users.name as user_name',
             'users.user_group as user_group',
