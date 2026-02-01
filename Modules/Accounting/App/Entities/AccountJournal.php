@@ -108,7 +108,7 @@ class AccountJournal
 
     /**
      * @var boolean
-     * @ORM\Column(type="boolean",nullable=true)
+     * @ORM\Column(type="boolean",options={"default"="false"})
      */
     private $isBranch = false;
 
