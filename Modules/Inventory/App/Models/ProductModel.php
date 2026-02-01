@@ -3,19 +3,20 @@
 namespace Modules\Inventory\App\Models;
 
 use Cviebrock\EloquentSluggable\Sluggable;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\DB;
 use Modules\AppsApi\App\Services\GeneratePatternCodeService;
 
 class ProductModel extends Model
 {
-    use HasFactory,Sluggable;
+    use Sluggable , SoftDeletes;
 
     protected $table = 'inv_product';
     public $timestamps = true;
     protected $guarded = ['id'];
+    protected $dates = ['deleted_at'];
 
     protected $fillable = [
         'product_type_id',

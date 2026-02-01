@@ -474,6 +474,11 @@ class StockItem
      **/
     private  $parentStockItem;
 
+    /**
+     * @ORM\Column(type="datetime", nullable=true)
+     */
+    private ?\DateTimeInterface $deletedAt = null;
+
 
     /**
      * Get id

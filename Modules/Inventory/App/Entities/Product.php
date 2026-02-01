@@ -201,6 +201,11 @@ class Product
     private  $vendor;
 
     /**
+     * @ORM\Column(type="datetime", nullable=true)
+     */
+    private ?\DateTimeInterface $deletedAt = null;
+
+    /**
      * @return int
      */
     public function getId()

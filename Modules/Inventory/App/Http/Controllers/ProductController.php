@@ -220,8 +220,7 @@ class ProductController extends Controller
      */
     public function destroy($id)
     {
-//        StockItemHistoryModel::where()
-        ProductModel::find($id)->delete();
+        ProductModel::findOrFail($id)->delete();
 
         return response()->json([
             'status' => 200,

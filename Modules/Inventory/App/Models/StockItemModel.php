@@ -4,6 +4,7 @@ namespace Modules\Inventory\App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Modules\AppsApi\App\Services\GeneratePatternCodeService;
@@ -11,10 +12,12 @@ use Modules\Core\App\Models\WarehouseModel;
 
 class StockItemModel extends Model
 {
+    use SoftDeletes;
 
     protected $table = 'inv_stock';
     public $timestamps = true;
     protected $guarded = ['id'];
+    protected $dates = ['deleted_at'];
 
     protected $fillable = [
         'product_id',
@@ -719,7 +722,7 @@ class StockItemModel extends Model
                     'category_name' => $product->category->name ?? null,
                     'product_id' => $product->id ?? null,
                     'product_code' => $product->product_code ?? null,
-                    'expiry_duration' => $product->expiry_duration ? $product->expiry_duration . ' days' : null,
+                    'expiry_duration' => $product?->expiry_duration ? $product->expiry_duration . ' days' : null,
                     'unit_name' => $product->unit->name ?? null,
                     'quantity' => $stock->quantity,
                     'average_price' => round($stock->average_price, 2),
@@ -727,7 +730,7 @@ class StockItemModel extends Model
                     'purchase_price' => round($stock->purchase_price, 2),
                     'barcode' => $stock->barcode,
                     'product_nature' => $product->setting->slug ?? null,
-                    'feature_image' => optional($product->images)->feature_image ?? null,
+                    'feature_image' => optional($product?->images)->feature_image ?? null,
                     'warehouses' => $warehouseQuantities,
                 ];
 
