@@ -520,6 +520,8 @@ class AccountJournalModel extends Model
         $input['module'] = 'sales';
         $input['process'] = 'Approved';
         $input['waiting_process'] = 'Approved';
+        $input['is_branch'] = false;
+        $input['branch_id'] = $domain['domain_id'];
         $journal = self::create($input);
 
         $journalItem = self::salesEntry($config,$journal,$subTotal);
