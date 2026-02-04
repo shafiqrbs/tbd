@@ -383,7 +383,7 @@ class StockItemModel extends Model
                     'average_price'    => ROUND($stock->average_price,2),
                     'barcode'           => $stock->barcode,
                     'product_nature'    => $product->setting->slug ?? null,
-                    'feature_image'     => optional(optional($product)->images)->feature_image ?? null,
+                    'feature_image'     => $product->parent_id ? optional(optional($product)->parent_images)->feature_image ?? null : optional(optional($product)->images)->feature_image ?? null,
                     'purchase_item_for_sales' => optional(optional($stock)->purchaseItemForSales)->map(function ($s) {
                         $salesQty = $s->sales_quantity ?? 0; // if null → 0
                         return [
