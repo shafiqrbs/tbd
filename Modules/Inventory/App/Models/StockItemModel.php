@@ -248,6 +248,7 @@ class StockItemModel extends Model
             'product.category',
             'product.setting',
             'product.images',
+            'product.parent_images',
             'multiplePrice.priceUnitName',
             'currentWarehouseStock' => function ($q) use ($domain) {
                 if (!empty($domain['config_id'])) {
@@ -285,7 +286,7 @@ class StockItemModel extends Model
                     'barcode'           => $stock->barcode,
                     'product_nature'    => $product->setting->slug ?? null,
                     'product_nature_id'    => $product->setting->id ?? null,
-                    'feature_image'     => optional(optional($product)->images)->feature_image ?? null,
+                    'feature_image'     => $product->parent_id ? optional(optional($product)->parent_images)->feature_image ?? null : optional(optional($product)->images)->feature_image ?? null,
                     'multi_price' => optional(optional($stock)->multiplePrice)->map(function ($m) {
                         return [
                             'id'                => $m->id,

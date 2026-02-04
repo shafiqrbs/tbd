@@ -110,6 +110,10 @@ class ProductModel extends Model
     {
         return $this->hasOne(ProductGalleryModel::class, 'product_id', 'product_id')->where('status', 1);
     }
+    public function parent_images()
+    {
+        return $this->hasOne(ProductGalleryModel::class, 'product_id', 'parent_id')->where('status', 1);
+    }
 
     public function measurments():HasMany
     {
@@ -161,6 +165,16 @@ class ProductModel extends Model
                 DB::raw('ROUND(inv_stock.sales_price, 2) as sales_price'),
                 DB::raw('ROUND(inv_stock.average_price, 2) as average_price'),
             ])->with(['images' => function ($query) {
+                $query->select([
+                    'inv_product_gallery.id',
+                    'inv_product_gallery.product_id',
+                    'inv_product_gallery.feature_image',
+                    'inv_product_gallery.path_one',
+                    'inv_product_gallery.path_two',
+                    'inv_product_gallery.path_three',
+                    'inv_product_gallery.path_four'
+                ])->where('inv_product_gallery.status', 1);
+            }])->with(['parent_images' => function ($query) {
                 $query->select([
                     'inv_product_gallery.id',
                     'inv_product_gallery.product_id',
@@ -228,6 +242,16 @@ class ProductModel extends Model
             ->orderBy('inv_category.name', 'ASC')
             ->orderBy('inv_product.name', 'ASC')
             ->get();
+        
+        $entities->transform(function ($product) {
+            if ($product->parent_images) {
+                $product->setRelation('images', $product->parent_images);
+            }
+            $product->unsetRelation('parent_images');
+            return $product;
+        });
+
+
         $data = array('count' => $total, 'entities' => $entities);
         return $data;
     }
