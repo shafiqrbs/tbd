@@ -75,10 +75,10 @@ class CategoryModel extends Model
     {
         $query = self::select(['name', 'slug', 'id'])
             ->where([['status', 1],['config_id', $domain['config_id']]]);
-        if ($type == 'parent'){
+        if ($type === 'parent'){
             $query->whereNotNull('parent');
         }
-        if ($type == 'child'){
+        if ($type === 'child'){
             $query->whereNull('parent');
         }
         $query->orderBy('inv_category.name','ASC');

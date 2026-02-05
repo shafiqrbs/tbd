@@ -110,8 +110,15 @@ class SalesModel extends Model
             ->leftjoin('acc_transaction_mode','acc_transaction_mode.id','=','inv_sales.transaction_mode_id')
             ->leftjoin('cor_customers','cor_customers.id','=','inv_sales.customer_id')
             ->leftjoin('cor_setting','cor_setting.id','=','cor_customers.customer_group_id')
+            //for purchase item warehouse show in common sales
+            ->leftJoin('inv_sales_item as isi', 'isi.sale_id', '=', 'inv_sales.id')
+            ->leftJoin('inv_purchase_item as ipi', 'ipi.id', '=', 'isi.child_purchase_item_id')
+            ->leftJoin('cor_warehouses as pwh', 'pwh.id', '=', 'ipi.warehouse_id')
+
             ->select([
                 'inv_sales.id',
+                DB::raw('MAX(ipi.warehouse_id) as purchase_warehouse_id'),
+                DB::raw('MAX(pwh.name) as purchase_warehouse_name'),
                 DB::raw('DATE_FORMAT(inv_sales.created_at, "%d-%m-%Y") as created'),
                 DB::raw('DATE_FORMAT(inv_sales.expected_date, "%d-%m-%Y") as expected_date'),
                 'inv_sales.invoice as invoice',
@@ -158,8 +165,13 @@ class SalesModel extends Model
                     DB::raw("CONCAT(cor_warehouses.name, ' (', cor_warehouses.location, ')') as warehouse_name"),
                     'cor_warehouses.name as warehouse',
                     'cor_warehouses.location as warehouse_location',
-                    'cor_warehouses.id as warehouse_id'
-                ])->leftjoin('cor_warehouses','cor_warehouses.id','=','inv_sales_item.warehouse_id');
+                    'cor_warehouses.id as warehouse_id',
+//                    'inv_purchase_item.warehouse_id as purchase_warehouse_id',
+//                    'pw.name as purchase_warehouse_name',
+                ])
+//                    ->leftjoin('inv_purchase_item','inv_purchase_item.id','=','inv_sales_item.child_purchase_item_id')
+//                    ->leftjoin('cor_warehouses as pw','pw.id','=','inv_purchase_item.warehouse_id')
+                    ->leftjoin('cor_warehouses','cor_warehouses.id','=','inv_sales_item.warehouse_id');
             }]);
 
         if (isset($request['term']) && !empty($request['term'])){
@@ -183,6 +195,7 @@ class SalesModel extends Model
         $total  = $entities->count();
         $entities = $entities->skip($skip)
             ->take($perPage)
+            ->groupBy('inv_sales.id')
             ->orderBy('inv_sales.updated_at','DESC')
             ->get();
 

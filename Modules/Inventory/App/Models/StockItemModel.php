@@ -2,11 +2,13 @@
 
 namespace Modules\Inventory\App\Models;
 
+use DateTime;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
+use InvalidArgumentException;
 use Modules\AppsApi\App\Services\GeneratePatternCodeService;
 use Modules\Core\App\Models\WarehouseModel;
 
@@ -48,10 +50,11 @@ class StockItemModel extends Model
         'is_private',
     ];
 
-    public static function boot() {
+    public static function boot()
+    {
         parent::boot();
         self::creating(function ($model) {
-            $date =  new \DateTime("now");
+            $date = new DateTime("now");
             $model->created_at = $date;
             $model->barcode = self::generatedEventListener($model)['generateId'];
             $model->product_code = self::generatedEventListener($model)['productCode'];
@@ -60,7 +63,7 @@ class StockItemModel extends Model
         });
 
         self::updating(function ($model) {
-            $date =  new \DateTime("now");
+            $date = new DateTime("now");
             $model->updated_at = $date;
         });
     }
@@ -71,7 +74,7 @@ class StockItemModel extends Model
 
         $product = DB::table('inv_product as inv_product')
             ->where('inv_product.id', $model['product_id'])
-            ->select('inv_product.id','inv_product.barcode','inv_product.product_code')
+            ->select('inv_product.id', 'inv_product.barcode', 'inv_product.product_code')
             ->first();
 
         $params = [
@@ -92,25 +95,28 @@ class StockItemModel extends Model
     }
 
 
-    public function measurments():HasMany
+    public function measurments(): HasMany
     {
         return $this->hasMany(ProductMeasurementModel::class, 'product_id');
     }
 
 
-    public function stockItemHistory() :HasMany
+    public function stockItemHistory(): HasMany
     {
         return $this->hasMany(StockItemHistoryModel::class, 'stock_item_id');
     }
-    public function multiplePrice() :HasMany
+
+    public function multiplePrice(): HasMany
     {
         return $this->hasMany(StockItemPriceMatrixModel::class, 'stock_item_id');
     }
-    public function currentWarehouseStock() :HasMany
+
+    public function currentWarehouseStock(): HasMany
     {
         return $this->hasMany(CurrentStockModel::class, 'stock_item_id');
     }
-    public function purchaseItemForSales() :HasMany
+
+    public function purchaseItemForSales(): HasMany
     {
         return $this->hasMany(PurchaseItemModel::class, 'stock_item_id');
     }
@@ -121,17 +127,17 @@ class StockItemModel extends Model
         return $this->belongsTo(StockItemModel::class, 'parent_stock_item');
     }
 
-    public static function getRecords($request,$domain)
+    public static function getRecords($request, $domain)
     {
-        $page =  isset($request['page']) && $request['page'] > 0?($request['page'] - 1 ) : 0;
-        $perPage = isset($request['offset']) && $request['offset']!=''? (int)($request['offset']):0;
-        $skip = isset($page) && $page!=''? (int)$page * $perPage:0;
+        $page = isset($request['page']) && $request['page'] > 0 ? ($request['page'] - 1) : 0;
+        $perPage = isset($request['offset']) && $request['offset'] != '' ? (int)($request['offset']) : 0;
+        $skip = isset($page) && $page != '' ? (int)$page * $perPage : 0;
 
-        $products = self::where([['inv_product.config_id',$domain['config_id']]])
-            ->leftjoin('inv_product','inv_product.id','=','inv_stock.product_id')
-            ->leftjoin('inv_category','inv_category.id','=','inv_product.category_id')
-            ->leftjoin('inv_particular','inv_particular.id','=','inv_product.unit_id')
-            ->leftjoin('inv_setting','inv_setting.id','=','inv_product.product_type_id')
+        $products = self::where([['inv_product.config_id', $domain['config_id']]])
+            ->leftjoin('inv_product', 'inv_product.id', '=', 'inv_stock.product_id')
+            ->leftjoin('inv_category', 'inv_category.id', '=', 'inv_product.category_id')
+            ->leftjoin('inv_particular', 'inv_particular.id', '=', 'inv_product.unit_id')
+            ->leftjoin('inv_setting', 'inv_setting.id', '=', 'inv_product.product_type_id')
             ->select([
                 'inv_product.id as id',
                 'inv_product.name as product_name',
@@ -148,41 +154,41 @@ class StockItemModel extends Model
                 'inv_setting.name as product_type',
             ]);
 
-        if (isset($request['term']) && !empty($request['term'])){
-            $products = $products->whereAny(['inv_product.name','inv_product.slug','inv_category.name','inv_particular.name','inv_brand.name','inv_product.sales_price','inv_setting.name'],'LIKE','%'.$request['term'].'%');
+        if (isset($request['term']) && !empty($request['term'])) {
+            $products = $products->whereAny(['inv_product.name', 'inv_product.slug', 'inv_category.name', 'inv_particular.name', 'inv_brand.name', 'inv_product.sales_price', 'inv_setting.name'], 'LIKE', '%' . $request['term'] . '%');
         }
 
-        if (isset($request['name']) && !empty($request['name'])){
-            $products = $products->where('inv_product.name',$request['name']);
+        if (isset($request['name']) && !empty($request['name'])) {
+            $products = $products->where('inv_product.name', $request['name']);
         }
 
-        if (isset($request['alternative_name']) && !empty($request['alternative_name'])){
-            $products = $products->where('inv_product.alternative_name',$request['alternative_name']);
+        if (isset($request['alternative_name']) && !empty($request['alternative_name'])) {
+            $products = $products->where('inv_product.alternative_name', $request['alternative_name']);
         }
-        if (isset($request['sku']) && !empty($request['sku'])){
-            $products = $products->where('inv_product.sku',$request['sku']);
+        if (isset($request['sku']) && !empty($request['sku'])) {
+            $products = $products->where('inv_product.sku', $request['sku']);
         }
-        if (isset($request['sales_price']) && !empty($request['sales_price'])){
-            $products = $products->where('inv_product.sales_price',$request['sales_price']);
+        if (isset($request['sales_price']) && !empty($request['sales_price'])) {
+            $products = $products->where('inv_product.sales_price', $request['sales_price']);
         }
 
-        $total  = $products->count();
+        $total = $products->count();
         $entities = $products->skip($skip)
             ->take($perPage)
-            ->orderBy('inv_product.name','DESC')
+            ->orderBy('inv_product.name', 'DESC')
             ->get();
 
-        $data = array('count'=>$total,'entities'=>$entities);
+        $data = array('count' => $total, 'entities' => $entities);
         return $data;
     }
 
-    public static function getProductStockDetails($id,$domain)
+    public static function getProductStockDetails($id, $domain)
     {
-        $product = self::where([['inv_product.config_id',$domain['config_id']],['inv_stock.id',$id]])
-            ->join('inv_product','inv_product.id','=','inv_stock.product_id')
-            ->leftjoin('inv_category','inv_category.id','=','inv_product.category_id')
-            ->leftjoin('inv_particular','inv_particular.id','=','inv_product.unit_id')
-            ->leftjoin('inv_setting','inv_setting.id','=','inv_product.product_type_id')
+        $product = self::where([['inv_product.config_id', $domain['config_id']], ['inv_stock.id', $id]])
+            ->join('inv_product', 'inv_product.id', '=', 'inv_stock.product_id')
+            ->leftjoin('inv_category', 'inv_category.id', '=', 'inv_product.category_id')
+            ->leftjoin('inv_particular', 'inv_particular.id', '=', 'inv_product.unit_id')
+            ->leftjoin('inv_setting', 'inv_setting.id', '=', 'inv_product.product_type_id')
             ->select([
                 'inv_product.product_type_id',
                 'inv_setting.name as product_type',
@@ -208,13 +214,13 @@ class StockItemModel extends Model
         return $product;
     }
 
-    public static function getProductDetails($id,$domain)
+    public static function getProductDetails($id, $domain)
     {
-        $product = self::where([['inv_product.config_id',$domain['config_id']],['inv_product.id',$id]])
-            ->join('inv_product','inv_product.id','=','inv_stock.product_id')
-            ->leftjoin('inv_category','inv_category.id','=','inv_product.category_id')
-            ->leftjoin('inv_particular','inv_particular.id','=','inv_product.unit_id')
-            ->leftjoin('inv_setting','inv_setting.id','=','inv_product.product_type_id')
+        $product = self::where([['inv_product.config_id', $domain['config_id']], ['inv_product.id', $id]])
+            ->join('inv_product', 'inv_product.id', '=', 'inv_stock.product_id')
+            ->leftjoin('inv_category', 'inv_category.id', '=', 'inv_product.category_id')
+            ->leftjoin('inv_particular', 'inv_particular.id', '=', 'inv_product.unit_id')
+            ->leftjoin('inv_setting', 'inv_setting.id', '=', 'inv_product.product_type_id')
             ->select([
                 'inv_product.product_type_id',
                 'inv_setting.name as product_type',
@@ -260,76 +266,76 @@ class StockItemModel extends Model
                     ->where('expired_date', '>', now()) // only not expired
                     ->whereRaw('quantity > COALESCE(sales_quantity, 0)');
             }
-            ])
+        ])
             ->where('config_id', $domain['config_id'])
             ->where('status', 1)
             ->orderByDesc('id')
             ->get()
-            ->map(function($stock) {
+            ->map(function ($stock) {
                 $product = $stock->product;
                 return [
-                    'id'                => $stock->id,
-                    'stock_id'          => $stock->id,
-                    'name'              => $stock->display_name ?? $stock->name,
-                    'display_name'      => $stock->display_name ?? $stock->name,
-                    'product_name'      => $stock->name . '[' . ($stock->quantity ?? 0) . '] ' . ($product->unit->name ?? ''),
-                    'slug'              => $product->slug ?? null,
-                    'vendor_id'         => $product->vendor_id ?? null,
-                    'category_id'       => $product->category_id ?? null,
-                    'unit_id'           => $product->unit_id ?? null,
-                    'unit_name'         => $product->unit->name ?? null,
-                    'quantity'          => $stock->quantity,
-                    'price'       => ROUND($stock->price,2),
-                    'sales_price'       => ROUND($stock->sales_price,2),
-                    'purchase_price'    => ROUND($stock->purchase_price,2),
-                    'average_price'    => ROUND($stock->average_price,2),
-                    'barcode'           => $stock->barcode,
-                    'product_nature'    => $product->setting->slug ?? null,
-                    'product_nature_id'    => $product->setting->id ?? null,
-                    'feature_image'     => $product->parent_id ? optional(optional($product)->parent_images)->feature_image ?? null : optional(optional($product)->images)->feature_image ?? null,
+                    'id' => $stock->id,
+                    'stock_id' => $stock->id,
+                    'name' => $stock->display_name ?? $stock->name,
+                    'display_name' => $stock->display_name ?? $stock->name,
+                    'product_name' => $stock->name . '[' . ($stock->quantity ?? 0) . '] ' . ($product->unit->name ?? ''),
+                    'slug' => $product->slug ?? null,
+                    'vendor_id' => $product->vendor_id ?? null,
+                    'category_id' => $product->category_id ?? null,
+                    'unit_id' => $product->unit_id ?? null,
+                    'unit_name' => $product->unit->name ?? null,
+                    'quantity' => $stock->quantity,
+                    'price' => ROUND($stock->price, 2),
+                    'sales_price' => ROUND($stock->sales_price, 2),
+                    'purchase_price' => ROUND($stock->purchase_price, 2),
+                    'average_price' => ROUND($stock->average_price, 2),
+                    'barcode' => $stock->barcode,
+                    'product_nature' => $product->setting->slug ?? null,
+                    'product_nature_id' => $product->setting->id ?? null,
+                    'feature_image' => $product?->parent_id ? optional(optional($product)->parent_images)->feature_image ?? null : optional(optional($product)->images)->feature_image ?? null,
                     'multi_price' => optional(optional($stock)->multiplePrice)->map(function ($m) {
                         return [
-                            'id'                => $m->id,
-                            'price_unit_id'     => $m->price_unit_id,
-                            'price'             => $m->price,
-                            'field_name'        => $m->priceUnitName->name ?? null,
-                            'field_slug'        => $m->priceUnitName->slug ?? null,
-                            'parent_slug'       => $m->priceUnitName->parent_slug ?? null,
+                            'id' => $m->id,
+                            'price_unit_id' => $m->price_unit_id,
+                            'price' => $m->price,
+                            'field_name' => $m->priceUnitName->name ?? null,
+                            'field_slug' => $m->priceUnitName->slug ?? null,
+                            'parent_slug' => $m->priceUnitName->parent_slug ?? null,
                         ];
                     }),
                     'current_warehouse_stock' => optional(optional($stock)->currentWarehouseStock)->map(function ($s) {
                         return [
-                            'id'                => $s->id,
-                            'config_id'         => $s->config_id,
-                            'quantity'          => $s->quantity,
-                            'warehouse_id'      => $s->warehouse_id,
-                            'stock_item_id'     => $s->stock_item_id,
-                            'warehouse_name'    => $s->warehouse->name ?? null,
+                            'id' => $s->id,
+                            'config_id' => $s->config_id,
+                            'quantity' => $s->quantity,
+                            'warehouse_id' => $s->warehouse_id,
+                            'stock_item_id' => $s->stock_item_id,
+                            'warehouse_name' => $s->warehouse->name ?? null,
                         ];
                     }),
                     'purchase_item_for_sales' => optional(optional($stock)->purchaseItemForSales)->map(function ($s) {
                         $salesQty = $s->sales_quantity ?? 0; // if null → 0
                         return [
-                            'id'                => $s->id,
-                            'warehouse_id'      => $s->warehouse_id,
+                            'id' => $s->id,
+                            'warehouse_id' => $s->warehouse_id,
                             'purchase_quantity' => $s->quantity,
-                            'sales_quantity'    => $salesQty,
-                            'remain_quantity'   => $s->quantity - $salesQty,
-                            'expired_date'      => $s->expired_date
+                            'sales_quantity' => $salesQty,
+                            'remain_quantity' => $s->quantity - $salesQty,
+                            'expired_date' => $s->expired_date
                                 ? Carbon::parse($s->expired_date)->format('d-M-Y')
                                 : null,
                         ];
                     }),
                     'measurements' => optional(optional($product)->measurement)->map(function ($m) {
                         return [
-                            'id'            => $m->id,
-                            'unit_id'       => $m->unit_id,
-                            'unit_name'     => $m->unit->name ?? null,
-                            'slug'          => $m->unit->slug ?? null,
-                            'is_base_unit'  => $m->is_base_unit,
-                            'is_sales'      => $m->is_sales,
-                            'is_purchase'   => $m->is_purchase,
-                            'quantity'      => $m->quantity,
+                            'id' => $m->id,
+                            'unit_id' => $m->unit_id,
+                            'unit_name' => $m->unit->name ?? null,
+                            'slug' => $m->unit->slug ?? null,
+                            'is_base_unit' => $m->is_base_unit,
+                            'is_sales' => $m->is_sales,
+                            'is_purchase' => $m->is_purchase,
+                            'quantity' => $m->quantity,
                         ];
                     }),
 
@@ -363,59 +369,59 @@ class StockItemModel extends Model
             ->where('inv_stock.status', 1)
             ->orderByDesc('inv_stock.name')
             ->get()
-            ->map(function($stock) {
+            ->map(function ($stock) {
                 $product = $stock->product;
                 return [
-                    'id'                => $stock->id,
-                    'stock_id'          => $stock->id,
-                    'name'              => $stock->display_name ?? $stock->name,
-                    'display_name'      => $stock->display_name ?? $stock->name,
-                    'product_name'      => $stock->name . '[' . ($stock->quantity ?? 0) . '] ' . ($product->unit->name ?? ''),
-                    'slug'              => $product->slug ?? null,
-                    'vendor_id'         => $product->vendor_id ?? null,
-                    'category_id'       => $product->category_id ?? null,
-                    'unit_id'           => $product->unit_id ?? null,
-                    'unit_name'         => $product->unit->name ?? null,
-                    'quantity'          => $stock->quantity,
-                    'price'       => ROUND($stock->price,2),
-                    'sales_price'       => ROUND($stock->sales_price,2),
-                    'purchase_price'    => ROUND($stock->purchase_price,2),
-                    'average_price'    => ROUND($stock->average_price,2),
-                    'barcode'           => $stock->barcode,
-                    'product_nature'    => $product->setting->slug ?? null,
-                    'feature_image'     => $product->parent_id ? optional(optional($product)->parent_images)->feature_image ?? null : optional(optional($product)->images)->feature_image ?? null,
+                    'id' => $stock->id,
+                    'stock_id' => $stock->id,
+                    'name' => $stock->display_name ?? $stock->name,
+                    'display_name' => $stock->display_name ?? $stock->name,
+                    'product_name' => $stock->name . '[' . ($stock->quantity ?? 0) . '] ' . ($product->unit->name ?? ''),
+                    'slug' => $product->slug ?? null,
+                    'vendor_id' => $product->vendor_id ?? null,
+                    'category_id' => $product->category_id ?? null,
+                    'unit_id' => $product->unit_id ?? null,
+                    'unit_name' => $product->unit->name ?? null,
+                    'quantity' => $stock->quantity,
+                    'price' => ROUND($stock->price, 2),
+                    'sales_price' => ROUND($stock->sales_price, 2),
+                    'purchase_price' => ROUND($stock->purchase_price, 2),
+                    'average_price' => ROUND($stock->average_price, 2),
+                    'barcode' => $stock->barcode,
+                    'product_nature' => $product->setting->slug ?? null,
+                    'feature_image' => $product?->parent_id ? optional(optional($product)->parent_images)->feature_image ?? null : optional(optional($product)->images)->feature_image ?? null,
                     'purchase_item_for_sales' => optional(optional($stock)->purchaseItemForSales)->map(function ($s) {
-                        $salesQty = $s->sales_quantity ?? 0; // if null → 0
+                        $salesQty = $s->sales_quantity ?? 0;
                         return [
-                            'purchase_item_id'  => $s->id,
+                            'purchase_item_id' => $s->id,
                             'purchase_quantity' => $s->quantity,
-                            'sales_quantity'    => $salesQty,
-                            'remain_quantity'   => $s->quantity - $salesQty,
-                            'expired_date'      => $s->expired_date
+                            'sales_quantity' => $salesQty,
+                            'remain_quantity' => $s->quantity - $salesQty,
+                            'expired_date' => $s->expired_date
                                 ? Carbon::parse($s->expired_date)->format('d-M-Y')
                                 : null,
                         ];
                     }),
                     'multi_price' => optional(optional($stock)->multiplePrice)->map(function ($m) {
                         return [
-                            'id'                => $m->id,
-                            'price_unit_id'     => $m->price_unit_id,
-                            'price'             => $m->price,
-                            'field_name'        => $m->priceUnitName->name ?? null,
-                            'field_slug'        => $m->priceUnitName->slug ?? null,
-                            'parent_slug'       => $m->priceUnitName->parent_slug ?? null,
+                            'id' => $m->id,
+                            'price_unit_id' => $m->price_unit_id,
+                            'price' => $m->price,
+                            'field_name' => $m->priceUnitName->name ?? null,
+                            'field_slug' => $m->priceUnitName->slug ?? null,
+                            'parent_slug' => $m->priceUnitName->parent_slug ?? null,
                         ];
                     }),
                     'measurements' => optional(optional($product)->measurement)->map(function ($m) {
                         return [
-                            'id'            => $m->id,
-                            'unit_id'       => $m->unit_id,
-                            'unit_name'     => $m->unit->name ?? null,
-                            'slug'          => $m->unit->slug ?? null,
-                            'is_base_unit'  => $m->is_base_unit,
-                            'is_sales'      => $m->is_sales,
-                            'is_purchase'   => $m->is_purchase,
-                            'quantity'      => $m->quantity,
+                            'id' => $m->id,
+                            'unit_id' => $m->unit_id,
+                            'unit_name' => $m->unit->name ?? null,
+                            'slug' => $m->unit->slug ?? null,
+                            'is_base_unit' => $m->is_base_unit,
+                            'is_sales' => $m->is_sales,
+                            'is_purchase' => $m->is_purchase,
+                            'quantity' => $m->quantity,
                         ];
                     }),
 
@@ -427,14 +433,14 @@ class StockItemModel extends Model
     public static function getStockItemBK($domain)
     {
         $products = self::with(['product.measurement'])
-            ->where([['inv_product.config_id',$domain['config_id']]])->where('inv_stock.status',1)
+            ->where([['inv_product.config_id', $domain['config_id']]])->where('inv_stock.status', 1)
 //            ->whereIN('inv_setting.slug',['pre-production','stockable','mid-production','post-production'])
-            ->join('inv_product','inv_product.id','=','inv_stock.product_id')
-            ->leftjoin('inv_category','inv_category.id','=','inv_product.category_id')
-            ->leftjoin('inv_particular','inv_particular.id','=','inv_product.unit_id')
-            ->leftjoin('inv_setting','inv_setting.id','=','inv_product.product_type_id')
-            ->leftjoin('inv_product_gallery','inv_product_gallery.product_id','=','inv_product.id')
-            ->leftjoin('inv_product_unit_measurment','inv_product_unit_measurment.product_id','=','inv_product.id')
+            ->join('inv_product', 'inv_product.id', '=', 'inv_stock.product_id')
+            ->leftjoin('inv_category', 'inv_category.id', '=', 'inv_product.category_id')
+            ->leftjoin('inv_particular', 'inv_particular.id', '=', 'inv_product.unit_id')
+            ->leftjoin('inv_setting', 'inv_setting.id', '=', 'inv_product.product_type_id')
+            ->leftjoin('inv_product_gallery', 'inv_product_gallery.product_id', '=', 'inv_product.id')
+            ->leftjoin('inv_product_unit_measurment', 'inv_product_unit_measurment.product_id', '=', 'inv_product.id')
             ->select([
                 'inv_stock.id',
                 'inv_product.id as product_id',
@@ -456,7 +462,7 @@ class StockItemModel extends Model
                 $query->select([
                     'inv_product_unit_measurment.id']);
             }]);
-        $products = $products->orderBy('inv_product.id','DESC')->get();
+        $products = $products->orderBy('inv_product.id', 'DESC')->get();
 
         return $products;
     }
@@ -464,12 +470,12 @@ class StockItemModel extends Model
 
     public static function getProductForRecipe($domain)
     {
-        $products = self::where([['inv_product.config_id',$domain['config_id']]])
-            ->whereIN('inv_setting.slug',['raw-materials','stockable','mid-production'])
-            ->join('inv_product','inv_product.id','=','inv_stock.product_id')
-            ->leftjoin('inv_category','inv_category.id','=','inv_product.category_id')
-            ->leftjoin('inv_particular','inv_particular.id','=','inv_product.unit_id')
-            ->join('inv_setting','inv_setting.id','=','inv_product.product_type_id')
+        $products = self::where([['inv_product.config_id', $domain['config_id']]])
+            ->whereIN('inv_setting.slug', ['raw-materials', 'stockable', 'mid-production'])
+            ->join('inv_product', 'inv_product.id', '=', 'inv_stock.product_id')
+            ->leftjoin('inv_category', 'inv_category.id', '=', 'inv_product.category_id')
+            ->leftjoin('inv_particular', 'inv_particular.id', '=', 'inv_product.unit_id')
+            ->join('inv_setting', 'inv_setting.id', '=', 'inv_product.product_type_id')
             ->select([
                 'inv_stock.id',
                 'inv_setting.name as product_type',
@@ -492,19 +498,19 @@ class StockItemModel extends Model
                 'inv_stock.sku',
                 'inv_stock.status'
             ]);
-        $products = $products->orderBy('inv_product.id','DESC')->get();
+        $products = $products->orderBy('inv_product.id', 'DESC')->get();
         return $products;
     }
 
-    public static function getStockSkuItem($product_id,$domain)
+    public static function getStockSkuItem($product_id, $domain)
     {
-        return self::where([['inv_stock.config_id',$domain['config_id']]])->where('product_id',$product_id)->where('inv_stock.is_delete',0)
-            ->leftjoin('inv_product','inv_product.id','=','inv_stock.product_id')
-            ->leftjoin('inv_particular as grade','grade.id','=','inv_stock.grade_id')
-            ->leftjoin('inv_particular as color','color.id','=','inv_stock.color_id')
-            ->leftjoin('inv_particular as brand','brand.id','=','inv_stock.brand_id')
-            ->leftjoin('inv_particular as size','size.id','=','inv_stock.size_id')
-            ->leftjoin('inv_particular as model','model.id','=','inv_stock.model_id')
+        return self::where([['inv_stock.config_id', $domain['config_id']]])->where('product_id', $product_id)->where('inv_stock.is_delete', 0)
+            ->leftjoin('inv_product', 'inv_product.id', '=', 'inv_stock.product_id')
+            ->leftjoin('inv_particular as grade', 'grade.id', '=', 'inv_stock.grade_id')
+            ->leftjoin('inv_particular as color', 'color.id', '=', 'inv_stock.color_id')
+            ->leftjoin('inv_particular as brand', 'brand.id', '=', 'inv_stock.brand_id')
+            ->leftjoin('inv_particular as size', 'size.id', '=', 'inv_stock.size_id')
+            ->leftjoin('inv_particular as model', 'model.id', '=', 'inv_stock.model_id')
             ->select([
                 'inv_stock.id as stock_id',
                 'inv_stock.is_master',
@@ -534,7 +540,7 @@ class StockItemModel extends Model
 
         // Ensure the product exists
         if (!$product) {
-            throw new \InvalidArgumentException("Product with ID {$id} not found.");
+            throw new InvalidArgumentException("Product with ID {$id} not found.");
         }
 
         // Check if a master stock item already exists for the product
@@ -566,7 +572,8 @@ class StockItemModel extends Model
         ]);
     }
 
-    public static function calculateTotalStockQuantity($productId, $configId) {
+    public static function calculateTotalStockQuantity($productId, $configId)
+    {
         $query = self::where('product_id', $productId)
             ->where('config_id', $configId)
             ->where('is_delete', 0)
@@ -595,7 +602,7 @@ class StockItemModel extends Model
 
         // Calculate total quantity
         $totalQuantity = $existingQuantity + $currentQuantity;
-        if (($totalQuantity == 0) || ($totalQuantity < 0) ){
+        if (($totalQuantity == 0) || ($totalQuantity < 0)) {
             $averagePrice = $query->purchase_price;
             return $averagePrice;
         }
@@ -631,11 +638,11 @@ class StockItemModel extends Model
             ->where('status', 1)
             ->where('is_delete', 0);
 
-            /*->whereHas('currentWarehouseStock', function ($q) use ($domain) {
-                if (!empty($domain['config_id'])) {
-                    $q->where('config_id', $domain['config_id']);
-                }
-            });*/
+        /*->whereHas('currentWarehouseStock', function ($q) use ($domain) {
+            if (!empty($domain['config_id'])) {
+                $q->where('config_id', $domain['config_id']);
+            }
+        });*/
 
         // --- Warehouse Stock Filter
         if (!empty($request['warehouse_id'])) {
@@ -697,10 +704,10 @@ class StockItemModel extends Model
 
         // --- Paginated Results
         $stockItems = $query->orderByDesc('id');
-            if ($dataFor == "FOR_LIST_SHOW") {
-                $stockItems = $stockItems->skip($skip)->take($perPage);
-            }
-            $stockItems = $stockItems->get()
+        if ($dataFor == "FOR_LIST_SHOW") {
+            $stockItems = $stockItems->skip($skip)->take($perPage);
+        }
+        $stockItems = $stockItems->get()
             ->map(function ($stock) use ($request) {
                 $product = $stock->product;
 
