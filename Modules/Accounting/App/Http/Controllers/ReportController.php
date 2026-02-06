@@ -43,14 +43,11 @@ class ReportController extends Controller
         $configId = $this->domain['acc_config'];
         $config = AccountingModel::find($configId);
 
-
         $cashSummary = AccountHeadModel::getAccountHeadLedgerSummary($config['account_cash_id']);
         $bankSummary = AccountHeadModel::getAccountHeadLedgerSummary($config['account_bank_id']);
         $mobileSummary = AccountHeadModel::getAccountHeadLedgerSummary($config['account_mobile_id']);
         $customerSummary = AccountHeadModel::getAccountHeadLedgerSummary($config['account_customer_id']);
         $vendorSummary = AccountHeadModel::getAccountHeadLedgerSummary($config['account_vendor_id']);
-
-
         $summary =[
             'cashSummary' => $cashSummary,
             'bankSummary' => $bankSummary,
@@ -58,6 +55,7 @@ class ReportController extends Controller
             'customerSummary' => $customerSummary,
             'vendorSummary' => $vendorSummary
         ];
+        
         $bankAccounts = AccountHeadModel::getAccountHeadLedger($config['account_bank_id']);
         $mobileAccounts = AccountHeadModel::getAccountHeadLedger($config['account_mobile_id']);
         $cashAccounts = AccountHeadModel::getAccountHeadLedger($config['account_cash_id']);
