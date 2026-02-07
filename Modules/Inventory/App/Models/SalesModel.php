@@ -5,7 +5,6 @@ namespace Modules\Inventory\App\Models;
 use App\Helpers\DateHelper;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Support\Facades\DB;
 use Modules\AppsApi\App\Services\GeneratePatternCodeService;
 use Modules\Core\App\Models\CustomerModel;
@@ -13,8 +12,6 @@ use Ramsey\Collection\Collection;
 
 class SalesModel extends Model
 {
-    use HasFactory;
-
     protected $table = 'inv_sales';
     public $timestamps = true;
     protected $guarded = ['id'];
@@ -557,6 +554,72 @@ class SalesModel extends Model
         }
 
         return $report;
+    }
+
+    public static function getRequisitionReconciliationItems($params, $domain)
+    {
+        $data = DB::table('inv_sales as s')
+            ->join('inv_sales_item as si', 'si.sale_id', '=', 's.id')
+            ->join('cor_customers as c', 'c.id', '=', 's.customer_id')
+            ->where('s.config_id', $domain['config_id'])
+            ->where('s.process', 'Created')
+            ->where('s.sales_form', 'requisition')
+            ->select(
+                's.id as sale_id',
+                's.invoice',
+                's.process',
+                's.sales_form',
+                DB::raw('DATE_FORMAT(s.created_at, "%d-%m-%Y") as created'),
+                'c.name as customer_name',
+                'si.name as item_name',
+                'si.id as sales_item_id',
+                DB::raw('SUM(si.quantity) as quantity')
+            )
+            ->groupBy(
+                's.id',
+                's.invoice',
+                'c.name',
+                'si.id',
+                'si.name'
+            )
+            ->orderBy('s.id')
+            ->get();
+
+        $result = [];
+        $allItems = [];
+
+        foreach ($data as $row) {
+            $saleId = $row->sale_id;
+
+            if (!isset($result[$saleId])) {
+                $result[$saleId] = [
+                    'customer_name' => $row->customer_name,
+                    'invoice' => $row->invoice,
+                    'process' => $row->process,
+                    'sales_form' => $row->sales_form,
+                    'created' => $row->created,
+                    'items' => []
+                ];
+            }
+
+            // Only keep item if quantity > 0
+            if ($row->quantity > 0) {
+                $result[$saleId]['items'][$row->sales_item_id] = [
+                    'sales_item_id' => $row->sales_item_id,
+                    'name' => $row->item_name,
+                    'quantity' => (float) $row->quantity
+                ];
+
+                $allItems[$row->sales_item_id] = $row->item_name;
+            }
+        }
+
+        return [
+            'data' => [
+                'sales' => $result,
+                'allItems' => $allItems,
+            ]
+        ];
     }
 
 

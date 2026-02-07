@@ -130,6 +130,7 @@ Route::prefix('/inventory')->middleware([HeaderAuthenticationMiddleware::class,L
         Route::get('copy/{id}', [SalesController::class, 'salesCopy'])->name('copy');
         Route::get('domain-customer/{id}', [SalesController::class, 'domainCustomerSales'])->name('get_domain_customer_sales');
         Route::get('not-domain-customer/{id}', [SalesController::class, 'notDomainCustomerSales'])->name('get_not_domain_customer_sales');
+        Route::get('requisition/reconciliation-items', [SalesController::class, 'requisitionReconciliationItems']);
     });
 
     Route::apiResource('/invoice-batch', InvoiceBatchController::class);

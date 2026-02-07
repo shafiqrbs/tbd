@@ -74,6 +74,17 @@ class SalesController extends Controller
         return $response;
     }
 
+    public function requisitionReconciliationItems(Request $request)
+    {
+        $data = SalesModel::getRequisitionReconciliationItems($request, $this->domain);
+        return response()->json([
+            'status' => 200,
+            'success' => true,
+            'message' => 'Sales created successfully.',
+            'data' => $data['data'],
+        ]);
+    }
+
     /**
      * Store a newly created resource in storage.
      */
