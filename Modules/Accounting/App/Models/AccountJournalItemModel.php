@@ -491,7 +491,7 @@ class AccountJournalItemModel extends Model
             ->where('acc_journal.config_id', $configId)
             ->where('acc_journal_item.account_sub_head_id', $ledgerId)
             ->whereNotNull('approved_by_id')
-            ->when(
+                ->when(
                 !empty($params['start_date']) && !empty($params['end_date']),
                 function ($query) use ($params) {
                     $query->whereBetween('acc_journal.issue_date', [

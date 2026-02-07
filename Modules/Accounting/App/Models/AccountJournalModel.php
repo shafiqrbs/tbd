@@ -246,7 +246,7 @@ class AccountJournalModel extends Model
         $input['created_by_id'] = $purchaseItem->created_by_id;
         $input['approved_by_id'] = $purchaseItem->approved_by_id;
         $input['purchase_item_id'] = $purchaseItem->id;
-        $input['issue_date'] = $purchaseItem->created;
+        $input['issue_date'] = $purchaseItem->updated_at;
         $input['module'] = 'opening-stock';
         $input['process'] = 'Approved';
         $input['waiting_process'] = 'Approved';
@@ -338,7 +338,7 @@ class AccountJournalModel extends Model
         $input['created_by_id'] = $entity->created_by_id;
         $input['approved_by_id'] = $entity->approved_by_id;
         $input['purchase_id'] = $entity->id;
-        $input['issue_date'] = $entity->created;
+        $input['issue_date'] = $entity->updated_at;
         $input['module'] = 'purchase';
         $input['process'] = 'Approved';
         $input['waiting_process'] = 'Approved';
@@ -516,7 +516,7 @@ class AccountJournalModel extends Model
         $input['created_by_id'] = $entity->created_by_id;
         $input['approved_by_id'] = $entity->approved_by_id;
         $input['sales_id'] = $entity->id;
-        $input['issue_date'] = $entity->created;
+        $input['issue_date'] = $entity->updated_at;
         $input['module'] = 'sales';
         $input['process'] = 'Approved';
         $input['waiting_process'] = 'Approved';
