@@ -560,6 +560,7 @@ class SalesModel extends Model
     {
         $data = DB::table('inv_sales as s')
             ->join('inv_sales_item as si', 'si.sale_id', '=', 's.id')
+            ->join('inv_stock as is', 'is.id', '=', 'si.stock_item_id')
             ->join('cor_customers as c', 'c.id', '=', 's.customer_id')
             ->where('s.config_id', $domain['config_id'])
             ->where('s.process', 'Created')
@@ -573,6 +574,7 @@ class SalesModel extends Model
                 'c.name as customer_name',
                 'si.name as item_name',
                 'si.id as sales_item_id',
+                'is.quantity as stock_quantity',
                 DB::raw('SUM(si.quantity) as quantity')
             )
             ->groupBy(
@@ -587,6 +589,7 @@ class SalesModel extends Model
 
         $result = [];
         $allItems = [];
+        $allStocks = [];
 
         foreach ($data as $row) {
             $saleId = $row->sale_id;
@@ -597,6 +600,7 @@ class SalesModel extends Model
                     'invoice' => $row->invoice,
                     'process' => $row->process,
                     'sales_form' => $row->sales_form,
+                    'sale_id' => $row->sale_id,
                     'created' => $row->created,
                     'items' => []
                 ];
@@ -607,17 +611,20 @@ class SalesModel extends Model
                 $result[$saleId]['items'][$row->sales_item_id] = [
                     'sales_item_id' => $row->sales_item_id,
                     'name' => $row->item_name,
+                    'stock_quantity' => $row->stock_quantity,
                     'quantity' => (float) $row->quantity
                 ];
 
-                $allItems[$row->sales_item_id] = $row->item_name;
+//                $allItems[$row->sales_item_id] = $row->item_name;
+//                $allStocks[$row->sales_item_id] = $row->stock_quantity;
             }
         }
 
         return [
             'data' => [
                 'sales' => $result,
-                'allItems' => $allItems,
+//                'allItems' => $allItems,
+//                'allStocks' => $allStocks,
             ]
         ];
     }

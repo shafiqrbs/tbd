@@ -85,6 +85,150 @@ class SalesController extends Controller
         ]);
     }
 
+    public function requisitionReconciliationItemsProcess(Request $request)
+    {
+        $input = $request->json()->all();
+
+        if (!is_array($input) || empty($input)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Invalid input.'
+            ], 422);
+        }
+
+        $results = [];
+
+        foreach ($input as $saleData) {
+
+            $saleId = $saleData['sale_id'] ?? null;
+
+            if (!$saleId) {
+                $results[] = [
+                    'sale_id' => null,
+                    'success' => false,
+                    'message' => 'Sales id missing'
+                ];
+                continue;
+            }
+
+            $findSale = SalesModel::with('salesItems')->find($saleId);
+
+            if (!$findSale) {
+                $results[] = [
+                    'sale_id' => $saleId,
+                    'success' => false,
+                    'message' => 'Sale not found.'
+                ];
+                continue;
+            }
+
+            if ($findSale->process !== 'Created') {
+                $results[] = [
+                    'sale_id' => $saleId,
+                    'success' => false,
+                    'message' => 'Sales process is not Created.'
+                ];
+                continue;
+            }
+
+            if ($findSale->sales_form !== 'requisition') {
+                $results[] = [
+                    'sale_id' => $saleId,
+                    'success' => false,
+                    'message' => 'Sales is not from requisition.'
+                ];
+                continue;
+            }
+
+            $itemsData = $saleData['items'] ?? [];
+
+            if (empty($itemsData)) {
+                $results[] = [
+                    'sale_id' => $saleId,
+                    'success' => false,
+                    'message' => 'No sales items provided.'
+                ];
+                continue;
+            }
+
+            try {
+
+                DB::transaction(function () use ($findSale, $itemsData) {
+
+                    // Fetch all sales items in one query
+                    $salesItemIds = collect($itemsData)
+                        ->pluck('sales_item_id')
+                        ->filter(fn($id) => $id !== null)
+                        ->toArray();
+
+                    $salesItems = SalesItemModel::whereIn('id', $salesItemIds)
+                        ->get()
+                        ->keyBy('id');
+
+                    foreach ($itemsData as $item) {
+                        $salesItemId = $item['sales_item_id'] ?? null;
+                        $quantity = $item['quantity'] ?? null;
+
+                        if (!$salesItemId || !is_numeric($quantity) || $quantity < 0) {
+                            throw new \Exception("Invalid quantity for sales item ID: $salesItemId");
+                        }
+
+                        if (!isset($salesItems[$salesItemId])) {
+                            throw new \Exception("Sales item not found: $salesItemId");
+                        }
+
+                        $salesItems[$salesItemId]->update([
+                            'quantity' => $quantity,
+                            'sub_total' => $quantity * $salesItems[$salesItemId]->sales_price,
+                        ]);
+                    }
+
+                    // Recalculate sale totals
+                    $subTotal = $salesItems->sum('sub_total');
+
+                    $findSale->update([
+                        'sub_total' => $subTotal,
+                        'total' => $subTotal,
+                    ]);
+
+                    // Call domain sales processing
+                    $this->domainSalesProcessWithPurchase($findSale->id);
+                });
+
+                $results[] = [
+                    'sale_id' => $findSale->id,
+                    'success' => true,
+                ];
+
+            } catch (\Throwable $e) {
+                // Log detailed error for debugging
+                Log::error('Sales approval failed', [
+                    'sale_id' => $findSale->id,
+                    'error' => $e->getMessage()
+                ]);
+
+                $results[] = [
+                    'sale_id' => $findSale->id,
+                    'success' => false,
+                    'message' => 'Failed to approve sale. Check logs for details.'
+                ];
+            }
+        }
+
+        // Determine single summary message
+        $message = collect($results)->every(fn($r) => $r['success'])
+            ? 'Sales approved successfully'
+            : 'Some sales failed';
+
+        Log::info('Requisition Sales processed', $results);
+
+        return response()->json([
+            'status' => 200,
+            'message' => $message
+        ]);
+    }
+
+
     /**
      * Store a newly created resource in storage.
      */
@@ -269,7 +413,7 @@ class SalesController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function domainCustomerSales($id)
+    /*public function domainCustomerSales($id)
     {
         DB::beginTransaction();
         try {
@@ -424,7 +568,238 @@ class SalesController extends Controller
                 DB::rollback();
                 return response()->json(['status' => 500, 'success' => false, 'error' => $e->getMessage()]);
             }
+    }*/
+
+    public function domainCustomerSales($id)
+    {
+        try {
+            DB::transaction(function () use ($id) {
+                $this->domainSalesProcessWithPurchase($id);
+            });
+
+            return response()->json([
+                'status' => 200,
+                'success' => true
+            ]);
+
+        } catch (\Throwable $e) {
+
+            return response()->json([
+                'status' => 500,
+                'success' => false,
+                'error' => $e->getMessage()
+            ]);
+        }
     }
+
+
+    /**
+     * @throws \Throwable
+     */
+    private function domainSalesProcessWithPurchase($id)
+    {
+        $getSales = SalesModel::with('salesItems')->findOrFail($id);
+
+        // Prevent duplicate processing
+        if ($getSales->is_domain_sales_completed) {
+            throw new \Exception('Sales already processed.');
+        }
+
+        $getSalesItems = $getSales->salesItems;
+        $customerDomain = $getSales->customerDomain;
+
+        if (!$customerDomain) {
+            return;
+        }
+        // Parent Domain Data
+        $getVendor = VendorModel::where('customer_id', $customerDomain->id)->first();
+
+        // Child Domain Configs
+        $accountConfig = DB::table('acc_config')
+            ->where('domain_id', $customerDomain->sub_domain_id)
+            ->first();
+
+        if (!$accountConfig) {
+            throw new \Exception('Account config not found for sub domain.');
+        }
+
+        $inventoryConfig = DB::table('inv_config')
+            ->where('domain_id', $customerDomain->sub_domain_id)
+            ->first();
+
+        if (!$inventoryConfig) {
+            throw new \Exception('Inventory config not found for sub domain.');
+        }
+
+        $getAccountConfigId = $accountConfig->id;
+        $getInventoryConfigId = $inventoryConfig->id;
+
+
+        // Transaction Mode Mapping
+        $getTransactionMode = null;
+
+        if ($getSales->transaction_mode_id) {
+
+            $getTransactionMode = TransactionModeModel::where('id', $getSales->transaction_mode_id)
+                ->where('config_id', $getAccountConfigId)
+                ->first();
+
+            if (!$getTransactionMode) {
+                $getTransactionMode = TransactionModeModel::where('config_id', $getAccountConfigId)->first();
+            }
+        }
+
+        // Create Purchase
+        $purchase = PurchaseModel::create([
+            'config_id' => $getInventoryConfigId,
+            'created_by_id' => $this->domain['user_id'],
+            'vendor_id' => $getVendor->id ?? null,
+            'transaction_mode_id' => $getTransactionMode?->id,
+            'process' => 'in-progress',
+            'mode' => 'Requisition',
+            'is_requisition' => 1,
+            'parent_sale_id' => $id
+        ]);
+
+        if (!$purchase) {
+            throw new \Exception('Purchase creation failed.');
+        }
+
+        // Requisition Items
+        $requisitionItems = RequisitionItemModel::whereIn(
+            'id',
+            $getSalesItems->pluck('requisition_item_id')->filter()
+        )->get()->keyBy('id');
+
+        // Process Sales Items
+        if ($getSalesItems->isNotEmpty()) {
+
+            $totalPrice = 0;
+            $records = [];
+
+            foreach ($getSalesItems as $item) {
+                // Map Parent Stock → Child Stock
+                $childStockItem = StockItemModel::where('parent_stock_item', $item->stock_item_id)
+                    ->where('config_id', $getInventoryConfigId)
+                    ->first();
+
+                if (!$childStockItem) {
+                    throw new \Exception("Stock item not found in child domain. Item ID: {$item->stock_item_id}");
+                }
+
+                // Expiry Handling
+                $expiryDuration = StockItemModel::getProductStockDetails(
+                    $item->stock_item_id,
+                    $this->domain
+                );
+
+                if ($expiryDuration?->expiry_duration) {
+
+                    $startDate = now();
+                    $endDate = now()->addDays($expiryDuration->expiry_duration);
+
+                    $item->update([
+                        'production_date' => $startDate,
+                        'expired_date' => $endDate,
+                    ]);
+                }
+
+                // Price Calculation
+                $purchasePrice = $item->sales_price -
+                    ($item->sales_price * $customerDomain->discount_percent) / 100;
+
+                $subtotal = $item->quantity * $purchasePrice;
+                $totalPrice += $subtotal;
+
+                //  Warehouse Mapping
+                $warehouseId = optional(
+                    $requisitionItems->get($item->requisition_item_id)
+                )->warehouse_id;
+
+                // Prepare Insert
+                $records[] = [
+                    'purchase_id' => $purchase->id,
+                    'created_by_id' => $this->domain['user_id'],
+                    'config_id' => $getInventoryConfigId,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                    'quantity' => $item->quantity,
+                    'purchase_price' => $purchasePrice,
+                    'production_date' => $item->production_date,
+                    'expired_date' => $item->expired_date,
+                    'sub_total' => $subtotal,
+                    'mode' => 'purchase',
+                    'warehouse_id' => $warehouseId,
+                    'stock_item_id' => $childStockItem->id,
+                    'parent_sales_item_id' => $item->id,
+                ];
+            }
+
+            // Insert Purchase Items
+            PurchaseItemModel::insert($records);
+
+            // Sync Back Purchase Item ID to Sales Items
+            $inserted = PurchaseItemModel::where('purchase_id', $purchase->id)
+                ->whereIn('parent_sales_item_id', $getSalesItems->pluck('id'))
+                ->get(['id', 'parent_sales_item_id']);
+
+            foreach ($inserted as $pi) {
+                SalesItemModel::where('id', $pi->parent_sales_item_id)
+                    ->update(['child_purchase_item_id' => $pi->id]);
+            }
+
+            // Update Purchase Totals
+            $purchase->update([
+                'sub_total' => $totalPrice,
+                'total' => $totalPrice,
+                'payment' => $getSales->payment,
+                'due' => max(0, $totalPrice - $getSales->payment),
+                'discount_type' => $getSales->discount_type,
+            ]);
+        }
+
+        // Update Sales Status
+        $getSales->update([
+            'is_domain_sales_completed' => 1,
+            'approved_by_id' => $this->domain['user_id'],
+            'process' => 'Approved',
+            'child_purchase_id' => $purchase->id
+        ]);
+
+        // Manage Stock + Daily Stock
+        foreach ($getSales->salesItems as $item) {
+
+            StockItemHistoryModel::openingStockQuantity(
+                $item,
+                'sales',
+                $this->domain
+            );
+
+            DailyStockService::maintainDailyStock(
+                date: now()->toDateString(),
+                field: 'sales_quantity',
+                configId: $this->domain['config_id'],
+                warehouseId: $item->warehouse_id,
+                stockItemId: $item->stock_item_id,
+                quantity: $item->quantity
+            );
+
+            if ($item->purchase_item_id) {
+                PurchaseItemModel::updateSalesQuantity(
+                    $item->purchase_item_id,
+                    $item->quantity
+                );
+            }
+        }
+
+        // Accounting Journal
+        AccountJournalModel::insertSalesAccountJournal(
+            $this->domain,
+            $getSales->id
+        );
+    }
+
+
     public function notDomainCustomerSales($id)
     {
         DB::beginTransaction();
