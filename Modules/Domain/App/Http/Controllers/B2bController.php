@@ -409,6 +409,16 @@ class B2bController extends Controller
         ], ResponseAlias::HTTP_OK);
     }
 
+    public function outletDomain()
+    {
+        $domains = SubDomainModel::getB2BDomain($this->domain['global_id']);
+        return response()->json([
+            'message' => 'Success',
+            'status'  => ResponseAlias::HTTP_OK,
+            'data'    => $domains
+        ], ResponseAlias::HTTP_OK);
+    }
+
     public function categoryWiseProductManage(B2bCategoryWiseProductRequest $request)
     {
         $validate = $request->validated();
