@@ -834,20 +834,31 @@ class AccountJournalItemModel extends Model
 
     private static function getOpeningBalance(array $accountArrayIds, array $params)
     {
+        $latestSub = DB::table('acc_journal_item')
+            ->select(
+                'account_sub_head_id',
+                DB::raw('MAX(id) as max_id')
+            )
+            ->whereIn('account_head_id', $accountArrayIds)
+            ->when(isset($params['start_date']), function ($q) use ($params) {
+                $q->where('created_at', '<', $params['start_date']);
+            })
+            ->groupBy('account_sub_head_id');
+
         return DB::table('acc_journal_item as item')
             ->select(
                 'item.account_sub_head_id',
                 'item.closing_amount as opening'
             )
-            ->join('acc_journal as journal', 'journal.id', '=', 'item.account_journal_id')
-            ->whereIn('item.account_head_id', $accountArrayIds)
-            ->whereNotNull('journal.approved_by_id')
-            ->when(isset($params['start_date']), function ($q) use ($params) {
-                $q->where('item.created_at', '<', $params['start_date']);
+            ->joinSub($latestSub, 'latest', function ($join) {
+                $join->on('latest.account_sub_head_id', '=', 'item.account_sub_head_id')
+                    ->on('latest.max_id', '=', 'item.id');
             })
-            ->groupBy('item.account_sub_head_id')
+            ->join('acc_journal as journal', 'journal.id', '=', 'item.account_journal_id')
+            ->whereNotNull('journal.approved_by_id')
             ->pluck('opening', 'account_sub_head_id');
     }
+
 
     public static function getVoucherEntryReconciliationItems(array $params, object $domain)
     {
