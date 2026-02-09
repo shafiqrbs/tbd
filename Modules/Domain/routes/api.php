@@ -81,7 +81,7 @@ Route::prefix('/domain')->middleware(array(HeaderAuthenticationMiddleware::class
 
         Route::prefix('sub-domain')->group(function() {
             Route::get('', [B2bController::class,'b2bSubDomain'])->name('b2b_sub_domain');
-            Route::get('outlet', [B2bController::class,'outletDomain'])->name('b2b_sub_domain');
+            Route::get('outlet', [B2bController::class,'outletDomain'])->name('b2b_sub_domain_outlet');
             Route::post('category', [B2bController::class,'categoryWiseProductManage'])->name('category_wise_product_insert');
             Route::get('setting/{id}', [B2bController::class,'b2bSubDomainSetting'])->name('b2b_sub_domain_setting');
             Route::get('category/{id}', [B2bController::class,'b2bSubDomainCategory'])->name('b2b_sub_domain_category');

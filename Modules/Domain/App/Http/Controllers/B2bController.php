@@ -411,7 +411,7 @@ class B2bController extends Controller
 
     public function outletDomain()
     {
-        $domains = SubDomainModel::getB2BDomain($this->domain['global_id']);
+        $domains = SubDomainModel::getB2BDomainOutlet($this->domain['global_id']);
         return response()->json([
             'message' => 'Success',
             'status'  => ResponseAlias::HTTP_OK,

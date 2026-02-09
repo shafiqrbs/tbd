@@ -6,7 +6,9 @@ declare(strict_types=1);
 namespace App\Services\PosSales;
 
 use Illuminate\Support\Facades\DB;
+use Modules\Accounting\App\Models\TransactionModeModel;
 use Modules\Core\App\Models\CustomerModel;
+use Modules\Inventory\App\Models\PaymentTransactionModel;
 use Modules\Inventory\App\Models\SalesItemModel;
 use Modules\Inventory\App\Models\SalesModel;
 use Modules\Inventory\App\Models\StockItemModel;
@@ -62,6 +64,41 @@ final class ProcessSingleSaleService
             }
 
             SalesItemModel::insertSalesItems($sale, $items, $domain['warehouse_id']);
+
+            $payments = $input['payments'] ?? [];
+
+            foreach ($payments as $payment) {
+                if (
+                    empty($payment['transaction_mode_id']) ||
+                    empty($payment['amount']) ||
+                    $payment['amount'] <= 0
+                ) {
+                    continue;
+                }
+
+                $transactionMode = TransactionModeModel::find($payment['transaction_mode_id']);
+                if (!$transactionMode) {
+                    continue;
+                }
+
+                PaymentTransactionModel::updateOrCreate(
+                    [
+                        'sale_id' => $sale->id,
+                        'transaction_mode_id' => $transactionMode->id,
+                    ],
+                    [
+                        'amount' => (float) $payment['amount'],
+                        'config_id' => $domain['config_id']
+                    ]
+                );
+            }
+
+            $paid = PaymentTransactionModel::where('sale_id', $sale->id)
+                ->sum('amount');
+
+            $sale->update([
+                'payment' => round($paid, 2),
+            ]);
 
             return $sale;
         });

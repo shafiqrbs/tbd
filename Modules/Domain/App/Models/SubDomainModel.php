@@ -70,6 +70,26 @@ class SubDomainModel extends Model
             ->get()->toArray();
         return $entities;
     }
+    public static function getB2BDomainOutlet($domain)
+    {
+        $subDomain = self::select([
+            'dom_sub_domain.sub_domain_id',
+            'd.company_name as name',
+        ])
+            ->join('dom_domain as d','d.id','=','dom_sub_domain.sub_domain_id')
+            ->leftJoin('inv_config','inv_config.domain_id','=','dom_sub_domain.sub_domain_id')
+            ->where('dom_sub_domain.domain_id', $domain)
+            ->where('dom_sub_domain.status', 1)
+            ->get();
+
+        $domainData = DomainModel::where('id', $domain)
+            ->select('id as sub_domain_id', 'name')
+            ->first();
+
+        return collect([$domainData])
+            ->merge($subDomain)
+            ->values();
+    }
 
     public static function getB2BDomainSetting($domain)
     {
