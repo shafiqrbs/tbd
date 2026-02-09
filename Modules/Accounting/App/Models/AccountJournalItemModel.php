@@ -841,7 +841,7 @@ class AccountJournalItemModel extends Model
             )
             ->whereIn('account_head_id', $accountArrayIds)
             ->when(isset($params['start_date']), function ($q) use ($params) {
-                $q->where('created_at', '<', $params['start_date']);
+                $q->where('created_at', '<', Carbon::parse($params['start_date'])->startOfDay());
             })
             ->groupBy('account_sub_head_id');
 
