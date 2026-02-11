@@ -80,6 +80,11 @@ class SalesModel extends Model
         return $this->hasMany(SalesItemModel::class, 'sale_id');
     }
 
+    public function salesPayments()
+    {
+        return $this->hasMany(PaymentTransactionModel::class, 'sale_id');
+    }
+
     public function customerDomain(){
         return $this->belongsTo(CustomerModel::class , 'customer_id');
     }

@@ -4,6 +4,7 @@ namespace Modules\Accounting\App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Modules\AppsApi\App\Services\GeneratePatternCodeService;
 use Modules\Inventory\App\Models\CategoryModel;
 use Modules\Inventory\App\Models\PurchaseItemModel;
@@ -503,6 +504,9 @@ class AccountJournalModel extends Model
 
         $config = ConfigModel::find($domain['acc_config']);
         $entity = SalesModel::find($sales);
+
+        $payments = $entity->salesPayments;
+//        Log::info($payments);
 
         $subTotal = ($entity->sub_total) ? floatval($entity->sub_total) : 0;
         $payment = ($entity->payment) ? floatval($entity->payment) : 0;
