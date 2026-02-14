@@ -499,14 +499,53 @@ class AccountJournalModel extends Model
 
     }
 
+    public static function insertPosSalesAccountJournal($domain,$sales){
+
+
+        $config = ConfigModel::find($domain['acc_config']);
+        $entity = SalesModel::find($sales);
+
+
+        $subTotal = ($entity->sub_total) ? floatval($entity->sub_total) : 0;
+        $payment = ($entity->payment) ? floatval($entity->payment) : 0;
+        $discount = ($entity->discount) ? floatval($entity->discount) : 0;
+
+
+        $input['config_id'] = $config->id;
+        $input['voucher_id'] = $config->voucher_sales_id;
+        $input['amount'] = $subTotal;
+        $input['debit'] = $subTotal;
+        $input['created_by_id'] = $entity->created_by_id;
+        $input['approved_by_id'] = $entity->approved_by_id;
+        $input['sales_id'] = $entity->id;
+        $input['issue_date'] = $entity->updated_at;
+        $input['module'] = 'sales';
+        $input['process'] = 'Approved';
+        $input['waiting_process'] = 'Approved';
+        $input['is_branch'] = false;
+        $input['branch_id'] = $domain['domain_id'];
+        $journal = self::create($input);
+
+        $journalItem = self::salesEntry($config,$journal,$subTotal);
+        if($journalItem and $discount > 0){
+            self::salesDiscountEntry($config,$journal,$discount,$journalItem);
+        }
+        $payments = $entity->salesPayments;
+     //   Log::info($payments);
+        self::salesPosCashDebitEntry($journal,$payments,$journalItem);
+        $journalItem = self::salesGoodsEntry($config,$journal,$subTotal);
+        if($journalItem){
+            self::goodsOutStock($journal,$journalItem,$entity);
+        }
+
+    }
+
     public static function insertSalesAccountJournal($domain,$sales){
 
 
         $config = ConfigModel::find($domain['acc_config']);
         $entity = SalesModel::find($sales);
 
-        $payments = $entity->salesPayments;
-//        Log::info($payments);
 
         $subTotal = ($entity->sub_total) ? floatval($entity->sub_total) : 0;
         $payment = ($entity->payment) ? floatval($entity->payment) : 0;
@@ -639,6 +678,27 @@ class AccountJournalModel extends Model
             $journalItem = AccountJournalItemModel::create($accountDebit);
             self::journalOpeningClosing($journal,$journalItem);
         }
+    }
+
+    public static function salesPosCashDebitEntry($journal,$payments,$journalItem){
+
+        foreach ($payments as $payment){
+            $amount = $payment->amount ?? 0;
+            $method = $payment->transaction_mode_id ?? null;
+            $head = AccountHeadModel::getAccountHeadWithParentPramValue('account_id',$method);
+            if($head){
+                $accountDebit['account_journal_id'] = $journal->id;
+                $accountDebit['account_head_id'] = $head->parent_id;
+                $accountDebit['account_sub_head_id'] = $head->id;
+                $accountDebit['parent_id'] = $journalItem;
+                $accountDebit['amount'] = "{$amount}";
+                $accountDebit['debit'] = $amount;
+                $accountDebit['mode'] = 'debit';
+                $journalItem = AccountJournalItemModel::create($accountDebit);
+                self::journalOpeningClosing($journal,$journalItem);
+            }
+        }
+
     }
 
     public static function salesGoodsEntry($config,$journal,$amount){

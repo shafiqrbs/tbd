@@ -33,12 +33,10 @@ final class SaleApprovalService
                 stockItemId: $item->stock_item_id,
                 quantity: (int)$item->quantity
             );
-
             if ($item->purchase_item_id) {
                 PurchaseItemModel::updateSalesQuantity($item->purchase_item_id, $item->quantity);
             }
         }
-
-        AccountJournalModel::insertSalesAccountJournal($domain, $sale->id);
+        AccountJournalModel::insertPosSalesAccountJournal($domain, $sale->id);
     }
 }

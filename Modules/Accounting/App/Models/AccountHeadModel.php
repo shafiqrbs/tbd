@@ -293,7 +293,9 @@ class AccountHeadModel extends Model
                 $searchTerm = '%' . $request['term'] . '%';
                 $query->where(function ($q) use ($searchTerm) {
                     $q->where('acc_head.name', 'LIKE', $searchTerm)
-                        ->orWhere('acc_head.slug', 'LIKE', $searchTerm);
+                        ->orWhere('acc_head.slug', 'LIKE', $searchTerm)
+                        ->orWhere('parent.name', 'LIKE', $searchTerm)
+                        ->orWhere('parent.slug', 'LIKE', $searchTerm);
                 });
             }
 
