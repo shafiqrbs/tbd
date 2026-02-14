@@ -1,5 +1,4 @@
 <?php
-
 declare(strict_types=1);
 
 namespace App\Jobs;
@@ -34,10 +33,12 @@ final class ProcessPosSalesJob implements ShouldQueue
     {
         DB::transaction(function () {
             $sync = PosSaleModel::lockForUpdate()->find($this->syncId);
+
             if (!$sync || $sync->process !== PosSaleProcess::PENDING) {
                 Log::warning('Sync not valid', ['sync_id' => $this->syncId]);
                 return;
             }
+
             $sync->update(['process' => PosSaleProcess::PROCESSING]);
         });
 
@@ -54,32 +55,74 @@ final class ProcessPosSalesJob implements ShouldQueue
             ) {
                 foreach ($chunk as $sale) {
                     try {
+                        $sale = $this->normalize($sale);
+
+                        if (!is_array($sale)) {
+                            throw new \Exception('Invalid sale format');
+                        }
+
                         $saleModel = $saleProcessor->process($sale, $this->domain);
                         $approver->approve($saleModel, $this->domain);
+
                     } catch (\Throwable $e) {
                         $failures++;
+
+                        $normalized = $this->normalize($sale);
+
                         PosSaleFailureModel::create([
-                            'sync_batch_id'  => $sync->sync_batch_id,
-                            'device_id'      => $sync->device_id,
-                            'sale_data'      => $sale,
-                            'error_message'  => $e->getMessage(),
+                            'sync_batch_id' => $sync->sync_batch_id,
+                            'device_id' => $sync->device_id,
+                            'sale_data' => $normalized,
+                            'error_message' => $e->getMessage(),
                         ]);
+
                         Log::error('Single sale failed', [
                             'error' => $e->getMessage(),
-                            'sale' => $sale
+                            'sale_id' => $normalized['id'] ?? null,
+                            'invoice' => $normalized['invoice'] ?? null,
+                            'payload' => $normalized,
                         ]);
                     }
                 }
             });
 
+            // Determine process state
+            if ($failures === $total) {
+                $process = PosSaleProcess::FAILED;
+            } elseif ($failures > 0) {
+                $process = PosSaleProcess::COMPLETE_PARTIALLY;
+            } else {
+                $process = PosSaleProcess::COMPLETED;
+            }
+
             $sync->update([
-                'process' => $failures > 0 ? PosSaleProcess::COMPLETE_PARTIALLY : PosSaleProcess::COMPLETED,
-                'total'   => $total,
-                'failed'  => $failures,
+                'process' => $process,
+                'total' => $total,
+                'failed' => $failures,
             ]);
+
         } catch (\Throwable $e) {
             $sync->update(['process' => PosSaleProcess::FAILED]);
-            Log::critical('Batch failed', ['sync_id' => $this->syncId, 'error' => $e->getMessage()]);
+
+            Log::critical('Batch failed', [
+                'sync_id' => $this->syncId,
+                'error' => $e->getMessage()
+            ]);
         }
+    }
+
+    private function normalize($data)
+    {
+        if ($data instanceof \Illuminate\Support\Collection) {
+            return $data->toArray();
+        }
+
+        if (is_object($data)) {
+            return method_exists($data, 'toArray')
+                ? $data->toArray()
+                : (array)$data;
+        }
+
+        return $data;
     }
 }

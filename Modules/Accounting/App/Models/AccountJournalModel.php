@@ -531,7 +531,6 @@ class AccountJournalModel extends Model
             self::salesDiscountEntry($config,$journal,$discount,$journalItem);
         }
         $payments = $entity->salesPayments;
-     //   Log::info($payments);
         self::salesPosCashDebitEntry($journal,$payments,$journalItem);
         $journalItem = self::salesGoodsEntry($config,$journal,$subTotal);
         if($journalItem){
@@ -680,26 +679,36 @@ class AccountJournalModel extends Model
         }
     }
 
-    public static function salesPosCashDebitEntry($journal,$payments,$journalItem){
-
-        foreach ($payments as $payment){
+    public static function salesPosCashDebitEntry($journal, $payments, $journalItem)
+    {
+        foreach ($payments as $payment) {
             $amount = $payment->amount ?? 0;
             $method = $payment->transaction_mode_id ?? null;
-            $head = AccountHeadModel::getAccountHeadWithParentPramValue('account_id',$method);
-            if($head){
+
+            $head = AccountHeadModel::getAccountHeadWithParentPramValue('account_id', $method);
+
+            if ($head) {
+                $accountDebit = [];
                 $accountDebit['account_journal_id'] = $journal->id;
                 $accountDebit['account_head_id'] = $head->parent_id;
                 $accountDebit['account_sub_head_id'] = $head->id;
-                $accountDebit['parent_id'] = $journalItem;
-                $accountDebit['amount'] = "{$amount}";
-                $accountDebit['debit'] = $amount;
+
+                // Handle Eloquent model or int
+                $accountDebit['parent_id'] = $journalItem instanceof \Illuminate\Database\Eloquent\Model
+                    ? $journalItem->id
+                    : (int) $journalItem;
+
+                $accountDebit['amount'] = (float) $amount;
+                $accountDebit['debit'] = (float) $amount;
                 $accountDebit['mode'] = 'debit';
+
                 $journalItem = AccountJournalItemModel::create($accountDebit);
-                self::journalOpeningClosing($journal,$journalItem);
+
+                self::journalOpeningClosing($journal, $journalItem);
             }
         }
-
     }
+
 
     public static function salesGoodsEntry($config,$journal,$amount){
 

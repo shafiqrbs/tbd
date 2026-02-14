@@ -264,12 +264,10 @@ class CustomerModel extends Model
             $customer['customer_group_id'] = $domainConfig->default_customer_group_id;
         }
         $customer['domain_id'] = $domain['domain_id'];
-        $customer['name'] = ($input['customer_name']) ? $input['customer_name'] : '';
-        $customer['mobile'] = ($input['customer_mobile']) ? $input['customer_mobile'] : '';
-        $customer['email'] = ($input['customer_email']) ? $input['customer_email'] : '';
+        $customer['name'] = data_get($input , 'customer_name' ,'');
+        $customer['mobile'] = data_get($input , 'customer_mobile', '');
+        $customer['email'] = data_get($input , 'customer_email' , '');
         return self::create($customer);
-
-
     }
 
     public static function uniqueCustomerCheck($domain, $mobile, $name)

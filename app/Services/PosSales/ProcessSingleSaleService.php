@@ -1,6 +1,4 @@
 <?php
-
-
 declare(strict_types=1);
 
 namespace App\Services\PosSales;
@@ -18,6 +16,9 @@ final class ProcessSingleSaleService
     public function process(array $input, array $domain): SalesModel
     {
         return DB::transaction(function () use ($input, $domain) {
+
+            $input = $this->normalizeKeys($input);
+
             $saleData = $input;
             $saleData['config_id'] = $domain['config_id'];
             $saleData['sales_form'] = 'Offline-sales';
@@ -28,18 +29,25 @@ final class ProcessSingleSaleService
 
             $sale = SalesModel::create($saleData);
 
-            // If invoice provided, override
+            // Force invoice if exists
             if (!empty($input['invoice'])) {
                 $sale->forceFill(['invoice' => $input['invoice']])->saveQuietly();
             }
 
-            // Customer
+            // CUSTOMER
             $customer = null;
+
             if (isset($input['customer_name'], $input['customer_mobile'])) {
-                $customer = CustomerModel::uniqueCustomerCheck($domain['domain_id'], $input['customer_mobile'], $input['customer_name'])
+                $customer = CustomerModel::uniqueCustomerCheck(
+                    $domain['domain_id'],
+                    $input['customer_mobile'],
+                    $input['customer_name']
+                )
                     ?? CustomerModel::insertSalesCustomer($domain, $input);
+
             } elseif (!empty($input['customer_id'])) {
                 $customer = CustomerModel::find($input['customer_id']);
+
             } else {
                 $customer = CustomerModel::where('is_default_customer', 1)
                     ->where('domain_id', $domain['domain_id'])
@@ -50,24 +58,42 @@ final class ProcessSingleSaleService
                 $sale->update(['customer_id' => $customer->id]);
             }
 
-            // Items
+            // SALES ITEMS
             $items = $input['sales_items'] ?? $input['items'] ?? [];
 
-            foreach ($items as &$item) {
+            // Group duplicate items
+            $items = collect($items)
+                ->groupBy('stock_item_id')
+                ->map(function ($group) {
+                    $first = $group->first();
+                    $first['quantity'] = $group->sum('quantity');
+                    $first['sub_total'] = $group->sum('sub_total');
+                    return $first;
+                })
+                ->values()
+                ->toArray();
+
+            foreach ($items as $index => $item) {
                 $stock = StockItemModel::find($item['stock_item_id']);
                 if (!$stock) continue;
 
-                $item['product_id'] = $stock->id;
-                $item['unit_id'] = $stock->product->unit_id;
-                $item['item_name'] = $stock->name;
-                $item['uom'] = $stock->uom;
+                $items[$index]['product_id'] = $stock->id;
+                $items[$index]['unit_id'] = $stock->product->unit_id;
+                $items[$index]['item_name'] = $stock->name;
+                $items[$index]['uom'] = $stock->uom;
             }
 
-            SalesItemModel::insertSalesItems($sale, $items, $domain['warehouse_id']);
+            SalesItemModel::insertSalesItems(
+                $sale,
+                $items,
+                $domain['warehouse_id']
+            );
 
+            // PAYMENTS
             $payments = $input['payments'] ?? [];
 
             foreach ($payments as $payment) {
+
                 if (
                     empty($payment['transaction_mode_id']) ||
                     empty($payment['amount']) ||
@@ -77,9 +103,7 @@ final class ProcessSingleSaleService
                 }
 
                 $transactionMode = TransactionModeModel::find($payment['transaction_mode_id']);
-                if (!$transactionMode) {
-                    continue;
-                }
+                if (!$transactionMode) continue;
 
                 PaymentTransactionModel::updateOrCreate(
                     [
@@ -87,12 +111,13 @@ final class ProcessSingleSaleService
                         'transaction_mode_id' => $transactionMode->id,
                     ],
                     [
-                        'amount' => (float) $payment['amount'],
+                        'amount' => (float)$payment['amount'],
                         'config_id' => $domain['config_id']
                     ]
                 );
             }
 
+            // FINAL PAYMENT UPDATE
             $paid = PaymentTransactionModel::where('sale_id', $sale->id)
                 ->sum('amount');
 
@@ -103,4 +128,22 @@ final class ProcessSingleSaleService
             return $sale;
         });
     }
+
+    private function normalizeKeys(array $input): array
+    {
+        $map = [
+            'customerName' => 'customer_name',
+            'customerMobile' => 'customer_mobile',
+            'salesItems' => 'sales_items',
+        ];
+
+        foreach ($map as $from => $to) {
+            if (isset($input[$from]) && !isset($input[$to])) {
+                $input[$to] = $input[$from];
+            }
+        }
+
+        return $input;
+    }
 }
+
