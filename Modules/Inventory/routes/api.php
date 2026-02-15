@@ -205,12 +205,14 @@ Route::prefix('/inventory')->middleware([HeaderAuthenticationMiddleware::class,L
     });
 
     Route::prefix('report')->group(function() {
+
         Route::prefix('stock-item')->group(function() {
             Route::get('history', [StockItemController::class,'stockItemHistory']);
         });
         Route::get('daily/sales', [SalesController::class,'dailySalesReport'])->name('daily_sales_report');
-//        Route::get('matrix/warehouse-xlsx', [ProductionReportController::class,'matrixWarehouseXlsx'])->name('matrix_warehouse_xlsx');
-//        Route::get('matrix/warehouse-pdf', [ProductionReportController::class,'matrixWarehousePdf'])->name('matrix_warehouse_pdf');
+        //  Route::get('matrix/warehouse-xlsx', [ProductionReportController::class,'matrixWarehouseXlsx'])->name('matrix_warehouse_xlsx');
+        //  Route::get('matrix/warehouse-pdf', [ProductionReportController::class,'matrixWarehousePdf'])->name('matrix_warehouse_pdf');
+
     });
 });
 
