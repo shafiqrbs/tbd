@@ -25,8 +25,8 @@ class PurchaseModel extends Model
     {
         parent::boot();
         self::creating(function ($model) {
-            $model->invoice = self::quickRandom();
-            $model->invoice = self::salesEventListener($model)['generateId'];
+            $invoice = self::salesEventListener($model)['generateId'];
+            $model->invoice = $invoice;
             $model->code = self::salesEventListener($model)['code'];
             $date = new \DateTime("now");
             $model->created_at = $date;

@@ -17,6 +17,7 @@ use Modules\Accounting\App\Models\SettingTypeModel;
 use Modules\AppsApi\App\Services\JsonRequestResponse;
 use Modules\Core\App\Models\UserModel;
 use Modules\Inventory\App\Models\ConfigModel;
+use Modules\Inventory\App\Models\ReportModel;
 use Symfony\Component\HttpFoundation\Response as ResponseAlias;
 
 
@@ -38,7 +39,7 @@ class ReportController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function saleSummary()
+    public function summaryReport()
     {
 
         $configId = $this->domain['inv_config'];
@@ -77,6 +78,29 @@ class ReportController extends Controller
         ];
         $service = new JsonRequestResponse();
         return $service->returnJosnResponse($data);
+
+    }
+
+
+    public function dailySummaryReport(Request $request)
+    {
+
+        $configId = $this->domain['inv_config'];
+        $request = $request->all();
+        $cashSummary = ReportModel::dailySummaryReport($configId,$request);
+        $service = new JsonRequestResponse();
+        return $service->returnJosnResponse($cashSummary);
+
+    }
+
+    public function purchaseStockReport(Request $request)
+    {
+
+        $configId = $this->domain['inv_config'];
+        $request = $request->all();
+        $cashSummary = ReportModel::purchaseStockReport($configId,$request);
+        $service = new JsonRequestResponse();
+        return $service->returnJosnResponse($cashSummary);
 
     }
 

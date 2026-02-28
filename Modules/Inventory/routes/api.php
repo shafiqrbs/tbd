@@ -17,6 +17,7 @@ use Modules\Inventory\App\Http\Controllers\ProductController;
 use Modules\Inventory\App\Http\Controllers\PurchaseController;
 use Modules\Inventory\App\Http\Controllers\PurchaseItemController;
 use Modules\Inventory\App\Http\Controllers\PurchaseReturnController;
+use Modules\Inventory\App\Http\Controllers\ReportController;
 use Modules\Inventory\App\Http\Controllers\RequisitionController;
 use Modules\Inventory\App\Http\Controllers\RequisitionMatrixBoardController;
 use Modules\Inventory\App\Http\Controllers\RequisitionMatrixBoardWarehouseController;
@@ -209,7 +210,9 @@ Route::prefix('/inventory')->middleware([HeaderAuthenticationMiddleware::class,L
         Route::prefix('stock-item')->group(function() {
             Route::get('history', [StockItemController::class,'stockItemHistory']);
         });
+        Route::get('daily-summary', [ReportController::class,'dailySummaryReport'])->name('daily_summary_report');
         Route::get('daily/sales', [SalesController::class,'dailySalesReport'])->name('daily_sales_report');
+        Route::get('purchase/stock', [ReportController::class,'purchaseStockReport'])->name('purchaseStockReport');
         //  Route::get('matrix/warehouse-xlsx', [ProductionReportController::class,'matrixWarehouseXlsx'])->name('matrix_warehouse_xlsx');
         //  Route::get('matrix/warehouse-pdf', [ProductionReportController::class,'matrixWarehousePdf'])->name('matrix_warehouse_pdf');
 

@@ -77,62 +77,62 @@ class PurchaseItem
 
     /**
      * @var float
-     * @ORM\Column(name="quantity", type="float",nullable=true)
+     * @ORM\Column(name="quantity", type="float",nullable=true,options={"default"="0"})
      */
     private $quantity;
 
      /**
      * @var float
-     * @ORM\Column( type="float",nullable=true)
+     * @ORM\Column( type="float",nullable=true,options={"default"="0"})
      */
     private $openingQuantity;
 
     /**
      * @var integer
-     * @ORM\Column(type="float",nullable=true)
+     * @ORM\Column(type="float",nullable=true,options={"default"="0"})
      */
     private $salesQuantity = 0;
 
     /**
      * @var integer
-     * @ORM\Column( type="float",nullable=true)
+     * @ORM\Column( type="float",nullable=true,options={"default"="0"})
      */
     private $salesReturnQuantity;
 
     /**
      * @var integer
-     * @ORM\Column( type="float",nullable=true)
+     * @ORM\Column( type="float",nullable=true,options={"default"="0"})
      */
     private $salesReplaceQuantity;
 
     /**
      * @var integer
-     * @ORM\Column(type="float",nullable=true)
+     * @ORM\Column(type="float",nullable=true,options={"default"="0"})
      */
     private $purchaseReturnQuantity;
 
     /**
      * @var integer
-     * @ORM\Column(type="float",nullable=true)
+     * @ORM\Column(type="float",nullable=true,options={"default"="0"})
      */
     private $damageQuantity;
 
     /**
      * @var integer
-     * @ORM\Column(type="float", nullable=true)
+     * @ORM\Column(type="float", nullable=true,options={"default"="0"})
      */
     private $bonusQuantity = 0;
 
 
     /**
      * @var integer
-     * @ORM\Column( type="float",nullable=true)
+     * @ORM\Column( type="float",nullable=true,options={"default"="0"})
      */
     private $remainingQuantity;
 
     /**
      * @var integer
-     * @ORM\Column( type="float",nullable=true)
+     * @ORM\Column( type="float",nullable=true,options={"default"="0"})
      */
     private $warehouseTransferQuantity;
 
@@ -140,7 +140,7 @@ class PurchaseItem
     /**
      * @var float
      *
-     * @ORM\Column(type="float", nullable=true)
+     * @ORM\Column(type="float", nullable=true,options={"default"="0"})
      */
     private $purchasePrice;
 
@@ -148,7 +148,7 @@ class PurchaseItem
     /**
      * @var float
      *
-     * @ORM\Column(type="float", nullable=true)
+     * @ORM\Column(type="float", nullable=true,options={"default"="0"})
      */
     private $actualPurchasePrice;
 
@@ -164,14 +164,14 @@ class PurchaseItem
     /**
      * @var float
      *
-     * @ORM\Column(type="float", nullable = true)
+     * @ORM\Column(type="float", nullable = true,options={"default"="0"})
      */
     private $salesPrice;
 
     /**
      * @var float
      *
-     * @ORM\Column(type="float", nullable = true)
+     * @ORM\Column(type="float", nullable = true,options={"default"="0"})
      */
     private $subTotal;
 
@@ -235,14 +235,14 @@ class PurchaseItem
 	/**
 	 * @var float
 	 *
-	 * @ORM\Column( type="float", nullable=true)
+	 * @ORM\Column( type="float", nullable=true,options={"default"="0"})
 	 */
 	private $subQuantity;
 
 	/**
 	 * @var float
 	 *
-	 * @ORM\Column(type="float", nullable=true)
+	 * @ORM\Column(type="float", nullable=true,options={"default"="0"})
 	 */
 	private $totalQuantity;
 
