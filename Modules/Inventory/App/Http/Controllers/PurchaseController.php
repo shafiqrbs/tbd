@@ -184,6 +184,7 @@ class PurchaseController extends Controller
                     $item['mode'] = 'purchase';
                     $item['warehouse_id'] = $item['warehouse_id'] ?? $data['warehouse_id'];
                     $item['bonus_quantity'] = $item['bonus_quantity'];
+                    $item['remaining_quantity'] = $item['quantity'];
                     PurchaseItemModel::create($item);
                 }
             }

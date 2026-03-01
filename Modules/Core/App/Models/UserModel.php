@@ -480,5 +480,31 @@ class UserModel extends Model
         return $data;
     }
 
+    public static function getUserDataByConfigId($id)
+    {
+        $data = self::select([
+            'dom_domain.id as id',
+            'dom_domain.id as global_id',
+            'dom_domain.id as domain_id',
+            'users.id as user_id',
+            'users.name as user_name',
+            'users.user_group as user_group',
+            'inv_config.id as config_id',
+            'inv_config.id as inv_config',
+            'acc_config.id as acc_config'
+        ])
+            ->join('dom_domain','dom_domain.id','=','users.domain_id')
+            ->leftjoin('inv_config','inv_config.domain_id','=','dom_domain.id')
+            ->leftjoin('acc_config','acc_config.domain_id','=','dom_domain.id')
+            ->where('inv_config.id',$id)->first();
+        $warehouse = WarehouseModel::insertDefaultWarehouse($data['id']);
+        $data['warehouse_id'] = '';
+        if($warehouse){
+            $data['warehouse_id'] = $warehouse->id;
+        }
+        return $data;
+    }
+
+
 
 }

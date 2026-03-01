@@ -264,12 +264,12 @@ class StockItemModel extends Model
             'purchaseItemForSales' => function ($q) use ($domain) {
                 $q->whereNotNull('expired_date')
                     ->where('expired_date', '>', now()) // only not expired
-                    ->whereRaw('quantity > COALESCE(sales_quantity, 0)');
+                    ->whereRaw('remaining_quantity');
             }
         ])
             ->where('config_id', $domain['config_id'])
             ->where('status', 1)
-            ->orderByAsc('id')
+            ->orderBy('id')
             ->get()
             ->map(function ($stock) {
                 $product = $stock->product;

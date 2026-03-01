@@ -102,6 +102,12 @@ class StockItemInventoryHistory
      */
     protected $damage;
 
+    /**
+     * @ORM\ManyToOne(targetEntity="DamageItem")
+     * @ORM\JoinColumn(onDelete="CASCADE")
+     **/
+    protected  $damageItem;
+
 
     /**
      * @var string

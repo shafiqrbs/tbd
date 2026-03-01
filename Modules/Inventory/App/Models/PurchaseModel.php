@@ -78,6 +78,7 @@ class PurchaseModel extends Model
         $items = array_map(function ($item) use ($warehouse) {
             $item['stock_item_id'] = $item['product_id'];
             $item['warehouse_id'] = $item['warehouse_id'] ?? $warehouse;
+            $item['remaining_quantity'] = $item['quantity'];
             $item['name'] = $item['name'];
             unset($item['product_id']);
             return $item;
@@ -302,7 +303,8 @@ class PurchaseModel extends Model
                 'inv_purchase_item.id',
                 'inv_purchase_item.purchase_id',
                 'inv_stock.name as item_name',
-                'inv_purchase_item.quantity as purchase_quantity',
+//                'inv_purchase_item.quantity as purchase_quantity',
+                'inv_purchase_item.remaining_quantity as purchase_quantity',
                 'inv_purchase_item.purchase_price',
                 'inv_purchase_item.sales_price',
                 'inv_purchase_item.sub_total',

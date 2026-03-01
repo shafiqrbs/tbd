@@ -36,10 +36,10 @@ class DamageItem
     private $purchaseItem;
 
     /**
-     * @ORM\ManyToOne(targetEntity="Modules\Inventory\App\Entities\WearHouse")
+     * @ORM\ManyToOne(targetEntity="Modules\Core\App\Entities\Warehouse")
      * @ORM\OrderBy({"sorting" = "ASC"})
      **/
-     private $wearHouse;
+    private $warehouse;
 
     /**
      * @var integer
@@ -97,12 +97,12 @@ class DamageItem
      */
     private $damage_mode;
 
-	/**
-	 * @var string
-	 *
-	 * @ORM\Column(name="process", type="string", nullable=true,options={"default"="Created"})
-	 */
-	private $process = "Created";
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="process", type="string", nullable=true,options={"default"="Created"})
+     */
+    private $process = "Created";
 
 
 }

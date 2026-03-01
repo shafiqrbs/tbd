@@ -75,6 +75,7 @@ class PurchaseItemModel extends Model
                 'inv_purchase_item.warehouse_id',
                 'cor_warehouses.name as warehouse_name',
                 'inv_purchase_item.opening_quantity',
+                'inv_purchase_item.remaining_quantity',
                 'inv_purchase_item.sales_price',
                 'inv_purchase_item.purchase_price',
                 'inv_purchase_item.sub_total',
@@ -139,9 +140,35 @@ class PurchaseItemModel extends Model
             ->whereNull('sales_quantity')
             ->update(['sales_quantity' => 0]);
 
-        return self::where('id', $purchaseItemId)
+        self::where('id', $purchaseItemId)
             ->increment('sales_quantity', $quantity);
+
+        $remainingQuantity = self::getPurchaseItemRemainingQuantity($purchaseItemId);
+
+        return self::where('id', $purchaseItemId)
+            ->update(['remaining_quantity' => $remainingQuantity]);
     }
+
+    public static function getPurchaseItemRemainingQuantity($id)
+    {
+        $item = self::find($id);
+
+        if (!$item) {
+            return 0;
+        }
+
+        // Calculate remaining quantity
+        return ($item->quantity ?? 0)
+            + ($item->sales_return_quantity ?? 0)
+            + ($item->bonus_quantity ?? 0)
+            - (
+                ($item->warehouse_transfer_quantity ?? 0)
+                + ($item->sales_quantity ?? 0)
+                + ($item->purchase_return_quantity ?? 0)
+                + ($item->damage_quantity ?? 0)
+            );
+    }
+
 
 
 }

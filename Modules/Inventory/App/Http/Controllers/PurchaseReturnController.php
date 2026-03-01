@@ -212,6 +212,16 @@ class PurchaseReturnController extends Controller
                         stockItemId: $item->stock_item_id,
                         quantity: $item->quantity
                     );
+
+                    // update purchase item (atomic + correct calc)
+                    $returnQuantity = $item->quantity;
+
+                    $remainingQuantity = PurchaseItemModel::getPurchaseItemRemainingQuantity($item->purchase_item_id);
+
+                    PurchaseItemModel::where('id',$item->purchase_item_id)->update([
+                        'purchase_return_quantity' => $returnQuantity,
+                        'remaining_quantity' => $remainingQuantity-$returnQuantity,
+                    ]);
                 });
 
                 // Update statuses

@@ -69,6 +69,7 @@ class StockItemHistoryModel extends Model
                 'production-issue' => '-',
                 'sales' => '-',
                 'stock-transfer-out' => '-',
+                'damage' => '-',
             ];
 
             // Determine the operator and apply calculations

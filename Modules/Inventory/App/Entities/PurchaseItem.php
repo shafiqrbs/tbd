@@ -113,7 +113,7 @@ class PurchaseItem
 
     /**
      * @var integer
-     * @ORM\Column(type="float",nullable=true,options={"default"="0"})
+     * @ORM\Column(type="float",nullable=true)
      */
     private $damageQuantity;
 

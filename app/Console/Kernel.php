@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Console;
 
+use App\Jobs\ProcessExpiredItems;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
 
@@ -15,8 +16,11 @@ final class Kernel extends ConsoleKernel
 
     protected function schedule(Schedule $schedule): void
     {
+        // Process expire stock product
+//        $schedule->job(new ProcessExpiredItems())->dailyAt('2:10')->withoutOverlapping();
+//        $schedule->job(new ProcessExpiredItems())->everyMinute();
         // Clean custom logs at 01:00 AM (before backup)
-        $schedule->command('logs:clean-requests --days=10')
+       /* $schedule->command('logs:clean-requests --days=10')
 //            ->dailyAt('01:00')
                 ->everyFiveMinutes()
             ->onSuccess(function () {
@@ -57,9 +61,9 @@ final class Kernel extends ConsoleKernel
             })
             ->onFailure(function () {
                 \Log::error('❌ Activitylog clean failed at ' . now());
-            });
+            });*/
 
-        $schedule->call(function () {
+        /*$schedule->call(function () {
             \Log::info('Environment: ' . app()->environment());
             \Log::info('Timezone: ' . config('app.timezone'));
             \Log::info('Current time: ' . now()->toDateTimeString());
@@ -67,7 +71,7 @@ final class Kernel extends ConsoleKernel
         // Keep your test callback
         $schedule->call(function () {
             \Log::info('✅ Scheduler test at ' . now()->toDateTimeString());
-        })->everyMinute();
+        })->everyMinute();*/
     }
 
     /**
