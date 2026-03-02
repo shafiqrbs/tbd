@@ -149,9 +149,8 @@ Route::prefix('/inventory')->middleware([HeaderAuthenticationMiddleware::class,L
             Route::apiResource('', PurchaseReturnController::class)
                 ->parameters(['' => 'id']);
         });
-
+        Route::get('items', [PurchaseItemController::class, 'index'])->name('purchaseItem');
         Route::apiResource('', PurchaseController::class)->parameters(['' => 'id']);
-
         Route::get('edit/{id}', [PurchaseController::class, 'edit'])->name('edit');
         Route::get('copy/{id}', [PurchaseController::class, 'purchaseCopy'])->name('copy');
         Route::get('approve/{id}', [PurchaseController::class, 'approve'])->name('approve');

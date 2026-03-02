@@ -269,7 +269,7 @@ class StockItemModel extends Model
         ])
             ->where('config_id', $domain['config_id'])
             ->where('status', 1)
-            ->orderBy('id')
+            ->orderBy('name')
             ->get()
             ->map(function ($stock) {
                 $product = $stock->product;

@@ -33,7 +33,6 @@ class PurchaseModel extends Model
         });
 
         self::updating(function ($model) {
-            $model->invoice = self::quickRandom();
             $date = new \DateTime("now");
             $model->updated_at = $date;
         });

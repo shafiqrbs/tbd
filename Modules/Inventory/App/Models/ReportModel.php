@@ -140,15 +140,14 @@ class ReportModel extends Model
             ->leftJoin('inv_particular', 'inv_particular.id', '=', 'inv_product.unit_id')
             ->select([
                 'inv_purchase_item.id',
-                'inv_purchase_item.created_at',
-                'inv_purchase_item.expired_date',
+                DB::raw('DATE_FORMAT(inv_purchase_item.created_at, "%d-%m-%Y") as created'),
+                DB::raw('DATE_FORMAT(inv_purchase_item.expired_date, "%d-%m-%Y") as expired_date'),
                 'inv_purchase_item.purchase_id',
                 'inv_purchase.invoice',
                 'inv_purchase.grn',
                 'inv_stock.name as item_name',
                 'inv_category.name as category_name',
                 'inv_purchase_item.quantity as quantity',
-                'inv_purchase_item.opening_quantity as opening_quantity',
                 'inv_purchase_item.opening_quantity as opening_quantity',
                 'inv_purchase_item.sales_quantity as sales_quantity',
                 'inv_purchase_item.sales_return_quantity as sales_return_quantity',

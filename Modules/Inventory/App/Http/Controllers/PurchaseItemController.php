@@ -10,6 +10,7 @@ use Modules\Core\App\Models\UserModel;
 use Modules\Inventory\App\Http\Requests\ProductRequest;
 use Modules\Inventory\App\Http\Requests\PurchaseRequest;
 use Modules\Inventory\App\Models\PurchaseModel;
+use Modules\Inventory\App\Models\ReportModel;
 use function Symfony\Component\HttpFoundation\Session\Storage\Handler\getInsertStatement;
 
 class PurchaseItemController extends Controller
@@ -27,7 +28,9 @@ class PurchaseItemController extends Controller
 
     public function index(Request $request)
     {
-        $data = PurchaseModel::getRecords($request, $this->domain);
+        $configId = $this->domain['inv_config'];
+        $request = $request->all();
+        $data = ReportModel::purchaseStockReport($configId,$request);
         $response = new Response();
         $response->headers->set('Content-Type', 'application/json');
         $response->setContent(json_encode([
