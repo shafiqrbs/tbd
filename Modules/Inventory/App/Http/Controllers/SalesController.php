@@ -724,6 +724,7 @@ class SalesController extends Controller
                     'created_at' => now(),
                     'updated_at' => now(),
                     'quantity' => $item->quantity,
+                    'remaining_quantity' => $item->quantity,
                     'purchase_price' => $purchasePrice,
                     'production_date' => $item->production_date,
                     'expired_date' => $item->expired_date,

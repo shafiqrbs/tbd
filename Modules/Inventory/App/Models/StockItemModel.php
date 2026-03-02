@@ -262,10 +262,17 @@ class StockItemModel extends Model
                 }
             },
             'purchaseItemForSales' => function ($q) use ($domain) {
+                $q->where(function ($query) {
+                    $query->where('expired_date', '>', now())
+                        ->orWhereNull('expired_date');
+                })
+                    ->where('remaining_quantity', '>', 0);
+            }
+            /*'purchaseItemForSales' => function ($q) use ($domain) {
                 $q->whereNotNull('expired_date')
                     ->where('expired_date', '>', now()) // only not expired
                     ->whereRaw('remaining_quantity');
-            }
+            }*/
         ])
             ->where('config_id', $domain['config_id'])
             ->where('status', 1)
