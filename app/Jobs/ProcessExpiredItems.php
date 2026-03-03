@@ -22,6 +22,7 @@ class ProcessExpiredItems implements ShouldQueue
     public function handle(): void
     {
         PurchaseItemModel::whereDate('expired_date', '<', now())
+            ->whereNotNull('expired_date')
             ->where('remaining_quantity', '>', 0)
             ->select('id', 'remaining_quantity', 'stock_item_id', 'name', 'warehouse_id', 'config_id', 'purchase_price',
                 'quantity','sales_return_quantity','bonus_quantity','warehouse_transfer_quantity',
@@ -48,7 +49,7 @@ class ProcessExpiredItems implements ShouldQueue
                             refId: $item->id,
                             qty: $qty,
                             stockItemId: $item->stock_item_id,
-                            name: $item->name,
+                            name: $item->name??null,
                             warehouseId: $item->warehouse_id,
                             configId: $item->config_id,
                             price: $item->purchase_price ?? 0
@@ -76,7 +77,7 @@ class ProcessExpiredItems implements ShouldQueue
         int $refId,
         float $qty,
         int $stockItemId,
-        string $name,
+         $name,
         int $warehouseId,
         int $configId,
         float $price
@@ -88,7 +89,7 @@ class ProcessExpiredItems implements ShouldQueue
         $attributes = [
             'config_id' => $configId,
             'warehouse_id' => $warehouseId,
-            'damage_mode' => $damageMode,
+            'damage_mode' => $damageMode
         ];
 
         if ($type === 'purchase') {
@@ -113,7 +114,7 @@ class ProcessExpiredItems implements ShouldQueue
             (object)[
                 'id' => $damageItem->id,
                 'stock_item_id' => $stockItemId,
-                'name' => $name,
+                'name' => $name ?? null,
                 'config_id' => $configId,
                 'warehouse_id' => $warehouseId,
                 'quantity' => $qty,

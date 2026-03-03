@@ -176,5 +176,47 @@ class ReportModel extends Model
         return $data;
     }
 
+    /**
+     * Fetch vendor-wise purchases with eager loaded items.
+     * $filters array can contain 'vendor_id' or other filters.
+     */
+    public static function damageStockDetailsReport($configId,array $request = [])
+    {
+        $page = isset($request['page']) && $request['page'] > 0 ? ($request['page'] - 1) : 0;
+        $perPage = isset($request['offset']) && $request['offset'] != '' ? (int)($request['offset']) : 50;
+        $skip = isset($page) && $page != '' ? (int)$page * $perPage : 0;
+
+        $entities = DamageItemModel::where('inv_damage_item.config_id',$configId)
+            ->join('inv_purchase_item', 'inv_purchase_item.id', '=', 'inv_damage_item.purchase_item_id')
+            ->join('inv_purchase', 'inv_purchase.id', '=', 'inv_purchase_item.purchase_id')
+            ->join('inv_stock', 'inv_stock.id', '=', 'inv_purchase_item.stock_item_id')
+            ->join('inv_product', 'inv_product.id', '=', 'inv_stock.product_id')
+            ->leftJoin('inv_category', 'inv_category.id', '=', 'inv_product.category_id')
+            ->leftJoin('cor_warehouses', 'cor_warehouses.id', '=', 'inv_purchase_item.warehouse_id')
+            ->leftJoin('inv_particular', 'inv_particular.id', '=', 'inv_product.unit_id')
+            ->select([
+                'inv_damage_item.id',
+                DB::raw('DATE_FORMAT(inv_purchase_item.created_at, "%d-%m-%Y") as created'),
+                DB::raw('DATE_FORMAT(inv_purchase_item.expired_date, "%d-%m-%Y") as expired_date'),
+                'inv_purchase_item.purchase_id',
+                'inv_purchase.grn',
+                'inv_stock.name as item_name',
+                'inv_category.name as category_name',
+                'inv_damage_item.quantity as quantity',
+                'inv_damage_item.price',
+                'inv_purchase_item.sub_total',
+                'inv_particular.name as unit_name',
+                'cor_warehouses.name as warehouse_name',
+            ]);
+
+        $total = $entities->count();
+        $entities = $entities->skip($skip)
+            ->take($perPage)
+            ->orderBy('inv_purchase.id', 'DESC')
+            ->get();
+        $data = array('count' => $total, 'entities' => $entities);
+        return $data;
+    }
+
 
 }

@@ -18,7 +18,7 @@ final class Kernel extends ConsoleKernel
     {
         // Process expire stock product
 //        $schedule->job(new ProcessExpiredItems())->dailyAt('2:10')->withoutOverlapping();
-//        $schedule->job(new ProcessExpiredItems())->everyMinute();
+        // $schedule->job(new ProcessExpiredItems())->everyMinute();
         // Clean custom logs at 01:00 AM (before backup)
        /* $schedule->command('logs:clean-requests --days=10')
 //            ->dailyAt('01:00')
