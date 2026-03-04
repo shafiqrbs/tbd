@@ -3,16 +3,11 @@
 namespace Modules\Inventory\App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Carbon;
-use Modules\Inventory\App\Entities\Product;
-use Modules\Utility\App\Models\ProductUnitModel;
-use Ramsey\Collection\Collection;
 
 class SalesItemModel extends Model
 {
-    use HasFactory;
 
     protected $table = 'inv_sales_item';
     public $timestamps = true;
@@ -45,6 +40,8 @@ class SalesItemModel extends Model
         'expired_date',
         'purchase_item_id',
         'requisition_item_id',
+        'return_quantity',
+        'damage_quantity',
     ];
 
     public static function boot() {

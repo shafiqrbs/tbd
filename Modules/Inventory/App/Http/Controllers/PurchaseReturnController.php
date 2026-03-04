@@ -297,7 +297,7 @@ class PurchaseReturnController extends Controller
                         'quantity'                => $item->quantity,
                         'price'                   => $item->purchase_price,
                         'sub_total'               => $item->sub_total,
-                        'warehouse_id'            => $salesStock->warehouse_id,
+                        'warehouse_id'            => $findParentSalesItem->warehouse_id,
                         'sales_item_id'           => $parentSalesItemId,
                         'purchase_return_item_id' => $item->id,
                         'sales_return_id'         => $salesReturn->id,

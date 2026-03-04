@@ -43,6 +43,12 @@ class DamageItem
     private $purchaseItem;
 
     /**
+     * @ORM\ManyToOne(targetEntity="Modules\Inventory\App\Entities\SalesItem")
+     * @ORM\JoinColumn(onDelete="CASCADE")
+     **/
+    private $SalesItem;
+
+    /**
      * @ORM\ManyToOne(targetEntity="Modules\Core\App\Entities\Warehouse")
      * @ORM\OrderBy({"sorting" = "ASC"})
      **/

@@ -36,12 +36,6 @@ class Damage
      **/
     private  $createdBy;
 
-    /**
-     * @ORM\ManyToOne(targetEntity="Modules\Inventory\App\Entities\WearHouse")
-     * @ORM\OrderBy({"sorting" = "ASC"})
-     **/
-    private $wearHouse;
-
 
     /**
      * @var integer
@@ -50,17 +44,11 @@ class Damage
      */
     private $quantity;
 
-    /**
-     * @var float
-     *
-     * @ORM\Column(name="purchasePrice", type="float",nullable=true)
-     */
-    private $purchasePrice;
 
     /**
      * @var string
      *
-     * @ORM\Column(name="subTotal", type="float",nullable=true)
+     * @ORM\Column( type="float",nullable=true)
      */
     private $subTotal;
 
@@ -98,6 +86,13 @@ class Damage
 	 * @ORM\Column(name="process", type="string", nullable=true,options={"default"="Created"})
 	 */
 	private $process = "Created";
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(type="string", length=50, nullable=false)
+     */
+    private $damage_type;
 
 
 }
