@@ -79,6 +79,7 @@ class SalesReturnModel extends Model
                 DB::raw('DATE_FORMAT(inv_sales_return.created_at, "%d-%m-%Y") as created'),
                 'inv_sales_return.invoice',
                 'inv_sales_return.code',
+                'inv_sales_return.request_quantity',
                 'inv_sales_return.quantity',
                 'inv_sales_return.process',
                 'inv_sales_return.sub_total',
@@ -99,6 +100,9 @@ class SalesReturnModel extends Model
                 $query->select([
                     'inv_sales_return_item.id',
                     'inv_sales_return_item.sales_return_id',
+                    'inv_sales_return_item.request_quantity',
+                    'inv_sales_return_item.stock_entry_quantity',
+                    'inv_sales_return_item.damage_entry_quantity',
                     'inv_sales_return_item.quantity',
                     'inv_sales_return_item.price',
                     'inv_sales_return_item.sub_total',

@@ -249,7 +249,6 @@ class PurchaseReturnController extends Controller
             DB::beginTransaction();
             try {
                 $purchaseReturnItems = $purchaseReturn->purchaseReturnItems;
-//                dump($purchaseReturnItems->purchase_item_id);
 
                 $purchaseReturnStockItemIds = $purchaseReturnItems->pluck('stock_item_id')->toArray();
 
@@ -294,7 +293,10 @@ class PurchaseReturnController extends Controller
                         'item_name'               => $salesStock->name,
                         'uom'                     => $salesStock->uom,
                         'stock_item_id'           => $salesStock->id,
-                        'quantity'                => $item->quantity,
+                        'request_quantity'        => $item->quantity,
+                        'stock_entry_quantity'    => $item->quantity,
+                        'quantity'    => $item->quantity,
+                        'damage_entry_quantity'   => 0,
                         'price'                   => $item->purchase_price,
                         'sub_total'               => $item->sub_total,
                         'warehouse_id'            => $findParentSalesItem->warehouse_id,

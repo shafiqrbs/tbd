@@ -69,15 +69,27 @@ class SalesReturnItem
 
     /**
      * @var float
-     * @ORM\Column(name="quantity", type="float", nullable=true)
+     * @ORM\Column(name="request_quantity", type="float", nullable=true)
      */
-    private $quantity;
+    private $requestQuantity;
 
     /**
      * @var float
-     * @ORM\Column(name="bonus_quantity", type="float",nullable=true)
+     * @ORM\Column(name="stock_entry_quantity", type="float", nullable=true)
      */
-    private $bonusQuantity;
+    private $stockEntryQuantity;
+
+    /**
+     * @var float
+     * @ORM\Column(name="damage_entry_quantity", type="float", nullable=true)
+     */
+    private $damageEntryQuantity;
+
+    /**
+     * @var float
+     * @ORM\Column(name="quantity", type="float", nullable=true)
+     */
+    private $quantity;
 
     /**
      * @var float

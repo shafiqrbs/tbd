@@ -8,22 +8,9 @@ class SalesReturnItemModel extends Model
 {
 
     protected $table = 'inv_sales_return_item';
-    public $timestamps = true;
+    public $timestamps = false;
     protected $guarded = ['id'];
 
-    protected $fillable = [];
+    protected $fillable = ['sales_item_id','sales_return_id','stock_item_id','warehouse_id','purchase_return_item_id','item_name','uom','request_quantity','price','sub_total','status','stock_entry_quantity','damage_entry_quantity','quantity'];
 
-    public static function boot()
-    {
-        parent::boot();
-        self::creating(function ($model) {
-            $date = new \DateTime("now");
-            $model->created_at = $date;
-        });
-
-        self::updating(function ($model) {
-            $date = new \DateTime("now");
-            $model->updated_at = $date;
-        });
-    }
 }

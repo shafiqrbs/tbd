@@ -134,6 +134,12 @@ class SalesReturn
      */
     private $quantity;
 
+    /**
+     * @var float
+     * @ORM\Column(name="request_quantity", type="float", nullable=true)
+     */
+    private $requestQuantity;
+
 
 }
 

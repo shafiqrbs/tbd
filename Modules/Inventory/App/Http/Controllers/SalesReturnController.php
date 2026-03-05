@@ -13,6 +13,7 @@ use Modules\Inventory\App\Models\DamageItemModel;
 use Modules\Inventory\App\Models\DamageModel;
 use Modules\Inventory\App\Models\PurchaseItemModel;
 use Modules\Inventory\App\Models\PurchaseModel;
+use Modules\Inventory\App\Models\PurchaseReturnItemModel;
 use Modules\Inventory\App\Models\PurchaseReturnModel;
 use Modules\Inventory\App\Models\SalesItemModel;
 use Modules\Inventory\App\Models\SalesReturnItemModel;
@@ -91,7 +92,7 @@ class SalesReturnController extends Controller
      */
     public function edit($id)
     {
-        $purchaseReturn = PurchaseReturnModel::with('purchaseReturnItems')->find($id);
+        $purchaseReturn = SalesReturnModel::with('salesReturnItems')->find($id);
         return response()->json(['status' => 200, 'message' => 'success', 'data' => $purchaseReturn]);
     }
 
@@ -352,6 +353,313 @@ class SalesReturnController extends Controller
         }
     }
 
+    public function processReturn1(Request $request, $sales_return_id)
+    {
+        DB::beginTransaction();
 
+        try {
+
+            $items = $request->data; // array of items from frontend
+
+            // find the sales return
+            $salesReturn = SalesReturnModel::findOrFail($sales_return_id);
+
+            $totalQuantity = 0;
+            $totalAmount = 0;
+
+            foreach ($items as $item) {
+
+                // find each sales return item
+                $returnItem = SalesReturnItemModel::findOrFail($item['id']);
+
+                $stockQty  = (float) $item['stock_entry_quantity'];
+                $damageQty = (float) $item['damage_entry_quantity'];
+                $totalQty  = $stockQty + $damageQty;
+
+                // validation: stock + damage must equal requested quantity
+                if ($totalQty > $returnItem->request_quantity) {
+                    DB::rollBack();
+                    return response()->json([
+                        'status' => 422,
+                        'message' => 'Stock + Damage must equal requested quantity'
+                    ]);
+                }
+
+                // update the item (without updated_at)
+                $returnItem->stock_entry_quantity  = $stockQty;
+                $returnItem->damage_entry_quantity = $damageQty;
+                $returnItem->quantity        = $totalQty;
+                $returnItem->sub_total       = $totalQty*$returnItem->price;
+
+                $returnItem->save(); // ✅ no updated_at column needed
+
+                // accumulate totals
+                $totalQuantity += $totalQty;
+                $totalAmount   += $totalQty * $returnItem->price;
+            }
+
+            // update the main sales return
+            $salesReturn->process  = 'Approved';
+            $salesReturn->quantity  = $totalQuantity;
+            $salesReturn->sub_total = $totalAmount;
+
+            $salesReturn->save(); // ✅ no timestamps issue
+
+            DB::commit();
+
+            return response()->json([
+                'status' => 200,
+                'message' => 'Sales return processed successfully'
+            ]);
+
+        } catch (\Exception $e) {
+
+            DB::rollBack();
+
+            return response()->json([
+                'status' => 500,
+                'message' => $e->getMessage()
+            ]);
+        }
+    }
+
+    public function processReturn(Request $request, $sales_return_id)
+    {
+        DB::beginTransaction();
+
+        try {
+            $items = $request->data;
+            $salesReturn = SalesReturnModel::with('salesReturnItems')->findOrFail($sales_return_id);
+
+            $totalQuantity = 0;
+            $totalAmount = 0;
+            $damageItems = [];
+
+            // ----------------------------
+            // STEP 1: UPDATE SALES RETURN ITEMS
+            // ----------------------------
+            foreach ($items as $item) {
+                $returnItem = SalesReturnItemModel::findOrFail($item['id']);
+
+                $stockQty  = (float) $item['stock_entry_quantity'];
+                $damageQty = (float) $item['damage_entry_quantity'];
+                $totalQty  = $stockQty + $damageQty;
+
+                if ($totalQty > $returnItem->request_quantity) {
+                    DB::rollBack();
+                    return response()->json([
+                        'status' => 422,
+                        'message' => 'Stock + Damage must not exceed requested quantity'
+                    ]);
+                }
+
+                // Update sales return item
+                $returnItem->update([
+                    'stock_entry_quantity'  => $stockQty,
+                    'damage_entry_quantity' => $damageQty,
+                    'quantity'              => $totalQty,
+                    'sub_total'             => $totalQty * $returnItem->price,
+                ]);
+
+                $totalQuantity += $totalQty;
+                $totalAmount   += $totalQty * $returnItem->price;
+
+                if ($damageQty > 0) {
+                    $damageItems[] = [
+                        'item' => $returnItem,
+                        'quantity' => $damageQty
+                    ];
+                }
+
+                // ----------------------------
+                // STEP 2: UPDATE LINKED PURCHASE RETURN ITEM
+                // ----------------------------
+                if ($returnItem->purchase_return_item_id) {
+                    $purchaseItem = PurchaseReturnItemModel::findOrFail($returnItem->purchase_return_item_id);
+
+                    $purchaseItem->update([
+                        'quantity'  => $totalQty,
+                        'sub_total' => $totalQty * $purchaseItem->purchase_price,
+                    ]);
+                }
+            }
+
+            // ----------------------------
+            // STEP 3: UPDATE MAIN SALES RETURN
+            // ----------------------------
+            $salesReturn->update([
+                'quantity'  => $totalQuantity,
+                'sub_total' => $totalAmount,
+            ]);
+
+            // ----------------------------
+            // STEP 4: UPDATE MAIN PURCHASE RETURN
+            // ----------------------------
+            if ($salesReturn->purchase_return_id) {
+                $purchaseReturn = PurchaseReturnModel::with('purchaseReturnItems')
+                    ->findOrFail($salesReturn->purchase_return_id);
+
+                $purchaseTotalQty = $purchaseReturn->purchaseReturnItems->sum('quantity');
+                $purchaseTotalAmt = $purchaseReturn->purchaseReturnItems->sum('sub_total');
+
+                $purchaseReturn->update([
+                    'quantity'  => $purchaseTotalQty,
+                    'sub_total' => $purchaseTotalAmt,
+                    'process'   => 'Approved',
+                ]);
+            }
+
+            // ----------------------------
+            // STEP 5: PROCESS SALES RETURN (stock & daily stock)
+            // ----------------------------
+            $salesReturn->refresh();
+            foreach ($salesReturn->salesReturnItems as $item) {
+                $item->config_id = $salesReturn->config_id;
+
+                StockItemHistoryModel::openingStockQuantity(
+                    $item,
+                    'sales-return',
+                    $this->domain
+                );
+
+                DailyStockService::maintainDailyStock(
+                    date: now()->toDateString(),
+                    field: 'sales_return_quantity',
+                    configId: $salesReturn->config_id,
+                    warehouseId: $item->warehouse_id,
+                    stockItemId: $item->stock_item_id,
+                    quantity: $item->quantity
+                );
+
+                $salesItem = SalesItemModel::find($item->sales_item_id);
+                $salesItem->update([
+                    'return_quantity' => ($salesItem->return_quantity ?? 0) + $item->quantity
+                ]);
+            }
+
+            // ----------------------------
+            // STEP 6: PROCESS PURCHASE RETURN (stock & daily stock)
+            // ----------------------------
+            if ($salesReturn->purchase_return_id) {
+                $purchaseReturn->refresh();
+                foreach ($purchaseReturn->purchaseReturnItems as $item) {
+                    $item->config_id = $purchaseReturn->config_id;
+
+                    StockItemHistoryModel::openingStockQuantity(
+                        $item,
+                        'purchase-return',
+                        $this->domain
+                    );
+
+                    DailyStockService::maintainDailyStock(
+                        date: now()->toDateString(),
+                        field: 'purchase_return_quantity',
+                        configId: $purchaseReturn->config_id,
+                        warehouseId: $item->warehouse_id,
+                        stockItemId: $item->stock_item_id,
+                        quantity: $item->quantity
+                    );
+
+                    $purchaseItem = PurchaseItemModel::find($item->purchase_item_id);
+                    $remainingQuantity = PurchaseItemModel::getPurchaseItemRemainingQuantity($item->purchase_item_id);
+
+                    $purchaseItem->update([
+                        'purchase_return_quantity' => ($purchaseItem->purchase_return_quantity ?? 0) + $item->quantity,
+                        'remaining_quantity' => ($remainingQuantity ?? 0) - $item->quantity,
+                    ]);
+                }
+            }
+
+            // ----------------------------
+            // STEP 7: DAMAGE PROCESS
+            // ----------------------------
+            if (count($damageItems) > 0) {
+                $damage = DamageModel::create([
+                    'config_id'     => $salesReturn->config_id,
+                    'created_by_id' => $this->domain['user_id'] ?? null,
+                    'quantity'      => 0,
+                    'sub_total'     => 0,
+                    'damage_type'   => 'Sales',
+                    'process'       => 'Created',
+                    'damage_mode'   => 'Damage',
+                ]);
+
+                $totalDamageQty = 0;
+                $totalDamageAmt = 0;
+
+                foreach ($damageItems as $d) {
+                    $returnItem = $d['item'];
+                    $qty        = $d['quantity'];
+
+                    $damageItem = DamageItemModel::create([
+                        'config_id'      => $salesReturn->config_id,
+                        'warehouse_id'   => $returnItem->warehouse_id,
+                        'damage_mode'    => 'Sales',
+                        'sales_item_id'  => $returnItem->sales_item_id,
+                        'damage_id'      => $damage->id,
+                        'quantity'       => $qty,
+                        'price'          => $returnItem->price,
+                        'purchase_price' => $returnItem->price,
+                        'sub_total'      => $qty * $returnItem->price,
+                        'process'        => 'Completed'
+                    ]);
+
+                    StockItemHistoryModel::openingStockQuantity(
+                        (object)[
+                            'id'            => $damageItem->id,
+                            'stock_item_id' => $returnItem->stock_item_id,
+                            'name'          => $returnItem->item_name,
+                            'config_id'     => $salesReturn->config_id,
+                            'warehouse_id'  => $returnItem->warehouse_id,
+                            'quantity'      => $qty,
+                        ],
+                        'damage',
+                        $this->domain
+                    );
+
+                    DailyStockService::maintainDailyStock(
+                        date: now()->toDateString(),
+                        field: 'damage_quantity',
+                        configId: $salesReturn->config_id,
+                        warehouseId: $returnItem->warehouse_id,
+                        stockItemId: $returnItem->stock_item_id,
+                        quantity: $qty
+                    );
+
+                    $totalDamageQty += $qty;
+                    $totalDamageAmt += $qty * $returnItem->price;
+                }
+
+                $damage->update([
+                    'quantity'  => $totalDamageQty,
+                    'sub_total' => $totalDamageAmt,
+                    'process'   => 'Approved'
+                ]);
+            }
+
+            // ----------------------------
+            // FINALIZE SALES RETURN
+            // ----------------------------
+            $salesReturn->update([
+                'process' => 'Approved',
+                'approved_by_id' => $this->domain['user_id'] ?? null,
+            ]);
+
+            DB::commit();
+
+            return response()->json([
+                'status'  => 200,
+                'message' => 'Sales return processed successfully'
+            ]);
+
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            return response()->json([
+                'status'  => 500,
+                'message' => 'Processing failed',
+                'error'   => $e->getMessage()
+            ], 500);
+        }
+    }
 
 }
