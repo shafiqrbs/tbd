@@ -84,6 +84,12 @@ class AccountHead
     private  $customer;
 
     /**
+     * @ORM\OneToOne(targetEntity="Modules\Inventory\App\Entities\Setting")
+     * @ORM\JoinColumn(name="stock_group_id", referencedColumnName="id", nullable=true, onDelete="cascade")
+     **/
+    private  $stockGroup;
+
+     /**
      * @ORM\OneToOne(targetEntity="Modules\Inventory\App\Entities\Category")
      * @ORM\JoinColumn(name="product_group_id", referencedColumnName="id", nullable=true, onDelete="cascade")
      **/

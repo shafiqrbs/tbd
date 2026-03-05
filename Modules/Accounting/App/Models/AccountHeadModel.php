@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\DB;
 use Modules\Core\App\Models\CustomerModel;
 use Modules\Core\App\Models\UserModel;
 use Modules\Core\App\Models\VendorModel;
+use Modules\Inventory\App\Entities\Setting;
 use Modules\Inventory\App\Models\CategoryModel;
 
 class AccountHeadModel extends Model
@@ -48,6 +49,7 @@ class AccountHeadModel extends Model
         'credit_limit',
         'credit_period',
         'account_id',
+        'stock_group_id',
         'balance_bill_by_bill',
         'is_credit_date_check_voucher_entry',
         'provide_bank_details'
@@ -616,7 +618,7 @@ class AccountHeadModel extends Model
             }
         }
 
-        $groups = CategoryModel::where([
+       /* $groups = CategoryModel::where([
             'config_id' => $domain['inv_config'],
             'parent' => null,
             'status'    => 1,
@@ -624,6 +626,16 @@ class AccountHeadModel extends Model
         if($groups){
             foreach ($groups as $group) {
                 self::insertCategoryGroupAccount($config, $group);
+            }
+        }*/
+
+        $groups = \Modules\Inventory\App\Models\SettingModel::where([
+            'config_id' => $domain['inv_config'],
+            'parent_slug'    => 'product-type',
+        ])->get();
+        if($groups){
+            foreach ($groups as $group) {
+                self::insertStockGroupAccount($config, $group);
             }
         }
 
@@ -855,6 +867,34 @@ class AccountHeadModel extends Model
         $head = AccountHeadModel::updateOrCreate(
             [
                 'product_group_id' => $entity->id,
+            ],
+            [
+                'config_id'        => $config->id,
+                'parent_id'        => $config->account_product_group_id ?? null, // Ensure this is the correct field
+                'name'             => $entity->name,
+                'display_name'     => $entity->name,
+                'head_group'       => 'ledger',
+                'level'            => 3,
+                'is_private'       => true,
+                'mode'             => 'debit',
+            ]
+        );
+
+        if (!$head->headDetail) {
+            AccountHeadDetailsModel::updateOrCreate(
+                [
+                    'config_id'  => $head->config_id,
+                    'account_head_id' => $head->id,
+                ]
+            );
+        }
+    }
+
+    public static function insertStockGroupAccount($config, $entity)
+    {
+        $head = AccountHeadModel::updateOrCreate(
+            [
+                'stock_group_id' => $entity->id,
             ],
             [
                 'config_id'        => $config->id,

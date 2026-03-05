@@ -155,7 +155,7 @@ class DomainController extends Controller
             );
 
             $user = UserModel::create([
-                'username' => $data['username'],
+                'username' => strtolower($data['username']),
                 'name' => $data['name'],
                 'employee_group_id' => $getUserGroupId['id'],
                 'email' => $email,
@@ -218,23 +218,30 @@ class DomainController extends Controller
                 );
 
                 // Handle Customer
-                CustomerModel::updateOrCreate(
-                    [
-                        'domain_id' => $entity->id,
-                        'name' => 'Default',
-                        'mobile' => $data['license_no'],
-                        'customer_group_id' => $getCustomerGroupId->id ?? null,
-                    ],
-                    [
-                        'slug' => Str::slug($entity->name),
-                        'email' => $entity->email,
-                        'address' => $entity->address,
-                        'is_default_customer' => true,
-                        'status' => true,
-                        'created_at' => now(),
-                        'updated_at' => now(),
-                    ]
-                );
+                $input = ['name'=> 'Default','mobile' => $data['license_no']];
+                $uniqueKey = CustomerModel::uniqueCustomerKey($entity->id,$input);
+                $customerUnique = CustomerModel::where(['customer_unique_key' => $uniqueKey])->first();
+                if(empty($customerUnique)){
+                    CustomerModel::updateOrCreate(
+                        [
+                            'domain_id' => $entity->id,
+                            'name' => 'Default',
+                            'mobile' => $data['license_no'],
+                            'customer_group_id' => $getCustomerGroupId->id ?? null,
+                        ],
+                        [
+                            'slug' => Str::slug($entity->name),
+                            'email' => $entity->email,
+                            'address' => $entity->address,
+                            'is_default_customer' => true,
+                            'customer_unique_key' => $uniqueKey,
+                            'status' => true,
+                            'created_at' => now(),
+                            'updated_at' => now(),
+                        ]
+                    );
+                }
+
             }
 
             // Handle Warehouse

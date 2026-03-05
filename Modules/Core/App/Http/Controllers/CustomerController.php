@@ -55,16 +55,20 @@ class CustomerController extends Controller
         DB::beginTransaction();
         try {
             $input['domain_id'] = $this->domain['global_id'];
-            $entity = CustomerModel::create($input);
-
-            $config = AccountingModel::where('id', $this->domain['acc_config'])->first();
-            $ledgerExist = AccountHeadModel::where('customer_id', $entity->id)->where('config_id', $this->domain['acc_config'])->where('parent_id', $config->account_customer_id)->first();
-            if (empty($ledgerExist)) {
-               AccountHeadModel::insertCustomerLedger($config, $entity);
+            $uniqueKey = CustomerModel::uniqueCustomerKey($this->domain['global_id'],$input);
+            $customerUnique = CustomerModel::where(['customer_unique_key' => $uniqueKey])->first();
+            if(empty($customerUnique)){
+                $input['customer_unique_key'] = $uniqueKey;
+                $entity = CustomerModel::create($input);
+                $config = AccountingModel::where('id', $this->domain['acc_config'])->first();
+                $ledgerExist = AccountHeadModel::where('customer_id', $entity->id)->where('config_id', $this->domain['acc_config'])->where('parent_id', $config->account_customer_id)->first();
+                if (empty($ledgerExist)) {
+                    AccountHeadModel::insertCustomerLedger($config, $entity);
+                }
+                DB::commit();
+                $data = $service->returnJosnResponse($entity);
+                return $data;
             }
-            DB::commit();
-            $data = $service->returnJosnResponse($entity);
-            return $data;
         } catch (\Exception $e) {
             // Something went wrong, rollback the transaction
             DB::rollBack();
@@ -154,10 +158,12 @@ class CustomerController extends Controller
 
         $data = $request->validated();
         $entity = CustomerModel::find($id);
-        $data['customer_unique_id'] = "{$entity['domain_id']}@{$data['mobile']}-{$data['name']}";
+        $input['domain_id'] = $this->domain['global_id'];
+        $uniqueKey = CustomerModel::uniqueCustomerKey($this->domain['global_id'],$data);
         $entity->update($data);
         $service = new JsonRequestResponse();
         return $service->returnJosnResponse($entity);
+
     }
 
     /**

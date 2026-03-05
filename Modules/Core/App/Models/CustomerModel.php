@@ -50,6 +50,7 @@ class CustomerModel extends Model
         'discount_percent',
         'bonus_percent',
         'is_default_customer',
+        'customer_unique_key',
         'monthly_target_amount'
     ];
 
@@ -139,6 +140,15 @@ class CustomerModel extends Model
             'prefix' => 'CUS-',
         ];
         return $patternCodeService->customerCode($params);
+    }
+
+    public static function uniqueCustomerKey($domain,$data)
+    {
+        $name   = preg_replace('/\s+/', '', strtolower(trim($data['name'])));
+        $mobile = trim($data['mobile']);
+        $uniqueKey = $domain . '_' . $name . '_' . $mobile;
+        return $uniqueKey;
+
     }
 
 
