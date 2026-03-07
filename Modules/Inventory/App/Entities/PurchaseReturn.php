@@ -29,6 +29,7 @@ class PurchaseReturn
 
     /**
      * @ORM\ManyToOne(targetEntity="Modules\Inventory\App\Entities\Config")
+     * @ORM\JoinColumn(onDelete="CASCADE")
      **/
     private  $config;
 
