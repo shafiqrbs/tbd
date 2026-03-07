@@ -30,7 +30,8 @@ class DailyStock
     private $invDate;
 
     /**
-     * @ORM\ManyToOne(targetEntity="Config" , cascade={"detach","merge"} )
+     * @ORM\ManyToOne(targetEntity="Config")
+     * @ORM\JoinColumn(onDelete="CASCADE")
      **/
     private  $config;
 
