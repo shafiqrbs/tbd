@@ -46,7 +46,7 @@ class DamageItem
      * @ORM\ManyToOne(targetEntity="Modules\Inventory\App\Entities\SalesItem")
      * @ORM\JoinColumn(onDelete="CASCADE")
      **/
-    private $SalesItem;
+    private $salesItem;
 
     /**
      * @ORM\ManyToOne(targetEntity="Modules\Core\App\Entities\Warehouse")

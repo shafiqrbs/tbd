@@ -659,30 +659,19 @@ class FileUploadController extends Controller
                 }
             }
 
-            $productUnit = ParticularModel::where('name', 'like', '%' . Str::slug(trim($values[9])) . '%')->where('config_id',$this->domain['config_id'])->first('id');
+            $productUnit = ParticularModel::where('name', 'like', '%' . Str::slug(trim($values[8])) . '%')->where('config_id',$this->domain['config_id'])->first('id');
             if (!$productUnit) {
                 $productUnit = ParticularModel::create([
                     'config_id' => $this->domain['config_id'],
                     'particular_type_id' => 1,
-                    'name' => trim($values[9]),
-                    'slug' => Str::slug(trim($values[9])),
+                    'name' => trim($values[8]),
+                    'slug' => Str::slug(trim($values[8])),
                     'status' => true
                 ]);
             }
             // Ensure valid data
 
             if ($productType && $values[5]) {
-
-                $productSize = ParticularModel::where('name', 'like', '%' . Str::slug(trim($values[8])) . '%')->where('config_id',$this->domain['config_id'])->first('id');
-                if (!$productSize) {
-                    $productSize = ParticularModel::create([
-                        'config_id' => $this->domain['config_id'],
-                        'particular_type_id' => 4,
-                        'name' => trim($values[8]),
-                        'slug' => Str::slug(trim($values[8])),
-                        'status' => true
-                    ]);
-                }
 
                 $productData = [
                     'code' => !empty($values[0]) ? str_replace("#", "", trim($values[0])) : null,
@@ -691,12 +680,12 @@ class FileUploadController extends Controller
                     'category_id' => $productCategory->id ?? null,
                     'unit_id' => $productUnit->id ?? null,
                     'name' => trim($values[5]),
-                    'item_size' => trim($values[8] ?? null),
+                  //  'item_size' => trim($values[8] ?? null),
                     'size_id' => $productSize->id ?? null,
                     'alternative_name' => !empty(trim($values[6])) ? trim($values[6]) : null,
                     'bangla_name' => !empty(trim($values[7])) ? trim($values[7]) : null,
-                    'purchase_price' => is_numeric(trim($values[10])) ? (float) trim($values[10]) : 0,
-                    'sales_price' => is_numeric(trim($values[11])) ? (float) trim($values[11]) : 0,
+                    'purchase_price' => is_numeric(trim($values[9])) ? (float) trim($values[9]) : 0,
+                    'sales_price' => is_numeric(trim($values[10])) ? (float) trim($values[10]) : 0,
                     'config_id' => $this->domain['config_id'] ?? null,
                     'status' => 1,
                 ];

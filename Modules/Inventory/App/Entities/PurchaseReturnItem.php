@@ -45,6 +45,7 @@ class PurchaseReturnItem
 
     /**
      * @ORM\ManyToOne(targetEntity="PurchaseItem")
+     * @ORM\JoinColumn(onDelete="CASCADE")
      * @ORM\OrderBy({"sorting" = "ASC"})
      **/
     private $purchaseItem;
