@@ -31,6 +31,7 @@ class B2BStockPriceMatrix
     /**
      * @var SubDomain $subDomain
      * @ORM\ManyToOne(targetEntity="Modules\Domain\App\Entities\B2BCategoryPriceMatrix")
+     * @ORM\JoinColumn(onDelete="CASCADE")
      **/
     private $categoryPriceMatrix;
 
