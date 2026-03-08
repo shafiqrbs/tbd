@@ -194,11 +194,13 @@ class SalesModel extends Model
             $entities = $entities->whereBetween('inv_sales.created_at',[$start_date, $end_date]);
         }
 
-        $total  = $entities->count();
-        $entities = $entities->skip($skip)
-            ->take($perPage)
-            ->groupBy('inv_sales.id')
+        $countQuery = clone $entities;
+        $total = $countQuery->distinct('inv_sales.id')->count('inv_sales.id');
+
+        $entities = $entities->groupBy('inv_sales.id')
             ->orderBy('inv_sales.updated_at','DESC')
+            ->skip($skip)
+            ->take($perPage)
             ->get();
 
         $data = array('count'=>$total,'entities'=>$entities);
