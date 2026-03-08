@@ -28,4 +28,5 @@ composer.lock
 /storage/framework
 /storage/logs
 /storage/app
+/CLAUDE.md
 

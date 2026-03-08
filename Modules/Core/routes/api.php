@@ -14,7 +14,6 @@ use Modules\Core\App\Http\Controllers\SplashController;
 use Modules\Core\App\Http\Controllers\UserController;
 use Modules\Core\App\Http\Controllers\VendorController;
 use Modules\Core\App\Http\Controllers\WarehouseController;
-use Modules\Core\App\Http\Middleware\LogRequestResponse;
 use Modules\Inventory\App\Http\Controllers\InventoryController;
 
 /*
@@ -28,7 +27,7 @@ use Modules\Inventory\App\Http\Controllers\InventoryController;
     |
 */
 
-Route::prefix('/core/select')->middleware([HeaderAuthenticationMiddleware::class,LogRequestResponse::class])->group(function() {
+Route::prefix('/core/select')->middleware([HeaderAuthenticationMiddleware::class])->group(function() {
     Route::get('/user', [CoreController::class,'user'])->name('user_autosearch');
     Route::get('/executive', [CoreController::class,'executive'])->name('executive_autosearch');
     Route::get('/vendor', [CoreController::class,'vendor'])->name('vendor_autosearch');
@@ -40,7 +39,7 @@ Route::prefix('/core/select')->middleware([HeaderAuthenticationMiddleware::class
     Route::get('/warehouse', [WarehouseController::class,'warehouseDropdown'])->name('core_warehouse_dropdown');
 });
 
-Route::prefix('/core')->middleware([HeaderAuthenticationMiddleware::class,LogRequestResponse::class])->group(function() {
+Route::prefix('/core')->middleware([HeaderAuthenticationMiddleware::class])->group(function() {
 
     Route::get('/customer/details', [CustomerController::class,'details'])->name('customer_details');
     Route::get('/customer/local-storage', [CustomerController::class,'localStorage'])->name('customer_local_storage');
@@ -79,7 +78,7 @@ Route::prefix('/core')->middleware([HeaderAuthenticationMiddleware::class,LogReq
 });
 
 // for local application
-Route::prefix('/core')->middleware([LogRequestResponse::class])->group(function() {
+Route::prefix('/core')->group(function() {
     Route::get('splash-info', [SplashController::class, 'splashInfo'])->name('splash_info');
 });
 

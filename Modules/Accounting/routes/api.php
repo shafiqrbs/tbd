@@ -12,7 +12,6 @@ use Modules\Accounting\App\Http\Controllers\AccountVoucherController;
 use Modules\Accounting\App\Http\Controllers\AccountVoucherEntryController;
 use Modules\Accounting\App\Http\Controllers\ReportController;
 use Modules\Accounting\App\Http\Controllers\TransactionModeController;
-use Modules\Core\App\Http\Middleware\LogRequestResponse;
 
 /*
     |--------------------------------------------------------------------------
@@ -26,7 +25,7 @@ use Modules\Core\App\Http\Middleware\LogRequestResponse;
 */
 
 
-Route::prefix('/accounting/select')->middleware([HeaderAuthenticationMiddleware::class,LogRequestResponse::class])->group(function() {
+Route::prefix('/accounting/select')->middleware([HeaderAuthenticationMiddleware::class])->group(function() {
     Route::get('/transaction-method', [AccountingController::class,'transactionMethodDropdown'])->name('transaction_method_dropdown');
     Route::get('/setting', [AccountingController::class,'settingDropdown'])->name('setting_accounting_dropdown');
     Route::get('/setting-type', [AccountingController::class,'settingTypeDropdown'])->name('setting_accounting_dropdown_type');
@@ -38,7 +37,7 @@ Route::prefix('/accounting/select')->middleware([HeaderAuthenticationMiddleware:
     Route::get('/head-dropdown', [AccountingController::class,'accountAllDropdownBySlug'])->name('account_all_dropdown_by_slug');
 });
 
-Route::prefix('/accounting')->middleware([HeaderAuthenticationMiddleware::class,LogRequestResponse::class])->group(function() {
+Route::prefix('/accounting')->middleware([HeaderAuthenticationMiddleware::class])->group(function() {
 
     Route::get('/transaction-mode-data', [TransactionModeController::class,'transactionMode'])->name('transaction_mode');
     Route::get('/transaction-mode/local-storage', [TransactionModeController::class,'LocalStorage'])->name('transaction_mode_local_storage');
@@ -127,7 +126,7 @@ Route::prefix('/accounting')->middleware([HeaderAuthenticationMiddleware::class,
 
 });
 
-Route::prefix('/accounting/report')->middleware([HeaderAuthenticationMiddleware::class,LogRequestResponse::class])->group(function() {
+Route::prefix('/accounting/report')->middleware([HeaderAuthenticationMiddleware::class])->group(function() {
     Route::get('/dashboard', [ReportController::class,'dashboard'])->name('dashboard');
     Route::get('/income-expense', [ReportController::class,'incomeExpense'])->name('income-expense');
 });

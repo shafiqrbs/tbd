@@ -4,7 +4,6 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Modules\AppsApi\App\Http\Controllers\AppsApiController;
 use Modules\AppsApi\App\Http\Controllers\GlobalApiController;
-use Modules\Core\App\Http\Middleware\LogRequestResponse;
 
 /*
     |--------------------------------------------------------------------------
@@ -24,11 +23,11 @@ use Modules\Core\App\Http\Middleware\LogRequestResponse;
     Route::post('/index', [\Modules\GlobalApi\Http\Controllers\GlobalApiController::class,'index'])->name('index');
 });*/
 
-Route::prefix('/apps')->middleware([LogRequestResponse::class])->group(function() {
+Route::prefix('/apps')->group(function() {
     Route::get('/splash', [GlobalApiController::class,'splash'])->name('terminal_splash');
 });
 
-Route::prefix('/terminal')->middleware([LogRequestResponse::class])->group(function() {
+Route::prefix('/terminal')->group(function() {
 
 //    Route::post('/sign-in', [GlobalApiController::class,'signIn'])->name('sign_in');
 //    Route::get('/customer', [GlobalApiController::class,'customer'])->name('terminal_customer');
