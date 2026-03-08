@@ -12,7 +12,7 @@ class ProcessSalesReturnRequest extends FormRequest
     {
         return [
             'data'                        => 'required|array|min:1',
-            'data.*.id'                   => 'required|integer|exists:inv_sales_return_item,id',
+            'data.*.id'                   => 'required|integer',
             'data.*.stock_entry_quantity'  => 'required|numeric|min:0',
             'data.*.damage_entry_quantity' => 'required|numeric|min:0',
         ];
