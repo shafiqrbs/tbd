@@ -16,6 +16,7 @@ use Modules\Inventory\App\Models\PurchaseModel;
 use Modules\Inventory\App\Models\PurchaseReturnItemModel;
 use Modules\Inventory\App\Models\PurchaseReturnModel;
 use Modules\Inventory\App\Models\SalesItemModel;
+use Modules\Inventory\App\Models\SalesModel;
 use Modules\Inventory\App\Models\SalesReturnItemModel;
 use Modules\Inventory\App\Models\SalesReturnModel;
 use Modules\Inventory\App\Models\StockItemHistoryModel;
@@ -590,6 +591,18 @@ class SalesReturnController extends Controller
                 'error'   => $e->getMessage()
             ], 500);
         }
+    }
+
+
+    public function salesItemsIndex(Request $request)
+    {
+        $data = SalesReturnModel::getSalesItemsForReturn($request, $this->domain);
+
+        return response()->json([
+            'status' => 200,
+            'data' => $data ?? [],
+            'message' => 'Sales items fetched successfully'
+        ]);
     }
 
 }

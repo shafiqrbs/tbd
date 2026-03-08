@@ -124,6 +124,9 @@ Route::prefix('/inventory')->middleware([HeaderAuthenticationMiddleware::class])
             Route::post('{sales_return_id}/process', [SalesReturnController::class, 'processReturn']);
             Route::get('{id}/approve/{type}', [SalesReturnController::class, 'approve'])->name('sales-return.approve');
 
+            Route::get('sales-item', [SalesReturnController::class, 'salesItemsIndex']);
+
+
             Route::apiResource('', SalesReturnController::class)->parameters(['' => 'id']);
         });
 

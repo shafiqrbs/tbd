@@ -201,5 +201,163 @@ class SalesReturnModel extends Model
     }
 
 
+    public static function getSalesItemsForReturn($request, $domain)
+    {
+        $sales = SalesModel::where('inv_sales.config_id', $domain['config_id'])
+
+            ->leftJoin('users as createdBy','createdBy.id','=','inv_sales.created_by_id')
+            ->leftJoin('users as salesBy','salesBy.id','=','inv_sales.sales_by_id')
+            ->leftJoin('acc_transaction_mode','acc_transaction_mode.id','=','inv_sales.transaction_mode_id')
+            ->leftJoin('cor_customers','cor_customers.id','=','inv_sales.customer_id')
+            ->leftJoin('cor_setting','cor_setting.id','=','cor_customers.customer_group_id')
+
+            // Purchase warehouse info
+            ->leftJoin('inv_sales_item as isi', 'isi.sale_id', '=', 'inv_sales.id')
+            ->leftJoin('inv_purchase_item as ipi', 'ipi.id', '=', 'isi.child_purchase_item_id')
+            ->leftJoin('cor_warehouses as pwh', 'pwh.id', '=', 'ipi.warehouse_id')
+
+            ->select([
+                'inv_sales.id',
+
+                DB::raw('MAX(ipi.warehouse_id) as purchase_warehouse_id'),
+                DB::raw('MAX(pwh.name) as purchase_warehouse_name'),
+
+                DB::raw('DATE_FORMAT(inv_sales.created_at, "%d-%m-%Y") as created'),
+                DB::raw('DATE_FORMAT(inv_sales.expected_date, "%d-%m-%Y") as expected_date'),
+
+                'inv_sales.invoice',
+                'inv_sales.sub_total',
+                'inv_sales.total',
+                'inv_sales.payment',
+                'inv_sales.discount',
+                'inv_sales.approved_by_id',
+                'inv_sales.discount_calculation',
+                'inv_sales.discount_type',
+                'inv_sales.invoice_batch_id',
+                'inv_sales.process',
+                'inv_sales.is_domain_sales_completed',
+
+                DB::raw("CONCAT(UCASE(LEFT(sales_form,1)), LCASE(SUBSTRING(sales_form,2))) as sales_form"),
+
+                'cor_customers.id as customerId',
+                'cor_customers.name as customerName',
+                'cor_customers.mobile as customerMobile',
+                'cor_customers.address as customer_address',
+                'cor_customers.balance',
+
+                'cor_setting.name as customer_group',
+
+                'createdBy.username as createdByUser',
+                'createdBy.name as createdByName',
+                'createdBy.id as createdById',
+
+                'salesBy.id as salesById',
+                'salesBy.username as salesByUser',
+                'salesBy.name as salesByName',
+
+                'acc_transaction_mode.name as mode_name',
+            ])
+
+            // Load only returnable items
+            ->with(['salesItems' => function ($query) {
+
+                $query->select([
+                    'inv_sales_item.id',
+                    'inv_sales_item.sale_id',
+                    'inv_sales_item.stock_item_id as product_id',
+                    'inv_sales_item.unit_id',
+
+                    'inv_sales_item.name as item_name',
+                    'inv_sales_item.name as name',
+                    'inv_sales_item.uom',
+
+                    'inv_sales_item.quantity',
+                    'inv_sales_item.return_quantity',
+                    'inv_sales_item.damage_quantity',
+                    'inv_sales_item.spoil_quantity',
+
+                    'inv_sales_item.sales_price',
+                    'inv_sales_item.purchase_price',
+                    'inv_sales_item.price',
+                    'inv_sales_item.sub_total',
+                    'inv_sales_item.bonus_quantity',
+
+                    DB::raw('
+                    (
+                        inv_sales_item.quantity
+                        - IFNULL(inv_sales_item.return_quantity,0)
+                        - IFNULL(inv_sales_item.damage_quantity,0)
+                        - IFNULL(inv_sales_item.spoil_quantity,0)
+                    ) as available_return_qty
+                '),
+
+                    DB::raw("CONCAT(cor_warehouses.name,' (',cor_warehouses.location,')') as warehouse_name"),
+
+                    'cor_warehouses.name as warehouse',
+                    'cor_warehouses.location as warehouse_location',
+                    'cor_warehouses.id as warehouse_id',
+                ])
+
+                    ->leftJoin('cor_warehouses','cor_warehouses.id','=','inv_sales_item.warehouse_id')
+
+                    ->whereRaw('
+                (
+                    inv_sales_item.quantity
+                    - IFNULL(inv_sales_item.return_quantity,0)
+                    - IFNULL(inv_sales_item.damage_quantity,0)
+                    - IFNULL(inv_sales_item.spoil_quantity,0)
+                ) > 0
+            ');
+            }])
+
+            // Only sales having returnable items
+            ->whereHas('salesItems', function ($query) {
+                $query->whereRaw('
+                (
+                    quantity
+                    - IFNULL(return_quantity,0)
+                    - IFNULL(damage_quantity,0)
+                    - IFNULL(spoil_quantity,0)
+                ) > 0
+            ');
+            });
+
+        // 🔎 Search
+        if (!empty($request['term'])) {
+
+            $sales = $sales->where(function ($query) use ($request) {
+
+                $query->where('inv_sales.invoice','LIKE','%'.$request['term'].'%')
+                    ->orWhere('cor_customers.name','LIKE','%'.$request['term'].'%')
+                    ->orWhere('cor_customers.mobile','LIKE','%'.$request['term'].'%')
+                    ->orWhere('salesBy.username','LIKE','%'.$request['term'].'%')
+                    ->orWhere('createdBy.username','LIKE','%'.$request['term'].'%')
+                    ->orWhere('acc_transaction_mode.name','LIKE','%'.$request['term'].'%')
+                    ->orWhere('inv_sales.total','LIKE','%'.$request['term'].'%');
+            });
+        }
+
+        // 👤 Customer filter
+        if (!empty($request['customer_id'])) {
+            $sales->where('inv_sales.customer_id',$request['customer_id']);
+        }
+
+        // 📅 Date filter
+        if (!empty($request['start_date']) && empty($request['end_date'])) {
+
+            $start_date = $request['start_date'].' 00:00:00';
+            $end_date   = $request['start_date'].' 23:59:59';
+
+            $sales->whereBetween('inv_sales.created_at',[$start_date,$end_date]);
+        }
+
+        $sales = $sales->groupBy('inv_sales.id')
+            ->orderBy('inv_sales.updated_at','DESC')
+            ->get();
+
+        return $sales;
+    }
+
+
 
 }
