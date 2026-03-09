@@ -204,27 +204,16 @@ class SalesReturnModel extends Model
     public static function getSalesItemsForReturn($request, $domain)
     {
         $sales = SalesModel::where('inv_sales.config_id', $domain['config_id'])
-
+            ->where('sales_form','<>','requisition')
             ->leftJoin('users as createdBy','createdBy.id','=','inv_sales.created_by_id')
             ->leftJoin('users as salesBy','salesBy.id','=','inv_sales.sales_by_id')
             ->leftJoin('acc_transaction_mode','acc_transaction_mode.id','=','inv_sales.transaction_mode_id')
             ->leftJoin('cor_customers','cor_customers.id','=','inv_sales.customer_id')
-            ->leftJoin('cor_setting','cor_setting.id','=','cor_customers.customer_group_id')
-
-            // Purchase warehouse info
             ->leftJoin('inv_sales_item as isi', 'isi.sale_id', '=', 'inv_sales.id')
-            ->leftJoin('inv_purchase_item as ipi', 'ipi.id', '=', 'isi.child_purchase_item_id')
-            ->leftJoin('cor_warehouses as pwh', 'pwh.id', '=', 'ipi.warehouse_id')
 
             ->select([
                 'inv_sales.id',
-
-                DB::raw('MAX(ipi.warehouse_id) as purchase_warehouse_id'),
-                DB::raw('MAX(pwh.name) as purchase_warehouse_name'),
-
                 DB::raw('DATE_FORMAT(inv_sales.created_at, "%d-%m-%Y") as created'),
-                DB::raw('DATE_FORMAT(inv_sales.expected_date, "%d-%m-%Y") as expected_date'),
-
                 'inv_sales.invoice',
                 'inv_sales.sub_total',
                 'inv_sales.total',
@@ -233,20 +222,12 @@ class SalesReturnModel extends Model
                 'inv_sales.approved_by_id',
                 'inv_sales.discount_calculation',
                 'inv_sales.discount_type',
-                'inv_sales.invoice_batch_id',
                 'inv_sales.process',
-                'inv_sales.is_domain_sales_completed',
-
-                DB::raw("CONCAT(UCASE(LEFT(sales_form,1)), LCASE(SUBSTRING(sales_form,2))) as sales_form"),
-
                 'cor_customers.id as customerId',
                 'cor_customers.name as customerName',
                 'cor_customers.mobile as customerMobile',
                 'cor_customers.address as customer_address',
                 'cor_customers.balance',
-
-                'cor_setting.name as customer_group',
-
                 'createdBy.username as createdByUser',
                 'createdBy.name as createdByName',
                 'createdBy.id as createdById',
@@ -323,17 +304,11 @@ class SalesReturnModel extends Model
             });
 
         // 🔎 Search
-        if (!empty($request['term'])) {
+        if (!empty($request['invoice'])) {
 
             $sales = $sales->where(function ($query) use ($request) {
 
-                $query->where('inv_sales.invoice','LIKE','%'.$request['term'].'%')
-                    ->orWhere('cor_customers.name','LIKE','%'.$request['term'].'%')
-                    ->orWhere('cor_customers.mobile','LIKE','%'.$request['term'].'%')
-                    ->orWhere('salesBy.username','LIKE','%'.$request['term'].'%')
-                    ->orWhere('createdBy.username','LIKE','%'.$request['term'].'%')
-                    ->orWhere('acc_transaction_mode.name','LIKE','%'.$request['term'].'%')
-                    ->orWhere('inv_sales.total','LIKE','%'.$request['term'].'%');
+                $query->where('inv_sales.invoice','LIKE','%'.$request['invoice'].'%');
             });
         }
 
@@ -343,10 +318,10 @@ class SalesReturnModel extends Model
         }
 
         // 📅 Date filter
-        if (!empty($request['start_date']) && empty($request['end_date'])) {
+        if (!empty($request['date'])) {
 
-            $start_date = $request['start_date'].' 00:00:00';
-            $end_date   = $request['start_date'].' 23:59:59';
+            $start_date = $request['date'].' 00:00:00';
+            $end_date   = $request['date'].' 23:59:59';
 
             $sales->whereBetween('inv_sales.created_at',[$start_date,$end_date]);
         }

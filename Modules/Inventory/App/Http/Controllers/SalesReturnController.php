@@ -9,6 +9,7 @@ use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
 use Modules\Core\App\Models\UserModel;
 use Modules\Inventory\App\Http\Requests\PurchaseReturnRequest;
+use Modules\Inventory\App\Http\Requests\SalesReturnRequest;
 use Modules\Inventory\App\Models\DamageItemModel;
 use Modules\Inventory\App\Models\DamageModel;
 use Modules\Inventory\App\Models\PurchaseItemModel;
@@ -56,9 +57,9 @@ class SalesReturnController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(PurchaseReturnRequest $request)
+    public function store(SalesReturnRequest $request)
     {
-        $input   = $request->validated();
+        $input = $request->validated();
 
         $input['process']       = "Created";
         $input['config_id']     = $this->domain['config_id'];
@@ -66,21 +67,21 @@ class SalesReturnController extends Controller
 
         DB::beginTransaction();
         try {
-            // Create purchase return
-            $purchaseReturn = PurchaseReturnModel::create($input);
-
-            // Insert purchase return items
-            $totals = PurchaseReturnModel::insertPurchaseReturnItems($purchaseReturn, $input['items']);
-
-            // Update purchase return with totals
-            $purchaseReturn->update([
+            // Create sales return
+            $salesReturn = SalesReturnModel::create($input);
+            // Insert sales return items
+            $totals = SalesReturnItemModel::insertSalesReturnItems($salesReturn, $input['items']);
+            // Update sales return with totals
+            $salesReturn->update([
                 'quantity'  => $totals['quantity'],
+                'request_quantity'  => $totals['quantity'],
                 'sub_total' => $totals['sub_total'],
             ]);
 
+
             DB::commit();
 
-            return response()->json(['status' => 200, 'message' => 'Purchase return created successfully.']);
+            return response()->json(['status' => 200, 'message' => 'Sales return created successfully.']);
         } catch (Throwable $e) {
             DB::rollBack();
             report($e);
@@ -464,7 +465,7 @@ class SalesReturnController extends Controller
 
                 $salesItem = SalesItemModel::find($item->sales_item_id);
                 $salesItem->update([
-                    'return_quantity' => ($salesItem->return_quantity ?? 0) + $item->quantity
+                    'return_quantity' => ($salesItem->return_quantity ?? 0) + $item->stock_entry_quantity
                 ]);
             }
 
@@ -556,6 +557,11 @@ class SalesReturnController extends Controller
                         stockItemId: $returnItem->stock_item_id,
                         quantity: $qty
                     );
+
+                    $salesItem = SalesItemModel::find($returnItem->sales_item_id);
+                    $salesItem->update([
+                        'damage_quantity' => ($salesItem->damage_quantity ?? 0) + $qty
+                    ]);
 
                     $totalDamageQty += $qty;
                     $totalDamageAmt += $qty * $returnItem->price;

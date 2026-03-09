@@ -55,7 +55,7 @@ class StockItemHistoryModel extends Model
             $existingStockHistory = self::where('stock_item_id', $item->stock_item_id)
                 ->where('config_id', $configId)
                 ->where('warehouse_id', $warehouseId)
-                ->latest()
+                ->latest('id')
                 ->first();
 
             // Define operators for processes
