@@ -155,6 +155,8 @@ Route::prefix('/inventory')->middleware([HeaderAuthenticationMiddleware::class])
                 ->parameters(['' => 'id']);
         });
         Route::get('items', [PurchaseItemController::class, 'index'])->name('purchaseItem');
+        Route::get('items-for-damage/{stock_item_id}', [PurchaseItemController::class, 'itemsForDamage']);
+        Route::post('manual/damage-process/{stock_item_id}', [PurchaseItemController::class, 'manualDamageProcess']);
         Route::apiResource('', PurchaseController::class)->parameters(['' => 'id']);
         Route::get('edit/{id}', [PurchaseController::class, 'edit'])->name('edit');
         Route::get('copy/{id}', [PurchaseController::class, 'purchaseCopy'])->name('copy');

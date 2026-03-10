@@ -114,6 +114,32 @@ class PurchaseItemModel extends Model
         return $data;
 
     }
+    public static function getPurchaseItemsForDamage($stockItemId, $domain)
+    {
+        return self::query()
+            ->join('inv_stock', 'inv_stock.id', '=', 'inv_purchase_item.stock_item_id')
+            ->join('inv_purchase', 'inv_purchase.id', '=', 'inv_purchase_item.purchase_id')
+            ->where('inv_purchase_item.stock_item_id', $stockItemId)
+            ->where('inv_purchase_item.config_id', $domain['config_id'])
+            ->whereNull('inv_purchase_item.parent_sales_item_id')
+            ->where('inv_purchase_item.remaining_quantity', '>', 0)
+            ->select([
+                'inv_purchase_item.id',
+                'inv_purchase_item.id as purchase_item_id',
+                'inv_purchase_item.purchase_id',
+                'inv_purchase_item.warehouse_id',
+                'inv_purchase_item.remaining_quantity',
+                'inv_purchase_item.purchase_price',
+                'inv_purchase_item.sales_price',
+                'inv_stock.name',
+                'inv_purchase_item.expired_date',
+                'inv_purchase.invoice',
+                DB::raw('DATE_FORMAT(inv_purchase.created_at, "%d-%M-%Y") as created_date')
+            ])
+            ->orderBy('inv_purchase.id', 'ASC')
+            ->get()
+            ->toArray();
+    }
 
     public static function getProductGroupPrice($entity)
     {
