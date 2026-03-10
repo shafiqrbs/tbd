@@ -140,7 +140,6 @@ class PurchaseItemController extends Controller
                     }
                 ])
                 ->findOrFail($stock_item_id);
-            dump($stockItem);
 
             if ($itemNatureType === 'Stockable'){
                 if (count($items) > 0) {
@@ -281,7 +280,7 @@ class PurchaseItemController extends Controller
 
             return response()->json([
                 'status'  => 200,
-                'message' => 'Sales return processed successfully'
+                'message' => 'Manual damage processed successfully'
             ]);
 
         } catch (\Throwable $e) {
