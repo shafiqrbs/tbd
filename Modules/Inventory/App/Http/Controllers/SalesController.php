@@ -592,6 +592,17 @@ class SalesController extends Controller
         }
     }
 
+    public function automaticPurchaseItemDeduct(Request $request)
+    {
+        $stock_item_id = $request->stock_item_id;
+        $sales_item_id = $request->sales_item_id;
+        $quantity = $request->quantity;
+        $domain = $this->domain;
+
+        $autoDeduct = PurchaseItemModel::saleItemsWisePurchaseItemsAutoDeduct($stock_item_id, $sales_item_id, $quantity ,$domain);
+
+    }
+
 
     /**
      * @throws \Throwable

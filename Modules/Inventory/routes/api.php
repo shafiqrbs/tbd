@@ -135,6 +135,7 @@ Route::prefix('/inventory')->middleware([HeaderAuthenticationMiddleware::class])
         Route::get('edit/{id}', [SalesController::class, 'edit'])->name('edit');
         Route::get('copy/{id}', [SalesController::class, 'salesCopy'])->name('copy');
         Route::get('domain-customer/{id}', [SalesController::class, 'domainCustomerSales'])->name('get_domain_customer_sales');
+        Route::get('auto-deduct/purchase-item', [SalesController::class, 'automaticPurchaseItemDeduct']);
         Route::get('not-domain-customer/{id}', [SalesController::class, 'notDomainCustomerSales'])->name('get_not_domain_customer_sales');
         Route::get('requisition/reconciliation-items', [SalesController::class, 'requisitionReconciliationItems']);
         Route::post('requisition/reconciliation-items', [SalesController::class, 'requisitionReconciliationItemsProcess']);

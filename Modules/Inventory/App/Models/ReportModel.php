@@ -132,6 +132,7 @@ class ReportModel extends Model
         $skip = isset($page) && $page != '' ? (int)$page * $perPage : 0;
 
         $entities = PurchaseItemModel::where('inv_purchase.config_id',$configId)
+            ->whereNotNull('inv_purchase.approved_by_id')
             ->join('inv_purchase', 'inv_purchase.id', '=', 'inv_purchase_item.purchase_id')
             ->join('inv_stock', 'inv_stock.id', '=', 'inv_purchase_item.stock_item_id')
             ->join('inv_product', 'inv_product.id', '=', 'inv_stock.product_id')

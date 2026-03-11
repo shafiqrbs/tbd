@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 
 class PurchaseItemModel extends Model
 {
@@ -122,6 +123,7 @@ class PurchaseItemModel extends Model
             ->where('inv_purchase_item.stock_item_id', $stockItemId)
             ->where('inv_purchase_item.config_id', $domain['config_id'])
             ->whereNull('inv_purchase_item.parent_sales_item_id')
+            ->whereNotNull('inv_purchase.approved_by_id')
             ->where('inv_purchase_item.remaining_quantity', '>', 0)
             ->select([
                 'inv_purchase_item.id',
@@ -193,6 +195,72 @@ class PurchaseItemModel extends Model
                 + ($item->purchase_return_quantity ?? 0)
                 + ($item->damage_quantity ?? 0)
             );
+    }
+
+    public static function saleItemsWisePurchaseItemsAutoDeduct($stock_item_id, $sales_item_id, $quantity, $domain)
+    {
+        if (empty($stock_item_id) || empty($sales_item_id) || empty($quantity)) {
+            return false;
+        }
+
+        $findStockItem = StockItemModel::find($stock_item_id);
+        if (!$findStockItem) {
+            return false;
+        }
+
+        $findSalesItem = SalesItemModel::find($sales_item_id);
+        if (!$findSalesItem) {
+            return false;
+        }
+
+        $getPurchaseItems = self::join('inv_purchase', 'inv_purchase.id', '=', 'inv_purchase_item.purchase_id')
+            ->where('inv_purchase_item.config_id', $domain['config_id'])
+            ->where('inv_purchase_item.stock_item_id', $stock_item_id)
+            ->where('inv_purchase_item.remaining_quantity', '>', 0)
+            ->whereNotNull('inv_purchase.approved_by_id')
+            ->where(function ($query) {
+                $query->whereNull('inv_purchase_item.expired_date')
+                    ->orWhere('inv_purchase_item.expired_date', '>', now());
+            })
+            ->orderByRaw('inv_purchase_item.expired_date IS NULL')
+            ->orderBy('inv_purchase_item.expired_date', 'asc')
+            ->orderBy('inv_purchase_item.id', 'asc')
+            ->select([
+                'inv_purchase_item.id',
+                'inv_purchase_item.remaining_quantity',
+                'inv_purchase_item.sales_quantity',
+            ])
+            ->get();
+
+        $remainingToIssue = $quantity;
+
+        foreach ($getPurchaseItems as $row) {
+
+            if ($remainingToIssue <= 0) {
+                break;
+            }
+
+            $purchaseItem = self::find($row->id);
+
+            $availableQty = $purchaseItem->remaining_quantity;
+
+            $issueQty = min($availableQty, $remainingToIssue);
+
+            $purchaseItem->sales_quantity = ($purchaseItem->sales_quantity ?? 0) + $issueQty;
+            $purchaseItem->remaining_quantity = $availableQty - $issueQty;
+
+            $purchaseItem->save();
+
+            $remainingToIssue -= $issueQty;
+        }
+
+        if ($remainingToIssue > 0) {
+            throw ValidationException::withMessages([
+                'stock' => ["{$findStockItem->name} stock low."]
+            ]);
+        }
+
+        return true;
     }
 
 

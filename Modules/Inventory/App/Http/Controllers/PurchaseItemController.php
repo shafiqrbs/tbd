@@ -120,175 +120,203 @@ class PurchaseItemController extends Controller
             'data' => $items,
         ]);
     }
-
     public function manualDamageProcess(Request $request, $stock_item_id)
     {
         DB::beginTransaction();
 
         try {
+
+            $request->validate([
+                'item_nature_type' => 'required|string',
+                'data' => 'required|array|min:1',
+                'data.*.damage_quantity' => 'required|numeric|min:0.01'
+            ]);
+
             $itemNatureType = $request->input('item_nature_type');
             $items = $request->input('data');
             $domain = $this->domain;
 
-//            $stockItem = StockItemModel::findOrFail($stock_item_id);
+
+            // GET STOCK ITEM
             $stockItem = StockItemModel::with([
-                    'currentWarehouseStock' => function ($q) use ($domain) {
-                        if (!empty($domain['config_id'])) {
-                            $q->where('config_id', $domain['config_id']);
-                        }
-                        $q->with('warehouse:id,name');
+                'currentWarehouseStock' => function ($q) use ($domain) {
+                    if (!empty($domain['config_id'])) {
+                        $q->where('config_id', $domain['config_id']);
                     }
-                ])
-                ->findOrFail($stock_item_id);
-
-            if ($itemNatureType === 'Stockable'){
-                if (count($items) > 0) {
-                    $damage = DamageModel::create([
-                        'config_id' => $this->domain['config_id'],
-                        'created_by_id' => $this->domain['user_id'] ?? null,
-                        'quantity' => 0,
-                        'sub_total' => 0,
-                        'damage_type' => 'Manual-purchase',
-                        'process' => 'Created',
-                        'damage_mode' => 'Damage',
-                    ]);
-                    $totalDamageQty = 0;
-                    $totalDamageAmt = 0;
-                    foreach ($items as $item) {
-                        $purchaseItem = PurchaseItemModel::findOrFail($item['purchase_item_id']);
-
-                        $damageItem = DamageItemModel::create([
-                            'config_id' => $this->domain['config_id'],
-                            'warehouse_id' => $purchaseItem->warehouse_id,
-                            'damage_mode' => 'Manual-purchase',
-                            'purchase_item_id' => $purchaseItem->id,
-                            'damage_id' => $damage->id,
-                            'quantity' => $item['damage_quantity'],
-                            'price' => $purchaseItem->purchase_price,
-                            'purchase_price' => $purchaseItem->purchase_price,
-                            'sub_total' => $item['damage_quantity'] * $purchaseItem->purchase_price,
-                            'process' => 'Completed'
-                        ]);
-
-                            StockItemHistoryModel::openingStockQuantity(
-                                (object)[
-                                    'id' => $damageItem->id,
-                                    'stock_item_id' => $stock_item_id,
-                                    'name' => $stockItem->name,
-                                    'config_id' => $this->domain['config_id'],
-                                    'warehouse_id' => $purchaseItem->warehouse_id,
-                                    'quantity' => $item['damage_quantity'],
-                                ],
-                                'damage',
-                                $this->domain
-                            );
-
-                            DailyStockService::maintainDailyStock(
-                                date: now()->toDateString(),
-                                field: 'damage_quantity',
-                                configId: $this->domain['config_id'],
-                                warehouseId: $purchaseItem->warehouse_id,
-                                stockItemId: $stockItem->id,
-                                quantity: $item['damage_quantity']
-                            );
-
-                            $purchaseItem->update([
-                                'damage_quantity' => ($purchaseItem->damage_quantity ?? 0) + $item['damage_quantity'],
-                                'remaining_quantity' => ($purchaseItem->remaining_quantity ?? 0) - $item['damage_quantity']
-                            ]);
-
-                            $totalDamageQty += $item['damage_quantity'];
-                            $totalDamageAmt += $item['damage_quantity'] * $purchaseItem->purchase_price;
-
-                            $damage->update([
-                                'quantity' => $totalDamageQty,
-                                'sub_total' => $totalDamageAmt,
-                                'process' => 'Approved'
-                            ]);
-                        }
-                    }
+                    $q->with('warehouse:id,name');
                 }
+            ])->findOrFail($stock_item_id);
 
-            /*if ($itemNatureType === 'Production'){
-                if (count($items) > 0) {
-                    $damage = DamageModel::create([
-                        'config_id' => $this->domain['config_id'],
-                        'created_by_id' => $this->domain['user_id'] ?? null,
-                        'quantity' => 0,
-                        'sub_total' => 0,
-                        'damage_type' => 'Manual-production',
-                        'process' => 'Created',
-                        'damage_mode' => 'Damage',
-                    ]);
-                    $totalDamageQty = 0;
-                    $totalDamageAmt = 0;
-                    foreach ($items as $item) {
+            // CREATE DAMAGE MASTER
+            $damage = DamageModel::create([
+                'config_id' => $domain['config_id'],
+                'created_by_id' => $domain['user_id'] ?? null,
+                'quantity' => 0,
+                'sub_total' => 0,
+                'damage_type' => $itemNatureType === 'Stockable'
+                    ? 'Manual-purchase'
+                    : 'Manual-production',
+                'process' => 'Created',
+                'damage_mode' => 'Damage',
+            ]);
 
-                        $damageItem = DamageItemModel::create([
-                            'config_id' => $this->domain['config_id'],
-                            'warehouse_id' => $purchaseItem->warehouse_id,
-                            'damage_mode' => 'Manual-purchase',
-                            'purchase_item_id' => $purchaseItem->id,
-                            'damage_id' => $damage->id,
-                            'quantity' => $item['damage_quantity'],
-                            'price' => $purchaseItem->purchase_price,
-                            'purchase_price' => $purchaseItem->purchase_price,
-                            'sub_total' => $item['damage_quantity'] * $purchaseItem->purchase_price,
-                            'process' => 'Completed'
-                        ]);
+            $totalDamageQty = 0;
+            $totalDamageAmt = 0;
 
-                            StockItemHistoryModel::openingStockQuantity(
-                                (object)[
-                                    'id' => $damageItem->id,
-                                    'purchase_item_id' => $purchaseItem->id,
-                                    'name' => $stockItem->name,
-                                    'config_id' => $this->domain['config_id'],
-                                    'warehouse_id' => $purchaseItem->warehouse_id,
-                                    'quantity' => $item['damage_quantity'],
-                                ],
-                                'damage',
-                                $this->domain
-                            );
 
-                            DailyStockService::maintainDailyStock(
-                                date: now()->toDateString(),
-                                field: 'damage_quantity',
-                                configId: $this->domain['config_id'],
-                                warehouseId: $purchaseItem->warehouse_id,
-                                stockItemId: $stockItem->id,
-                                quantity: $item['damage_quantity']
-                            );
+            // STOCKABLE ITEMS DAMAGE
+            if ($itemNatureType === 'Stockable') {
 
-                            $purchaseItem->update([
-                                'damage_quantity' => ($purchaseItem->damage_quantity ?? 0) + $item['damage_quantity']
-                            ]);
+                $purchaseItemIds = collect($items)->pluck('purchase_item_id')->toArray();
 
-                            $totalDamageQty += $item['damage_quantity'];
-                            $totalDamageAmt += $item['damage_quantity'] * $purchaseItem->purchase_price;
+                $purchaseItems = PurchaseItemModel::whereIn('id', $purchaseItemIds)
+                    ->get()
+                    ->keyBy('id');
 
-                            $damage->update([
-                                'quantity' => $totalDamageQty,
-                                'sub_total' => $totalDamageAmt,
-                                'process' => 'Approved'
-                            ]);
-                        }
+                foreach ($items as $item) {
+
+                    $purchaseItem = $purchaseItems[$item['purchase_item_id']] ?? null;
+
+                    if (!$purchaseItem) {
+                        continue;
                     }
-                }*/
 
+                    $damageQty = $item['damage_quantity'];
+                    $price = $purchaseItem->purchase_price;
+
+                    $damageItem = DamageItemModel::create([
+                        'config_id' => $domain['config_id'],
+                        'warehouse_id' => $purchaseItem->warehouse_id,
+                        'damage_mode' => 'Manual-purchase',
+                        'purchase_item_id' => $purchaseItem->id,
+                        'damage_id' => $damage->id,
+                        'quantity' => $damageQty,
+                        'price' => $price,
+                        'purchase_price' => $price,
+                        'sub_total' => $damageQty * $price,
+                        'process' => 'Completed'
+                    ]);
+
+                    /* ----- STOCK HISTORY ----- */
+
+                    StockItemHistoryModel::openingStockQuantity(
+                        (object)[
+                            'id' => $damageItem->id,
+                            'stock_item_id' => $stock_item_id,
+                            'name' => $stockItem->name,
+                            'config_id' => $domain['config_id'],
+                            'warehouse_id' => $purchaseItem->warehouse_id,
+                            'quantity' => $damageQty,
+                        ],
+                        'damage',
+                        $domain
+                    );
+
+                    /* ----- DAILY STOCK ----- */
+
+                    DailyStockService::maintainDailyStock(
+                        date: now()->toDateString(),
+                        field: 'damage_quantity',
+                        configId: $domain['config_id'],
+                        warehouseId: $purchaseItem->warehouse_id,
+                        stockItemId: $stockItem->id,
+                        quantity: $damageQty
+                    );
+
+                    /* ----- UPDATE PURCHASE ITEM ----- */
+
+                    $purchaseItem->update([
+                        'damage_quantity' => ($purchaseItem->damage_quantity ?? 0) + $damageQty,
+                        'remaining_quantity' => ($purchaseItem->remaining_quantity ?? 0) - $damageQty
+                    ]);
+
+                    $totalDamageQty += $damageQty;
+                    $totalDamageAmt += $damageQty * $price;
+                }
+            }
+
+
+            // PRODUCTION ITEMS DAMAGE
+            if ($itemNatureType === 'Production') {
+
+                foreach ($items as $item) {
+
+                    if (empty($item['warehouse_id'])) {
+                        continue;
+                    }
+
+                    $damageQty = $item['damage_quantity'];
+                    $price = $stockItem->purchase_price;
+
+                    $damageItem = DamageItemModel::create([
+                        'config_id' => $domain['config_id'],
+                        'warehouse_id' => $item['warehouse_id'],
+                        'damage_mode' => 'Manual-production',
+                        'stock_item_id' => $stockItem->id,
+                        'damage_id' => $damage->id,
+                        'quantity' => $damageQty,
+                        'price' => $price,
+                        'purchase_price' => $price,
+                        'sub_total' => $damageQty * $price,
+                        'process' => 'Completed'
+                    ]);
+
+                    /* ----- STOCK HISTORY ----- */
+
+                    StockItemHistoryModel::openingStockQuantity(
+                        (object)[
+                            'id' => $damageItem->id,
+                            'stock_item_id' => $stockItem->id,
+                            'name' => $stockItem->name,
+                            'config_id' => $domain['config_id'],
+                            'warehouse_id' => $item['warehouse_id'],
+                            'quantity' => $damageQty,
+                        ],
+                        'damage',
+                        $domain
+                    );
+
+                    /* ----- DAILY STOCK ----- */
+
+                    DailyStockService::maintainDailyStock(
+                        date: now()->toDateString(),
+                        field: 'damage_quantity',
+                        configId: $domain['config_id'],
+                        warehouseId: $item['warehouse_id'],
+                        stockItemId: $stockItem->id,
+                        quantity: $damageQty
+                    );
+
+                    $totalDamageQty += $damageQty;
+                    $totalDamageAmt += $damageQty * $price;
+                }
+            }
+
+            /* -----------------------------
+             UPDATE DAMAGE MASTER
+            ------------------------------*/
+
+            $damage->update([
+                'quantity' => $totalDamageQty,
+                'sub_total' => $totalDamageAmt,
+                'process' => 'Approved'
+            ]);
 
             DB::commit();
 
             return response()->json([
-                'status'  => 200,
+                'status' => 200,
                 'message' => 'Manual damage processed successfully'
             ]);
 
         } catch (\Throwable $e) {
+
             DB::rollBack();
+
             return response()->json([
-                'status'  => 500,
+                'status' => 500,
                 'message' => 'Processing failed',
-                'error'   => $e->getMessage()
+                'error' => $e->getMessage()
             ], 500);
         }
     }
