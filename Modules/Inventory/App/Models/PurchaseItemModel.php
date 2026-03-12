@@ -197,7 +197,7 @@ class PurchaseItemModel extends Model
             );
     }
 
-    public static function saleItemsWisePurchaseItemsAutoDeduct($stock_item_id, $sales_item_id, $quantity, $domain)
+    public static function saleItemsWisePurchaseItemsAutoDeduct($stock_item_id, $sales_item_id, $quantity, $warehouse_id, $domain)
     {
         if (empty($stock_item_id) || empty($sales_item_id) || empty($quantity)) {
             return false;
@@ -216,6 +216,7 @@ class PurchaseItemModel extends Model
         $getPurchaseItems = self::join('inv_purchase', 'inv_purchase.id', '=', 'inv_purchase_item.purchase_id')
             ->where('inv_purchase_item.config_id', $domain['config_id'])
             ->where('inv_purchase_item.stock_item_id', $stock_item_id)
+            ->where('inv_purchase_item.warehouse_id', $warehouse_id)
             ->where('inv_purchase_item.remaining_quantity', '>', 0)
             ->whereNotNull('inv_purchase.approved_by_id')
             ->where(function ($query) {
@@ -243,7 +244,6 @@ class PurchaseItemModel extends Model
             $purchaseItem = self::find($row->id);
 
             $availableQty = $purchaseItem->remaining_quantity;
-
             $issueQty = min($availableQty, $remainingToIssue);
 
             $purchaseItem->sales_quantity = ($purchaseItem->sales_quantity ?? 0) + $issueQty;

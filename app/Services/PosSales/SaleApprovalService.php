@@ -33,8 +33,19 @@ final class SaleApprovalService
                 stockItemId: $item->stock_item_id,
                 quantity: (int)$item->quantity
             );
+
+            // update for set sales quantity in purchase item for batch wise sales
             if ($item->purchase_item_id) {
-                PurchaseItemModel::updateSalesQuantity($item->purchase_item_id, $item->quantity);
+                PurchaseItemModel::updateSalesQuantity($item->purchase_item_id,$item->quantity);
+            }else{
+                // AUTO DEDUCT PURCHASE AMOUNT
+                PurchaseItemModel::saleItemsWisePurchaseItemsAutoDeduct(
+                    stock_item_id: $item->stock_item_id,
+                    sales_item_id: $item->id,
+                    quantity: $item->quantity,
+                    warehouse_id: $item->warehouse_id,
+                    domain: $domain
+                );
             }
         }
         AccountJournalModel::insertPosSalesAccountJournal($domain, $sale->id);

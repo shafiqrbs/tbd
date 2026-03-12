@@ -306,6 +306,15 @@ class SalesController extends Controller
                         // update for set sales quantity in purchase item for batch wise sales
                         if ($item->purchase_item_id) {
                             PurchaseItemModel::updateSalesQuantity($item->purchase_item_id,$item->quantity);
+                        }else{
+                            // AUTO DEDUCT PURCHASE AMOUNT
+                            PurchaseItemModel::saleItemsWisePurchaseItemsAutoDeduct(
+                                stock_item_id: $item->stock_item_id,
+                                sales_item_id: $item->id,
+                                quantity: $item->quantity,
+                                warehouse_id: $item->warehouse_id,
+                                domain: $this->domain
+                            );
                         }
                     }
                 }
@@ -801,6 +810,15 @@ class SalesController extends Controller
                     $item->purchase_item_id,
                     $item->quantity
                 );
+            }else{
+                // AUTO DEDUCT PURCHASE AMOUNT
+                PurchaseItemModel::saleItemsWisePurchaseItemsAutoDeduct(
+                    stock_item_id: $item->stock_item_id,
+                    sales_item_id: $item->id,
+                    quantity: $item->quantity,
+                    warehouse_id: $item->warehouse_id,
+                    domain: $this->domain
+                );
             }
         }
 
@@ -839,6 +857,15 @@ class SalesController extends Controller
                     // update for set sales quantity in purchase item for batch wise sales
                     if ($item->purchase_item_id) {
                         PurchaseItemModel::updateSalesQuantity($item->purchase_item_id,$item->quantity);
+                    }else{
+                        // AUTO DEDUCT PURCHASE AMOUNT
+                        PurchaseItemModel::saleItemsWisePurchaseItemsAutoDeduct(
+                            stock_item_id: $item->stock_item_id,
+                            sales_item_id: $item->id,
+                            quantity: $item->quantity,
+                            warehouse_id: $item->warehouse_id,
+                            domain: $this->domain
+                        );
                     }
                 }
             }
@@ -895,6 +922,20 @@ class SalesController extends Controller
                         stockItemId: $item->stock_item_id,
                         quantity: $item->quantity
                     );
+
+                    // update for set sales quantity in purchase item for batch wise sales
+                    if ($item->purchase_item_id) {
+                        PurchaseItemModel::updateSalesQuantity($item->purchase_item_id,$item->quantity);
+                    }else{
+                        // AUTO DEDUCT PURCHASE AMOUNT
+                        PurchaseItemModel::saleItemsWisePurchaseItemsAutoDeduct(
+                            stock_item_id: $item->stock_item_id,
+                            sales_item_id: $item->id,
+                            quantity: $item->quantity,
+                            warehouse_id: $item->warehouse_id,
+                            domain: $this->domain
+                        );
+                    }
                 }
             }
 
