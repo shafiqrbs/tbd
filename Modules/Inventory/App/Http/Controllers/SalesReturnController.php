@@ -482,6 +482,7 @@ class SalesReturnController extends Controller
                         if ($getPurchaseItem) {
                             $getPurchaseItem->update([
                                 'sales_return_quantity' => $totalReturnQuantity,
+                                'remaining_quantity' => $totalReturnQuantity + $getPurchaseItem->remaining_quantity,
                             ]);
                         }
                     }
