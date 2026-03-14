@@ -467,6 +467,25 @@ class SalesReturnController extends Controller
                 $salesItem->update([
                     'return_quantity' => ($salesItem->return_quantity ?? 0) + $item->stock_entry_quantity
                 ]);
+
+                // sync purchase sales_return_quantity
+                if (isset($returnItem->sales_item_id)) {
+                    $getSalesItems = SalesItemModel::find($returnItem->sales_item_id);
+
+                    if ($getSalesItems && isset($getSalesItems->purchase_item_id)) {
+
+                        $totalReturnQuantity = SalesItemModel::where('purchase_item_id', $getSalesItems->purchase_item_id)
+                            ->sum('return_quantity');
+
+                        $getPurchaseItem = PurchaseItemModel::find($getSalesItems->purchase_item_id);
+
+                        if ($getPurchaseItem) {
+                            $getPurchaseItem->update([
+                                'sales_return_quantity' => $totalReturnQuantity,
+                            ]);
+                        }
+                    }
+                }
             }
 
             // ----------------------------
