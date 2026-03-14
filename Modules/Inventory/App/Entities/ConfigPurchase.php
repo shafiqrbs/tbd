@@ -72,6 +72,13 @@ class ConfigPurchase
      *
      * @ORM\Column(type="boolean",options={"default"="false"})
      */
+    private $purchaseOnline;
+
+    /**
+     * @var boolean
+     *
+     * @ORM\Column(type="boolean",options={"default"="false"})
+     */
     private $showProduct;
 
     /**

@@ -111,6 +111,13 @@ class ConfigSales
     /**
      * @var boolean
      *
+     * @ORM\Column(type="boolean",options={"default"="false"})
+     */
+    private $salesOnline;
+
+    /**
+     * @var boolean
+     *
      * @ORM\Column(type="boolean",options={"default"="true"})
      */
     private $zeroStock;
