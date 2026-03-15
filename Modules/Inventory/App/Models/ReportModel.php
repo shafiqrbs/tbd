@@ -132,7 +132,7 @@ class ReportModel extends Model
         ];
         $salesOverview = [];
 
-        $salesOverview['totalOpeningBalance'] = $sales->totalInvoices;
+        $salesOverview['totalInvoices'] = $sales->totalInvoices;
         $salesOverview['totalSales'] = $sales->totalSales;
         $salesOverview['total'] = $sales->total;
         $salesOverview['receive'] = $sales->totalPayment;
