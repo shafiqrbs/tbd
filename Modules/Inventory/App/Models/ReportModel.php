@@ -85,23 +85,51 @@ class ReportModel extends Model
             ->selectRaw('SUM(s.sub_total) as sub_total')
             ->first();
 
-        $subQuery = DB::table('inv_stock_item_history')
+
+        $sameDateSub = DB::table('inv_stock_item_history')
             ->selectRaw('MAX(id) as id')
-         //   ->where('warehouse_id', $warehouseId)
             ->where('config_id', $inventoryConfigId)
-            ->where('created_at', '<', $start_date)
-            ->where('closing_balance', '>=', 0)
+            ->whereDate('created_at', $start_date)
             ->groupBy('stock_item_id');
 
-        $stocks = DB::table('inv_stock_item_history as h')
-            ->joinSub($subQuery, 'latest', function ($join) {
-                $join->on('h.id', '=', 'latest.id');
+        $prevDateSub = DB::table('inv_stock_item_history')
+            ->selectRaw('MAX(id) as id')
+            ->where('config_id', $inventoryConfigId)
+            ->whereDate('created_at', '<', $start_date)
+            ->groupBy('stock_item_id');
+
+        $totalClosingBalance = DB::table('inv_stock_item_history as h')
+            ->joinSub($sameDateSub, 'sd', function ($join) {
+                $join->on('h.id', '=', 'sd.id');
             })
-            ->selectRaw('
-            SUM(h.opening_quantity) as totalOpeningQuantity,
-            SUM(h.opening_balance) as totalOpeningBalance,
-            SUM(h.closing_quantity) as totalClosingQuantity,
-            SUM(h.closing_balance) as totalClosingBalance')->first();
+            ->sum('h.closing_balance');
+
+
+        $totalClosingQuantity = DB::table('inv_stock_item_history as h')
+            ->joinSub($sameDateSub, 'sd', function ($join) {
+                $join->on('h.id', '=', 'sd.id');
+            })
+            ->sum('h.closing_quantity');
+
+        $totalOpeningBalance = DB::table('inv_stock_item_history as h')
+            ->joinSub($prevDateSub, 'pd', function ($join) {
+                $join->on('h.id', '=', 'pd.id');
+            })
+            ->sum('h.closing_balance');
+
+
+        $totalOpeningQuantity = DB::table('inv_stock_item_history as h')
+            ->joinSub($prevDateSub, 'pd', function ($join) {
+                $join->on('h.id', '=', 'pd.id');
+            })
+            ->sum('h.opening_quantity');
+
+        $stocks = [
+            'totalOpeningQuantity' => $totalOpeningQuantity,
+            'totalOpeningBalance' => $totalOpeningBalance,
+            'totalClosingQuantity' => $totalClosingQuantity,
+            'totalClosingBalance' => $totalClosingBalance
+        ];
 
 
         $data = ['sales' => $sales,'purchase' => $purchase , 'methods' => $method,'transactionModes' => $transactionModes,'topSalesItem' => $topSalesItem, 'damage' => $damage->sub_total, 'salesReturn' => $salesReturn->sub_total,'stocks' => $stocks];
