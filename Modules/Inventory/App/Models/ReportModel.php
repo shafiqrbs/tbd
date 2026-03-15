@@ -44,7 +44,7 @@ class ReportModel extends Model
             ->orderBy('quantity','DESC')
             ->limit(10)
             ->when($start_date && $end_date, fn($q) => $q->whereBetween('s.created_at', [$start_date, $end_date]))
-            ->get();
+            ->first();
 
         $sales = DB::table('inv_sales as s')->where('s.config_id', $inventoryConfigId)
             ->selectRaw('ROUND(COUNT(s.id)) as totalInvoices,ROUND(SUM(s.sub_total)) as totalSales,ROUND(SUM(s.total)) as total,ROUND(SUM(s.payment)) as totalPayment,ROUND(SUM(s.total) - SUM(s.payment)) as totalDue, ROUND(SUM(s.discount)) as totalDiscount')
@@ -130,10 +130,23 @@ class ReportModel extends Model
             'totalClosingQuantity' => $totalClosingQuantity,
             'totalClosingBalance' => $totalClosingBalance
         ];
+        $salesOverview = [];
+
+        $salesOverview['totalOpeningBalance'] = $sales->totalInvoices;
+        $salesOverview['totalSales'] = $sales->totalSales;
+        $salesOverview['total'] = $sales->total;
+        $salesOverview['receive'] = $sales->totalPayment;
+        $salesOverview['totalDue'] = $sales->totalDue;
+        $salesOverview['totalDiscount'] = $sales->totalDiscount;
+        $salesOverview['totalOpeningBalance'] = $totalOpeningQuantity;
+        $salesOverview['totalClosingBalance'] = $totalClosingBalance;
+        $salesOverview['wastage'] = $damage->sub_total;
+        $salesOverview['return'] = $salesReturn->sub_total;
+
 
 
         $data = ['sales' => $sales,'purchase' => $purchase , 'methods' => $method,'transactionModes' => $transactionModes,'topSalesItem' => $topSalesItem, 'damage' => $damage->sub_total, 'salesReturn' => $salesReturn->sub_total,'stocks' => $stocks];
-        return $data;
+        return $salesOverview;
 
 
     }
