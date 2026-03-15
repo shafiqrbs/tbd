@@ -73,7 +73,38 @@ class ReportModel extends Model
             ->groupBy('tm.method_id')
             ->get();
 
-        $data = ['sales' => $sales,'purchase' => $purchase , 'methods' => $method,'transactionModes' => $transactionModes,'topSalesItem' => $topSalesItem];
+        $damage = DB::table('inv_damage_item as s')->where('s.config_id', $inventoryConfigId)
+            // ->when($start_date && $end_date, fn($q) => $q->whereBetween('s.created_at', [$start_date, $end_date]))
+            ->selectRaw('SUM(s.sub_total) as sub_total')
+            ->first();
+
+        $salesReturn = DB::table('inv_sales_return_item as s')
+            ->join('inv_sales_return as sr', 'sr.id', '=', 's.sales_return_id')
+            ->where('sr.config_id', $inventoryConfigId)
+            // ->when($start_date && $end_date, fn($q) => $q->whereBetween('sr.created_at', [$start_date, $end_date]))
+            ->selectRaw('SUM(s.sub_total) as sub_total')
+            ->first();
+
+        $subQuery = DB::table('inv_stock_item_history')
+            ->selectRaw('MAX(id) as id')
+         //   ->where('warehouse_id', $warehouseId)
+            ->where('config_id', $inventoryConfigId)
+            ->where('created_at', '<', $start_date)
+            ->where('closing_balance', '>=', 0)
+            ->groupBy('stock_item_id');
+
+        $stocks = DB::table('inv_stock_item_history as h')
+            ->joinSub($subQuery, 'latest', function ($join) {
+                $join->on('h.id', '=', 'latest.id');
+            })
+            ->selectRaw('
+            SUM(h.opening_quantity) as totalOpeningQuantity,
+            SUM(h.opening_balance) as totalOpeningBalance,
+            SUM(h.closing_quantity) as totalClosingQuantity,
+            SUM(h.closing_balance) as totalClosingBalance')->first();
+
+
+        $data = ['sales' => $sales,'purchase' => $purchase , 'methods' => $method,'transactionModes' => $transactionModes,'topSalesItem' => $topSalesItem, 'damage' => $damage->sub_total, 'salesReturn' => $salesReturn->sub_total,'stocks' => $stocks];
         return $data;
 
 
