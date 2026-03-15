@@ -143,10 +143,8 @@ class ReportModel extends Model
         $salesOverview['wastage'] = $damage->sub_total;
         $salesOverview['return'] = $salesReturn->sub_total;
 
-
-
-        $data = ['sales' => $sales,'purchase' => $purchase , 'methods' => $method,'transactionModes' => $transactionModes,'topSalesItem' => $topSalesItem, 'damage' => $damage->sub_total, 'salesReturn' => $salesReturn->sub_total,'stocks' => $stocks];
-        return $salesOverview;
+        $data = ['sales' => $salesOverview,'purchase' => $purchase , 'methods' => $method,'transactionModes' => $transactionModes,'topSalesItem' => $topSalesItem, 'damage' => $damage->sub_total, 'salesReturn' => $salesReturn->sub_total,'stocks' => $stocks];
+        return $data;
 
 
     }
