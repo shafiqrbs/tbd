@@ -55,7 +55,7 @@ class ReportModel extends Model
         $purchase = DB::table('inv_purchase as s')->where('s.config_id', $inventoryConfigId)
             ->selectRaw('COUNT(s.id) as totalInvoices,SUM(s.sub_total) as totalPurchase,SUM(s.total) as total,SUM(s.payment) as totalPayment,(SUM(s.total) - SUM(s.payment)) as totalDue, SUM(s.discount) as totalDiscount')
             ->when($start_date && $end_date, fn($q) => $q->whereBetween('s.created_at', [$start_date, $end_date]))
-            ->get();
+            ->first();
 
         $transactionModes = DB::table('inv_sales as s')->where('s.config_id', $inventoryConfigId)
            // ->when($start_date && $end_date, fn($q) => $q->whereBetween('s.created_at', [$start_date, $end_date]))
@@ -75,12 +75,19 @@ class ReportModel extends Model
             ->get();
 
         $damage = DB::table('inv_damage_item as s')->where('s.config_id', $inventoryConfigId)
-            // ->when($start_date && $end_date, fn($q) => $q->whereBetween('s.created_at', [$start_date, $end_date]))
+            ->when($start_date && $end_date, fn($q) => $q->whereBetween('s.created_at', [$start_date, $end_date]))
             ->selectRaw('SUM(s.sub_total) as sub_total')
             ->first();
 
         $salesReturn = DB::table('inv_sales_return_item as s')
             ->join('inv_sales_return as sr', 'sr.id', '=', 's.sales_return_id')
+            ->where('sr.config_id', $inventoryConfigId)
+            // ->when($start_date && $end_date, fn($q) => $q->whereBetween('sr.created_at', [$start_date, $end_date]))
+            ->selectRaw('SUM(s.sub_total) as sub_total')
+            ->first();
+
+        $purchaseReturn = DB::table('inv_purchase_return_item as s')
+            ->join('inv_purchase_return as sr', 'sr.id', '=', 's.purchase_return_id')
             ->where('sr.config_id', $inventoryConfigId)
             // ->when($start_date && $end_date, fn($q) => $q->whereBetween('sr.created_at', [$start_date, $end_date]))
             ->selectRaw('SUM(s.sub_total) as sub_total')
@@ -118,12 +125,13 @@ class ReportModel extends Model
         $salesOverview['totalInvoices'] = $sales->totalInvoices;
         $salesOverview['totalSales'] = $sales->totalSales;
         $salesOverview['total'] = $sales->total;
-        $salesOverview['receive'] = $sales->totalPayment;
-        $salesOverview['totalDue'] = $sales->totalDue;
+        $salesOverview['totalPurchase'] = $purchase->totalPurchase;
         $salesOverview['totalDiscount'] = $sales->totalDiscount;
         $salesOverview['totalOpeningBalance'] = $totalOpeningQuantity;
         $salesOverview['wastage'] = $damage->sub_total;
-        $salesOverview['return'] = $salesReturn->sub_total;
+        $salesOverview['return'] = $purchaseReturn->sub_total;
+
+        $salesOverview['totalClosingBalance'] = (($totalOpeningQuantity + $purchase->total)-($sales->totalSales+$damage->sub_total+$purchaseReturn->sub_total));
 
         $data = ['sales' => $salesOverview,'purchase' => $purchase , 'methods' => $method,'transactionModes' => $transactionModes,'topSalesItem' => $topSalesItem, 'damage' => $damage->sub_total, 'salesReturn' => $salesReturn->sub_total,'stocks' => $stocks];
         return $data;
