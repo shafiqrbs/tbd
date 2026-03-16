@@ -3,6 +3,7 @@
 namespace Modules\Inventory\App\Models;
 
 use App\Helpers\DateHelper;
+use App\Helpers\NumberHelper;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -86,30 +87,11 @@ class ReportModel extends Model
             ->first();
 
 
-        $sameDateSub = DB::table('inv_stock_item_history')
-            ->selectRaw('MAX(id) as id')
-            ->where('config_id', $inventoryConfigId)
-            ->whereDate('created_at', $start_date)
-            ->groupBy('stock_item_id');
-
         $prevDateSub = DB::table('inv_stock_item_history')
             ->selectRaw('MAX(id) as id')
             ->where('config_id', $inventoryConfigId)
             ->whereDate('created_at', '<', $start_date)
             ->groupBy('stock_item_id');
-
-        $totalClosingBalance = DB::table('inv_stock_item_history as h')
-            ->joinSub($sameDateSub, 'sd', function ($join) {
-                $join->on('h.id', '=', 'sd.id');
-            })
-            ->sum('h.closing_balance');
-
-
-        $totalClosingQuantity = DB::table('inv_stock_item_history as h')
-            ->joinSub($sameDateSub, 'sd', function ($join) {
-                $join->on('h.id', '=', 'sd.id');
-            })
-            ->sum('h.closing_quantity');
 
         $totalOpeningBalance = DB::table('inv_stock_item_history as h')
             ->joinSub($prevDateSub, 'pd', function ($join) {
@@ -124,12 +106,13 @@ class ReportModel extends Model
             })
             ->sum('h.opening_quantity');
 
+
         $stocks = [
             'totalOpeningQuantity' => $totalOpeningQuantity,
             'totalOpeningBalance' => $totalOpeningBalance,
-            'totalClosingQuantity' => $totalClosingQuantity,
-            'totalClosingBalance' => $totalClosingBalance
+            'totalOpeningBalance_format' => NumberHelper::formatAmount($totalOpeningBalance),
         ];
+
         $salesOverview = [];
 
         $salesOverview['totalInvoices'] = $sales->totalInvoices;
@@ -139,7 +122,6 @@ class ReportModel extends Model
         $salesOverview['totalDue'] = $sales->totalDue;
         $salesOverview['totalDiscount'] = $sales->totalDiscount;
         $salesOverview['totalOpeningBalance'] = $totalOpeningQuantity;
-        $salesOverview['totalClosingBalance'] = $totalClosingBalance;
         $salesOverview['wastage'] = $damage->sub_total;
         $salesOverview['return'] = $salesReturn->sub_total;
 
@@ -147,6 +129,11 @@ class ReportModel extends Model
         return $data;
 
 
+    }
+
+    public function formatAmount($amount)
+    {
+        return rtrim(rtrim(number_format($amount, 2), '0'), '.');
     }
 
     public static function dailySalesReport(array $params, int $domain_id, int $inventoryConfigId)
