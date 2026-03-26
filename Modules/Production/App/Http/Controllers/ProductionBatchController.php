@@ -13,6 +13,7 @@ use Modules\Core\App\Models\UserModel;
 use Modules\Inventory\App\Models\CurrentStockModel;
 use Modules\Inventory\App\Models\DailyStockModel;
 use Modules\Inventory\App\Models\ProductModel;
+use Modules\Inventory\App\Models\PurchaseItemModel;
 use Modules\Inventory\App\Models\StockItemHistoryModel;
 use Modules\Inventory\App\Models\StockItemModel;
 use Modules\Production\App\Http\Requests\BatchItemQuantityInlineUpdateRequest;
@@ -341,13 +342,11 @@ class ProductionBatchController extends Controller
                         stockItemId: $productionElement->material_id,
                         quantity: $expenseItem->quantity
                     );
+
                 }
             }
         }
-
         $batch->update($input);
-
-
         return response()->json([
             'message' => 'success',
             'status' => ResponseAlias::HTTP_OK
@@ -369,7 +368,6 @@ class ProductionBatchController extends Controller
     public function batchApproved(Request $request,$id)
     {
         DB::beginTransaction();
-
         try {
             // find batch
             $batch = ProductionBatchModel::find($id);
@@ -402,9 +400,14 @@ class ProductionBatchController extends Controller
                         stockItemId: $productionElement->material_id,
                         quantity: $expenseItem->quantity
                     );
+                    PurchaseItemModel::productionItemsWisePurchaseItemsAutoDeduct(
+                        stock_item_id: $productionElement->material_id,
+                                quantity: $expenseItem->quantity,
+                                warehouse_id: $batch->warehouse_id,
+                                domain: $this->domain
+                            );
                 }
             }
-
             // approve batch
             $batch->update([
                 'approved_by_id' => $this->domain['user_id'],

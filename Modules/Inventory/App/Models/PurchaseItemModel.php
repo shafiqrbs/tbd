@@ -265,5 +265,56 @@ class PurchaseItemModel extends Model
     }
 
 
+    public static function productionItemsWisePurchaseItemsAutoDeduct($stock_item_id, $quantity, $warehouse_id, $domain)
+    {
+        if (empty($stock_item_id) || empty($quantity)) {
+            return false;
+        }
+
+        $config = $domain['inv_config'];
+
+        $findStockItem = StockItemModel::find($stock_item_id);
+        if (!$findStockItem) {
+            return false;
+        }
+
+        $getPurchaseItems = self::join('inv_purchase', 'inv_purchase.id', '=', 'inv_purchase_item.purchase_id')
+            ->where('inv_purchase_item.config_id', $config)
+            ->where('inv_purchase_item.stock_item_id', $stock_item_id)
+            ->where('inv_purchase_item.warehouse_id', $warehouse_id)
+            ->where('inv_purchase_item.remaining_quantity', '>', 0)
+            ->whereNotNull('inv_purchase.approved_by_id')
+            ->where(function ($query) {
+                $query->whereNull('inv_purchase_item.expired_date')
+                    ->orWhere('inv_purchase_item.expired_date', '>', now());
+            })
+            ->orderByRaw('inv_purchase_item.expired_date IS NULL')
+            ->orderBy('inv_purchase_item.id', 'asc')
+            ->select([
+                'inv_purchase_item.id',
+                'inv_purchase_item.remaining_quantity',
+                'inv_purchase_item.sales_quantity',
+            ])
+            ->get();
+        $remainingToIssue = $quantity;
+        foreach ($getPurchaseItems as $row) {
+
+            if ($remainingToIssue <= 0) {
+                break;
+            }
+
+            $purchaseItem = self::find($row->id);
+
+            $availableQty = $purchaseItem->remaining_quantity;
+            $issueQty = min($availableQty, $remainingToIssue);
+
+            $purchaseItem->sales_quantity = ($purchaseItem->sales_quantity ?? 0) + $issueQty;
+            $purchaseItem->remaining_quantity = $availableQty - $issueQty;
+            $purchaseItem->save();
+            $remainingToIssue -= $issueQty;
+        }
+        return true;
+    }
+
 
 }
