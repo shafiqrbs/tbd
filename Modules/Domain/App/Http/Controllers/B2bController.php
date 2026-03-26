@@ -979,6 +979,49 @@ class B2bController extends Controller
 
     }
 
+    public function domainImpersonate($subDomainId)
+    {
+
+        $domain = $this->domain['domain_id'];
+        $subDomain = DomainModel::where('id',$subDomainId)
+            ->where('status',1)
+            ->firstOrFail();
+
+        if ($subDomain){
+            $userExists = UserModel::where('user_group', 'domain')
+                ->where('domain_id',$subDomain->id)
+                ->where('enabled',1)
+                ->firstOrFail();
+
+            $accessRole = \DB::table('cor_user_role')->where('user_id',$userExists->id)->first();
+            $getUserWareHouse = UserWarehouseModel::getUserActiveWarehouse($userExists->id);
+            $getUserWareHouseItem = StockItemHistoryModel::getUserWarehouseProductionItem($userExists->id);
+
+            $arrayData=[
+
+                'id'=> $userExists->id,
+                'name'=> $userExists->name,
+                'mobile'=> $userExists->mobile,
+                'email'=> $userExists->email,
+                'username'=> $userExists->username,
+                'user_group'=> $userExists->user_group,
+                'domain_id'=> $userExists->domain_id,
+                'access_control_role' => $accessRole?$accessRole->access_control_role:[],
+                'android_control_role' => $accessRole?$accessRole->android_control_role:[],
+                'user_warehouse'=> $getUserWareHouse? $getUserWareHouse:[],
+                'production_item'=> $getUserWareHouseItem? $getUserWareHouseItem:[],
+
+            ];
+
+            return new JsonResponse([
+                'status'=>200,
+                'message'=>'success',
+                'data'=> $arrayData
+            ]);
+        }
+
+    }
+
     /**
      * Update B2B products' sales and purchase prices based on domain-wise category price matrix.
      * Each product update is transactional: failure of one product does not affect others.

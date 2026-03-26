@@ -203,6 +203,9 @@ class PurchaseItemModel extends Model
             return false;
         }
 
+        $config = $domain['inv_config'];
+        $salesConfig = ConfigSalesModel::where('config_id',$config)->first();
+
         $findStockItem = StockItemModel::find($stock_item_id);
         if (!$findStockItem) {
             return false;
@@ -248,13 +251,11 @@ class PurchaseItemModel extends Model
 
             $purchaseItem->sales_quantity = ($purchaseItem->sales_quantity ?? 0) + $issueQty;
             $purchaseItem->remaining_quantity = $availableQty - $issueQty;
-
             $purchaseItem->save();
-
             $remainingToIssue -= $issueQty;
         }
 
-        if ($remainingToIssue > 0) {
+        if ($remainingToIssue > 0 && $salesConfig->zero_stock !== 1) {
             throw ValidationException::withMessages([
                 'stock' => ["{$findStockItem->name} stock low."]
             ]);

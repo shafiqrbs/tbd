@@ -71,7 +71,8 @@ Route::prefix('/domain')->middleware(array(HeaderAuthenticationMiddleware::class
         Route::get('domain-stock', [B2bController::class,'domainStock'])->name('b2b_domain_stock');
         Route::get('users', [DomainController::class,'users'])->name('domain_users');
         Route::get('sub-domain-users', [DomainController::class,'subDomainUsers'])->name('domain_users');
-        Route::get('impersonate/{domain}/{user}', [B2bController::class, 'impersonate'])->name('auth');
+        Route::get('impersonate/{domain}/{user}', [B2bController::class, 'impersonate'])->name('impersonate');
+        Route::get('domain-impersonate/{domain}', [B2bController::class, 'domainImpersonate'])->name('domainImpersonate');
         Route::prefix('inline-update')->group(function() {
             Route::post('domain', [B2bController::class,'domainInlineUpdate'])->name('domain_inline_update');
             Route::post('category', [B2bController::class,'domainInlineUpdateCategory'])->name('domain_inline_update_category');

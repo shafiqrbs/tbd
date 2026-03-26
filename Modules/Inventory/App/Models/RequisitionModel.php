@@ -114,6 +114,82 @@ class RequisitionModel extends Model
         return $data;
     }
 
+    public static function getCustomerRequisitions($request,$domain)
+    {
+        $page =  isset($request['page']) && $request['page'] > 0?($request['page'] - 1 ) : 0;
+        $perPage = isset($request['offset']) && $request['offset']!=''? (int)($request['offset']):50;
+        $skip = isset($page) && $page!=''? (int)$page * $perPage:0;
+
+        $entities = self::where([['inv_requisition.vendor_config_id',$domain['config_id']]])
+            ->whereIn('inv_requisition.process',['Approved', 'Generated'])
+            ->leftjoin('users as createdBy','createdBy.id','=','inv_requisition.created_by_id')
+            ->leftjoin('cor_customers','cor_customers.id','=','inv_requisition.customer_id')
+            ->join('cor_warehouses','cor_warehouses.id','=','inv_requisition.warehouse_id')
+            ->select([
+                'inv_requisition.id',
+                'inv_requisition.invoice',
+                'inv_requisition.warehouse_id',
+                'cor_warehouses.name as warehouse_name',
+                DB::raw('DATE_FORMAT(inv_requisition.created_at, "%d-%m-%Y") as created'),
+                DB::raw('DATE_FORMAT(inv_requisition.expected_date, "%d-%m-%Y") as expected_date'),
+                'inv_requisition.sub_total as sub_total',
+                'inv_requisition.total as total',
+                'inv_requisition.payment as payment',
+                'inv_requisition.discount as discount',
+                'inv_requisition.discount_calculation as discount_calculation',
+                'inv_requisition.discount_type as discount_type',
+                'inv_requisition.approved_by_id',
+                'cor_customers.id as vendor_id',
+                'cor_customers.name as vendor_name',
+                'cor_customers.mobile as vendor_mobile',
+                'createdBy.username as createdByUser',
+                'createdBy.name as createdByName',
+                'createdBy.id as createdById',
+                'inv_requisition.process as process',
+                'cor_customers.address as vendor_address',
+            ])->with(['requisitionItems' => function ($query){
+                $query->select([
+                    'inv_requisition_item.id',
+                    'inv_requisition_item.requisition_id',
+                    'inv_stock.name as item_name',
+                    'inv_requisition_item.quantity',
+                    'inv_requisition_item.purchase_price',
+                    'inv_requisition_item.sales_price',
+                    'inv_requisition_item.sub_total',
+                    'inv_requisition_item.unit_name as unit_name',
+                ])
+                    ->join('inv_stock','inv_stock.id','=','inv_requisition_item.customer_stock_item_id')
+                    ->join('inv_product','inv_product.id','=','inv_stock.product_id');
+//                        ->leftjoin('inv_particular','inv_particular.id','=','inv_product.unit_id');
+            }]);
+
+        if (isset($request['term']) && !empty($request['term'])){
+            $entities = $entities->whereAny(['inv_requisition.sub_total','inv_requisition.invoice','cor_vendors.mobile','createdBy.username','cor_vendors.name','createdBy.name'],'LIKE','%'.$request['term'].'%');
+        }
+
+        if (isset($request['customer_id']) && !empty($request['customer_id'])){
+            $entities = $entities->where('inv_requisition.customer_id',$request['customer_id']);
+        }
+        if (isset($request['start_date']) && !empty($request['start_date']) && empty($request['end_date'])){
+            $start_date = $request['start_date'].' 00:00:00';
+            $end_date = $request['start_date'].' 23:59:59';
+            $entities = $entities->whereBetween('inv_requisition.created_at',[$start_date, $end_date]);
+        }
+        if (isset($request['start_date']) && !empty($request['start_date']) && isset($request['end_date']) && !empty($request['end_date'])){
+            $start_date = $request['start_date'].' 00:00:00';
+            $end_date = $request['end_date'].' 23:59:59';
+            $entities = $entities->whereBetween('inv_requisition.created_at',[$start_date, $end_date]);
+        }
+
+        $total  = $entities->count();
+        $entities = $entities->skip($skip)
+            ->take($perPage)
+            ->orderBy('inv_requisition.id','DESC')
+            ->get();
+        $data = array('count'=>$total,'entities'=>$entities);
+        return $data;
+    }
+
     public static function getShow($id,$domain)
     {
         $data = self::where('inv_requisition.id',$id)

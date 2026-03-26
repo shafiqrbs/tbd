@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\DB;
 use Modules\Core\App\Models\VendorModel;
 use Modules\Core\App\Models\WarehouseModel;
 use Modules\Inventory\App\Models\ConfigModel;
+use Modules\Inventory\App\Models\CurrentStockModel;
 use Modules\Inventory\App\Models\RequisitionItemModel;
 use Modules\Inventory\App\Models\RequisitionModel;
 use Modules\Inventory\App\Models\StockItemHistoryModel;
@@ -350,7 +351,6 @@ class ProductionBatchModel extends Model
         $vendors = VendorModel::whereIn('id', $vendorIds)->get()->keyBy('id');
         $configs = ConfigModel::whereIn('domain_id', $vendors->pluck('sub_domain_id'))->get()->keyBy('domain_id');
         $now = Carbon::now();
-
         foreach ($inQuery as $vendorId => $items) {
             $vendor = $vendors->get($vendorId);
             if (!$vendor) {
@@ -384,6 +384,7 @@ class ProductionBatchModel extends Model
             $total = 0;
 
             foreach ($items as $val) {
+
                 $customerStockItem = $stockItems->get($val->stock_id);
                 if (!$customerStockItem) {
                     throw new Exception("Stock item {$val->stock_id} not found");
@@ -393,28 +394,31 @@ class ProductionBatchModel extends Model
                     ? $val->issue_quantity - $val->quantity
                     : $val->issue_quantity;
 
-                $subTotal = $quantity * $customerStockItem->purchase_price;
-                $total += $subTotal;
 
-                $itemsToInsert[] = [
-                    'requisition_id' => $requisition->id,
-                    'customer_stock_item_id' => $customerStockItem->id,
-                    'vendor_stock_item_id' => $customerStockItem->parent_stock_item,
-                    'vendor_config_id' => $requisition->vendor_config_id,
-                    'customer_config_id' => $requisition->customer_config_id,
-                    'barcode' => $customerStockItem->barcode,
-                    'quantity' => $quantity,
-                    'display_name' => $customerStockItem->display_name,
-                    'purchase_price' => $customerStockItem->purchase_price,
-                    'sales_price' => $customerStockItem->sales_price,
-                    'sub_total' => $subTotal,
-                    'unit_id' => $customerStockItem->unit_id,
-                    'unit_name' => $customerStockItem->uom,
-                    'warehouse_id' => $productionBatch->warehouse_id,
-                    'created_at' => $now,
-                ];
+                $warehouseCurrentStock = CurrentStockModel::getCurrentStockByWarehouseAndStockItemId($invConfig,$productionBatch->warehouse_id,$val->stock_id);
+                $requiredQuantity = max(0, $quantity - $warehouseCurrentStock);
+                if($requiredQuantity > 0 ) {
+                    $subTotal = $requiredQuantity * $customerStockItem->purchase_price;
+                    $total += $subTotal;
+                    $itemsToInsert[] = [
+                        'requisition_id' => $requisition->id,
+                        'customer_stock_item_id' => $customerStockItem->id,
+                        'vendor_stock_item_id' => $customerStockItem->parent_stock_item,
+                        'vendor_config_id' => $requisition->vendor_config_id,
+                        'customer_config_id' => $requisition->customer_config_id,
+                        'barcode' => $customerStockItem->barcode,
+                        'quantity' => $requiredQuantity,
+                        'display_name' => $customerStockItem->display_name,
+                        'purchase_price' => $customerStockItem->purchase_price,
+                        'sales_price' => $customerStockItem->sales_price,
+                        'sub_total' => $subTotal,
+                        'unit_id' => $customerStockItem->unit_id,
+                        'unit_name' => $customerStockItem->uom,
+                        'warehouse_id' => $productionBatch->warehouse_id,
+                        'created_at' => $now,
+                    ];
+                }
             }
-
             if ($itemsToInsert) {
                 RequisitionItemModel::insert($itemsToInsert);
             }

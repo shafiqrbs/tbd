@@ -127,6 +127,13 @@ class ConfigSales
      *
      * @ORM\Column(type="boolean",options={"default"="false"})
      */
+    private $purchaseItemRequired;
+
+    /**
+     * @var boolean
+     *
+     * @ORM\Column(type="boolean",options={"default"="false"})
+     */
     private $isMultiPrice;
 
 

@@ -107,9 +107,7 @@ class ConfigController extends Controller
             $data['path'] = $imageName;
         }
         $data['pos_invoice_mode_id'] = $data['pos_invoice_mode_id'] ?? null;
-
         $entity->update($data);
-
         $productSlugs = [
             'raw_materials' => 'raw-materials',
             'stockable' => 'stockable',

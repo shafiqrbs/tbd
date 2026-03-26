@@ -37,6 +37,7 @@ class ConfigPurchaseModel extends Model
         'is_purchase_by_purchase_price',
         'is_barcode',
         'purchase_product_nature',
+        'purchase_online',
         'purchase_mode'
     ];
 

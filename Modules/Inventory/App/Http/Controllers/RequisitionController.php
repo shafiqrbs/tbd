@@ -58,6 +58,22 @@ class RequisitionController extends Controller
         return $response;
     }
 
+    public function customerRequisition(Request $request)
+    {
+
+        $data = RequisitionModel::getCustomerRequisitions($request, $this->domain);
+        $response = new Response();
+        $response->headers->set('Content-Type', 'application/json');
+        $response->setContent(json_encode([
+            'message' => 'success',
+            'status' => Response::HTTP_OK,
+            'total' => $data['count'],
+            'data' => $data['entities']
+        ]));
+        $response->setStatusCode(Response::HTTP_OK);
+        return $response;
+    }
+
     /**
      * Store a newly created resource in storage.
      */
@@ -128,7 +144,7 @@ class RequisitionController extends Controller
                         'created_at' => now(),
                     ];
                 }
-                
+
                 if (!empty($itemsToInsert)) {
                     RequisitionItemModel::insert($itemsToInsert);
                 }

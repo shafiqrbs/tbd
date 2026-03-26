@@ -696,6 +696,7 @@ class   RequisitionMatrixBoardController extends Controller
 
     public function matrixBoardProductionProcess(Request $request, GeneratePatternCodeService $patternCodeService)
     {
+
         $itemIds = $request->input('item_ids', []);
         if (empty($itemIds)) {
             return response()->json([

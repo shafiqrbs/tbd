@@ -39,6 +39,8 @@ class ConfigSalesModel extends Model
         'is_bonus_quantity',
         'is_barcode',
         'default_customer_group_id',
+        'sales_online',
+        'purchase_item_required',
         'sales_product_nature'
     ];
 

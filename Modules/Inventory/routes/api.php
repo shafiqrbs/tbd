@@ -173,6 +173,7 @@ Route::prefix('/inventory')->middleware([HeaderAuthenticationMiddleware::class])
     Route::post('/opening-stock/inline-update', [OpeningStockController::class,'inlineUpdate'])->name('opening_stock_inline_update');
   //  Route::post('/inventory/branch-management', [BranchManagementController::class,'branchManagement'])->name('branch_management_update');
 
+    Route::get('/requisition/customer', [RequisitionController::class,'customerRequisition'])->name('customerRequisition');
     Route::apiResource('/requisition', RequisitionController::class);
     Route::apiResource('/warehouse-issue', WarehouseIssueController::class);
     Route::prefix('/requisition')->group(function() {

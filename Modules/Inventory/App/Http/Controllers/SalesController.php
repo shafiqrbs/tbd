@@ -256,8 +256,6 @@ class SalesController extends Controller
             // Insert Sales Items
             SalesItemModel::insertSalesItems($sales, $input['items'],$this->domain['warehouse_id']);
 
-
-
             // Customer Maintenance Logic (Auto Approval)
             if(isset($input['customer_name']) and isset($input['customer_mobile'])) {
                 $findCustomer = CustomerModel::uniqueCustomerCheck($this->domain['domain_id'],$input['customer_mobile'],$input['customer_name']);
@@ -338,8 +336,8 @@ class SalesController extends Controller
 
             // Send Error Response
             return response()->json([
-                'message' => 'An error occurred while processing the sale.',
-                'error' => $e->getMessage()
+                'error' => 'An error occurred while processing the sale.',
+                'message' => $e->getMessage()
             ], 500);
         }
     }
