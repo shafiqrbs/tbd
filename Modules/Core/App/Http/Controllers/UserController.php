@@ -340,4 +340,16 @@ class UserController extends Controller
         return null;
     }
 
+    public function resetPassword($id)
+    {
+        $user = UserModel::find($id); // or any User object you have
+        $password = $user->username."@123";
+        $user->password = Hash::make($password);
+        $user->save();
+        return response()->json([
+            'status' => true,
+            'message' => 'Password updated successfully.'
+        ]);
+    }
+
 }

@@ -53,6 +53,8 @@ Route::prefix('/core')->middleware([HeaderAuthenticationMiddleware::class])->gro
 
     Route::apiResource('user', UserController::class)->middleware([HeaderAuthenticationMiddleware::class]);
     Route::post('/change-password', [LoginController::class, 'changePassword'])->name('change_password');
+    Route::get('/user/reset-password/{id}', [UserController::class,'resetPassword'])->name('user_local_storage');
+
 
     Route::apiResource('location', LocationController::class)->middleware([HeaderAuthenticationMiddleware::class]);
     Route::apiResource('customer', CustomerController::class)->middleware([HeaderAuthenticationMiddleware::class]);

@@ -75,7 +75,7 @@ class LoginController extends Controller
 
         $validator = Validator::make($request->all(), [
             'current_password'      => 'required',
-            'new_password'          => 'required|min:8',
+            'new_password'          => 'required|min:6',
         ], [
             'current_password.required' => 'Please enter your current password.',
             'new_password.required' => 'Please enter a new password.',

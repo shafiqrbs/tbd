@@ -77,7 +77,7 @@ class UserRequest extends FormRequest
                     'email' => [
                         'required',
                         'email',
-                        Rule::unique('Modules\Core\App\Entities\User', 'email')->ignore($user) // Ignore on update
+                        Rule::unique('Modules\Core\App\Entities\User', 'email')->ignore($user, 'id') // Ignore on update
                     ],
                     'profile_image' => 'nullable|image|mimes:jpeg,png,jpg,gif',
                     'digital_signature' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg',
@@ -94,8 +94,6 @@ class UserRequest extends FormRequest
                     'employee_group_id' => 'required',
                     'access_control_role' => 'nullable|array',
                     'android_control_role' => 'nullable|array',
-                    'password' => 'nullable|min:6',
-                    'confirm_password' => 'required_with:password|same:password',
                 ];
             }
             default:
