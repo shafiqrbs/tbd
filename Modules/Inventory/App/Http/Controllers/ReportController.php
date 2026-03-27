@@ -93,6 +93,17 @@ class ReportController extends Controller
 
     }
 
+    public function categorySummaryReport(Request $request)
+    {
+
+        $configId = $this->domain['inv_config'];
+        $request = $request->all();
+        $cashSummary = ReportModel::categorySummaryReport($configId,$request);
+        $service = new JsonRequestResponse();
+        return $service->returnJosnResponse($cashSummary);
+
+    }
+
     public function purchaseStockReport(Request $request)
     {
 

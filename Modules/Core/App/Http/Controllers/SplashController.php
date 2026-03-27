@@ -27,11 +27,10 @@ class SplashController extends Controller
     public function splashInfo(Request $request){
         $licenseKey = $request->license_key;
         $activeKey = $request->active_key;
-
         if (empty($licenseKey) || empty($activeKey)) {
             return response()->json([
                 'status' => 404,
-                'message' => 'License Key and Active Key are required.',
+                'message' => 'License and Active Key are required.',
             ], 404);
         }
 

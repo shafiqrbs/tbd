@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\DB;
 use Modules\AppsApi\App\Services\GeneratePatternCodeService;
 use Modules\Core\App\Models\CustomerModel;
 use Ramsey\Collection\Collection;
+use function Symfony\Component\Form\ChoiceList\groupBy;
 
 class ReportModel extends Model
 {
@@ -240,6 +241,44 @@ class ReportModel extends Model
             ->get();
         $data = array('count' => $total, 'entities' => $entities);
         return $data;
+    }
+
+    /**
+     * Fetch vendor-wise purchases with eager loaded items.
+     * $filters array can contain 'vendor_id' or other filters.
+     */
+    public static function categorySummaryReport($configId,array $request = [])
+    {
+        $page = isset($request['page']) && $request['page'] > 0 ? ($request['page'] - 1) : 0;
+        $perPage = isset($request['offset']) && $request['offset'] != '' ? (int)$request['offset'] : 50;
+        $skip = $page * $perPage;
+
+        $query = StockItemModel::where('inv_product.config_id', $configId)
+            ->join('inv_product', 'inv_product.id', '=', 'inv_stock.product_id')
+            ->leftJoin('inv_category', 'inv_category.id', '=', 'inv_product.category_id')
+            ->select([
+                'inv_category.id',
+                'inv_category.name as name',
+                DB::raw('SUM(inv_stock.quantity * inv_stock.price) as total')
+            ])
+            ->groupBy('inv_category.id', 'inv_category.name');
+
+
+        // ✅ Correct total count (after groupBy)
+        $total = $query->get()->count();
+
+
+        // ✅ Pagination + data
+        $entities = $query
+            ->skip($skip)
+            ->take($perPage)
+            ->orderBy('inv_category.id', 'DESC') // fixed
+            ->get();
+
+        return [
+            'count' => $total,
+            'entities' => $entities
+        ];
     }
 
     /**

@@ -381,6 +381,7 @@ class StockItemModel extends Model
             ->get()
             ->map(function ($stock) {
                 $product = $stock->product;
+                $category = $stock->product->category;
                 return [
                     'id' => $stock->id,
                     'stock_id' => $stock->id,
@@ -390,6 +391,7 @@ class StockItemModel extends Model
                     'slug' => $product->slug ?? null,
                     'vendor_id' => $product->vendor_id ?? null,
                     'category_id' => $product->category_id ?? null,
+                    'category' => $category->name ?? null,
                     'unit_id' => $product->unit_id ?? null,
                     'unit_name' => $product->unit->name ?? null,
                     'quantity' => $stock->quantity,
