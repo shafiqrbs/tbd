@@ -68,11 +68,11 @@ class UserRequest extends FormRequest
                     'name' => 'required|string',
                     'username' => [
                         'required',
-                        Rule::unique('Modules\Core\App\Entities\User', 'username')->ignore($user) // Ignore the current user's username on update
+                        Rule::unique('Modules\Core\App\Entities\User', 'username')->ignore($user,'id') // Ignore the current user's username on update
                     ],
                     'mobile' => [
                         'required',
-                        Rule::unique('Modules\Core\App\Entities\User', 'mobile')->ignore($user) // Ignore on update
+                        Rule::unique('Modules\Core\App\Entities\User', 'mobile')->ignore($user,'id') // Ignore on update
                     ],
                     'email' => [
                         'required',
