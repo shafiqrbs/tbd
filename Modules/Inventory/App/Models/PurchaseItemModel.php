@@ -157,6 +157,19 @@ class PurchaseItemModel extends Model
         return $purchaseItems;
     }
 
+    public static function getProductNaturePrice($entity)
+    {
+        $purchaseItems = self::where('purchase_id', $entity)
+            ->join('inv_stock', 'inv_stock.id', '=', 'inv_purchase_item.stock_item_id')
+            ->join('inv_product', 'inv_product.id', '=', 'inv_stock.product_id')
+            ->join('inv_setting', 'inv_setting.id', '=', 'inv_product.product_type_id')
+            ->selectRaw('SUM(inv_purchase_item.sub_total) as amount, inv_setting.id as product_group_id')
+            ->groupBy('inv_setting.id')
+            ->get();
+
+        return $purchaseItems;
+    }
+
     public static function updateSalesQuantity($purchaseItemId, $quantity)
     {
         if (!is_numeric($purchaseItemId) || $quantity == 0) {

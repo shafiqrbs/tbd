@@ -159,8 +159,9 @@ class OpeningStockController extends Controller
                     stockItemId: $getPurchaseItem->stock_item_id,
                     quantity: $getPurchaseItem->quantity
                 );
-
-                AccountJournalModel::insertOpeningStockAccountJournal($this->domain,$getPurchaseItem->id);
+                if($this->domain['is_accounting_active'] === 1 ) {
+                    AccountJournalModel::insertOpeningStockAccountJournal($this->domain, $getPurchaseItem->id);
+                }
             }
 
             if ($request->field_name === 'opening_quantity') {

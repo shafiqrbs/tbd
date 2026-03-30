@@ -316,7 +316,9 @@ class SalesController extends Controller
                         }
                     }
                 }
-                AccountJournalModel::insertSalesAccountJournal($this->domain,$sales->id);
+                if($this->domain['is_accounting_active'] === 1 ) {
+                    AccountJournalModel::insertSalesAccountJournal($this->domain, $sales->id);
+                }
             }
             DB::commit();
 
@@ -417,165 +419,6 @@ class SalesController extends Controller
         return $response;
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    /*public function domainCustomerSales($id)
-    {
-        DB::beginTransaction();
-        try {
-            $getSales = SalesModel::findOrFail($id);
-            $getSalesItems = $getSales->salesItems;
-
-            // get customer domain
-            $customerDomain = $getSales->customerDomain;
-
-            if ($customerDomain){
-                // parent domain data
-                $getVendor = VendorModel::where('customer_id', $customerDomain->id)->first();
-
-                // child domain data
-                $getAccountConfigId = DB::table('acc_config')->where('domain_id', $customerDomain->sub_domain_id)->first()->id;
-                $getInventoryConfigId = DB::table('inv_config')->where('domain_id', $customerDomain->sub_domain_id)->first()->id;
-
-                $getTransactionMode = null;
-
-                if ($getSales->transaction_mode_id) {
-                    $getTransactionMode = TransactionModeModel::where('id', $getSales->transaction_mode_id)
-                        ->where('config_id', $getAccountConfigId)
-                        ->first();
-
-                    // If not found with the given config_id, fallback to first available
-                    if (!$getTransactionMode) {
-                        $getTransactionMode = TransactionModeModel::where('config_id', $getAccountConfigId)->first();
-                    }
-                }
-
-                $purchase = PurchaseModel::create([
-                    'config_id'          => $getInventoryConfigId,
-                    'created_by_id'      => $this->domain['user_id'],
-                    'vendor_id'          => $getVendor->id ?? null,
-                    'transaction_mode_id'=> $getTransactionMode?->id,
-                    'process'            => 'in-progress',
-                    'mode'               => 'Requisition',
-                    'is_requisition'     => 1,
-                    'parent_sale_id'     => $id
-                ]);
-
-                if ($purchase){
-                    if (sizeof($getSalesItems)>0){
-                        $totalPrice = 0;
-
-                        $records = []; // Initialize an empty array to store records
-
-                        foreach ($getSalesItems as $item) {
-                            $getStockItemId = StockItemModel::where('parent_stock_item', $item['stock_item_id'])
-                                ->where('config_id', $getInventoryConfigId)
-                                ->first();
-                            if (!$getStockItemId){
-                                return response()->json(['status' => 404, 'success' => false, 'message' => 'Stock item not found in child domain']);
-                            }
-
-                            $expiryDuration = StockItemModel::getProductStockDetails($item->stock_item_id,$this->domain);
-                            if ($expiryDuration && $expiryDuration->expiry_duration) {
-                                $startDate = new \DateTime(); // today
-                                $endDate = (new \DateTime())->modify("+{$expiryDuration->expiry_duration} days"); // use the property
-                                $item->update([
-                                    'production_date' => $startDate,
-                                    'expired_date'    => $endDate,
-                                ]);
-                            }
-                            $getStockItemId = $getStockItemId->id;
-                            $purchasePrice = $item['sales_price'] - ($item['sales_price'] * $customerDomain->discount_percent) / 100;
-                            $subtotal = $item['quantity'] * $purchasePrice;
-                            $totalPrice += $subtotal;
-
-                            $findRequisitionItem = RequisitionItemModel::find($item['requisition_item_id']);
-
-                            $warehouseId = null;
-                            if ($findRequisitionItem){
-                                $warehouseId = $findRequisitionItem->warehouse_id;
-                            }
-
-                            $records[] = [  // Add each record to the $records array
-                                'purchase_id'   => $purchase->id,
-                                'created_by_id' => $this->domain['user_id'],
-                                'config_id'     => $getInventoryConfigId,
-                                'created_at'    => now(),
-                                'quantity'      => $item['quantity'],
-                                'purchase_price' => $purchasePrice,
-                                'production_date'     => $item->production_date ?? null,
-                                'expired_date'     => $item->expired_date ?? null,
-                                'sub_total'     => $subtotal,
-                                'mode'          => 'purchase',
-                                'warehouse_id'          => $warehouseId,
-                                'updated_at'    => now(),
-                                'stock_item_id' => $getStockItemId,
-                                'parent_sales_item_id' => $item['id'],
-                            ];
-                        }
-
-                        // Convert collection of models/arrays into plain array of IDs
-                        $salesItemIds = collect($getSalesItems)->pluck('id')->toArray();
-
-                        PurchaseItemModel::insert($records);
-
-                        // Fetch the inserted purchase items
-                        $inserted = PurchaseItemModel::where('purchase_id', $purchase->id)
-                            ->whereIn('parent_sales_item_id', $salesItemIds)
-                            ->get(['id', 'parent_sales_item_id']);
-
-                        // Map and update sales items
-                        foreach ($inserted as $pi) {
-                            SalesItemModel::where('id', $pi->parent_sales_item_id)
-                                ->update(['child_purchase_item_id' => $pi->id]);
-                        }
-                        $purchase->update([
-                            'sub_total' => $totalPrice,
-                            'total'=>$totalPrice,
-                            'payment'=>$getSales->payment,
-                            'due'=>$totalPrice-$getSales->payment,
-                            'discount_type' => $getSales->discount_type,
-                        ]);
-                    }
-                }
-
-                $getSales->update(['is_domain_sales_completed'=> 1,'approved_by_id'=>$this->domain['user_id'],'process' => 'Approved','child_purchase_id'=>$purchase->id]);
-                // Manege stock
-                if (sizeof($getSales->salesItems)>0){
-                    foreach ($getSales->salesItems as $item){
-                        StockItemHistoryModel::openingStockQuantity($item,'sales',$this->domain);
-
-                        // for maintain inventory daily stock
-                        date_default_timezone_set('Asia/Dhaka');
-                        DailyStockService::maintainDailyStock(
-                            date: date('Y-m-d'),
-                            field: 'sales_quantity',
-                            configId: $this->domain['config_id'],
-                            warehouseId: $item->warehouse_id,
-                            stockItemId: $item->stock_item_id,
-                            quantity: $item->quantity
-                        );
-
-                        // update for set sales quantity in purchase item for batch wise sales
-                        if ($item->purchase_item_id) {
-                            PurchaseItemModel::updateSalesQuantity($item->purchase_item_id,$item->quantity);
-                        }
-                    }
-                }
-
-                // accounting journal entry
-                AccountJournalModel::insertSalesAccountJournal($this->domain,$getSales->id);
-            }
-
-            DB::commit();
-            return response()->json(['status' => 200, 'success' => true]);
-
-            } catch (\Exception $e) {
-                DB::rollback();
-                return response()->json(['status' => 500, 'success' => false, 'error' => $e->getMessage()]);
-            }
-    }*/
 
     public function domainCustomerSales($id)
     {
@@ -821,10 +664,12 @@ class SalesController extends Controller
         }
 
         // Accounting Journal
-        AccountJournalModel::insertSalesAccountJournal(
-            $this->domain,
-            $getSales->id
-        );
+         if($this->domain['is_accounting_active'] === 1 ) {
+             AccountJournalModel::insertSalesAccountJournal(
+                 $this->domain,
+                 $getSales->id
+             );
+         }
     }
 
 
@@ -938,7 +783,9 @@ class SalesController extends Controller
             }
 
             // accounting journal entry
-            AccountJournalModel::insertSalesAccountJournal($this->domain,$entity->id);
+            if($this->domain['is_accounting_active'] === 1 ) {
+                AccountJournalModel::insertSalesAccountJournal($this->domain, $entity->id);
+            }
 
             // Commit the transaction after all updates are successful
             DB::commit();

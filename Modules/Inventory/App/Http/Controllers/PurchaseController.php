@@ -120,7 +120,9 @@ class PurchaseController extends Controller
                 'approved_by_id' => $this->domain['user_id'],
                 'process' => 'Approved'
             ]);
-            AccountJournalModel::insertPurchaseAccountJournal($this->domain,$entity->id);
+            if($this->domain['is_accounting_active'] === 1 ){
+                AccountJournalModel::insertPurchaseAccountJournal($this->domain,$entity->id);
+            }
         }
 
         $data = $service->returnJosnResponse($entity);
@@ -268,7 +270,9 @@ class PurchaseController extends Controller
                         quantity: $item->quantity
                     );
                 }
-                AccountJournalModel::insertPurchaseAccountJournal($this->domain,$purchase->id);
+                if($this->domain['is_accounting_active'] === 1 ){
+                    AccountJournalModel::insertPurchaseAccountJournal($this->domain,$purchase->id);
+                }
             }
             // Commit the transaction after all updates are successful
             DB::commit();

@@ -358,12 +358,12 @@ class AccountJournalModel extends Model
             self::goodsInStock($journal,$journalItem,$purchase);
         }
 
-       if($payment > 0){
+        if($payment > 0){
            $journalItem = self::purchasePayableDebitEntry($journal, $entity);
            if($journalItem){
                self::purchasePayablePaymentEntry($config, $journal, $entity , $journalItem);
            }
-       }
+        }
     }
 
     public static function purchaseEntry($config,$journal,$amount){
@@ -437,12 +437,13 @@ class AccountJournalModel extends Model
 
     public static function goodsInStock($journal,$journalItem,$purchase){
 
-        $records = PurchaseItemModel::getProductGroupPrice($purchase);
+        $records = PurchaseItemModel::getProductNaturePrice($purchase);
         foreach ($records as $record){
-            $head = AccountHeadModel::getAccountHeadWithParentPramValue('product_group_id',$record['product_group_id']);
+            $head = AccountHeadModel::getAccountHeadWithParentPramValue('stock_group_id',$record['product_group_id']);
             if(empty($head)){
-                $group = CategoryModel::find($record['product_group_id']);
-                $head = AccountHeadModel::insertCategoryGroupLedger($journal->config_id,$group);
+                $group = \Modules\Inventory\App\Models\SettingModel::find($record['product_group_id']);
+               // $head = AccountHeadModel::insertCategoryGroupLedger($journal->config_id,$group);
+                $head = AccountHeadModel::insertStockGroupAccount($journal->config_id,$group);
             }
             if($head and $record['amount'] > 0){
                 $amount = $record['amount'];

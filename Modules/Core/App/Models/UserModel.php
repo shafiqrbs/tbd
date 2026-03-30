@@ -141,6 +141,7 @@ class UserModel extends Model
             'inv_config.id as config_id',
             'inv_config.id as inv_config',
             'acc_config.id as acc_config',
+            'acc_config.is_accounting_active as is_accounting_active',
             'pro_config.id as pro_config',
             'nbr_config.id as nbr_config',
         ])

@@ -190,6 +190,13 @@ class Config
      **/
     private  $voucherStockReconciliation;
 
+    /**
+     * @var boolean
+     *
+     * @ORM\Column(type="boolean",options={"default"="false"})
+     */
+    private $isAccountingActive= false;
+
 
     /**
      * @var \DateTime

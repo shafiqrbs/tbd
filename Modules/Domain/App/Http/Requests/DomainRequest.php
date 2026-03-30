@@ -35,11 +35,18 @@ class DomainRequest extends FormRequest
                         'required',
                         Rule::unique('Modules\Domain\App\Entities\GlobalOption', 'mobile')
                     ],
-                    'email' => 'required|email',
+                    'username' => [
+                        'required',
+                        Rule::unique('Modules\Core\App\Entities\User', 'username')  // Ensure using `users` table - check your actual table
+                    ],
+                    'email' => [
+                        'required',
+                        'email',
+                        Rule::unique('Modules\Domain\App\Entities\GlobalOption', 'email')  // Ensure using `users` table
+                    ],
                     'company_name' => 'required|string',
                     'alternative_mobile' => 'string|nullable',
                     'short_name' => 'string|nullable',
-                    'username' => 'required|string',
                     'address' => 'string|nullable',
                     'business_model_id' => 'required',
                     'modules' => 'nullable|array',
@@ -56,7 +63,11 @@ class DomainRequest extends FormRequest
                         'required',
                         Rule::unique('Modules\Domain\App\Entities\GlobalOption', 'mobile')->ignore($domainId)
                     ],
-                    'email' => 'required|email',
+                    'email' => [
+                        'required',
+                        'email',
+                        Rule::unique('Modules\Domain\App\Entities\GlobalOption', 'email')->ignore($domainId)  // Ensure using `users` table
+                    ],
                     'company_name' => 'required|string',
                     'alternative_mobile' => 'string|nullable',
                     'address' => 'string|nullable',

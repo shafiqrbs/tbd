@@ -44,6 +44,7 @@ class AccountingModel extends Model
         'voucher_sales_id',
         'voucher_sales_return_id',
         'voucher_purchase_return_id',
+        'is_accounting_active',
         'voucher_stock_reconciliation_id'
     ];
 

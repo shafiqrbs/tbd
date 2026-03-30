@@ -632,10 +632,11 @@ class AccountHeadModel extends Model
         $groups = \Modules\Inventory\App\Models\SettingModel::where([
             'config_id' => $domain['inv_config'],
             'parent_slug'    => 'product-type',
+            'status'    => 1,
         ])->get();
         if($groups){
             foreach ($groups as $group) {
-                self::insertStockGroupAccount($config, $group);
+                self::insertStockGroupAccount($config->id, $group);
             }
         }
 
@@ -897,7 +898,7 @@ class AccountHeadModel extends Model
                 'stock_group_id' => $entity->id,
             ],
             [
-                'config_id'        => $config->id,
+                'config_id'        => $config,
                 'parent_id'        => $config->account_product_group_id ?? null, // Ensure this is the correct field
                 'name'             => $entity->name,
                 'display_name'     => $entity->name,
