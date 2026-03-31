@@ -122,7 +122,7 @@ class PurchaseItemModel extends Model
             ->join('inv_purchase', 'inv_purchase.id', '=', 'inv_purchase_item.purchase_id')
             ->where('inv_purchase_item.stock_item_id', $stockItemId)
             ->where('inv_purchase_item.config_id', $domain['config_id'])
-            ->whereNull('inv_purchase_item.parent_sales_item_id')
+          //  ->whereNull('inv_purchase_item.parent_sales_item_id')
             ->whereNotNull('inv_purchase.approved_by_id')
             ->where('inv_purchase_item.remaining_quantity', '>', 0)
             ->select([
