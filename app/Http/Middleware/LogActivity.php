@@ -10,32 +10,32 @@ class LogActivity
 {
     public function handle(Request $request, Closure $next)
     {
-        try {
-            $response = $next($request);
+        $response = $next($request);
 
-            // Debug: Check if activity log is working
-            Log::info('LogActivity middleware triggered for: ' . $request->path());
+        try {
+            // Use only safe, non-file parameters for logging
+            $parameters = $request->except(['password', 'password_confirmation', 'file']);
+            if ($request->hasFile('file')) {
+                $parameters['file'] = '[uploaded file]';
+            }
 
             // Log the request
             activity()
-                ->causedBy(auth()->user()) // This might be null for unauthenticated users
+                ->causedBy(auth()->user())
                 ->withProperties([
                     'url' => $request->fullUrl(),
                     'method' => $request->method(),
                     'ip' => $request->ip(),
                     'user_agent' => $request->userAgent(),
-                    'parameters' => $request->except(['password', 'password_confirmation']),
+                    'parameters' => $parameters,
                     'response_status' => $response->getStatusCode(),
                 ])
                 ->log('Request: ' . $request->method() . ' ' . $request->path());
 
-            Log::info('Activity logged successfully');
-
-            return $response;
-
         } catch (\Exception $e) {
             Log::error('LogActivity middleware error: ' . $e->getMessage());
-            return $next($request);
         }
+
+        return $response;
     }
 }

@@ -22,11 +22,13 @@ use Modules\Inventory\App\Models\StockItemHistoryModel;
 use Modules\Inventory\App\Models\StockItemModel;
 use Modules\Inventory\App\Models\StockItemPriceMatrixModel;
 use Modules\Inventory\App\Repositories\StockItemRepository;
+use Modules\Core\App\Models\WarehouseModel;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
 use PhpOffice\PhpSpreadsheet\Writer\Pdf\Mpdf;
 use PhpOffice\PhpSpreadsheet\Worksheet\PageSetup;
+use PhpOffice\PhpSpreadsheet\Cell\DataValidation;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use PhpOffice\PhpSpreadsheet\Style\Border;
 use PhpOffice\PhpSpreadsheet\Style\Fill;
@@ -1111,8 +1113,15 @@ class StockItemController extends Controller
                 ]);
             }
 
+            // Get warehouses for this domain
+            $warehouses = WarehouseModel::where('domain_id', $this->domain['id'])
+                ->where('status', 1)
+                ->pluck('name')
+                ->toArray();
+            $defaultWarehouse = !empty($warehouses) ? $warehouses[0] : '';
+
             // Define headers and fields
-            $headers = ['ProductID', 'ProductName', 'CategoryName', 'UnitName', 'StockQuantity','OpeningStock'];
+            $headers = ['ProductID', 'ProductName', 'CategoryName', 'UnitName', 'StockQuantity', 'Warehouse', 'OpeningStock'];
             $fields = ['id', 'product_name', 'category_name', 'unit_name', 'quantity'];
 
             // Write headers to the first row
@@ -1123,7 +1132,7 @@ class StockItemController extends Controller
                 'font' => ['bold' => true],
             ];
             // Dynamically set style for all header cells
-            $columnRange = 'A1:' . chr(64 + count($headers)) . '1'; // e.g., A1:E1
+            $columnRange = 'A1:' . chr(64 + count($headers)) . '1';
             $sheet->getStyle($columnRange)->applyFromArray($headerStyleArray);
 
             // Set the data rows
@@ -1140,7 +1149,25 @@ class StockItemController extends Controller
                     }
                     $colIndex++;
                 }
+                // Warehouse column (F) - set default warehouse with dropdown
+                $sheet->setCellValue('F' . $rowIndex, $defaultWarehouse);
+                // OpeningStock column (G) - leave empty for user to fill
+                $sheet->setCellValue('G' . $rowIndex, '');
                 $rowIndex++;
+            }
+
+            // Apply warehouse dropdown validation on column F for all data rows
+            if (!empty($warehouses)) {
+                $warehouseList = '"' . implode(',', $warehouses) . '"';
+                $lastRow = $rowIndex - 1;
+                for ($r = 2; $r <= $lastRow; $r++) {
+                    $validation = $sheet->getCell('F' . $r)->getDataValidation();
+                    $validation->setType(DataValidation::TYPE_LIST);
+                    $validation->setErrorStyle(DataValidation::STYLE_INFORMATION);
+                    $validation->setAllowBlank(false);
+                    $validation->setShowDropDown(true);
+                    $validation->setFormula1($warehouseList);
+                }
             }
 
             // Auto-size columns

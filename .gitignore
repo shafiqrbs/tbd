@@ -29,4 +29,5 @@ composer.lock
 /storage/logs
 /storage/app
 /CLAUDE.md
+.claude
 

@@ -101,7 +101,7 @@ class FileUploadController extends Controller
             $service = new JsonRequestResponse();
             return $service->returnJosnResponse($entity);
 
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             // If there's an exception, rollback the transaction.
             DB::rollBack();
 
@@ -132,7 +132,7 @@ class FileUploadController extends Controller
             }
 
             // Generate a unique file name with timestamp
-            $fileName = time() . '.' . $file->extension();
+            $fileName = time() . '.' . $file->getClientOriginalExtension();
 
             // Move the uploaded file to the target location
             $file->move($uploadDirPath, $fileName);
@@ -161,47 +161,55 @@ class FileUploadController extends Controller
      * process file data to DB.
      */
 
-    public function fileProcessToDB(Request $request, EntityManagerInterface $em)
+    public function fileProcessToDB(Request $request)
     {
         set_time_limit(0);
+        ini_set('memory_limit', '-1');
+        DB::disableQueryLog();
+
         $fileID = $request->file_id;
         $getFile = FileUploadModel::find($fileID);
 
         $filePath = public_path('/uploads/core/file-upload/') . $getFile->file;
 
-        // Load file based on extension
+        // Load file ONCE based on extension
         $reader = match (pathinfo($filePath, PATHINFO_EXTENSION)) {
             'xlsx' => new Xlsx(),
             'csv' => new \PhpOffice\PhpSpreadsheet\Reader\Csv(),
             default => throw new Exception('Unsupported file format.')
         };
 
-        $allData = $reader->load($filePath)->getActiveSheet()->toArray();
-
-        // for process data with header
         $spreadsheet = $reader->load($filePath);
-        $data = $spreadsheet->getActiveSheet()->toArray(null, true, true, true);
+        $sheet = $spreadsheet->getActiveSheet();
 
-        // Use the first row as headers
-        $headers = array_shift($data);
+        // Only read rows with actual data (avoids loading 1M+ empty Excel rows)
+        $highestDataRow = $sheet->getHighestDataRow();
+        $highestDataCol = $sheet->getHighestDataColumn();
 
-        // Map rows to headers
+        // Raw data for Product/Production types
+        $allData = $sheet->rangeToArray("A1:{$highestDataCol}{$highestDataRow}", null, true, true, false);
+
+        // Data with headers for Opening-Stock/Finish-Goods types
+        $dataKeyed = $sheet->rangeToArray("A1:{$highestDataCol}{$highestDataRow}", null, true, true, true);
+        $headers = array_shift($dataKeyed);
+
         $dataWithHeaders = [];
-        foreach ($data as $row) {
+        foreach ($dataKeyed as $row) {
             $mappedRow = [];
             foreach ($headers as $column => $headerName) {
-                $mappedRow[$headerName] = $row[$column] ?? null; // Use header name as key
+                $mappedRow[$headerName] = $row[$column] ?? null;
             }
             $dataWithHeaders[] = $mappedRow;
         }
+        unset($spreadsheet, $sheet, $dataKeyed);
 
-        // Remove headers
+        // Remove headers from raw data
         $keys = array_map('trim', array_shift($allData));
         // Only proceed if it's 'Product' and structure is correct
         if ($getFile->file_type === 'Product') {
-            $isInsert = $this->insertProductsInBatches($allData, $em);
+            $isInsert = $this->insertProductsInBatches($allData);
         }elseif ($getFile->file_type === 'Production'){
-            $isInsert = $this->insertProductionInBatches($allData, $em);
+            $isInsert = $this->insertProductionInBatches($allData);
         }elseif ($getFile->file_type === 'Opening-Stock'){
             $isInsert = $this->insertOpeningStock($dataWithHeaders);
         }elseif ($getFile->file_type === 'Finish-Goods'){
@@ -349,13 +357,17 @@ class FileUploadController extends Controller
     // for opening stock process for upload
     private function insertOpeningStock($allData)
     {
-        $batchSize = 1000;
+        $batchSize = 200;
         $batch = [];
         $rowsProcessed = 0;
 
         // Get all stock items in one query
         $productIds = array_column($allData, 'ProductID');
         $stockItems = StockItemModel::whereIn('product_id', $productIds)->get()->keyBy('product_id');
+
+        // Pre-fetch all warehouses for this domain, keyed by name
+        $domain = $this->domain['id'];
+        $warehouses = WarehouseModel::where('domain_id', $domain)->get()->keyBy('name');
 
         foreach ($allData as $index => $data) {
             $values = array_map(fn($item) => is_string($item) ? trim($item) : $item, $data);
@@ -365,9 +377,9 @@ class FileUploadController extends Controller
             if (!$productID || !isset($stockItems[$productID])) {
                 continue;
             }
-            $domain = $this->domain['id'];
             $findStockItem = $stockItems[$productID];
-            $store = WarehouseModel::where(['name'=>  $values['Warehouse'],['domain_id',$domain]])->first();
+            $warehouseName = $values['Warehouse'] ?? '';
+            $store = $warehouses[$warehouseName] ?? null;
             if(!$store){
                 continue;
             }
@@ -407,30 +419,40 @@ class FileUploadController extends Controller
         if (empty($batch)) {
             return 0;
         }
-        // Bulk insert
-        PurchaseItemModel::insert($batch);
 
-        // Get inserted records for furthequantityr processing
-        $insertedRecords = PurchaseItemModel::latest('id')->take(count($batch))->get();
-        foreach ($insertedRecords as $item) {
-            if ($item->purchase_price && $item->quantity) {
-                StockItemHistoryModel::openingStockQuantity($item, 'opening', $this->domain);
-                DailyStockService::maintainDailyStock(
-                    date: date('Y-m-d'),
+        DB::beginTransaction();
+        try {
+            // Bulk insert
+            PurchaseItemModel::insert($batch);
+
+            // Get inserted records for further processing
+            $insertedRecords = PurchaseItemModel::latest('id')->take(count($batch))->get();
+            foreach ($insertedRecords as $item) {
+                if ($item->purchase_price && $item->quantity) {
+                    StockItemHistoryModel::openingStockQuantity($item, 'opening', $this->domain);
+                    DailyStockService::maintainDailyStock(
+                        date: date('Y-m-d'),
                         field: 'purchase_quantity',
                         configId: $this->domain['config_id'],
                         warehouseId: $item->warehouse_id ?? $this->domain['warehouse_id'],
                         stockItemId: $item->stock_item_id,
                         quantity: $item->quantity
                     );
+                }
             }
+
+            DB::commit();
+            return count($batch);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Error processing opening stock batch: ' . $e->getMessage());
+            return 0;
         }
-        return count($batch);
     }
 
 
     // for production batch process for upload
-    private function insertProductionInBatches($allData, EntityManagerInterface $em)
+    private function insertProductionInBatches($allData)
     {
         $batchSize = 1000;
         $batch = [];
@@ -478,7 +500,7 @@ class FileUploadController extends Controller
 
                 // Batch insert when batch size reached
                 if (count($batch) === $batchSize) {
-                    $rowsProcessed += $this->processProductionBatch($batch, $em);
+                    $rowsProcessed += $this->processProductionBatch($batch);
                     $batch = [];  // Reset batch after processing
                 }
             }
@@ -486,14 +508,14 @@ class FileUploadController extends Controller
 
         // Process any remaining items
         if (count($batch) > 0) {
-            $rowsProcessed += $this->processProductionBatch($batch, $em);
+            $rowsProcessed += $this->processProductionBatch($batch);
         }
 
         return ['is_insert' => true, 'row_count' => $rowsProcessed];
     }
 
     // product batch upload
-    private function processProductionBatch(array $batch, EntityManagerInterface $em)
+    private function processProductionBatch(array $batch)
     {
         $rowCount = 0;
 
@@ -609,7 +631,7 @@ class FileUploadController extends Controller
     }
 
     // for product batch process for upload
-    private function insertProductsInBatches($allData, EntityManagerInterface $em)
+    private function insertProductsInBatches($allData)
     {
         $batchSize = 1000;
         $batch = [];
@@ -709,7 +731,7 @@ class FileUploadController extends Controller
 
                 // Batch insert when batch size reached
                 if (count($batch) === $batchSize) {
-                    $rowsProcessed += $this->processProductBatch($batch, $em);
+                    $rowsProcessed += $this->processProductBatch($batch);
                     $batch = [];  // Reset batch after processing
                 }
             }
@@ -717,13 +739,13 @@ class FileUploadController extends Controller
 
         // Process any remaining items
         if (count($batch) > 0) {
-            $rowsProcessed += $this->processProductBatch($batch, $em);
+            $rowsProcessed += $this->processProductBatch($batch);
         }
         return ['is_insert' => true, 'row_count' => $rowsProcessed];
     }
 
     // product batch upload
-    private function processProductBatch(array $batch, EntityManagerInterface $em)
+    private function processProductBatch(array $batch)
     {
         $rowCount = 0;
 
