@@ -3,6 +3,7 @@
 namespace Modules\Core\App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Services\DailyStockService;
 use Doctrine\ORM\EntityManagerInterface;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -19,6 +20,7 @@ use Modules\Core\App\Http\Requests\VendorRequest;
 use Modules\Core\App\Models\FileUploadModel;
 use Modules\Core\App\Models\UserModel;
 use Modules\Core\App\Models\VendorModel;
+use Modules\Core\App\Models\WarehouseModel;
 use Modules\Domain\App\Models\DomainModel;
 use Modules\Inventory\App\Entities\StockItem;
 use Modules\Inventory\App\Models\CategoryModel;
@@ -363,9 +365,12 @@ class FileUploadController extends Controller
             if (!$productID || !isset($stockItems[$productID])) {
                 continue;
             }
-
+            $domain = $this->domain['id'];
             $findStockItem = $stockItems[$productID];
-
+            $store = WarehouseModel::where(['name'=>  $values['Warehouse'],['domain_id',$domain]])->first();
+            if(!$store){
+                continue;
+            }
             $batch[] = [
                 'config_id' => $this->domain['config_id'],
                 'created_by_id' => $this->domain['user_id'],
@@ -375,6 +380,7 @@ class FileUploadController extends Controller
                 'quantity' => $openingStock,
                 'mode' => 'opening',
                 'sales_price' => $findStockItem->sales_price,
+                'warehouse_id' => $store->id,
                 'purchase_price' => $findStockItem->purchase_price,
                 'sub_total' => $openingStock * $findStockItem->purchase_price,
                 'created_at' => now(),
@@ -406,9 +412,17 @@ class FileUploadController extends Controller
 
         // Get inserted records for furthequantityr processing
         $insertedRecords = PurchaseItemModel::latest('id')->take(count($batch))->get();
-        foreach ($insertedRecords as $purchase) {
-            if ($purchase->purchase_price && $purchase->quantity) {
-                StockItemHistoryModel::openingStockQuantity($purchase, 'opening', $this->domain);
+        foreach ($insertedRecords as $item) {
+            if ($item->purchase_price && $item->quantity) {
+                StockItemHistoryModel::openingStockQuantity($item, 'opening', $this->domain);
+                DailyStockService::maintainDailyStock(
+                    date: date('Y-m-d'),
+                        field: 'purchase_quantity',
+                        configId: $this->domain['config_id'],
+                        warehouseId: $item->warehouse_id ?? $this->domain['warehouse_id'],
+                        stockItemId: $item->stock_item_id,
+                        quantity: $item->quantity
+                    );
             }
         }
         return count($batch);
