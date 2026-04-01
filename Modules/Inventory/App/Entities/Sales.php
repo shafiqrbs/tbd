@@ -375,6 +375,12 @@ class Sales
      */
     private $narration;
 
+    /**
+     * @ORM\ManyToOne(targetEntity="RequisitionBoard")
+     * @ORM\JoinColumn(name="requisition_board_id", referencedColumnName="id", nullable=true, onDelete="SET NULL")
+     **/
+    private $requisitionBoard;
+
 
 }
 

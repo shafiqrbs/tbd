@@ -38,7 +38,8 @@ class SalesModel extends Model
         'transaction_mode_id',
         'sales_form',
         'expected_date',
-        'child_purchase_id'
+        'child_purchase_id',
+        'requisition_board_id'
     ];
 
 

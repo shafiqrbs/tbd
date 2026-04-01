@@ -503,6 +503,7 @@ class   RequisitionMatrixBoardController extends Controller
             foreach ($groupedSales as $sale) {
                 $sale['sales_form'] = 'requisition';
                 $sale['expected_date'] = $findBoard->generate_date;
+                $sale['requisition_board_id'] = $findBoard->id;
                 $sales = SalesModel::create($sale);
                 $salesItems = array_map(fn($item) => array_merge($item, ['sale_id' => $sales->id]), $sale['items']);
                 SalesItemModel::insert($salesItems);
