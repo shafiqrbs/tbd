@@ -285,6 +285,43 @@ class ReportModel extends Model
      * Fetch vendor-wise purchases with eager loaded items.
      * $filters array can contain 'vendor_id' or other filters.
      */
+    public static function damageItemReport($configId,array $request = [])
+    {
+        $page = isset($request['page']) && $request['page'] > 0 ? ($request['page'] - 1) : 0;
+        $perPage = isset($request['offset']) && $request['offset'] != '' ? (int)$request['offset'] : 50;
+        $skip = $page * $perPage;
+
+        $query = DamageItemModel::where('inv_damage_item.config_id', $configId)
+          //  ->join('inv_product', 'inv_product.id', '=', 'inv_stock.product_id')
+            ->select([
+                'inv_damage_item.id',
+                'inv_damage_item.created_at',
+                'inv_damage_item.quantity',
+                'inv_damage_item.price',
+                'inv_damage_item.damage_mode as damage_mode',
+                DB::raw('SUM(inv_damage_item.quantity * inv_damage_item.price) as total')
+            ]);
+        // ✅ Correct total count (after groupBy)
+        $total = $query->get()->count();
+
+
+        // ✅ Pagination + data
+        $entities = $query
+            ->skip($skip)
+            ->take($perPage)
+            ->orderBy('inv_damage_item.id', 'DESC') // fixed
+            ->get();
+
+        return [
+            'count' => $total,
+            'entities' => $entities
+        ];
+    }
+
+    /**
+     * Fetch vendor-wise purchases with eager loaded items.
+     * $filters array can contain 'vendor_id' or other filters.
+     */
     public static function damageStockDetailsReport($configId,array $request = [])
     {
         $page = isset($request['page']) && $request['page'] > 0 ? ($request['page'] - 1) : 0;
