@@ -139,6 +139,8 @@ Route::prefix('/inventory')->middleware([HeaderAuthenticationMiddleware::class])
         Route::get('not-domain-customer/{id}', [SalesController::class, 'notDomainCustomerSales'])->name('get_not_domain_customer_sales');
         Route::get('requisition/reconciliation-items', [SalesController::class, 'requisitionReconciliationItems']);
         Route::post('requisition/reconciliation-items', [SalesController::class, 'requisitionReconciliationItemsProcess']);
+        Route::get('board-reconciliation/{boardId}', [SalesController::class, 'boardReconciliationItems']);
+        Route::post('board-reconciliation', [SalesController::class, 'requisitionReconciliationItemsProcess']);
     });
 
     Route::apiResource('/invoice-batch', InvoiceBatchController::class);

@@ -85,6 +85,17 @@ class SalesController extends Controller
         ]);
     }
 
+    public function boardReconciliationItems(Request $request, $boardId)
+    {
+        $result = SalesModel::getBoardReconciliationItems($boardId, $this->domain);
+        return response()->json([
+            'status' => 200,
+            'success' => true,
+            'data' => $result['data'],
+            'customers' => $result['customers'],
+        ]);
+    }
+
     public function requisitionReconciliationItemsProcess(Request $request)
     {
         $input = $request->json()->all();

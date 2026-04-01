@@ -573,6 +573,7 @@ class SalesModel extends Model
             ->where('s.config_id', $domain['config_id'])
             ->where('s.process', 'Created')
             ->where('s.sales_form', 'requisition')
+            ->whereNull('s.requisition_board_id')
             ->select(
                 's.id as sale_id',
                 's.invoice',
@@ -631,9 +632,77 @@ class SalesModel extends Model
         return [
             'data' => [
                 'sales' => $result,
-//                'allItems' => $allItems,
-//                'allStocks' => $allStocks,
             ]
+        ];
+    }
+
+    public static function getBoardReconciliationItems($boardId, $domain)
+    {
+        $data = DB::table('inv_sales as s')
+            ->join('inv_sales_item as si', 'si.sale_id', '=', 's.id')
+            ->join('inv_stock as stk', 'stk.id', '=', 'si.stock_item_id')
+            ->join('cor_customers as c', 'c.id', '=', 's.customer_id')
+            ->leftJoin('cor_warehouses as w', 'w.id', '=', 'si.warehouse_id')
+            ->where('s.config_id', $domain['config_id'])
+            ->where('s.process', 'Created')
+            ->where('s.sales_form', 'requisition')
+            ->where('s.requisition_board_id', $boardId)
+            ->select(
+                'si.id as sales_item_id',
+                'si.sale_id',
+                'si.name as product_name',
+                'si.stock_item_id',
+                'si.quantity',
+                'si.sales_price',
+                'si.sub_total',
+                'si.warehouse_id',
+                'w.name as warehouse_name',
+                'stk.quantity as stock_quantity',
+                'c.name as customer_name',
+                'c.id as customer_id',
+                's.invoice'
+            )
+            ->orderBy('si.name')
+            ->get();
+
+        $customers = $data->pluck('customer_name')->unique()->values()->toArray();
+
+        $products = collect($data)
+            ->groupBy('product_name')
+            ->map(function ($group) use ($customers) {
+                $first = $group->first();
+                $base = [
+                    'product' => $first->product_name,
+                    'stock_item_id' => $first->stock_item_id,
+                    'warehouse_name' => $first->warehouse_name,
+                    'vendor_stock_quantity' => $first->stock_quantity,
+                    'total_quantity' => $group->sum('quantity'),
+                ];
+
+                foreach ($customers as $customer) {
+                    $key = strtolower(str_replace(' ', '_', $customer));
+                    $base[$key . '_quantity'] = 0;
+                    $base[$key . '_sales_item_id'] = null;
+                    $base[$key . '_sale_id'] = null;
+                }
+
+                foreach ($group as $item) {
+                    $key = strtolower(str_replace(' ', '_', $item->customer_name));
+                    $base[$key . '_quantity'] = (float) $item->quantity;
+                    $base[$key . '_sales_item_id'] = $item->sales_item_id;
+                    $base[$key . '_sale_id'] = $item->sale_id;
+                }
+
+                $base['remaining_quantity'] = $first->stock_quantity - $base['total_quantity'];
+
+                return $base;
+            })
+            ->values()
+            ->toArray();
+
+        return [
+            'data' => $products,
+            'customers' => $customers,
         ];
     }
 
