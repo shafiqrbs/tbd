@@ -187,8 +187,9 @@ class PurchaseItemController extends Controller
                     $damageItem = DamageItemModel::create([
                         'config_id' => $domain['config_id'],
                         'warehouse_id' => $purchaseItem->warehouse_id,
-                        'damage_mode' => 'Manual-purchase',
+                        'damage_mode' => 'Manual',
                         'purchase_item_id' => $purchaseItem->id,
+                        'stock_item_id' => $purchaseItem->stock_item_id,
                         'damage_id' => $damage->id,
                         'quantity' => $damageQty,
                         'price' => $price,

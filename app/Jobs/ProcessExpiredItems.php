@@ -101,8 +101,11 @@ class ProcessExpiredItems implements ShouldQueue
             [
                 'quantity' => $qty,
                 'price' => $price,
+                'stock_item_id' => $stockItemId,
                 'purchase_price' => $price,
                 'sub_total' => $price * $qty,
+                'warehouse_id' => $warehouseId,
+                'damage_mode' => 'Expired',
                 'process' => 'Created'
             ]
         );

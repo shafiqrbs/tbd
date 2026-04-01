@@ -292,9 +292,10 @@ class ReportModel extends Model
         $skip = $page * $perPage;
 
         $query = DamageItemModel::where('inv_damage_item.config_id', $configId)
-          //  ->join('inv_product', 'inv_product.id', '=', 'inv_stock.product_id')
+            ->join('inv_stock', 'inv_stock.id', '=', 'inv_damage_item.stock_item_id')
             ->select([
                 'inv_damage_item.id',
+                'inv_stock.name',
                 'inv_damage_item.created_at',
                 'inv_damage_item.quantity',
                 'inv_damage_item.price',

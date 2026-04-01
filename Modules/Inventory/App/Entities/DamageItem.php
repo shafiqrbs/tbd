@@ -61,6 +61,13 @@ class DamageItem
     private $warehouse;
 
     /**
+     * @var string
+     *
+     * @ORM\Column(type="string", nullable=true)
+     */
+    private $name;
+
+    /**
      * @var integer
      *
      * @ORM\Column(name="quantity", type="integer")

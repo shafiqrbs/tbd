@@ -236,6 +236,7 @@ class SalesReturnController extends Controller
                         'warehouse_id' => $item->warehouse_id,
                         'damage_mode' => 'Sales',
                         'sales_item_id' => $item->sales_item_id,
+                        'stock_item_id' => $salesItem->stock_item_id,
                         'damage_id' => $damage->id,
                         'quantity' => $item->quantity,
                         'price' => $item->price,

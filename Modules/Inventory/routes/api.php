@@ -224,7 +224,7 @@ Route::prefix('/inventory')->middleware([HeaderAuthenticationMiddleware::class])
         Route::get('daily/sales', [SalesController::class,'dailySalesReport'])->name('daily_sales_report');
         Route::get('purchase/stock', [ReportController::class,'purchaseStockReport'])->name('purchaseStockReport');
         Route::get('category-summary', [ReportController::class,'categorySummaryReport'])->name('CategoryStockReport');
-        Route::get('damage-item', [ReportController::class,'damageItemReport'])->name('damageItemReport');
+        Route::get('damage-item', [ReportController::class,'damageItemReport'])->name('damageDetailsReport');
         //  Route::get('matrix/warehouse-xlsx', [ProductionReportController::class,'matrixWarehouseXlsx'])->name('matrix_warehouse_xlsx');
         //  Route::get('matrix/warehouse-pdf', [ProductionReportController::class,'matrixWarehousePdf'])->name('matrix_warehouse_pdf');
 
