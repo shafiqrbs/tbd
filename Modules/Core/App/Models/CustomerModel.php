@@ -207,10 +207,10 @@ class CustomerModel extends Model
     {
 
         $global = $domain['global_id'];
-
         $customers = self::where('cor_customers.domain_id', $global)
             ->leftJoin('users', 'users.id', '=', 'cor_customers.marketing_id')
             ->leftJoin('cor_locations', 'cor_locations.id', '=', 'cor_customers.location_id')
+            ->leftJoin('acc_head', 'acc_head.customer_id', '=', 'cor_customers.id')
             ->select([
                 'cor_customers.id',
                 'cor_customers.name',
@@ -231,10 +231,17 @@ class CustomerModel extends Model
                 'cor_customers.location_id',
                 'cor_locations.name as location_name',
                 DB::raw('DATE_FORMAT(cor_customers.created_at, "%d-%m-%Y") as created_date'),
-                'cor_customers.created_at',
-                DB::raw('"5000" as debit'),
-                DB::raw('"2000" as credit'),
-                DB::raw('"3000" as balance')
+                'acc_head.name as ledger_name',
+                'acc_head.id as ledger_id',
+                'acc_head.opening_balance',
+                'acc_head.amount as closing_balance',
+                'acc_head.credit',
+                'acc_head.debit',
+                'acc_head.credit_limit',
+                'acc_head.credit_period',
+                'acc_head.earn_point',
+                'acc_head.balance_bill_by_bill',
+                'acc_head.is_credit_date_check_voucher_entry'
             ])
             ->orderBy('cor_customers.id', 'DESC')
             ->get();

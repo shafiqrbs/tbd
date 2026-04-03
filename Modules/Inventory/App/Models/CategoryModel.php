@@ -67,9 +67,27 @@ class CategoryModel extends Model
     {
         $query = self::select(['name', 'slug', 'id'])
             ->where([['status', 1],['config_id', $domain['config_id']]]);
-        $query->whereNull('parent');
+      //  $query->whereNull('parent');
         return $query->get();
     }
+
+    public static function getCategoryFlutter($domain)
+    {
+        $query = self::select(['name', 'slug', 'id as category_id'])
+            ->where([['status', 1],['config_id', $domain['config_id']]]);
+        $query->whereNotNull('parent');
+        return $query->get();
+    }
+
+    public static function getBrandFlutter($domain)
+    {
+        $query = self::select(['name', 'slug', 'id as brand_id'])
+            ->where([['status', 1],['config_id', $domain['config_id']]]);
+        $query->whereNotNull('parent');
+        return $query->get();
+    }
+
+
 
     public static function getCategoryDropdown($domain,$type='all')
     {

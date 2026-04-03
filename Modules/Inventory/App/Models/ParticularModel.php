@@ -161,6 +161,24 @@ class ParticularModel extends Model
             ->get();
     }
 
+    public static function getProductUnitFlutter($domain,$dropdownType)
+    {
+
+        return DB::table('inv_particular')
+            ->join('inv_particular_type','inv_particular_type.id','=','inv_particular.particular_type_id')
+            ->select([
+                'inv_particular.id as unit_id',
+                'inv_particular.name',
+                'inv_particular.slug',
+            ])
+            ->where([
+                ['inv_particular_type.slug',$dropdownType],
+                ['inv_particular.config_id',$domain['config_id']],
+                ['inv_particular.status','1'],
+            ])
+            ->get();
+    }
+
 
 
 }

@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Route;
 use Modules\Core\App\Http\Controllers\CoreController;
 use Modules\Core\App\Http\Controllers\CustomerController;
 use Modules\Core\App\Http\Controllers\FileUploadController;
+use Modules\Core\App\Http\Controllers\FlutterController;
 use Modules\Core\App\Http\Controllers\LocationController;
 use Modules\Core\App\Http\Controllers\SettingController;
 use Modules\Core\App\Http\Controllers\SiteMapController;
@@ -82,6 +83,11 @@ Route::prefix('/core')->middleware([HeaderAuthenticationMiddleware::class])->gro
 // for local application
 Route::prefix('/core')->group(function() {
     Route::get('splash-info', [SplashController::class, 'splashInfo'])->name('splash_info');
+});
+
+Route::prefix('/flutter')->group(function() {
+    Route::post('poskeeper-splash', [FlutterController::class, 'splash'])->name('splash');
+    Route::post('splash-info', [FlutterController::class, 'splashInfo'])->name('splash_info');
 });
 
 
