@@ -288,51 +288,13 @@ class ReportModel extends Model
     public static function damageItemReport($configId,array $request = [])
     {
         $page = isset($request['page']) && $request['page'] > 0 ? ($request['page'] - 1) : 0;
-        $perPage = isset($request['offset']) && $request['offset'] != '' ? (int)$request['offset'] : 50;
-        $skip = $page * $perPage;
-
-        $query = DamageItemModel::where('inv_damage_item.config_id', $configId)
-            ->join('inv_stock', 'inv_stock.id', '=', 'inv_damage_item.stock_item_id')
-            ->select([
-                'inv_damage_item.id',
-                'inv_stock.name',
-                'inv_damage_item.created_at',
-                'inv_damage_item.quantity',
-                'inv_damage_item.price',
-                'inv_damage_item.damage_mode as damage_mode',
-                DB::raw('SUM(inv_damage_item.quantity * inv_damage_item.price) as total')
-            ]);
-        // ✅ Correct total count (after groupBy)
-        $total = $query->get()->count();
-
-
-        // ✅ Pagination + data
-        $entities = $query
-            ->skip($skip)
-            ->take($perPage)
-            ->orderBy('inv_damage_item.id', 'DESC') // fixed
-            ->get();
-
-        return [
-            'count' => $total,
-            'entities' => $entities
-        ];
-    }
-
-    /**
-     * Fetch vendor-wise purchases with eager loaded items.
-     * $filters array can contain 'vendor_id' or other filters.
-     */
-    public static function damageStockDetailsReport($configId,array $request = [])
-    {
-        $page = isset($request['page']) && $request['page'] > 0 ? ($request['page'] - 1) : 0;
         $perPage = isset($request['offset']) && $request['offset'] != '' ? (int)($request['offset']) : 50;
         $skip = isset($page) && $page != '' ? (int)$page * $perPage : 0;
 
         $entities = DamageItemModel::where('inv_damage_item.config_id',$configId)
             ->join('inv_purchase_item', 'inv_purchase_item.id', '=', 'inv_damage_item.purchase_item_id')
             ->join('inv_purchase', 'inv_purchase.id', '=', 'inv_purchase_item.purchase_id')
-            ->join('inv_stock', 'inv_stock.id', '=', 'inv_purchase_item.stock_item_id')
+            ->join('inv_stock', 'inv_stock.id', '=', 'inv_damage_item.stock_item_id')
             ->join('inv_product', 'inv_product.id', '=', 'inv_stock.product_id')
             ->leftJoin('inv_category', 'inv_category.id', '=', 'inv_product.category_id')
             ->leftJoin('cor_warehouses', 'cor_warehouses.id', '=', 'inv_purchase_item.warehouse_id')
@@ -343,6 +305,7 @@ class ReportModel extends Model
                 DB::raw('DATE_FORMAT(inv_purchase_item.expired_date, "%d-%m-%Y") as expired_date'),
                 'inv_purchase_item.purchase_id',
                 'inv_purchase.grn',
+                'inv_purchase.invoice',
                 'inv_stock.name as item_name',
                 'inv_category.name as category_name',
                 'inv_damage_item.quantity as quantity',
@@ -355,7 +318,7 @@ class ReportModel extends Model
         $total = $entities->count();
         $entities = $entities->skip($skip)
             ->take($perPage)
-            ->orderBy('inv_purchase.id', 'DESC')
+            ->orderBy('inv_damage_item.id', 'DESC') // fixed
             ->get();
         $data = array('count' => $total, 'entities' => $entities);
         return $data;

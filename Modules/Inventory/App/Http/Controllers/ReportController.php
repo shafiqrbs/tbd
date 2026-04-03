@@ -131,7 +131,7 @@ class ReportController extends Controller
 
         $configId = $this->domain['inv_config'];
         $request = $request->all();
-        $cashSummary = ReportModel::damageStockDetailsReport($configId,$request);
+        $cashSummary = ReportModel::damageItemReport($configId,$request);
         $service = new JsonRequestResponse();
         return $service->returnJosnResponse($cashSummary);
 
