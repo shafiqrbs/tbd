@@ -566,7 +566,7 @@ class StockItemModel extends Model
                             'parent_slug' => $m->priceUnitName->parent_slug ?? null,
                         ];
                     }),
-                    'measurments' => optional(optional($product)->measurement)->map(function ($m) {
+                    'measurements' => optional(optional($product)->measurement)->map(function ($m) {
                         return [
                             'id' => $m->id,
                             'unit_id' => $m->unit_id,

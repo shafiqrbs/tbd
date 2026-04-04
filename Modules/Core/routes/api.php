@@ -95,7 +95,6 @@ Route::prefix('/pos')->group(function() {
 });
 
 
-
 Route::prefix('/flutter')->group(function() {
     Route::get('poskeeper-onboard', [PosController::class, 'onboard'])->name('onboard');
     Route::get('poskeeper-color-plate', [PosController::class, 'themes'])->name('themes');
