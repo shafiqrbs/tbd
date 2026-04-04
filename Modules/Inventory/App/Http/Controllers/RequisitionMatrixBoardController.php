@@ -607,7 +607,8 @@ class   RequisitionMatrixBoardController extends Controller
                 'process' => $item->process,
                 'approved_date' => $item->approved_date,
                 'quantity' => $item->quantity,
-                'stock_quantity' => $item->stock_quantity,
+//                'stock_quantity' => $item->stock_quantity,
+                'stock_quantity' => CurrentStockModel::getCurrentStockByWarehouseAndStockItemId($this->domain['config_id'] , $item->warehouse_id, $item->item_id) ?? 0,
                 'demand_quantity' => $item->demand_quantity,
                 'warehouse_id' => $item->warehouse_id,
                 'warehouse_name' => $item->warehouse->name,
@@ -745,11 +746,25 @@ class   RequisitionMatrixBoardController extends Controller
             ]);
 
             foreach ($productionMatrixItems as $findProductionMatrixItem) {
+
+                $stock = CurrentStockModel::getCurrentStockByWarehouseAndStockItemId(
+                    $this->domain['config_id'],
+                    $findProductionMatrixItem->warehouse_id,
+                    $findProductionMatrixItem->item_id
+                ) ?? 0;
+
+                $requiredQty = max(
+                    0,
+                    $findProductionMatrixItem->demand_quantity - $stock
+                );
+
                 $productionBatchItem = ProductionBatchItemModel::create([
                     'config_id' => $findProductionMatrixItem->config_id,
                     'production_item_id' => $findProductionMatrixItem->pro_item_id,
-                    'issue_quantity' => $findProductionMatrixItem->demand_quantity,
-                    'receive_quantity' => $findProductionMatrixItem->demand_quantity,
+                    'issue_quantity' => $requiredQty,
+                    'receive_quantity' => $requiredQty,
+                    /*'issue_quantity' => $findProductionMatrixItem->demand_quantity,
+                    'receive_quantity' => $findProductionMatrixItem->demand_quantity,*/
                     'batch_id' => $productionBatch->id,
                     'warehouse_id' => $findProductionMatrixItem->warehouse_id,
                 ]);

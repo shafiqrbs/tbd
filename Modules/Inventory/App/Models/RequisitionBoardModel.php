@@ -83,6 +83,8 @@ class RequisitionBoardModel extends Model
                 'approvedBy.name as approved_name',
                 DB::raw('(SELECT COUNT(*) FROM inv_sales WHERE inv_sales.requisition_board_id = inv_requisition_board.id) as sales_count'),
                 DB::raw('(SELECT GROUP_CONCAT(DISTINCT inv_sales.process) FROM inv_sales WHERE inv_sales.requisition_board_id = inv_requisition_board.id) as sales_status'),
+                DB::raw('(SELECT COUNT(*) FROM inv_requisition_production_item_matrix WHERE inv_requisition_production_item_matrix.requisition_board_id = inv_requisition_board.id AND inv_requisition_production_item_matrix.pro_batch_id IS NOT NULL) as production_count'),
+                DB::raw('(SELECT GROUP_CONCAT(DISTINCT pro_batch.process) FROM inv_requisition_production_item_matrix INNER JOIN pro_batch ON pro_batch.id = inv_requisition_production_item_matrix.pro_batch_id WHERE inv_requisition_production_item_matrix.requisition_board_id = inv_requisition_board.id) as production_status'),
             ])->with(['requisition_matrix' => function ($query) {
                 $query->select([
                     'inv_requisition_matrix_board.vendor_stock_item_id',
