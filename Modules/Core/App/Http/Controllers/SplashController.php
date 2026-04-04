@@ -24,7 +24,7 @@ use Modules\Inventory\App\Models\StockItemModel;
 class SplashController extends Controller
 {
 
-    public function splashInfo(Request $request){
+    public function splash(Request $request){
         $licenseKey = $request->license_key;
         $activeKey = $request->active_key;
         if (empty($licenseKey) || empty($activeKey)) {

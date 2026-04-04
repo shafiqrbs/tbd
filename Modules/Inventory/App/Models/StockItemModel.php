@@ -273,7 +273,7 @@ class StockItemModel extends Model
                     ->where('expired_date', '>', now()) // only not expired
                     ->whereRaw('remaining_quantity');
             }*/
-        ])
+             ])
             ->where('config_id', $domain['config_id'])
             ->where('status', 1)
             ->orderBy('name')
@@ -350,6 +350,147 @@ class StockItemModel extends Model
             });
     }
 
+
+    public static function getPosProductItem($request, $domain)
+    {
+        $perPage = !empty($request['offset']) ? (int)$request['offset'] : 50;
+
+        $query = self::query()
+            ->select([
+                'inv_stock.id',
+                'inv_stock.product_id',
+                'inv_stock.name',
+                'inv_stock.display_name',
+                'inv_stock.quantity',
+                'inv_stock.price',
+                'inv_stock.sales_price',
+                'inv_stock.purchase_price',
+                'inv_stock.average_price',
+                'inv_stock.barcode'
+            ])
+            ->with([
+                'product:id,slug,unit_id,category_id,vendor_id,parent_id',
+                'product.unit:id,name',
+                'product.category:id,name',
+                'product.setting:id,slug',
+                'product.images:id,product_id,feature_image',
+                'product.measurement:id,product_id,unit_id,is_base_unit,is_sales,is_purchase,quantity',
+                'product.measurement.unit:id,name,slug',
+
+                'multiplePrice:id,stock_item_id,price_unit_id,price',
+                'multiplePrice.priceUnitName:id,name,slug,parent_slug',
+
+                'purchaseItemForSales:id,stock_item_id,quantity,sales_quantity,expired_date'
+            ])
+            ->where('inv_stock.config_id', $domain['config_id'])
+            ->where('inv_stock.status', 1)
+            ->whereHas('product.setting', function ($q) {
+                $q->whereIn('slug', [
+                    'pre-production', 'stockable', 'mid-production', 'post-production'
+                ]);
+            });
+
+        # 🔍 Optimized Search (important fields first)
+        if (!empty($request['term'])) {
+            $term = $request['term'];
+
+            $query->where(function ($q) use ($term) {
+                $q->where('inv_stock.name', 'LIKE', "%$term%")
+                    ->orWhere('inv_stock.barcode', 'LIKE', "%$term%")
+                    ->orWhereHas('product', function ($p) use ($term) {
+                        $p->where('name', 'LIKE', "%$term%")
+                            ->orWhere('slug', 'LIKE', "%$term%");
+                    });
+            });
+        }
+
+        if (!empty($request['sku'])) {
+            $query->whereHas('product', fn($q) => $q->where('sku', $request['sku']));
+        }
+
+        if (!empty($request['name'])) {
+            $query->whereHas('product', fn($q) => $q->where('name', $request['name']));
+        }
+
+        # ✅ Pagination (BEST)
+        $stocks = $query->orderBy('inv_stock.name','ASC')
+            ->paginate($perPage);
+
+        # ✅ Transform Data
+        $entities = $stocks->getCollection()->map(function ($stock) {
+
+            $product = $stock->product;
+
+            return [
+                'id' => $stock->id,
+                'stock_id' => $stock->id,
+                'name' => $stock->display_name ?? $stock->name,
+                'display_name' => $stock->display_name ?? $stock->name,
+
+                'product_name' => $stock->name . '[' . ($stock->quantity ?? 0) . '] ' . ($product->unit->name ?? ''),
+
+                'slug' => $product->slug ?? null,
+                'vendor_id' => $product->vendor_id ?? null,
+                'category_id' => $product->category_id ?? null,
+                'category' => $product->category->name ?? null,
+
+                'unit_id' => $product->unit_id ?? null,
+                'unit_name' => $product->unit->name ?? null,
+
+                'quantity' => $stock->quantity,
+
+                'price' => round($stock->price, 2),
+                'sales_price' => round($stock->sales_price, 2),
+                'purchase_price' => round($stock->purchase_price, 2),
+                'average_price' => round($stock->average_price, 2),
+
+                'barcode' => $stock->barcode,
+                'product_nature' => $product->setting->slug ?? null,
+
+                'feature_image' => $product?->parent_id
+                ? optional($product->parent_images)->feature_image
+                : optional($product->images)->feature_image,
+
+            # 🔥 Optimized mapping (no nested optional)
+            'purchase_item_for_sales' => $stock->purchaseItemForSales->map(function ($s) {
+                $salesQty = $s->sales_quantity ?? 0;
+
+                return [
+                    'purchase_item_id' => $s->id,
+                    'remain_quantity' => $s->quantity - $salesQty,
+                    'expired_date' => $s->expired_date
+                        ? \Carbon\Carbon::parse($s->expired_date)->format('d-M-Y')
+                        : null,
+                ];
+            }),
+
+            'multi_price' => $stock->multiplePrice->map(function ($m) {
+                return [
+                    'id' => $m->id,
+                    'price' => $m->price,
+                    'field_name' => $m->priceUnitName->name ?? null,
+                ];
+            }),
+
+            'measurements' => optional(optional($product)->measurement)->map(function ($m) {
+                return [
+                    'id' => $m->id,
+                    'unit_id' => $m->unit_id,
+                    'unit_name' => $m->unit->name ?? null,
+                    'slug' => $m->unit->slug ?? null,
+                    'is_base_unit' => $m->is_base_unit,
+                    'is_sales' => $m->is_sales,
+                    'is_purchase' => $m->is_purchase,
+                    'quantity' => $m->quantity,
+                ];
+            }),
+        ];
+    });
+
+        $data = array('total' =>  $stocks->total(), 'entities' => $entities);
+        return $data;
+    }
+
     public static function getPosStockItem($domain)
     {
         return self::with([
@@ -359,23 +500,24 @@ class StockItemModel extends Model
             'product.setting',
             'product.images',
             'multiplePrice.priceUnitName',
-            'purchaseItemForSales' => function ($q) {
-                $q->where(function ($query) {
-                    $query->whereNull('expired_date')
-                        ->orWhere(function ($sub) {
-                            $sub->whereNotNull('expired_date')
-                                ->where('expired_date', '>', now())
-                                ->whereRaw('quantity > COALESCE(sales_quantity, 0)');
-                        });
-                });
-            }
-        ])
+                'purchaseItemForSales' => function ($q) {
+                    $q->where(function ($query) {
+                        $query->whereNull('expired_date')
+                            ->orWhere(function ($sub) {
+                                $sub->whereNotNull('expired_date')
+                                    ->where('expired_date', '>', now())
+                                    ->whereRaw('quantity > COALESCE(sales_quantity, 0)');
+                            });
+                    });
+                }
+            ])
             ->where('inv_stock.config_id', $domain['config_id'])
             ->whereHas('product.setting', function ($query) {
                 $query->whereIn('slug', [
                     'pre-production', 'stockable', 'mid-production', 'post-production'
                 ]);
             })
+
             ->where('inv_stock.status', 1)
             ->orderBy('inv_stock.name')
             ->get()
@@ -424,7 +566,7 @@ class StockItemModel extends Model
                             'parent_slug' => $m->priceUnitName->parent_slug ?? null,
                         ];
                     }),
-                    'measurements' => optional(optional($product)->measurement)->map(function ($m) {
+                    'measurments' => optional(optional($product)->measurement)->map(function ($m) {
                         return [
                             'id' => $m->id,
                             'unit_id' => $m->unit_id,

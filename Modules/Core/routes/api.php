@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\Route;
 use Modules\Core\App\Http\Controllers\CoreController;
 use Modules\Core\App\Http\Controllers\CustomerController;
 use Modules\Core\App\Http\Controllers\FileUploadController;
-use Modules\Core\App\Http\Controllers\FlutterController;
+use Modules\Core\App\Http\Controllers\PosController;
 use Modules\Core\App\Http\Controllers\LocationController;
 use Modules\Core\App\Http\Controllers\SettingController;
 use Modules\Core\App\Http\Controllers\SiteMapController;
@@ -85,11 +85,22 @@ Route::prefix('/core')->group(function() {
     Route::get('splash-info', [SplashController::class, 'splashInfo'])->name('splash_info');
 });
 
+
+
+Route::prefix('/pos')->group(function() {
+    Route::get('onboard', [PosController::class, 'onboard'])->name('onboard');
+    Route::get('theme', [PosController::class, 'theme'])->name('theme');
+    Route::get('splash', [PosController::class, 'splash'])->name('splash');
+    Route::get('product', [PosController::class, 'posProduct'])->name('stock');
+});
+
+
+
 Route::prefix('/flutter')->group(function() {
-    Route::get('poskeeper-onboard', [FlutterController::class, 'onboard'])->name('onboard');
-    Route::get('poskeeper-color-plate', [FlutterController::class, 'themes'])->name('themes');
-    Route::post('poskeeper-splash', [FlutterController::class, 'splash'])->name('splash');
-    Route::post('splash-info', [FlutterController::class, 'splashInfo'])->name('splash_info');
+    Route::get('poskeeper-onboard', [PosController::class, 'onboard'])->name('onboard');
+    Route::get('poskeeper-color-plate', [PosController::class, 'themes'])->name('themes');
+    Route::post('poskeeper-splash', [PosController::class, 'splash'])->name('splash');
+    Route::post('splash-info', [PosController::class, 'splashInfo'])->name('splash_info');
 });
 
 

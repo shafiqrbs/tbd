@@ -23,8 +23,17 @@ use Modules\Inventory\App\Models\ParticularModel;
 use Modules\Inventory\App\Models\SettingModel;
 use Modules\Inventory\App\Models\StockItemModel;
 
-class FlutterController extends Controller
+class PosController extends Controller
 {
+
+    public function __construct(Request $request)
+    {
+        $userId = $request->header('X-Api-User');
+        if ($userId && !empty($userId)) {
+            $userData = UserModel::getUserData($userId);
+            $this->domain = $userData;
+        }
+    }
 
     public function onboard()
     {
@@ -72,7 +81,7 @@ class FlutterController extends Controller
         ], 200);
     }
 
-    public function themes()
+    public function theme()
     {
         return response()->json([
             'status' => 200,
@@ -196,17 +205,12 @@ class FlutterController extends Controller
         $licenseKey = $request->license_key;
         $activeKey = $request->active_key;
         if (empty($licenseKey) || empty($activeKey)) {
+
             return response()->json([
                 'status' => 404,
                 'message' => 'License and Active Key are required.',
             ], 404);
         }
-
-        $findDomain = DomainModel::where('mobile', $licenseKey)->where('unique_code',$activeKey)
-            ->select(['dom_domain.id','acc_config.id as acc_config','inv_config.id as config_id'])
-            ->leftjoin('inv_config','inv_config.domain_id','=','dom_domain.id')
-            ->leftjoin('acc_config','acc_config.domain_id','=','dom_domain.id')
-            ->first();
 
         $findDomain = DomainModel::where('license_no', $licenseKey)->where('unique_code',$activeKey)
             ->with('accountConfig',
@@ -214,14 +218,12 @@ class FlutterController extends Controller
                 'accountConfig.voucher_stock_opening','accountConfig.voucher_purchase','accountConfig.voucher_sales','accountConfig.voucher_purchase_return','accountConfig.voucher_stock_reconciliation',
                 'productionConfig','gstConfig','inventoryConfig','inventoryConfig.configPurchase','inventoryConfig.configSales','inventoryConfig.configProduct','inventoryConfig.configDiscount','inventoryConfig.configVat','inventoryConfig.businessModel','inventoryConfig.currency')->first();
 
-
         if (!$findDomain) {
             return response()->json([
                 'status' => 404,
                 'message' => 'Invalid License Key or Active Key.',
             ], 404);
         }
-
 
         $domainData = [
           'global_id' => $findDomain->id,
@@ -237,11 +239,8 @@ class FlutterController extends Controller
         $brands = CategoryModel::getBrandFlutter($domainData);
         $categories = CategoryModel::getCategoryFlutter($domainData);
         $units = ParticularModel::getProductUnitFlutter($domainData,'product-unit');
-    //    $allVendors = isset($vendors['entities']) ? $vendors['entities'] : [];
         $transactionMode = TransactionModeModel::getRecordsForLocalStorage($request,$domainData)['entities'];
-        $allTransactionMode = isset($transactionMode['entities']) ? $transactionMode['entities'] : [];
         $stockItem = StockItemModel::getPosStockItem($domainData);
-
         return response()->json([
             'status' => 200,
             'message' => 'success',
@@ -260,80 +259,19 @@ class FlutterController extends Controller
         ], 200);
     }
 
-    private function getDomainConfig($id,$globalId)
-    {
-//        $entity = ConfigModel::with('domain.productionConfig','currency','businessModel','pos_invoice_mode','configProduct','configPurchase','configSales','configDiscount')->find($id);
-        $entity = DomainModel::with('inventoryConfig','inventoryConfig.configPurchase','inventoryConfig.configSales','inventoryConfig.configProduct','inventoryConfig.configDiscount')->find($globalId);
-        /*$inv_product_type = SettingModel::where('parent_slug', 'product-type')->where('config_id', $id)
-            ->select('id', 'slug', 'name', 'status')
-            ->get()
-            ->toArray();
+    public function posProduct(Request $request){
 
-        $entity['child_domain_exists'] = VendorModel::where('sub_domain_id', $globalId)->exists();
-        if ($inv_product_type) {
-            foreach ($inv_product_type as $value) {
-                switch ($value['slug']) {
-                    case 'raw-materials':
-                        $entity['raw_materials'] = $value['status'];
-                        break;
-                    case 'stockable':
-                        $entity['stockable'] = $value['status'];
-                        break;
-                    case 'post-production':
-                        $entity['post_production'] = $value['status'];
-                        break;
-                    case 'mid-production':
-                        $entity['mid_production'] = $value['status'];
-                        break;
-                    case 'pre-production':
-                        $entity['pre_production'] = $value['status'];
-                        break;
-                }
-            }
-        }
-        if (!$entity){
-            $entity = 'Data not found';
-        }*/
-        return $entity;
+        $data = StockItemModel::getPosProductItem($request,$this->domain);
+        $response = new Response();
+        $response->headers->set('Content-Type', 'application/json');
+        $response->setContent(json_encode([
+            'message' => 'success',
+            'status' => Response::HTTP_OK,
+            'total' => $data['total'],
+            'data' => $data['entities']
+        ]));
+        $response->setStatusCode(Response::HTTP_OK);
+        return $response;
     }
-
-
-
-    private function getInventoryConfig($id,$globalId)
-    {
-        $entity = ConfigModel::with('domain','currency','businessModel','pos_invoice_mode','configProduct','configPurchase','configSales','configDiscount')->find($id);
-        $inv_product_type = SettingModel::where('parent_slug', 'product-type')->where('config_id', $id)
-            ->select('id', 'slug', 'name', 'status')
-            ->get()
-            ->toArray();
-
-        $entity['child_domain_exists'] = VendorModel::where('sub_domain_id', $globalId)->exists();
-        if ($inv_product_type) {
-            foreach ($inv_product_type as $value) {
-                switch ($value['slug']) {
-                    case 'raw-materials':
-                        $entity['raw_materials'] = $value['status'];
-                        break;
-                    case 'stockable':
-                        $entity['stockable'] = $value['status'];
-                        break;
-                    case 'post-production':
-                        $entity['post_production'] = $value['status'];
-                        break;
-                    case 'mid-production':
-                        $entity['mid_production'] = $value['status'];
-                        break;
-                    case 'pre-production':
-                        $entity['pre_production'] = $value['status'];
-                        break;
-                }
-            }
-        }
-        if (!$entity){
-            $entity = 'Data not found';
-        }
-        return $entity;
-    }
-
 
 }
