@@ -41,10 +41,10 @@ class FlutterController extends Controller
                         "app_slug" => "medicine",
                         "name" => "Medicine",
                         "title" => "Medicine Management System",
-                        "license_no" => "01820584047",
-                        "active_key" => "1671288227",
-                        "username" => "Pharmacy",
-                        "password" => "@123456",
+                        "license_no" => "01828148148",
+                        "active_key" => "0915332674",
+                        "username" => "manager",
+                        "password" => "manager@123",
                         "content" => "<ul><li><strong>Inventory Tracking:</strong> ...</li></ul>"
                     ],
                     [
