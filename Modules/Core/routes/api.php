@@ -86,6 +86,7 @@ Route::prefix('/core')->group(function() {
 });
 
 Route::prefix('/flutter')->group(function() {
+    Route::get('poskeeper-onboard', [FlutterController::class, 'onboard'])->name('onboard');
     Route::post('poskeeper-splash', [FlutterController::class, 'splash'])->name('splash');
     Route::post('splash-info', [FlutterController::class, 'splashInfo'])->name('splash_info');
 });

@@ -26,6 +26,51 @@ use Modules\Inventory\App\Models\StockItemModel;
 class FlutterController extends Controller
 {
 
+    public function onboard()
+    {
+        return response()->json([
+            'status' => 200,
+            'message' => 'success',
+            'data' => [
+                "video_url" => "https://youtu.be/CPclGyYCGtY?si=12eJJnM7yUQvh7RU",
+                "terms_condition" => "<p>1. Acceptance of Terms ...</p>",
+                "aboutus" => "<p>Founded in 2018, POSKeeper Global IT began its journey...</p>",
+                "onboard" => 1,
+                "demo" => [
+                    [
+                        "app_slug" => "medicine",
+                        "name" => "Medicine",
+                        "title" => "Medicine Management System",
+                        "license_no" => "01820584047",
+                        "active_key" => "1671288227",
+                        "username" => "Pharmacy",
+                        "password" => "@123456",
+                        "content" => "<ul><li><strong>Inventory Tracking:</strong> ...</li></ul>"
+                    ],
+                    [
+                        "app_slug" => "restaurant",
+                        "name" => "Restaurant",
+                        "title" => "Restaurant Management System",
+                        "license_no" => "01852892044",
+                        "active_key" => "1551378444",
+                        "username" => "jp_rubel",
+                        "password" => "@123456",
+                        "content" => "<ul><li><strong>Table Management:</strong> ...</li></ul>"
+                    ],
+                    [
+                        "app_slug" => "invoice",
+                        "name" => "Business Invoice",
+                        "title" => "Trading Business POS System",
+                        "license_no" => "01706250725",
+                        "active_key" => "1577633987",
+                        "username" => "rpf_kajol",
+                        "password" => "@123456",
+                        "content" => "<ul><li><strong>Multi-Warehouse Management:</strong> ...</li></ul>"
+                    ]
+                ]
+            ]
+        ], 200);
+    }
     public function splash(Request $request){
         $licenseKey = $request->license_key;
         $activeKey = $request->active_key;
