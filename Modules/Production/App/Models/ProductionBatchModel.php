@@ -399,6 +399,15 @@ class ProductionBatchModel extends Model
                 $requiredQuantity = max(0, $quantity - $warehouseCurrentStock);
                 if($requiredQuantity > 0 ) {
                     $subTotal = $requiredQuantity * $customerStockItem->purchase_price;
+
+                    if (fmod($requiredQuantity, 1) != 0) {
+                        $requiredQuantity = number_format($requiredQuantity, 3, '.', '');
+                    }
+
+                    if (fmod($subTotal, 1) != 0) {
+                        $subTotal = number_format($subTotal, 2, '.', '');
+                    }
+
                     $total += $subTotal;
                     $itemsToInsert[] = [
                         'requisition_id' => $requisition->id,
@@ -421,6 +430,10 @@ class ProductionBatchModel extends Model
             }
             if ($itemsToInsert) {
                 RequisitionItemModel::insert($itemsToInsert);
+            }
+
+            if (fmod($total, 1) != 0) {
+                $total = number_format($total, 2, '.', '');
             }
 
             $requisition->update([

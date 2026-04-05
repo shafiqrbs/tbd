@@ -97,11 +97,17 @@ class ProductionExpense extends Model
                     'production_element_id' => $item->id,
                 ];
 
+                $quantity = $productionBatchItem->issue_quantity * $item->quantity;
+
+                if (fmod($quantity, 1) != 0) {
+                    $quantity = number_format($quantity, 3, '.', '');
+                }
+
                 $data = [
                     'purchase_price' => $item->item_purchase_price,
                     'sales_price' => $item->item_sale_price,
-                    'quantity' => $productionBatchItem->issue_quantity * $item->quantity,
-                    'issue_quantity' => $productionBatchItem->issue_quantity * $item->quantity,
+                    'quantity' => $quantity,
+                    'issue_quantity' => $quantity,
                 ];
 
                 ProductionExpense::updateOrCreate($filter, $data);

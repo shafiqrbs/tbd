@@ -148,44 +148,44 @@ class   RequisitionMatrixBoardController extends Controller
                         ->where('process', 'approved')
                         ->first();
 
-                    $warehouseId = $this->domain['warehouse_id'];
                     if ($findProItem) {
                         $warehouseId = $findProItem->warehouse_id;
-                    }
 
-                    $itemsToInsert[] = [
-                        'customer_stock_item_id' => $val['customer_stock_item_id'],
-                        'vendor_stock_item_id' => $val['vendor_stock_item_id'],
-                        'requisition_item_id' => $val['requisition_item_id'],
-                        'customer_config_id' => $val['customer_config_id'],
-                        'vendor_config_id' => $val['vendor_config_id'],
-                        'unit_id' => $val['unit_id'],
-                        'barcode' => $val['barcode'],
-                        'purchase_price' => $val['purchase_price'],
-                        'sales_price' => $val['sales_price'],
-                        'quantity' => $val['quantity'],
-                        'requested_quantity' => $val['quantity'],
-                        'approved_quantity' => $val['quantity'],
-                        'sub_total' => $val['sub_total'],
-                        'display_name' => $val['display_name'],
-                        'unit_name' => $val['unit_name'],
-                        'customer_id' => $val['customer_id'],
-                        'customer_name' => $val['customer_name'],
-                        'expected_date' => $val['expected_date'],
-                        'generate_date' => $expectedDate,
+
+                        $itemsToInsert[] = [
+                            'customer_stock_item_id' => $val['customer_stock_item_id'],
+                            'vendor_stock_item_id' => $val['vendor_stock_item_id'],
+                            'requisition_item_id' => $val['requisition_item_id'],
+                            'customer_config_id' => $val['customer_config_id'],
+                            'vendor_config_id' => $val['vendor_config_id'],
+                            'unit_id' => $val['unit_id'],
+                            'barcode' => $val['barcode'],
+                            'purchase_price' => $val['purchase_price'],
+                            'sales_price' => $val['sales_price'],
+                            'quantity' => $val['quantity'],
+                            'requested_quantity' => $val['quantity'],
+                            'approved_quantity' => $val['quantity'],
+                            'sub_total' => $val['sub_total'],
+                            'display_name' => $val['display_name'],
+                            'unit_name' => $val['unit_name'],
+                            'customer_id' => $val['customer_id'],
+                            'customer_name' => $val['customer_name'],
+                            'expected_date' => $val['expected_date'],
+                            'generate_date' => $expectedDate,
 //                        'vendor_stock_quantity' => $val['vendor_stock_quantity'],
-                        'vendor_stock_quantity' => CurrentStockModel::getCurrentStockByWarehouseAndStockItemId(
-                            $this->domain['config_id'],
-                            $warehouseId,
-                            $val['vendor_stock_item_id']
-                        ),
-                        'status' => true,
-                        'process' => 'Created',
-                        'requisition_board_id' => $board->id,
-                        'created_at' => now(),
-                        'warehouse_id' => $warehouseId,
+                            'vendor_stock_quantity' => CurrentStockModel::getCurrentStockByWarehouseAndStockItemId(
+                                $this->domain['config_id'],
+                                $warehouseId,
+                                $val['vendor_stock_item_id']
+                            ),
+                            'status' => true,
+                            'process' => 'Created',
+                            'requisition_board_id' => $board->id,
+                            'created_at' => now(),
+                            'warehouse_id' => $warehouseId,
 
-                    ];
+                        ];
+                    }
                     // Check if a Generated record already exists for this vendor and expected date
                 }
 
