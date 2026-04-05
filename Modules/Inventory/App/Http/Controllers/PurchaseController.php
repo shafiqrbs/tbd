@@ -250,12 +250,20 @@ class PurchaseController extends Controller
                     $itemAveragePrice = StockItemModel::calculateStockItemAveragePrice($item->stock_item_id,$item->config_id,$item);
 
                     //set average price
-                    StockItemModel::where('id', $item->stock_item_id)->where('config_id',$item->config_id)->update([
+                    $updateData = [
                         'average_price' => $itemAveragePrice,
                         'purchase_price' => $item['purchase_price'],
-                        //'price' => $item['sales_price'] ?? 0,
-                        //'sales_price' => $item['sales_price'] ?? 0
-                    ]);
+                    ];
+
+// 👉               Only update sales fields if > 0
+                    if (!empty($item['sales_price']) && $item['sales_price'] > 0) {
+                        $updateData['price'] = $item['sales_price'];
+                        $updateData['sales_price'] = $item['sales_price'];
+                    }
+
+                    StockItemModel::where('id', $item->stock_item_id)
+                        ->where('config_id', $item->config_id)
+                        ->update($updateData);
 
                     $item->update(['approved_by_id' => $this->domain['user_id']]);
                     StockItemHistoryModel::openingStockQuantity($item,'purchase',$this->domain);
