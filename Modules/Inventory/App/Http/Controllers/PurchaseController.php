@@ -248,12 +248,13 @@ class PurchaseController extends Controller
                 foreach ($purchase->purchaseItems as $item){
                     // get average price
                     $itemAveragePrice = StockItemModel::calculateStockItemAveragePrice($item->stock_item_id,$item->config_id,$item);
+
                     //set average price
                     StockItemModel::where('id', $item->stock_item_id)->where('config_id',$item->config_id)->update([
                         'average_price' => $itemAveragePrice,
                         'purchase_price' => $item['purchase_price'],
-                        'price' => $item['sales_price'] ?? 0,
-                        'sales_price' => $item['sales_price'] ?? 0
+                        //'price' => $item['sales_price'] ?? 0,
+                        //'sales_price' => $item['sales_price'] ?? 0
                     ]);
 
                     $item->update(['approved_by_id' => $this->domain['user_id']]);
