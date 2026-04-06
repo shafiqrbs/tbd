@@ -241,6 +241,7 @@ class PosController extends Controller
         $units = ParticularModel::getProductUnitFlutter($domainData,'product-unit');
         $transactionMode = TransactionModeModel::getRecordsForLocalStorage($request,$domainData)['entities'];
         $stockItem = StockItemModel::getPosStockItem($domainData);
+        $getProductCategory = StockItemModel::getProductCategory($domainData);
         return response()->json([
             'status' => 200,
             'message' => 'success',
@@ -255,6 +256,7 @@ class PosController extends Controller
                 'transaction_methods' => $transactionMode,
                 'setup' => $findDomain,
                 'stocks' => $stockItem,
+                'productCategory' => $getProductCategory,
             ]
         ], 200);
     }
