@@ -254,7 +254,7 @@ class PosController extends Controller
                 'customers' => $allCustomers,
                 'vendors' => $vendors,
                 'transaction_methods' => $transactionMode,
-                'setup' => $findDomain,
+                'domain_config' => $findDomain,
                 'stocks' => $stockItem,
                 'productCategory' => $getProductCategory,
             ]
