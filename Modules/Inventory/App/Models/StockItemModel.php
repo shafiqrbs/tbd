@@ -585,17 +585,26 @@ class StockItemModel extends Model
 
     public static function getProductCategory($domain)
     {
-        $products = self::where([['inv_product.config_id', $domain['config_id']]])->where('inv_stock.status', 1)->where('inv_category.status', 1)
+        $products = self::query()
             ->join('inv_product', 'inv_product.id', '=', 'inv_stock.product_id')
-            ->leftjoin('inv_category', 'inv_category.id', '=', 'inv_product.category_id')
-             ->select([
+            ->leftJoin('inv_category', 'inv_category.id', '=', 'inv_product.category_id')
+            ->where('inv_product.config_id', $domain['config_id'])
+            ->where('inv_stock.status', 1)
+            ->where('inv_category.status', 1)
+            ->select([
                 'inv_category.id',
-                'inv_category.name as name',
-                'inv_category.slug as slug',
-            ]);
-        $entities = $products->groupBy('inv_category.id')->orderBy('inv_category.id')->get();
-        return $entities;
+                'inv_category.name',
+                'inv_category.slug',
+                DB::raw('COUNT(inv_stock.id) as item')
+            ])
+            ->groupBy(
+                'inv_category.id',
+                'inv_category.name',
+                'inv_category.slug'
+            )
+            ->orderBy('inv_category.id');
 
+        return $products->get();
     }
 
 
