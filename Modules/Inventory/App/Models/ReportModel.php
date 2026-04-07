@@ -37,29 +37,47 @@ class ReportModel extends Model
             $start_date = $date->format('Y-m-d 00:00:00');
             $end_date = $date->format('Y-m-d 23:59:59');
         }
-       // dd($start_date,$end_date);
+
 
         $topSalesItem = DB::table('inv_sales as s')->where('s.config_id', $inventoryConfigId)
+            ->where('s.process', 'Approved')
             ->join('inv_sales_item as si', 's.id', '=', 'si.sale_id')
             ->selectRaw('ROUND(SUM(si.quantity)) as totalQuantity ,SUM(si.sub_total)  as totalAmount , SUM(si.sub_total)  as salesPrice ,  si.name as name')
             ->groupBy('si.stock_item_id')
             ->orderBy('quantity','DESC')
             ->limit(10)
-            ->when($start_date && $end_date, fn($q) => $q->whereBetween('s.created_at', [$start_date, $end_date]))
-            ->first();
+            ->when($start_date, function ($q) use ($start_date) { $q->whereDate('s.created_at', '>=', $start_date); })
+            ->when($end_date, function ($q) use ($end_date) { $q->whereDate('s.created_at', '<=', $end_date); })
+            ->get();
 
-        $sales = DB::table('inv_sales as s')->where('s.config_id', $inventoryConfigId)
-            ->selectRaw('ROUND(COUNT(s.id)) as totalInvoices,ROUND(SUM(s.sub_total)) as totalSales,ROUND(SUM(s.total)) as total,ROUND(SUM(s.payment)) as totalPayment,ROUND(SUM(s.total) - SUM(s.payment)) as totalDue, ROUND(SUM(s.discount)) as totalDiscount')
-            ->when($start_date && $end_date, fn($q) => $q->whereBetween('s.created_at', [$start_date, $end_date]))
-            ->first();
+        $sales = DB::table('inv_sales as s')
+            ->where('s.config_id', $inventoryConfigId)
+            ->where('s.process', 'Approved')
+            ->when($start_date, function ($q) use ($start_date) { $q->whereDate('s.created_at', '>=', $start_date); })
+            ->when($end_date, function ($q) use ($end_date) { $q->whereDate('s.created_at', '<=', $end_date); })
+            ->selectRaw('
+                COUNT(s.id) as totalInvoices,
+                SUM(s.sub_total) as totalSales,
+                SUM(s.total) as total,
+                SUM(s.payment) as totalPayment,
+                SUM(s.total - s.payment) as totalDue,
+                SUM(s.discount) as totalDiscount
+            ')->first();
 
-        $purchase = DB::table('inv_purchase as s')->where('s.config_id', $inventoryConfigId)
+
+        $purchase = DB::table('inv_purchase as s')
+            ->where('s.config_id', $inventoryConfigId)
+            ->where('s.process', 'Approved')
             ->selectRaw('COUNT(s.id) as totalInvoices,SUM(s.sub_total) as totalPurchase,SUM(s.total) as total,SUM(s.payment) as totalPayment,(SUM(s.total) - SUM(s.payment)) as totalDue, SUM(s.discount) as totalDiscount')
-            ->when($start_date && $end_date, fn($q) => $q->whereBetween('s.created_at', [$start_date, $end_date]))
+            ->when($start_date, function ($q) use ($start_date) { $q->whereDate('s.created_at', '>=', $start_date); })
+            ->when($end_date, function ($q) use ($end_date) { $q->whereDate('s.created_at', '<=', $end_date); })
             ->first();
 
-        $transactionModes = DB::table('inv_sales as s')->where('s.config_id', $inventoryConfigId)
-           // ->when($start_date && $end_date, fn($q) => $q->whereBetween('s.created_at', [$start_date, $end_date]))
+        $transactionModes = DB::table('inv_sales as s')
+            ->where('s.config_id', $inventoryConfigId)
+            ->where('s.process', 'Approved')
+            ->when($start_date, function ($q) use ($start_date) { $q->whereDate('s.created_at', '>=', $start_date); })
+            ->when($end_date, function ($q) use ($end_date) { $q->whereDate('s.created_at', '<=', $end_date); })
             ->join('inv_payment_transaction as pt', 's.id', '=', 'pt.sale_id')
             ->join('acc_transaction_mode as tm', 'tm.id', '=', 'pt.transaction_mode_id')
             ->selectRaw('tm.name as method,SUM(pt.amount) as amount')
@@ -67,7 +85,9 @@ class ReportModel extends Model
             ->get();
 
         $method = DB::table('inv_sales as s')->where('s.config_id', $inventoryConfigId)
-           // ->when($start_date && $end_date, fn($q) => $q->whereBetween('s.created_at', [$start_date, $end_date]))
+            ->where('s.process', 'Approved')
+            ->when($start_date, function ($q) use ($start_date) { $q->whereDate('s.created_at', '>=', $start_date); })
+            ->when($end_date, function ($q) use ($end_date) { $q->whereDate('s.created_at', '<=', $end_date); })
             ->join('inv_payment_transaction as pt', 's.id', '=', 'pt.sale_id')
             ->join('acc_transaction_mode as tm', 'tm.id', '=', 'pt.transaction_mode_id')
             ->join('acc_setting as acs', 'acs.id', '=', 'tm.method_id')
@@ -76,21 +96,26 @@ class ReportModel extends Model
             ->get();
 
         $damage = DB::table('inv_damage_item as s')->where('s.config_id', $inventoryConfigId)
-            ->when($start_date && $end_date, fn($q) => $q->whereBetween('s.created_at', [$start_date, $end_date]))
+            ->when($start_date, function ($q) use ($start_date) { $q->whereDate('s.created_at', '>=', $start_date); })
+            ->when($end_date, function ($q) use ($end_date) { $q->whereDate('s.created_at', '<=', $end_date); })
             ->selectRaw('SUM(s.sub_total) as sub_total')
             ->first();
 
         $salesReturn = DB::table('inv_sales_return_item as s')
             ->join('inv_sales_return as sr', 'sr.id', '=', 's.sales_return_id')
             ->where('sr.config_id', $inventoryConfigId)
-            // ->when($start_date && $end_date, fn($q) => $q->whereBetween('sr.created_at', [$start_date, $end_date]))
+            ->where('sr.process', 'Approved')
+            ->when($start_date, function ($q) use ($start_date) { $q->whereDate('sr.created_at', '>=', $start_date); })
+            ->when($end_date, function ($q) use ($end_date) { $q->whereDate('sr.created_at', '<=', $end_date); })
             ->selectRaw('SUM(s.sub_total) as sub_total')
             ->first();
 
         $purchaseReturn = DB::table('inv_purchase_return_item as s')
             ->join('inv_purchase_return as sr', 'sr.id', '=', 's.purchase_return_id')
             ->where('sr.config_id', $inventoryConfigId)
-            // ->when($start_date && $end_date, fn($q) => $q->whereBetween('sr.created_at', [$start_date, $end_date]))
+            ->where('sr.process', 'Approved')
+            ->when($start_date, function ($q) use ($start_date) { $q->whereDate('s.created_at', '>=', $start_date); })
+            ->when($end_date, function ($q) use ($end_date) { $q->whereDate('s.created_at', '<=', $end_date); })
             ->selectRaw('SUM(s.sub_total) as sub_total')
             ->first();
 
@@ -102,18 +127,13 @@ class ReportModel extends Model
             ->groupBy('stock_item_id');
 
         $totalOpeningBalance = DB::table('inv_stock_item_history as h')
-            ->joinSub($prevDateSub, 'pd', function ($join) {
-                $join->on('h.id', '=', 'pd.id');
-            })
+            ->joinSub($prevDateSub, 'pd', function ($join) { $join->on('h.id', '=', 'pd.id');})
             ->sum('h.closing_balance');
 
 
         $totalOpeningQuantity = DB::table('inv_stock_item_history as h')
-            ->joinSub($prevDateSub, 'pd', function ($join) {
-                $join->on('h.id', '=', 'pd.id');
-            })
+            ->joinSub($prevDateSub, 'pd', function ($join) { $join->on('h.id', '=', 'pd.id');})
             ->sum('h.opening_quantity');
-
 
         $stocks = [
             'totalOpeningQuantity' => $totalOpeningQuantity,
@@ -122,7 +142,6 @@ class ReportModel extends Model
         ];
 
         $salesOverview = [];
-
         $salesOverview['totalInvoices'] = $sales->totalInvoices;
         $salesOverview['totalSales'] = $sales->totalSales;
         $salesOverview['total'] = $sales->total;
@@ -134,7 +153,16 @@ class ReportModel extends Model
         $salesOverview['return'] = $purchaseReturn->sub_total;
         $salesOverview['totalClosingBalance'] = (($totalOpeningBalance + $purchase->totalPurchase)-($sales->totalSales+$damage->sub_total+$purchaseReturn->sub_total));
 
-        $data = ['sales' => $salesOverview,'purchase' => $purchase , 'methods' => $method,'transactionModes' => $transactionModes,'topSalesItem' => $topSalesItem, 'damage' => $damage->sub_total, 'salesReturn' => $salesReturn->sub_total,'stocks' => $stocks];
+        $data = [
+            'sales' => $salesOverview,
+            'purchase' => $purchase ,
+            'methods' => $method,
+            'transactionModes' => $transactionModes,
+            'topSalesItem' => $topSalesItem,
+            'damage' => $damage->sub_total,
+            'salesReturn' => $salesReturn->sub_total,
+            'stocks' => $stocks
+        ];
         return $data;
 
 
