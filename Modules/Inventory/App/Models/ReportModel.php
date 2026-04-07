@@ -128,11 +128,11 @@ class ReportModel extends Model
         $salesOverview['total'] = $sales->total;
         $salesOverview['totalPurchase'] = $purchase->totalPurchase;
         $salesOverview['totalDiscount'] = $sales->totalDiscount;
-        $salesOverview['totalOpeningBalance'] = $totalOpeningQuantity;
+        $salesOverview['totalOpeningBalance'] = $totalOpeningBalance;
+        $salesOverview['totalStock'] = $totalOpeningBalance + $purchase->totalPurchase;
         $salesOverview['wastage'] = $damage->sub_total;
         $salesOverview['return'] = $purchaseReturn->sub_total;
-
-        $salesOverview['totalClosingBalance'] = (($totalOpeningQuantity + $purchase->total)-($sales->totalSales+$damage->sub_total+$purchaseReturn->sub_total));
+        $salesOverview['totalClosingBalance'] = (($totalOpeningBalance + $purchase->totalPurchase)-($sales->totalSales+$damage->sub_total+$purchaseReturn->sub_total));
 
         $data = ['sales' => $salesOverview,'purchase' => $purchase , 'methods' => $method,'transactionModes' => $transactionModes,'topSalesItem' => $topSalesItem, 'damage' => $damage->sub_total, 'salesReturn' => $salesReturn->sub_total,'stocks' => $stocks];
         return $data;
