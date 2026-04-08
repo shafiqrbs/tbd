@@ -114,8 +114,8 @@ class ReportModel extends Model
             ->join('inv_purchase_return as sr', 'sr.id', '=', 's.purchase_return_id')
             ->where('sr.config_id', $inventoryConfigId)
             ->where('sr.process', 'Approved')
-            ->when($start_date, function ($q) use ($start_date) { $q->whereDate('s.updated_at', '>=', $start_date); })
-            ->when($end_date, function ($q) use ($end_date) { $q->whereDate('s.updated_at', '<=', $end_date); })
+            ->when($start_date, function ($q) use ($start_date) { $q->whereDate('sr.updated_at', '>=', $start_date); })
+            ->when($end_date, function ($q) use ($end_date) { $q->whereDate('sr.updated_at', '<=', $end_date); })
             ->selectRaw('SUM(s.sub_total) as sub_total')
             ->first();
 
