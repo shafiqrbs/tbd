@@ -105,8 +105,8 @@ class ReportModel extends Model
             ->join('inv_sales_return as sr', 'sr.id', '=', 's.sales_return_id')
             ->where('sr.config_id', $inventoryConfigId)
             ->where('sr.process', 'Approved')
-            ->when($start_date, function ($q) use ($start_date) { $q->whereDate('sr.created_at', '>=', $start_date); })
-            ->when($end_date, function ($q) use ($end_date) { $q->whereDate('sr.created_at', '<=', $end_date); })
+            ->when($start_date, function ($q) use ($start_date) { $q->whereDate('sr.updated_at', '>=', $start_date); })
+            ->when($end_date, function ($q) use ($end_date) { $q->whereDate('sr.updated_at', '<=', $end_date); })
             ->selectRaw('SUM(s.sub_total) as sub_total')
             ->first();
 
@@ -114,8 +114,8 @@ class ReportModel extends Model
             ->join('inv_purchase_return as sr', 'sr.id', '=', 's.purchase_return_id')
             ->where('sr.config_id', $inventoryConfigId)
             ->where('sr.process', 'Approved')
-            ->when($start_date, function ($q) use ($start_date) { $q->whereDate('s.created_at', '>=', $start_date); })
-            ->when($end_date, function ($q) use ($end_date) { $q->whereDate('s.created_at', '<=', $end_date); })
+            ->when($start_date, function ($q) use ($start_date) { $q->whereDate('s.updated_at', '>=', $start_date); })
+            ->when($end_date, function ($q) use ($end_date) { $q->whereDate('s.updated_at', '<=', $end_date); })
             ->selectRaw('SUM(s.sub_total) as sub_total')
             ->first();
 
@@ -300,7 +300,7 @@ class ReportModel extends Model
         $entities = $query
             ->skip($skip)
             ->take($perPage)
-            ->orderBy('inv_category.id', 'DESC') // fixed
+            ->orderBy('inv_category.name', 'ASC') // fixed
             ->get();
 
         return [
