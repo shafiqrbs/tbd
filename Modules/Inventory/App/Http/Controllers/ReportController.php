@@ -104,7 +104,7 @@ class ReportController extends Controller
 
     }
 
-     public function damageItemReport(Request $request)
+    public function damageItemReport(Request $request)
     {
 
         $configId = $this->domain['inv_config'];

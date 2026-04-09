@@ -479,8 +479,32 @@ class ReportModel extends Model
             ->join('inv_product', 'inv_product.id', '=', 'inv_stock.product_id')
             ->leftJoin('inv_category', 'inv_category.id', '=', 'inv_product.category_id')
             ->leftJoin('cor_warehouses', 'cor_warehouses.id', '=', 'inv_purchase_item.warehouse_id')
-            ->leftJoin('inv_particular', 'inv_particular.id', '=', 'inv_product.unit_id')
-            ->select([
+            ->leftJoin('inv_particular', 'inv_particular.id', '=', 'inv_product.unit_id');
+
+            if (!empty($request['term'])) {
+                $term = $request['term'];
+                $entities->where(function ($q) use ($term) {
+                    $q->where('inv_stock.name', 'LIKE', "%$term%")
+                        ->orWhere('inv_stock.barcode', 'LIKE', "%$term%")
+                    ->orWhereHas('inv_category', function ($p) use ($term) {
+                        $p->where('name', 'LIKE', "%$term%")
+                            ->orWhere('slug', 'LIKE', "%$term%");
+                    });
+                });
+            }
+
+            if (isset($request['start_date']) && !empty($request['start_date']) && empty($request['end_date'])){
+                $start_date = $request['start_date'].' 00:00:00';
+                $end_date = $request['start_date'].' 23:59:59';
+                $entities = $entities->whereBetween('inv_damage_item.created_at',[$start_date, $end_date]);
+            }
+            if (isset($request['start_date']) && !empty($request['start_date']) && isset($request['end_date']) && !empty($request['end_date'])){
+                $start_date = $request['start_date'].' 00:00:00';
+                $end_date = $request['end_date'].' 23:59:59';
+                $entities = $entities->whereBetween('inv_damage_item.created_at',[$start_date, $end_date]);
+            }
+
+        $entities->select([
                 'inv_damage_item.id',
                 DB::raw('DATE_FORMAT(inv_purchase_item.created_at, "%d-%m-%Y") as created'),
                 DB::raw('DATE_FORMAT(inv_purchase_item.expired_date, "%d-%m-%Y") as expired_date'),
