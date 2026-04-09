@@ -283,6 +283,7 @@ class StockItemModel extends Model
                 return [
                     'id' => $stock->id,
                     'stock_id' => $stock->id,
+                    'product_id' => $stock->product_id,
                     'name' => $stock->display_name ?? $stock->name,
                     'display_name' => $stock->display_name ?? $stock->name,
                     'product_name' => $stock->name . '[' . ($stock->quantity ?? 0) . '] ' . ($product->unit->name ?? ''),
@@ -424,6 +425,7 @@ class StockItemModel extends Model
             return [
                 'id' => $stock->id,
                 'stock_id' => $stock->id,
+                'product_id' => $stock->product_id,
                 'name' => $stock->display_name ?? $stock->name,
                 'display_name' => $stock->display_name ?? $stock->name,
 
