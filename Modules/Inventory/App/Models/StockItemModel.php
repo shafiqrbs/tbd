@@ -358,7 +358,7 @@ class StockItemModel extends Model
         $query = self::query()
             ->select([
                 'inv_stock.id',
-                'inv_stock.product_id',
+                'inv_stock.product_id as product_id',
                 'inv_stock.name',
                 'inv_stock.display_name',
                 'inv_stock.quantity',
