@@ -146,11 +146,13 @@ class ReportModel extends Model
             ->joinSub($prevDateSub, 'pd', function ($join) { $join->on('h.id', '=', 'pd.id');})
             ->sum('h.opening_quantity');
 
-        $todayOpening = DB::table('inv_stock_item_history')
-            ->where('config_id', $inventoryConfigId)
-            ->where('mode', 'opening')
-            ->whereDate('created_at', $start_date)
-            ->sum('closing_balance');
+            /*
+                $todayOpening = DB::table('inv_stock_item_history')
+                ->where('config_id', $inventoryConfigId)
+                ->where('mode', 'opening')
+                ->whereDate('created_at', $start_date)
+                ->sum('closing_balance');
+            */
 
         $stocks = [
             'totalOpeningQuantity' => $totalOpeningQuantity,
