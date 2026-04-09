@@ -135,6 +135,12 @@ class ReportModel extends Model
             ->joinSub($prevDateSub, 'pd', function ($join) { $join->on('h.id', '=', 'pd.id');})
             ->sum('h.opening_quantity');
 
+        $todayOpening = DB::table('inv_stock_item_history')
+            ->where('config_id', $inventoryConfigId)
+            ->where('mode', 'opening')
+            ->whereDate('created_at', $start_date)
+            ->sum('closing_balance');
+
         $stocks = [
             'totalOpeningQuantity' => $totalOpeningQuantity,
             'totalOpeningBalance' => $totalOpeningBalance,
@@ -151,6 +157,7 @@ class ReportModel extends Model
         $salesOverview['totalStock'] = $totalOpeningBalance + $purchase->totalPurchase;
         $salesOverview['wastage'] = $damage->sub_total;
         $salesOverview['return'] = $purchaseReturn->sub_total;
+        $salesOverview['today_opening'] = $todayOpening;
         $salesOverview['totalClosingBalance'] = (($totalOpeningBalance + $purchase->totalPurchase)-($sales->totalSales+$damage->sub_total+$purchaseReturn->sub_total));
 
         $data = [
@@ -275,38 +282,171 @@ class ReportModel extends Model
      * Fetch vendor-wise purchases with eager loaded items.
      * $filters array can contain 'vendor_id' or other filters.
      */
-    public static function categorySummaryReport($configId,array $request = [])
+    public static function categorySummaryReport($inventoryConfigId,array $request = [])
     {
-        $page = isset($request['page']) && $request['page'] > 0 ? ($request['page'] - 1) : 0;
-        $perPage = isset($request['offset']) && $request['offset'] != '' ? (int)$request['offset'] : 50;
-        $skip = $page * $perPage;
 
-        $query = StockItemModel::where('inv_product.config_id', $configId)
+        if (isset($request['start_date']) && !empty($request['end_date'])){
+            $start_date = new \DateTime($request['start_date']);
+            $end_date = new \DateTime($request['end_date']);
+            $start_date = $start_date->format('Y-m-d 00:00:00');
+            $end_date = $end_date->format('Y-m-d 23:59:59');
+        }else{
+            $date = new \DateTime();
+            $start_date = $date->format('Y-m-d 00:00:00');
+            $end_date = $date->format('Y-m-d 23:59:59');
+        }
+
+        $categories = StockItemModel::query()
             ->join('inv_product', 'inv_product.id', '=', 'inv_stock.product_id')
             ->leftJoin('inv_category', 'inv_category.id', '=', 'inv_product.category_id')
+            ->where('inv_product.config_id', $inventoryConfigId)
+            ->where('inv_category.status', 1)
             ->select([
                 'inv_category.id',
-                'inv_category.name as name',
-                DB::raw('SUM(inv_stock.quantity * inv_stock.price) as total')
+                'inv_category.name',
+                'inv_category.slug',
+                DB::raw('COUNT(inv_stock.id) as item')
             ])
-            ->groupBy('inv_category.id', 'inv_category.name');
+            ->groupBy(
+                'inv_category.id',
+                'inv_category.name',
+                'inv_category.slug'
+            )
+            ->orderBy('inv_category.id');
+
+        $categories =  $categories->get();
 
 
-        // ✅ Correct total count (after groupBy)
-        $total = $query->get()->count();
-
-
-        // ✅ Pagination + data
-        $entities = $query
-            ->skip($skip)
-            ->take($perPage)
-            ->orderBy('inv_category.name', 'ASC') // fixed
+        $sales = DB::table('inv_sales_item')
+            ->where('s.config_id', $inventoryConfigId)
+            ->where('s.process', 'Approved')
+            ->join('inv_sales as s', 's.id', '=', 'inv_sales_item.sale_id')
+            ->join('inv_stock', 'inv_stock.id', '=', 'inv_sales_item.stock_item_id')
+            ->join('inv_product', 'inv_product.id', '=', 'inv_stock.product_id')
+            ->join('inv_category', 'inv_category.id', '=', 'inv_product.category_id')
+            ->selectRaw('inv_category.id as id , inv_category.name as name')
+            ->selectRaw('ROUND(COALESCE(SUM(inv_sales_item.sub_total), 0), 2) as total')
+            ->when($start_date, function ($q) use ($start_date) { $q->whereDate('s.updated_at', '>=', $start_date); })
+            ->when($end_date, function ($q) use ($end_date) { $q->whereDate('s.updated_at', '<=', $end_date); })
+            ->groupBy('inv_category.id')
             ->get();
 
-        return [
-            'count' => $total,
-            'entities' => $entities
-        ];
+        $purchase = DB::table('inv_purchase_item as s')
+            ->where('s.config_id', $inventoryConfigId)
+            ->whereNotNull('s.approved_by_id')
+            ->join('inv_stock', 'inv_stock.id', '=', 's.stock_item_id')
+            ->join('inv_product', 'inv_product.id', '=', 'inv_stock.product_id')
+            ->join('inv_category', 'inv_category.id', '=', 'inv_product.category_id')
+            ->selectRaw('inv_category.id as id , inv_category.name as name')
+            ->selectRaw('ROUND(COALESCE(SUM(s.sub_total), 0), 2) as total')
+            ->when($start_date, function ($q) use ($start_date) { $q->whereDate('s.updated_at', '>=', $start_date); })
+            ->when($end_date, function ($q) use ($end_date) { $q->whereDate('s.updated_at', '<=', $end_date); })
+            ->groupBy('inv_category.id')
+            ->get();
+
+        $damage = DB::table('inv_damage_item as s')->where('s.config_id', $inventoryConfigId)
+            ->join('inv_stock', 'inv_stock.id', '=', 's.stock_item_id')
+            ->join('inv_product', 'inv_product.id', '=', 'inv_stock.product_id')
+            ->join('inv_category', 'inv_category.id', '=', 'inv_product.category_id')
+            ->when($start_date, function ($q) use ($start_date) { $q->whereDate('s.updated_at', '>=', $start_date); })
+            ->when($end_date, function ($q) use ($end_date) { $q->whereDate('s.updated_at', '<=', $end_date); })
+            ->selectRaw('inv_category.id as id , inv_category.name as name')
+            ->selectRaw('ROUND(COALESCE(SUM(s.sub_total), 0), 2) as total')
+            ->groupBy('inv_category.id')
+            ->get();
+
+        $salesReturn = DB::table('inv_sales_return_item as s')
+            ->join('inv_sales_return as sr', 'sr.id', '=', 's.sales_return_id')
+            ->join('inv_stock', 'inv_stock.id', '=', 's.stock_item_id')
+            ->join('inv_product', 'inv_product.id', '=', 'inv_stock.product_id')
+            ->join('inv_category', 'inv_category.id', '=', 'inv_product.category_id')
+            ->where('sr.config_id', $inventoryConfigId)
+            ->where('sr.process', 'Approved')
+            ->when($start_date, function ($q) use ($start_date) { $q->whereDate('sr.updated_at', '>=', $start_date); })
+            ->when($end_date, function ($q) use ($end_date) { $q->whereDate('sr.updated_at', '<=', $end_date); })
+            ->selectRaw('inv_category.id as id , inv_category.name as name')
+            ->selectRaw('ROUND(COALESCE(SUM(s.sub_total), 0), 2) as total')
+            ->groupBy('inv_category.id')
+            ->get();
+
+        $purchaseReturn = DB::table('inv_purchase_return_item as s')
+            ->join('inv_purchase_return as sr', 'sr.id', '=', 's.purchase_return_id')
+            ->join('inv_stock', 'inv_stock.id', '=', 's.stock_item_id')
+            ->join('inv_product', 'inv_product.id', '=', 'inv_stock.product_id')
+            ->join('inv_category', 'inv_category.id', '=', 'inv_product.category_id')
+            ->where('sr.config_id', $inventoryConfigId)
+            ->where('sr.process', 'Approved')
+            ->when($start_date, function ($q) use ($start_date) { $q->whereDate('sr.updated_at', '>=', $start_date); })
+            ->when($end_date, function ($q) use ($end_date) { $q->whereDate('sr.updated_at', '<=', $end_date); })
+            ->selectRaw('inv_category.id as id , inv_category.name as name')
+            ->selectRaw('ROUND(COALESCE(SUM(s.sub_total), 0), 2) as total')
+            ->groupBy('inv_category.id')
+            ->get();
+
+        $prevDateSub = DB::table('inv_stock_item_history')
+            ->selectRaw('MAX(id) as id')
+            ->where('config_id', $inventoryConfigId)
+            ->whereDate('created_at', '<', $start_date)
+            ->groupBy('stock_item_id');
+
+        $categoryWiseOpening = DB::table('inv_stock_item_history as h')
+            ->joinSub($prevDateSub, 'pd', function ($join) {
+                $join->on('h.id', '=', 'pd.id');
+            })
+            ->join('inv_stock as s', 's.id', '=', 'h.stock_item_id')
+            ->join('inv_product as p', 'p.id', '=', 's.product_id')
+            ->join('inv_category as c', 'c.id', '=', 'p.category_id')
+            ->select(
+                'c.id as category_id',
+                'c.name as category_name',
+                DB::raw('ROUND(COALESCE(SUM(h.closing_balance),0),2) as opening')
+            )
+            ->groupBy('c.id', 'c.name')
+            ->get();
+
+        // Convert to keyed arrays for easy lookup
+        $salesData = $sales->keyBy('id')->toArray();
+        $purchaseData = $purchase->keyBy('id')->toArray();
+        $damageData = $damage->keyBy('id')->toArray();
+        $salesReturnData = $salesReturn->keyBy('id')->toArray();
+        $purchaseReturnData = $purchaseReturn->keyBy('id')->toArray();
+        $openingData = $categoryWiseOpening->keyBy('category_id')->toArray();
+
+
+        $results = [];
+
+        foreach ($categories as $category) {
+
+            $categoryId = $category->id;
+
+            // Get values or default to 0
+            $opening = $openingData[$categoryId]->opening ?? 0;
+            $sale = $salesData[$categoryId]->total ?? 0;
+            $purch = $purchaseData[$categoryId]->total ?? 0;
+            $dmg = $damageData[$categoryId]->total ?? 0;
+            $salesRet = $salesReturnData[$categoryId]->total ?? 0;
+            $purchaseRet = $purchaseReturnData[$categoryId]->total ?? 0;
+
+            // Calculate closing stock
+
+            $receive = ($opening + $purch + $salesRet);
+            $issue = ($sale + $purchaseRet + $dmg);
+            $closing = (($opening + $purch + $salesRet) - ($sale + $purchaseRet + $dmg));
+
+            $results[] = [
+                'id' => $categoryId,
+                'name' => $category->name,
+                'slug' => $category->slug,
+                'items' => $category->item,
+                'opening_balance' => round($opening, 2),
+                'receive_amount' => round($receive, 2),
+                'issue_amount' => round($issue, 2),
+                'closing_balance' => round($closing, 2),
+            ];
+        }
+        $data = array('count' => 0, 'entities' => $results);
+        return $data;
+
     }
 
     /**
