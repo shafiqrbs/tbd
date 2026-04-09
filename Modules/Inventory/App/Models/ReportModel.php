@@ -170,7 +170,7 @@ class ReportModel extends Model
         $salesOverview['totalStock'] = $totalOpeningBalance + $purchaseItem->totalPurchase;
         $salesOverview['wastage'] = $damage->sub_total;
         $salesOverview['return'] = $purchaseReturn->sub_total;
-        $salesOverview['today_opening'] = $todayOpening;
+      //  $salesOverview['today_opening'] = $todayOpening;
         $salesOverview['totalClosingBalance'] = (($totalOpeningBalance + $purchaseItem->totalPurchase)-($sales->totalSales+$damage->sub_total+$purchaseReturn->sub_total));
 
         $data = [
