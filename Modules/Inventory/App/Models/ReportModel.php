@@ -316,7 +316,6 @@ class ReportModel extends Model
 
         $categories =  $categories->get();
 
-
         $sales = DB::table('inv_sales_item')
             ->where('s.config_id', $inventoryConfigId)
             ->where('s.process', 'Approved')
@@ -343,6 +342,7 @@ class ReportModel extends Model
             ->when($end_date, function ($q) use ($end_date) { $q->whereDate('s.updated_at', '<=', $end_date); })
             ->groupBy('inv_category.id')
             ->get();
+
 
         $damage = DB::table('inv_damage_item as s')->where('s.config_id', $inventoryConfigId)
             ->join('inv_stock', 'inv_stock.id', '=', 's.stock_item_id')
@@ -429,7 +429,7 @@ class ReportModel extends Model
 
             // Calculate closing stock
 
-            $receive = ($opening + $purch + $salesRet);
+            $receive = ($purch + $salesRet);
             $issue = ($sale + $purchaseRet + $dmg);
             $closing = (($opening + $purch + $salesRet) - ($sale + $purchaseRet + $dmg));
 
