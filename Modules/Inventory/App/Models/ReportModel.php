@@ -39,6 +39,7 @@ class ReportModel extends Model
         }
 
 
+
         $topSalesItem = DB::table('inv_sales as s')->where('s.config_id', $inventoryConfigId)
             ->where('s.process', 'Approved')
             ->join('inv_sales_item as si', 's.id', '=', 'si.sale_id')
@@ -69,9 +70,19 @@ class ReportModel extends Model
             ->where('s.config_id', $inventoryConfigId)
             ->where('s.process', 'Approved')
             ->selectRaw('COUNT(s.id) as totalInvoices,SUM(s.sub_total) as totalPurchase,SUM(s.total) as total,SUM(s.payment) as totalPayment,(SUM(s.total) - SUM(s.payment)) as totalDue, SUM(s.discount) as totalDiscount')
-            ->when($start_date, function ($q) use ($start_date) { $q->whereDate('s.created_at', '>=', $start_date); })
-            ->when($end_date, function ($q) use ($end_date) { $q->whereDate('s.created_at', '<=', $end_date); })
+            ->when($start_date, function ($q) use ($start_date) { $q->whereDate('s.updated_at', '>=', $start_date); })
+            ->when($end_date, function ($q) use ($end_date) { $q->whereDate('s.updated_at', '<=', $end_date); })
             ->first();
+
+
+        $purchaseItem = DB::table('inv_purchase_item as s')
+            ->where('s.config_id', $inventoryConfigId)
+            ->whereNotNull('s.approved_by_id')
+            ->selectRaw('SUM(s.sub_total) as totalPurchase')
+            ->when($start_date, function ($q) use ($start_date) { $q->whereDate('s.updated_at', '>=', $start_date); })
+            ->when($end_date, function ($q) use ($end_date) { $q->whereDate('s.updated_at', '<=', $end_date); })
+            ->first();
+
 
         $transactionModes = DB::table('inv_sales as s')
             ->where('s.config_id', $inventoryConfigId)
@@ -151,14 +162,14 @@ class ReportModel extends Model
         $salesOverview['totalInvoices'] = $sales->totalInvoices;
         $salesOverview['totalSales'] = $sales->totalSales;
         $salesOverview['total'] = $sales->total;
-        $salesOverview['totalPurchase'] = $purchase->totalPurchase;
+        $salesOverview['totalPurchase'] = $purchaseItem->totalPurchase;
         $salesOverview['totalDiscount'] = $sales->totalDiscount;
         $salesOverview['totalOpeningBalance'] = $totalOpeningBalance;
-        $salesOverview['totalStock'] = $totalOpeningBalance + $purchase->totalPurchase;
+        $salesOverview['totalStock'] = $totalOpeningBalance + $purchaseItem->totalPurchase;
         $salesOverview['wastage'] = $damage->sub_total;
         $salesOverview['return'] = $purchaseReturn->sub_total;
         $salesOverview['today_opening'] = $todayOpening;
-        $salesOverview['totalClosingBalance'] = (($totalOpeningBalance + $purchase->totalPurchase)-($sales->totalSales+$damage->sub_total+$purchaseReturn->sub_total));
+        $salesOverview['totalClosingBalance'] = (($totalOpeningBalance + $purchaseItem->totalPurchase)-($sales->totalSales+$damage->sub_total+$purchaseReturn->sub_total));
 
         $data = [
             'sales' => $salesOverview,
