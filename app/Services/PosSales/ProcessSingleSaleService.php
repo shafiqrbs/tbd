@@ -38,11 +38,10 @@ final class ProcessSingleSaleService
             $customer = null;
 
             if (isset($input['customer_name'], $input['customer_mobile'])) {
-                $customer = CustomerModel::uniqueCustomerCheck(
-                    $domain['domain_id'],
-                    $input['customer_mobile'],
-                    $input['customer_name']
-                )
+
+                $uniqueKey = CustomerModel::uniquePosCustomerKey($domain['domain_id'],$input);
+                $customerUnique = CustomerModel::where(['customer_unique_key' => $uniqueKey])->first();
+                $customer = $customerUnique
                     ?? CustomerModel::insertSalesCustomer($domain, $input);
 
             } elseif (!empty($input['customer_id'])) {

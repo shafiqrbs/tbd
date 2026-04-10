@@ -151,6 +151,15 @@ class CustomerModel extends Model
 
     }
 
+    public static function uniquePosCustomerKey($domain,$data)
+    {
+        $name   = preg_replace('/\s+/', '', strtolower(trim($data['customer_name'])));
+        $mobile = trim($data['customer_mobile']);
+        $uniqueKey = $domain . '_' . $name . '_' . $mobile;
+        return $uniqueKey;
+
+    }
+
 
     public static function getRecords($domain, $request)
     {
@@ -277,9 +286,11 @@ class CustomerModel extends Model
     public static function insertSalesCustomer($domain, $input)
     {
         $domainConfig = ConfigSalesModel::where('config_id', $domain['inv_config'])->first();
+        $uniqueKey = CustomerModel::uniquePosCustomerKey($domain['domain_id'],$input);
         if ($domainConfig and $domainConfig->default_customer_group_id) {
             $customer['customer_group_id'] = $domainConfig->default_customer_group_id;
         }
+        $customer['customer_unique_key'] = $uniqueKey;
         $customer['domain_id'] = $domain['domain_id'];
         $customer['name'] = data_get($input , 'customer_name' ,'');
         $customer['mobile'] = data_get($input , 'customer_mobile', '');
