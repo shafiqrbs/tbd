@@ -455,6 +455,12 @@ class ReportModel extends Model
                 'receive_amount' => round($receive, 2),
                 'issue_amount' => round($issue, 2),
                 'closing_balance' => round($closing, 2),
+                'purchase' => round($purch, 2),
+                'sales_return' => round($salesRet, 2),
+                'sales' => round($sale, 2),
+                'purchase_return' => round($purchaseRet, 2),
+                'damage' => round($dmg, 2),
+
             ];
         }
         $data = array('count' => 0, 'entities' => $results);
