@@ -343,6 +343,8 @@ class ReportModel extends Model
             ->groupBy('inv_category.id')
             ->get();
 
+
+
         $purchase = DB::table('inv_purchase_item as s')
             ->where('s.config_id', $inventoryConfigId)
             ->whereNotNull('s.approved_by_id')
