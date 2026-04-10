@@ -351,8 +351,8 @@ class ReportModel extends Model
             ->join('inv_category', 'inv_category.id', '=', 'inv_product.category_id')
             ->selectRaw('inv_category.id as id , inv_category.name as name')
             ->selectRaw('ROUND(COALESCE(SUM(s.sub_total), 0), 2) as total')
-            ->when($start_date, function ($q) use ($start_date) { $q->whereDate('s.updated_at', '>=', $start_date); })
-            ->when($end_date, function ($q) use ($end_date) { $q->whereDate('s.updated_at', '<=', $end_date); })
+            ->when($start_date, function ($q) use ($start_date) { $q->whereDate('s.created_at', '>=', $start_date); })
+            ->when($end_date, function ($q) use ($end_date) { $q->whereDate('s.created_at', '<=', $end_date); })
             ->groupBy('inv_category.id')
             ->get();
 
@@ -485,11 +485,7 @@ class ReportModel extends Model
                 $term = $request['term'];
                 $entities->where(function ($q) use ($term) {
                     $q->where('inv_stock.name', 'LIKE', "%$term%")
-                        ->orWhere('inv_stock.barcode', 'LIKE', "%$term%")
-                    ->orWhereHas('inv_category', function ($p) use ($term) {
-                        $p->where('name', 'LIKE', "%$term%")
-                            ->orWhere('slug', 'LIKE', "%$term%");
-                    });
+                        ->orWhere('inv_stock.barcode', 'LIKE', "%$term%");
                 });
             }
 

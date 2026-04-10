@@ -242,7 +242,7 @@ class ProductModel extends Model
             ->orderBy('inv_category.name', 'ASC')
             ->orderBy('inv_product.name', 'ASC')
             ->get();
-        
+
         $entities->transform(function ($product) {
             if ($product->parent_images) {
                 $product->setRelation('images', $product->parent_images);
@@ -279,7 +279,7 @@ class ProductModel extends Model
             ->leftjoin('inv_particular as grade','grade.id','=','inv_stock.grade_id')
             ->leftjoin('inv_particular as size','size.id','=','inv_stock.size_id')
             ->select([
-                'inv_product.id',
+                'inv_stock.id',
                 'inv_stock.name as product_name',
                 'inv_product.slug',
                 'inv_category.name as category_name',

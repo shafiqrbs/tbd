@@ -14,7 +14,8 @@ return [
         'http://192.168.20.222:8080',
         'https://sandra.poskeeper.com',
         'https://epharmabd.com',
-        'https://pos.poskeeper.com'
+        'https://pos.poskeeper.com',
+        'http://www.tbd.local'
 
     ],
 

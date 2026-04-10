@@ -115,7 +115,7 @@ Route::prefix('/inventory')->middleware([HeaderAuthenticationMiddleware::class])
     Route::get('/stock-item/matrix/{file_type}/generate', [StockItemController::class,'stockItemMatrixGeneratePdfXlsx'])->name('get_stock_item_matrix_generate_pdf_xlsx');
 
     // now this not implement into frontend
-    Route::get('generate/stock-item/xlsx', [StockItemController::class,'stockItemXlsxGenerate'])->name('get_stock_item_xlsx_generate');
+    Route::get('generate/stock-item/xlsx', [StockItemController::class,'stockItemXlsxGenopening-stockerate'])->name('get_stock_item_xlsx_generate');
 
 
     Route::prefix('sales')->name('sales.')->group(function () {

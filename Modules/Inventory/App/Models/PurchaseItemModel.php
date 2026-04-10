@@ -85,7 +85,7 @@ class PurchaseItemModel extends Model
                 'unit.name as unit_name',
                 'inv_stock.barcode',
                 'inv_setting.name as product_type',
-                DB::raw('DATE_FORMAT(inv_purchase_item.updated_at, "%d-%M-%Y") as created'),
+                DB::raw('DATE_FORMAT(inv_purchase_item.created_at, "%d-%M-%Y") as created'),
             ]);
 
         if (!empty($request['term'])) {
