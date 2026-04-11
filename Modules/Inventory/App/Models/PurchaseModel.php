@@ -287,6 +287,7 @@ class PurchaseModel extends Model
         }
 
 
+        $query->orderBy('inv_purchase.created_at','DESC');
         $purchases = $query->get();
 
         // get purchase items for all purchase ids in one query to avoid N+1
