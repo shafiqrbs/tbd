@@ -16,6 +16,7 @@ use Modules\Core\App\Http\Controllers\UserController;
 use Modules\Core\App\Http\Controllers\VendorController;
 use Modules\Core\App\Http\Controllers\WarehouseController;
 use Modules\Inventory\App\Http\Controllers\InventoryController;
+use Modules\Inventory\App\Http\Controllers\ReportController;
 
 /*
     |--------------------------------------------------------------------------
@@ -91,6 +92,9 @@ Route::prefix('/pos')->group(function() {
     Route::get('onboard', [PosController::class, 'onboard'])->name('onboard');
     Route::get('theme', [PosController::class, 'theme'])->name('theme');
     Route::get('splash', [PosController::class, 'splash'])->name('splash');
+    Route::get('dashboard', [ReportController::class, 'dailySummaryReport'])->name('dailySummaryReport');
+    Route::get('category-summary', [ReportController::class, 'categorySummaryReport'])->name('categorySummaryReport');
+    Route::get('home', [PosController::class, 'posProduct'])->name('stock');
     Route::get('product', [PosController::class, 'posProduct'])->name('stock');
 });
 

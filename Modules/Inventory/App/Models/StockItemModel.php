@@ -522,6 +522,7 @@ class StockItemModel extends Model
 
             ->where('inv_stock.status', 1)
             ->orderBy('inv_stock.name')
+            ->limit('2000')
             ->get()
             ->map(function ($stock) {
                 $product = $stock->product;
