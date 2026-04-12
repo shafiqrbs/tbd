@@ -203,6 +203,7 @@ class UserModel extends Model
                 'users.id',
                 'users.name',
                 'users.username',
+                'users.password',
                 'users.email',
                 'users.mobile',
                 'cor_user_transaction.max_discount',

@@ -510,7 +510,7 @@ class ReportModel extends Model
 
         $entities->select([
                 'inv_damage_item.id',
-                DB::raw('DATE_FORMAT(inv_purchase_item.created_at, "%d-%m-%Y") as created'),
+                DB::raw('DATE_FORMAT(inv_damage_item.created_at, "%d-%m-%Y") as created'),
                 DB::raw('DATE_FORMAT(inv_purchase_item.expired_date, "%d-%m-%Y") as expired_date'),
                 'inv_purchase_item.purchase_id',
                 'inv_purchase.grn',
@@ -527,7 +527,7 @@ class ReportModel extends Model
         $total = $entities->count();
         $entities = $entities->skip($skip)
             ->take($perPage)
-            ->orderBy('inv_damage_item.id', 'DESC') // fixed
+            ->orderBy('inv_damage_item.created_at', 'DESC') // fixed
             ->get();
         $data = array('count' => $total, 'entities' => $entities);
         return $data;
