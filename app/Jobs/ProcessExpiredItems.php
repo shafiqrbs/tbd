@@ -14,6 +14,7 @@ use Modules\Core\App\Models\UserModel;
 use Modules\Inventory\App\Models\DamageItemModel;
 use Modules\Inventory\App\Models\PurchaseItemModel;
 use Modules\Inventory\App\Models\StockItemHistoryModel;
+use Modules\Inventory\App\Models\StockItemModel;
 
 class ProcessExpiredItems implements ShouldQueue
 {
@@ -40,6 +41,7 @@ class ProcessExpiredItems implements ShouldQueue
                         if ($qty <= 0) {
                             return;
                         }
+                        $findStockItem = StockItemModel::find($item->stock_item_id);
 
                         // =========================
                         // PURCHASE DAMAGE PROCESS
@@ -49,7 +51,7 @@ class ProcessExpiredItems implements ShouldQueue
                             refId: $item->id,
                             qty: $qty,
                             stockItemId: $item->stock_item_id,
-                            name: $item->name??null,
+                            name: $item->name??($findStockItem->name??null),
                             warehouseId: $item->warehouse_id,
                             configId: $item->config_id,
                             price: $item->purchase_price ?? 0
@@ -62,7 +64,7 @@ class ProcessExpiredItems implements ShouldQueue
 
                         $item->update([
                             'damage_quantity' => $newDamageQty,
-                            'remaining_quantity' => $remainingQuantity-$newDamageQty,
+                            'remaining_quantity' => $remainingQuantity-$qty,
                         ]);
                     });
                 }

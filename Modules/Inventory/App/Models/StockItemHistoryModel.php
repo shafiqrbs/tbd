@@ -168,7 +168,7 @@ class StockItemHistoryModel extends Model
     {
         return [
             'stock_item_id' => $item->stock_item_id,
-            'item_name' => $item->name ?? $item->item_name,
+            'item_name' => isset($item->name) ? $item->name : ($item->item_name ?? null),
             'config_id' => $configId,
             'quantity' => $quantity,
             'purchase_price' => $item->purchase_price ?? 0,

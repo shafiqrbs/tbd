@@ -132,6 +132,8 @@ class DamageController extends Controller
                             return;
                         }
 
+                        $findStockItem = StockItemModel::find($item->stock_item_id);
+
                         // =========================
                         // PURCHASE DAMAGE PROCESS
                         // =========================
@@ -140,7 +142,7 @@ class DamageController extends Controller
                             refId: $item->id,
                             qty: $qty,
                             stockItemId: $item->stock_item_id,
-                            name: $item->name??null,
+                            name: $item->name??($findStockItem->name??null),
                             warehouseId: $item->warehouse_id,
                             configId: $item->config_id,
                             price: $item->purchase_price ?? 0
@@ -151,7 +153,7 @@ class DamageController extends Controller
                         $remainingQuantity = PurchaseItemModel::getPurchaseItemRemainingQuantity($item->id);
                         $item->update([
                             'damage_quantity' => $newDamageQty,
-                            'remaining_quantity' => $remainingQuantity-$newDamageQty,
+                            'remaining_quantity' => $remainingQuantity-$qty,
                         ]);
                     });
                 }
