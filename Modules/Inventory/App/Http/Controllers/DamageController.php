@@ -31,7 +31,7 @@ class DamageController extends Controller
 
     public function __construct(Request $request)
     {
-        $userId = $request->header('X-Api-User');
+         $userId = $request->header('X-Api-User');
         if ($userId && !empty($userId)) {
             $userData = UserModel::getUserData($userId);
             $this->domain = $userData;
@@ -113,8 +113,9 @@ class DamageController extends Controller
 
     public function manualExpiryDamageProcess()
     {
+        $config =  $this->domain['inv_config'];
         PurchaseItemModel::whereDate('expired_date', '<', now())
-            ->where('inv_config',$this->domain['inv_config'])
+            ->where('config_id',$config)
             ->whereNotNull('expired_date')
             ->where('remaining_quantity', '>', 0)
             ->select('id', 'remaining_quantity', 'stock_item_id', 'name', 'warehouse_id', 'config_id', 'purchase_price',

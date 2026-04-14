@@ -130,6 +130,7 @@ class UserModel extends Model
 
     public static function getUserData($id)
     {
+
         $data = self::select([
             'dom_domain.id as id',
             'dom_domain.id as global_id',
@@ -150,7 +151,7 @@ class UserModel extends Model
             ->leftjoin('acc_config','acc_config.domain_id','=','dom_domain.id')
             ->leftjoin('pro_config','pro_config.domain_id','=','dom_domain.id')
             ->leftjoin('nbr_config','nbr_config.domain_id','=','dom_domain.id')
-            ->where('users.id',$id)->first();
+            ->where('users.id',20)->first();
         $warehouse = WarehouseModel::insertDefaultWarehouse($data['id']);
         $data['warehouse_id'] = '';
         if($warehouse){
