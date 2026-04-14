@@ -7,6 +7,7 @@ use Modules\Accounting\App\Http\Controllers\AccountGroupHeadController;
 use Modules\Accounting\App\Http\Controllers\AccountHeadMasterController;
 use Modules\Accounting\App\Http\Controllers\AccountingController;
 use Modules\Accounting\App\Http\Controllers\AccountHeadController;
+use Modules\Accounting\App\Http\Controllers\AccountPosVoucherController;
 use Modules\Accounting\App\Http\Controllers\AccountSettingController;
 use Modules\Accounting\App\Http\Controllers\AccountVoucherController;
 use Modules\Accounting\App\Http\Controllers\AccountVoucherEntryController;
@@ -129,6 +130,26 @@ Route::prefix('/accounting')->middleware([HeaderAuthenticationMiddleware::class]
 Route::prefix('/accounting/report')->middleware([HeaderAuthenticationMiddleware::class])->group(function() {
     Route::get('/dashboard', [ReportController::class,'dashboard'])->name('dashboard');
     Route::get('/income-expense', [ReportController::class,'incomeExpense'])->name('income-expense');
+});
+
+Route::prefix('/account-pos')->middleware([HeaderAuthenticationMiddleware::class])->group(function() {
+    Route::get('/dashboard', [ReportController::class,'dashboard'])->name('dashboard');
+    Route::apiResource('/voucher',
+        AccountPosVoucherController::class)
+        ->middleware([HeaderAuthenticationMiddleware::class])
+        ->parameters(['setting' => 'account-pos.voucher'])
+        ->names([
+            'index' => 'account-pos.voucher.index',
+            'store' => 'account-pos.voucher.store',
+            'show' => 'account-pos.voucher.show',
+            'update' => 'account-pos.voucher.update',
+            'destroy' => 'account-pos.voucher.destroy'
+        ]);
+    Route::get('/payment', [ReportController::class,'incomeExpense'])->name('income-expense');
+    Route::get('/receive', [ReportController::class,'incomeExpense'])->name('income-expense');
+    Route::get('/payment-ledger', [ReportController::class,'incomeExpense'])->name('income-expense');
+    Route::get('/receive-ledger', [ReportController::class,'incomeExpense'])->name('income-expense');
+    Route::get('/expense', [ReportController::class,'incomeExpense'])->name('income-expense');
 });
 
 Route::get('ledger-report/download/{type}', [AccountHeadController::class,'generateFileDownload']);

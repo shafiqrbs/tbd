@@ -113,13 +113,6 @@ class CategoryGroupController extends Controller
         $data = $request->validated();
         $entity = CategoryModel::find($id);
         $entity->update($data);
-        if($entity->parent){
-            $head = AccountHeadModel::where('category_id',$entity->id)->first();
-        }else{
-            $head = AccountHeadModel::where('product_group_id',$entity->id)->first();
-        }
-        $head->name = $entity->name;
-        $head->save();
         $service = new JsonRequestResponse();
         return $service->returnJosnResponse($entity);
     }

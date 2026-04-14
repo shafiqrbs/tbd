@@ -67,7 +67,7 @@ class CategoryModel extends Model
     {
         $query = self::select(['name', 'slug', 'id'])
             ->where([['status', 1],['config_id', $domain['config_id']]]);
-      //  $query->whereNull('parent');
+        $query->whereNull('parent');
         return $query->get();
     }
 

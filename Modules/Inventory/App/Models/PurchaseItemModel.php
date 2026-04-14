@@ -14,9 +14,7 @@ class PurchaseItemModel extends Model
     protected $table = 'inv_purchase_item';
     public $timestamps = true;
     protected $guarded = ['id'];
-
-    protected $fillable = [
-    ];
+    protected $fillable = [];
 
     public static function boot() {
 
@@ -24,12 +22,19 @@ class PurchaseItemModel extends Model
         self::creating(function ($model) {
             $date =  new \DateTime("now");
             $model->created_at = $date;
+            $model->barcode = self::quickRandom();
         });
 
         self::updating(function ($model) {
             $date =  new \DateTime("now");
             $model->updated_at = $date;
         });
+    }
+
+    public static function quickRandom($length = 12)
+    {
+        $pool = '0123456789';
+        return substr(str_shuffle(str_repeat($pool, $length)), 0, $length);
     }
 
 

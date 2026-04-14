@@ -5,6 +5,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Modules\Inventory\App\Http\Controllers\CategoryGroupController;
 use Modules\Inventory\App\Http\Controllers\ConfigController;
+use Modules\Inventory\App\Http\Controllers\DamageController;
 use Modules\Inventory\App\Http\Controllers\DiscountConfigController;
 use Modules\Inventory\App\Http\Controllers\InventoryController;
 use Modules\Inventory\App\Http\Controllers\InvoiceBatchController;
@@ -73,7 +74,6 @@ Route::prefix('/inventory')->middleware([HeaderAuthenticationMiddleware::class])
             Route::get('/{product}', [ProductController::class,'measurementList'])->name('product_measurement_list');
             Route::delete('/{product}', [ProductController::class,'measurementDelete'])->name('product_measurement_delete');
         });
-
         Route::get('/nbr-tariff/{product}', [ProductController::class,'nbrTariff'])->name('nbr_tariff_list');
         Route::post('/nbr-tariff/inline-update/{product}', [ProductController::class,'nbrTariffInlineUpdate'])->name('nbr_tariff_inline_update');
         Route::post('/stock/sku', [StockItemController::class,'stockSkuAdded'])->name('product_stock_sku');
@@ -110,6 +110,7 @@ Route::prefix('/inventory')->middleware([HeaderAuthenticationMiddleware::class])
     });
 
     Route::get('/damage-item', [ReportController::class,'damageStockDetailsReport'])->name('damageStockDetailsReport');
+    Route::get('/damage-item-expiry', [DamageController::class,'manualExpiryDamageProcess'])->name('manualExpiryDamageProcess');
     Route::get('/stock-item', [StockItemController::class,'stockItem'])->name('get_stock_item');
     Route::get('/stock-item/matrix', [StockItemController::class,'stockItemMatrix'])->name('get_stock_item_matrix');
     Route::get('/stock-item/matrix/{file_type}/generate', [StockItemController::class,'stockItemMatrixGeneratePdfXlsx'])->name('get_stock_item_matrix_generate_pdf_xlsx');
