@@ -148,9 +148,7 @@ class DamageController extends Controller
 
                         // update purchase item (atomic + correct calc)
                         $newDamageQty = $item->damage_quantity + $qty;
-
                         $remainingQuantity = PurchaseItemModel::getPurchaseItemRemainingQuantity($item->id);
-
                         $item->update([
                             'damage_quantity' => $newDamageQty,
                             'remaining_quantity' => $remainingQuantity-$newDamageQty,
