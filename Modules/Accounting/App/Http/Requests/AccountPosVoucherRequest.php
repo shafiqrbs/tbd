@@ -38,8 +38,7 @@ class AccountPosVoucherRequest extends FormRequest
                     'payment_mode' => 'required|string',
                     'narration' => 'nullable|string',
                     'is_approve' => 'integer|boolean',
-                    'is_sms' => 'integer|boolean',
-
+                    'is_sms' => 'integer|boolean'
                 ];
             }
             default:break;

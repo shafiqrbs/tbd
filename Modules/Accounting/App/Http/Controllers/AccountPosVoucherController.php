@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
 use Modules\Accounting\App\Http\Requests\AccountHeadRequest;
+use Modules\Accounting\App\Http\Requests\AccountPosVoucherRequest;
 use Modules\Accounting\App\Models\AccountJournalItemModel;
 use Modules\Accounting\App\Models\AccountJournalModel;
 use Modules\Accounting\App\Models\DailyLedger;
@@ -58,14 +59,14 @@ class AccountPosVoucherController extends Controller
      */
     public function store(Request $request)
     {
-       // $input = $request->validated();
+//        $input = $request->validated();
         $data = $request->all();
         $input['config_id'] = $this->domain['acc_config'];
         $input['created_by_id'] = $this->domain['user_id'];
         $input['process'] = "Created";
-
         if ($data['payment_mode'] == 'payment'){
 
+            $input['vaoucher_id'] = ;
         }
 
         // Start Database Transaction to Ensure Data Consistency

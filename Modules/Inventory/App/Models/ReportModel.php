@@ -70,8 +70,8 @@ class ReportModel extends Model
             ->where('s.config_id', $inventoryConfigId)
             ->where('s.process', 'Approved')
             ->selectRaw('COUNT(s.id) as totalInvoices,SUM(s.sub_total) as totalPurchase,SUM(s.total) as total,SUM(s.payment) as totalPayment,(SUM(s.total) - SUM(s.payment)) as totalDue, SUM(s.discount) as totalDiscount')
-            ->when($start_date, function ($q) use ($start_date) { $q->whereDate('s.updated_at', '>=', $start_date); })
-            ->when($end_date, function ($q) use ($end_date) { $q->whereDate('s.updated_at', '<=', $end_date); })
+            ->when($start_date, function ($q) use ($start_date) { $q->whereDate('s.created_at', '>=', $start_date); })
+            ->when($end_date, function ($q) use ($end_date) { $q->whereDate('s.created_at', '<=', $end_date); })
             ->first();
 
 
@@ -79,8 +79,8 @@ class ReportModel extends Model
             ->where('s.config_id', $inventoryConfigId)
             ->whereNotNull('s.approved_by_id')
             ->selectRaw('SUM(s.sub_total) as totalPurchase')
-            ->when($start_date, function ($q) use ($start_date) { $q->whereDate('s.updated_at', '>=', $start_date); })
-            ->when($end_date, function ($q) use ($end_date) { $q->whereDate('s.updated_at', '<=', $end_date); })
+            ->when($start_date, function ($q) use ($start_date) { $q->whereDate('s.created_at', '>=', $start_date); })
+            ->when($end_date, function ($q) use ($end_date) { $q->whereDate('s.created_at', '<=', $end_date); })
             ->first();
 
 
@@ -167,11 +167,11 @@ class ReportModel extends Model
         $salesOverview['totalPurchase'] = $purchaseItem->totalPurchase;
         $salesOverview['totalDiscount'] = $sales->totalDiscount;
         $salesOverview['totalOpeningBalance'] = $totalOpeningBalance;
-        $salesOverview['totalStock'] = $totalOpeningBalance + $purchaseItem->totalPurchase;
+        $salesOverview['totalStock'] = $totalOpeningBalance + $purchase->totalPurchase;
         $salesOverview['wastage'] = $damage->sub_total;
         $salesOverview['return'] = $purchaseReturn->sub_total;
       //  $salesOverview['today_opening'] = $todayOpening;
-        $salesOverview['totalClosingBalance'] = (($totalOpeningBalance + $purchaseItem->totalPurchase)-($sales->totalSales+$damage->sub_total+$purchaseReturn->sub_total));
+        $salesOverview['totalClosingBalance'] = (($totalOpeningBalance + $purchase->totalPurchase)-($sales->totalSales+$damage->sub_total+$purchaseReturn->sub_total));
 
         $data = [
             'sales' => $salesOverview,
@@ -338,8 +338,8 @@ class ReportModel extends Model
             ->join('inv_category', 'inv_category.id', '=', 'inv_product.category_id')
             ->selectRaw('inv_category.id as id , inv_category.name as name')
             ->selectRaw('ROUND(COALESCE(SUM(inv_sales_item.sub_total), 0), 2) as total')
-            ->when($start_date, function ($q) use ($start_date) { $q->whereDate('s.updated_at', '>=', $start_date); })
-            ->when($end_date, function ($q) use ($end_date) { $q->whereDate('s.updated_at', '<=', $end_date); })
+            ->when($start_date, function ($q) use ($start_date) { $q->whereDate('s.created_at', '>=', $start_date); })
+            ->when($end_date, function ($q) use ($end_date) { $q->whereDate('s.created_at', '<=', $end_date); })
             ->groupBy('inv_category.id')
             ->get();
 
@@ -363,8 +363,8 @@ class ReportModel extends Model
             ->join('inv_stock', 'inv_stock.id', '=', 's.stock_item_id')
             ->join('inv_product', 'inv_product.id', '=', 'inv_stock.product_id')
             ->join('inv_category', 'inv_category.id', '=', 'inv_product.category_id')
-            ->when($start_date, function ($q) use ($start_date) { $q->whereDate('s.updated_at', '>=', $start_date); })
-            ->when($end_date, function ($q) use ($end_date) { $q->whereDate('s.updated_at', '<=', $end_date); })
+            ->when($start_date, function ($q) use ($start_date) { $q->whereDate('s.created_at', '>=', $start_date); })
+            ->when($end_date, function ($q) use ($end_date) { $q->whereDate('s.created_at', '<=', $end_date); })
             ->selectRaw('inv_category.id as id , inv_category.name as name')
             ->selectRaw('ROUND(COALESCE(SUM(s.sub_total), 0), 2) as total')
             ->groupBy('inv_category.id')
