@@ -508,7 +508,8 @@ class StockItemModel extends Model
                             ->orWhere(function ($sub) {
                                 $sub->whereNotNull('expired_date')
                                     ->where('expired_date', '>', now())
-                                    ->whereRaw('quantity > COALESCE(sales_quantity, 0)');
+//                                    ->whereRaw('remaining_quantity > COALESCE(sales_quantity, 0)')
+                                    ->where('remaining_quantity', '>', 0);
                             });
                     });
                 }
