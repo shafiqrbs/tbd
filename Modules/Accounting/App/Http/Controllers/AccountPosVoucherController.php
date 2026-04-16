@@ -13,6 +13,7 @@ use Modules\Accounting\App\Http\Requests\AccountHeadRequest;
 use Modules\Accounting\App\Http\Requests\AccountPosVoucherRequest;
 use Modules\Accounting\App\Models\AccountJournalItemModel;
 use Modules\Accounting\App\Models\AccountJournalModel;
+use Modules\Accounting\App\Models\ConfigModel;
 use Modules\Accounting\App\Models\DailyLedger;
 use Modules\Accounting\App\Models\SettingModel;
 use Modules\AppsApi\App\Services\JsonRequestResponse;
@@ -65,8 +66,8 @@ class AccountPosVoucherController extends Controller
         $input['created_by_id'] = $this->domain['user_id'];
         $input['process'] = "Created";
         if ($data['payment_mode'] == 'payment'){
-
-            $input['vaoucher_id'] = ;
+            $config = ConfigModel::findOrFail($this->domain['acc_config']);
+            $input['vaoucher_id'] = $config->voucher_receive_id;
         }
 
         // Start Database Transaction to Ensure Data Consistency

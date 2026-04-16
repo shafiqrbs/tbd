@@ -211,7 +211,7 @@ class Config
     /**
      * @var boolean
      *
-     * @ORM\Column(type="boolean",options={"default"="false"})
+     * @ORM\Column(type="boolean",options={"default"="false"}, nullable=true)
      */
     private $isAccountingActive= false;
 
