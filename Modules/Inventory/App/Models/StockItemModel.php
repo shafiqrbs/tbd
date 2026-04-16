@@ -267,13 +267,7 @@ class StockItemModel extends Model
                         ->orWhereNull('expired_date');
                 })
                     ->where('remaining_quantity', '>', 0);
-            }
-            /*'purchaseItemForSales' => function ($q) use ($domain) {
-                $q->whereNotNull('expired_date')
-                    ->where('expired_date', '>', now()) // only not expired
-                    ->whereRaw('remaining_quantity');
-            }*/
-             ])
+            }])
             ->where('config_id', $domain['config_id'])
             ->where('status', 1)
             ->orderBy('name')
@@ -326,9 +320,8 @@ class StockItemModel extends Model
                         return [
                             'id' => $s->id,
                             'warehouse_id' => $s->warehouse_id,
-                            'purchase_quantity' => $s->quantity,
-                            'sales_quantity' => $salesQty,
-                            'remain_quantity' => $s->quantity - $salesQty,
+                            'barcode' => $s->barcode,
+                            'remain_quantity' => $s->remaining_quantity,
                             'expired_date' => $s->expired_date
                                 ? Carbon::parse($s->expired_date)->format('d-M-Y')
                                 : null,
@@ -380,8 +373,6 @@ class StockItemModel extends Model
 
                 'multiplePrice:id,stock_item_id,price_unit_id,price',
                 'multiplePrice.priceUnitName:id,name,slug,parent_slug',
-
-//                'purchaseItemForSales:id,stock_item_id,quantity,sales_quantity,expired_date'
                 'purchaseItemForSales' => function ($q) use ($domain) {
                     $q->where(function ($query) {
                         $query->where('expired_date', '>', now())
@@ -464,6 +455,8 @@ class StockItemModel extends Model
             'purchase_item_for_sales' => $stock->purchaseItemForSales->map(function ($s) {
                 return [
                     'purchase_item_id' => $s->id,
+                    'barcode' => $s->barcode,
+                    'warehouse_id' => $s->warehouse_id,
                     'remain_quantity' => $s->remaining_quantity,
                     'expired_date' => $s->expired_date
                         ? \Carbon\Carbon::parse($s->expired_date)->format('d-M-Y')
@@ -554,8 +547,8 @@ class StockItemModel extends Model
                         $salesQty = $s->sales_quantity ?? 0;
                         return [
                             'purchase_item_id' => $s->id,
-                            'purchase_quantity' => $s->quantity,
-                            'sales_quantity' => $salesQty,
+                            'warehouse_id' => $s->warehouse_id,
+                            'barcode' => $s->barcode,
                             'remain_quantity' => $s->remaining_quantity,
                             'expired_date' => $s->expired_date
                                 ? Carbon::parse($s->expired_date)->format('d-M-Y')
