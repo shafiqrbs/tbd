@@ -569,6 +569,7 @@ class AccountHeadModel extends Model
         $domainId = $domain->id;
         $configId = $domain['acc_config'];
         $config = ConfigModel::findOrFail($configId);
+
         $currentAssets = TransactionModeModel::where('config_id', $configId)
             ->where('status', 1)
             ->get();
@@ -636,7 +637,7 @@ class AccountHeadModel extends Model
         ])->get();
         if($groups){
             foreach ($groups as $group) {
-                self::insertStockGroupAccount($config->id, $group);
+                self::insertStockGroupAccount($config, $group);
             }
         }
 
@@ -898,7 +899,7 @@ class AccountHeadModel extends Model
                 'stock_group_id' => $entity->id,
             ],
             [
-                'config_id'        => $config,
+                'config_id'        => $config->id,
                 'parent_id'        => $config->account_product_group_id ?? null, // Ensure this is the correct field
                 'name'             => $entity->name,
                 'display_name'     => $entity->name,
