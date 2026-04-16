@@ -111,6 +111,7 @@ class AccountVoucherModel extends Model
                 ['acc_voucher.config_id',$domain['acc_config']],
                 ['acc_voucher.status','1']
             ])
+            ->orderBy('name')
             ->get();
     }
 

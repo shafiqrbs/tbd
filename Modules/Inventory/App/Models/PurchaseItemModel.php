@@ -22,7 +22,9 @@ class PurchaseItemModel extends Model
         self::creating(function ($model) {
             $date =  new \DateTime("now");
             $model->created_at = $date;
-            $model->barcode = self::quickRandom();
+            if (empty($model->barcode)) {
+                $model->barcode = self::generateUniqueCode(12);
+            }
         });
 
         self::updating(function ($model) {
@@ -31,10 +33,14 @@ class PurchaseItemModel extends Model
         });
     }
 
-    public static function quickRandom($length = 12)
+
+    public static function generateUniqueCode($length = 12)
     {
-        $pool = '0123456789';
-        return substr(str_shuffle(str_repeat($pool, $length)), 0, $length);
+        do {
+            // Generate a random 12-digit number
+            $code = str_pad(random_int(0, 999999999999), 12, '0', STR_PAD_LEFT);
+        } while (self::where('barcode', $code)->exists());
+        return $code;
     }
 
 

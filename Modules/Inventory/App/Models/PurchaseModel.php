@@ -70,6 +70,15 @@ class PurchaseModel extends Model
         return $this->belongsTo(VendorModel::class, 'vendor_id');
     }
 
+    public static function generateUniqueCode($length = 12)
+    {
+        do {
+            // Generate a random 12-digit number
+            $code = str_pad(random_int(0, 999999999999), 12, '0', STR_PAD_LEFT);
+        } while (PurchaseItemModel::where('barcode', $code)->exists());
+        return $code;
+    }
+
     public function insertPurchaseItems($purchase, $items, $warehouse)
     {
         $timestamp = Carbon::now();
@@ -79,6 +88,7 @@ class PurchaseModel extends Model
             $item['warehouse_id'] = $item['warehouse_id'] ?? $warehouse;
             $item['remaining_quantity'] = $item['quantity'];
             $item['name'] = $item['name'];
+            $item['barcode'] = $item['barcode'] ?? self::generateUniqueCode(12);
             unset($item['product_id']);
             return $item;
         }, $items);
@@ -128,6 +138,7 @@ class PurchaseModel extends Model
             ])->with(['purchaseItems' => function ($query) {
                 $query->select([
                     'inv_purchase_item.id',
+                    'inv_purchase_item.barcode',
                     'inv_purchase_item.purchase_id',
                     'inv_stock.name as item_name',
                     'inv_purchase_item.quantity',

@@ -161,15 +161,33 @@ class Config
 
     /**
      * @ORM\OneToOne(targetEntity="AccountVoucher")
+     * @ORM\JoinColumn(name="voucher_expense_id", referencedColumnName="id", nullable=true, onDelete="SET NULL")
+     **/
+    private $voucherExpense;
+
+    /**
+     * @ORM\OneToOne(targetEntity="AccountVoucher")
      * @ORM\JoinColumn(name="voucher_purchase_id", referencedColumnName="id", nullable=true, onDelete="SET NULL")
      **/
     private $voucherPurchase;
+
+     /**
+     * @ORM\OneToOne(targetEntity="AccountVoucher")
+     * @ORM\JoinColumn(name="voucher_payment_id", referencedColumnName="id", nullable=true, onDelete="SET NULL")
+     **/
+    private $voucherPayment;
 
     /**
      * @ORM\OneToOne(targetEntity="AccountVoucher")
      * @ORM\JoinColumn(name="voucher_sales_id", referencedColumnName="id", nullable=true, onDelete="SET NULL")
      **/
     private $voucherSales;
+
+    /**
+     * @ORM\OneToOne(targetEntity="AccountVoucher")
+     * @ORM\JoinColumn(name="voucher_receive_id", referencedColumnName="id", nullable=true, onDelete="SET NULL")
+     **/
+    private $voucherReceive;
 
     /**
      * @ORM\OneToOne(targetEntity="AccountVoucher")
@@ -193,7 +211,7 @@ class Config
     /**
      * @var boolean
      *
-     * @ORM\Column(type="boolean",options={"default"="false"})
+     * @ORM\Column(type="boolean",options={"default"="false"}, nullable=true)
      */
     private $isAccountingActive= false;
 
