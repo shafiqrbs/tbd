@@ -186,6 +186,7 @@ Route::prefix('/inventory')->middleware([HeaderAuthenticationMiddleware::class])
             Route::get('{id}', [RequisitionMatrixBoardController::class,'matrixBoardDetails']);
             Route::post('create', [RequisitionMatrixBoardController::class,'store']);
             Route::post('quantity-update', [RequisitionMatrixBoardController::class,'matrixBoardQuantityUpdate']);
+            Route::post('board-status-update', [RequisitionMatrixBoardController::class,'matrixBoardStatusUpdate']);
             Route::post('batch-generate/{id}', [RequisitionMatrixBoardController::class,'matrixBoardBatchGenerate']);
             Route::prefix('production')->group(function() {
                 Route::get('{id}', [RequisitionMatrixBoardController::class,'boardWiseProduction']);
@@ -198,6 +199,7 @@ Route::prefix('/inventory')->middleware([HeaderAuthenticationMiddleware::class])
             Route::get('{id}', [RequisitionMatrixBoardWarehouseController::class,'matrixBoardDetails']);
             Route::post('create', [RequisitionMatrixBoardWarehouseController::class,'store']);
             Route::post('quantity-update', [RequisitionMatrixBoardWarehouseController::class,'matrixBoardQuantityUpdate']);
+            Route::post('board-status-update', [RequisitionMatrixBoardController::class,'matrixBoardStatusUpdate']);
             Route::post('batch-generate/{id}', [RequisitionMatrixBoardWarehouseController::class,'matrixBoardBatchGenerate']);
             Route::prefix('production')->group(function() {
                 Route::get('{id}', [RequisitionMatrixBoardWarehouseController::class,'boardWiseProduction']);

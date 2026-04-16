@@ -174,6 +174,7 @@ class   RequisitionMatrixBoardWarehouseController extends Controller
                             $val['vendor_stock_item_id']
                         ),
                         'status' => true,
+                        'board_status' => 'board-process',
                         'process' => 'Created',
                         'requisition_board_id' => $board->id,
                         'created_at' => now(),
@@ -195,6 +196,13 @@ class   RequisitionMatrixBoardWarehouseController extends Controller
 
                     // Insert new records
                     RequisitionMatrixBoardModel::insert($itemsToInsert);
+
+                    // Set board_status = 'board-process' on inserted inv_requisition_item records
+                    $insertedReqItemIds = array_unique(array_filter(array_column($itemsToInsert, 'requisition_item_id')));
+                    if (!empty($insertedReqItemIds)) {
+                        RequisitionItemModel::whereIn('id', $insertedReqItemIds)
+                            ->update(['board_status' => 'board-process']);
+                    }
                 }
             }
 
@@ -225,8 +233,17 @@ class   RequisitionMatrixBoardWarehouseController extends Controller
 
         try {
             $findBoard = RequisitionBoardModel::find($id);
-            // Fetch the latest data after insertion
-            $getItemWiseProduct = $findBoard->requisition_matrix->toArray();
+            // Fetch the latest data after insertion with board_status from inv_requisition_item
+            $matrixItems = $findBoard->requisition_matrix;
+            $reqItemIds = $matrixItems->pluck('requisition_item_id')->filter()->unique()->values()->toArray();
+            $boardStatusMap = RequisitionItemModel::whereIn('id', $reqItemIds)
+                ->pluck('board_status', 'id')
+                ->toArray();
+
+            $getItemWiseProduct = $matrixItems->map(function ($item) use ($boardStatusMap) {
+                $item->board_status = $boardStatusMap[$item->requisition_item_id] ?? 'board-process';
+                return $item;
+            })->toArray();
 
             $shops = $this->getCustomerNames($getItemWiseProduct);
             $transformedData = $this->formatMatrixBoardData($getItemWiseProduct, $shops);
@@ -289,6 +306,7 @@ class   RequisitionMatrixBoardWarehouseController extends Controller
                     'total_approved_quantity' => $group->sum('approved_quantity'),
                     'is_production_item' => DB::table('pro_item')->where('item_id', $group->first()['vendor_stock_item_id'])->where('config_id', $this->domain['pro_config'])->where('process', 'approved')->exists(),
                     'child_domain_name' => DB::table('dom_domain')->join('inv_config', 'inv_config.domain_id', '=', 'dom_domain.id')->select('dom_domain.name')->where('inv_config.id', $group->first()['customer_config_id'])->first()?->name,
+                    'board_status' => $group->first()['board_status'] ?? 'board-process',
                 ];
 
                 foreach ($shops as $shop) {
@@ -417,12 +435,20 @@ class   RequisitionMatrixBoardWarehouseController extends Controller
                 ], ResponseAlias::HTTP_BAD_REQUEST);
             }
 
-            $matrixCollection = $matrixCollection->where('process', '!=', 'Confirmed');
+            // Filter out confirmed and board-not-process items
+            $disabledReqItemIds = RequisitionItemModel::where('board_status', 'board-not-process')
+                ->whereIn('id', $matrixCollection->pluck('requisition_item_id')->filter()->toArray())
+                ->pluck('id')
+                ->toArray();
+
+            $matrixCollection = $matrixCollection
+                ->where('process', '!=', 'Confirmed')
+                ->filter(fn($item) => !in_array($item->requisition_item_id, $disabledReqItemIds));
 
             if ($matrixCollection->isEmpty()) {
                 return response()->json([
                     'status' => ResponseAlias::HTTP_CONFLICT,
-                    'message' => 'Matrix data has already been processed.',
+                    'message' => 'Matrix data has already been processed or all items are disabled.',
                 ], ResponseAlias::HTTP_CONFLICT);
             }
 

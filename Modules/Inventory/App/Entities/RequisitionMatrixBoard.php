@@ -161,6 +161,12 @@ class RequisitionMatrixBoard
 
     /**
      * @var string
+     * @ORM\Column(name="board_status", type="string", nullable=true, options={"default":"board-process"})
+     */
+    private $boardStatus = "board-process";
+
+    /**
+     * @var string
      * @ORM\Column(name="process", type="string", nullable=true)
      */
     private $process = "Generated";

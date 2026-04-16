@@ -118,6 +118,12 @@ class RequisitionItem
 	private $status=false;
 
     /**
+     * @var string
+     * @ORM\Column(name="board_status", type="string", nullable=true, options={"default":"board-process"})
+     */
+    private $boardStatus = "board-process";
+
+    /**
      * @var \DateTime
      * @Gedmo\Timestampable(on="create")
      * @ORM\Column(type="datetime")

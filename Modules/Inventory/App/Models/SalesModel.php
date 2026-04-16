@@ -647,6 +647,14 @@ class SalesModel extends Model
             ->where('s.process', 'Created')
             ->where('s.sales_form', 'requisition')
             ->where('s.requisition_board_id', $boardId)
+            ->whereNotExists(function ($query) use ($boardId) {
+                $query->select(DB::raw(1))
+                    ->from('inv_requisition_matrix_board as mb')
+                    ->join('inv_requisition_item as ri', 'ri.id', '=', 'mb.requisition_item_id')
+                    ->whereColumn('mb.vendor_stock_item_id', 'si.stock_item_id')
+                    ->where('mb.requisition_board_id', $boardId)
+                    ->where('ri.board_status', 'board-not-process');
+            })
             ->select(
                 'si.id as sales_item_id',
                 'si.sale_id',

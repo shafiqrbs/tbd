@@ -96,6 +96,11 @@ class RequisitionBoardModel extends Model
                     DB::raw('SUM(inv_requisition_matrix_board.sub_Total) as sub_Total'),
                     'inv_requisition_matrix_board.requisition_board_id', // required for relation
                 ])
+                    ->leftJoin('inv_requisition_item', 'inv_requisition_item.id', '=', 'inv_requisition_matrix_board.requisition_item_id')
+                    ->where(function ($q) {
+                        $q->where('inv_requisition_item.board_status', 'board-process')
+                            ->orWhereNull('inv_requisition_item.board_status');
+                    })
                     ->groupBy('inv_requisition_matrix_board.vendor_stock_item_id', 'inv_requisition_matrix_board.display_name', 'inv_requisition_matrix_board.unit_name',
                         'inv_requisition_matrix_board.requisition_board_id');
             }]);
