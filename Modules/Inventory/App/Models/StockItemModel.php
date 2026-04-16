@@ -502,7 +502,7 @@ class StockItemModel extends Model
             'product.setting',
             'product.images',
             'multiplePrice.priceUnitName',
-                'purchaseItemForSales' => function ($q) {
+                /*'purchaseItemForSales' => function ($q) {
                     $q->where(function ($query) {
                         $query->whereNull('expired_date')
                             ->orWhere(function ($sub) {
@@ -512,7 +512,13 @@ class StockItemModel extends Model
                                     ->where('remaining_quantity', '>', 0);
                             });
                     });
-                }
+                }*/
+            'purchaseItemForSales' => function ($q) {
+                $q->where(function ($query) {
+                    $query->whereNull('expired_date')
+                        ->orWhere('expired_date', '>', now());
+                })->where('remaining_quantity', '>', 0);
+            }
             ])
             ->where('inv_stock.config_id', $domain['config_id'])
             ->whereHas('product.setting', function ($query) {
