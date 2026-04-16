@@ -79,6 +79,7 @@ class PurchaseModel extends Model
             $item['warehouse_id'] = $item['warehouse_id'] ?? $warehouse;
             $item['remaining_quantity'] = $item['quantity'];
             $item['name'] = $item['name'];
+            $item['barcode'] = $item['barcode'];
             unset($item['product_id']);
             return $item;
         }, $items);
@@ -128,6 +129,7 @@ class PurchaseModel extends Model
             ])->with(['purchaseItems' => function ($query) {
                 $query->select([
                     'inv_purchase_item.id',
+                    'inv_purchase_item.barcode',
                     'inv_purchase_item.purchase_id',
                     'inv_stock.name as item_name',
                     'inv_purchase_item.quantity',
