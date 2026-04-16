@@ -381,7 +381,14 @@ class StockItemModel extends Model
                 'multiplePrice:id,stock_item_id,price_unit_id,price',
                 'multiplePrice.priceUnitName:id,name,slug,parent_slug',
 
-                'purchaseItemForSales:id,stock_item_id,quantity,sales_quantity,expired_date'
+//                'purchaseItemForSales:id,stock_item_id,quantity,sales_quantity,expired_date'
+                'purchaseItemForSales' => function ($q) use ($domain) {
+                    $q->where(function ($query) {
+                        $query->where('expired_date', '>', now())
+                            ->orWhereNull('expired_date');
+                    })
+                        ->where('remaining_quantity', '>', 0);
+                }
             ])
             ->where('inv_stock.config_id', $domain['config_id'])
             ->where('inv_stock.status', 1)
@@ -455,11 +462,9 @@ class StockItemModel extends Model
 
             # 🔥 Optimized mapping (no nested optional)
             'purchase_item_for_sales' => $stock->purchaseItemForSales->map(function ($s) {
-                $salesQty = $s->sales_quantity ?? 0;
-
                 return [
                     'purchase_item_id' => $s->id,
-                    'remain_quantity' => $s->quantity - $salesQty,
+                    'remain_quantity' => $s->remaining_quantity,
                     'expired_date' => $s->expired_date
                         ? \Carbon\Carbon::parse($s->expired_date)->format('d-M-Y')
                         : null,
@@ -502,23 +507,13 @@ class StockItemModel extends Model
             'product.setting',
             'product.images',
             'multiplePrice.priceUnitName',
-                /*'purchaseItemForSales' => function ($q) {
-                    $q->where(function ($query) {
-                        $query->whereNull('expired_date')
-                            ->orWhere(function ($sub) {
-                                $sub->whereNotNull('expired_date')
-                                    ->where('expired_date', '>', now())
-//                                    ->whereRaw('remaining_quantity > COALESCE(sales_quantity, 0)')
-                                    ->where('remaining_quantity', '>', 0);
-                            });
-                    });
-                }*/
             'purchaseItemForSales' => function ($q) {
                 $q->where(function ($query) {
                     $query->whereNull('expired_date')
                         ->orWhere('expired_date', '>', now());
                 })->where('remaining_quantity', '>', 0);
             }
+
             ])
             ->where('inv_stock.config_id', $domain['config_id'])
             ->whereHas('product.setting', function ($query) {
@@ -561,7 +556,7 @@ class StockItemModel extends Model
                             'purchase_item_id' => $s->id,
                             'purchase_quantity' => $s->quantity,
                             'sales_quantity' => $salesQty,
-                            'remain_quantity' => $s->quantity - $salesQty,
+                            'remain_quantity' => $s->remaining_quantity,
                             'expired_date' => $s->expired_date
                                 ? Carbon::parse($s->expired_date)->format('d-M-Y')
                                 : null,
