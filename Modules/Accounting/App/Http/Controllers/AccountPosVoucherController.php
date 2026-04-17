@@ -62,34 +62,15 @@ class AccountPosVoucherController extends Controller
     {
 //        $input = $request->validated();
         $data = $request->all();
-        $input['config_id'] = $this->domain['acc_config'];
-        $input['created_by_id'] = $this->domain['user_id'];
-        $input['process'] = "Created";
-        if ($data['payment_mode'] == 'payment'){
-            $config = ConfigModel::findOrFail($this->domain['acc_config']);
-            $input['vaoucher_id'] = $config->voucher_receive_id;
-            $input['module'] = $data['payment_mode'];
-            $input['created_by_id'] = $this->domain['user_id'];
-        }
-        if($data['is_approve'] == 1){
-            $input['approved_by_id'] = $this->domain['user_id'];
-            $input['process'] = 'Approved';
-            $input['waiting_process'] = 'Approved';
-        }
         // Start Database Transaction to Ensure Data Consistency
         DB::beginTransaction();
-
         try {
 
-            // Create journal Record
-            $journal = AccountJournalModel::create($input);
-            $journal->refresh();
-
             // Insert journal Items
-            AccountJournalItemModel::insertJournalItems($journal, $input['items']);
-
+            if ($data['payment_mode'] == 'payment'){
+                $journal = AccountJournalModel::insertPaymentJournal($this->domain,$data);
+            }
             DB::commit();
-
             // Send Success Response
             return response()->json([
                 'status' => 200,

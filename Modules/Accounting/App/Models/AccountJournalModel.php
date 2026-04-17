@@ -753,51 +753,49 @@ class AccountJournalModel extends Model
 
     }
 
-    public static function insertPaymentJournal($domain,$openingId){
+    public static function insertPaymentJournal($domain,$data)
+    {
 
         $config = ConfigModel::find($domain['acc_config']);
-        $purchaseItem = PurchaseItemModel::find($openingId);
+        $ledger = AccountHeadModel::where('config_id',$domain['acc_config'])->where('vendor_id', $data['vendor_id'])->first();
+        $head1 = AccountHeadModel::where('config_id',$domain['acc_config'])->where('account_id', $data['transaction_mode_id'])->first();
+        if ($ledger && $head1) {
+            $input['config_id'] = $domain['acc_config'];
+            $input['voucher_id'] = $config->payment_voucher_id;
+            $input['amount'] = $data['amount'];
+            $input['module'] = $data['payment_mode'];
+            $input['created_by_id'] = $domain['user_id'];
+            $input['approved_by_id'] = $domain['user_id'];
+            $input['issue_date'] = new \DateTime();
+            $input['module'] = 'payment';
+            $input['narration'] = $data['narration'];
+            if($data['is_approve'] == 1 ){
+                $input['process'] = 'Approved';
+                $input['waiting_process'] = 'Approved';
+            }
+            $entity = self::create($input);
 
-        $input['config_id'] = $domain['acc_config'];
-        $input['voucher_id'] = $config->voucher_stock_opening_id;
-        $input['amount'] = $purchaseItem->sub_total;
-        $input['debit'] = $purchaseItem->sub_total;
-        $input['created_by_id'] = $purchaseItem->created_by_id;
-        $input['approved_by_id'] = $purchaseItem->approved_by_id;
-        $input['purchase_item_id'] = $purchaseItem->id;
-        $input['issue_date'] = $purchaseItem->updated_at;
-        $input['module'] = 'opening-stock';
-        $input['process'] = 'Approved';
-        $input['waiting_process'] = 'Approved';
-        $entity = self::create($input);
 
+            $accountDebit['account_journal_id'] = $entity->id;
+            $accountDebit['account_head_id'] = $ledger->parent_id;
+            $accountDebit['account_sub_head_id'] = $ledger->id;
+            $accountDebit['amount'] = $entity->amount;
+            $accountDebit['debit'] = $entity->amount;
+            $accountDebit['mode'] = 'debit';
+            $accountDebit['is_parent'] = true;
+            $debit = AccountJournalItemModel::create($accountDebit);
+            self::journalOpeningClosing($entity, $debit);
 
-
-        $head = AccountHeadModel::getAccountHeadWithParent($config->account_stock_opening_id);
-        $accountDebit['account_journal_id'] = $entity->id;
-        $accountDebit['account_head_id'] = $head->parent_id;
-        $accountDebit['account_sub_head_id'] = $config->account_stock_opening_id;
-        $accountDebit['amount'] = $purchaseItem->sub_total;
-        $accountDebit['debit'] = $purchaseItem->sub_total;
-        $accountDebit['mode'] = 'debit';
-        $accountDebit['is_parent'] = true;
-        $debit = AccountJournalItemModel::create($accountDebit);
-
-        self::journalOpeningClosing($entity,$debit);
-
-        $head1 = AccountHeadModel::getAccountHeadWithParent($config->capital_investment_id);
-        $accountCredit['account_journal_id'] = $entity->id;
-        $accountCredit['parent_id'] = $debit->id;
-        $accountCredit['account_head_id'] = $head1->parent_id;
-        $accountCredit['account_sub_head_id'] = $config->capital_investment_id;
-        $accountCredit['amount'] = "-".$purchaseItem->sub_total;
-        $accountCredit['credit'] = $purchaseItem->sub_total;
-        $accountCredit['mode'] = 'credit';
-        $credit = AccountJournalItemModel::create($accountCredit);
-        self::journalOpeningClosing($entity,$credit);
-
-        //   self::openingGoodsEntry($journal,$config,$amount);
-
+            $accountCredit['account_journal_id'] = $entity->id;
+            $accountCredit['parent_id'] = $debit->id;
+            $accountCredit['account_head_id'] = $head1->parent_id;
+            $accountCredit['account_sub_head_id'] = $head1->id;
+            $accountCredit['amount'] = "-" . $entity->amount;
+            $accountCredit['credit'] = $entity->amount;
+            $accountCredit['mode'] = 'credit';
+            $credit = AccountJournalItemModel::create($accountCredit);
+            self::journalOpeningClosing($entity, $credit);
+        }
         return true;
 
     }

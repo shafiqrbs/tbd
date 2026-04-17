@@ -127,9 +127,9 @@ class AccountJournal
 
     /**
      * @var string
-     * @ORM\Column(type="string",nullable=true)
+     * @ORM\Column(type="string",nullable=true,options={"default"="Created"},)
      */
-    private $process='New';
+    private $process='Create';
 
     /**
      * @var string
@@ -140,7 +140,7 @@ class AccountJournal
 
     /**
      * @var string
-     * @ORM\Column(type="string",nullable=true)
+     * @ORM\Column(type="string",nullable=true,options={"default"="Created"},)
      */
     private $waitingProcess;
 
@@ -222,6 +222,14 @@ class AccountJournal
      * @ORM\Column(name="description", type="text", nullable = true)
      */
     private $description;
+
+
+     /**
+     * @var text
+     *
+     * @ORM\Column(name="narration", type="text", nullable = true)
+     */
+    private $narration;
 
 
     /**
