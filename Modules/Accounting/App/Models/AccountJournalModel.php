@@ -761,9 +761,8 @@ class AccountJournalModel extends Model
         $head1 = AccountHeadModel::where('config_id',$domain['acc_config'])->where('account_id', $data['transaction_mode_id'])->first();
         if ($ledger && $head1) {
             $input['config_id'] = $domain['acc_config'];
-            $input['voucher_id'] = $config->payment_voucher_id;
+            $input['voucher_id'] = $config->voucher_payment_id;
             $input['amount'] = $data['amount'];
-            $input['module'] = $data['payment_mode'];
             $input['created_by_id'] = $domain['user_id'];
             $input['approved_by_id'] = $domain['user_id'];
             $input['issue_date'] = new \DateTime();
@@ -776,6 +775,99 @@ class AccountJournalModel extends Model
             $entity = self::create($input);
 
 
+            $accountCredit['account_journal_id'] = $entity->id;
+            $accountCredit['account_head_id'] = $head1->parent_id;
+            $accountCredit['account_sub_head_id'] = $head1->id;
+            $accountCredit['amount'] = "-" . $entity->amount;
+            $accountCredit['credit'] = $entity->amount;
+            $accountCredit['mode'] = 'credit';
+            $accountCredit['is_parent'] = true;
+            $credit = AccountJournalItemModel::create($accountCredit);
+            self::journalOpeningClosing($entity, $credit);
+
+            $accountDebit['account_journal_id'] = $entity->id;
+            $accountDebit['account_head_id'] = $ledger->parent_id;
+            $accountDebit['account_sub_head_id'] = $ledger->id;
+            $accountDebit['parent_id'] = $credit->id;
+            $accountDebit['amount'] = $entity->amount;
+            $accountDebit['debit'] = $entity->amount;
+            $accountDebit['mode'] = 'debit';
+            $debit = AccountJournalItemModel::create($accountDebit);
+            self::journalOpeningClosing($entity, $debit);
+        }
+        return true;
+
+    }
+
+    public static function insertReceiveJournal($domain,$data)
+    {
+
+        $config = ConfigModel::find($domain['acc_config']);
+        $ledger = AccountHeadModel::where('config_id',$domain['acc_config'])->where('customer_id', $data['customer_id'])->first();
+        $head1 = AccountHeadModel::where('config_id',$domain['acc_config'])->where('account_id', $data['transaction_mode_id'])->first();
+        if ($ledger && $head1) {
+            $input['config_id'] = $domain['acc_config'];
+            $input['voucher_id'] = $config->voucher_receive_id;
+            $input['amount'] = $data['amount'];
+            $input['created_by_id'] = $domain['user_id'];
+            $input['approved_by_id'] = $domain['user_id'];
+            $input['issue_date'] = new \DateTime();
+            $input['module'] = 'receive';
+            $input['narration'] = $data['narration'];
+            if($data['is_approve'] == 1 ){
+                $input['process'] = 'Approved';
+                $input['waiting_process'] = 'Approved';
+            }
+            $entity = self::create($input);
+
+            $accountDebit['account_journal_id'] = $entity->id;
+            $accountDebit['account_head_id'] = $head1->parent_id;
+            $accountDebit['account_sub_head_id'] = $head1->id;
+            $accountDebit['amount'] = $entity->amount;
+            $accountDebit['debit'] = $entity->amount;
+            $accountDebit['mode'] = 'debit';
+            $accountDebit['is_parent'] = true;
+            $debit = AccountJournalItemModel::create($accountDebit);
+            self::journalOpeningClosing($entity, $debit);
+
+            $accountCredit['account_journal_id'] = $entity->id;
+            $accountCredit['account_head_id'] = $ledger->parent_id;
+            $accountCredit['account_sub_head_id'] = $ledger->id;
+            $accountCredit['parent_id'] = $debit->id;
+            $accountCredit['amount'] = "-" . $entity->amount;
+            $accountCredit['credit'] = $entity->amount;
+            $accountCredit['mode'] = 'credit';
+            $credit = AccountJournalItemModel::create($accountCredit);
+            self::journalOpeningClosing($entity, $credit);
+
+
+        }
+        return true;
+
+    }
+
+    public static function insertExpenseJournal($domain,$data)
+    {
+
+        $config = ConfigModel::find($domain['acc_config']);
+        $expense_id = $data['expense_id'];
+        $ledger = AccountHeadModel::find($expense_id);
+        $head1 = AccountHeadModel::where('config_id',$domain['acc_config'])->where('account_id', $data['transaction_mode_id'])->first();
+        if ($ledger && $head1) {
+            $input['config_id'] = $domain['acc_config'];
+            $input['voucher_id'] = $config->voucher_expense_id;
+            $input['amount'] = $data['amount'];
+            $input['created_by_id'] = $domain['user_id'];
+            $input['approved_by_id'] = $domain['user_id'];
+            $input['issue_date'] = new \DateTime();
+            $input['module'] = 'expense';
+            $input['narration'] = $data['narration'];
+            if($data['is_approve'] == 1 ){
+                $input['process'] = 'Approved';
+                $input['waiting_process'] = 'Approved';
+            }
+            $entity = self::create($input);
+
             $accountDebit['account_journal_id'] = $entity->id;
             $accountDebit['account_head_id'] = $ledger->parent_id;
             $accountDebit['account_sub_head_id'] = $ledger->id;
@@ -787,16 +879,101 @@ class AccountJournalModel extends Model
             self::journalOpeningClosing($entity, $debit);
 
             $accountCredit['account_journal_id'] = $entity->id;
-            $accountCredit['parent_id'] = $debit->id;
             $accountCredit['account_head_id'] = $head1->parent_id;
             $accountCredit['account_sub_head_id'] = $head1->id;
+            $accountCredit['parent_id'] = $debit->id;
             $accountCredit['amount'] = "-" . $entity->amount;
             $accountCredit['credit'] = $entity->amount;
             $accountCredit['mode'] = 'credit';
             $credit = AccountJournalItemModel::create($accountCredit);
             self::journalOpeningClosing($entity, $credit);
+
         }
         return true;
+
+    }
+
+    public static function getLedgerDetails($accountId)
+    {
+        $rows = DB::table('acc_journal_item as j')
+            ->join('acc_journal as v', 'v.id', '=', 'j.account_journal_id')
+            ->leftJoin('acc_journal_item as j2', function($join) use ($accountId) {
+                $join->on('j2.account_journal_id', '=', 'j.account_journal_id')
+                    ->whereColumn('j2.account_sub_head_id', '!=', 'j.account_sub_head_id');
+            })
+            ->leftJoin('acc_head as a', 'a.id', '=', 'j2.account_sub_head_id')
+            ->where('j.account_sub_head_id', $accountId)
+            ->select(
+                'j.id',
+                'v.issue_date',
+                'v.narration',
+                'j.debit',
+                'j.credit',
+                'j.account_journal_id',
+                DB::raw('GROUP_CONCAT(a.name) as opposite_account')
+            )
+            ->groupBy('j.id','v.issue_date','v.narration','j.debit','j.credit','j.account_journal_id')
+            ->orderBy('v.issue_date')
+            ->get();
+        return $rows;
+    }
+
+
+    public static function getLedgerDetailsx($accountId)
+    {
+
+        $account = DB::table('acc_head')->where('id', $accountId)->first();
+        $account = AccountHeadModel::find($accountId);
+        $mother_type = $account->parent->parent->mother_account->slug;
+        $rows = DB::table('acc_journal_item as j')
+            ->join('acc_journal as v', 'v.id', '=', 'j.account_journal_id')
+            ->where('j.account_sub_head_id', $accountId)
+            ->select(
+                'j.id',
+                'v.issue_date',
+                'v.narration',
+                'j.debit',
+                'j.credit',
+                'j.account_journal_id'
+            )
+            ->orderBy('v.issue_date')
+            ->orderBy('j.id')
+            ->get();
+
+        $ledger = [];
+        $balance = 0;
+
+        foreach ($rows as $row) {
+
+            // 🔥 Opposite account (other side of voucher)
+            $opposite = DB::table('acc_journal_item as j2')
+                ->join('acc_head as a', 'a.id', '=', 'j2.account_sub_head_id')
+                ->where('j2.account_journal_id', $row->account_journal_id)
+                ->where('j2.account_sub_head_id', '!=', $accountId)
+                ->pluck('a.name');
+
+            // 🔥 Running balance (Tally logic)
+            if (in_array($mother_type, ['asset', 'expense'])) {
+                $balance += ($row->debit - $row->credit);
+            } else {
+                $balance += ($row->credit - $row->debit);
+            }
+
+            $ledger[] = [
+                'date' => $row->issue_date,
+                'narration' => $row->narration,
+                'debit' => $row->debit,
+                'credit' => $row->credit,
+                'opposite_account' => $opposite,
+                'balance' => $balance
+            ];
+        }
+
+        return [
+            'account' => $account,
+            'ledger' => $ledger,
+            'closing_balance' => $balance
+        ];
 
     }
 

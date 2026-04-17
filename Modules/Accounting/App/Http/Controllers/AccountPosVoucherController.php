@@ -69,6 +69,10 @@ class AccountPosVoucherController extends Controller
             // Insert journal Items
             if ($data['payment_mode'] == 'payment'){
                 $journal = AccountJournalModel::insertPaymentJournal($this->domain,$data);
+            }elseif ($data['payment_mode'] == 'receive'){
+                $journal = AccountJournalModel::insertReceiveJournal($this->domain,$data);
+            }elseif ($data['payment_mode'] == 'expense'){
+                $journal = AccountJournalModel::insertExpenseJournal($this->domain,$data);
             }
             DB::commit();
             // Send Success Response
@@ -91,6 +95,20 @@ class AccountPosVoucherController extends Controller
                 'error' => $e->getMessage()
             ], 500);
         }
+    }
+
+    /**
+     * Show the specified resource.
+     */
+    public function ledger($id)
+    {
+        $service = new JsonRequestResponse();
+        $entity = AccountJournalModel::getLedgerDetails($id);
+        if (!$entity){
+            $entity = 'Data not found';
+        }
+        $data = $service->returnJosnResponse($entity);
+        return $data;
     }
 
     /**

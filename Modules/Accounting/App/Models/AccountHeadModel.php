@@ -106,6 +106,11 @@ class AccountHeadModel extends Model
         return $this->belongsTo(AccountHeadModel::class, 'parent_id');
     }
 
+    public function mother_account()
+    {
+        return $this->belongsTo(SettingModel::class, 'mother_account_id');
+    }
+
 
 
 
@@ -390,6 +395,62 @@ class AccountHeadModel extends Model
                 ['acc_head.head_group', $head]
             ])
             ->get();
+    }
+
+    public static function getAccountExpenseHeadDropdown($domain)
+    {
+        $data = DB::table('acc_head')
+            ->select([
+                'acc_head.id',
+                'acc_head.display_name as name',
+            ])
+            ->where('acc_head.config_id', $domain['acc_config'])
+            ->where('acc_head.head_group', 'head')
+            ->whereIn('acc_head.account_master_head_id', [93, 94, 95,117])
+            ->orderBy('acc_head.display_name')
+            ->get();
+        return $data;
+    }
+
+    public static function getAccountExpenseSubHeadDropdown($domain)
+    {
+        $data = DB::table('acc_head')
+            ->select([
+                'acc_head.id',
+                'acc_head.parent_id',
+                'acc_head.display_name',
+                'parent.display_name as parent_name'
+            ])
+            ->join('acc_head as parent', 'acc_head.parent_id', '=', 'parent.id')
+            ->where('acc_head.config_id', $domain['acc_config'])
+            ->where('acc_head.head_group', 'sub-head')
+            ->whereIn('parent.account_master_head_id', [93, 94, 95,117])
+            ->orderBy('parent.display_name')
+            ->orderBy('acc_head.display_name')
+            ->get()
+            ->groupBy('parent_name'); // ✅ magic line
+        return $data;
+    }
+
+    public static function getAccountExpenseLedgerDropdown($domain, $head = '')
+    {
+        $data = DB::table('acc_head')
+            ->select([
+                'acc_head.id',
+                'acc_head.parent_id',
+                'acc_head.display_name',
+                'sub_parent.display_name as parent_name'
+            ])
+            ->join('acc_head as sub_parent', 'acc_head.parent_id', '=', 'sub_parent.id')
+            ->join('acc_head as parent', 'sub_parent.parent_id', '=', 'parent.id')
+            ->where('acc_head.config_id', $domain['acc_config'])
+            ->where('acc_head.head_group', 'ledger')
+            ->whereIn('parent.account_master_head_id', [93, 94, 95,117])
+            ->orderBy('parent.display_name')
+            ->orderBy('acc_head.display_name')
+            ->get()
+            ->groupBy('parent_name'); // ✅ magic line
+        return $data;
     }
 
     public static function getAccountLedgerDropdown($domain, $head = '')

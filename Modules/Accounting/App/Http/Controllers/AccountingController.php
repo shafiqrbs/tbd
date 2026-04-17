@@ -90,6 +90,39 @@ class AccountingController extends Controller
         $service = new JsonRequestResponse();
         return $service->returnJosnResponse($dropdown);
     }
+
+
+     /**
+     * Show the form for editing the specified resource.
+     */
+    public function accountExpenseHeadDropdown(Request $request)
+    {
+        $dropdown = AccountHeadModel::getAccountExpenseHeadDropdown($this->domain);
+        $service = new JsonRequestResponse();
+        return $service->returnJosnResponse($dropdown);
+    }
+
+     /**
+     * Show the form for editing the specified resource.
+     */
+    public function accountExpenseSubHeadDropdown(Request $request)
+    {
+        $dropdown = AccountHeadModel::getAccountExpenseSubHeadDropdown($this->domain);
+        $service = new JsonRequestResponse();
+        return $service->returnJosnResponse($dropdown);
+    }
+
+    /**
+     * Show the form for editing the specified resource.
+     */
+    public function accountExpenseLedgerDropdown(Request $request)
+    {
+        $dropdown = AccountHeadModel::getAccountExpenseLedgerDropdown($this->domain);
+        $service = new JsonRequestResponse();
+        return $service->returnJosnResponse($dropdown);
+    }
+
+
     public function accountHeadForReconciliationDropdown(Request $request)
     {
         $mode = $request->get('dropdown-type');

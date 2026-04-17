@@ -134,6 +134,10 @@ Route::prefix('/accounting/report')->middleware([HeaderAuthenticationMiddleware:
 
 Route::prefix('/account-pos')->middleware([HeaderAuthenticationMiddleware::class])->group(function() {
     Route::get('/dashboard', [ReportController::class,'dashboard'])->name('dashboard');
+    Route::get('/expense-head', [AccountingController::class,'accountExpenseHeadDropdown'])->name('accountExpenseHeadDropdown');
+    Route::get('/expense-sub-head', [AccountingController::class,'accountExpenseSubHeadDropdown'])->name('accountExpenseSubHeadDropdown');
+    Route::get('/expense-ledger', [AccountingController::class,'accountExpenseLedgerDropdown'])->name('accountExpenseLedgerDropdown');
+    Route::get('/ledger/{id}', [AccountHeadController::class,'accountLedgerWiseJournal'])->name('accountExpenseLedgerDropdown');
     Route::apiResource('/voucher',
         AccountPosVoucherController::class)
         ->middleware([HeaderAuthenticationMiddleware::class])
@@ -145,6 +149,19 @@ Route::prefix('/account-pos')->middleware([HeaderAuthenticationMiddleware::class
             'update' => 'account-pos.voucher.update',
             'destroy' => 'account-pos.voucher.destroy'
         ]);
+
+    /*Route::apiResource('/expense-head',
+        AccountPosVoucherController::class)
+        ->middleware([HeaderAuthenticationMiddleware::class])
+        ->parameters(['setting' => 'account-pos.expense-head'])
+        ->names([
+            'index' => 'account-pos.expense-head.index',
+            'store' => 'account-pos.expense-head.store',
+            'show' => 'account-pos.expense-head.show',
+            'update' => 'account-pos.expense-head.update',
+            'destroy' => 'account-pos.expense-head.destroy'
+        ]);*/
+
     Route::get('/payment', [ReportController::class,'incomeExpense'])->name('income-expense');
     Route::get('/receive', [ReportController::class,'incomeExpense'])->name('income-expense');
     Route::get('/payment-ledger', [ReportController::class,'incomeExpense'])->name('income-expense');
