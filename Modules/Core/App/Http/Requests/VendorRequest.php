@@ -53,7 +53,7 @@ class VendorRequest extends FormRequest
                     'mobile' => [
                         'required',
                         'numeric',
-                        Rule::unique('Modules\Core\App\Entities\Vendor', 'mobile')->ignore($vendor)
+                       // Rule::unique('Modules\Core\App\Entities\Vendor', 'mobile')->ignore($vendor,'id')
                     ],
                     'email' => 'email|nullable',
                     'vendor_group_id' => [

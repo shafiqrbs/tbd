@@ -129,7 +129,6 @@ class VendorController extends Controller
     public function update(VendorRequest $request, $id)
     {
         $data = $request->validated();
-
         if ($data['customer_id']){
             $customerExists = VendorModel::where('customer_id', $data['customer_id'])->first();
 

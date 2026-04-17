@@ -88,6 +88,14 @@ class ConfigPurchase
     private $defaultVendorGroup;
 
 
+
+    /**
+     * @ORM\ManyToOne(targetEntity="Modules\Core\App\Entities\Vendor")
+     * @ORM\JoinColumn(onDelete="CASCADE")
+     **/
+    private $openingVendor;
+
+
     /**
      * @var boolean
      *

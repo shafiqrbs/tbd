@@ -394,6 +394,7 @@ class AccountHeadModel extends Model
                 ['acc_head.config_id', $domain['acc_config']],
                 ['acc_head.head_group', $head]
             ])
+            ->orderBy('acc_head.name')
             ->get();
     }
 
@@ -468,8 +469,9 @@ class AccountHeadModel extends Model
                 'acc_head.slug',
                 'acc_head.code',
             ])
-            ->get()
+            ->orderBy('acc_head.name','ASC')
             ->groupBy('parent_id')
+            ->get()
             ->map(function ($group) {
                 return [
                     'group' => $group->first()->parent_name,

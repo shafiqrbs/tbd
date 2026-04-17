@@ -43,10 +43,16 @@ use Modules\Inventory\App\Models\ConfigProductModel;
 use Modules\Inventory\App\Models\ConfigPurchaseModel;
 use Modules\Inventory\App\Models\ConfigSalesModel;
 use Modules\Inventory\App\Models\ConfigVatModel;
+use Modules\Inventory\App\Models\CurrentStockModel;
+use Modules\Inventory\App\Models\DailyStockModel;
+use Modules\Inventory\App\Models\DamageItemModel;
+use Modules\Inventory\App\Models\DamageModel;
 use Modules\Inventory\App\Models\PurchaseItemModel;
 use Modules\Inventory\App\Models\PurchaseModel;
+use Modules\Inventory\App\Models\PurchaseReturnModel;
 use Modules\Inventory\App\Models\RequisitionModel;
 use Modules\Inventory\App\Models\SalesModel;
+use Modules\Inventory\App\Models\SalesReturnModel;
 use Modules\Inventory\App\Models\StockItemHistoryModel;
 use Modules\Inventory\App\Models\StockItemInventoryHistoryModel;
 use Modules\Inventory\App\Models\StockItemModel;
@@ -193,7 +199,7 @@ class DomainController extends Controller
                     [
                         'domain_id' => $entity->id,
                         'setting_type_id' => $getCoreSettingTypeId->id,
-                        'name' => 'Domain',
+                        'name' => 'Default',
                         'is_private' => true,
                     ],
                     [
@@ -621,49 +627,22 @@ class DomainController extends Controller
             return response()->json(['message' => 'Inventory config not found', 'status' => Response::HTTP_NOT_FOUND], Response::HTTP_NOT_FOUND);
         }
 
-       /* // Delete purchases and related data using chunking
-        PurchaseModel::with('purchaseItems.stock.stockItemHistory')
-            ->where('config_id', $allConfigId['inv_config'])
-            ->chunk(100, function ($purchases) {
-                $purchases->each(function ($purchase) {
-                    $purchase->purchaseItems->each(function ($purchaseItem) {
-                        if ($purchaseItem->stock && $purchaseItem->stock->stockItemHistory->isNotEmpty()) {
-                            $purchaseItem->stock->stockItemHistory->each(function ($history) {
-                                $history->delete();
-                            });
-                        }
-                    });
-                    $purchase->delete();
-                });
-            });*/
-
-
-        /*// Delete sales and related data using chunking
-        SalesModel::with('salesItems.stock.stockItemHistory')
-            ->where('config_id', $allConfigId['inv_config'])
-            ->chunk(100, function ($sales) {
-                $sales->each(function ($sale) {
-                    $sale->salesItems->each(function ($salesItem) {
-                        if ($salesItem->stock && $salesItem->stock->stockItemHistory->isNotEmpty()) {
-                            $salesItem->stock->stockItemHistory->each(function ($history) {
-                                $history->delete();
-                            });
-                        }
-                    });
-                    $sale->delete();
-                });
-            });*/
-
-
-        $invConfig = $allConfigId['inv_config'];
+        $entity = UserModel::getDomainData($id);
+        $invConfig = $entity['inv_config'];
         StockItemHistoryModel::where('config_id', $invConfig)->delete();
+        CurrentStockModel::where('config_id', $invConfig)->delete();
+        DailyStockModel::where('config_id', $invConfig)->delete();
+        RequisitionModel::where('customer_config_id', $invConfig)->delete();
+        DamageModel::where('config_id', $invConfig)->delete();
+        DamageItemModel::where('config_id', $invConfig)->delete();
+        PurchaseReturnModel::where('config_id', $invConfig)->delete();
+        SalesReturnModel::where('config_id', $invConfig)->delete();
         SalesModel::where('config_id', $invConfig)->delete();
         PurchaseItemModel::where('config_id', $invConfig)->delete();
         PurchaseModel::where('config_id', $invConfig)->delete();
-        RequisitionModel::where('customer_config_id', $invConfig)->delete();
-
         // Bulk update stock item quantities
-        StockItemModel::where('config_id',$invConfig)->update(['quantity' => 0]);
+        StockItemModel::where('config_id',$invConfig)->update(['quantity' => 0,'remaining_quantity' => 0]);
+
 
         $accConfig = $allConfigId['acc_config'];
         AccountJournalModel::where('config_id', $accConfig)->delete();
@@ -686,13 +665,20 @@ class DomainController extends Controller
 
         $entity = UserModel::getDomainData($id);
         $domain = $entity;
-        $invConfig = $entity['inv_config'];
+        /*$invConfig = $entity['inv_config'];
         StockItemHistoryModel::where('config_id', $invConfig)->delete();
+        CurrentStockModel::where('config_id', $invConfig)->delete();
+        DailyStockModel::where('config_id', $invConfig)->delete();
+        RequisitionModel::where('customer_config_id', $invConfig)->delete();
+        DamageModel::where('config_id', $invConfig)->delete();
+        DamageItemModel::where('config_id', $invConfig)->delete();
+        PurchaseReturnModel::where('config_id', $invConfig)->delete();
+        SalesReturnModel::where('config_id', $invConfig)->delete();
         SalesModel::where('config_id', $invConfig)->delete();
         PurchaseItemModel::where('config_id', $invConfig)->delete();
         PurchaseModel::where('config_id', $invConfig)->delete();
         // Bulk update stock item quantities
-        StockItemModel::where('config_id',$invConfig)->update(['quantity' => 0]);
+        StockItemModel::where('config_id',$invConfig)->update(['quantity' => 0,'remaining_quantity' => 0]);*/
 
         // Start the transaction
         DB::beginTransaction();
@@ -704,7 +690,7 @@ class DomainController extends Controller
                 [
                     'domain_id' => $id,
                     'setting_type_id' => $getCoreSettingTypeId->id,
-                    'name' => 'Domain',
+                    'name' => 'Default',
                     'is_private' => true,
                 ],
                 [

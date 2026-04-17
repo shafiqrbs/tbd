@@ -38,6 +38,7 @@ class ConfigPurchaseModel extends Model
         'is_barcode',
         'purchase_product_nature',
         'purchase_online',
+        'opening_vendor_id',
         'purchase_mode'
     ];
 

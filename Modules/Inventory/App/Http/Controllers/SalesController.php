@@ -260,6 +260,7 @@ class SalesController extends Controller
                 $input['sales_by_id'] = $this->domain['user_id'];
             }
             $input['inv_config'] = $this->domain['inv_config'];
+            $input['expected_date'] = now();
             // Create Sales Record
             $sales = SalesModel::create($input);
             $sales->refresh();
