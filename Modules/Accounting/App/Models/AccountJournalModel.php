@@ -753,5 +753,54 @@ class AccountJournalModel extends Model
 
     }
 
+    public static function insertPaymentJournal($domain,$openingId){
+
+        $config = ConfigModel::find($domain['acc_config']);
+        $purchaseItem = PurchaseItemModel::find($openingId);
+
+        $input['config_id'] = $domain['acc_config'];
+        $input['voucher_id'] = $config->voucher_stock_opening_id;
+        $input['amount'] = $purchaseItem->sub_total;
+        $input['debit'] = $purchaseItem->sub_total;
+        $input['created_by_id'] = $purchaseItem->created_by_id;
+        $input['approved_by_id'] = $purchaseItem->approved_by_id;
+        $input['purchase_item_id'] = $purchaseItem->id;
+        $input['issue_date'] = $purchaseItem->updated_at;
+        $input['module'] = 'opening-stock';
+        $input['process'] = 'Approved';
+        $input['waiting_process'] = 'Approved';
+        $entity = self::create($input);
+
+
+
+        $head = AccountHeadModel::getAccountHeadWithParent($config->account_stock_opening_id);
+        $accountDebit['account_journal_id'] = $entity->id;
+        $accountDebit['account_head_id'] = $head->parent_id;
+        $accountDebit['account_sub_head_id'] = $config->account_stock_opening_id;
+        $accountDebit['amount'] = $purchaseItem->sub_total;
+        $accountDebit['debit'] = $purchaseItem->sub_total;
+        $accountDebit['mode'] = 'debit';
+        $accountDebit['is_parent'] = true;
+        $debit = AccountJournalItemModel::create($accountDebit);
+
+        self::journalOpeningClosing($entity,$debit);
+
+        $head1 = AccountHeadModel::getAccountHeadWithParent($config->capital_investment_id);
+        $accountCredit['account_journal_id'] = $entity->id;
+        $accountCredit['parent_id'] = $debit->id;
+        $accountCredit['account_head_id'] = $head1->parent_id;
+        $accountCredit['account_sub_head_id'] = $config->capital_investment_id;
+        $accountCredit['amount'] = "-".$purchaseItem->sub_total;
+        $accountCredit['credit'] = $purchaseItem->sub_total;
+        $accountCredit['mode'] = 'credit';
+        $credit = AccountJournalItemModel::create($accountCredit);
+        self::journalOpeningClosing($entity,$credit);
+
+        //   self::openingGoodsEntry($journal,$config,$amount);
+
+        return true;
+
+    }
+
 }
 
