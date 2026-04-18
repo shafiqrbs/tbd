@@ -233,7 +233,6 @@ class PurchaseController extends Controller
     {
         $response = new Response();
         $response->headers->set('Content-Type', 'application/json');
-
         // Start the database transaction
         DB::beginTransaction();
 

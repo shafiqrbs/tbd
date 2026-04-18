@@ -94,7 +94,7 @@ class AccountJournalModel extends Model
         $page = isset($request['page']) && $request['page'] > 0 ? ($request['page'] - 1) : 0;
         $perPage = isset($request['offset']) && $request['offset'] != '' ? (int)($request['offset']) : 0;
         $skip = isset($page) && $page != '' ? (int)$page * $perPage : 0;
-        $isBranch = isset($request['is_branch']) && $request['is_branch'] == true ? true : false;
+        $isBranch = (isset($request['is_branch']) && $request['is_branch'] == true) == true ? true : false;
 
         $firstPendingId = self::where('acc_journal.config_id', $domain['acc_config'])
             ->where('acc_journal.process', 'Created')
@@ -349,6 +349,7 @@ class AccountJournalModel extends Model
         if($journalItem and $discount > 0){
             self::purchaseDiscountEntry($config,$journal,$discount,$journalItem);
         }
+
         if($journalItem){
             self::purchasePayableEntry($journal, $entity, $journalItem);
         }
@@ -379,7 +380,7 @@ class AccountJournalModel extends Model
             $accountDebit['is_parent'] = true;
             $journalItem = AccountJournalItemModel::create($accountDebit);
             self::journalOpeningClosing($journal,$journalItem);
-            return $journalItem->id;
+            return $journalItem;
         }
 
     }
@@ -391,7 +392,7 @@ class AccountJournalModel extends Model
             $accountDebit['account_journal_id'] = $journal->id;
             $accountDebit['account_head_id'] = $head->parent_id;
             $accountDebit['account_sub_head_id'] = $config->account_purchase_discount_id;
-            $accountDebit['parent_id'] = $journalItem;
+            $accountDebit['parent_id'] = $journalItem->id;
             $accountDebit['amount'] = "-{$amount}";
             $accountDebit['credit'] = $amount;
             $accountDebit['mode'] = 'credit';
@@ -409,7 +410,7 @@ class AccountJournalModel extends Model
             $accountDebit['account_journal_id'] = $journal->id;
             $accountDebit['account_head_id'] = $head->parent_id;
             $accountDebit['account_sub_head_id'] = $head->id;
-            $accountDebit['parent_id'] = $journalItem;
+            $accountDebit['parent_id'] = $journalItem->id;
             $accountDebit['amount'] = "-{$amount}";
             $accountDebit['credit'] = $amount;
             $accountDebit['mode'] = 'credit';
@@ -442,15 +443,15 @@ class AccountJournalModel extends Model
             $head = AccountHeadModel::getAccountHeadWithParentPramValue('stock_group_id',$record['product_group_id']);
             if(empty($head)){
                 $group = \Modules\Inventory\App\Models\SettingModel::find($record['product_group_id']);
-               // $head = AccountHeadModel::insertCategoryGroupLedger($journal->config_id,$group);
-                $head = AccountHeadModel::insertStockGroupAccount($journal->config_id,$group);
+                $config = ConfigModel::find($journal->config_id);
+                $head = AccountHeadModel::insertStockGroupAccount($config,$group);
             }
             if($head and $record['amount'] > 0){
                 $amount = $record['amount'];
                 $accountDebit['account_journal_id'] = $journal->id;
                 $accountDebit['account_head_id'] = $head->parent_id;
                 $accountDebit['account_sub_head_id'] = $head->id;
-                $accountDebit['parent_id'] = $journalItem;
+                $accountDebit['parent_id'] = $journalItem->id;
                 $accountDebit['amount'] = "{$amount}";
                 $accountDebit['debit'] = $amount;
                 $accountDebit['mode'] = 'debit';
@@ -476,7 +477,7 @@ class AccountJournalModel extends Model
             $accountDebit['is_parent'] = true;
             $journalItem = AccountJournalItemModel::create($accountDebit);
             self::journalOpeningClosing($journal,$journalItem);
-            return $journalItem->id;
+            return $journalItem;
         }
         return false;
     }
@@ -490,7 +491,7 @@ class AccountJournalModel extends Model
             $accountDebit['account_journal_id'] = $journal->id;
             $accountDebit['account_head_id'] = $head->parent_id;
             $accountDebit['account_sub_head_id'] = $head->id;
-            $accountDebit['parent_id'] = $journalItem;
+            $accountDebit['parent_id'] = $journalItem->id;
             $accountDebit['amount'] = "-{$amount}";
             $accountDebit['credit'] = $amount;
             $accountDebit['mode'] = 'credit';

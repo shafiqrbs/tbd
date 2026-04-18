@@ -647,6 +647,11 @@ class DomainController extends Controller
         $accConfig = $allConfigId['acc_config'];
         AccountJournalModel::where('config_id', $accConfig)->delete();
         AccountHeadModel::where('config_id', $accConfig)->update(['amount' => 0 , 'opening_balance' => 0, 'debit' => 0, 'credit' => 0]);
+
+        AccountHeadModel::generateAccountHead($entity);
+        AccountHeadModel::initialLedgerSetup($entity);
+        AccountVoucherModel::resetVoucher($entity);
+        AccountingModel::initiateConfig($entity);
         return response()->json(['message' => 'Domain reset successfully', 'status' => Response::HTTP_OK], Response::HTTP_OK);
     }
 
@@ -860,6 +865,7 @@ class DomainController extends Controller
             // Commit all database operations
             DB::commit();
             AccountHeadModel::generateAccountHead($domain);
+            AccountHeadModel::initialLedgerSetup($domain);
             AccountVoucherModel::resetVoucher($domain);
             AccountingModel::initiateConfig($domain);
 

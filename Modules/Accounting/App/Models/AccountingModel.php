@@ -204,6 +204,9 @@ class AccountingModel extends Model
                 'voucher_sales_return_id' => self::getVoucherConfig($domain['acc_config'],6),
                 'voucher_purchase_return_id' => self::getVoucherConfig($domain['acc_config'],9),
                 'voucher_stock_reconciliation_id' => self::getVoucherConfig($domain['acc_config'],19),
+                'voucher_expense_id' => self::getVoucherConfig($domain['acc_config'],5),
+                'voucher_payment_id' => self::getVoucherConfig($domain['acc_config'],15),
+                'voucher_receive_id' => self::getVoucherConfig($domain['acc_config'],14),
             ]
         );
         self::setAccountHeadVoucher($domain);
